@@ -1,18 +1,5 @@
-(ns reitit.core)
-
-(defn- deep-merge [& values]
-  (let [[values strategy] (if (keyword? (first values))
-                            [(rest values) (first values)]
-                            [values :replace])]
-    (cond
-      (every? map? values)
-      (apply merge-with (partial deep-merge strategy) values)
-
-      (and (= strategy :into) (every? coll? values))
-      (reduce into values)
-
-      :else
-      (last values))))
+(ns reitit.core
+  (:require [meta-merge.core :refer [meta-merge]]))
 
 (defprotocol ExpandArgs
   (expand [this]))
@@ -54,16 +41,11 @@
 (defn map-meta [f routes]
   (mapv #(update % 1 f) routes))
 
-(defn merge-meta [key-strategy x]
+(defn merge-meta [x]
   (reduce
     (fn [acc [k v]]
-      (let [strategy (or (key-strategy k) :replace)]
-        (deep-merge strategy acc {k v})))
-    {}
-    x))
+      (meta-merge acc {k v}))
+    {} x))
 
-(defn resolve-routes
-  ([x]
-   (resolve-routes (constantly :replace) x))
-  ([key-strategy x]
-   (->> x (walk) (map-meta (partial merge-meta key-strategy)))))
+(defn resolve-routes [x]
+  (->> x (walk) (map-meta merge-meta)))
