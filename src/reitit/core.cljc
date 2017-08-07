@@ -19,15 +19,15 @@
 
 (extend-protocol ExpandArgs
 
-  #?(:clj clojure.lang.Keyword 
+  #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
   (expand [this] {:handler this})
 
-  #?(:clj clojure.lang.PersistentArrayMap
+  #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
   (expand [this] this)
 
-  #?(:clj clojure.lang.PersistentHashMap
+  #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
   (expand [this] this)
 
@@ -38,7 +38,7 @@
   ([routes]
    (walk ["" []] routes))
   ([[pacc macc] routes]
-   (letfn [(subwalk [p m r] 
+   (letfn [(subwalk [p m r]
              (reduce #(into %1 (walk [p m] %2)) [] r))]
      (if (vector? (first routes))
        (subwalk pacc macc routes)
