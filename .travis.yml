@@ -1,0 +1,17 @@
+sudo: false
+language: clojure
+lein: 2.7.1
+script:
+  - ./scripts/test.sh $TEST
+  - ./scripts/submit-to-coveralls.sh $TEST
+env:
+  matrix:
+  - TEST=clj
+  - TEST=cljs
+jdk:
+  - oraclejdk8
+node_js:
+  - "6.1"
+cache:
+  directories:
+  - "$HOME/.m2"
