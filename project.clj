@@ -11,6 +11,8 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
+  :dependencies [[meta-merge "1.0.0"]]
+
   :profiles {:dev {:plugins [[jonase/eastwood "0.2.3"]
                              [lein-tach "0.3.0"]
                              [lein-doo "0.1.7"]

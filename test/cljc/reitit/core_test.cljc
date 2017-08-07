@@ -20,11 +20,11 @@
                    ["/:sub-id" {:parameters {:sub-id String}}]]
                   ["/pong"]
                   ["/admin" {:mw [:admin] :roles #{:admin}}
-                   ["/user" {:roles #{:user}}]
+                   ["/user" {:roles ^:replace #{:user}}]
                    ["/db" {:mw [:db]}]]]
           expected [["/api/ping" {:mw [:api], :handler :kikka}]
                     ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:id String, :sub-id String}}]
                     ["/api/pong" {:mw [:api]}]
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]]
-      (is (= expected (reitit/resolve-routes {:mw :into} routes))))))
+      (is (= expected (reitit/resolve-routes routes))))))
