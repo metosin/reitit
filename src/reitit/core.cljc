@@ -38,18 +38,14 @@
   ([routes]
    (walk ["" []] routes))
   ([[pacc macc] routes]
-   (let [subwalk (fn [path meta routes]
-                   (reduce
-                     (fn [acc route]
-                       (into acc (walk [path meta] route)))
-                     []
-                     routes))]
+   (letfn [(subwalk [p m r] 
+             (reduce #(into %1 (walk [p m] %2)) [] r))]
      (if (vector? (first routes))
        (subwalk pacc macc routes)
        (let [[path & [maybe-meta :as args]] routes]
-         (let [[meta childs] (if-not (vector? maybe-meta)
-                               [maybe-meta (rest args)]
-                               [{} args])
+         (let [[meta childs] (if (vector? maybe-meta)
+                               [{} args]
+                               [maybe-meta (rest args)])
                macc (into macc (expand meta))]
            (if (seq childs)
              (subwalk (str pacc path) macc childs)
@@ -58,16 +54,13 @@
 (defn map-meta [f routes]
   (mapv #(update % 1 f) routes))
 
-(defn merge-meta
-  ([x]
-   (merge-meta (constantly :into) x))
-  ([key-strategy x]
-   (reduce
-     (fn [acc [k v]]
-       (let [strategy (or (key-strategy k) :replace)]
-         (deep-merge strategy acc {k v})))
-     {}
-     x)))
+(defn merge-meta [key-strategy x]
+  (reduce
+    (fn [acc [k v]]
+      (let [strategy (or (key-strategy k) :replace)]
+        (deep-merge strategy acc {k v})))
+    {}
+    x))
 
 (defn resolve-routes
   ([x]
