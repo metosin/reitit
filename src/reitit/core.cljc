@@ -19,7 +19,7 @@
      :cljs cljs.core.PersistentHashMap)
   (expand [this] this)
 
-  #?(:clj clojure.lang.Fn
+  #?(:clj  clojure.lang.Fn
      :cljs function)
   (expand [this] {:handler this})
 
@@ -28,21 +28,21 @@
 
 (defn walk [data {:keys [path meta routes expand]
                   :or {path "", meta [], routes [], expand expand}}]
-   (letfn
-     [(walk-many [p m r]
-        (reduce #(into %1 (walk-one p m %2)) [] r))
-      (walk-one [pacc macc routes]
-        (if (vector? (first routes))
-          (walk-many pacc macc routes)
-          (let [[path & [maybe-meta :as args]] routes]
-            (let [[meta childs] (if (vector? maybe-meta)
-                                  [{} args]
-                                  [maybe-meta (rest args)])
-                  macc (into macc (expand meta))]
-              (if (seq childs)
-                (walk-many (str pacc path) macc childs)
-                [[(str pacc path) macc]])))))]
-     (walk-one path meta data)))
+  (letfn
+    [(walk-many [p m r]
+       (reduce #(into %1 (walk-one p m %2)) [] r))
+     (walk-one [pacc macc routes]
+       (if (vector? (first routes))
+         (walk-many pacc macc routes)
+         (let [[path & [maybe-meta :as args]] routes
+               [meta childs] (if (vector? maybe-meta)
+                               [{} args]
+                               [maybe-meta (rest args)])
+               macc (into macc (expand meta))]
+           (if (seq childs)
+             (walk-many (str pacc path) macc childs)
+             [[(str pacc path) macc]]))))]
+    (walk-one path meta data)))
 
 (defn map-meta [f routes]
   (mapv #(update % 1 f) routes))
