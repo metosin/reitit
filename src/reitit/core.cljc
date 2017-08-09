@@ -69,10 +69,19 @@
           (reduced (assoc m :route-params params))))
       nil routes)))
 
+(defrecord LookupRouter [routes]
+  Routing
+  (match-route [_ path]
+    (routes path)))
+
 (defn router
   ([data]
    (router data {}))
   ([data opts]
-   (->LinearRouter
-     (for [[p m] (resolve-routes data opts)]
-       [p m (regex/matcher p)]))))
+   (let [routes (resolve-routes data opts)]
+     (if (some regex/contains-wilds? (map first routes))
+       (->LinearRouter
+         (for [[p m] routes]
+           [p m (regex/matcher p)]))
+       (->LookupRouter
+         (into {} routes))))))

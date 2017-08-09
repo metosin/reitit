@@ -1,8 +1,25 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as reitit]))
+    #?(:clj  [reitit.core :as reitit]
+       :cljs [reitit.core :as reitit :refer [LinearRouter LookupRouter]]))
+  #?(:clj
+     (:import (reitit.core LinearRouter LookupRouter))))
 
 (deftest reitit-test
+
+  (testing "linear router"
+    (let [router (reitit/router ["/api"
+                                 ["/ipa"
+                                  ["/:size"]]])]
+      (is (instance? LinearRouter router))
+      (is (map? (reitit/match-route router "/api/ipa/large")))))
+
+  (testing "lookup router"
+    (let [router (reitit/router ["/api"
+                                 ["/ipa"
+                                  ["/large"]]])]
+      (is (instance? LookupRouter router))
+      (is (map? (reitit/match-route router "/api/ipa/large")))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
