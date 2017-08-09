@@ -26,7 +26,13 @@
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.7"]]}
-             :perf {:jvm-opts ^:replace ["-server"]}}
+             :perf {:jvm-opts ^:replace ["-server"]
+                    :test-paths ["perf-test/clj"]
+                    :dependencies [[metosin/compojure-api "2.0.0-alpha7"]
+                                   [io.pedestal/pedestal.route "0.5.2"]
+                                   [org.clojure/core.async "0.3.443"]
+                                   [ataraxy "0.4.0"]
+                                   [bidi "2.0.9"]]}}
   :aliases {"all" ["with-profile" "dev"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["test"] ["check"]]
