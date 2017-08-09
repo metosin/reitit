@@ -29,7 +29,7 @@ Named routes (example from [bide](https://github.com/funcool/bide#why-another-ro
 ;  :route-params {:project-uuid "1", :page-uuid "2"}}
 ```
 
-Nested routes with meta-data:
+Nested routes with [meta-merged](https://github.com/weavejester/meta-merge) meta-data:
 
 ```clj
 (def handler (constantly "ok"))
@@ -58,7 +58,7 @@ Nested routes with meta-data:
 
 To all Clojure(Script) routing libs out there, expecially to
 [Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [Compojure](https://github.com/weavejester/compojure) and
-[Pedestal Route](https://github.com/pedestal/pedestal/tree/master/route),
+[Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
 
 ## License
 
