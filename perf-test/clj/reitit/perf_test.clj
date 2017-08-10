@@ -96,8 +96,9 @@
       (call)))
 
   ;; 1.0µs (-94%)
+  ;; 770ns (-95%, -23%)
   (title "reitit")
-  (let [call #(reitit/match-route reitit-routes "/workspace/1/1")]
+  (let [call #(reitit/match reitit-routes "/workspace/1/1")]
     (assert (call))
     (cc/quick-bench
       (call))))

@@ -1,6 +1,8 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.regex :as regex]))
+            [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
+  #?(:clj
+     (:import (reitit.impl Route))))
 
 (defprotocol Expand
   (expand [this]))
@@ -57,31 +59,65 @@
   (->> (walk data opts) (map-meta merge-meta)))
 
 (defprotocol Routing
-  (match-route [this path])
-  (path-for [this name] [this name parameters]))
+  (routes [this])
+  (match [this path])
+  (by-name [this name] [this name parameters]))
 
-(defrecord LinearRouter [routes]
+(defrecord Match [template meta path params])
+
+(defrecord LinearRouter [routes data lookup]
   Routing
-  (match-route [_ path]
+  (routes [_]
+    routes)
+  (match [_ path]
     (reduce
-      (fn [acc [p m matcher]]
-        (if-let [params (matcher path)]
-          (reduced (assoc m :route-params params))))
-      nil routes)))
+      (fn [acc ^Route route]
+        (if-let [params ((:matcher route) path)]
+          (reduced (->Match (:path route) (:meta route) path params))))
+      nil data))
+  (by-name [_ name]
+    ((lookup name) nil))
+  (by-name [_ name params]
+    ((lookup name) params)))
 
-(defrecord LookupRouter [routes]
+(defn linear-router [routes]
+  (->LinearRouter
+    routes
+    (mapv (partial apply impl/create) routes)
+    (->> (for [[p {:keys [name] :as meta}] routes
+               :when name
+               :let [route (impl/create p meta)]]
+           [name (fn [params]
+                   (->Match p meta (impl/path-for route params) params))])
+         (into {}))))
+
+(defrecord LookupRouter [routes data lookup]
   Routing
-  (match-route [_ path]
-    (routes path)))
+  (routes [_]
+    routes)
+  (match [_ path]
+    (data path))
+  (by-name [_ name]
+    ((lookup name) nil))
+  (by-name [_ name params]
+    ((lookup name) params)))
+
+(defn lookup-router [routes]
+  (->LookupRouter
+    routes
+    (->> (for [[p meta] routes]
+           [p (->Match p meta p {})])
+         (into {}))
+    (->> (for [[p {:keys [name] :as meta}] routes
+               :when name]
+           [name (fn [params]
+                   (->Match p meta p params))])
+         (into {}))))
 
 (defn router
   ([data]
    (router data {}))
   ([data opts]
    (let [routes (resolve-routes data opts)]
-     (if (some regex/contains-wilds? (map first routes))
-       (->LinearRouter
-         (for [[p m] routes]
-           [p m (regex/matcher p)]))
-       (->LookupRouter
-         (into {} routes))))))
+     ((if (some impl/contains-wilds? (map first routes))
+        linear-router lookup-router) routes))))
