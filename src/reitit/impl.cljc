@@ -10,8 +10,9 @@
 ;
 ; You must not remove this notice, or any other, from this software.
 
-(ns reitit.regex
-  (:require [clojure.string :as str])
+(ns reitit.impl
+  (:require [clojure.string :as str]
+            [clojure.set :as set])
   (:import #?(:clj (java.util.regex Pattern))))
 
 ;;
@@ -97,12 +98,34 @@
         (wild? (first parts)))))
 
 ;;
-;; Routing
+;; Routing (c) Metosin
 ;;
 
-(defn matcher [path]
+(defrecord Route [path matcher parts params meta])
+
+(defn create [path meta]
   (if (contains-wilds? path)
     (as-> (parse-path path) $
           (assoc $ :path-re (path-regex $))
-          (path-matcher $))
-    #(if (= path %) {})))
+          (merge $ {:path path
+                    :matcher (path-matcher $)
+                    :meta meta})
+          (dissoc $ :path-re :path-constraints)
+          (update $ :path-params set)
+          (set/rename-keys $ {:path-parts :parts
+                              :path-params :params})
+          (map->Route $))
+    (map->Route {:path path
+                 :meta meta
+                 :matcher #(if (= path %) {})})))
+
+(defn path-for [^Route route params]
+  (when-not (every? #(contains? params %) (:params route))
+    (let [defined (-> params keys set)
+          required (:params route)
+          missing (clojure.set/difference required defined)]
+      (throw
+        (ex-info
+          (str "missing path-params for route '" (:path route) "': " missing)
+          {:params params, :required required}))))
+  (str "/" (str/join \/ (map #(get params % %) (:parts route)))))

@@ -1,25 +1,51 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-    #?(:clj  [reitit.core :as reitit]
-       :cljs [reitit.core :as reitit :refer [LinearRouter LookupRouter]]))
+            [reitit.core :as reitit #?@(:cljs [:refer [Match LinearRouter LookupRouter]])])
   #?(:clj
-     (:import (reitit.core LinearRouter LookupRouter))))
+     (:import (reitit.core Match LinearRouter LookupRouter)
+              (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
 
   (testing "linear router"
-    (let [router (reitit/router ["/api"
-                                 ["/ipa"
-                                  ["/:size"]]])]
+    (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
       (is (instance? LinearRouter router))
-      (is (map? (reitit/match-route router "/api/ipa/large")))))
+      (is (= [["/api/ipa/:size" {:name ::beer}]]
+             (reitit/routes router)))
+      (is (= (reitit/map->Match
+               {:template "/api/ipa/:size"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (reitit/match router "/api/ipa/large")))
+      (is (= (reitit/map->Match
+               {:template "/api/ipa/:size"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (reitit/by-name router ::beer {:size "large"})))
+      (is (thrown-with-msg?
+            ExceptionInfo
+            #"^missing path-params for route '/api/ipa/:size': \#\{:size\}$"
+            (reitit/by-name router ::beer)))))
 
   (testing "lookup router"
-    (let [router (reitit/router ["/api"
-                                 ["/ipa"
-                                  ["/large"]]])]
+    (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
       (is (instance? LookupRouter router))
-      (is (map? (reitit/match-route router "/api/ipa/large")))))
+      (is (= [["/api/ipa/large" {:name ::beer}]]
+             (reitit/routes router)))
+      (is (= (reitit/map->Match
+               {:template "/api/ipa/large"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {}})
+             (reitit/match router "/api/ipa/large")))
+      (is (= (reitit/map->Match
+               {:template "/api/ipa/large"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (reitit/by-name router ::beer {:size "large"})))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
@@ -47,7 +73,10 @@
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
           router (reitit/router routes)]
       (is (= expected (reitit/resolve-routes routes {})))
-      (is (= {:mw [:api], :parameters {:id String, :sub-id String}
-              :route-params {:id "1", :sub-id "2"}}
-             (reitit/match-route router "/api/user/1/2"))))))
+      (is (= (reitit/map->Match
+               {:template "/api/user/:id/:sub-id"
+                :meta {:mw [:api], :parameters {:id String, :sub-id String}}
+                :path "/api/user/1/2"
+                :params {:id "1", :sub-id "2"}})
+             (reitit/match router "/api/user/1/2"))))))
 
