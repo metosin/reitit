@@ -17,17 +17,18 @@
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/match router "/api/ipa/large")))
+             (reitit/match-by-path router "/api/ipa/large")))
       (is (= (reitit/map->Match
                {:template "/api/ipa/:size"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/by-name router ::beer {:size "large"})))
-      (is (thrown-with-msg?
-            ExceptionInfo
-            #"^missing path-params for route '/api/ipa/:size': \#\{:size\}$"
-            (reitit/by-name router ::beer)))))
+             (reitit/match-by-name router ::beer {:size "large"})))
+      (testing "name-based routing at runtime for missing parameters"
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"^missing path-params for route '/api/ipa/:size': \#\{:size\}$"
+              (reitit/match-by-name router ::beer))))))
 
   (testing "lookup router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
@@ -39,13 +40,20 @@
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {}})
-             (reitit/match router "/api/ipa/large")))
+             (reitit/match-by-path router "/api/ipa/large")))
       (is (= (reitit/map->Match
                {:template "/api/ipa/large"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/by-name router ::beer {:size "large"})))))
+             (reitit/match-by-name router ::beer {:size "large"})))
+      (testing "can't be created with wildcard routes"
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"can't create LookupRouter with wildcard routes"
+              (reitit/lookup-router
+                (reitit/resolve-routes
+                  ["/api/:version/ping"] {})))))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
@@ -78,5 +86,5 @@
                 :meta {:mw [:api], :parameters {:id String, :sub-id String}}
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
-             (reitit/match router "/api/user/1/2"))))))
+             (reitit/match-by-path router "/api/user/1/2"))))))
 
