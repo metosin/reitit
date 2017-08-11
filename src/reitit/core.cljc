@@ -55,8 +55,11 @@
       (meta-merge acc {k v}))
     {} x))
 
-(defn resolve-routes [data opts]
-  (->> (walk data opts) (map-meta merge-meta)))
+(defn resolve-routes [data {:keys [coerce] :or {coerce identity} :as opts}]
+  (->> (walk data opts)
+       (map-meta merge-meta)
+       (mapv (partial coerce))
+       (filterv identity)))
 
 (defprotocol Routing
   (routes [this])

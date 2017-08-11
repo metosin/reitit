@@ -55,6 +55,26 @@
                 (reitit/resolve-routes
                   ["/api/:version/ping"] {})))))))
 
+  (testing "route coercion"
+    (let [coerce (fn [[path meta]]
+                   (if-not (:invalid? meta)
+                     [path (assoc meta :path path)]))
+          router (reitit/router
+                   ["/api" {:roles #{:admin}}
+                    ["/ping" ::ping]
+                    ["/pong" ::pong]
+                    ["/hidden" {:invalid? true}
+                     ["/utter"]
+                     ["/crap"]]]
+                   {:coerce coerce})]
+      (is (= [["/api/ping" {:name ::ping
+                            :path "/api/ping",
+                            :roles #{:admin}}]
+              ["/api/pong" {:name ::pong
+                            :path "/api/pong",
+                            :roles #{:admin}}]]
+             (reitit/routes router)))))
+
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
                   ["/auth/recovery/token/:token" :auth/recovery]
