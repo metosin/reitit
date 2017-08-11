@@ -69,7 +69,7 @@ Create a router:
   (reitit/router
     [["/api"
       ["/ping" ::ping]
-      ["/user/:id ::user]]))
+      ["/user/:id" ::user]]))
 
 (class router)
 ; reitit.core.LinearRouter
