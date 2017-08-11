@@ -60,8 +60,8 @@
 
 (defprotocol Routing
   (routes [this])
-  (match [this path])
-  (by-name [this name] [this name parameters]))
+  (match-by-path [this path])
+  (match-by-name [this name] [this name parameters]))
 
 (defrecord Match [template meta path params])
 
@@ -69,15 +69,15 @@
   Routing
   (routes [_]
     routes)
-  (match [_ path]
+  (match-by-path [_ path]
     (reduce
       (fn [acc ^Route route]
         (if-let [params ((:matcher route) path)]
           (reduced (->Match (:path route) (:meta route) path params))))
       nil data))
-  (by-name [_ name]
+  (match-by-name [_ name]
     ((lookup name) nil))
-  (by-name [_ name params]
+  (match-by-name [_ name params]
     ((lookup name) params)))
 
 (defn linear-router [routes]
@@ -95,14 +95,20 @@
   Routing
   (routes [_]
     routes)
-  (match [_ path]
+  (match-by-path [_ path]
     (data path))
-  (by-name [_ name]
+  (match-by-name [_ name]
     ((lookup name) nil))
-  (by-name [_ name params]
+  (match-by-name [_ name params]
     ((lookup name) params)))
 
 (defn lookup-router [routes]
+  (when-let [route (some impl/contains-wilds? (map first routes))]
+    (throw
+      (ex-info
+        (str "can't create LookupRouter with wildcard routes: " route)
+        {:route route
+         :routes routes})))
   (->LookupRouter
     routes
     (->> (for [[p meta] routes]

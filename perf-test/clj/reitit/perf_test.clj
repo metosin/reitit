@@ -3,12 +3,14 @@
             [reitit.core :as reitit]
 
             [bidi.bidi :as bidi]
-            [compojure.api.core :refer [routes GET]]
+            [compojure.api.sweet :refer [api routes GET]]
+            [compojure.api.routes :as routes]
             [ataraxy.core :as ataraxy]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
-            [io.pedestal.http.route.router :as pedestal]))
+            [io.pedestal.http.route.router :as pedestal]
+            [io.pedestal.http.route :as route]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -40,9 +42,12 @@
 
 (def compojure-api-routes
   (routes
-    (GET "/auth/login" [] (constantly ""))
-    (GET "/auth/recovery/token/:token" [] (constantly ""))
-    (GET "/workspace/:project/:page" [] (constantly ""))))
+    (GET "/auth/login" [] :name :auth/login (constantly ""))
+    (GET "/auth/recovery/token/:token" [] :name :auth/recovery (constantly ""))
+    (GET "/workspace/:project/:page" [] :name :workspace/page (constantly ""))))
+
+(def compojure-api-request
+  {:compojure.api.request/lookup (routes/route-lookup-table (routes/get-routes (api compojure-api-routes)))})
 
 (def ataraxy-routes
   (ataraxy/compile
@@ -51,11 +56,16 @@
       ["/workspace/" project "/" token] [:workspace/page project token]}))
 
 (def pedestal-routes
+  (table/table-routes
+    [["/auth/login" :get (constantly "") :route-name :auth/login]
+     ["/auth/recovery/token/:token" :get (constantly "") :route-name :auth/recovery]
+     ["/workspace/:project/:page" :get (constantly "") :route-name :workspace/page]]))
+
+(def pedestal-router
   (map-tree/router
-    (table/table-routes
-      [["/auth/login" :get (constantly "") :route-name :auth/login]
-       ["/auth/recovery/token/:token" :get (constantly "") :route-name :auth/recovery]
-       ["/workspace/:project/:page" :get (constantly "") :route-name :workspace/page]])))
+    pedestal-routes))
+
+(def pedestal-url-for (route/url-for-routes pedestal-routes))
 
 (def reitit-routes
   (reitit/router
@@ -98,10 +108,45 @@
   ;; 1.0µs (-94%)
   ;; 770ns (-95%, -23%)
   (title "reitit")
-  (let [call #(reitit/match reitit-routes "/workspace/1/1")]
+  (let [call #(reitit/match-by-path reitit-routes "/workspace/1/1")]
+    (assert (call))
+    (cc/quick-bench
+      (call))))
+
+(defn reverse-routing-test []
+
+  (suite "reverse routing")
+
+  ;; 2.2µs (-56%)
+  (title "bidi")
+  (let [call #(bidi/path-for bidi-routes :workspace/page :project "1" :page "1")]
+    (assert (= "/workspace/1/1" (call)))
+    (cc/quick-bench
+      (call)))
+
+  (title "ataraxy doesn't support reverse routing :(")
+
+  ;; 3.8µs (-25%)
+  (title "pedestal - map-tree => prefix-tree")
+  (let [call #(pedestal-url-for :workspace/page :path-params {:project "1" :page "1"})]
+    (assert (= "/workspace/1/1" (call)))
+    (cc/quick-bench
+      (call)))
+
+  ;; 5.1µs
+  (title "compojure-api")
+  (let [call #(routes/path-for* :workspace/page compojure-api-request {:project "1", :page "1"})]
+    (assert (= "/workspace/1/1" (call)))
+    (cc/quick-bench
+      (call)))
+
+  ;; 850ns (-83%)
+  (title "reitit")
+  (let [call #(reitit/match-by-name reitit-routes :workspace/page {:project "1", :page "1"})]
     (assert (call))
     (cc/quick-bench
       (call))))
 
 (comment
-  (routing-test))
+  (routing-test)
+  (reverse-routing-test))
