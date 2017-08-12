@@ -55,10 +55,14 @@
                 (reitit/resolve-routes
                   ["/api/:version/ping"] {})))))))
 
-  (testing "route coercion"
-    (let [coerce (fn [[path meta]]
+  (testing "route coercion & compilation"
+    (let [compile-times (atom 0)
+          coerce (fn [[path meta]]
                    (if-not (:invalid? meta)
                      [path (assoc meta :path path)]))
+          compile (fn [[path meta]]
+                    (swap! compile-times inc)
+                    (constantly path))
           router (reitit/router
                    ["/api" {:roles #{:admin}}
                     ["/ping" ::ping]
@@ -66,14 +70,22 @@
                     ["/hidden" {:invalid? true}
                      ["/utter"]
                      ["/crap"]]]
-                   {:coerce coerce})]
-      (is (= [["/api/ping" {:name ::ping
-                            :path "/api/ping",
-                            :roles #{:admin}}]
-              ["/api/pong" {:name ::pong
-                            :path "/api/pong",
-                            :roles #{:admin}}]]
-             (reitit/routes router)))))
+                   {:coerce coerce
+                    :compile compile})]
+      (testing "routes are coerced"
+        (is (= [["/api/ping" {:name ::ping
+                              :path "/api/ping",
+                              :roles #{:admin}}]
+                ["/api/pong" {:name ::pong
+                              :path "/api/pong",
+                              :roles #{:admin}}]]
+               (reitit/routes router))))
+      (testing "route match contains compiled handler"
+        (is (= 2 @compile-times))
+        (let [{:keys [handler]} (reitit/match-by-path router "/api/pong")]
+          (is handler)
+          (is (= "/api/pong" (handler)))
+          (is (= 2 @compile-times))))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]

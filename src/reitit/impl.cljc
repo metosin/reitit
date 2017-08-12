@@ -101,14 +101,15 @@
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher parts params meta])
+(defrecord Route [path matcher parts params meta handler])
 
-(defn create [path meta]
+(defn create [[path meta handler]]
   (if (contains-wilds? path)
     (as-> (parse-path path) $
           (assoc $ :path-re (path-regex $))
           (merge $ {:path path
                     :matcher (path-matcher $)
+                    :handler handler
                     :meta meta})
           (dissoc $ :path-re :path-constraints)
           (update $ :path-params set)
@@ -117,7 +118,8 @@
           (map->Route $))
     (map->Route {:path path
                  :meta meta
-                 :matcher #(if (= path %) {})})))
+                 :matcher #(if (= path %) {})
+                 :handler handler})))
 
 (defn path-for [^Route route params]
   (when-not (every? #(contains? params %) (:params route))
