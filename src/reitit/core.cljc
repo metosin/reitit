@@ -90,7 +90,7 @@
   "Creates a [[LinearRouter]] from routes and optional options.
   See [[router]] for available options"
   ([routes]
-    (linear-router routes {}))
+   (linear-router routes {}))
   ([routes {:keys [compile]}]
    (let [compiled (map (partial compile-route compile) routes)]
      (->LinearRouter
@@ -118,7 +118,7 @@
   "Creates a [[LookupRouter]] from routes and optional options.
   See [[router]] for available options"
   ([routes]
-    (lookup-router routes {}))
+   (lookup-router routes {}))
   ([routes {:keys [compile]}]
    (let [compiled (map (partial compile-route compile) routes)]
      (when-let [route (some impl/contains-wilds? (map first routes))]

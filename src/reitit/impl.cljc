@@ -10,7 +10,7 @@
 ;
 ; You must not remove this notice, or any other, from this software.
 
-(ns reitit.impl
+(ns ^:no-doc reitit.impl
   (:require [clojure.string :as str]
             [clojure.set :as set])
   (:import #?(:clj (java.util.regex Pattern))))
