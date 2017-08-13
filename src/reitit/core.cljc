@@ -97,16 +97,15 @@
    (linear-router routes {}))
   ([routes opts]
    (let [{:keys [compile]} (meta-merge default-router-options opts)
-         compiled (map (partial compile-route compile) routes)]
-     (->LinearRouter
-       routes
-       (mapv (partial impl/create) compiled)
-       (->> (for [[p {:keys [name] :as meta} handler] compiled
-                  :when name
-                  :let [route (impl/create [p meta handler])]]
-              [name (fn [params]
-                      (->Match p meta (impl/path-for route params) handler params))])
-            (into {}))))))
+         compiled (map (partial compile-route compile) routes)
+         [data lookup] (reduce
+                         (fn [[data lookup] [p {:keys [name] :as meta} handler]]
+                           (let [route (impl/create [p meta handler])]
+                             [(conj data route)
+                              (if name
+                                (assoc lookup name #(->Match p meta (impl/path-for route %) handler %))
+                                lookup)])) [[] {}] compiled)]
+     (->LinearRouter routes data lookup))))
 
 (defrecord LookupRouter [routes data lookup]
   Routing
@@ -125,24 +124,21 @@
   ([routes]
    (lookup-router routes {}))
   ([routes opts]
+   (when-let [route (some impl/contains-wilds? (map first routes))]
+     (throw
+       (ex-info
+         (str "can't create LookupRouter with wildcard routes: " route)
+         {:route route
+          :routes routes})))
    (let [{:keys [compile]} (meta-merge default-router-options opts)
-         compiled (map (partial compile-route compile) routes)]
-     (when-let [route (some impl/contains-wilds? (map first routes))]
-       (throw
-         (ex-info
-           (str "can't create LookupRouter with wildcard routes: " route)
-           {:route route
-            :routes routes})))
-     (->LookupRouter
-       routes
-       (->> (for [[p meta handler] compiled]
-              [p (->Match p meta p handler {})])
-            (into {}))
-       (->> (for [[p {:keys [name] :as meta} handler] compiled
-                  :when name]
-              [name (fn [params]
-                      (->Match p meta p handler params))])
-            (into {}))))))
+         compiled (map (partial compile-route compile) routes)
+         [data lookup] (reduce
+                         (fn [[data lookup] [p {:keys [name] :as meta} handler]]
+                           [(assoc data p (->Match p meta p handler {}))
+                            (if name
+                              (assoc lookup name #(->Match p meta p handler %))
+                              lookup)]) [{} {}] compiled)]
+     (->LookupRouter routes data lookup))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
