@@ -89,7 +89,6 @@
             (is (= 2 @compile-times))))))
     (testing "default compile"
       (let [router (reitit/router ["/ping" (constantly "ok")])]
-        (println (reitit/match-by-path router "/ping"))
         (let [{:keys [handler]} (reitit/match-by-path router "/ping")]
           (is handler)
           (is (= "ok" (handler)))))))
