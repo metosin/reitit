@@ -55,11 +55,11 @@
       (meta-merge acc {k v}))
     {} x))
 
-(defn resolve-routes [data {:keys [coerce] :or {coerce identity} :as opts}]
-  (->> (walk data opts)
-       (map-meta merge-meta)
-       (mapv (partial coerce))
-       (filterv identity)))
+(defn resolve-routes [data {:keys [coerce] :as opts}]
+  (cond-> (->> (walk data opts)
+               (map-meta merge-meta))
+          coerce (->> (mapv (partial coerce))
+                      (filterv identity))))
 
 (defn compile-route [compile [p m :as route]]
   [p m (if compile (compile route))])
@@ -70,6 +70,10 @@
   (match-by-name [this name] [this name parameters]))
 
 (defrecord Match [template meta path handler params])
+
+(def default-router-options
+  {:coerce identity
+   :compile (comp :handler second)})
 
 (defrecord LinearRouter [routes data lookup]
   Routing
@@ -91,8 +95,9 @@
   See [[router]] for available options"
   ([routes]
    (linear-router routes {}))
-  ([routes {:keys [compile]}]
-   (let [compiled (map (partial compile-route compile) routes)]
+  ([routes opts]
+   (let [{:keys [compile]} (meta-merge default-router-options opts)
+         compiled (map (partial compile-route compile) routes)]
      (->LinearRouter
        routes
        (mapv (partial impl/create) compiled)
@@ -119,8 +124,9 @@
   See [[router]] for available options"
   ([routes]
    (lookup-router routes {}))
-  ([routes {:keys [compile]}]
-   (let [compiled (map (partial compile-route compile) routes)]
+  ([routes opts]
+   (let [{:keys [compile]} (meta-merge default-router-options opts)
+         compiled (map (partial compile-route compile) routes)]
      (when-let [route (some impl/contains-wilds? (map first routes))]
        (throw
          (ex-info
@@ -150,7 +156,7 @@
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
   | `:expand`  | Function `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`  | Function `[path meta] => [path meta]` to coerce resolved route, can throw or return `nil` (default `identity`)
-  | `:compile` | Function `[path meta] => handler` to compile a route handler"
+  | `:compile` | Function `[path meta] => handler` to compile a route handler (default `(comp :handler second)`)"
   ([data]
    (router data {}))
   ([data opts]
