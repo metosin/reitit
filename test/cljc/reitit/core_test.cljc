@@ -1,5 +1,5 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [deftest testing is]]
             [reitit.core :as reitit #?@(:cljs [:refer [Match LinearRouter LookupRouter]])])
   #?(:clj
      (:import (reitit.core Match LinearRouter LookupRouter)
