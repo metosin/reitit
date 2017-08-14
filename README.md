@@ -93,6 +93,7 @@ Path-based routing:
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
+;        :handler nil
 ;        :params {:id "1"}}
 ```
 
@@ -110,6 +111,7 @@ Oh, that didn't work, retry:
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
+;        :handler nil
 ;        :params {:id "1"}}
 ```
 
@@ -164,10 +166,13 @@ Path-based routing:
 ;               :middleware [:api-mw :admin-mw]
 ;               :roles #{:root}}
 ;        :path "/api/admin/root"
+;        :handler nil
 ;        :params {}}
 ```
 
-Route meta-data is just data and the actual interpretation is left to the application. `Router` will get more options in the future to do things like [`clojure.spec`](https://clojure.org/about/spec) validation and custom route compilation (into into [Ring](https://github.com/ring-clojure/ring)-handlers or [Pedestal](pedestal.io)-style interceptors). See [Open issues](https://github.com/metosin/reitit/issues/).
+Route meta-data is just data and the actual interpretation is left to the application. Custom coercion and route compilation can be defined via router options enabling things like [`clojure.spec`](https://clojure.org/about/spec) validation for route-meta data and pre-compiled route handlers ([Ring](https://github.com/ring-clojure/ring)-handlers or [Pedestal](pedestal.io)-style interceptors).
+
+**TODO**: examples / implementations of different kind of routers. See [Open issues](https://github.com/metosin/reitit/issues/).
 
 ## Special thanks
 

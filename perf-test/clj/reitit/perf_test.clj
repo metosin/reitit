@@ -93,7 +93,7 @@
 
   ;; 2.4µs (-84%)
   (title "pedestal - map-tree => prefix-tree")
-  (let [call #(pedestal/find-route pedestal-routes {:path-info "/workspace/1/1" :request-method :get})]
+  (let [call #(pedestal/find-route pedestal-router {:path-info "/workspace/1/1" :request-method :get})]
     (assert (call))
     (cc/quick-bench
       (call)))
