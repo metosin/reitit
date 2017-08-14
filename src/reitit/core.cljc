@@ -56,10 +56,8 @@
     {} x))
 
 (defn resolve-routes [data {:keys [coerce] :as opts}]
-  (cond-> (->> (walk data opts)
-               (map-meta merge-meta))
-          coerce (->> (mapv #(coerce % opts))
-                      (filterv identity))))
+  (cond->> (->> (walk data opts) (map-meta merge-meta))
+           coerce (into [] (keep #(coerce % opts)))))
 
 (defn compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
