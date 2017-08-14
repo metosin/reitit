@@ -17,6 +17,12 @@
        #(respond (update % :body (fnil conj []) name))
        raise))))
 
+(defn handler
+  ([{:keys [::mw]}]
+   {:status 200 :body (conj mw :ok)})
+  ([request respond raise]
+   (respond (handler request))))
+
 (deftest ring-test
 
   (testing "simple-router"
@@ -29,11 +35,6 @@
 
     (testing "ring-handler"
       (let [api-mw #(mw % :api)
-            handler (fn handle
-                      ([{:keys [::mw]}]
-                       {:status 200 :body (conj mw :ok)})
-                      ([request respond raise]
-                       (respond (handle request))))
             router (ring/simple-router
                      [["/ping" handler]
                       ["/api" {:middleware [api-mw]}
@@ -77,11 +78,6 @@
 
     (testing "ring-handler"
       (let [api-mw #(mw % :api)
-            handler (fn handle
-                      ([{:keys [::mw]}]
-                       {:status 200 :body (conj mw :ok)})
-                      ([request respond raise]
-                       (respond (handle request))))
             router (ring/method-router
                      [["/api" {:middleware [api-mw]}
                        ["/all" handler]
