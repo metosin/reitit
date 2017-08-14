@@ -58,10 +58,10 @@
   (testing "route coercion & compilation"
     (testing "custom compile"
       (let [compile-times (atom 0)
-            coerce (fn [[path meta]]
+            coerce (fn [[path meta] _]
                      (if-not (:invalid? meta)
                        [path (assoc meta :path path)]))
-            compile (fn [[path meta]]
+            compile (fn [[path meta] _]
                       (swap! compile-times inc)
                       (constantly path))
             router (reitit/router
