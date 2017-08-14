@@ -56,13 +56,11 @@
     {} x))
 
 (defn resolve-routes [data {:keys [coerce] :as opts}]
-  (cond-> (->> (walk data opts)
-               (map-meta merge-meta))
-          coerce (->> (mapv (partial coerce))
-                      (filterv identity))))
+  (cond->> (->> (walk data opts) (map-meta merge-meta))
+           coerce (into [] (keep #(coerce % opts)))))
 
-(defn compile-route [compile [p m :as route]]
-  [p m (if compile (compile route))])
+(defn compile-route [[p m :as route] {:keys [compile] :as opts}]
+  [p m (if compile (compile route opts))])
 
 (defprotocol Routing
   (routes [this])
@@ -72,8 +70,9 @@
 (defrecord Match [template meta path handler params])
 
 (def default-router-options
-  {:coerce identity
-   :compile (comp :handler second)})
+  {:expand expand
+   :coerce (fn [route _] route)
+   :compile (fn [[_ {:keys [handler]}] _] handler)})
 
 (defrecord LinearRouter [routes data lookup]
   Routing
@@ -91,13 +90,12 @@
     ((lookup name) params)))
 
 (defn linear-router
-  "Creates a [[LinearRouter]] from routes and optional options.
-  See [[router]] for available options"
+  "Creates a [[LinearRouter]] from resolved routes and optional
+  expanded options. See [[router]] for available options"
   ([routes]
    (linear-router routes {}))
   ([routes opts]
-   (let [{:keys [compile]} (meta-merge default-router-options opts)
-         compiled (map (partial compile-route compile) routes)
+   (let [compiled (map #(compile-route % opts) routes)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} handler]]
                            (let [route (impl/create [p meta handler])]
@@ -119,8 +117,8 @@
     ((lookup name) params)))
 
 (defn lookup-router
-  "Creates a [[LookupRouter]] from routes and optional options.
-  See [[router]] for available options"
+  "Creates a [[LookupRouter]] from resolved routes and optional
+  expanded options. See [[router]] for available options"
   ([routes]
    (lookup-router routes {}))
   ([routes opts]
@@ -130,8 +128,7 @@
          (str "can't create LookupRouter with wildcard routes: " route)
          {:route route
           :routes routes})))
-   (let [{:keys [compile]} (meta-merge default-router-options opts)
-         compiled (map (partial compile-route compile) routes)
+   (let [compiled (map #(compile-route % opts) routes)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} handler]]
                            [(assoc data p (->Match p meta p handler {}))
@@ -151,11 +148,12 @@
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
   | `:expand`  | Function `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function `[path meta] => [path meta]` to coerce resolved route, can throw or return `nil` (default `identity`)
-  | `:compile` | Function `[path meta] => handler` to compile a route handler (default `(comp :handler second)`)"
+  | `:coerce`  | Function `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function `[path meta] opts => handler` to compile a route handler"
   ([data]
    (router data {}))
   ([data opts]
-   (let [routes (resolve-routes data opts)]
+   (let [opts (meta-merge default-router-options opts)
+         routes (resolve-routes data opts)]
      ((if (some impl/contains-wilds? (map first routes))
         linear-router lookup-router) routes opts))))

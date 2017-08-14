@@ -1,5 +1,5 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [deftest testing is]]
             [reitit.core :as reitit #?@(:cljs [:refer [Match LinearRouter LookupRouter]])])
   #?(:clj
      (:import (reitit.core Match LinearRouter LookupRouter)
@@ -58,10 +58,10 @@
   (testing "route coercion & compilation"
     (testing "custom compile"
       (let [compile-times (atom 0)
-            coerce (fn [[path meta]]
+            coerce (fn [[path meta] _]
                      (if-not (:invalid? meta)
                        [path (assoc meta :path path)]))
-            compile (fn [[path meta]]
+            compile (fn [[path meta] _]
                       (swap! compile-times inc)
                       (constantly path))
             router (reitit/router
@@ -89,7 +89,6 @@
             (is (= 2 @compile-times))))))
     (testing "default compile"
       (let [router (reitit/router ["/ping" (constantly "ok")])]
-        (println (reitit/match-by-path router "/ping"))
         (let [{:keys [handler]} (reitit/match-by-path router "/ping")]
           (is handler)
           (is (= "ok" (handler)))))))
