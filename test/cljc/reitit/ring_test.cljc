@@ -1,7 +1,8 @@
 (ns reitit.ring-test
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.middleware :as middleware]
-            [reitit.ring :as ring])
+            [reitit.ring :as ring]
+            [clojure.set :as set])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -121,4 +122,38 @@
               respond (partial reset! result), raise ::not-called]
           (app {:uri "/api/users" :request-method :post} respond raise)
           (is (= {:status 200, :body [:api :users :post :ok :post :users :api]}
-                 @result)))))))
+                 @result))))))
+
+  (testing "runtime extensions for meta-data"
+    (let [enforce-roles (fn [handler]
+                          (fn [{:keys [::roles] :as request}]
+                            (let [required (some-> request
+                                                   (ring/get-match)
+                                                   :meta
+                                                   ::roles)]
+                              (if (or (not (seq required))
+                                      (set/intersection required roles))
+                                (handler request)
+                                {:status 403 :body "forbidden"}))))
+          router (ring/router
+                   [["/api"
+                     ["/ping" handler]
+                     ["/admin" {::roles #{:admin}}
+                      ["/ping" handler]]]]
+                   {:meta {:middleware [enforce-roles]}})
+          app (ring/ring-handler router)]
+
+      (testing "public handler"
+        (is (= {:status 200, :body [:ok]}
+               (app {:uri "/api/ping" :request-method :get}))))
+
+      (testing "runtime-enforced handler"
+        (testing "without needed roles"
+          (is (= {:status 403 :body "forbidden"}
+                 (app {:uri "/api/admin/ping"
+                       :request-method :get}))))
+        (testing "with needed roles"
+          (is (= {:status 200, :body [:ok]}
+                 (app {:uri "/api/admin/ping"
+                       :request-method :get
+                       ::roles #{:admin}}))))))))

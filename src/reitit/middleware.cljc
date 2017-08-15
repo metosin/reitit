@@ -1,5 +1,6 @@
 (ns reitit.middleware
-  (:require [reitit.core :as reitit]))
+  (:require [meta-merge.core :refer [meta-merge]]
+            [reitit.core :as reitit]))
 
 (defprotocol ExpandMiddleware
   (expand-middleware [this]))
@@ -40,5 +41,9 @@
    (ensure-handler! path meta scope)
    ((compose-middleware middleware) handler)))
 
-(defn router [data]
-  (reitit/router data {:compile compile-handler}))
+(defn router
+  ([data]
+   (router data nil))
+  ([data opts]
+   (let [opts (meta-merge {:compile compile-handler} opts)]
+     (reitit/router data opts))))
