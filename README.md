@@ -79,7 +79,7 @@ Creating a router:
       ["/user/:id" ::user]]))
 ```
 
-It's `LinearRouter` (as there are wildcard):
+`LinearRouter` is created (as there are wildcard):
 
 ```clj
 (class router)
@@ -131,46 +131,46 @@ A router based on nested route tree:
 ```clj
 (def router
   (reitit/router
-    ["/api" {:middleware [:api-mw]}
+    ["/api" {:interceptors [::api]}
      ["/ping" ::ping]
      ["/public/*path" ::resources]
      ["/user/:id" {:name ::get-user
                    :parameters {:id String}}
       ["/orders" ::user-orders]]
-     ["/admin" {:middleware [:admin-mw]
+     ["/admin" {:interceptors [::admin]
                 :roles #{:admin}}
       ["/root" {:name ::root
                 :roles ^:replace #{:root}}]
       ["/db" {:name ::db
-              :middleware [:db-mw]}]]]))
+              :interceptors [::db]}]]]))
 ```
 
 Resolved route tree:
 
 ```clj
-(reitit/routes ring-router)
+(reitit/routes router)
 ; [["/api/ping" {:name :user/ping
-;                :middleware [:api-mw]}]
+;                :interceptors [::api]}]
 ;  ["/api/public/*path" {:name :user/resources
-;                        :middleware [:api-mw]}]
+;                        :interceptors [::api]}]
 ;  ["/api/user/:id/orders" {:name :user/user-orders
-;                           :middleware [:api-mw]
+;                           :interceptors [::api]
 ;                           :parameters {:id String}}]
 ;  ["/api/admin/root" {:name :user/root
-;                      :middleware [:api-mw :admin-mw]
+;                      :interceptors [::api ::admin]
 ;                      :roles #{:root}}]
 ;  ["/api/admin/db" {:name :user/db
-;                    :middleware [:api-mw :admin-mw :db-mw]
+;                    :interceptors [::api ::admin ::db]
 ;                    :roles #{:admin}}]]
 ```
 
 Path-based routing:
 
 ```clj
-(reitit/match-by-path ring-router "/api/admin/root")
+(reitit/match-by-path router "/api/admin/root")
 ; #Match{:template "/api/admin/root"
 ;        :meta {:name :user/root
-;               :middleware [:api-mw :admin-mw]
+;               :interceptors [::api ::admin]
 ;               :roles #{:root}}
 ;        :path "/api/admin/root"
 ;        :handler nil
@@ -183,7 +183,7 @@ Routers also support meta-data compilation enabling things like fast [Ring](http
 
 ## Ring
 
-Simplest possible [Ring](https://github.com/ring-clojure/ring)-based routing app:
+Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -195,6 +195,13 @@ Simplest possible [Ring](https://github.com/ring-clojure/ring)-based routing app
   (ring/ring-handler
     (ring/router
       ["/ping" handler])))
+```
+
+It's backed by a `LookupRouter` (no wildcards!)
+
+```clj
+(-> app (ring/get-router) class)
+; reitit.core.LookupRouter
 ```
 
 The expanded routes:
@@ -230,7 +237,7 @@ Routing based on `:request-method`:
 ; nil
 ```
 
-Some middleware and a handler:
+Define some middleware and a new handler:
 
 ```clj
 (defn wrap [handler id]
@@ -258,7 +265,7 @@ App with nested middleware:
                          :handler handler}}]]])))
 ```
 
-Middleware is called correctly:
+Middleware is applied correctly:
 
 ```clj
 (app {:request-method :delete, :uri "/api/ping"})
@@ -272,7 +279,7 @@ Nested middleware works too:
 ; {:status 200, :body [:api :admin :db :delete :handler]}
 ```
 
-Ring-router supports also [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html), so it can be used on [Node.js](https://nodejs.org/en/) too.
+Ring-router supports also 3-arity [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html), so it can be used on [Node.js](https://nodejs.org/en/) too.
 
 ## Validating route-tree
 
