@@ -179,7 +179,7 @@ Path-based routing:
 
 On match, route meta-data is returned and can interpreted by the  application.
 
-Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:handler` in the match. See [configuring routers](configuring-routers) for details.
+Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:handler` in the match. See [configuring routers](#configuring-routers) for details.
 
 ## Ring
 
@@ -281,6 +281,59 @@ Nested middleware works too:
 
 Ring-router supports also 3-arity [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html), so it can be used on [Node.js](https://nodejs.org/en/) too.
 
+### Meta-data based extensions
+
+The routing `Match` is injected into a request and can be extracted with `reitit.ring/get-match` helper. It can be used to build dynamic extensions to the system.
+
+A middleware to guard routes:
+
+```clj
+(require '[clojure.set :as set])
+
+(defn wrap-enforce-roles [handler]
+  (fn [{:keys [::roles] :as request}]
+    (let [required (some-> request (ring/get-match) :meta ::roles)]
+      (if (and (seq required) (not (set/intersection required roles)))
+        {:status 403, :body "forbidden"}
+        (handler request)))))
+```
+
+Mounted to an app via router meta-data (effecting all routes):
+
+```clj
+(def handler (constantly {:status 200, :body "ok"}))
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      [["/api"
+        ["/ping" handler]
+        ["/admin" {::roles #{:admin}}
+         ["/ping" handler]]]]
+      {:meta {:middleware [wrap-enforce-roles]}})))
+```
+
+Anonymous access to public route:
+
+```clj
+(app {:request-method :get, :uri "/api/ping"})
+; {:status 200, :body "ok"}
+```
+
+Anonymous access to guarded route:
+
+```clj
+(app {:request-method :get, :uri "/api/admin/ping"})
+; {:status 403, :body "forbidden"}
+```
+
+Authorized access to guarded route:
+
+```clj
+(app {:request-method :get, :uri "/api/admin/ping", ::roles #{:admin}})
+; {:status 200, :body "ok"}
+```
+
 ## Validating route-tree
 
 **TODO**
@@ -294,10 +347,6 @@ Ring-router supports also 3-arity [Async Ring](https://www.booleanknot.com/blog/
 **TODO**
 
 ## Interceptors
-
-**TODO**
-
-## Custom extensions
 
 **TODO**
 

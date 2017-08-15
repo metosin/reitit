@@ -130,6 +130,7 @@
       (if (and (seq required) (not (set/intersection required roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
+
 (deftest enforcing-meta-data-rules-at-runtime-test
   (let [handler (constantly {:status 200, :body "ok"})
         app (ring/ring-handler
