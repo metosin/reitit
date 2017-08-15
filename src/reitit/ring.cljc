@@ -18,14 +18,17 @@
     (fn
       ([request]
        (if-let [match (reitit/match-by-path router (:uri request))]
-         ((:handler match) request)))
+         ((:handler match) (assoc request ::match match))))
       ([request respond raise]
        (if-let [match (reitit/match-by-path router (:uri request))]
-         ((:handler match) request respond raise))))
+         ((:handler match) (assoc request ::match match) respond raise))))
     {::router router}))
 
 (defn get-router [handler]
   (some-> handler meta ::router))
+
+(defn get-match [request]
+  (::match request))
 
 (defn coerce-handler [[path meta] {:keys [expand]}]
   [path (reduce
@@ -53,6 +56,10 @@
            (if-let [handler (resolved-handler (:request-method request))]
              (handler request respond raise))))))))
 
-(defn router [data]
-  (reitit/router data {:coerce coerce-handler
-                       :compile compile-handler}))
+(defn router
+  ([data]
+   (router data nil))
+  ([data opts]
+   (let [opts (meta-merge {:coerce coerce-handler
+                           :compile compile-handler} opts)]
+     (reitit/router data opts))))

@@ -1,7 +1,8 @@
 (ns reitit.ring-test
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.middleware :as middleware]
-            [reitit.ring :as ring])
+            [reitit.ring :as ring]
+            [clojure.set :as set])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -122,3 +123,35 @@
           (app {:uri "/api/users" :request-method :post} respond raise)
           (is (= {:status 200, :body [:api :users :post :ok :post :users :api]}
                  @result)))))))
+
+(defn wrap-enforce-roles [handler]
+  (fn [{:keys [::roles] :as request}]
+    (let [required (some-> request (ring/get-match) :meta ::roles)]
+      (if (and (seq required) (not (set/intersection required roles)))
+        {:status 403, :body "forbidden"}
+        (handler request)))))
+
+(deftest enforcing-meta-data-rules-at-runtime-test
+  (let [handler (constantly {:status 200, :body "ok"})
+        app (ring/ring-handler
+              (ring/router
+                [["/api"
+                  ["/ping" handler]
+                  ["/admin" {::roles #{:admin}}
+                   ["/ping" handler]]]]
+                {:meta {:middleware [wrap-enforce-roles]}}))]
+
+    (testing "public handler"
+      (is (= {:status 200, :body "ok"}
+             (app {:uri "/api/ping" :request-method :get}))))
+
+    (testing "runtime-enforced handler"
+      (testing "without needed roles"
+        (is (= {:status 403 :body "forbidden"}
+               (app {:uri "/api/admin/ping"
+                     :request-method :get}))))
+      (testing "with needed roles"
+        (is (= {:status 200, :body "ok"}
+               (app {:uri "/api/admin/ping"
+                     :request-method :get
+                     ::roles #{:admin}})))))))
