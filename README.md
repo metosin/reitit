@@ -25,15 +25,22 @@ Simple route:
 Two routes:
 
 ```clj
-[["/ping]
- ["/pong]]
+[["/ping"]
+ ["/pong"]]
 ```
 
 Routes with meta-data:
 
 ```clj
-[["/ping ::ping]
- ["/pong {:name ::pong}]]
+[["/ping" ::ping]
+ ["/pong" {:name ::pong}]]
+```
+
+Routes with path and catch-all parameters:
+
+```clj
+[["/users/:user-id"]
+ ["/public/*path"]]
 ```
 
 Nested routes with meta-data:
@@ -60,7 +67,7 @@ For actual routing, we need to create a `Router`. Reitit ships with 2 different 
 
 `Router` is created with `reitit.core/router`, which takes routes and optionally an options map as arguments. The route-tree gets expanded, optionally coerced and compiled to support both fast path- and name-based lookups.
 
-Create a router:
+Creating a router:
 
 ```clj
 (require '[reitit.core :as reitit])
@@ -70,12 +77,16 @@ Create a router:
     [["/api"
       ["/ping" ::ping]
       ["/user/:id" ::user]]))
+```
 
+It's `LinearRouter` (as there are wildcard):
+
+```clj
 (class router)
 ; reitit.core.LinearRouter
 ```
 
-Get the expanded routes:
+The expanded routes:
 
 ```clj
 (reitit/routes router)
@@ -102,11 +113,7 @@ Name-based (reverse) routing:
 ```clj
 (reitit/match-by-name router ::user)
 ; ExceptionInfo missing path-params for route '/api/user/:id': #{:id}
-```
 
-Oh, that didn't work, retry:
-
-```clj
 (reitit/match-by-name router ::user {:id "1"})
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
@@ -122,7 +129,7 @@ Routes can have arbitrary meta-data. For nested routes, the meta-data is accumul
 A router based on nested route tree:
 
 ```clj
-(def ring-router
+(def router
   (reitit/router
     ["/api" {:middleware [:api-mw]}
      ["/ping" ::ping]
@@ -138,7 +145,7 @@ A router based on nested route tree:
               :middleware [:db-mw]}]]]))
 ```
 
-Expanded and merged route tree:
+Resolved route tree:
 
 ```clj
 (reitit/routes ring-router)
@@ -170,9 +177,137 @@ Path-based routing:
 ;        :params {}}
 ```
 
-Route meta-data is just data and the actual interpretation is left to the application. Custom coercion and route compilation can be defined via router options enabling things like [`clojure.spec`](https://clojure.org/about/spec) validation for route-meta data and pre-compiled route handlers ([Ring](https://github.com/ring-clojure/ring)-handlers or [Pedestal](pedestal.io)-style interceptors).
+On match, route meta-data is returned and can interpreted by the  application.
 
-**TODO**: examples / implementations of different kind of routers. See [Open issues](https://github.com/metosin/reitit/issues/).
+Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:handler` in the match. See [configuring routers](configuring-routers) for details.
+
+## Ring
+
+Simplest possible [Ring](https://github.com/ring-clojure/ring)-based routing app:
+
+```clj
+(require '[reitit.ring :as ring])
+
+(defn handler [_]
+  {:status 200, :body "ok"})
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/ping" handler])))
+```
+
+The expanded routes:
+
+```clj
+(-> app (ring/get-router) (reitit/routes))
+; [["/ping" {:handler #object[...]}]]
+```
+
+Applying the handler:
+
+```clj
+(app {:request-method :get, :uri "/favicon.ico"})
+; nil
+
+(app {:request-method :get, :uri "/ping"})
+; {:status 200, :body "ok"}
+```
+
+Routing based on `:request-method`:
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/ping" {:get handler
+                :post handler}])))
+
+(app {:request-method :get, :uri "/ping"})
+; {:status 200, :body "ok"}
+
+(app {:request-method :put, :uri "/ping"})
+; nil
+```
+
+Some middleware and a handler:
+
+```clj
+(defn wrap [handler id]
+  (fn [request]
+    (handler (update request ::acc (fnil conj []) id))))
+
+(defn wrap-api [handler]
+  (wrap handler :api))
+
+(defn handler [{:keys [::acc]}]
+  {:status 200, :body (conj acc :handler)})
+```
+
+App with nested middleware:
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [wrap-api]}
+       ["/ping" handler]
+       ["/admin" {:middleware [[wrap :admin]]}
+        ["/db" {:middleware [[wrap :db]]
+                :delete {:middleware [#(wrap % :delete)]
+                         :handler handler}}]]])))
+```
+
+Middleware is called correctly:
+
+```clj
+(app {:request-method :delete, :uri "/api/ping"})
+; {:status 200, :body [:api :handler]}
+```
+
+Nested middleware works too:
+
+```clj
+(app {:request-method :delete, :uri "/api/admin/db"})
+; {:status 200, :body [:api :admin :db :delete :handler]}
+```
+
+Ring-router supports also [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html), so it can be used on [Node.js](https://nodejs.org/en/) too.
+
+## Validating route-tree
+
+**TODO**
+
+## Merging route-trees
+
+**TODO**
+
+## Schema, Spec, Swagger & Openapi
+
+**TODO**
+
+## Interceptors
+
+**TODO**
+
+## Custom extensions
+
+**TODO**
+
+## Configuring Routers
+
+Routers can be configured via options to do things like custom coercion and compilatin of meta-data. These can be used to do things like [`clojure.spec`](https://clojure.org/about/spec) validation of meta-data and fast, compiled [Ring](https://github.com/ring-clojure/ring/wiki/Concepts) or [Pedestal](http://pedestal.io/) -style handlers.
+
+The following options are available for the `Router`:
+
+  | key        | description |
+  | -----------|-------------|
+  | `:path`    | Base-path for routes (default `""`)
+  | `:routes`  | Initial resolved routes (default `[]`)
+  | `:meta`    | Initial expanded route-meta vector (default `[]`)
+  | `:expand`  | Function of `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler
 
 ## Special thanks
 

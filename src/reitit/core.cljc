@@ -142,14 +142,14 @@
   If routes contain wildcards, a [[LinearRouter]] is used, otherwise a
   [[LookupRouter]]. The following options are available:
 
-  | keys       | description |
+  | key        | description |
   | -----------|-------------|
   | `:path`    | Base-path for routes (default `\"\"`)
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
-  | `:expand`  | Function `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function `[path meta] opts => handler` to compile a route handler"
+  | `:expand`  | Function of `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler"
   ([data]
    (router data {}))
   ([data opts]
