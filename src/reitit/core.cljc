@@ -5,31 +5,32 @@
      (:import (reitit.impl Route))))
 
 (defprotocol Expand
-  (expand [this]))
+  (expand [this opts]))
 
 (extend-protocol Expand
 
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
-  (expand [this] {:name this})
+  (expand [this _] {:name this})
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
-  (expand [this] this)
+  (expand [this _] this)
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
-  (expand [this] this)
+  (expand [this _] this)
 
   #?(:clj  clojure.lang.Fn
      :cljs function)
-  (expand [this] {:handler this})
+  (expand [this _] {:handler this})
 
   nil
-  (expand [_]))
+  (expand [_ _]))
 
 (defn walk [data {:keys [path meta routes expand]
-                  :or {path "", meta [], routes [], expand expand}}]
+                  :or {path "", meta [], routes [], expand expand}
+                  :as opts}]
   (letfn
     [(walk-many [p m r]
        (reduce #(into %1 (walk-one p m %2)) [] r))
@@ -40,7 +41,7 @@
                [meta childs] (if (vector? maybe-meta)
                                [{} args]
                                [maybe-meta (rest args)])
-               macc (into macc (expand meta))]
+               macc (into macc (expand meta opts))]
            (if (seq childs)
              (walk-many (str pacc path) macc childs)
              [[(str pacc path) macc]]))))]
@@ -151,7 +152,7 @@
   | `:path`    | Base-path for routes (default `\"\"`)
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
-  | `:expand`  | Function of `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
   | `:compile` | Function of `[path meta] opts => handler` to compile a route handler"
   ([data]

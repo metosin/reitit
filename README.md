@@ -361,7 +361,7 @@ Routers can be configured via options. Options allow things like [`clojure.spec`
   | `:path`    | Base-path for routes (default `""`)
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
-  | `:expand`  | Function of `arg => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
   | `:compile` | Function of `[path meta] opts => handler` to compile a route handler
 

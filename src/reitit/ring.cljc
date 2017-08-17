@@ -30,11 +30,11 @@
 (defn get-match [request]
   (::match request))
 
-(defn coerce-handler [[path meta] {:keys [expand]}]
+(defn coerce-handler [[path meta] {:keys [expand] :as opts}]
   [path (reduce
           (fn [acc method]
             (if (contains? acc method)
-              (update acc method expand)
+              (update acc method expand opts)
               acc)) meta http-methods)])
 
 (defn compile-handler [[path meta] opts]

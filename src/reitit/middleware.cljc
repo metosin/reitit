@@ -3,22 +3,22 @@
             [reitit.core :as reitit]))
 
 (defprotocol ExpandMiddleware
-  (expand-middleware [this]))
+  (expand-middleware [this opts]))
 
 (extend-protocol ExpandMiddleware
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
-  (expand-middleware [[f & args]]
+  (expand-middleware [[f & args] _]
     (fn [handler]
       (apply f handler args)))
 
   #?(:clj  clojure.lang.Fn
      :cljs function)
-  (expand-middleware [this] this)
+  (expand-middleware [this _] this)
 
   nil
-  (expand-middleware [_]))
+  (expand-middleware [_ _]))
 
 (defn- ensure-handler! [path meta scope]
   (when-not (:handler meta)
@@ -28,18 +28,18 @@
              (merge {:path path, :meta meta}
                     (if scope {:scope scope}))))))
 
-(defn compose-middleware [middleware]
+(defn compose-middleware [middleware opts]
   (->> middleware
        (keep identity)
-       (map expand-middleware)
+       (map #(expand-middleware % opts))
        (apply comp identity)))
 
 (defn compile-handler
   ([route opts]
    (compile-handler route opts nil))
-  ([[path {:keys [middleware handler] :as meta}] _ scope]
+  ([[path {:keys [middleware handler] :as meta}] opts scope]
    (ensure-handler! path meta scope)
-   ((compose-middleware middleware) handler)))
+   ((compose-middleware middleware opts) handler)))
 
 (defn router
   ([data]
