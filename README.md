@@ -8,6 +8,8 @@ A friendly data-driven router for Clojure(Script).
 * Extendable
 * Fast
 
+Ships with example router for [Ring](#ring). See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
+
 ## Latest version
 
 [![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
