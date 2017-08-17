@@ -24,6 +24,7 @@
                 :path "/api/ipa/large"
                 :params {:size "large"}})
              (reitit/match-by-name router ::beer {:size "large"})))
+      (is (= nil (reitit/match-by-name router "ILLEGAL")))
       (testing "name-based routing at runtime for missing parameters"
         (is (thrown-with-msg?
               ExceptionInfo
@@ -47,6 +48,7 @@
                 :path "/api/ipa/large"
                 :params {:size "large"}})
              (reitit/match-by-name router ::beer {:size "large"})))
+      (is (= nil (reitit/match-by-name router "ILLEGAL")))
       (testing "can't be created with wildcard routes"
         (is (thrown-with-msg?
               ExceptionInfo

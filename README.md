@@ -1,6 +1,6 @@
 # reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit) [![Dependencies Status](https://jarkeeper.com/metosin/reitit/status.svg)](https://jarkeeper.com/metosin/reitit)
 
-Snappy data-driven router for Clojure(Script).
+A friendly data-driven router for Clojure(Script).
 
 * Simple data-driven route syntax
 * First-class route meta-data
@@ -14,7 +14,7 @@ Snappy data-driven router for Clojure(Script).
 
 ## Route Syntax
 
-Routes are defined as vectors, which String path as the first element, then optional meta-data (non-vector) and optional child routes. Routes can be wrapped in vectors.
+Routes are defined as vectors, which String path, optional (non-vector) route argument and optional child routes. Routes can be wrapped in vectors.
 
 Simple route:
 
@@ -53,7 +53,7 @@ Nested routes with meta-data:
  ["/ping" ::ping]]
 ```
 
-Previous example flattened:
+Same routes flattened:
 
 ```clj
 [["/api/admin/user" {:middleware [::admin], :name ::user}
@@ -63,9 +63,9 @@ Previous example flattened:
 
 ## Routers
 
-For actual routing, we need to create a `Router`. Reitit ships with 2 different router implementations: `LinearRouter` and `LookupRouter`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
+For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `LinearRouter` and `LookupRouter`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
 
-`Router` is created with `reitit.core/router`, which takes routes and optionally an options map as arguments. The route-tree gets expanded, optionally coerced and compiled to support both fast path- and name-based lookups.
+`Router` is created with `reitit.core/router`, which takes routes and optional options map as arguments. The route-tree gets expanded, optionally coerced and compiled. `Router` support both fast path- and name-based lookups.
 
 Creating a router:
 
@@ -197,7 +197,7 @@ Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
       ["/ping" handler])))
 ```
 
-It's backed by a `LookupRouter` (no wildcards!)
+Backed by a `LookupRouter` (as no wildcards found):
 
 ```clj
 (-> app (ring/get-router) class)
@@ -237,7 +237,7 @@ Routing based on `:request-method`:
 ; nil
 ```
 
-Define some middleware and a new handler:
+Some middleware and a new handler:
 
 ```clj
 (defn wrap [handler id]
@@ -283,7 +283,7 @@ Ring-router supports also 3-arity [Async Ring](https://www.booleanknot.com/blog/
 
 ### Meta-data based extensions
 
-The routing `Match` is injected into a request and can be extracted with `reitit.ring/get-match` helper. It can be used to build dynamic extensions to the system.
+The routing `Match` is injected into a request and can be extracted with `reitit.ring/get-match`. It can be used to build dynamic extensions to the system.
 
 A middleware to guard routes:
 
@@ -334,27 +334,25 @@ Authorized access to guarded route:
 ; {:status 200, :body "ok"}
 ```
 
-## Validating route-tree
-
-**TODO**
-
 ## Merging route-trees
 
-**TODO**
+*TODO*
+
+## Validating meta-data
+
+*TODO*
 
 ## Schema, Spec, Swagger & Openapi
 
-**TODO**
+*TODO*
 
 ## Interceptors
 
-**TODO**
+*TODO*
 
 ## Configuring Routers
 
-Routers can be configured via options to do things like custom coercion and compilatin of meta-data. These can be used to do things like [`clojure.spec`](https://clojure.org/about/spec) validation of meta-data and fast, compiled [Ring](https://github.com/ring-clojure/ring/wiki/Concepts) or [Pedestal](http://pedestal.io/) -style handlers.
-
-The following options are available for the `Router`:
+Routers can be configured via options. Options allow things like [`clojure.spec`](https://clojure.org/about/spec) validation for meta-data and fast, compiled handlers. The following options are available for the `reitit.core/router`:
 
   | key        | description |
   | -----------|-------------|

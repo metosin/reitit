@@ -85,9 +85,11 @@
           (reduced (->Match (:path route) (:meta route) path (:handler route) params))))
       nil data))
   (match-by-name [_ name]
-    ((lookup name) nil))
+    (if-let [match (lookup name)]
+      (match nil)))
   (match-by-name [_ name params]
-    ((lookup name) params)))
+    (if-let [match (lookup name)]
+      (match params))))
 
 (defn linear-router
   "Creates a [[LinearRouter]] from resolved routes and optional
@@ -112,9 +114,11 @@
   (match-by-path [_ path]
     (data path))
   (match-by-name [_ name]
-    ((lookup name) nil))
+    (if-let [match (lookup name)]
+      (match nil)))
   (match-by-name [_ name params]
-    ((lookup name) params)))
+    (if-let [match (lookup name)]
+      (match params))))
 
 (defn lookup-router
   "Creates a [[LookupRouter]] from resolved routes and optional
