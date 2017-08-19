@@ -63,7 +63,7 @@ Same routes flattened:
  ["/api/ping" ::ping]]
 ```
 
-## Routers
+## Routing
 
 For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `LinearRouter` and `LookupRouter`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
 
@@ -78,7 +78,7 @@ Creating a router:
   (reitit/router
     [["/api"
       ["/ping" ::ping]
-      ["/user/:id" ::user]]))
+      ["/user/:id" ::user]]]))
 ```
 
 `LinearRouter` is created (as there are wildcard):
@@ -254,7 +254,8 @@ Routing based on `:request-method`:
 (def app
   (ring/ring-handler
     (ring/router
-      ["/ping" {:get handler
+      ["/ping" {:name ::ping
+                :get handler
                 :post handler}])))
 
 (app {:request-method :get, :uri "/ping"})
@@ -262,6 +263,16 @@ Routing based on `:request-method`:
 
 (app {:request-method :put, :uri "/ping"})
 ; nil
+```
+
+Reverse routing:
+
+```clj
+(-> app
+    (ring/get-router)
+    (reitit/match-by-name ::ping)
+    :path)
+; "/ping"
 ```
 
 Some middleware and a new handler:
@@ -387,8 +398,8 @@ Routers can be configured via options. Options allow things like [`clojure.spec`
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
   | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler
+  | `:coerce`  | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function of `route opts => handler` to compile a route handler
 
 ## Special thanks
 

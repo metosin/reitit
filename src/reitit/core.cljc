@@ -183,8 +183,8 @@
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
   | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler"
+  | `:coerce`  | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function of `route opts => handler` to compile a route handler"
   ([data]
    (router data {}))
   ([data opts]
