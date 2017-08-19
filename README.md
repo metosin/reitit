@@ -96,6 +96,13 @@ The expanded routes:
 ;  ["/api/user/:id" {:name :user/user}]]
 ```
 
+Route names:
+
+```clj
+(reitit/route-names router)
+; [:user/ping :user/user]
+```
+
 Path-based routing:
 
 ```clj
@@ -114,14 +121,32 @@ Name-based (reverse) routing:
 
 ```clj
 (reitit/match-by-name router ::user)
-; ExceptionInfo missing path-params for route '/api/user/:id': #{:id}
+; #PartialMatch{:template "/api/user/:id",
+;               :meta {:name :user/user},
+;               :handler nil,
+;               :params nil,
+;               :required #{:id}}
 
+(reitit/partial-match? (reitit/match-by-name router ::user))
+; true
+```
+
+Only a partial match. Let's provide path-parameters:
+
+```clj
 (reitit/match-by-name router ::user {:id "1"})
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
 ;        :handler nil
 ;        :params {:id "1"}}
+```
+
+There is also a exception throwing version:
+
+```
+(reitit/match-by-name! router ::user)
+; ExceptionInfo missing path-params for route /api/user/:id: #{:id}
 ```
 
 ## Route meta-data

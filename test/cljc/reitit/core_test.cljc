@@ -25,11 +25,19 @@
                 :params {:size "large"}})
              (reitit/match-by-name router ::beer {:size "large"})))
       (is (= nil (reitit/match-by-name router "ILLEGAL")))
-      (testing "name-based routing at runtime for missing parameters"
+      (is (= [::beer] (reitit/route-names router)))
+      (testing "name-based routing with missing parameters"
+        (is (= (reitit/map->PartialMatch
+                 {:template "/api/ipa/:size"
+                  :meta {:name ::beer}
+                  :required #{:size}
+                  :params nil})
+               (reitit/match-by-name router ::beer)))
+        (is (= true (reitit/partial-match? (reitit/match-by-name router ::beer))))
         (is (thrown-with-msg?
               ExceptionInfo
-              #"^missing path-params for route '/api/ipa/:size': \#\{:size\}$"
-              (reitit/match-by-name router ::beer))))))
+              #"^missing path-params for route /api/ipa/:size: \#\{:size\}$"
+              (reitit/match-by-name! router ::beer))))))
 
   (testing "lookup router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
@@ -49,6 +57,7 @@
                 :params {:size "large"}})
              (reitit/match-by-name router ::beer {:size "large"})))
       (is (= nil (reitit/match-by-name router "ILLEGAL")))
+      (is (= [::beer] (reitit/route-names router)))
       (testing "can't be created with wildcard routes"
         (is (thrown-with-msg?
               ExceptionInfo
