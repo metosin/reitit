@@ -98,7 +98,7 @@
 ;; Perf tests
 ;;
 
-(def handler (constantly {:status 200, :body ""}))
+(def handler (constantly {:status 200, :body "ok"}))
 
 (def opensensors-routes
   [["/v2/whoami" {:handler handler, :name :test/route1}]
@@ -446,7 +446,7 @@
 (comment
 
   (doseq [route (valid-urls (reitit/router opensensors-routes))]
-    (let [app (ring/ring-handler (reitit/router opensensors-routes))
+    (let [app (ring/ring-handler (ring/router opensensors-routes))
           match (app {:uri route :request-method :get})]
       (if-not match
         (println route))))
@@ -471,36 +471,581 @@
       (if-not match
         (println route)))))
 
-(defn bench! [routes name f]
+(defn bench! [routes verbose? name f]
   (System/gc)
   (println)
   (suite name)
   (println)
   (let [times (for [[path time] (bench-routes routes f)]
                 (do
-                  (println (format "%7s" time) "\t" path)
+                  (when verbose? (println (format "%7s" time) "\t" path))
                   time))]
     (title (str "average: " (int (/ (reduce + times) (count times)))))))
 
-(defn bench-all! []
+(defn bench-rest! []
   (let [routes opensensors-routes
         router (reitit/router routes)
         reitit-f #(reitit/match-by-path router %)
-        reitit-ring-f (let [app (ring/ring-handler (reitit/router opensensors-routes))]
+        reitit-ring-f (let [app (ring/ring-handler (ring/router opensensors-routes))]
                         #(app {:uri % :request-method :get}))
         bidi-f #(bidi/match-route opensensors-bidi-routes %)
         ataraxy-f #(ataraxy/matches opensensors-ataraxy-routes {:uri %})
         compojure-api-f #(opensensors-compojure-api-routes {:uri % :request-method :get})
         pedestal-f #(pedestal/find-route opensensors-pedestal-routes {:path-info % :request-method :get})]
 
-    (bench! routes "reitit" reitit-f)                       ;;  2538ns    10%
-    (bench! routes "pedestal" pedestal-f)                   ;;  2737ns    11%
-    (bench! routes "reitit-ring" reitit-ring-f)             ;;  2845ns    11%
-    (bench! routes "compojure-api" compojure-api-f)         ;; 10215ns    41%
-    (bench! routes "bidi" bidi-f)                           ;; 19298ns    77%
-    (bench! routes "ataraxy" ataraxy-f)                     ;; 24950ns   100%
+    (bench! routes true "reitit" reitit-f)                       ;;  2538ns    10%
+    (bench! routes true "pedestal" pedestal-f)                   ;;  2737ns    11%
+    (bench! routes true "reitit-ring" reitit-ring-f)             ;;  2845ns    11%
+    (bench! routes true "compojure-api" compojure-api-f)         ;; 10215ns    41%
+    (bench! routes true "bidi" bidi-f)                           ;; 19298ns    77%
+    (bench! routes true "ataraxy" ataraxy-f)                     ;; 24950ns   100%
 
     ))
 
 (comment
-  (bench-all!))
+  (bench-rest!))
+
+;;
+;; CQRSish
+;;
+
+(def commands
+  #{:upsert-appeal
+    :upsert-appeal-verdict
+    :delete-appeal
+    :delete-appeal-verdict
+    :mark-seen
+    :mark-everything-seen
+    :upsert-application-handler
+    :remove-application-handler
+    :cancel-inforequest
+    :cancel-application
+    :cancel-application-authority
+    :undo-cancellation
+    :request-for-complement
+    :cleanup-krysp
+    :submit-application
+    :refresh-ktj
+    :save-application-drawings
+    :create-application
+    :add-operation
+    :update-op-description
+    :change-primary-operation
+    :change-permit-sub-type
+    :change-location
+    :change-application-state
+    :return-to-draft
+    :change-warranty-start-date
+    :change-warranty-end-date
+    :add-link-permit
+    :remove-link-permit-by-app-id
+    :create-change-permit
+    :create-continuation-period-permit
+    :convert-to-application
+    :add-bulletin-comment
+    :move-to-proclaimed
+    :move-to-verdict-given
+    :move-to-final
+    :save-proclaimed-bulletin
+    :save-verdict-given-bulletin
+    :set-municipality-hears-neighbors
+    :archive-documents
+    :mark-pre-verdict-phase-archived
+    :save-asianhallinta-config
+    :create-assignment
+    :update-assignment
+    :complete-assignment
+    :bind-attachment
+    :bind-attachments
+    :set-attachment-type
+    :approve-attachment
+    :reject-attachment
+    :reject-attachment-note
+    :create-attachments
+    :create-ram-attachment
+    :delete-attachment
+    :delete-attachment-version
+    :upload-attachment
+    :rotate-pdf
+    :upsert-stamp-template
+    :delete-stamp-template
+    :stamp-attachments
+    :sign-attachments
+    :set-attachment-meta
+    :set-attachment-not-needed
+    :set-attachments-as-verdict-attachment
+    :set-attachment-as-construction-time
+    :set-attachment-visibility
+    :convert-to-pdfa
+    :invite-with-role
+    :approve-invite
+    :decline-invitation
+    :remove-auth
+    :change-auth
+    :unsubscribe-notifications
+    :subscribe-notifications
+    :set-calendar-enabled-for-authority
+    :create-calendar-slots
+    :update-calendar-slot
+    :delete-calendar-slot
+    :add-reservation-type-for-organization
+    :update-reservation-type
+    :delete-reservation-type
+    :reserve-calendar-slot
+    :accept-reservation
+    :decline-reservation
+    :cancel-reservation
+    :mark-reservation-update-seen
+    :add-campaign
+    :delete-campaign
+    :change-email-init
+    :change-email
+    :can-target-comment-to-authority
+    :can-mark-answered
+    :add-comment
+    :company-update
+    :company-lock
+    :company-user-update
+    :company-user-delete
+    :company-user-delete-all
+    :company-invite-user
+    :company-add-user
+    :company-invite
+    :company-cancel-invite
+    :save-company-tags
+    :update-application-company-notes
+    :inform-construction-started
+    :inform-construction-ready
+    :copy-application
+    :update-3d-map-server-details
+    :set-3d-map-enabled
+    :redirect-to-3d-map
+    :create-archiving-project
+    :submit-archiving-project
+    :create-doc
+    :remove-doc
+    :set-doc-status
+    :update-doc
+    :update-task
+    :remove-document-data
+    :approve-doc
+    :reject-doc
+    :reject-doc-note
+    :set-user-to-document
+    :set-current-user-to-document
+    :set-company-to-document
+    :set-feature
+    :remove-uploaded-file
+    :create-foreman-application
+    :update-foreman-other-applications
+    :link-foreman-task
+    :update-guest-authority-organization
+    :remove-guest-authority-organization
+    :invite-guest
+    :toggle-guest-subscription
+    :delete-guest-application
+    :info-link-delete
+    :info-link-reorder
+    :info-link-upsert
+    :mark-seen-organization-links
+    :create-inspection-summary-template
+    :delete-inspection-summary-template
+    :modify-inspection-summary-template
+    :set-inspection-summary-template-for-operation
+    :create-inspection-summary
+    :delete-inspection-summary
+    :toggle-inspection-summary-locking
+    :add-target-to-inspection-summary
+    :edit-inspection-summary-target
+    :remove-target-from-inspection-summary
+    :set-target-status
+    :set-inspection-date
+    :approve-application
+    :move-attachments-to-backing-system
+    :parties-as-krysp
+    :merge-details-from-krysp
+    :application-to-asianhallinta
+    :attachments-to-asianhallinta
+    :order-verdict-attachment-prints
+    :frontend-log
+    :reset-frontend-log
+    :new-verdict-template
+    :set-verdict-template-name
+    :save-verdict-template-draft-value
+    :publish-verdict-template
+    :toggle-delete-verdict-template
+    :copy-verdict-template
+    :save-verdict-template-settings-value
+    :add-verdict-template-review
+    :update-verdict-template-review
+    :add-verdict-template-plan
+    :update-verdict-template-plan
+    :set-default-operation-verdict-template
+    :upsert-phrase
+    :delete-phrase
+    :neighbor-add
+    :neighbor-add-owners
+    :neighbor-update
+    :neighbor-remove
+    :neighbor-send-invite
+    :neighbor-mark-done
+    :neighbor-response
+    :change-urgency
+    :add-authority-notice
+    :add-application-tags
+    :init-sign
+    :cancel-sign
+    :convert-to-normal-inforequests
+    :update-organization
+    :add-scope
+    :create-organization
+    :add-organization-link
+    :update-organization-link
+    :remove-organization-link
+    :update-allowed-autologin-ips
+    :set-organization-selected-operations
+    :organization-operations-attachments
+    :set-organization-app-required-fields-filling-obligatory
+    :set-automatic-ok-for-attachments
+    :set-organization-assignments
+    :set-organization-inspection-summaries
+    :set-organization-extended-construction-waste-report
+    :set-organization-validate-verdict-given-date
+    :set-organization-use-attachment-links-integration
+    :set-organization-calendars-enabled
+    :set-organization-boolean-attribute
+    :set-organization-permanent-archive-start-date
+    :set-organization-neighbor-order-email
+    :set-organization-submit-notification-email
+    :set-organization-inforequest-notification-email
+    :set-organization-default-reservation-location
+    :set-krysp-endpoint
+    :set-kopiolaitos-info
+    :save-vendor-backend-redirect-config
+    :update-organization-name
+    :save-organization-tags
+    :update-map-server-details
+    :update-user-layers
+    :update-suti-server-details
+    :section-toggle-enabled
+    :section-toggle-operation
+    :upsert-handler-role
+    :toggle-handler-role
+    :upsert-assignment-trigger
+    :remove-assignment-trigger
+    :update-docstore-info
+    :browser-timing
+    :create-application-from-previous-permit
+    :screenmessages-add
+    :screenmessages-reset
+    :add-single-sign-on-key
+    :update-single-sign-on-key
+    :remove-single-sign-on-key
+    :create-statement-giver
+    :delete-statement-giver
+    :request-for-statement
+    :ely-statement-request
+    :delete-statement
+    :save-statement-as-draft
+    :give-statement
+    :request-for-statement-reply
+    :save-statement-reply-as-draft
+    :reply-statement
+    :suti-toggle-enabled
+    :suti-toggle-operation
+    :suti-www
+    :suti-update-id
+    :suti-update-added
+    :create-task
+    :delete-task
+    :approve-task
+    :reject-task
+    :review-done
+    :mark-review-faulty
+    :resend-review-to-backing-system
+    :set-tos-function-for-operation
+    :remove-tos-function-from-operation
+    :set-tos-function-for-application
+    :force-fix-tos-function-for-application
+    :store-tos-metadata-for-attachment
+    :store-tos-metadata-for-application
+    :store-tos-metadata-for-process
+    :set-myyntipalvelu-for-attachment
+    :create-user
+    :create-rest-api-user
+    :update-user
+    :applicant-to-authority
+    :update-default-application-filter
+    :save-application-filter
+    :remove-application-filter
+    :update-user-organization
+    :remove-user-organization
+    :update-user-roles
+    :check-password
+    :change-passwd
+    :reset-password
+    :admin-reset-password
+    :set-user-enabled
+    :login
+    :impersonate-authority
+    :register-user
+    :confirm-account-link
+    :retry-rakentajafi
+    :remove-user-attachment
+    :copy-user-attachments-to-application
+    :remove-user-notification
+    :notifications-update
+    :check-for-verdict
+    :new-verdict-draft
+    :save-verdict-draft
+    :publish-verdict
+    :delete-verdict
+    :sign-verdict
+    :create-digging-permit})
+
+(def queries
+  #{:comments
+    :actions
+    :allowed-actions
+    :allowed-actions-for-category
+    :admin-attachment-report
+    :appeals
+    :application
+    :application-authorities
+    :application-commenters
+    :enable-accordions
+    :party-document-names
+    :application-submittable
+    :inforequest-markers
+    :change-application-state-targets
+    :link-permit-required
+    :app-matches-for-link-permits
+    :all-operations-in
+    :application-handlers
+    :application-organization-handler-roles
+    :application-organization-archive-enabled
+    :application-bulletins
+    :application-bulletin-municipalities
+    :application-bulletin-states
+    :bulletin
+    :bulletin-versions
+    :bulletin-comments
+    :publish-bulletin-enabled
+    :municipality-hears-neighbors-visible
+    :applications-search
+    :applications-search-default
+    :applications-for-new-appointment-page
+    :get-application-operations
+    :applications
+    :latest-applications
+    :event-search
+    :tasks-tab-visible
+    :application-info-tab-visible
+    :application-summary-tab-visible
+    :application-verdict-tab-visible
+    :document-states
+    :archiving-operations-enabled
+    :permanent-archive-enabled
+    :application-in-final-archiving-state
+    :asianhallinta-config
+    :assignments-for-application
+    :assignment-targets
+    :assignments-search
+    :assignment-count
+    :assignments
+    :assignment
+    :bind-attachments-job
+    :attachments
+    :attachment
+    :attachment-groups
+    :attachments-filters
+    :attachments-tag-groups
+    :attachment-types
+    :ram-linked-attachments
+    :attachment-operations
+    :stamp-templates
+    :custom-stamps
+    :stamp-attachments-job
+    :signing-possible
+    :set-attachment-group-enabled
+    :invites
+    :my-calendars
+    :calendar
+    :calendars-for-authority-admin
+    :calendar-slots
+    :reservation-types-for-organization
+    :available-calendar-slots
+    :application-calendar-config
+    :calendar-actions-required
+    :applications-with-appointments
+    :my-reserved-slots
+    :campaigns
+    :campaign
+    :company
+    :company-users-for-person-selector
+    :company-tags
+    :companies
+    :user-company-locked
+    :company-search-user
+    :remove-company-tag-ok
+    :company-notes
+    :enable-company-search
+    :info-construction-status
+    :copy-application-invite-candidates
+    :application-copyable-to-location
+    :application-copyable
+    :source-application
+    :user-is-pure-digitizer
+    :digitizing-enabled
+    :document
+    :validate-doc
+    :fetch-validation-errors
+    :schemas
+    :features
+    :apply-fixture
+    :foreman-history
+    :foreman-applications
+    :resolve-guest-authority-candidate
+    :guest-authorities-organization
+    :application-guests
+    :guest-authorities-application-organization
+    :get-link-account-token
+    :info-links
+    :organization-links
+    :organization-inspection-summary-settings
+    :inspection-summaries-for-application
+    :get-building-info-from-wfs
+    :external-api-enabled
+    :integration-messages
+    :ely-statement-types
+    :frontend-log-entries
+    :newest-version
+    :verdict-templates
+    :verdict-template-categories
+    :verdict-template
+    :verdict-template-settings
+    :verdict-template-reviews
+    :verdict-template-plans
+    :default-operation-verdict-templates
+    :organization-phrases
+    :application-phrases
+    :owners
+    :application-property-owners
+    :municipality-borders
+    :active-municipalities
+    :municipality-active
+    :neighbor-application
+    :authority-notice
+    :find-sign-process
+    :organization-by-user
+    :all-attachment-types-by-user
+    :organization-name-by-user
+    :user-organizations-for-permit-type
+    :user-organizations-for-archiving-project
+    :organizations
+    :allowed-autologin-ips-for-organization
+    :organization-by-id
+    :permit-types
+    :municipalities-with-organization
+    :municipalities
+    :all-operations-for-organization
+    :selected-operations-for-municipality
+    :addable-operations
+    :organization-details
+    :krysp-config
+    :kopiolaitos-config
+    :get-organization-names
+    :vendor-backend-redirect-config
+    :remove-tag-ok
+    :get-organization-tags
+    :get-organization-areas
+    :get-map-layers-data
+    :municipality-for-property
+    :property-borders
+    :screenmessages
+    :get-single-sign-on-keys
+    :get-organizations-statement-givers
+    :get-possible-statement-statuses
+    :get-statement-givers
+    :statement-replies-enabled
+    :statement-is-replyable
+    :authorized-for-requesting-statement-reply
+    :statement-attachment-allowed
+    :statements-after-approve-allowed
+    :neighbors-statement-enabled
+    :suti-admin-details
+    :suti-operations
+    :suti-application-data
+    :suti-application-products
+    :suti-pre-sent-state
+    :task-types-for-application
+    :review-can-be-marked-done
+    :is-end-review
+    :available-tos-functions
+    :tos-metadata-schema
+    :case-file-data
+    :tos-operations-enabled
+    :common-area-application
+    :user
+    :users
+    :users-in-same-organizations
+    :user-by-email
+    :users-for-datatables
+    :saved-application-filters
+    :redirect-after-login
+    :user-attachments
+    :add-user-attachment-allowed
+    :email-in-use
+    :enable-foreman-search
+    :calendars-enabled
+    :verdict-attachment-type
+    :selected-digging-operations-for-organization
+    :ya-extensions
+    :approve-ya-extension})
+
+(def cqrs-routes
+  (mapv (fn [command] [(str "/command/" (name command)) {:post handler :name command}]) commands))
+
+(def cqrs-routes-pedestal
+  (map-tree/router
+    (table/table-routes
+      (mapv (fn [command] [(str "/command/" (name command)) :post handler :route-name command]) commands))))
+
+(class (:tree-map cqrs-routes-pedestal))
+
+(class (:data (ring/router cqrs-routes)))
+
+(comment
+
+  (doseq [route (valid-urls (reitit/router cqrs-routes))]
+    (let [app (ring/ring-handler (ring/router cqrs-routes))
+          match (app {:uri route :request-method :post})]
+      (if-not match
+        (println route))))
+
+  (doseq [route (valid-urls (reitit/router cqrs-routes))]
+    (let [match (pedestal/find-route cqrs-routes-pedestal {:path-info route :request-method :post})]
+      (if-not match
+        (println route)))))
+
+(defn bench-cqrs! []
+  (let [routes cqrs-routes
+        router (reitit/router cqrs-routes)
+        reitit-f #(reitit/match-by-path router %)
+        reitit-ring-f (let [app (ring/ring-handler (ring/router routes))]
+                        #(app {:uri % :request-method :post}))
+        pedestal-f #(pedestal/find-route cqrs-routes-pedestal {:path-info % :request-method :post})]
+
+    ;;  125ns
+    (bench! routes false "reitit" reitit-f)
+
+    ;;  272ns
+    ;;  219ns (fast-assoc)
+    (bench! routes false "reitit-ring" reitit-ring-f)
+
+    ;;  172ns
+    (bench! routes false "pedestal" pedestal-f)))
+
+(comment
+  (bench-cqrs!))
+

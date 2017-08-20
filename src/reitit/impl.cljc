@@ -135,3 +135,7 @@
         (ex-info
           (str "missing path-params for route " template ": " missing)
           {:params params, :required required})))))
+
+(defn fast-assoc
+  #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
+      :cljs [[a k v] (assoc a k v)]))

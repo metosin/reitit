@@ -117,14 +117,14 @@
     (let [pong (constantly "ok")
           routes ["/api" {:mw [:api]}
                   ["/ping" :kikka]
-                  ["/user/:id" {:parameters {:id String}}
-                   ["/:sub-id" {:parameters {:sub-id String}}]]
+                  ["/user/:id" {:parameters {:id "String"}}
+                   ["/:sub-id" {:parameters {:sub-id "String"}}]]
                   ["/pong" pong]
                   ["/admin" {:mw [:admin] :roles #{:admin}}
                    ["/user" {:roles ^:replace #{:user}}]
                    ["/db" {:mw [:db]}]]]
           expected [["/api/ping" {:mw [:api], :name :kikka}]
-                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:id String, :sub-id String}}]
+                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:id "String", :sub-id "String"}}]
                     ["/api/pong" {:mw [:api], :handler pong}]
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
@@ -132,7 +132,7 @@
       (is (= expected (reitit/resolve-routes routes {})))
       (is (= (reitit/map->Match
                {:template "/api/user/:id/:sub-id"
-                :meta {:mw [:api], :parameters {:id String, :sub-id String}}
+                :meta {:mw [:api], :parameters {:id "String", :sub-id "String"}}
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
              (reitit/match-by-path router "/api/user/1/2"))))))
