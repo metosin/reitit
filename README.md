@@ -65,7 +65,7 @@ Same routes flattened:
 
 ## Routing
 
-For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `LinearRouter` and `LookupRouter`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
+For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `:linear-router` and `:lookup-router`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
 
 `Router` is created with `reitit.core/router`, which takes routes and optional options map as arguments. The route-tree gets expanded, optionally coerced and compiled. `Router` support both fast path- and name-based lookups.
 
@@ -81,11 +81,11 @@ Creating a router:
       ["/user/:id" ::user]]]))
 ```
 
-`LinearRouter` is created (as there are wildcard):
+`:linear-router` is created (as there are wildcard):
 
 ```clj
-(class router)
-; reitit.core.LinearRouter
+(reitit/router-type router)
+; :linear-router
 ```
 
 The expanded routes:
@@ -224,11 +224,11 @@ Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
       ["/ping" handler])))
 ```
 
-Backed by a `LookupRouter` (as no wildcards found):
+Backed by a `:lookup-router` (as no wildcards found):
 
 ```clj
-(-> app (ring/get-router) class)
-; reitit.core.LookupRouter
+(-> app (ring/get-router) (reitit/router-type))
+; :lookup-router
 ```
 
 The expanded routes:
