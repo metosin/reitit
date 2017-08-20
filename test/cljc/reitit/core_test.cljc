@@ -9,9 +9,10 @@
 
   (testing "linear router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (instance? LinearRouter router))
+      (is (= :linear-router (reitit/router-type router)))
       (is (= [["/api/ipa/:size" {:name ::beer}]]
              (reitit/routes router)))
+      (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
                {:template "/api/ipa/:size"
                 :meta {:name ::beer}
@@ -41,9 +42,10 @@
 
   (testing "lookup router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (instance? LookupRouter router))
+      (is (= :lookup-router (reitit/router-type router)))
       (is (= [["/api/ipa/large" {:name ::beer}]]
              (reitit/routes router)))
+      (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
                {:template "/api/ipa/large"
                 :meta {:name ::beer}

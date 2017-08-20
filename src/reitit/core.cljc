@@ -70,7 +70,9 @@
   [p m (if compile (compile route opts))])
 
 (defprotocol Routing
+  (router-type [this])
   (routes [this])
+  (options [this])
   (route-names [this])
   (match-by-path [this path])
   (match-by-name [this name] [this name params]))
@@ -97,25 +99,6 @@
    :coerce (fn [route _] route)
    :compile (fn [[_ {:keys [handler]}] _] handler)})
 
-(defrecord LinearRouter [routes names data lookup]
-  Routing
-  (routes [_]
-    routes)
-  (route-names [_]
-    names)
-  (match-by-path [_ path]
-    (reduce
-      (fn [acc ^Route route]
-        (if-let [params ((:matcher route) path)]
-          (reduced (->Match (:path route) (:meta route) (:handler route) params path))))
-      nil data))
-  (match-by-name [_ name]
-    (if-let [match (lookup name)]
-      (match nil)))
-  (match-by-name [_ name params]
-    (if-let [match (lookup name)]
-      (match params))))
-
 (defn linear-router
   "Creates a [[LinearRouter]] from resolved routes and optional
   expanded options. See [[router]] for available options"
@@ -132,26 +115,33 @@
                                       (->PartialMatch p meta handler % params))]
                              [(conj data route)
                               (if name (assoc lookup name f) lookup)]))
-                         [[] {}] compiled)]
-     (->LinearRouter routes names data lookup))))
-
-(defrecord LookupRouter [routes names data lookup]
-  Routing
-  (routes [_]
-    routes)
-  (route-names [_]
-    names)
-  (match-by-path [_ path]
-    (impl/fast-get data path))
-  (match-by-name [_ name]
-    (if-let [match (impl/fast-get lookup name)]
-      (match nil)))
-  (match-by-name [_ name params]
-    (if-let [match (impl/fast-get lookup name)]
-      (match params))))
+                         [[] {}] compiled)
+         lookup (impl/fast-map lookup)]
+     (reify
+       Routing
+       (router-type [_]
+         :linear-router)
+       (routes [_]
+         routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (reduce
+           (fn [acc ^Route route]
+             (if-let [params ((:matcher route) path)]
+               (reduced (->Match (:path route) (:meta route) (:handler route) params path))))
+           nil data))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
 
 (defn lookup-router
-  "Creates a [[LookupRouter]] from resolved routes and optional
+  "Creates a LookupRouter from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (lookup-router routes {}))
@@ -169,8 +159,26 @@
                            [(assoc data p (->Match p meta handler {} p))
                             (if name
                               (assoc lookup name #(->Match p meta handler % p))
-                              lookup)]) [{} {}] compiled)]
-     (->LookupRouter routes names (impl/fast-map data) (impl/fast-map lookup)))))
+                              lookup)]) [{} {}] compiled)
+         data (impl/fast-map data)
+         lookup (impl/fast-map lookup)]
+     (reify Routing
+       (router-type [_]
+         :lookup-router)
+       (routes [_]
+         routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (impl/fast-get data path))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
