@@ -22,7 +22,6 @@
                    :jvm-opts ^:replace ["-server"]
                    :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                                   [org.clojure/clojurescript "1.9.660"]
-                                  [cheshire "5.8.0"]
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]

@@ -1,8 +1,8 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match LinearRouter LookupRouter]])])
+            [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
   #?(:clj
-     (:import (reitit.core Match LinearRouter LookupRouter)
+     (:import (reitit.core Match)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
