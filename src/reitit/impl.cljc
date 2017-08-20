@@ -139,3 +139,11 @@
 (defn fast-assoc
   #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
       :cljs [[a k v] (assoc a k v)]))
+
+(defn fast-map [m]
+  #?@(:clj  [(java.util.HashMap. m)]
+      :cljs [m]))
+
+(defn fast-get
+  #?@(:clj  [[^java.util.HashMap m k] (.get m k)]
+      :cljs [[m k] (m k)]))

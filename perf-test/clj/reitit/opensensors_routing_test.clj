@@ -1037,10 +1037,12 @@
         pedestal-f #(pedestal/find-route cqrs-routes-pedestal {:path-info % :request-method :post})]
 
     ;;  125ns
+    ;;   62ns (fast-map)
     (bench! routes false "reitit" reitit-f)
 
     ;;  272ns
     ;;  219ns (fast-assoc)
+    ;;  171ns (fast-map)
     (bench! routes false "reitit-ring" reitit-ring-f)
 
     ;;  172ns

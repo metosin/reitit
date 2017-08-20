@@ -142,12 +142,12 @@
   (route-names [_]
     names)
   (match-by-path [_ path]
-    (data path))
+    (impl/fast-get data path))
   (match-by-name [_ name]
-    (if-let [match (lookup name)]
+    (if-let [match (impl/fast-get lookup name)]
       (match nil)))
   (match-by-name [_ name params]
-    (if-let [match (lookup name)]
+    (if-let [match (impl/fast-get lookup name)]
       (match params))))
 
 (defn lookup-router
@@ -170,7 +170,7 @@
                             (if name
                               (assoc lookup name #(->Match p meta handler % p))
                               lookup)]) [{} {}] compiled)]
-     (->LookupRouter routes names data lookup))))
+     (->LookupRouter routes names (impl/fast-map data) (impl/fast-map lookup)))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
