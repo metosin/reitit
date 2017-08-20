@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [bidi.bidi :as bidi]
             [ataraxy.core :as ataraxy]
+            [compojure.api.sweet :refer [api routes context ANY]]
             [reitit.core :as reitit]))
 
 (defn raw-title [color s]
@@ -266,6 +267,83 @@
               ["topics/" topic] [:test/route47 topic]
               "topics" [:test/route50]}}))
 
+(def opensensors-compojure-api-routes
+  (let [handler (constantly {:status 200, :body ""})]
+    (routes
+      (context "/v1" []
+        (context "/public" []
+          (ANY "/topics/:topic" [] {:name :test/route4} handler)
+          (ANY "/users/:user-id" [] {:name :test/route16} handler)
+          (ANY "/orgs/:org-id" [] {:name :test/route18} handler))
+        (context "/users/:user-id" []
+          (ANY "/orgs/:org-id" [] {:name :test/route5} handler)
+          (ANY "/invitations" [] {:name :test/route7} handler)
+          (ANY "/topics" [] {:name :test/route9} handler)
+          (ANY "/bookmarks/followers" [] {:name :test/route10} handler)
+          (context "/devices" []
+            (ANY "/" [] {:name :test/route15} handler)
+            (ANY "/bulk" [] {:name :test/route21} handler)
+            (ANY "/:client-id" [] {:name :test/route35} handler)
+            (ANY "/:client-id/reset-password" [] {:name :test/route49} handler))
+          (ANY "/device-errors" [] {:name :test/route22} handler)
+          (ANY "/usage-stats" [] {:name :test/route24} handler)
+          (ANY "/claim-device/:client-id" [] {:name :test/route26} handler)
+          (ANY "/owned-orgs" [] {:name :test/route31} handler)
+          (ANY "/bookmark/:topic" [] {:name :test/route33} handler)
+          (ANY "/" [] {:name :test/route36} handler)
+          (ANY "/orgs" [] {:name :test/route52} handler)
+          (ANY "/api-key" [] {:name :test/route43} handler)
+          (ANY "/bookmarks" [] {:name :test/route56} handler))
+        (ANY "/search/topics/:term" [] {:name :test/route6} handler)
+        (context "/orgs" []
+          (ANY "/" [] {:name :test/route55} handler)
+          (context "/:org-id" []
+            (context "/devices" []
+              (ANY "/" [] {:name :test/route37} handler)
+              (ANY "/:device-id" [] {:name :test/route13} handler)
+              (ANY "/:batch/:type" [] {:name :test/route8} handler))
+            (ANY "/usage-stats" [] {:name :test/route12} handler)
+            (ANY "/invitations" [] {:name :test/route19} handler)
+            (context "/members" []
+              (ANY "/:user-id" [] {:name :test/route34} handler)
+              (ANY "/" [] {:name :test/route38} handler)
+              (ANY "/invitation-data/:user-id" [] {:name :test/route39} handler))
+            (ANY "/errors" [] {:name :test/route17} handler)
+            (ANY "/" [] {:name :test/route42} handler)
+            (ANY "/confirm-membership/:token" [] {:name :test/route46} handler)
+            (ANY "/topics" [] {:name :test/route57} handler)))
+        (context "/messages" []
+          (ANY "/user/:user-id" [] {:name :test/route14} handler)
+          (ANY "/device/:client-id" [] {:name :test/route30} handler)
+          (ANY "/topic/:topic" [] {:name :test/route48} handler))
+        (context "/topics" []
+          (ANY "/:topic" [] {:name :test/route32} handler)
+          (ANY "/" [] {:name :test/route54} handler))
+        (ANY "/whoami" [] {:name :test/route41} handler)
+        (ANY "/login" [] {:name :test/route51} handler))
+      (context "/v2" []
+        (ANY "/whoami" [] {:name :test/route1} handler)
+        (context "/users/:user-id" []
+          (ANY "/datasets" [] {:name :test/route2} handler)
+          (ANY "/devices" [] {:name :test/route25} handler)
+          (context "/topics" []
+            (ANY "/bulk" [] {:name :test/route29} handler)
+            (ANY "/" [] {:name :test/route54} handler))
+          (ANY "/" [] {:name :test/route45} handler))
+        (context "/public" []
+          (context "/projects/:project-id" []
+            (ANY "/datasets" [] {:name :test/route3} handler)
+            (ANY "/" [] {:name :test/route27} handler))
+          (ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
+          (ANY "/datasets/:dataset-id" [] {:name :test/route28} handler)
+          (ANY "/messages/dataset/:dataset-id" [] {:name :test/route53} handler))
+        (ANY "/datasets/:dataset-id" [] {:name :test/route11} handler)
+        (ANY "/login" [] {:name :test/route23} handler)
+        (ANY "/orgs/:org-id/topics" [] {:name :test/route40} handler)
+        (ANY "/schemas" [] {:name :test/route44} handler)
+        (ANY "/topics/:topic" [] {:name :test/route47} handler)
+        (ANY "/topics" [] {:name :test/route50} handler)))))
+
 (comment
   (bench opensensors-routes false)
   (bench opensensors-routes true))
@@ -283,6 +361,12 @@
         (if-not match
           (println route))))))
 
+(comment
+  (doseq [route (valid-urls (reitit/router opensensors-routes))]
+    (let [match (opensensors-compojure-api-routes {:uri route :request-method :get})]
+      (if-not match
+        (println route)))))
+
 (defn bench! [routes name f]
   (System/gc)
   (println)
@@ -296,10 +380,12 @@
         router (reitit/router routes)
         reitit-f #(reitit/match-by-path router %)
         bidi-f #(bidi/match-route opensensors-bidi-routes %)
-        ataraxy-f #(ataraxy/matches opensensors-ataraxy-routes {:uri %})]
-    (bench! routes "reitit" reitit-f)
-    (bench! routes "bidi" bidi-f)
-    (bench! routes "ataraxy" ataraxy-f)))
+        ataraxy-f #(ataraxy/matches opensensors-ataraxy-routes {:uri %})
+        compojure-api-f #(opensensors-compojure-api-routes {:uri % :request-method :get})]
+    (bench! routes "reitit" reitit-f)                       ;;  2958ns    11%
+    (bench! routes "bidi" bidi-f)                           ;; 18919ns    71%
+    (bench! routes "ataraxy" ataraxy-f)                     ;; 26461ns   100%
+    (bench! routes "compojure-api" compojure-api-f)))       ;; 10463ns    40%
 
 (comment
   (bench-all!))
