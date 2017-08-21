@@ -139,12 +139,11 @@
                 :params {:id "1", :sub-id "2"}})
              (reitit/match-by-path router "/api/user/1/2"))))))
 
-(deftest first-conflicting-routes-test
+(deftest conflicting-routes-test
   (are [conflicting? data]
-    (let [routes (reitit/resolve-routes data {})]
-      (= (if conflicting? routes)
-         (reitit/first-conflicting-routes
-           (reitit/resolve-routes routes {}))))
+    (let [routes (reitit/resolve-routes data {})
+          conflicts (-> routes (reitit/resolve-routes {}) (reitit/conflicting-routes))]
+      (if conflicting? (seq conflicts) (nil? conflicts)))
 
     true [["/a"]
           ["/a"]]
@@ -173,6 +172,14 @@
     true [["/v2/public/messages/dataset/bulk"]
           ["/v2/public/messages/dataset/:dataset-id"]])
 
+  (testing "all conflicts are returned"
+    (is (= {["/a" {}] #{["/*d" {}] ["/:b" {}]},
+            ["/:b" {}] #{["/c" {}] ["/*d" {}]},
+            ["/c" {}] #{["/*d" {}]}}))
+    (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
+        (reitit/resolve-routes {})
+        (reitit/conflicting-routes)))
+
   (testing "router with conflicting routes"
     (testing "throws by default"
       (is (thrown-with-msg?
@@ -186,4 +193,3 @@
               (reitit/router
                 [["/a"] ["/a"]]
                 {:conflicts (constantly nil)})))))))
-

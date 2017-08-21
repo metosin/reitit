@@ -60,17 +60,22 @@
   (cond->> (->> (walk data opts) (map-meta merge-meta))
            coerce (into [] (keep #(coerce % opts)))))
 
-(defn first-conflicting-routes [routes]
-  (loop [[r & rest] routes]
-    (if (seq rest)
-      (or (some #(if (impl/conflicting-routes? r %) [r %]) rest)
-          (recur rest)))))
+(defn conflicting-routes [routes]
+  (some->>
+    (loop [[r & rest] routes, acc {}]
+      (if (seq rest)
+        (let [conflicting (set (keep #(if (impl/conflicting-routes? r %) %) rest))]
+          (recur rest (update acc r (fnil (comp set concat) #{}) conflicting)))
+        acc))
+    (filter (comp seq second))
+    (seq)
+    (into {})))
 
-(defn throw-on-conflicts! [routes]
+(defn throw-on-conflicts! [conflicts]
   (throw
     (ex-info
-      (str "router contains conflicting routes: " routes)
-      {:routes routes})))
+      (str "router contains conflicting routes: " conflicts)
+      {:conflicts conflicts})))
 
 (defn name-lookup [[_ {:keys [name]}] opts]
   (if name #{name}))
@@ -206,14 +211,14 @@
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => handler` to compile a route handler
-  | `:conflicts` | Function of `[route route] => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)"
+  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)"
   ([data]
    (router data {}))
   ([data opts]
    (let [opts (meta-merge default-router-options opts)
          routes (resolve-routes data opts)]
      (when-let [conflicts (:conflicts opts)]
-       (when-let [conflicting-routes (first-conflicting-routes routes)]
-         (conflicts conflicting-routes)))
+       (when-let [conflicting (conflicting-routes routes)]
+         (conflicts conflicting)))
      ((if (some impl/contains-wilds? (map first routes))
         linear-router lookup-router) routes opts))))
