@@ -1,5 +1,5 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
   #?(:clj
      (:import (reitit.core Match)
@@ -138,3 +138,37 @@
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
              (reitit/match-by-path router "/api/user/1/2"))))))
+
+(deftest first-conflicting-routes-test
+  (are [conflicting? data]
+    (let [routes (reitit/resolve-routes data {})]
+      (= (if conflicting? routes)
+         (reitit/first-conflicting-routes
+           (reitit/resolve-routes routes {}))))
+
+    true [["/a"]
+          ["/a"]]
+
+    true [["/a"]
+          ["/:b"]]
+
+    true [["/a"]
+          ["/*b"]]
+
+    true [["/a/1/2"]
+          ["/*b"]]
+
+    false [["/a"]
+           ["/a/"]]
+
+    false [["/a"]
+           ["/a/1"]]
+
+    false [["/a"]
+           ["/a/:b"]]
+
+    false [["/a"]
+           ["/a/*b"]]
+
+    true [["/v2/public/messages/dataset/bulk"]
+          ["/v2/public/messages/dataset/:dataset-id"]]))
