@@ -121,6 +121,25 @@
                  :matcher #(if (= path %) {})
                  :handler handler})))
 
+(defn segments [path]
+  (let [ss (-> (str/split path #"/") rest vec)]
+    (if (str/ends-with? path "/")
+      (conj ss "") ss)))
+
+(defn- catch-all? [segment]
+  (= \* (first segment)))
+
+(defn conflicting-routes? [[p1 :as route1] [p2 :as route2]]
+  (loop [[s1 & ss1] (segments p1)
+         [s2 & ss2] (segments p2)]
+    (cond
+      (= s1 s2 nil) true
+      (or (nil? s1) (nil? s2)) false
+      (or (catch-all? s1) (catch-all? s2)) true
+      (or (wild? s1) (wild? s2)) (recur ss1 ss2)
+      (not= s1 s2) false
+      :else (recur ss1 ss2))))
+
 (defn path-for [^Route route params]
   (if-let [required (:params route)]
     (if (every? #(contains? params %) required)

@@ -60,6 +60,12 @@
   (cond->> (->> (walk data opts) (map-meta merge-meta))
            coerce (into [] (keep #(coerce % opts)))))
 
+(defn first-conflicting-routes [routes]
+  (loop [[r & rest] routes]
+    (if (seq rest)
+      (or (some #(if (impl/conflicting-routes? r %) [r %]) rest)
+          (recur rest)))))
+
 (defn name-lookup [[_ {:keys [name]}] opts]
   (if name #{name}))
 
