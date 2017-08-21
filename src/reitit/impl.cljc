@@ -121,13 +121,48 @@
                  :matcher #(if (= path %) {})
                  :handler handler})))
 
+(defn segments [path]
+  (let [ss (-> (str/split path #"/") rest vec)]
+    (if (str/ends-with? path "/")
+      (conj ss "") ss)))
+
+(defn- catch-all? [segment]
+  (= \* (first segment)))
+
+(defn conflicting-routes? [[p1 :as route1] [p2 :as route2]]
+  (loop [[s1 & ss1] (segments p1)
+         [s2 & ss2] (segments p2)]
+    (cond
+      (= s1 s2 nil) true
+      (or (nil? s1) (nil? s2)) false
+      (or (catch-all? s1) (catch-all? s2)) true
+      (or (wild? s1) (wild? s2)) (recur ss1 ss2)
+      (not= s1 s2) false
+      :else (recur ss1 ss2))))
+
 (defn path-for [^Route route params]
-  (when-not (every? #(contains? params %) (:params route))
+  (if-let [required (:params route)]
+    (if (every? #(contains? params %) required)
+      (str "/" (str/join \/ (map #(get (or params {}) % %) (:parts route)))))
+    (:path route)))
+
+(defn throw-on-missing-path-params [template required params]
+  (when-not (every? #(contains? params %) required)
     (let [defined (-> params keys set)
-          required (:params route)
           missing (clojure.set/difference required defined)]
       (throw
         (ex-info
-          (str "missing path-params for route '" (:path route) "': " missing)
-          {:params params, :required required}))))
-  (str "/" (str/join \/ (map #(get params % %) (:parts route)))))
+          (str "missing path-params for route " template ": " missing)
+          {:params params, :required required})))))
+
+(defn fast-assoc
+  #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
+      :cljs [[a k v] (assoc a k v)]))
+
+(defn fast-map [m]
+  #?@(:clj  [(java.util.HashMap. m)]
+      :cljs [m]))
+
+(defn fast-get
+  #?@(:clj  [[^java.util.HashMap m k] (.get m k)]
+      :cljs [[m k] (m k)]))

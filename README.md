@@ -63,9 +63,9 @@ Same routes flattened:
  ["/api/ping" ::ping]]
 ```
 
-## Routers
+## Routing
 
-For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `LinearRouter` and `LookupRouter`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
+For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `:linear-router` and `:lookup-router`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
 
 `Router` is created with `reitit.core/router`, which takes routes and optional options map as arguments. The route-tree gets expanded, optionally coerced and compiled. `Router` support both fast path- and name-based lookups.
 
@@ -78,14 +78,14 @@ Creating a router:
   (reitit/router
     [["/api"
       ["/ping" ::ping]
-      ["/user/:id" ::user]]))
+      ["/user/:id" ::user]]]))
 ```
 
-`LinearRouter` is created (as there are wildcard):
+`:linear-router` is created (as there are wildcard):
 
 ```clj
-(class router)
-; reitit.core.LinearRouter
+(reitit/router-type router)
+; :linear-router
 ```
 
 The expanded routes:
@@ -94,6 +94,13 @@ The expanded routes:
 (reitit/routes router)
 ; [["/api/ping" {:name :user/ping}]
 ;  ["/api/user/:id" {:name :user/user}]]
+```
+
+Route names:
+
+```clj
+(reitit/route-names router)
+; [:user/ping :user/user]
 ```
 
 Path-based routing:
@@ -114,14 +121,32 @@ Name-based (reverse) routing:
 
 ```clj
 (reitit/match-by-name router ::user)
-; ExceptionInfo missing path-params for route '/api/user/:id': #{:id}
+; #PartialMatch{:template "/api/user/:id",
+;               :meta {:name :user/user},
+;               :handler nil,
+;               :params nil,
+;               :required #{:id}}
 
+(reitit/partial-match? (reitit/match-by-name router ::user))
+; true
+```
+
+Only a partial match. Let's provide path-parameters:
+
+```clj
 (reitit/match-by-name router ::user {:id "1"})
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
 ;        :handler nil
 ;        :params {:id "1"}}
+```
+
+There is also a exception throwing version:
+
+```
+(reitit/match-by-name! router ::user)
+; ExceptionInfo missing path-params for route /api/user/:id: #{:id}
 ```
 
 ## Route meta-data
@@ -199,11 +224,11 @@ Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
       ["/ping" handler])))
 ```
 
-Backed by a `LookupRouter` (as no wildcards found):
+Backed by a `:lookup-router` (as no wildcards found):
 
 ```clj
-(-> app (ring/get-router) class)
-; reitit.core.LookupRouter
+(-> app (ring/get-router) (reitit/router-type))
+; :lookup-router
 ```
 
 The expanded routes:
@@ -229,7 +254,8 @@ Routing based on `:request-method`:
 (def app
   (ring/ring-handler
     (ring/router
-      ["/ping" {:get handler
+      ["/ping" {:name ::ping
+                :get handler
                 :post handler}])))
 
 (app {:request-method :get, :uri "/ping"})
@@ -237,6 +263,16 @@ Routing based on `:request-method`:
 
 (app {:request-method :put, :uri "/ping"})
 ; nil
+```
+
+Reverse routing:
+
+```clj
+(-> app
+    (ring/get-router)
+    (reitit/match-by-name ::ping)
+    :path)
+; "/ping"
 ```
 
 Some middleware and a new handler:
@@ -356,14 +392,15 @@ Authorized access to guarded route:
 
 Routers can be configured via options. Options allow things like [`clojure.spec`](https://clojure.org/about/spec) validation for meta-data and fast, compiled handlers. The following options are available for the `reitit.core/router`:
 
-  | key        | description |
-  | -----------|-------------|
-  | `:path`    | Base-path for routes (default `""`)
-  | `:routes`  | Initial resolved routes (default `[]`)
-  | `:meta`    | Initial expanded route-meta vector (default `[]`)
-  | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler
+  | key          | description |
+  | -------------|-------------|
+  | `:path`      | Base-path for routes (default `""`)
+  | `:routes`    | Initial resolved routes (default `[]`)
+  | `:meta`      | Initial expanded route-meta vector (default `[]`)
+  | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
+  | `:compile`   | Function of `route opts => handler` to compile a route handler
+  | `:conflicts` | Function of `[route route] => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)"
 
 ## Special thanks
 
