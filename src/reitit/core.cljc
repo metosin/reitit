@@ -81,7 +81,7 @@
 (defn compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
 
-(defprotocol Routing
+(defprotocol Router
   (router-type [this])
   (routes [this])
   (options [this])
@@ -131,7 +131,7 @@
                          [[] {}] compiled)
          lookup (impl/fast-map lookup)]
      (reify
-       Routing
+       Router
        (router-type [_]
          :linear-router)
        (routes [_]
@@ -175,7 +175,7 @@
                               lookup)]) [{} {}] compiled)
          data (impl/fast-map data)
          lookup (impl/fast-map lookup)]
-     (reify Routing
+     (reify Router
        (router-type [_]
          :lookup-router)
        (routes [_]

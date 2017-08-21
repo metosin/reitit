@@ -1,8 +1,8 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match Routing]])])
+            [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
   #?(:clj
-     (:import (reitit.core Match Routing)
+     (:import (reitit.core Match)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
@@ -181,9 +181,9 @@
             (reitit/router
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
-      (is (instance?
-            Routing
-            (reitit/router
-              [["/a"] ["/a"]]
-              {:conflicts (constantly nil)}))))))
+      (is (not
+            (nil?
+              (reitit/router
+                [["/a"] ["/a"]]
+                {:conflicts (constantly nil)})))))))
 
