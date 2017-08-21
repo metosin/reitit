@@ -1,8 +1,8 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
+            [reitit.core :as reitit #?@(:cljs [:refer [Match Routing]])])
   #?(:clj
-     (:import (reitit.core Match)
+     (:import (reitit.core Match Routing)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
@@ -171,4 +171,19 @@
            ["/a/*b"]]
 
     true [["/v2/public/messages/dataset/bulk"]
-          ["/v2/public/messages/dataset/:dataset-id"]]))
+          ["/v2/public/messages/dataset/:dataset-id"]])
+
+  (testing "router with conflicting routes"
+    (testing "throws by default"
+      (is (thrown-with-msg?
+            ExceptionInfo
+            #"router contains conflicting routes"
+            (reitit/router
+              [["/a"] ["/a"]]))))
+    (testing "can be configured to ignore"
+      (is (instance?
+            Routing
+            (reitit/router
+              [["/a"] ["/a"]]
+              {:conflicts (constantly nil)}))))))
+
