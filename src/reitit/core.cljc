@@ -60,37 +60,44 @@
   (cond->> (->> (walk data opts) (map-meta merge-meta))
            coerce (into [] (keep #(coerce % opts)))))
 
+(defn name-lookup [[_ {:keys [name]}] opts]
+  (if name #{name}))
+
+(defn find-names [routes opts]
+  (into [] (keep #(-> % second :name) routes)))
+
 (defn compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
 
 (defprotocol Routing
+  (router-type [this])
   (routes [this])
+  (options [this])
+  (route-names [this])
   (match-by-path [this path])
-  (match-by-name [this name] [this name parameters]))
+  (match-by-name [this name] [this name params]))
 
-(defrecord Match [template meta path handler params])
+(defrecord Match [template meta handler params path])
+(defrecord PartialMatch [template meta handler params required])
+
+(defn partial-match? [x]
+  (instance? PartialMatch x))
+
+(defn match-by-name!
+  ([this name]
+   (match-by-name! this name nil))
+  ([this name params]
+   (if-let [match (match-by-name this name params)]
+     (if-not (partial-match? match)
+       match
+       (impl/throw-on-missing-path-params
+         (:template match) (:required match) params)))))
 
 (def default-router-options
-  {:expand expand
+  {:lookup name-lookup
+   :expand expand
    :coerce (fn [route _] route)
    :compile (fn [[_ {:keys [handler]}] _] handler)})
-
-(defrecord LinearRouter [routes data lookup]
-  Routing
-  (routes [_]
-    routes)
-  (match-by-path [_ path]
-    (reduce
-      (fn [acc ^Route route]
-        (if-let [params ((:matcher route) path)]
-          (reduced (->Match (:path route) (:meta route) path (:handler route) params))))
-      nil data))
-  (match-by-name [_ name]
-    (if-let [match (lookup name)]
-      (match nil)))
-  (match-by-name [_ name params]
-    (if-let [match (lookup name)]
-      (match params))))
 
 (defn linear-router
   "Creates a [[LinearRouter]] from resolved routes and optional
@@ -99,30 +106,42 @@
    (linear-router routes {}))
   ([routes opts]
    (let [compiled (map #(compile-route % opts) routes)
+         names (find-names routes opts)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} handler]]
-                           (let [route (impl/create [p meta handler])]
+                           (let [{:keys [params] :as route} (impl/create [p meta handler])
+                                 f #(if-let [path (impl/path-for route %)]
+                                      (->Match p meta handler % path)
+                                      (->PartialMatch p meta handler % params))]
                              [(conj data route)
-                              (if name
-                                (assoc lookup name #(->Match p meta (impl/path-for route %) handler %))
-                                lookup)])) [[] {}] compiled)]
-     (->LinearRouter routes data lookup))))
-
-(defrecord LookupRouter [routes data lookup]
-  Routing
-  (routes [_]
-    routes)
-  (match-by-path [_ path]
-    (data path))
-  (match-by-name [_ name]
-    (if-let [match (lookup name)]
-      (match nil)))
-  (match-by-name [_ name params]
-    (if-let [match (lookup name)]
-      (match params))))
+                              (if name (assoc lookup name f) lookup)]))
+                         [[] {}] compiled)
+         lookup (impl/fast-map lookup)]
+     (reify
+       Routing
+       (router-type [_]
+         :linear-router)
+       (routes [_]
+         routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (reduce
+           (fn [acc ^Route route]
+             (if-let [params ((:matcher route) path)]
+               (reduced (->Match (:path route) (:meta route) (:handler route) params path))))
+           nil data))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
 
 (defn lookup-router
-  "Creates a [[LookupRouter]] from resolved routes and optional
+  "Creates a LookupRouter from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (lookup-router routes {}))
@@ -134,13 +153,32 @@
          {:route route
           :routes routes})))
    (let [compiled (map #(compile-route % opts) routes)
+         names (find-names routes opts)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} handler]]
-                           [(assoc data p (->Match p meta p handler {}))
+                           [(assoc data p (->Match p meta handler {} p))
                             (if name
-                              (assoc lookup name #(->Match p meta p handler %))
-                              lookup)]) [{} {}] compiled)]
-     (->LookupRouter routes data lookup))))
+                              (assoc lookup name #(->Match p meta handler % p))
+                              lookup)]) [{} {}] compiled)
+         data (impl/fast-map data)
+         lookup (impl/fast-map lookup)]
+     (reify Routing
+       (router-type [_]
+         :lookup-router)
+       (routes [_]
+         routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (impl/fast-get data path))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
@@ -153,8 +191,8 @@
   | `:routes`  | Initial resolved routes (default `[]`)
   | `:meta`    | Initial expanded route-meta vector (default `[]`)
   | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function of `[path meta] opts => [path meta]` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function of `[path meta] opts => handler` to compile a route handler"
+  | `:coerce`  | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
+  | `:compile` | Function of `route opts => handler` to compile a route handler"
   ([data]
    (router data {}))
   ([data opts]

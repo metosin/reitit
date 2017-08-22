@@ -122,12 +122,28 @@
                  :handler handler})))
 
 (defn path-for [^Route route params]
-  (when-not (every? #(contains? params %) (:params route))
+  (if-let [required (:params route)]
+    (if (every? #(contains? params %) required)
+      (str "/" (str/join \/ (map #(get (or params {}) % %) (:parts route)))))
+    (:path route)))
+
+(defn throw-on-missing-path-params [template required params]
+  (when-not (every? #(contains? params %) required)
     (let [defined (-> params keys set)
-          required (:params route)
           missing (clojure.set/difference required defined)]
       (throw
         (ex-info
-          (str "missing path-params for route '" (:path route) "': " missing)
-          {:params params, :required required}))))
-  (str "/" (str/join \/ (map #(get params % %) (:parts route)))))
+          (str "missing path-params for route " template ": " missing)
+          {:params params, :required required})))))
+
+(defn fast-assoc
+  #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
+      :cljs [[a k v] (assoc a k v)]))
+
+(defn fast-map [m]
+  #?@(:clj  [(java.util.HashMap. m)]
+      :cljs [m]))
+
+(defn fast-get
+  #?@(:clj  [[^java.util.HashMap m k] (.get m k)]
+      :cljs [[m k] (m k)]))

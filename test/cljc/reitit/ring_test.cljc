@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [reitit.core :as reitit])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -122,7 +123,30 @@
               respond (partial reset! result), raise ::not-called]
           (app {:uri "/api/users" :request-method :post} respond raise)
           (is (= {:status 200, :body [:api :users :post :ok :post :users :api]}
-                 @result)))))))
+                 @result))))))
+
+  (testing "named routes"
+    (let [router (ring/router
+                   [["/api"
+                     ["/all" {:handler handler :name ::all}]
+                     ["/get" {:get {:handler handler :name ::HIDDEN}
+                              :name ::get}]
+                     ["/users" {:get handler
+                                :post handler
+                                :handler handler
+                                :name ::users}]]])
+          app (ring/ring-handler router)]
+
+      (testing "router can be extracted"
+        (is (= router (ring/get-router app))))
+
+      (testing "only top-level route names are matched"
+        (is (= [::all ::get ::users]
+              (reitit/route-names router))))
+
+      (testing "all named routes can be matched"
+        (doseq [name (reitit/route-names router)]
+          (is (= name (-> (reitit/match-by-name router name) :meta :name))))))))
 
 (defn wrap-enforce-roles [handler]
   (fn [{:keys [::roles] :as request}]
