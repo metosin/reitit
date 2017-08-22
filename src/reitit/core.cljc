@@ -256,9 +256,11 @@
          routes (resolve-routes data opts)
          conflicting (conflicting-routes routes)
          wilds? (some impl/wild-route? routes)
+         all-wilds? (every? impl/wild-route? routes)
          router (cond
                   router router
                   (not wilds?) lookup-router
+                  all-wilds? linear-router
                   (not conflicting) mixed-router
                   :else linear-router)]
 

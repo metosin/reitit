@@ -7,9 +7,9 @@
 
 (deftest reitit-test
 
-  (testing "mixed router"
+  (testing "linear-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= :mixed-router (reitit/router-type router)))
+      (is (= :linear-router (reitit/router-type router)))
       (is (= [["/api/ipa/:size" {:name ::beer}]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
@@ -40,7 +40,7 @@
               #"^missing path-params for route /api/ipa/:size: \#\{:size\}$"
               (reitit/match-by-name! router ::beer))))))
 
-  (testing "lookup router"
+  (testing "lookup-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
       (is (= :lookup-router (reitit/router-type router)))
       (is (= [["/api/ipa/large" {:name ::beer}]]
