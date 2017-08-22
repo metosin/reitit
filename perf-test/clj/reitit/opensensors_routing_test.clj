@@ -202,10 +202,10 @@
                "whoami" :test/route41
                "login" :test/route51}
         "v2/" {"whoami" :test/route1
-               ["users/" :user-id "/"] {"datasets" :test/route2
-                                        "devices" :test/route25
-                                        "topics" {"/bulk" :test/route29
-                                                  "" :test/route45}}
+               ["users/" :user-id] {"/datasets" :test/route2
+                                    "/devices" :test/route25
+                                    "/topics" {"/bulk" :test/route29
+                                               "" :test/route45}}
                "public/" {["projects/" :project-id] {"/datasets" :test/route3
                                                      "" :test/route27}
                           #_#_"messages/dataset/bulk" :test/route20
@@ -264,7 +264,7 @@
       "/v2/" {"whoami" [:test/route1]
               ["users/" user-id] {"/datasets" [:test/route2 user-id]
                                   "/devices" [:test/route25 user-id]
-                                  "topics/" {"bulk" [:test/route29 user-id]
+                                  "/topics" {"/bulk" [:test/route29 user-id]
                                              "" [:test/route45 user-id]}}
               "public/" {["projects/" project-id] {"/datasets" [:test/route3 project-id]
                                                    "" [:test/route27 project-id]}

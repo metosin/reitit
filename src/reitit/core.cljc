@@ -86,7 +86,7 @@
   (if name #{name}))
 
 (defn find-names [routes opts]
-  (into [] (keep #(-> % second :name) routes)))
+  (into [] (keep #(-> % second :name)) routes))
 
 (defn compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
