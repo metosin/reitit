@@ -61,6 +61,7 @@
   (cond->> (->> (walk data opts) (map-meta merge-meta))
            coerce (into [] (keep #(coerce % opts)))))
 
+;; This whole function might be more efficient and easier to understand with transducers.
 (defn conflicting-routes [routes]
   (some->>
     (loop [[r & rest] routes, acc {}]
