@@ -120,7 +120,7 @@
    ["/v1/orgs/:org-id/errors" {:handler handler, :name :test/route17}]
    ["/v1/public/orgs/:org-id" {:handler handler, :name :test/route18}]
    ["/v1/orgs/:org-id/invitations" {:handler handler, :name :test/route19}]
-   ["/v2/public/messages/dataset/bulk" {:handler handler, :name :test/route20}]
+   #_["/v2/public/messages/dataset/bulk" {:handler handler, :name :test/route20}]
    #_["/v1/users/:user-id/devices/bulk" {:handler handler, :name :test/route21}]
    ["/v1/users/:user-id/device-errors" {:handler handler, :name :test/route22}]
    ["/v2/login" {:handler handler, :name :test/route23}]
@@ -208,7 +208,7 @@
                                                   "" :test/route45}}
                "public/" {["projects/" :project-id] {"/datasets" :test/route3
                                                      "" :test/route27}
-                          "messages/dataset/bulk" :test/route20
+                          #_#_"messages/dataset/bulk" :test/route20
                           ["datasets/" :dataset-id] :test/route28
                           ["messages/dataset/" :dataset-id] :test/route53}
                ["datasets/" :dataset-id] :test/route11
@@ -268,7 +268,7 @@
                                              "" [:test/route45 user-id]}}
               "public/" {["projects/" project-id] {"/datasets" [:test/route3 project-id]
                                                    "" [:test/route27 project-id]}
-                         "messages/dataset/bulk" [:test/route20]
+                         #_#_"messages/dataset/bulk" [:test/route20]
                          ["datasets/" dataset-id] [:test/route28 dataset-id]
                          ["messages/dataset/" dataset-id] [:test/route53 dataset-id]}
               ["datasets/" dataset-id] [:test/route11 dataset-id]
@@ -344,7 +344,7 @@
         (context "/projects/:project-id" []
           (ANY "/datasets" [] {:name :test/route3} handler)
           (ANY "/" [] {:name :test/route27} handler))
-        (ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
+        #_(ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
         (ANY "/datasets/:dataset-id" [] {:name :test/route28} handler)
         (ANY "/messages/dataset/:dataset-id" [] {:name :test/route53} handler))
       (ANY "/datasets/:dataset-id" [] {:name :test/route11} handler)
@@ -376,7 +376,7 @@
        ["/v1/orgs/:org-id/errors" :get handler :route-name :test/route17]
        ["/v1/public/orgs/:org-id" :get handler :route-name :test/route18]
        ["/v1/orgs/:org-id/invitations" :get handler :route-name :test/route19]
-       ["/v2/public/messages/dataset/bulk" :get handler :route-name :test/route20]
+       #_["/v2/public/messages/dataset/bulk" :get handler :route-name :test/route20]
        #_["/v1/users/:user-id/devices/bulk" :get handler :route-name :test/route21]
        ["/v1/users/:user-id/device-errors" :get handler :route-name :test/route22]
        ["/v2/login" :get handler :route-name :test/route23]
@@ -493,12 +493,12 @@
         compojure-api-f #(opensensors-compojure-api-routes {:uri % :request-method :get})
         pedestal-f #(pedestal/find-route opensensors-pedestal-routes {:path-info % :request-method :get})]
 
-    (bench! routes true "reitit" reitit-f)                  ;;  2538ns    10%
-    (bench! routes true "pedestal" pedestal-f)              ;;  2737ns    11%
-    (bench! routes true "reitit-ring" reitit-ring-f)        ;;  2845ns    11%
-    (bench! routes true "compojure-api" compojure-api-f)    ;; 10215ns    41%
-    (bench! routes true "bidi" bidi-f)                      ;; 19298ns    77%
-    (bench! routes true "ataraxy" ataraxy-f)                ;; 24950ns   100%
+    (bench! routes true "reitit" reitit-f)                  ;;  2538ns -> 2028ns
+    (bench! routes true "reitit-ring" reitit-ring-f)        ;;  2845ns -> 2299ns
+    (bench! routes true "pedestal" pedestal-f)              ;;  2737ns
+    (bench! routes true "compojure-api" compojure-api-f)    ;;  9823ns
+    (bench! routes true "bidi" bidi-f)                      ;; 16716ns
+    (bench! routes true "ataraxy" ataraxy-f)                ;; 24467ns
 
     ))
 

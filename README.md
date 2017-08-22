@@ -400,7 +400,8 @@ Routers can be configured via options. Options allow things like [`clojure.spec`
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => handler` to compile a route handler
-  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)"
+  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
+  | `:router`    | Function of `routes opts => router` to override the actual router implementation
 
 ## Special thanks
 

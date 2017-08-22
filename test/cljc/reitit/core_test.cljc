@@ -1,15 +1,15 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
+            [reitit.core :as reitit #?@(:cljs [:refer [Match Router]])])
   #?(:clj
-     (:import (reitit.core Match)
+     (:import (reitit.core Match Router)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
 
-  (testing "linear router"
+  (testing "mixed router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= :linear-router (reitit/router-type router)))
+      (is (= :mixed-router (reitit/router-type router)))
       (is (= [["/api/ipa/:size" {:name ::beer}]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
@@ -106,6 +106,13 @@
           (is handler)
           (is (= "ok" (handler)))))))
 
+  (testing "custom router"
+    (let [router (reitit/router ["/ping"] {:router (fn [_ _]
+                                                     (reify Router
+                                                       (reitit/router-type [_]
+                                                         ::custom)))})]
+      (is (= ::custom (reitit/router-type router)))))
+
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
                   ["/auth/recovery/token/:token" :auth/recovery]
@@ -175,10 +182,10 @@
   (testing "all conflicts are returned"
     (is (= {["/a" {}] #{["/*d" {}] ["/:b" {}]},
             ["/:b" {}] #{["/c" {}] ["/*d" {}]},
-            ["/c" {}] #{["/*d" {}]}}))
-    (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
-        (reitit/resolve-routes {})
-        (reitit/conflicting-routes)))
+            ["/c" {}] #{["/*d" {}]}}
+           (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
+               (reitit/resolve-routes {})
+               (reitit/conflicting-routes)))))
 
   (testing "router with conflicting routes"
     (testing "throws by default"
@@ -188,8 +195,4 @@
             (reitit/router
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
-      (is (not
-            (nil?
-              (reitit/router
-                [["/a"] ["/a"]]
-                {:conflicts (constantly nil)})))))))
+      (is (not (nil? (reitit/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
