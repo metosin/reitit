@@ -5,6 +5,7 @@ A friendly data-driven router for Clojure(Script).
 * Simple data-driven route syntax
 * First-class route meta-data
 * Generic, not tied to HTTP
+* [Route conflict resolution](#route-conflicts)
 * Extendable
 * Fast
 
@@ -65,9 +66,9 @@ Same routes flattened:
 
 ## Routing
 
-For routing, a `Router` is needed. Reitit ships with 2 different router implementations: `:linear-router` and `:lookup-router`, both based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
+For routing, a `Router` is needed. Reitit ships with several different router implementations: `:linear-router`, `:lookup-router` and `:mixed-router`, based on the awesome [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation.
 
-`Router` is created with `reitit.core/router`, which takes routes and optional options map as arguments. The route-tree gets expanded, optionally coerced and compiled. `Router` support both fast path- and name-based lookups.
+`Router` is created with `reitit.core/router`, which takes routes and optional options map as arguments. The route tree gets expanded, optionally coerced and compiled. The actual `Router` implementation is selected based on the route tree or can be selected with the `:router` option. `Router` support both fast path- and name-based lookups.
 
 Creating a router:
 
@@ -81,11 +82,11 @@ Creating a router:
       ["/user/:id" ::user]]]))
 ```
 
-`:linear-router` is created (as there are wildcard):
+`:mixed-router` is created (both static & wild routes are used):
 
 ```clj
 (reitit/router-type router)
-; :linear-router
+; :mixed-router
 ```
 
 The expanded routes:
@@ -103,7 +104,7 @@ Route names:
 ; [:user/ping :user/user]
 ```
 
-Path-based routing:
+### Path-based routing
 
 ```clj
 (reitit/match-by-path router "/hello")
@@ -117,7 +118,7 @@ Path-based routing:
 ;        :params {:id "1"}}
 ```
 
-Name-based (reverse) routing:
+### Name-based (reverse) routing
 
 ```clj
 (reitit/match-by-name router ::user)
@@ -131,7 +132,7 @@ Name-based (reverse) routing:
 ; true
 ```
 
-Only a partial match. Let's provide path-parameters:
+Only a partial match. Let's provide the path-parameters:
 
 ```clj
 (reitit/match-by-name router ::user {:id "1"})
@@ -204,13 +205,40 @@ Path-based routing:
 ;        :params {}}
 ```
 
-On match, route meta-data is returned and can interpreted by the  application.
+On match, route meta-data is returned and can interpreted by the application.
 
 Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:handler` in the match. See [configuring routers](#configuring-routers) for details.
 
+## Route conflicts
+
+Route trees should not have multiple routes that match to a single (request) path. `router` checks the route tree at creation for conflicts and calls a registered `:conflicts` option callback with the found conflicts. Default implementation throws `ex-info` with a descriptive message.
+
+```clj
+(reitit/router
+  [["/ping"]
+   ["/:user-id/orders"]
+   ["/bulk/:bulk-id"]
+   ["/public/*path"]
+   ["/:version/status"]])
+; CompilerException clojure.lang.ExceptionInfo: router contains conflicting routes:
+;
+;    /:user-id/orders
+; -> /public/*path
+; -> /bulk/:bulk-id
+; 
+;    /bulk/:bulk-id
+; -> /:version/status
+; 
+;    /public/*path
+; -> /:version/status
+;
+```
+
 ## Ring
 
-Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
+[Ring](https://github.com/ring-clojure/ring)-router adds support for [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`.
+
+Simple Ring app:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -222,13 +250,6 @@ Simple [Ring](https://github.com/ring-clojure/ring)-based routing app:
   (ring/ring-handler
     (ring/router
       ["/ping" handler])))
-```
-
-Backed by a `:lookup-router` (as no wildcards found):
-
-```clj
-(-> app (ring/get-router) (reitit/router-type))
-; :lookup-router
 ```
 
 The expanded routes:
@@ -248,7 +269,7 @@ Applying the handler:
 ; {:status 200, :body "ok"}
 ```
 
-Routing based on `:request-method`:
+### Request-method based routing
 
 ```clj
 (def app
@@ -275,7 +296,9 @@ Reverse routing:
 ; "/ping"
 ```
 
-Some middleware and a new handler:
+### Middleware
+
+Let's define some middleware and a handler:
 
 ```clj
 (defn wrap [handler id]
@@ -316,6 +339,8 @@ Nested middleware works too:
 (app {:request-method :delete, :uri "/api/admin/db"})
 ; {:status 200, :body [:api :admin :db :delete :handler]}
 ```
+
+### Async Ring
 
 Ring-router supports also 3-arity [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html), so it can be used on [Node.js](https://nodejs.org/en/) too.
 
