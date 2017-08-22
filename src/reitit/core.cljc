@@ -1,5 +1,6 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
+            [clojure.string :as str]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -60,16 +61,38 @@
   (cond->> (->> (walk data opts) (map-meta merge-meta))
            coerce (into [] (keep #(coerce % opts)))))
 
+;; This whole function might be more efficient and easier to understand with transducers.
+(defn conflicting-routes [routes]
+  (some->>
+    (loop [[r & rest] routes, acc {}]
+      (if (seq rest)
+        (let [conflicting (set (keep #(if (impl/conflicting-routes? r %) %) rest))]
+          (recur rest (update acc r (fnil (comp set concat) #{}) conflicting)))
+        acc))
+    (filter (comp seq second))
+    (seq)
+    (into {})))
+
+(defn throw-on-conflicts! [conflicts]
+  (throw
+    (ex-info
+      (apply str "router contains conflicting routes:\n\n"
+             (mapv
+               (fn [[[path] vals]]
+                 (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
+               conflicts))
+      {:conflicts conflicts})))
+
 (defn name-lookup [[_ {:keys [name]}] opts]
   (if name #{name}))
 
 (defn find-names [routes opts]
-  (into [] (keep #(-> % second :name) routes)))
+  (into [] (keep #(-> % second :name)) routes))
 
 (defn compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
 
-(defprotocol Routing
+(defprotocol Router
   (router-type [this])
   (routes [this])
   (options [this])
@@ -97,10 +120,11 @@
   {:lookup name-lookup
    :expand expand
    :coerce (fn [route _] route)
-   :compile (fn [[_ {:keys [handler]}] _] handler)})
+   :compile (fn [[_ {:keys [handler]}] _] handler)
+   :conflicts throw-on-conflicts!})
 
 (defn linear-router
-  "Creates a [[LinearRouter]] from resolved routes and optional
+  "Creates a LinearRouter from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (linear-router routes {}))
@@ -118,7 +142,7 @@
                          [[] {}] compiled)
          lookup (impl/fast-map lookup)]
      (reify
-       Routing
+       Router
        (router-type [_]
          :linear-router)
        (routes [_]
@@ -146,11 +170,11 @@
   ([routes]
    (lookup-router routes {}))
   ([routes opts]
-   (when-let [route (some impl/contains-wilds? (map first routes))]
+   (when-let [wilds (seq (filter impl/wild-route? routes))]
      (throw
        (ex-info
-         (str "can't create LookupRouter with wildcard routes: " route)
-         {:route route
+         (str "can't create LookupRouter with wildcard routes: " wilds)
+         {:wilds wilds
           :routes routes})))
    (let [compiled (map #(compile-route % opts) routes)
          names (find-names routes opts)
@@ -162,7 +186,7 @@
                               lookup)]) [{} {}] compiled)
          data (impl/fast-map data)
          lookup (impl/fast-map lookup)]
-     (reify Routing
+     (reify Router
        (router-type [_]
          :lookup-router)
        (routes [_]
@@ -180,23 +204,68 @@
          (if-let [match (impl/fast-get lookup name)]
            (match params)))))))
 
+(defn mixed-router
+  "Creates two routers: [[lookup-router]] for static routes and
+  [[linear-router]] for wildcard routes. All routes should be
+  non-conflicting. Takes resolved routes and optional
+  expanded options. See [[router]] for options."
+  ([routes]
+   (mixed-router routes {}))
+  ([routes opts]
+   (let [{linear true, lookup false} (group-by impl/wild-route? routes)
+         linear-router (linear-router linear opts)
+         lookup-router (lookup-router lookup opts)
+         names (find-names routes opts)]
+     (reify Router
+       (router-type [_]
+         :mixed-router)
+       (routes [_]
+         routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (or (match-by-path lookup-router path)
+             (match-by-path linear-router path)))
+       (match-by-name [_ name]
+         (or (match-by-name lookup-router name)
+             (match-by-name linear-router name)))
+       (match-by-name [_ name params]
+         (or (match-by-name lookup-router name params)
+             (match-by-name linear-router name params)))))))
+
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
   If routes contain wildcards, a [[LinearRouter]] is used, otherwise a
   [[LookupRouter]]. The following options are available:
 
-  | key        | description |
-  | -----------|-------------|
-  | `:path`    | Base-path for routes (default `\"\"`)
-  | `:routes`  | Initial resolved routes (default `[]`)
-  | `:meta`    | Initial expanded route-meta vector (default `[]`)
-  | `:expand`  | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
-  | `:coerce`  | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
-  | `:compile` | Function of `route opts => handler` to compile a route handler"
+  | key          | description |
+  | -------------|-------------|
+  | `:path`      | Base-path for routes (default `\"\"`)
+  | `:routes`    | Initial resolved routes (default `[]`)
+  | `:meta`      | Initial expanded route-meta vector (default `[]`)
+  | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
+  | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
+  | `:compile`   | Function of `route opts => handler` to compile a route handler
+  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
+  | `:router`    | Function of `routes opts => router` to override the actual router implementation"
   ([data]
    (router data {}))
   ([data opts]
-   (let [opts (meta-merge default-router-options opts)
-         routes (resolve-routes data opts)]
-     ((if (some impl/contains-wilds? (map first routes))
-        linear-router lookup-router) routes opts))))
+   (let [{:keys [router] :as opts} (meta-merge default-router-options opts)
+         routes (resolve-routes data opts)
+         conflicting (conflicting-routes routes)
+         wilds? (some impl/wild-route? routes)
+         all-wilds? (every? impl/wild-route? routes)
+         router (cond
+                  router router
+                  (not wilds?) lookup-router
+                  all-wilds? linear-router
+                  (not conflicting) mixed-router
+                  :else linear-router)]
+
+     (when-let [conflicts (:conflicts opts)]
+       (when conflicting (conflicts conflicting)))
+
+     (router routes opts))))

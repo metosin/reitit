@@ -1,13 +1,13 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match]])])
+  (:require [clojure.test :refer [deftest testing is are]]
+            [reitit.core :as reitit #?@(:cljs [:refer [Match Router]])])
   #?(:clj
-     (:import (reitit.core Match)
+     (:import (reitit.core Match Router)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
 
-  (testing "linear router"
+  (testing "linear-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
       (is (= :linear-router (reitit/router-type router)))
       (is (= [["/api/ipa/:size" {:name ::beer}]]
@@ -40,7 +40,7 @@
               #"^missing path-params for route /api/ipa/:size: \#\{:size\}$"
               (reitit/match-by-name! router ::beer))))))
 
-  (testing "lookup router"
+  (testing "lookup-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
       (is (= :lookup-router (reitit/router-type router)))
       (is (= [["/api/ipa/large" {:name ::beer}]]
@@ -106,6 +106,13 @@
           (is handler)
           (is (= "ok" (handler)))))))
 
+  (testing "custom router"
+    (let [router (reitit/router ["/ping"] {:router (fn [_ _]
+                                                     (reify Router
+                                                       (reitit/router-type [_]
+                                                         ::custom)))})]
+      (is (= ::custom (reitit/router-type router)))))
+
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
                   ["/auth/recovery/token/:token" :auth/recovery]
@@ -138,3 +145,54 @@
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
              (reitit/match-by-path router "/api/user/1/2"))))))
+
+(deftest conflicting-routes-test
+  (are [conflicting? data]
+    (let [routes (reitit/resolve-routes data {})
+          conflicts (-> routes (reitit/resolve-routes {}) (reitit/conflicting-routes))]
+      (if conflicting? (seq conflicts) (nil? conflicts)))
+
+    true [["/a"]
+          ["/a"]]
+
+    true [["/a"]
+          ["/:b"]]
+
+    true [["/a"]
+          ["/*b"]]
+
+    true [["/a/1/2"]
+          ["/*b"]]
+
+    false [["/a"]
+           ["/a/"]]
+
+    false [["/a"]
+           ["/a/1"]]
+
+    false [["/a"]
+           ["/a/:b"]]
+
+    false [["/a"]
+           ["/a/*b"]]
+
+    true [["/v2/public/messages/dataset/bulk"]
+          ["/v2/public/messages/dataset/:dataset-id"]])
+
+  (testing "all conflicts are returned"
+    (is (= {["/a" {}] #{["/*d" {}] ["/:b" {}]},
+            ["/:b" {}] #{["/c" {}] ["/*d" {}]},
+            ["/c" {}] #{["/*d" {}]}}
+           (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
+               (reitit/resolve-routes {})
+               (reitit/conflicting-routes)))))
+
+  (testing "router with conflicting routes"
+    (testing "throws by default"
+      (is (thrown-with-msg?
+            ExceptionInfo
+            #"router contains conflicting routes"
+            (reitit/router
+              [["/a"] ["/a"]]))))
+    (testing "can be configured to ignore"
+      (is (not (nil? (reitit/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
