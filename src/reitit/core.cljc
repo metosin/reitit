@@ -1,5 +1,6 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
+            [clojure.string :as str]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -74,7 +75,11 @@
 (defn throw-on-conflicts! [conflicts]
   (throw
     (ex-info
-      (str "router contains conflicting routes: " conflicts)
+      (apply str "router contains conflicting routes:\n\n"
+             (mapv
+               (fn [[[path] vals]]
+                 (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
+               conflicts))
       {:conflicts conflicts})))
 
 (defn name-lookup [[_ {:keys [name]}] opts]
@@ -118,7 +123,7 @@
    :conflicts throw-on-conflicts!})
 
 (defn linear-router
-  "Creates a [[LinearRouter]] from resolved routes and optional
+  "Creates a LinearRouter from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (linear-router routes {}))
@@ -164,11 +169,11 @@
   ([routes]
    (lookup-router routes {}))
   ([routes opts]
-   (when-let [route (some impl/contains-wilds? (map first routes))]
+   (when-let [wilds (seq (filter impl/wild-route? routes))]
      (throw
        (ex-info
-         (str "can't create LookupRouter with wildcard routes: " route)
-         {:route route
+         (str "can't create LookupRouter with wildcard routes: " wilds)
+         {:wilds wilds
           :routes routes})))
    (let [compiled (map #(compile-route % opts) routes)
          names (find-names routes opts)
@@ -218,7 +223,6 @@
    (let [opts (meta-merge default-router-options opts)
          routes (resolve-routes data opts)]
      (when-let [conflicts (:conflicts opts)]
-       (when-let [conflicting (conflicting-routes routes)]
-         (conflicts conflicting)))
-     ((if (some impl/contains-wilds? (map first routes))
-        linear-router lookup-router) routes opts))))
+       (when conflicting (conflicts conflicting)))
+
+     (router routes opts))))
