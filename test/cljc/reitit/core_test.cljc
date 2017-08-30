@@ -96,15 +96,15 @@
                  (reitit/routes router))))
         (testing "route match contains compiled handler"
           (is (= 2 @compile-times))
-          (let [{:keys [handler]} (reitit/match-by-path router "/api/pong")]
-            (is handler)
-            (is (= "/api/pong" (handler)))
+          (let [{:keys [result]} (reitit/match-by-path router "/api/pong")]
+            (is result)
+            (is (= "/api/pong" (result)))
             (is (= 2 @compile-times))))))
     (testing "default compile"
       (let [router (reitit/router ["/ping" (constantly "ok")])]
-        (let [{:keys [handler]} (reitit/match-by-path router "/ping")]
-          (is handler)
-          (is (= "ok" (handler)))))))
+        (let [{:keys [result]} (reitit/match-by-path router "/ping")]
+          (is result)
+          (is (= "ok" (result)))))))
 
   (testing "custom router"
     (let [router (reitit/router ["/ping"] {:router (fn [_ _]

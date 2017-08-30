@@ -60,6 +60,5 @@
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (meta-merge {:coerce coerce-handler
-                           :compile compile-handler} opts)]
+   (let [opts (meta-merge {:coerce coerce-handler, :compile compile-handler} opts)]
      (reitit/router data opts))))

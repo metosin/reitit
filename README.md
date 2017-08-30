@@ -114,7 +114,7 @@ Route names:
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
-;        :handler nil
+;        :result nil
 ;        :params {:id "1"}}
 ```
 
@@ -124,7 +124,7 @@ Route names:
 (reitit/match-by-name router ::user)
 ; #PartialMatch{:template "/api/user/:id",
 ;               :meta {:name :user/user},
-;               :handler nil,
+;               :result nil,
 ;               :params nil,
 ;               :required #{:id}}
 
@@ -139,7 +139,7 @@ Only a partial match. Let's provide the path-parameters:
 ; #Match{:template "/api/user/:id"
 ;        :meta {:name :user/user}
 ;        :path "/api/user/1"
-;        :handler nil
+;        :result nil
 ;        :params {:id "1"}}
 ```
 
@@ -201,13 +201,13 @@ Path-based routing:
 ;               :interceptors [::api ::admin]
 ;               :roles #{:root}}
 ;        :path "/api/admin/root"
-;        :handler nil
+;        :result nil
 ;        :params {}}
 ```
 
 On match, route meta-data is returned and can interpreted by the application.
 
-Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:handler` in the match. See [configuring routers](#configuring-routers) for details.
+Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:result` in the match. See [configuring routers](#configuring-routers) for details.
 
 ## Route conflicts
 
@@ -225,10 +225,10 @@ Route trees should not have multiple routes that match to a single (request) pat
 ;    /:user-id/orders
 ; -> /public/*path
 ; -> /bulk/:bulk-id
-; 
+;
 ;    /bulk/:bulk-id
 ; -> /:version/status
-; 
+;
 ;    /public/*path
 ; -> /:version/status
 ;
@@ -424,7 +424,7 @@ Routers can be configured via options. Options allow things like [`clojure.spec`
   | `:meta`      | Initial expanded route-meta vector (default `[]`)
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
-  | `:compile`   | Function of `route opts => handler` to compile a route handler
+  | `:compile`   | Function of `route opts => result` to compile a route handler
   | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
   | `:router`    | Function of `routes opts => router` to override the actual router implementation
 
