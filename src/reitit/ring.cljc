@@ -5,7 +5,8 @@
             [reitit.impl :as impl]))
 
 (def http-methods #{:get :head :patch :delete :options :post :put})
-(defrecord MethodHandlers [get head patch delete options post put])
+(defrecord Methods [get head post put delete trace options connect patch any])
+(defrecord Endpoint [meta handler])
 
 (defn- group-keys [meta]
   (reduce-kv
@@ -19,10 +20,27 @@
     (fn
       ([request]
        (if-let [match (reitit/match-by-path router (:uri request))]
-         ((:handler match) (impl/fast-assoc request ::match match))))
+         (let [method (:request-method request :any)
+               params (:params match)
+               result (:result match)
+               handler (or (-> result method :handler)
+                           (-> result :any :handler))]
+           (if handler
+             (handler
+               (cond-> (impl/fast-assoc request ::match match)
+                       params (impl/fast-assoc :path-params params)))))))
       ([request respond raise]
        (if-let [match (reitit/match-by-path router (:uri request))]
-         ((:handler match) (impl/fast-assoc request ::match match) respond raise))))
+         (let [method (:request-method request :any)
+               params (:params match)
+               result (:result match)
+               handler (or (-> result method :handler)
+                           (-> result :any :handler))]
+           (if handler
+             (handler
+               (cond-> (impl/fast-assoc request ::match match)
+                       params (impl/fast-assoc :path-params params))
+               respond raise))))))
     {::router router}))
 
 (defn get-router [handler]
@@ -41,20 +59,23 @@
 (defn compile-handler [[path meta] opts]
   (let [[top childs] (group-keys meta)]
     (if-not (seq childs)
-      (middleware/compile-handler [path meta] opts)
-      (let [handlers (map->MethodHandlers
-                       (reduce-kv
-                         #(assoc %1 %2 (middleware/compile-handler
-                                         [path (meta-merge top %3)] opts %2))
-                         {} childs))
-            default-handler (if (:handler top) (middleware/compile-handler [path meta] opts))]
-        (fn
-          ([request]
-           (if-let [handler (or ((:request-method request) handlers) default-handler)]
-             (handler request)))
-          ([request respond raise]
-           (if-let [handler (or ((:request-method request) handlers) default-handler)]
-             (handler request respond raise))))))))
+      (map->Methods
+        {:any (map->Endpoint
+                {:handler (middleware/compile-handler [path top] opts)
+                 :meta top})})
+      (let [any-handler (if (:handler top) (middleware/compile-handler [path meta] opts))]
+        (reduce-kv
+          (fn [acc method meta]
+            (let [meta (meta-merge top meta)
+                  handler (middleware/compile-handler [path meta] opts method)]
+              (assoc acc method (map->Endpoint
+                                  {:handler handler
+                                   :meta meta}))))
+          (map->Methods
+            {:any (map->Endpoint
+                    {:handler (if (:handler top) (middleware/compile-handler [path meta] opts))
+                     :meta top})})
+          childs)))))
 
 (defn router
   ([data]
