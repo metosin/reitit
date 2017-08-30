@@ -1,5 +1,7 @@
 (ns reitit.opensensors-routing-test
   (:require [clojure.test :refer [deftest testing is]]
+            [criterium.core :as cc]
+            [reitit.perf-utils :refer :all]
             [cheshire.core :as json]
             [clojure.string :as str]
             [reitit.core :as reitit]
@@ -16,13 +18,20 @@
             [io.pedestal.http.route.router :as pedestal]
             [io.pedestal.http.route :as route]))
 
-(defn raw-title [color s]
-  (println (str color (apply str (repeat (count s) "#")) "\u001B[0m"))
-  (println (str color s "\u001B[0m"))
-  (println (str color (apply str (repeat (count s) "#")) "\u001B[0m")))
-
-(def title (partial raw-title "\u001B[35m"))
-(def suite (partial raw-title "\u001B[32m"))
+;;
+;; start repl with `lein perf repl`
+;; perf measured with the following setup:
+;;
+;; Model Name:            MacBook Pro
+;; Model Identifier:      MacBookPro11,3
+;; Processor Name:        Intel Core i7
+;; Processor Speed:       2,5 GHz
+;; Number of Processors:  1
+;; Total Number of Cores: 4
+;; L2 Cache (per Core):   256 KB
+;; L3 Cache:              6 MB
+;; Memory:                16 GB
+;;
 
 ;;
 ;; extract sample routes
@@ -76,15 +85,6 @@
                         (drop-last dropped))
              avg (int (/ (reduce + times) (count times)))]
          [% avg]) urls)))
-
-(defn bench [routes no-paths?]
-  (let [routes (mapv (fn [[path name]]
-                       (if no-paths?
-                         [(str/replace path #"\:" "") name]
-                         [path name])) routes)
-        router (reitit/router routes)]
-    (doseq [[path time] (bench-routes routes #(reitit/match-by-path router %))]
-      (println path "\t" time))))
 
 (defn bench [routes no-paths?]
   (let [routes (mapv (fn [[path name]]
@@ -471,7 +471,7 @@
       (if-not match
         (println route)))))
 
-(defn bench! [routes verbose? name f]
+(defn bench!! [routes verbose? name f]
   (System/gc)
   (println)
   (suite name)
@@ -493,14 +493,23 @@
         compojure-api-f #(opensensors-compojure-api-routes {:uri % :request-method :get})
         pedestal-f #(pedestal/find-route opensensors-pedestal-routes {:path-info % :request-method :get})]
 
-    (bench! routes true "reitit" reitit-f)                  ;;  2538ns -> 2028ns
-    (bench! routes true "reitit-ring" reitit-ring-f)        ;;  2845ns -> 2299ns
-    (bench! routes true "pedestal" pedestal-f)              ;;  2737ns
-    (bench! routes true "compojure-api" compojure-api-f)    ;;  9823ns
-    (bench! routes true "bidi" bidi-f)                      ;; 16716ns
-    (bench! routes true "ataraxy" ataraxy-f)                ;; 24467ns
+    ;;  2538ns -> 2028ns
+    (bench!! routes true "reitit" reitit-f)
 
-    ))
+    ;;  2845ns -> 2299ns
+    (bench!! routes true "reitit-ring" reitit-ring-f)
+
+    ;;  2737ns
+    (bench!! routes true "pedestal" pedestal-f)
+
+    ;;  9823ns
+    (bench!! routes true "compojure-api" compojure-api-f)
+
+    ;; 16716ns
+    (bench!! routes true "bidi" bidi-f)
+
+    ;; 24467ns
+    (bench!! routes true "ataraxy" ataraxy-f)))
 
 (comment
   (bench-rest!))
@@ -548,16 +557,15 @@
 
     ;;  125ns
     ;;   62ns (fast-map)
-    (bench! routes false "reitit" reitit-f)
+    (bench!! routes false "reitit" reitit-f)
 
     ;;  272ns
     ;;  219ns (fast-assoc)
     ;;  171ns (fast-map)
-    (bench! routes false "reitit-ring" reitit-ring-f)
+    (bench!! routes false "reitit-ring" reitit-ring-f)
 
     ;;  172ns
-    (bench! routes false "pedestal" pedestal-f)))
+    (bench!! routes false "pedestal" pedestal-f)))
 
 (comment
   (bench-cqrs!))
-
