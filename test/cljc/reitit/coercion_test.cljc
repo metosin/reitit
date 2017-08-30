@@ -1,4 +1,4 @@
-(ns reitit.middleware-test
+(ns reitit.coercion-test
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.ring :as ring]
             [reitit.coercion :as coercion]

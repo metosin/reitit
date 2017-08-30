@@ -57,7 +57,7 @@
   protocol/Coercion
   (get-name [_] name)
 
-  (compile [_ model]
+  (compile [_ model _]
     (memoized-specify model))
 
   (get-apidocs [_ _ {:keys [parameters responses] :as info}]

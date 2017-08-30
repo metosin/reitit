@@ -6,7 +6,7 @@
             [reitit.ring :as ring]
             [reitit.impl :as impl]))
 
-(defn get-apidocs [coercion spec info]
+#_(defn get-apidocs [coercion spec info]
   (protocol/get-apidocs coercion spec info))
 
 ;;
@@ -61,15 +61,16 @@
             (request-coercion-failed! result coercion value in request)
             result))))))
 
-(defn- response-format [request response]
+#_(defn muuntaja-response-format [request response]
   (or (-> response :muuntaja/content-type)
       (some-> request :muuntaja/response :format)))
 
-(defn response-coercer [coercion model]
+(defn response-coercer [coercion model {:keys [extract-response-format]
+                                        :or {extract-response-format (constantly nil)}}]
   (if coercion
     (let [coercer (protocol/response-coercer coercion model)]
       (fn [request response]
-        (let [format (response-format request response)
+        (let [format (extract-response-format request response)
               value (:body response)
               result (coercer value format)]
           (if (protocol/error? result)
@@ -98,15 +99,15 @@
          [k (request-coercer coercion k v)])
        (into {})))
 
-(defn ^:no-doc response-coercers [coercion responses]
+(defn ^:no-doc response-coercers [coercion responses opts]
   (->> (for [[status {:keys [schema]}] responses :when schema]
-         [status (response-coercer coercion schema)])
+         [status (response-coercer coercion schema opts)])
        (into {})))
 
 (defn wrap-coerce-parameters
   "Pluggable request coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  from injected route meta, otherwise does not mount."
+  and :parameters from route meta, otherwise does not mount."
   [handler]
   (fn
     ([request]
@@ -132,10 +133,10 @@
 (def gen-wrap-coerce-parameters
   "Generator for pluggable request coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  from injected route meta, otherwise does not mount."
+  and :parameters from route meta, otherwise does not mount."
   (middleware/gen
     (fn [{:keys [parameters coercion]} _]
-      (if coercion
+      (if (and coercion parameters)
         (let [coercers (request-coercers coercion parameters)]
           (fn [handler]
             (fn
@@ -149,7 +150,7 @@
 (defn wrap-coerce-response
   "Pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  from injected route meta, otherwise does not mount."
+  and :responses from route meta, otherwise does not mount."
   [handler]
   (fn
     ([request]
@@ -157,9 +158,10 @@
            method (:request-method request)
            match (ring/get-match request)
            responses (-> match :result method :meta :responses)
-           coercion (-> match :meta :coercion)]
+           coercion (-> match :meta :coercion)
+           opts (-> match :meta :opts)]
        (if coercion
-         (let [coercers (response-coercers coercion responses)
+         (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (coerce-response coercers request (handler request)))
          (handler request))))
@@ -168,9 +170,10 @@
            method (:request-method request)
            match (ring/get-match request)
            responses (-> match :result method :meta :responses)
-           coercion (-> match :meta :coercion)]
+           coercion (-> match :meta :coercion)
+           opts (-> match :meta :opts)]
        (if coercion
-         (let [coercers (response-coercers coercion responses)
+         (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (handler request #(respond (coerce-response coercers request %))))
          (handler request respond raise))))))
@@ -178,11 +181,11 @@
 (def gen-wrap-coerce-response
   "Generator for pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  from injected route meta, otherwise does not mount."
+  and :responses from route meta, otherwise does not mount."
   (middleware/gen
-    (fn [{:keys [responses coercion]} _]
-      (if coercion
-        (let [coercers (response-coercers coercion responses)]
+    (fn [{:keys [responses coercion opts]} _]
+      (if (and coercion responses)
+        (let [coercers (response-coercers coercion responses opts)]
           (fn [handler]
             (fn
               ([request]

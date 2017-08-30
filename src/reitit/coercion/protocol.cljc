@@ -2,13 +2,14 @@
   (:refer-clojure :exclude [compile]))
 
 (defprotocol Coercion
-  (get-name [this])
-  (compile [this model])
-  (get-apidocs [this model data])
-  (make-open [this model])
-  (encode-error [this error])
-  (request-coercer [this type model])
-  (response-coercer [this model]))
+  "Pluggable coercion protocol"
+  (get-name [this] "Keyword name for the coercion")
+  (compile [this model name] "Compiles a coercion model")
+  (get-apidocs [this model data] "???")
+  (make-open [this model] "Returns a new map model which doesn't fail on extra keys")
+  (encode-error [this error] "Converts error in to a serializable format")
+  (request-coercer [this type model] "Returns a `value format => value` request coercion function")
+  (response-coercer [this model] "Returns a `value format => value` response coercion function"))
 
 (defrecord CoercionError [])
 
