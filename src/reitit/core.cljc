@@ -46,7 +46,7 @@
            (if (seq childs)
              (walk-many (str pacc path) macc childs)
              [[(str pacc path) macc]]))))]
-    (walk-one path meta data)))
+    (walk-one path (mapv identity meta) data)))
 
 (defn map-meta [f routes]
   (mapv #(update % 1 f) routes))
@@ -100,8 +100,11 @@
   (match-by-path [this path])
   (match-by-name [this name] [this name params]))
 
-(defrecord Match [template meta handler params path])
-(defrecord PartialMatch [template meta handler params required])
+(defn router? [x]
+  (satisfies? Router x))
+
+(defrecord Match [template meta result params path])
+(defrecord PartialMatch [template meta result params required])
 
 (defn partial-match? [x]
   (instance? PartialMatch x))
@@ -132,11 +135,11 @@
    (let [compiled (map #(compile-route % opts) routes)
          names (find-names routes opts)
          [data lookup] (reduce
-                         (fn [[data lookup] [p {:keys [name] :as meta} handler]]
-                           (let [{:keys [params] :as route} (impl/create [p meta handler])
+                         (fn [[data lookup] [p {:keys [name] :as meta} result]]
+                           (let [{:keys [params] :as route} (impl/create [p meta result])
                                  f #(if-let [path (impl/path-for route %)]
-                                      (->Match p meta handler % path)
-                                      (->PartialMatch p meta handler % params))]
+                                      (->Match p meta result % path)
+                                      (->PartialMatch p meta result % params))]
                              [(conj data route)
                               (if name (assoc lookup name f) lookup)]))
                          [[] {}] compiled)
@@ -155,7 +158,7 @@
          (reduce
            (fn [acc ^Route route]
              (if-let [params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:meta route) (:handler route) params path))))
+               (reduced (->Match (:path route) (:meta route) (:result route) params path))))
            nil data))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -179,10 +182,10 @@
    (let [compiled (map #(compile-route % opts) routes)
          names (find-names routes opts)
          [data lookup] (reduce
-                         (fn [[data lookup] [p {:keys [name] :as meta} handler]]
-                           [(assoc data p (->Match p meta handler {} p))
+                         (fn [[data lookup] [p {:keys [name] :as meta} result]]
+                           [(assoc data p (->Match p meta result {} p))
                             (if name
-                              (assoc lookup name #(->Match p meta handler % p))
+                              (assoc lookup name #(->Match p meta result % p))
                               lookup)]) [{} {}] compiled)
          data (impl/fast-map data)
          lookup (impl/fast-map lookup)]
@@ -244,10 +247,10 @@
   | -------------|-------------|
   | `:path`      | Base-path for routes (default `\"\"`)
   | `:routes`    | Initial resolved routes (default `[]`)
-  | `:meta`      | Initial expanded route-meta vector (default `[]`)
+  | `:meta`      | Initial route meta (default `{}`)
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
-  | `:compile`   | Function of `route opts => handler` to compile a route handler
+  | `:compile`   | Function of `route opts => result` to compile a route handler
   | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
   | `:router`    | Function of `routes opts => router` to override the actual router implementation"
   ([data]

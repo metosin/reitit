@@ -22,6 +22,13 @@
                    :jvm-opts ^:replace ["-server"]
                    :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                                   [org.clojure/clojurescript "1.9.660"]
+
+                                  [metosin/spec-tools "0.3.2"]
+                                  [org.clojure/spec.alpha "0.1.123"]
+
+                                  [expound "0.2.1"]
+                                  [orchestra "2017.08.13"]
+
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]

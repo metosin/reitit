@@ -26,50 +26,6 @@
   ([request respond raise]
    (respond (handler request))))
 
-(deftest middleware-router-test
-
-  (testing "all paths should have a handler"
-    (is (thrown-with-msg?
-          ExceptionInfo
-          #"path \"/ping\" doesn't have a :handler defined"
-          (middleware/router ["/ping"]))))
-
-  (testing "ring-handler"
-    (let [api-mw #(mw % :api)
-          router (middleware/router
-                   [["/ping" handler]
-                    ["/api" {:middleware [api-mw]}
-                     ["/ping" handler]
-                     ["/admin" {:middleware [[mw :admin]]}
-                      ["/ping" handler]]]])
-          app (ring/ring-handler router)]
-
-      (testing "router can be extracted"
-        (is (= router (ring/get-router app))))
-
-      (testing "not found"
-        (is (= nil (app {:uri "/favicon.ico"}))))
-
-      (testing "normal handler"
-        (is (= {:status 200, :body [:ok]}
-               (app {:uri "/ping"}))))
-
-      (testing "with middleware"
-        (is (= {:status 200, :body [:api :ok :api]}
-               (app {:uri "/api/ping"}))))
-
-      (testing "with nested middleware"
-        (is (= {:status 200, :body [:api :admin :ok :admin :api]}
-               (app {:uri "/api/admin/ping"}))))
-
-      (testing "3-arity"
-        (let [result (atom nil)
-              respond (partial reset! result), raise ::not-called]
-          (app {:uri "/api/admin/ping"} respond raise)
-          (is (= {:status 200, :body [:api :admin :ok :admin :api]}
-                 @result)))))))
-
-
 (deftest ring-router-test
 
   (testing "all paths should have a handler"
@@ -142,7 +98,7 @@
 
       (testing "only top-level route names are matched"
         (is (= [::all ::get ::users]
-              (reitit/route-names router))))
+               (reitit/route-names router))))
 
       (testing "all named routes can be matched"
         (doseq [name (reitit/route-names router)]

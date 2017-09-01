@@ -101,15 +101,15 @@
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher parts params meta handler])
+(defrecord Route [path matcher parts params meta result])
 
-(defn create [[path meta handler]]
+(defn create [[path meta result]]
   (if (contains-wilds? path)
     (as-> (parse-path path) $
           (assoc $ :path-re (path-regex $))
           (merge $ {:path path
                     :matcher (path-matcher $)
-                    :handler handler
+                    :result result
                     :meta meta})
           (dissoc $ :path-re :path-constraints)
           (update $ :path-params set)
@@ -119,7 +119,7 @@
     (map->Route {:path path
                  :meta meta
                  :matcher #(if (= path %) {})
-                 :handler handler})))
+                 :result result})))
 
 (defn segments [path]
   (let [ss (-> (str/split path #"/") rest vec)]

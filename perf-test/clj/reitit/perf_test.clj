@@ -1,6 +1,7 @@
 (ns reitit.perf-test
   (:require [criterium.core :as cc]
             [reitit.core :as reitit]
+            [reitit.perf-utils :refer :all]
 
             [bidi.bidi :as bidi]
             [compojure.api.sweet :refer [api routes GET]]
@@ -26,14 +27,6 @@
 ;; L3 Cache:              6 MB
 ;; Memory:                16 GB
 ;;
-
-(defn raw-title [color s]
-  (println (str color (apply str (repeat (count s) "#")) "\u001B[0m"))
-  (println (str color s "\u001B[0m"))
-  (println (str color (apply str (repeat (count s) "#")) "\u001B[0m")))
-
-(def title (partial raw-title "\u001B[35m"))
-(def suite (partial raw-title "\u001B[32m"))
 
 (def bidi-routes
   ["/" [["auth/login" :auth/login]
@@ -106,7 +99,7 @@
       (call)))
 
   ;; 1.0µs (-94%)
-  ;; 770ns (-95%, -23%)
+  ;; 690ns (-96%)
   (title "reitit")
   (let [call #(reitit/match-by-path reitit-routes "/workspace/1/1")]
     (assert (call))
@@ -117,7 +110,7 @@
 
   (suite "reverse routing")
 
-  ;; 2.2µs (-56%)
+  ;; 2.0µs (-59%)
   (title "bidi")
   (let [call #(bidi/path-for bidi-routes :workspace/page :project "1" :page "1")]
     (assert (= "/workspace/1/1" (call)))
@@ -126,14 +119,14 @@
 
   (title "ataraxy doesn't support reverse routing :(")
 
-  ;; 3.8µs (-25%)
+  ;; 3.8µs (-22%)
   (title "pedestal - map-tree => prefix-tree")
   (let [call #(pedestal-url-for :workspace/page :path-params {:project "1" :page "1"})]
     (assert (= "/workspace/1/1" (call)))
     (cc/quick-bench
       (call)))
 
-  ;; 5.1µs
+  ;; 4.9µs
   (title "compojure-api")
   (let [call #(routes/path-for* :workspace/page compojure-api-request {:project "1", :page "1"})]
     (assert (= "/workspace/1/1" (call)))
