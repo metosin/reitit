@@ -100,6 +100,9 @@
   (match-by-path [this path])
   (match-by-name [this name] [this name params]))
 
+(defn router? [x]
+  (satisfies? Router x))
+
 (defrecord Match [template meta result params path])
 (defrecord PartialMatch [template meta result params required])
 
