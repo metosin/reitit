@@ -38,42 +38,41 @@
 
 (s/def ::router reitit/router?)
 
-(s/def :reitit.router/path (s/or :empty #{""} :path ::path))
+(s/def :reitit.router/path ::path)
 
 (s/def :reitit.router/routes ::routes)
 
 (s/def :reitit.router/meta ::meta)
 
-(s/def :reitit.router/expand
-  (s/fspec :args (s/cat :arg ::arg, :opts ::opts)
-           :ret ::route))
+(s/def :reitit.router/expand fn?
+  #_(s/fspec :args (s/cat :arg ::arg, :opts ::opts)
+             :ret ::route))
 
-(s/def :reitit.router/coerce
-  (s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
-           :ret ::route))
+(s/def :reitit.router/coerce fn?
+  #_(s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
+             :ret ::route))
 
-(s/def :reitit.router/compile
-  (s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
-           :ret ::result))
+(s/def :reitit.router/compile fn?
+  #_(s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
+             :ret ::result))
 
-(s/def :reitit.router/conflicts
-  (s/fspec :args (s/cat :conflicts (s/map-of ::route (s/coll-of ::route :into #{})))))
+(s/def :reitit.router/conflicts fn?
+  #_(s/fspec :args (s/cat :conflicts (s/map-of ::route (s/coll-of ::route :into #{})))))
 
-(s/def :reitit.router/router
-  (s/fspec :args (s/cat :routes ::routes, :opts ::opts)
-           :ret ::router))
+(s/def :reitit.router/router fn?
+  #_(s/fspec :args (s/cat :routes ::routes, :opts ::opts)
+             :ret ::router))
 
-;; TODO: fspecs fail..
 (s/def ::opts
   (s/nilable
     (s/keys :opt-un [:reitit.router/path
                      :reitit.router/routes
                      :reitit.router/meta
-                     #_:reitit.router/expand
-                     #_:reitit.router/coerce
-                     #_:reitit.router/compile
-                     #_:reitit.router/conflicts
-                     #_:reitit.router/router])))
+                     :reitit.router/expand
+                     :reitit.router/coerce
+                     :reitit.router/compile
+                     :reitit.router/conflicts
+                     :reitit.router/router])))
 
 (s/fdef reitit/router
         :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))

@@ -46,22 +46,29 @@
 
     (testing "options"
 
-        (are [opts]
-          (is (= true (reitit/router? (reitit/router ["/api"] opts))))
+      (are [opts]
+        (is (= true (reitit/router? (reitit/router ["/api"] opts))))
 
-          {:path "/"}
+        {:path "/"}
+        {:meta {}}
+        {:expand (fn [_ _] {})}
+        {:coerce (fn [route _] route)}
+        {:compile (fn [_ _])}
+        {:conflicts (fn [_])}
+        {:router reitit/linear-router})
 
-          {:meta {}}
+      (are [opts]
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"Call to #'reitit.core/router did not conform to spec"
+              (reitit/router
+                ["/api"] opts)))
 
-          #_{:coerce (fn [_ _] ["/"])}
-          )
-
-
-        (are [opts]
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"Call to #'reitit.core/router did not conform to spec"
-                (reitit/router
-                  ["/api"] opts)))
-
-          {:meta 1}))))
+        {:path ""}
+        {:path nil}
+        {:meta nil}
+        {:expand nil}
+        {:coerce nil}
+        {:compile nil}
+        {:conflicts nil}
+        {:router nil}))))
