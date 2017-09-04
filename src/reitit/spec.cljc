@@ -18,7 +18,7 @@
 (s/def ::raw-route
   (s/cat :path ::path
          :arg (s/? ::arg)
-         :childs (s/* (s/spec (s/and ::raw-route)))))
+         :childs (s/* (s/and ::raw-route))))
 
 (s/def ::raw-routes
   (s/or :route ::raw-route
@@ -37,31 +37,14 @@
 ;;
 
 (s/def ::router reitit/router?)
-
 (s/def :reitit.router/path ::path)
-
 (s/def :reitit.router/routes ::routes)
-
 (s/def :reitit.router/meta ::meta)
-
-(s/def :reitit.router/expand fn?
-  #_(s/fspec :args (s/cat :arg ::arg, :opts ::opts)
-             :ret ::route))
-
-(s/def :reitit.router/coerce fn?
-  #_(s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
-             :ret ::route))
-
-(s/def :reitit.router/compile fn?
-  #_(s/fspec :args (s/cat :route (s/spec ::route), :opts ::opts)
-             :ret ::result))
-
-(s/def :reitit.router/conflicts fn?
-  #_(s/fspec :args (s/cat :conflicts (s/map-of ::route (s/coll-of ::route :into #{})))))
-
-(s/def :reitit.router/router fn?
-  #_(s/fspec :args (s/cat :routes ::routes, :opts ::opts)
-             :ret ::router))
+(s/def :reitit.router/expand fn?)
+(s/def :reitit.router/coerce fn?)
+(s/def :reitit.router/compile fn?)
+(s/def :reitit.router/conflicts fn?)
+(s/def :reitit.router/router fn?)
 
 (s/def ::opts
   (s/nilable
