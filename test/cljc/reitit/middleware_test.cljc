@@ -1,5 +1,5 @@
 (ns reitit.middleware-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [reitit.middleware :as middleware]
             [clojure.set :as set]
             [reitit.core :as reitit])
@@ -26,61 +26,96 @@
    (respond (handler request))))
 
 (deftest expand-middleware-test
-  (testing "middleware generators"
-    (let [calls (atom 0)]
 
-      (testing "record generator"
-        (reset! calls 0)
-        (let [syntax [(middleware/gen
-                        (fn [meta _]
+  (testing "middleware records"
+
+    (testing ":name is mandatory"
+      (is (thrown-with-msg?
+            ExceptionInfo
+            #"Middleware must have :name defined"
+            (middleware/create
+              {:wrap identity
+               :gen (constantly identity)}))))
+
+    (testing ":wrap & :gen are exclusive"
+      (is (thrown-with-msg?
+            ExceptionInfo
+            #"Middleware can't both :wrap and :gen defined"
+            (middleware/create
+              {:name ::test
+               :wrap identity
+               :gen (constantly identity)}))))
+
+    (testing ":wrap"
+      (let [calls (atom 0)
+            data {:name ::test
+                  :wrap (fn [handler value]
                           (swap! calls inc)
-                          (fn [handler value]
-                            (swap! calls inc)
-                            (fn [request]
-                              [meta value request]))))]
-              app ((middleware/compose-middleware syntax :meta {}) identity :value)]
-          (dotimes [_ 10]
-            (is (= [:meta :value :request] (app :request)))
-            (is (= 2 @calls)))))
+                          (fn [request]
+                            [value request]))}]
 
-      (testing "middleware generator as function"
-        (reset! calls 0)
-        (let [syntax (middleware/gen
-                       (fn [meta _]
+        (testing "as map"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [data] :meta {}) identity :value)]
+            (dotimes [_ 10]
+              (is (= [:value :request] (app :request)))
+              (is (= 1 @calls)))))
+
+        (testing "direct"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [(middleware/create data)] :meta {}) identity :value)]
+            (dotimes [_ 10]
+              (is (= [:value :request] (app :request)))
+              (is (= 1 @calls)))))
+
+        (testing "vector"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [[(middleware/create data) :value]] :meta {}) identity)]
+            (dotimes [_ 10]
+              (is (= [:value :request] (app :request)))
+              (is (= 1 @calls)))))))
+
+    (testing ":gen"
+      (let [calls (atom 0)
+            data {:name ::test
+                  :gen (fn [meta _]
                          (swap! calls inc)
                          (fn [handler value]
                            (swap! calls inc)
                            (fn [request]
-                             [meta value request]))))
-              app ((syntax :meta nil) identity :value)]
-          (dotimes [_ 10]
+                             [meta value request])))}]
+
+        (testing "as map"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [data] :meta {}) identity :value)]
+            (dotimes [_ 10]
+              (is (= [:meta :value :request] (app :request)))
+              (is (= 2 @calls)))))
+
+        (testing "direct"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [(middleware/create data)] :meta {}) identity :value)]
+            (dotimes [_ 10]
+              (is (= [:meta :value :request] (app :request)))
+              (is (= 2 @calls)))))
+
+        (testing "vector"
+          (reset! calls 0)
+          (let [app ((middleware/compose-middleware [[(middleware/create data) :value]] :meta {}) identity)]
             (is (= [:meta :value :request] (app :request)))
-            (is (= 2 @calls)))))
+            (dotimes [_ 10]
+              (is (= [:meta :value :request] (app :request)))
+              (is (= 2 @calls)))))
 
-      (testing "generator vector"
-        (reset! calls 0)
-        (let [syntax [[(middleware/gen
-                         (fn [meta _]
-                           (swap! calls inc)
-                           (fn [handler value]
-                             (swap! calls inc)
-                             (fn [request]
-                               [meta value request])))) :value]]
-              app ((middleware/compose-middleware syntax :meta {}) identity)]
-          (is (= [:meta :value :request] (app :request)))
-          (dotimes [_ 10]
-            (is (= [:meta :value :request] (app :request)))
-            (is (= 2 @calls)))))
-
-      (testing "generator can return nil"
-        (reset! calls 0)
-        (let [syntax [[(middleware/gen
-                         (fn [meta _])) :value]]
-              app ((middleware/compose-middleware syntax :meta {}) identity)]
-          (is (= :request (app :request)))
-          (dotimes [_ 10]
-            (is (= :request (app :request)))))))))
-
+        (testing "nil unmounts the middleware"
+          (reset! calls 0)
+          (let [syntax [[(middleware/create
+                           {:name ::test
+                            :gen (fn [meta _])}) :value]]
+                app ((middleware/compose-middleware syntax :meta {}) identity)]
+            (is (= :request (app :request)))
+            (dotimes [_ 10]
+              (is (= :request (app :request))))))))))
 
 (deftest middleware-router-test
 

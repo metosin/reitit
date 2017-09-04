@@ -7,7 +7,7 @@
             [reitit.impl :as impl]))
 
 #_(defn get-apidocs [coercion spec info]
-  (protocol/get-apidocs coercion spec info))
+    (protocol/get-apidocs coercion spec info))
 
 ;;
 ;; coercer
@@ -62,8 +62,8 @@
             result))))))
 
 #_(defn muuntaja-response-format [request response]
-  (or (-> response :muuntaja/content-type)
-      (some-> request :muuntaja/response :format)))
+    (or (-> response :muuntaja/content-type)
+        (some-> request :muuntaja/response :format)))
 
 (defn response-coercer [coercion model {:keys [extract-response-format]
                                         :or {extract-response-format (constantly nil)}}]
@@ -134,18 +134,19 @@
   "Generator for pluggable request coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :parameters from route meta, otherwise does not mount."
-  (middleware/gen
-    (fn [{:keys [parameters coercion]} _]
-      (if (and coercion parameters)
-        (let [coercers (request-coercers coercion parameters)]
-          (fn [handler]
-            (fn
-              ([request]
-               (let [coerced (coerce-parameters coercers request)]
-                 (handler (impl/fast-assoc request :parameters coerced))))
-              ([request respond raise]
-               (let [coerced (coerce-parameters coercers request)]
-                 (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))))
+  (middleware/create
+    {:name ::coerce-parameters
+     :gen (fn [{:keys [parameters coercion]} _]
+            (if (and coercion parameters)
+              (let [coercers (request-coercers coercion parameters)]
+                (fn [handler]
+                  (fn
+                    ([request]
+                     (let [coerced (coerce-parameters coercers request)]
+                       (handler (impl/fast-assoc request :parameters coerced))))
+                    ([request respond raise]
+                     (let [coerced (coerce-parameters coercers request)]
+                       (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
 
 (defn wrap-coerce-response
   "Pluggable response coercion middleware.
@@ -182,14 +183,15 @@
   "Generator for pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route meta, otherwise does not mount."
-  (middleware/gen
-    (fn [{:keys [responses coercion opts]} _]
-      (if (and coercion responses)
-        (let [coercers (response-coercers coercion responses opts)]
-          (fn [handler]
-            (fn
-              ([request]
-               (coerce-response coercers request (handler request)))
-              ([request respond raise]
-               (handler request #(respond (coerce-response coercers request %)) raise)))))))))
+  (middleware/create
+    {:name ::coerce-response
+     :gen (fn [{:keys [responses coercion opts]} _]
+            (if (and coercion responses)
+              (let [coercers (response-coercers coercion responses opts)]
+                (fn [handler]
+                  (fn
+                    ([request]
+                     (coerce-response coercers request (handler request)))
+                    ([request respond raise]
+                     (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 

@@ -7,7 +7,7 @@ A friendly data-driven router for Clojure(Script).
 * Generic, not tied to HTTP
 * [Route conflict resolution](#route-conflicts)
 * [Pluggable coercion](#parameter-coercion) ([clojure.spec](https://clojure.org/about/spec))
-* Middleware & Interceptors
+* both Middleware & Interceptors
 * Extendable
 * Fast
 
@@ -233,7 +233,7 @@ Route trees should not have multiple routes that match to a single (request) pat
 
 ## Ring
 
-[Ring](https://github.com/ring-clojure/ring)-router adds support for [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`.
+[Ring](https://github.com/ring-clojure/ring)-router adds support for ring [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`. Ring-router is created with `reitit.ring/router` function. It validates that all paths have a `:handler` defined and expands `:middleware` to create accumulated handlers for all request-methods. `reitit.ring/ring-handler` creates an actual ring handler out of a ring-router.
 
 Simple Ring app:
 
@@ -295,6 +295,11 @@ Reverse routing:
 
 ### Middleware
 
+`:middleware` should be a vector of either of the following (expanded via the `reitit.middleware/ExpandMiddleware`:
+
+1. a ring middleware function of `handler -> request -> response`
+2. a vector of middleware function (`handler args -> request -> response`) and it's args - actial middleware is created by applying function with handler and args
+
 Let's define some middleware and a handler:
 
 ```clj
@@ -334,6 +339,50 @@ Middleware is applied correctly:
 (app {:request-method :delete, :uri "/api/admin/db"})
 ; {:status 200, :body [:api :admin :db :delete :handler]}
 ```
+
+### Middleware Records
+
+Besides just being opaque functions, middleware can be presented as first-class data entries, `reitit.middleware/Middleware` records. They are created with `reitit.middleware/create` function and must have a `:name` and either `:wrap` or `:gen` key with the actual middleware function or a [middleware generator function](#compiling-middleware).
+
+When routes are compiled, middleware records are unwrapped into normal middleware functions producing no runtime performance penalty. Thanks to  the `ExpandMiddleware` protocol, plain clojure(script) maps can also be used - they get expanded into middleware records.
+
+The previous middleware re-written as records:
+
+```clj
+(require '[reitit.middleware :as middleware])
+
+(def wrap2
+  (middleware/create
+    {:name ::wrap
+     :description "a nice little mw, takes 1 arg."
+     :wrap wrap}))
+
+(def wrap2-api
+  {:name ::wrap-api
+   :description "a nice little mw, :api as arg"
+   :wrap (fn [handler]
+           (wrap handler :api))})
+```
+
+Or as maps:
+
+```clj
+(require '[reitit.middleware :as middleware])
+
+(def wrap3
+  {:name ::wrap
+   :description "a nice little mw, takes 1 arg."
+   :wrap wrap})
+
+(def wrap3-api
+  {:name ::wrap-api
+   :description "a nice little mw, :api as arg"
+   :wrap (fn [handler]
+           (wrap handler :api))})
+```
+
+
+
 
 ### Async Ring
 
@@ -399,9 +448,9 @@ Reitit ships with pluggable parameter coercion via `reitit.coercion.protocol/Coe
 **NOTE**: to use the spec-coercion, one needs to add the following dependencies manually to the project:
 
 ```clj
-[org.clojure/clojure "1.9.0-alpha17"]
+[org.clojure/clojure "1.9.0-alpha19"]
 [org.clojure/spec.alpha "0.1.123"]
-[metosin/spec-tools "0.3.2"]
+[metosin/spec-tools "0.3.3"]
 ```
 
 ### Ring request and response coercion
@@ -489,11 +538,11 @@ If either request or response coercion fails, an descriptive error is thrown.
 
 The [meta-data extensions](#meta-data-based-extensions) are a easy way to extend the system. Routes meta-data can be trasnformed into any shape (records, functions etc.) in route compilation, enabling easy access at request-time.
 
-Still, we can do better. As we know the exact route interceptor/middleware is linked to, we can pass the (compiled) route information into the interceptor/middleware at creation-time. It can extract and transform relevant data just for it and pass it into the actual request-handler via a closure. We can do all the static local computations forehand, yielding much lighter runtime processing.
+Still, we can do better. As we know the exact route interceptor/middleware is linked to, we can pass the (compiled) route information into the interceptor/middleware at creation-time. It can extract and transform relevant data just for it and pass it into the actual request-handler via a closure. We can do all the static local computations forehand, yielding faster runtime processing.
 
-For middleware, there is a helper `reitit.middleware/gen` for this. It takes a function of `route-meta router-opts => middleware` and returns a special record extending the internal middleware protocols so it can be mounted as normal middleware. The compiled middleware can also decide no to mount itsef byt returning `nil`. Why mount `wrap-enforce-roles` if there are no roles required for that route?
+To do this we use [middleware records](#middleware-records) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Instead of returning the actual middleware function, the middleware record can also decide no to mount itsef byt returning `nil`. Why mount `wrap-enforce-roles` for a route if there are no roles required for it?
 
-To demonstrate the two approaches, below are response coercion middleware written in both ways (found in `reitit.coercion`):
+To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. The actual codes are from `reitit.coercion`:
 
 ### Naive
 
@@ -543,17 +592,20 @@ To demonstrate the two approaches, below are response coercion middleware writte
   "Generator for pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route meta, otherwise does not mount."
-  (middleware/gen
-    (fn [{:keys [responses coercion opts]} _]
-      (if (and coercion responses)
-        (let [coercers (response-coercers coercion responses opts)]
-          (fn [handler]
-            (fn
-              ([request]
-               (coerce-response coercers request (handler request)))
-              ([request respond raise]
-               (handler request #(respond (coerce-response coercers request %)) raise)))))))))
+  (middleware/create
+    {:name ::coerce-response
+     :gen (fn [{:keys [responses coercion opts]} _]
+            (if (and coercion responses)
+              (let [coercers (response-coercers coercion responses opts)]
+                (fn [handler]
+                  (fn
+                    ([request]
+                     (coerce-response coercers request (handler request)))
+                    ([request respond raise]
+                     (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 ```
+
+The `:gen` -version is both much easier to understand but also 2-4x faster on basic perf tests.
 
 ## Merging route-trees
 
@@ -577,7 +629,7 @@ Routers can be configured via options. Options allow things like [`clojure.spec`
 
   | key          | description |
   | -------------|-------------|
-  | `:path`      | Base-path for routes (default `""`)
+  | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:meta`      | Initial expanded route-meta vector (default `[]`)
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)

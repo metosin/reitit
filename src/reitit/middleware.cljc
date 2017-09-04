@@ -1,23 +1,22 @@
 (ns reitit.middleware
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.core :as reitit])
-  #?(:clj
-     (:import (clojure.lang IFn AFn))))
+            [reitit.core :as reitit]))
 
 (defprotocol ExpandMiddleware
   (expand-middleware [this meta opts]))
 
-(defrecord MiddlewareGenerator [f args]
-  IFn
-  (invoke [_]
-    (f nil nil))
-  (invoke [_ meta]
-    (f meta nil))
-  (invoke [_ meta opts]
-    (f meta opts))
-  #?(:clj
-     (applyTo [this args]
-       (AFn/applyToHelper this args))))
+(defrecord Middleware [name wrap create])
+
+(defn create [{:keys [name gen wrap] :as m}]
+  (when-not name
+    (throw
+      (ex-info
+        (str "Middleware must have :name defined " m) m)))
+  (when (and gen wrap)
+    (throw
+      (ex-info
+        (str "Middleware can't both :wrap and :gen defined " m) m)))
+  (map->Middleware m))
 
 (extend-protocol ExpandMiddleware
 
@@ -32,11 +31,24 @@
      :cljs function)
   (expand-middleware [this _ _] this)
 
-  MiddlewareGenerator
+  #?(:clj  clojure.lang.PersistentArrayMap
+     :cljs cljs.core.PersistentArrayMap)
   (expand-middleware [this meta opts]
-    (if-let [mw (this meta opts)]
+    (expand-middleware (create this) meta opts))
+
+  #?(:clj  clojure.lang.PersistentHashMap
+     :cljs cljs.core.PersistentHashMap)
+  (expand-middleware [this meta opts]
+    (expand-middleware (create this) meta opts))
+
+  Middleware
+  (expand-middleware [{:keys [wrap gen]} meta opts]
+    (if gen
+      (if-let [wrap (gen meta opts)]
+        (fn [handler & args]
+          (apply wrap handler args)))
       (fn [handler & args]
-        (apply mw handler args))))
+        (apply wrap handler args))))
 
   nil
   (expand-middleware [_ _ _]))
@@ -55,9 +67,6 @@
        (map #(expand-middleware % meta opts))
        (keep identity)
        (apply comp identity)))
-
-(defn gen [f & args]
-  (->MiddlewareGenerator f args))
 
 (defn compile-handler
   ([route opts]
