@@ -30,7 +30,7 @@
   (expand [_ _]))
 
 (defn walk [data {:keys [path meta routes expand]
-                  :or {path "", meta [], routes [], expand expand}
+                  :or {meta [], routes [], expand expand}
                   :as opts}]
   (letfn
     [(walk-many [p m r]
@@ -99,6 +99,9 @@
   (route-names [this])
   (match-by-path [this path])
   (match-by-name [this name] [this name params]))
+
+(defn router? [x]
+  (satisfies? Router x))
 
 (defrecord Match [template meta result params path])
 (defrecord PartialMatch [template meta result params required])
@@ -242,7 +245,7 @@
 
   | key          | description |
   | -------------|-------------|
-  | `:path`      | Base-path for routes (default `\"\"`)
+  | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:meta`      | Initial route meta (default `{}`)
   | `:expand`    | Function of `arg opts => meta` to expand route arg to route meta-data (default `reitit.core/expand`)
