@@ -147,7 +147,7 @@ Only a partial match. Let's provide the path-parameters:
 
 There is also a exception throwing version:
 
-```
+```clj
 (reitit/match-by-name! router ::user)
 ; ExceptionInfo missing path-params for route /api/user/:id: #{:id}
 ```
@@ -266,7 +266,7 @@ The expanded routes:
 ```clj
 (-> app (ring/get-router) (reitit/routes))
 ; [["/ping"
-;   {:handler #object[user$handler 0x5c312d6f "user$handler@5c312d6f"]}
+;   {:handler #object[...]}
 ;   #Methods{:any #Endpoint{:meta {:handler #object[...]},
 ;                           :handler #object[...],
 ;                           :middleware []}}]]
@@ -307,10 +307,10 @@ Reverse routing:
 
 Middleware can be added with a `:middleware` key, with a vector value of the following:
 
-1. ring middleware function (`handler -> request -> response`)
-2. vector of middleware function (`handler ?args -> request -> response`) and optinally it's args.
+1. ring middleware function `handler -> request -> response`
+2. vector of middleware function `handler ?args -> request -> response` and optinally it's args.
 
-Let's define some middleware and a handler:
+A middleware and a handler:
 
 ```clj
 (defn wrap [handler id]
@@ -357,7 +357,7 @@ Reitit supports first-class data-driven middleware via `reitit.middleware/Middle
 | `:wrap`    | The actual middleware function of `handler args? => request => response`
 | `:gen`     | Middleware compile function, see [compiling middleware](#compiling-middleware).
 
-Behind the scenes, when routes are compiled, all middleware are first expanded into `Middleware` and stored as such in compilation results to be used for api-docs etc. For actual request processing, they are unwrapped into normal middleware functions producing zero runtime performance penalty. Thanks to the `reitit.middleware/IntoMiddleware` protocol, plain clojure(script) maps can also be used.
+When routes are compiled, all middleware are expanded (and optionally compiled) into `Middleware` and stored in compilation results for later use (api-docs etc). For actual request processing, they are unwrapped into normal middleware functions producing zero runtime performance penalty. Middleware expansion is backed by `reitit.middleware/IntoMiddleware` protocol, enabling plain clojure(script) maps to be used.
 
 A Record:
 
@@ -384,13 +384,13 @@ As plain map:
 
 ### Async Ring
 
-All built-in middleware provide both the 2 and 3-arity, so they work with [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) too.
+All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure & ClojureScript, so they work with [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) and [Node.js](https://nodejs.org) too.
 
 ### Meta-data based extensions
 
 `ring-handler` injects the `Match` into a request and it can be extracted at runtime with `reitit.ring/get-match`. This can be used to build dynamic extensions to the system.
 
-A middleware to guard routes based on user roles:
+Example middleware to guard routes based on user roles:
 
 ```clj
 (require '[clojure.set :as set])
@@ -540,7 +540,7 @@ Still, we can do better. As we know the exact route that interceptor/middleware 
 
 To do this we use [middleware records](#middleware-records) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
-To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from `reitit.coercion`:
+To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/coercion.cljc):
 
 ### Naive
 

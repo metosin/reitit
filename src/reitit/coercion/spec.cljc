@@ -23,31 +23,32 @@
 (def default-conforming
   ::default)
 
-(defprotocol Specify
-  (specify [this name]))
+(defprotocol IntoSpec
+  (into-spec [this name]))
 
-(extend-protocol Specify
+(extend-protocol IntoSpec
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
-  (specify [this name]
+  (into-spec [this name]
     (ds/spec name this))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
-  (specify [this name]
+  (into-spec [this name]
     (ds/spec name this))
 
   Spec
-  (specify [this _] this)
+  (into-spec [this _] this)
 
-  Object
-  (specify [this _]
+  #?(:clj  Object
+     :cljs default)
+  (into-spec [this _]
     (st/create-spec {:spec this})))
 
 ;; TODO: proper name!
-(def memoized-specify
-  (memoize #(specify %1 (gensym "spec"))))
+(def memoized-into-spec
+  (memoize #(into-spec %1 (gensym "spec"))))
 
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
@@ -58,7 +59,7 @@
   (get-name [_] name)
 
   (compile [_ model _]
-    (memoized-specify model))
+    (memoized-into-spec model))
 
   (get-apidocs [_ _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
@@ -67,13 +68,13 @@
                          (into
                            (empty parameters)
                            (for [[k v] parameters]
-                             [k memoized-specify])))
+                             [k memoized-into-spec])))
             responses (assoc
                         ::swagger/responses
                         (into
                           (empty responses)
                           (for [[k response] responses]
-                            [k (update response :schema memoized-specify)])))))
+                            [k (update response :schema memoized-into-spec)])))))
 
   (make-open [_ spec] spec)
 
@@ -81,7 +82,7 @@
     (update error :spec (comp str s/form)))
 
   (request-coercer [_ type spec]
-    (let [spec (memoized-specify spec)
+    (let [spec (memoized-into-spec spec)
           {:keys [formats default]} (conforming type)]
       (fn [value format]
         (if-let [conforming (or (get formats format) default)]
@@ -101,9 +102,7 @@
 (def default-options
   {:coerce-response? coerce-response?
    :conforming {:body {:default default-conforming
-                       :formats {"application/json" json-conforming
-                                 "application/msgpack" json-conforming
-                                 "application/x-yaml" json-conforming}}
+                       :formats {"application/json" json-conforming}}
                 :string {:default string-conforming}
                 :response {:default default-conforming}}})
 
