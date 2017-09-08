@@ -28,7 +28,7 @@
            (if handler
              (handler
                (cond-> (impl/fast-assoc request ::match match)
-                       params (impl/fast-assoc :path-params params)))))))
+                       (seq params) (impl/fast-assoc :path-params params)))))))
       ([request respond raise]
        (if-let [match (reitit/match-by-path router (:uri request))]
          (let [method (:request-method request :any)
@@ -39,7 +39,7 @@
            (if handler
              (handler
                (cond-> (impl/fast-assoc request ::match match)
-                       params (impl/fast-assoc :path-params params))
+                       (seq params) (impl/fast-assoc :path-params params))
                respond raise))))))
     {::router router}))
 
