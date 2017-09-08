@@ -89,8 +89,11 @@
 (defn find-names [routes opts]
   (into [] (keep #(-> % second :name)) routes))
 
-(defn compile-route [[p m :as route] {:keys [compile] :as opts}]
+(defn- compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
+
+(defn- compile-routes [routes opts]
+  (into [] (keep #(compile-route % opts) routes)))
 
 (defprotocol Router
   (router-name [this])
@@ -132,7 +135,7 @@
   ([routes]
    (linear-router routes {}))
   ([routes opts]
-   (let [compiled (map #(compile-route % opts) routes)
+   (let [compiled (compile-routes routes opts)
          names (find-names routes opts)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} result]]
@@ -149,7 +152,7 @@
        (router-name [_]
          :linear-router)
        (routes [_]
-         routes)
+         compiled)
        (options [_]
          opts)
        (route-names [_]
@@ -179,7 +182,7 @@
          (str "can't create LookupRouter with wildcard routes: " wilds)
          {:wilds wilds
           :routes routes})))
-   (let [compiled (map #(compile-route % opts) routes)
+   (let [compiled (compile-routes routes opts)
          names (find-names routes opts)
          [data lookup] (reduce
                          (fn [[data lookup] [p {:keys [name] :as meta} result]]
@@ -193,7 +196,7 @@
        (router-name [_]
          :lookup-router)
        (routes [_]
-         routes)
+         compiled)
        (options [_]
          opts)
        (route-names [_]

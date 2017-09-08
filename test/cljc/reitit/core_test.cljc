@@ -9,8 +9,8 @@
 
   (testing "linear-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= [["/api/ipa/:size" {:name ::beer}]]
       (is (= :linear-router (reitit/router-name router)))
+      (is (= [["/api/ipa/:size" {:name ::beer} nil]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
@@ -43,8 +43,8 @@
 
   (testing "lookup-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (= [["/api/ipa/large" {:name ::beer}]]
       (is (= :lookup-router (reitit/router-name router)))
+      (is (= [["/api/ipa/large" {:name ::beer} nil]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
@@ -97,7 +97,8 @@
                   ["/api/pong" {:name ::pong
                                 :path "/api/pong",
                                 :roles #{:admin}}]]
-                 (reitit/routes router))))
+                 (map butlast (reitit/routes router)))))
+
         (testing "route match contains compiled handler"
           (is (= 2 @compile-times))
           (let [{:keys [result]} (reitit/match-by-path router "/api/pong")]
