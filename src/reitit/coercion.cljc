@@ -115,7 +115,7 @@
            match (ring/get-match request)
            parameters (-> match :result method :meta :parameters)
            coercion (-> match :meta :coercion)]
-       (if coercion
+       (if (and coercion parameters)
          (let [coercers (request-coercers coercion parameters)
                coerced (coerce-parameters coercers request)]
            (handler (impl/fast-assoc request :parameters coerced)))
@@ -125,7 +125,7 @@
            match (ring/get-match request)
            parameters (-> match :result method :meta :parameters)
            coercion (-> match :meta :coercion)]
-       (if coercion
+       (if (and coercion parameters)
          (let [coercers (request-coercers coercion parameters)
                coerced (coerce-parameters coercers request)]
            (handler (impl/fast-assoc request :parameters coerced) respond raise)))))))
@@ -161,7 +161,7 @@
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
-       (if coercion
+       (if (and coercion responses)
          (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (coerce-response coercers request (handler request)))
@@ -173,7 +173,7 @@
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
-       (if coercion
+       (if (and coercion responses)
          (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (handler request #(respond (coerce-response coercers request %))))

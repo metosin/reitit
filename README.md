@@ -560,7 +560,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
-       (if coercion
+       (if (and coercion responses)
          (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (coerce-response coercers request (handler request)))
@@ -572,7 +572,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
-       (if coercion
+       (if (and coercion responses)
          (let [coercers (response-coercers coercion responses opts)
                coerced (coerce-response coercers request response)]
            (handler request #(respond (coerce-response coercers request %))))
