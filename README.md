@@ -87,7 +87,7 @@ Creating a router:
 `:mixed-router` is created (both static & wild routes are found):
 
 ```clj
-(reitit/router-type router)
+(reitit/router-name router)
 ; :mixed-router
 ```
 

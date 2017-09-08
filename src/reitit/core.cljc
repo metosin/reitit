@@ -93,7 +93,7 @@
   [p m (if compile (compile route opts))])
 
 (defprotocol Router
-  (router-type [this])
+  (router-name [this])
   (routes [this])
   (options [this])
   (route-names [this])
@@ -146,7 +146,7 @@
          lookup (impl/fast-map lookup)]
      (reify
        Router
-       (router-type [_]
+       (router-name [_]
          :linear-router)
        (routes [_]
          routes)
@@ -190,7 +190,7 @@
          data (impl/fast-map data)
          lookup (impl/fast-map lookup)]
      (reify Router
-       (router-type [_]
+       (router-name [_]
          :lookup-router)
        (routes [_]
          routes)
@@ -220,7 +220,7 @@
          lookup-router (lookup-router lookup opts)
          names (find-names routes opts)]
      (reify Router
-       (router-type [_]
+       (router-name [_]
          :mixed-router)
        (routes [_]
          routes)
