@@ -26,7 +26,8 @@
 
 (s/def ::route
   (s/cat :path ::path
-         :meta ::meta))
+         :meta ::meta
+         :result (s/? any?)))
 
 (s/def ::routes
   (s/or :route ::route
