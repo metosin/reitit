@@ -9,8 +9,8 @@
 
   (testing "linear-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= :linear-router (reitit/router-type router)))
-      (is (= [["/api/ipa/:size" {:name ::beer}]]
+      (is (= :linear-router (reitit/router-name router)))
+      (is (= [["/api/ipa/:size" {:name ::beer} nil]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
@@ -27,6 +27,7 @@
              (reitit/match-by-name router ::beer {:size "large"})))
       (is (= nil (reitit/match-by-name router "ILLEGAL")))
       (is (= [::beer] (reitit/route-names router)))
+
       (testing "name-based routing with missing parameters"
         (is (= (reitit/map->PartialMatch
                  {:template "/api/ipa/:size"
@@ -42,8 +43,8 @@
 
   (testing "lookup-router"
     (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (= :lookup-router (reitit/router-type router)))
-      (is (= [["/api/ipa/large" {:name ::beer}]]
+      (is (= :lookup-router (reitit/router-name router)))
+      (is (= [["/api/ipa/large" {:name ::beer} nil]]
              (reitit/routes router)))
       (is (= true (map? (reitit/options router))))
       (is (= (reitit/map->Match
@@ -60,6 +61,7 @@
              (reitit/match-by-name router ::beer {:size "large"})))
       (is (= nil (reitit/match-by-name router "ILLEGAL")))
       (is (= [::beer] (reitit/route-names router)))
+
       (testing "can't be created with wildcard routes"
         (is (thrown-with-msg?
               ExceptionInfo
@@ -69,6 +71,7 @@
                   ["/api/:version/ping"] {})))))))
 
   (testing "route coercion & compilation"
+
     (testing "custom compile"
       (let [compile-times (atom 0)
             coerce (fn [[path meta] _]
@@ -86,6 +89,7 @@
                        ["/crap"]]]
                      {:coerce coerce
                       :compile compile})]
+
         (testing "routes are coerced"
           (is (= [["/api/ping" {:name ::ping
                                 :path "/api/ping",
@@ -93,13 +97,15 @@
                   ["/api/pong" {:name ::pong
                                 :path "/api/pong",
                                 :roles #{:admin}}]]
-                 (reitit/routes router))))
+                 (map butlast (reitit/routes router)))))
+
         (testing "route match contains compiled handler"
           (is (= 2 @compile-times))
           (let [{:keys [result]} (reitit/match-by-path router "/api/pong")]
             (is result)
             (is (= "/api/pong" (result)))
             (is (= 2 @compile-times))))))
+
     (testing "default compile"
       (let [router (reitit/router ["/ping" (constantly "ok")])]
         (let [{:keys [result]} (reitit/match-by-path router "/ping")]
@@ -109,9 +115,9 @@
   (testing "custom router"
     (let [router (reitit/router ["/ping"] {:router (fn [_ _]
                                                      (reify Router
-                                                       (reitit/router-type [_]
+                                                       (reitit/router-name [_]
                                                          ::custom)))})]
-      (is (= ::custom (reitit/router-type router)))))
+      (is (= ::custom (reitit/router-name router)))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]

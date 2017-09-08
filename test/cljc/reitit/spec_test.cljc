@@ -1,13 +1,13 @@
 (ns reitit.spec-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [clojure.spec.test.alpha :as stest]
+            [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
             [clojure.spec.alpha :as s]
             [reitit.core :as reitit]
             [reitit.spec :as spec])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
-(stest/instrument `reitit/router)
+(stest/instrument `reitit/router `reitit/routes)
 
 (deftest router-spec-test
 
@@ -43,6 +43,9 @@
           ;; vector meta
           ["/api" []
            ["/ipa"]])))
+
+    (testing "routes conform to spec (can't spec protocol functions)"
+      (is (= true (s/valid? ::spec/routes (reitit/routes (reitit/router ["/ping"]))))))
 
     (testing "options"
 

@@ -33,7 +33,7 @@
     (s/def ::y (s/and (s/conformer #(if (string? %) (Long/parseLong %) %) identity) int?))
     (s/def ::k (s/keys :req-un [::x ::y]))
 
-    (let [spec (spec/specify {:x int?, :y int?} ::jeah)
+    (let [spec (spec/into-spec {:x int?, :y int?} ::jeah)
           coercers (#'coercion/request-coercers spec/coercion {:body spec})
           params {:x "1", :y "2"}
           request {:body-params {:x "1", :y "2"}}]
