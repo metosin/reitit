@@ -1,6 +1,6 @@
 (ns reitit.spec-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [clojure.spec.test.alpha :as stest]
+            [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
             [clojure.spec.alpha :as s]
             [reitit.core :as reitit]
             [reitit.spec :as spec])

@@ -4,7 +4,7 @@
             reitit.core-test
             reitit.middleware-test
             reitit.ring-test
-            reitit.spec-test))
+            #_reitit.spec-test))
 
 (enable-console-print!)
 
@@ -12,4 +12,4 @@
            'reitit.core-test
            'reitit.middleware-test
            'reitit.ring-test
-           'reitit.spec-test)
+           #_'reitit.spec-test)
