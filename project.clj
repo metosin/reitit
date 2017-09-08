@@ -20,7 +20,7 @@
                              [lein-cloverage "1.0.9"]
                              [lein-codox "0.10.3"]]
                    :jvm-opts ^:replace ["-server"]
-                   :dependencies [[org.clojure/clojure "1.9.0-alpha19"]
+                   :dependencies [[org.clojure/clojure "1.9.0-alpha20"]
                                   [org.clojure/clojurescript "1.9.660"]
 
                                   [metosin/spec-tools "0.3.3"]

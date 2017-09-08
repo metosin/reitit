@@ -2,12 +2,12 @@
 
 A friendly data-driven router for Clojure(Script).
 
-* Simple data-driven route syntax
-* First-class route meta-data
+* Simple data-driven [route syntax](#route-syntax)
+* First-class [route meta-data](#route-meta-data)
 * Generic, not tied to HTTP
 * [Route conflict resolution](#route-conflicts)
 * [Pluggable coercion](#parameter-coercion) ([clojure.spec](https://clojure.org/about/spec))
-* both Middleware & Interceptors
+* both [Middleware](#middleware) & Interceptors
 * Extendable
 * Fast
 
@@ -446,7 +446,7 @@ Reitit provides pluggable parameter coercion via `reitit.coercion.protocol/Coerc
 **NOTE**: Before Clojure 1.9.0 is shipped, to use the spec-coercion, one needs to add the following dependencies manually to the project:
 
 ```clj
-[org.clojure/clojure "1.9.0-alpha19"]
+[org.clojure/clojure "1.9.0-alpha20"]
 [org.clojure/spec.alpha "0.1.123"]
 [metosin/spec-tools "0.3.3"]
 ```
