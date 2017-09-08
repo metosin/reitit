@@ -10,14 +10,6 @@
 
   (testing "middleware records"
 
-    (testing ":name is mandatory"
-      (is (thrown-with-msg?
-            ExceptionInfo
-            #"Middleware must have :name defined"
-            (middleware/create
-              {:wrap identity
-               :gen (constantly identity)}))))
-
     (testing ":wrap & :gen are exclusive"
       (is (thrown-with-msg?
             ExceptionInfo

@@ -9,10 +9,6 @@
 (defrecord Endpoint [meta handler middleware])
 
 (defn create [{:keys [name gen wrap] :as m}]
-  (when-not name
-    (throw
-      (ex-info
-        (str "Middleware must have :name defined " m) m)))
   (when (and gen wrap)
     (throw
       (ex-info
