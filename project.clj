@@ -26,7 +26,7 @@
                                   [metosin/spec-tools "0.3.3"]
                                   [org.clojure/spec.alpha "0.1.123"]
 
-                                  [expound "0.2.1"]
+                                  [expound "0.3.0"]
                                   [orchestra "2017.08.13"]
 
                                   [criterium "0.4.4"]

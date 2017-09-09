@@ -194,4 +194,3 @@
                      (coerce-response coercers request (handler request)))
                     ([request respond raise]
                      (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
-
