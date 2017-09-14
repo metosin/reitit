@@ -8,5 +8,7 @@ pom.xml.asc
 /.lein-*
 /.nrepl-port
 /.nrepl-history
-/doc
 /gh-pages
+/node_modules
+/package-lock.json
+/_book
