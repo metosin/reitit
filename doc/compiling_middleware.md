@@ -1,10 +1,10 @@
 ## Compiling Middleware
 
-The [meta-data extensions](#meta-data-based-extensions) are a easy way to extend the system. Routes meta-data can be transformed into any shape (records, functions etc.) in route compilation, enabling fast access at request-time.
+The [meta-data extensions](ring.md#meta-data-based-extensions) are a easy way to extend the system. Routes meta-data can be transformed into any shape (records, functions etc.) in route compilation, enabling fast access at request-time.
 
 Still, we can do better. As we know the exact route that interceptor/middleware is linked to, we can pass the (compiled) route information into the interceptor/middleware at creation-time. It can extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding faster runtime processing.
 
-To do this we use [middleware records](#middleware-records) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
+To do this we use [middleware records](ring.md#middleware-records) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
 To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/coercion.cljc):
 

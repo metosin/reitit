@@ -52,4 +52,4 @@ Path-based routing:
 
 On match, route meta-data is returned and can interpreted by the application.
 
-Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:result` in the match. See [configuring routers](#configuring-routers) for details.
+Routers also support meta-data compilation enabling things like fast [Ring](https://github.com/ring-clojure/ring) or [Pedestal](http://pedestal.io/) -style handlers. Compilation results are found under `:result` in the match. See [configuring routers](../configuring_routers.md) for details.
