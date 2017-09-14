@@ -1,0 +1,13 @@
+{
+  "root": "doc",
+  "plugins": ["editlink", "github"],
+  "pluginsConfig": {
+    "editlink": {
+      "base": "https://github.com/metosin/reitit/tree/master/doc",
+      "label": "Edit This Page"
+    },
+    "github": {
+      "url": "https://github.com/metosin/reitit"
+    }
+  }
+}

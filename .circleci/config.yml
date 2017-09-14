@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/build
+    docker:
+      - image: circleci/node:latest
+    branches:
+      only:
+        - master
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-{{ checksum "book.json" }}'
+            - 'v1-'
+      - run:
+          name: "Install GitBook"
+          command: npm install gitbook-cli && ./node_modules/.bin/gitbook install
+      - run:
+          name: "Clone gh-pages"
+          command: git clone --branch gh-pages git@github.com:metosin/reitit.git ~/gh-pages
+      - run:
+          name: Build the documentation
+          command: |
+            ./node_modules/.bin/gitbook build
+            cp -r _book/* ~/gh-pages/
+      - add_ssh_keys:
+          fingerprints:
+            - "2d:eb:be:af:53:33:36:01:40:61:81:9d:76:84:8e:83"
+      - deploy:
+          name: Upload the documentation
+          command: |
+            cd ~/gh-pages
+            git config user.name  "Automatic build"
+            git config user.email "noreply@metosin.fi"
+            git add -A
+            git commit -m "Build book from commit $CIRCLE_SHA1"
+            git push
+      - save_cache:
+          key: 'v1-{{ checksum "book.json" }}'
+          paths:
+            - node_modules
