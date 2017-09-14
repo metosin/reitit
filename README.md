@@ -31,6 +31,15 @@ Also to [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](ht
 
 And some [Yada](https://github.com/juxt/yada) too.
 
+## Development instructions
+
+The documentation is built with [gitbook](https://toolchain.gitbook.com). To preview your changes locally:
+
+```bash
+npm install -g gitbook-cli
+gitbook serve
+```
+
 ## License
 
 Copyright © 2017 [Metosin Oy](http://www.metosin.fi)
