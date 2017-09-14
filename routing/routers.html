@@ -331,8 +331,8 @@
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">reitit/router</span>
     [[<span class="hljs-string">&quot;/api&quot;</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> :<span class="hljs-symbol">:ping</span>]
-      [<span class="hljs-string">&quot;/user/:id&quot;</span> :<span class="hljs-symbol">:user</span>]]]))
+      [<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+      [<span class="hljs-string">&quot;/user/:id&quot;</span> <span class="hljs-symbol">::user</span>]]]))
 </code></pre>
 <p><code>:mixed-router</code> is created (both static &amp; wild routes are found):</p>
 <pre><code class="lang-clj">(<span class="hljs-name">reitit/router-name</span> router)
@@ -359,18 +359,18 @@
 <span class="hljs-comment">;        :params {:id &quot;1&quot;}}</span>
 </code></pre>
 <h3 id="name-based-reverse-routing">Name-based (reverse) routing</h3>
-<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name</span> router :<span class="hljs-symbol">:user</span>)
+<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name</span> router <span class="hljs-symbol">::user</span>)
 <span class="hljs-comment">; #PartialMatch{:template &quot;/api/user/:id&quot;,</span>
 <span class="hljs-comment">;               :meta {:name :user/user},</span>
 <span class="hljs-comment">;               :result nil,</span>
 <span class="hljs-comment">;               :params nil,</span>
 <span class="hljs-comment">;               :required #{:id}}</span>
 
-(<span class="hljs-name">reitit/partial-match?</span> (<span class="hljs-name">reitit/match-by-name</span> router :<span class="hljs-symbol">:user</span>))
+(<span class="hljs-name">reitit/partial-match?</span> (<span class="hljs-name">reitit/match-by-name</span> router <span class="hljs-symbol">::user</span>))
 <span class="hljs-comment">; true</span>
 </code></pre>
 <p>Only a partial match. Let&apos;s provide the path-parameters:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name</span> router :<span class="hljs-symbol">:user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;1&quot;</span>})
+<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name</span> router <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;1&quot;</span>})
 <span class="hljs-comment">; #Match{:template &quot;/api/user/:id&quot;</span>
 <span class="hljs-comment">;        :meta {:name :user/user}</span>
 <span class="hljs-comment">;        :path &quot;/api/user/1&quot;</span>
@@ -378,7 +378,7 @@
 <span class="hljs-comment">;        :params {:id &quot;1&quot;}}</span>
 </code></pre>
 <p>There is also a exception throwing version:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name!</span> router :<span class="hljs-symbol">:user</span>)
+<pre><code class="lang-clj">(<span class="hljs-name">reitit/match-by-name!</span> router <span class="hljs-symbol">::user</span>)
 <span class="hljs-comment">; ExceptionInfo missing path-params for route /api/user/:id: #{:id}</span>
 </code></pre>
 
@@ -424,7 +424,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Routers","level":"1.2.2","depth":2,"next":{"title":"Route metadata","level":"1.2.3","depth":2,"path":"routing/route_metadata.md","ref":"routing/route_metadata.md","articles":[]},"previous":{"title":"Route syntax","level":"1.2.1","depth":2,"path":"routing/route_syntax.md","ref":"routing/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"routing/routers.md","mtime":"2017-09-14T14:20:32.192Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-14T14:21:05.600Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Routers","level":"1.2.2","depth":2,"next":{"title":"Route metadata","level":"1.2.3","depth":2,"path":"routing/route_metadata.md","ref":"routing/route_metadata.md","articles":[]},"previous":{"title":"Route syntax","level":"1.2.1","depth":2,"path":"routing/route_syntax.md","ref":"routing/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"routing/routers.md","mtime":"2017-09-14T14:39:52.093Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-14T14:40:29.150Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

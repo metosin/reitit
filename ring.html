@@ -356,7 +356,7 @@
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> :<span class="hljs-symbol">:ping</span>
+      [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>
                 <span class="hljs-symbol">:get</span> handler
                 <span class="hljs-symbol">:post</span> handler}])))
 
@@ -369,7 +369,7 @@
 <p>Reverse routing:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app
     (<span class="hljs-name">ring/get-router</span>)
-    (<span class="hljs-name">reitit/match-by-name</span> :<span class="hljs-symbol">:ping</span>)
+    (<span class="hljs-name">reitit/match-by-name</span> <span class="hljs-symbol">::ping</span>)
     <span class="hljs-symbol">:path</span>)
 <span class="hljs-comment">; &quot;/ping&quot;</span>
 </code></pre>
@@ -382,9 +382,9 @@
 <p>A middleware and a handler:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap [handler id]
   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
-    (<span class="hljs-name">handler</span> (<span class="hljs-name">update</span> request :<span class="hljs-symbol">:acc</span> (<span class="hljs-name">fnil</span> conj []) id))))
+    (<span class="hljs-name">handler</span> (<span class="hljs-name">update</span> request <span class="hljs-symbol">::acc</span> (<span class="hljs-name">fnil</span> conj []) id))))
 
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [{<span class="hljs-symbol">:keys</span> [:<span class="hljs-symbol">:acc</span>]}]
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::acc</span>]}]
   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> (<span class="hljs-name"><span class="hljs-builtin-name">conj</span></span> acc <span class="hljs-symbol">:handler</span>)})
 </code></pre>
 <p>App with nested middleware:</p>
@@ -435,14 +435,14 @@
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap2
   (<span class="hljs-name">middleware/create</span>
-    {<span class="hljs-symbol">:name</span> :<span class="hljs-symbol">:wrap2</span>
+    {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap2</span>
      <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;a nice little mw, takes 1 arg.&quot;</span>
      <span class="hljs-symbol">:wrap</span> wrap}))
 </code></pre>
 <p>As plain map:</p>
 <pre><code class="lang-clj"><span class="hljs-comment">;; plain map</span>
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap3
-  {<span class="hljs-symbol">:name</span> :<span class="hljs-symbol">:wrap3</span>
+  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap3</span>
    <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;a nice little mw, :api as arg&quot;</span>
    <span class="hljs-symbol">:wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
            (<span class="hljs-name">wrap</span> handler <span class="hljs-symbol">:api</span>))})
@@ -455,8 +455,8 @@
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.set <span class="hljs-symbol">:as</span> set])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-enforce-roles [handler]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [:<span class="hljs-symbol">:roles</span>] <span class="hljs-symbol">:as</span> request}]
-    (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [required (<span class="hljs-name">some-&gt;</span> request (<span class="hljs-name">ring/get-match</span>) <span class="hljs-symbol">:meta</span> :<span class="hljs-symbol">:roles</span>)]
+  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::roles</span>] <span class="hljs-symbol">:as</span> request}]
+    (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [required (<span class="hljs-name">some-&gt;</span> request (<span class="hljs-name">ring/get-match</span>) <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">::roles</span>)]
       (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">seq</span></span> required) (<span class="hljs-name"><span class="hljs-builtin-name">not</span></span> (<span class="hljs-name">set/intersection</span> required roles)))
         {<span class="hljs-symbol">:status</span> <span class="hljs-number">403</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;forbidden&quot;</span>}
         (<span class="hljs-name">handler</span> request)))))
@@ -469,7 +469,7 @@
     (<span class="hljs-name">ring/router</span>
       [[<span class="hljs-string">&quot;/api&quot;</span>
         [<span class="hljs-string">&quot;/ping&quot;</span> handler]
-        [<span class="hljs-string">&quot;/admin&quot;</span> {:<span class="hljs-symbol">:roles</span> #{<span class="hljs-symbol">:admin</span>}}
+        [<span class="hljs-string">&quot;/admin&quot;</span> {<span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}}
          [<span class="hljs-string">&quot;/ping&quot;</span> handler]]]]
       {<span class="hljs-symbol">:meta</span> {<span class="hljs-symbol">:middleware</span> [wrap-enforce-roles]}})))
 </code></pre>
@@ -482,7 +482,7 @@
 <span class="hljs-comment">; {:status 403, :body &quot;forbidden&quot;}</span>
 </code></pre>
 <p>Authorized access to guarded route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>, :<span class="hljs-symbol">:roles</span> #{<span class="hljs-symbol">:admin</span>}})
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>, <span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}})
 <span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
 </code></pre>
 
@@ -528,7 +528,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Ring support","level":"1.3","depth":1,"next":{"title":"Parameter coercion","level":"1.4","depth":1,"path":"parameter_coercion.md","ref":"parameter_coercion.md","articles":[]},"previous":{"title":"Route conflicts","level":"1.2.4","depth":2,"path":"routing/route_conflicts.md","ref":"routing/route_conflicts.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring.md","mtime":"2017-09-14T14:20:32.192Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-14T14:21:05.600Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring support","level":"1.3","depth":1,"next":{"title":"Parameter coercion","level":"1.4","depth":1,"path":"parameter_coercion.md","ref":"parameter_coercion.md","articles":[]},"previous":{"title":"Route conflicts","level":"1.2.4","depth":2,"path":"routing/route_conflicts.md","ref":"routing/route_conflicts.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring.md","mtime":"2017-09-14T14:39:52.093Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-14T14:40:29.150Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
