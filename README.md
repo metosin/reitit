@@ -37,6 +37,7 @@ The documentation is built with [gitbook](https://toolchain.gitbook.com). To pre
 
 ```bash
 npm install -g gitbook-cli
+gitbook install
 gitbook serve
 ```
 
