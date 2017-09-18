@@ -38,7 +38,7 @@
         (is (= true (reitit/partial-match? (reitit/match-by-name router ::beer))))
         (is (thrown-with-msg?
               ExceptionInfo
-              #"^missing path-params for route /api/ipa/:size: \#\{:size\}$"
+              #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
               (reitit/match-by-name! router ::beer))))))
 
   (testing "lookup-router"
@@ -197,7 +197,7 @@
     (testing "throws by default"
       (is (thrown-with-msg?
             ExceptionInfo
-            #"router contains conflicting routes"
+            #"Router contains conflicting routes"
             (reitit/router
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"

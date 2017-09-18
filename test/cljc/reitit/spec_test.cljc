@@ -67,7 +67,7 @@
               (reitit/router
                 ["/api"] opts)))
 
-        {:path ""}
+        {:path "api"}
         {:path nil}
         {:meta nil}
         {:expand nil}

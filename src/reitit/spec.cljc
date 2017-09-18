@@ -8,7 +8,7 @@
 ;; routes
 ;;
 
-(s/def ::path (s/with-gen (s/and string? #(str/starts-with? % "/"))
+(s/def ::path (s/with-gen (s/and string? #(or (str/blank? %) (str/starts-with? % "/")))
                           #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
 (s/def ::arg (s/and any? (complement vector?)))
@@ -18,7 +18,7 @@
 (s/def ::raw-route
   (s/cat :path ::path
          :arg (s/? ::arg)
-         :childs (s/* (s/and ::raw-route))))
+         :childs (s/* (s/and (s/nilable ::raw-route)))))
 
 (s/def ::raw-routes
   (s/or :route ::raw-route

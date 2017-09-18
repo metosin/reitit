@@ -73,14 +73,17 @@
     (seq)
     (into {})))
 
+(defn conflicts-str [conflicts]
+  (apply str "Router contains conflicting routes:\n\n"
+         (mapv
+           (fn [[[path] vals]]
+             (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
+           conflicts)))
+
 (defn throw-on-conflicts! [conflicts]
   (throw
     (ex-info
-      (apply str "router contains conflicting routes:\n\n"
-             (mapv
-               (fn [[[path] vals]]
-                 (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
-               conflicts))
+      (conflicts-str conflicts)
       {:conflicts conflicts})))
 
 (defn name-lookup [[_ {:keys [name]}] opts]

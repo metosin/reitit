@@ -155,7 +155,7 @@
           missing (clojure.set/difference required defined)]
       (throw
         (ex-info
-          (str "missing path-params for route " template ": " missing)
+          (str "missing path-params for route " template " -> " missing)
           {:params params, :required required})))))
 
 (defn fast-assoc
