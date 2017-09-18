@@ -1,16 +1,133 @@
-# reitit
+# Introduction
 
-[reitit](https://github.com/metosin/reitit) is a friendly data-driven router for Clojure(Script).
+[Reitit](https://github.com/metosin/reitit) is a small Clojure(Script) library for data-driven routing.
 
 * Simple data-driven [route syntax](./routing/route_syntax.md)
 * First-class [route meta-data](./routing/route_metadata.md)
-* Generic, not tied to HTTP
+* Bi-directional-routing
 * [Route conflict resolution](./routing/route_conflicts.md)
 * [Pluggable coercion](./parameter-coercion.md) ([clojure.spec](https://clojure.org/about/spec))
-* both [Middleware](./ring.md#middleware) & Interceptors
+* Both [Middleware](./ring.md#middleware) & Interceptors
 * Extendable
 * Fast
 
-## Latest version
+To use Reitit, add the following dependecy to your project:
 
-[![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
+```clj
+[metosin/reitit "0.1.0-SNAPSHOT"]
+```
+
+# Examples
+
+## Simple router
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/api/ping" ::ping]
+     ["/api/orders/:id" ::order-by-id]]))
+```
+
+Routing:
+
+```clj
+(r/match-by-path router "/api/ipa")
+; nil
+
+(r/match-by-path router "/api/ping")
+; #Match{:template "/api/ping"
+;        :meta {:name ::ping}
+;        :result nil
+;        :params {}
+;        :path "/api/ping"}
+
+(r/match-by-path router "/api/orders/1")
+; #Match{:template "/api/orders/:id"
+;        :meta {:name ::order-by-id}
+;        :result nil
+;        :params {:id "1"}
+;        :path "/api/orders/1"}
+```
+
+Reverse-routing:
+
+```clj
+(r/match-by-name router ::ipa)
+; nil
+
+(r/match-by-name router ::ping)
+; #Match{:template "/api/ping"
+;        :meta {:name ::ping}
+;        :result nil
+;        :params {}
+;        :path "/api/ping"}
+
+(r/match-by-name router ::order-by-id)
+; #PartialMatch{:template "/api/orders/:id"
+;               :meta {:name :user/order-by-id}
+;               :result nil
+;               :params nil
+;               :required #{:id}}
+
+(r/partial-match? (r/match-by-name router ::order-by-id))
+; true
+
+(r/match-by-name router ::order-by-id {:id 2})
+; #Match{:template "/api/orders/:id",
+;        :meta {:name ::order-by-id},
+;        :result nil,
+;        :params {:id 2},
+;        :path "/api/orders/2"}
+```
+
+## Ring-router
+
+Ring-router adds support for `:handler` functions, `:middleware` and routing based on `:request-method`. It also supports pluggable parameter coercion (`clojure.spec`), data-driven middleware, route and middleware compilation, dynamic extensions and more.
+
+```clj
+(require '[reitit.ring :as ring])
+
+(def handler [_]
+  {:status 200, :body "ok"})
+
+(defn wrap [handler id]
+  (fn [request]
+    (update (handler request) :wrap (fnil conj '()) id)))
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[wrap :api]]}
+       ["/ping" {:get handler
+                 :name ::ping}]
+       ["/admin" {:middleware [[wrap :admin]]}
+        ["/users" {:get handler
+                   :post handler}]]])))
+```
+
+Routing:
+
+```clj
+(app {:request-method :get, :uri "/api/admin/users"})
+; {:status 200, :body "ok", :wrap (:api :admin}
+
+(app {:request-method :put, :uri "/api/admin/users"})
+; nil
+```
+
+Reverse-routing:
+
+```clj
+(require '[reitit.core :as r])
+
+(-> app (ring/get-router) (r/match-by-name ::ping))
+; #Match{:template "/api/ping"
+;        :meta {:middleware [[#object[user$wrap] :api]]
+;               :get {:handler #object[user$handler]}
+;        :name ::ping}
+;        :result #Methods{...}
+;        :params nil
+;        :path "/api/ping"}
+```

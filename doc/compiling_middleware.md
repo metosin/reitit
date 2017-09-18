@@ -1,4 +1,4 @@
-## Compiling Middleware
+# Compiling Middleware
 
 The [meta-data extensions](ring.md#meta-data-based-extensions) are a easy way to extend the system. Routes meta-data can be transformed into any shape (records, functions etc.) in route compilation, enabling fast access at request-time.
 
@@ -8,7 +8,7 @@ To do this we use [middleware records](ring.md#middleware-records) `:gen` hook i
 
 To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/coercion.cljc):
 
-### Naive
+## Naive
 
 * Extracts the compiled route information on every request.
 
@@ -45,7 +45,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
          (handler request respond raise))))))
 ```
 
-### Compiled
+## Compiled
 
 * Route information is provided via a closure
 * Pre-compiled coercers
