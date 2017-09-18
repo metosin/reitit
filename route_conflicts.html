@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Configuring routers · GitBook</title>
+        <title>Route conflicts · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,8 +57,8 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
+    <link rel="next" href="route_validation.html" />
     
-    <link rel="prev" href="route_validation.html" />
     
 
     </head>
@@ -211,7 +211,7 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.3.1" data-path="route_conflicts.html">
+        <li class="chapter active" data-level="1.3.1" data-path="route_conflicts.html">
             
                 <a href="route_conflicts.html">
             
@@ -237,7 +237,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.3.3" data-path="configuring_routers.html">
+        <li class="chapter " data-level="1.3.3" data-path="configuring_routers.html">
             
                 <a href="configuring_routers.html">
             
@@ -382,7 +382,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Configuring routers</a>
+        <a href="." >Route conflicts</a>
     </h1>
 </div>
 
@@ -397,50 +397,51 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h2 id="configuring-routers">Configuring Routers</h2>
-<p>Routers can be configured via options. Options allow things like <a href="https://clojure.org/about/spec" target="_blank"><code>clojure.spec</code></a> validation for meta-data and fast, compiled handlers. The following options are available for the <code>reitit.core/router</code>:</p>
-<table>
-<thead>
-<tr>
-<th>key</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>:path</code></td>
-<td>Base-path for routes</td>
-</tr>
-<tr>
-<td><code>:routes</code></td>
-<td>Initial resolved routes (default <code>[]</code>)</td>
-</tr>
-<tr>
-<td><code>:meta</code></td>
-<td>Initial expanded route-meta vector (default <code>[]</code>)</td>
-</tr>
-<tr>
-<td><code>:expand</code></td>
-<td>Function of <code>arg opts =&gt; meta</code> to expand route arg to route meta-data (default <code>reitit.core/expand</code>)</td>
-</tr>
-<tr>
-<td><code>:coerce</code></td>
-<td>Function of <code>route opts =&gt; route</code> to coerce resolved route, can throw or return <code>nil</code></td>
-</tr>
-<tr>
-<td><code>:compile</code></td>
-<td>Function of <code>route opts =&gt; result</code> to compile a route handler</td>
-</tr>
-<tr>
-<td><code>:conflicts</code></td>
-<td>Function of <code>{route #{route}} =&gt; side-effect</code> to handle conflicting routes (default <code>reitit.core/throw-on-conflicts!</code>)</td>
-</tr>
-<tr>
-<td><code>:router</code></td>
-<td>Function of <code>routes opts =&gt; router</code> to override the actual router implementation</td>
-</tr>
-</tbody>
-</table>
+                                <h1 id="route-conflicts">Route conflicts</h1>
+<p>Many routing libraries allow single path lookup could match multiple routes. Usually, first match is used. This is not good, especially if route tree is merged from multiple sources - routes might regress to be unreachable without a warning.</p>
+<p>Reitit resolves this by running explicit conflicit resolution when a <code>Router</code> is created. Conflicting routes are passed into a <code>:conflicts</code> callback. Default implementation throws <code>ex-info</code> with a descriptive message.</p>
+<p>Examples routes with conflicts:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> reitit])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [[<span class="hljs-string">&quot;/ping&quot;</span>]
+   [<span class="hljs-string">&quot;/:user-id/orders&quot;</span>]
+   [<span class="hljs-string">&quot;/bulk/:bulk-id&quot;</span>]
+   [<span class="hljs-string">&quot;/public/*path&quot;</span>]
+   [<span class="hljs-string">&quot;/:version/status&quot;</span>]])
+</code></pre>
+<p>By default, <code>ExceptionInfo</code> is thrown:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">reitit/router</span> routes)
+<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting routes:</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /:user-id/orders</span>
+<span class="hljs-comment">; -&gt; /public/*path</span>
+<span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /bulk/:bulk-id</span>
+<span class="hljs-comment">; -&gt; /:version/status</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /public/*path</span>
+<span class="hljs-comment">; -&gt; /:version/status</span>
+<span class="hljs-comment">;</span>
+</code></pre>
+<p>Just logging the conflicts:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">reitit/router</span>
+  routes
+  {<span class="hljs-symbol">:conflicts</span> (<span class="hljs-name"><span class="hljs-builtin-name">comp</span></span> println reitit/conflicts-str)})
+<span class="hljs-comment">; Router contains conflicting routes:</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /:user-id/orders</span>
+<span class="hljs-comment">; -&gt; /public/*path</span>
+<span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /bulk/:bulk-id</span>
+<span class="hljs-comment">; -&gt; /:version/status</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;    /public/*path</span>
+<span class="hljs-comment">; -&gt; /:version/status</span>
+<span class="hljs-comment">;</span>
+</code></pre>
 
                                 
                                 </section>
@@ -468,10 +469,10 @@
 
             
                 
-                <a href="route_validation.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Route Validation">
-                    <i class="fa fa-angle-left"></i>
-                </a>
                 
+                <a href="route_validation.html" class="navigation navigation-next navigation-unique" aria-label="Next page: Route Validation">
+                    <i class="fa fa-angle-right"></i>
+                </a>
                 
             
         
@@ -480,7 +481,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Configuring routers","level":"1.3.3","depth":2,"next":{"title":"Ring","level":"1.4","depth":1,"ref":"","articles":[{"title":"Ring-router","level":"1.4.1","depth":2,"path":"ring.md","ref":"ring.md","articles":[]},{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"dynamic_extensions.md","ref":"dynamic_extensions.md","articles":[]},{"title":"Parameter coercion","level":"1.4.3","depth":2,"path":"parameter_coercion.md","ref":"parameter_coercion.md","articles":[]},{"title":"Compiling middleware","level":"1.4.4","depth":2,"path":"compiling_middleware.md","ref":"compiling_middleware.md","articles":[]}]},"previous":{"title":"Route Validation","level":"1.3.2","depth":2,"path":"route_validation.md","ref":"route_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"configuring_routers.md","mtime":"2017-09-18T05:30:25.732Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-18T05:30:51.447Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route conflicts","level":"1.3.1","depth":2,"next":{"title":"Route Validation","level":"1.3.2","depth":2,"path":"route_validation.md","ref":"route_validation.md","articles":[]},"previous":{"title":"Advanced","level":"1.3","depth":1,"ref":"","articles":[{"title":"Route conflicts","level":"1.3.1","depth":2,"path":"route_conflicts.md","ref":"route_conflicts.md","articles":[]},{"title":"Route Validation","level":"1.3.2","depth":2,"path":"route_validation.md","ref":"route_validation.md","articles":[]},{"title":"Configuring routers","level":"1.3.3","depth":2,"path":"configuring_routers.md","ref":"configuring_routers.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"route_conflicts.md","mtime":"2017-09-18T05:30:25.732Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-18T05:30:51.447Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

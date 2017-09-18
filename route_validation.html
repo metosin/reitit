@@ -1,0 +1,644 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Route Validation · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="configuring_routers.html" />
+    
+    
+    <link rel="prev" href="route_conflicts.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" >
+            
+                <span>
+            
+                    
+                    Basics
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="basics.html">
+            
+                <a href="basics.html#route-syntax">
+            
+                    
+                    Route syntax
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="basics.html">
+            
+                <a href="basics.html#router">
+            
+                    
+                    Router
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="basics.html">
+            
+                <a href="basics.html#path-based-routing">
+            
+                    
+                    Path-based Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="basics.html">
+            
+                <a href="basics.html#name-based-routing">
+            
+                    
+                    Name-based Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="basics.html">
+            
+                <a href="basics.html#route-data">
+            
+                    
+                    Route data
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.6" data-path="basics.html">
+            
+                <a href="basics.html#different-routers">
+            
+                    
+                    Different Routers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" >
+            
+                <span>
+            
+                    
+                    Advanced
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="route_conflicts.html">
+            
+                <a href="route_conflicts.html">
+            
+                    
+                    Route conflicts
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.3.2" data-path="route_validation.html">
+            
+                <a href="route_validation.html">
+            
+                    
+                    Route Validation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="configuring_routers.html">
+            
+                <a href="configuring_routers.html">
+            
+                    
+                    Configuring routers
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" >
+            
+                <span>
+            
+                    
+                    Ring
+            
+                </span>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="ring.html">
+            
+                <a href="ring.html">
+            
+                    
+                    Ring-router
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="dynamic_extensions.html">
+            
+                <a href="dynamic_extensions.html">
+            
+                    
+                    Dynamic extensions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="parameter_coercion.html">
+            
+                <a href="parameter_coercion.html">
+            
+                    
+                    Parameter coercion
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="compiling_middleware.html">
+            
+                <a href="compiling_middleware.html">
+            
+                    
+                    Compiling middleware
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" >
+            
+                <span>
+            
+                    
+                    TODO: Swagger & OpenAPI
+            
+                </span>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" >
+            
+                <span>
+            
+                    
+                    TODO: Interceptors
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Route Validation</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="route-validation">Route validation</h1>
+<p>Namespace <code>reitit.spec</code> contains <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> definitions for raw-routes, routes, router and router options.</p>
+<p><strong>NOTE:</strong> Use of specs requires to use one of the following:</p>
+<ul>
+<li><code>[org.clojure/clojurescript &quot;1.9.660&quot;]</code></li>
+<li><code>[org.clojure/clojure &quot;1.9.0-alpha19&quot;]</code></li>
+<li><code>[clojure-future-spec &quot;1.9.0-alpha17&quot;]</code> (Clojure 1.8)</li>
+</ul>
+<h2 id="at-runtime">At runtime</h2>
+<p>If route trees are generated at runtime (e.g. from external source like the database), one can use directly the <code>clojure.spec</code> functions.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
+(<span class="hljs-name">require</span> &apos;[reitit.spec <span class="hljs-symbol">:as</span> spec])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes-from-db
+  [<span class="hljs-string">&quot;tenant1&quot;</span> <span class="hljs-symbol">::tenant1</span>])
+
+(<span class="hljs-name">s/valid?</span> <span class="hljs-symbol">::spec/raw-routes</span> routes-from-db)
+<span class="hljs-comment">; false</span>
+
+(<span class="hljs-name">s/explain</span> <span class="hljs-symbol">::spec/raw-routes</span> routes-from-db)
+<span class="hljs-comment">; In: [0] val: &quot;tenant1&quot; fails spec: :reitit.spec/path at: [:route :path] predicate: (or (blank? %) (starts-with? % &quot;/&quot;))</span>
+<span class="hljs-comment">; In: [0] val: &quot;tenant1&quot; fails spec: :reitit.spec/raw-route at: [:routes] predicate: (cat :path :reitit.spec/path :arg (? :reitit.spec/arg) :childs (* (and (nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">; In: [1] val: :user/tenant1 fails spec: :reitit.spec/raw-route at: [:routes] predicate: (cat :path :reitit.spec/path :arg (? :reitit.spec/arg) :childs (* (and (nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">; :clojure.spec.alpha/spec  :reitit.spec/raw-routes</span>
+<span class="hljs-comment">; :clojure.spec.alpha/value  [&quot;tenant1&quot; :user/tenant1]</span>
+</code></pre>
+<h2 id="at-development-time">At development time</h2>
+<p><code>reitit.core/router</code> can be instrumented and use something like <a href="https://github.com/bhb/expound" target="_blank">expound</a> to pretty-print the spec problems.</p>
+<p>First add a <code>:dev</code> dependency to:</p>
+<pre><code class="lang-clj">[expound <span class="hljs-string">&quot;0.3.0&quot;</span>]
+</code></pre>
+<p>Some bootstrapping:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.test.alpha <span class="hljs-symbol">:as</span> stest])
+(<span class="hljs-name">require</span> &apos;[expound.alpha <span class="hljs-symbol">:as</span> expound])
+(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
+(<span class="hljs-name">require</span> &apos;[reitit.spec])
+
+(<span class="hljs-name">stest/instrument</span> `reitit/router)
+(<span class="hljs-name"><span class="hljs-builtin-name">set!</span></span> s/*explain-out* expound/printer)
+</code></pre>
+<p>And we are ready to go:</p>
+<pre><code class="lang-clj">
+(<span class="hljs-name">reitit/router</span>
+  [<span class="hljs-string">&quot;/api&quot;</span>
+   [<span class="hljs-string">&quot;/public&quot;</span>
+    [<span class="hljs-string">&quot;/ping&quot;</span>]
+    [<span class="hljs-string">&quot;pong&quot;</span>]]])
+
+<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Call to #&apos;reitit.core/router did not conform to spec:</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; -- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; Function arguments</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; ([&quot;/api&quot; ...])</span>
+<span class="hljs-comment">;   ^^^^^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;     should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; (clojure.spec.alpha/cat</span>
+<span class="hljs-comment">;   :path</span>
+<span class="hljs-comment">;   :reitit.spec/path</span>
+<span class="hljs-comment">;   :arg</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/? :reitit.spec/arg)</span>
+<span class="hljs-comment">;   :childs</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/*</span>
+<span class="hljs-comment">;     (clojure.spec.alpha/and</span>
+<span class="hljs-comment">;       (clojure.spec.alpha/nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; or</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; (clojure.spec.alpha/cat</span>
+<span class="hljs-comment">;   :path</span>
+<span class="hljs-comment">;   :reitit.spec/path</span>
+<span class="hljs-comment">;   :arg</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/? :reitit.spec/arg)</span>
+<span class="hljs-comment">;   :childs</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/*</span>
+<span class="hljs-comment">;     (clojure.spec.alpha/and</span>
+<span class="hljs-comment">;       (clojure.spec.alpha/nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; -- Relevant specs -------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; :reitit.spec/raw-route:</span>
+<span class="hljs-comment">; (clojure.spec.alpha/cat</span>
+<span class="hljs-comment">;   :path</span>
+<span class="hljs-comment">;   :reitit.spec/path</span>
+<span class="hljs-comment">;   :arg</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/? :reitit.spec/arg)</span>
+<span class="hljs-comment">;   :childs</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/*</span>
+<span class="hljs-comment">;     (clojure.spec.alpha/and</span>
+<span class="hljs-comment">;       (clojure.spec.alpha/nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">; :reitit.spec/raw-routes:</span>
+<span class="hljs-comment">; (clojure.spec.alpha/or</span>
+<span class="hljs-comment">;   :route</span>
+<span class="hljs-comment">;   :reitit.spec/raw-route</span>
+<span class="hljs-comment">;   :routes</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/coll-of :reitit.spec/raw-route :into []))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; -- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; Function arguments</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; ([... [... ... [&quot;pong&quot;]]])</span>
+<span class="hljs-comment">;                 ^^^^^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;     should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; (fn</span>
+<span class="hljs-comment">;   [%]</span>
+<span class="hljs-comment">;   (or</span>
+<span class="hljs-comment">;     (clojure.string/blank? %)</span>
+<span class="hljs-comment">;     (clojure.string/starts-with? % &quot;/&quot;)))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; or</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; (fn</span>
+<span class="hljs-comment">;   [%]</span>
+<span class="hljs-comment">;   (or</span>
+<span class="hljs-comment">;     (clojure.string/blank? %)</span>
+<span class="hljs-comment">;     (clojure.string/starts-with? % &quot;/&quot;)))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; -- Relevant specs -------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; :reitit.spec/path:</span>
+<span class="hljs-comment">; (clojure.spec.alpha/and</span>
+<span class="hljs-comment">;   clojure.core/string?</span>
+<span class="hljs-comment">;   (clojure.core/fn</span>
+<span class="hljs-comment">;     [%]</span>
+<span class="hljs-comment">;     (clojure.core/or</span>
+<span class="hljs-comment">;       (clojure.string/blank? %)</span>
+<span class="hljs-comment">;       (clojure.string/starts-with? % &quot;/&quot;))))</span>
+<span class="hljs-comment">; :reitit.spec/raw-route:</span>
+<span class="hljs-comment">; (clojure.spec.alpha/cat</span>
+<span class="hljs-comment">;   :path</span>
+<span class="hljs-comment">;   :reitit.spec/path</span>
+<span class="hljs-comment">;   :arg</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/? :reitit.spec/arg)</span>
+<span class="hljs-comment">;   :childs</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/*</span>
+<span class="hljs-comment">;     (clojure.spec.alpha/and</span>
+<span class="hljs-comment">;       (clojure.spec.alpha/nilable :reitit.spec/raw-route))))</span>
+<span class="hljs-comment">; :reitit.spec/raw-routes:</span>
+<span class="hljs-comment">; (clojure.spec.alpha/or</span>
+<span class="hljs-comment">;   :route</span>
+<span class="hljs-comment">;   :reitit.spec/raw-route</span>
+<span class="hljs-comment">;   :routes</span>
+<span class="hljs-comment">;   (clojure.spec.alpha/coll-of :reitit.spec/raw-route :into []))</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; -------------------------</span>
+<span class="hljs-comment">; Detected 2 errors</span>
+</code></pre>
+<h1 id="validating-route-data">Validating route data</h1>
+<p><em>TODO</em></p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="route_conflicts.html" class="navigation navigation-prev " aria-label="Previous page: Route conflicts">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="configuring_routers.html" class="navigation navigation-next " aria-label="Next page: Configuring routers">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Route Validation","level":"1.3.2","depth":2,"next":{"title":"Configuring routers","level":"1.3.3","depth":2,"path":"configuring_routers.md","ref":"configuring_routers.md","articles":[]},"previous":{"title":"Route conflicts","level":"1.3.1","depth":2,"path":"route_conflicts.md","ref":"route_conflicts.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"route_validation.md","mtime":"2017-09-18T05:30:25.732Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-09-18T05:30:51.447Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
