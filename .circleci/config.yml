@@ -34,7 +34,7 @@ jobs:
             git config user.name  "Automatic build"
             git config user.email "noreply@metosin.fi"
             git add -A
-            git commit -m "Build book from commit $CIRCLE_SHA1"
+            git commit -m "Build book from commit $CIRCLE_SHA1 [skip ci]"
             git push
       - save_cache:
           key: 'v1-{{ checksum "book.json" }}'
