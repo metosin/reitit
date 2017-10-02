@@ -70,9 +70,9 @@
                 (r/resolve-routes
                   ["/api/:version/ping"] {})))))))
 
-  (testing "fast-router"
+  (testing "single-static-path-router"
     (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (= :fast-router (r/router-name router)))
+      (is (= :single-static-path-router (r/router-name router)))
       (is (= [["/api/ipa/large" {:name ::beer} nil]]
              (r/routes router)))
       (is (= true (map? (r/options router))))
@@ -94,16 +94,16 @@
       (testing "can't be created with wildcard routes"
         (is (thrown-with-msg?
               ExceptionInfo
-              #":fast-router requires exactly 1 static route"
-              (r/fast-router
+              #":single-static-path-router requires exactly 1 static route"
+              (r/single-static-path-router
                 (r/resolve-routes
                   ["/api/:version/ping"] {})))))
 
       (testing "can't be created with multiple routes"
         (is (thrown-with-msg?
               ExceptionInfo
-              #":fast-router requires exactly 1 static route"
-              (r/fast-router
+              #":single-static-path-router requires exactly 1 static route"
+              (r/single-static-path-router
                 (r/resolve-routes
                   [["/ping"]
                    ["/pong"]] {})))))))

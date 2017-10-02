@@ -213,16 +213,16 @@
          (if-let [match (impl/fast-get lookup name)]
            (match params)))))))
 
-(defn fast-router
-  "Creates a super-fast router of 1 static route(s) and optional
+(defn single-static-path-router
+  "Creates a fast router of 1 static route(s) and optional
   expanded options. See [[router]] for available options"
   ([routes]
-   (fast-router routes {}))
+   (single-static-path-router routes {}))
   ([routes opts]
    (when (or (not= (count routes) 1) (some impl/wild-route? routes))
      (throw
        (ex-info
-         (str ":fast-router requires exactly 1 static route: " routes)
+         (str ":single-static-path-router requires exactly 1 static route: " routes)
          {:routes routes})))
    (let [[n :as names] (find-names routes opts)
          [[p meta result] :as compiled] (compile-routes routes opts)
@@ -230,7 +230,7 @@
          match (->Match p meta result {} p)]
      (reify Router
        (router-name [_]
-         :fast-router)
+         :single-static-path-router)
        (routes [_]
          compiled)
        (options [_]
@@ -248,7 +248,7 @@
            (impl/fast-assoc match :params params)))))))
 
 (defn mixed-router
-  "Creates two routers: [[lookup-router]] or [[fast-ruoter]] for
+  "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
   static routes and [[linear-router]] for wildcard routes. All
   routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
@@ -256,7 +256,7 @@
    (mixed-router routes {}))
   ([routes opts]
    (let [{linear true, lookup false} (group-by impl/wild-route? routes)
-         ->static-router (if (= 1 (count lookup)) fast-router lookup-router)
+         ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (linear-router linear opts)
          static-router (->static-router lookup opts)
          names (find-names routes opts)]
@@ -304,7 +304,7 @@
          all-wilds? (every? impl/wild-route? routes)
          router (cond
                   router router
-                  (and (= 1 (count routes)) (not wilds?)) fast-router
+                  (and (= 1 (count routes)) (not wilds?)) single-static-path-router
                   (not wilds?) lookup-router
                   all-wilds? linear-router
                   (not conflicting) mixed-router
