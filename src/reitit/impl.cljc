@@ -119,8 +119,7 @@
             (map->Route $))
       (map->Route {:path path
                    :meta meta
-                   :matcher #?(:clj #(if (.equals path %) {})
-                               :cljs #(if (= path %)))
+                   :matcher #(if (#?(:clj .equals, :cljs =) path %) {})
                    :result result}))))
 
 (defn segments [path]

@@ -69,7 +69,6 @@
               (r/lookup-router
                 (r/resolve-routes
                   ["/api/:version/ping"] {})))))))
-                  ["/api/:version/ping"] {})))))))
 
   (testing "route coercion & compilation"
 
