@@ -3,7 +3,7 @@
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
             [clojure.set :as set]
-            [reitit.core :as reitit])
+            [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -98,11 +98,11 @@
 
       (testing "only top-level route names are matched"
         (is (= [::all ::get ::users]
-               (reitit/route-names router))))
+               (r/route-names router))))
 
       (testing "all named routes can be matched"
-        (doseq [name (reitit/route-names router)]
-          (is (= name (-> (reitit/match-by-name router name) :meta :name))))))))
+        (doseq [name (r/route-names router)]
+          (is (= name (-> (r/match-by-name router name) :meta :name))))))))
 
 (defn wrap-enforce-roles [handler]
   (fn [{:keys [::roles] :as request}]

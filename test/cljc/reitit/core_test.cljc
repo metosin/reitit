@@ -1,6 +1,6 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as reitit #?@(:cljs [:refer [Match Router]])])
+            [reitit.core :as r #?@(:cljs [:refer [Match Router]])])
   #?(:clj
      (:import (reitit.core Match Router)
               (clojure.lang ExceptionInfo))))
@@ -8,66 +8,67 @@
 (deftest reitit-test
 
   (testing "linear-router"
-    (let [router (reitit/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= :linear-router (reitit/router-name router)))
+    (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]])]
+      (is (= :linear-router (r/router-name router)))
       (is (= [["/api/ipa/:size" {:name ::beer} nil]]
-             (reitit/routes router)))
-      (is (= true (map? (reitit/options router))))
-      (is (= (reitit/map->Match
+             (r/routes router)))
+      (is (= true (map? (r/options router))))
+      (is (= (r/map->Match
                {:template "/api/ipa/:size"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/match-by-path router "/api/ipa/large")))
-      (is (= (reitit/map->Match
+             (r/match-by-path router "/api/ipa/large")))
+      (is (= (r/map->Match
                {:template "/api/ipa/:size"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/match-by-name router ::beer {:size "large"})))
-      (is (= nil (reitit/match-by-name router "ILLEGAL")))
-      (is (= [::beer] (reitit/route-names router)))
+             (r/match-by-name router ::beer {:size "large"})))
+      (is (= nil (r/match-by-name router "ILLEGAL")))
+      (is (= [::beer] (r/route-names router)))
 
       (testing "name-based routing with missing parameters"
-        (is (= (reitit/map->PartialMatch
+        (is (= (r/map->PartialMatch
                  {:template "/api/ipa/:size"
                   :meta {:name ::beer}
                   :required #{:size}
                   :params nil})
-               (reitit/match-by-name router ::beer)))
-        (is (= true (reitit/partial-match? (reitit/match-by-name router ::beer))))
+               (r/match-by-name router ::beer)))
+        (is (= true (r/partial-match? (r/match-by-name router ::beer))))
         (is (thrown-with-msg?
               ExceptionInfo
               #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
-              (reitit/match-by-name! router ::beer))))))
+              (r/match-by-name! router ::beer))))))
 
   (testing "lookup-router"
-    (let [router (reitit/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (= :lookup-router (reitit/router-name router)))
+    (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]] {:router r/lookup-router})]
+      (is (= :lookup-router (r/router-name router)))
       (is (= [["/api/ipa/large" {:name ::beer} nil]]
-             (reitit/routes router)))
-      (is (= true (map? (reitit/options router))))
-      (is (= (reitit/map->Match
+             (r/routes router)))
+      (is (= true (map? (r/options router))))
+      (is (= (r/map->Match
                {:template "/api/ipa/large"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {}})
-             (reitit/match-by-path router "/api/ipa/large")))
-      (is (= (reitit/map->Match
+             (r/match-by-path router "/api/ipa/large")))
+      (is (= (r/map->Match
                {:template "/api/ipa/large"
                 :meta {:name ::beer}
                 :path "/api/ipa/large"
                 :params {:size "large"}})
-             (reitit/match-by-name router ::beer {:size "large"})))
-      (is (= nil (reitit/match-by-name router "ILLEGAL")))
-      (is (= [::beer] (reitit/route-names router)))
+             (r/match-by-name router ::beer {:size "large"})))
+      (is (= nil (r/match-by-name router "ILLEGAL")))
+      (is (= [::beer] (r/route-names router)))
 
       (testing "can't be created with wildcard routes"
         (is (thrown-with-msg?
               ExceptionInfo
-              #"can't create LookupRouter with wildcard routes"
-              (reitit/lookup-router
-                (reitit/resolve-routes
+              #"can't create :lookup-router with wildcard routes"
+              (r/lookup-router
+                (r/resolve-routes
+                  ["/api/:version/ping"] {})))))))
                   ["/api/:version/ping"] {})))))))
 
   (testing "route coercion & compilation"
@@ -80,7 +81,7 @@
             compile (fn [[path meta] _]
                       (swap! compile-times inc)
                       (constantly path))
-            router (reitit/router
+            router (r/router
                      ["/api" {:roles #{:admin}}
                       ["/ping" ::ping]
                       ["/pong" ::pong]
@@ -97,27 +98,27 @@
                   ["/api/pong" {:name ::pong
                                 :path "/api/pong",
                                 :roles #{:admin}}]]
-                 (map butlast (reitit/routes router)))))
+                 (map butlast (r/routes router)))))
 
         (testing "route match contains compiled handler"
           (is (= 2 @compile-times))
-          (let [{:keys [result]} (reitit/match-by-path router "/api/pong")]
+          (let [{:keys [result]} (r/match-by-path router "/api/pong")]
             (is result)
             (is (= "/api/pong" (result)))
             (is (= 2 @compile-times))))))
 
     (testing "default compile"
-      (let [router (reitit/router ["/ping" (constantly "ok")])]
-        (let [{:keys [result]} (reitit/match-by-path router "/ping")]
+      (let [router (r/router ["/ping" (constantly "ok")])]
+        (let [{:keys [result]} (r/match-by-path router "/ping")]
           (is result)
           (is (= "ok" (result)))))))
 
   (testing "custom router"
-    (let [router (reitit/router ["/ping"] {:router (fn [_ _]
-                                                     (reify Router
-                                                       (reitit/router-name [_]
-                                                         ::custom)))})]
-      (is (= ::custom (reitit/router-name router)))))
+    (let [router (r/router ["/ping"] {:router (fn [_ _]
+                                                (reify Router
+                                                  (r/router-name [_]
+                                                    ::custom)))})]
+      (is (= ::custom (r/router-name router)))))
 
   (testing "bide sample"
     (let [routes [["/auth/login" :auth/login]
@@ -126,7 +127,7 @@
           expected [["/auth/login" {:name :auth/login}]
                     ["/auth/recovery/token/:token" {:name :auth/recovery}]
                     ["/workspace/:project-uuid/:page-uuid" {:name :workspace/page}]]]
-      (is (= expected (reitit/resolve-routes routes {})))))
+      (is (= expected (r/resolve-routes routes {})))))
 
   (testing "ring sample"
     (let [pong (constantly "ok")
@@ -143,19 +144,19 @@
                     ["/api/pong" {:mw [:api], :handler pong}]
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
-          router (reitit/router routes)]
-      (is (= expected (reitit/resolve-routes routes {})))
-      (is (= (reitit/map->Match
+          router (r/router routes)]
+      (is (= expected (r/resolve-routes routes {})))
+      (is (= (r/map->Match
                {:template "/api/user/:id/:sub-id"
                 :meta {:mw [:api], :parameters {:id "String", :sub-id "String"}}
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
-             (reitit/match-by-path router "/api/user/1/2"))))))
+             (r/match-by-path router "/api/user/1/2"))))))
 
 (deftest conflicting-routes-test
   (are [conflicting? data]
-    (let [routes (reitit/resolve-routes data {})
-          conflicts (-> routes (reitit/resolve-routes {}) (reitit/conflicting-routes))]
+    (let [routes (r/resolve-routes data {})
+          conflicts (-> routes (r/resolve-routes {}) (r/conflicting-routes))]
       (if conflicting? (seq conflicts) (nil? conflicts)))
 
     true [["/a"]
@@ -190,15 +191,15 @@
             ["/:b" {}] #{["/c" {}] ["/*d" {}]},
             ["/c" {}] #{["/*d" {}]}}
            (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
-               (reitit/resolve-routes {})
-               (reitit/conflicting-routes)))))
+               (r/resolve-routes {})
+               (r/conflicting-routes)))))
 
   (testing "router with conflicting routes"
     (testing "throws by default"
       (is (thrown-with-msg?
             ExceptionInfo
             #"Router contains conflicting routes"
-            (reitit/router
+            (r/router
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
-      (is (not (nil? (reitit/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
+      (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))

@@ -2,12 +2,12 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
             [clojure.spec.alpha :as s]
-            [reitit.core :as reitit]
+            [reitit.core :as r]
             [reitit.spec :as spec])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
-(stest/instrument `reitit/router `reitit/routes)
+(stest/instrument)
 
 (deftest router-spec-test
 
@@ -15,7 +15,7 @@
 
     (testing "route-data"
       (are [data]
-        (is (= true (reitit/router? (reitit/router data))))
+        (is (= true (r/router? (r/router data))))
 
         ["/api" {}]
 
@@ -31,7 +31,7 @@
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Call to #'reitit.core/router did not conform to spec"
-                (reitit/router
+                (r/router
                   data)))
 
           ;; missing slash
@@ -45,12 +45,12 @@
            ["/ipa"]])))
 
     (testing "routes conform to spec (can't spec protocol functions)"
-      (is (= true (s/valid? ::spec/routes (reitit/routes (reitit/router ["/ping"]))))))
+      (is (= true (s/valid? ::spec/routes (r/routes (r/router ["/ping"]))))))
 
     (testing "options"
 
       (are [opts]
-        (is (= true (reitit/router? (reitit/router ["/api"] opts))))
+        (is (= true (r/router? (r/router ["/api"] opts))))
 
         {:path "/"}
         {:meta {}}
@@ -58,13 +58,13 @@
         {:coerce (fn [route _] route)}
         {:compile (fn [_ _])}
         {:conflicts (fn [_])}
-        {:router reitit/linear-router})
+        {:router r/linear-router})
 
       (are [opts]
         (is (thrown-with-msg?
               ExceptionInfo
               #"Call to #'reitit.core/router did not conform to spec"
-              (reitit/router
+              (r/router
                 ["/api"] opts)))
 
         {:path "api"}

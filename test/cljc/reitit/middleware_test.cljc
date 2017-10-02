@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.middleware :as middleware]
             [clojure.set :as set]
-            [reitit.core :as reitit])
+            [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -157,7 +157,7 @@
           (is (= [::mw1 ::mw3 :ok ::mw3 ::mw1] (app "/api")))
 
           (testing "routes contain list of actually applied mw"
-            (is (= [::mw1 ::mw3] (->> (reitit/routes router)
+            (is (= [::mw1 ::mw3] (->> (r/routes router)
                                       first
                                       last
                                       :middleware
@@ -165,7 +165,7 @@
 
           (testing "match contains list of actually applied mw"
             (is (= [::mw1 ::mw3] (->> "/api"
-                                      (reitit/match-by-path router)
+                                      (r/match-by-path router)
                                       :result
                                       :middleware
                                       (map :name))))))))))

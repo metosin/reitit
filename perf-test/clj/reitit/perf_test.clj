@@ -35,9 +35,9 @@
 
 (def compojure-api-routes
   (routes
-    (GET "/auth/login" [] :name :auth/login (constantly ""))
-    (GET "/auth/recovery/token/:token" [] :name :auth/recovery (constantly ""))
-    (GET "/workspace/:project/:page" [] :name :workspace/page (constantly ""))))
+    (GET "/auth/login" [] {:name :auth/login} (constantly ""))
+    (GET "/auth/recovery/token/:token" [] {:name :auth/recovery} (constantly ""))
+    (GET "/workspace/:project/:page" [] {:name :workspace/page} (constantly ""))))
 
 (def compojure-api-request
   {:compojure.api.request/lookup (routes/route-lookup-table (routes/get-routes (api compojure-api-routes)))})

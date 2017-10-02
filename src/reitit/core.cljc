@@ -133,7 +133,7 @@
    :conflicts throw-on-conflicts!})
 
 (defn linear-router
-  "Creates a LinearRouter from resolved routes and optional
+  "Creates a linear-router from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (linear-router routes {}))
@@ -174,7 +174,7 @@
            (match params)))))))
 
 (defn lookup-router
-  "Creates a LookupRouter from resolved routes and optional
+  "Creates a lookup-router from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
    (lookup-router routes {}))
@@ -182,7 +182,7 @@
    (when-let [wilds (seq (filter impl/wild-route? routes))]
      (throw
        (ex-info
-         (str "can't create LookupRouter with wildcard routes: " wilds)
+         (str "can't create :lookup-router with wildcard routes: " wilds)
          {:wilds wilds
           :routes routes})))
    (let [compiled (compile-routes routes opts)
