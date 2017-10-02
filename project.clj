@@ -15,7 +15,7 @@
 
   :profiles {:dev {:plugins [[jonase/eastwood "0.2.3"]
                              [lein-tach "0.3.0"]
-                             [lein-doo "0.1.7"]
+                             [lein-doo "0.1.8"]
                              [lein-cljsbuild "1.1.6"]
                              [lein-cloverage "1.0.9"]
                              [lein-codox "0.10.3"]]
