@@ -66,9 +66,48 @@
      ["/auth/recovery/token/:token" :auth/recovery]
      ["/workspace/:project/:page" :workspace/page]]))
 
-(defn routing-test []
+(defn routing-test1 []
 
-  (suite "simple routing")
+  (suite "static route")
+
+  ;; 2.2µs
+  (title "bidi")
+  (let [call #(bidi/match-route bidi-routes "/auth/login")]
+    (assert (call))
+    (cc/quick-bench
+      (call)))
+
+  ;; 1.5µs (-40%)
+  (title "ataraxy")
+  (let [call #(ataraxy/matches ataraxy-routes {:uri "/auth/login"})]
+    (assert (call))
+    (cc/quick-bench
+      (call)))
+
+  ;; 1.1µs (-50%)
+  (title "pedestal - map-tree => prefix-tree")
+  (let [call #(pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get})]
+    (assert (call))
+    (cc/quick-bench
+      (call)))
+
+  ;; 1.5µs (-40%)
+  (title "compojure-api")
+  (let [call #(compojure-api-routes {:uri "/auth/login", :request-method :get})]
+    (assert (call))
+    (cc/quick-bench
+      (call)))
+
+  ;; 11.5ns (-99,5%)
+  (title "reitit")
+  (let [call #(reitit/match-by-path reitit-routes "/auth/login")]
+    (assert (call))
+    (cc/quick-bench
+      (call))))
+
+(defn routing-test2 []
+
+  (suite "wildcard route")
 
   ;; 15.4µs
   (title "bidi")
@@ -141,5 +180,6 @@
       (call))))
 
 (comment
-  (routing-test)
+  (routing-test1)
+  (routing-test2)
   (reverse-routing-test))

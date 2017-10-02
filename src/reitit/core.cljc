@@ -213,17 +213,52 @@
          (if-let [match (impl/fast-get lookup name)]
            (match params)))))))
 
+(defn single-static-path-router
+  "Creates a fast router of 1 static route(s) and optional
+  expanded options. See [[router]] for available options"
+  ([routes]
+   (single-static-path-router routes {}))
+  ([routes opts]
+   (when (or (not= (count routes) 1) (some impl/wild-route? routes))
+     (throw
+       (ex-info
+         (str ":single-static-path-router requires exactly 1 static route: " routes)
+         {:routes routes})))
+   (let [[n :as names] (find-names routes opts)
+         [[p meta result] :as compiled] (compile-routes routes opts)
+         p #?(:clj (.intern ^String p) :cljs p)
+         match (->Match p meta result {} p)]
+     (reify Router
+       (router-name [_]
+         :single-static-path-router)
+       (routes [_]
+         compiled)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (if (#?(:clj .equals :cljs =) p path)
+           match))
+       (match-by-name [_ name]
+         (if (= n name)
+           match))
+       (match-by-name [_ name params]
+         (if (= n name)
+           (impl/fast-assoc match :params params)))))))
+
 (defn mixed-router
-  "Creates two routers: [[lookup-router]] for static routes and
-  [[linear-router]] for wildcard routes. All routes should be
-  non-conflicting. Takes resolved routes and optional
+  "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
+  static routes and [[linear-router]] for wildcard routes. All
+  routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
   ([routes]
    (mixed-router routes {}))
   ([routes opts]
    (let [{linear true, lookup false} (group-by impl/wild-route? routes)
-         linear-router (linear-router linear opts)
-         lookup-router (lookup-router lookup opts)
+         ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
+         wildcard-router (linear-router linear opts)
+         static-router (->static-router lookup opts)
          names (find-names routes opts)]
      (reify Router
        (router-name [_]
@@ -235,19 +270,19 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (or (match-by-path lookup-router path)
-             (match-by-path linear-router path)))
+         (or (match-by-path static-router path)
+             (match-by-path wildcard-router path)))
        (match-by-name [_ name]
-         (or (match-by-name lookup-router name)
-             (match-by-name linear-router name)))
+         (or (match-by-name static-router name)
+             (match-by-name wildcard-router name)))
        (match-by-name [_ name params]
-         (or (match-by-name lookup-router name params)
-             (match-by-name linear-router name params)))))))
+         (or (match-by-name static-router name params)
+             (match-by-name wildcard-router name params)))))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
-  If routes contain wildcards, a [[LinearRouter]] is used, otherwise a
-  [[LookupRouter]]. The following options are available:
+  Selects implementation based on route details. The following options
+  are available:
 
   | key          | description |
   | -------------|-------------|
@@ -265,10 +300,11 @@
    (let [{:keys [router] :as opts} (meta-merge default-router-options opts)
          routes (resolve-routes data opts)
          conflicting (conflicting-routes routes)
-         wilds? (some impl/wild-route? routes)
+         wilds? (boolean (some impl/wild-route? routes))
          all-wilds? (every? impl/wild-route? routes)
          router (cond
                   router router
+                  (and (= 1 (count routes)) (not wilds?)) single-static-path-router
                   (not wilds?) lookup-router
                   all-wilds? linear-router
                   (not conflicting) mixed-router
