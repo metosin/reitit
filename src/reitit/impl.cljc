@@ -104,22 +104,24 @@
 (defrecord Route [path matcher parts params meta result])
 
 (defn create [[path meta result]]
-  (if (contains-wilds? path)
-    (as-> (parse-path path) $
-          (assoc $ :path-re (path-regex $))
-          (merge $ {:path path
-                    :matcher (path-matcher $)
-                    :result result
-                    :meta meta})
-          (dissoc $ :path-re :path-constraints)
-          (update $ :path-params set)
-          (set/rename-keys $ {:path-parts :parts
-                              :path-params :params})
-          (map->Route $))
-    (map->Route {:path path
-                 :meta meta
-                 :matcher #(if (= path %) {})
-                 :result result})))
+  (let [path #?(:clj (.intern ^String path) :cljs path)]
+    (if (contains-wilds? path)
+      (as-> (parse-path path) $
+            (assoc $ :path-re (path-regex $))
+            (merge $ {:path path
+                      :matcher (path-matcher $)
+                      :result result
+                      :meta meta})
+            (dissoc $ :path-re :path-constraints)
+            (update $ :path-params set)
+            (set/rename-keys $ {:path-parts :parts
+                                :path-params :params})
+            (map->Route $))
+      (map->Route {:path path
+                   :meta meta
+                   :matcher #?(:clj #(if (.equals path %) {})
+                               :cljs #(if (= path %)))
+                   :result result}))))
 
 (defn segments [path]
   (let [ss (-> (str/split path #"/") rest vec)]
