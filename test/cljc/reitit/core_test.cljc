@@ -70,6 +70,44 @@
                 (r/resolve-routes
                   ["/api/:version/ping"] {})))))))
 
+  (testing "fast-router"
+    (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]])]
+      (is (= :fast-router (r/router-name router)))
+      (is (= [["/api/ipa/large" {:name ::beer} nil]]
+             (r/routes router)))
+      (is (= true (map? (r/options router))))
+      (is (= (r/map->Match
+               {:template "/api/ipa/large"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {}})
+             (r/match-by-path router "/api/ipa/large")))
+      (is (= (r/map->Match
+               {:template "/api/ipa/large"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (r/match-by-name router ::beer {:size "large"})))
+      (is (= nil (r/match-by-name router "ILLEGAL")))
+      (is (= [::beer] (r/route-names router)))
+
+      (testing "can't be created with wildcard routes"
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #":fast-router requires exactly 1 static route"
+              (r/fast-router
+                (r/resolve-routes
+                  ["/api/:version/ping"] {})))))
+
+      (testing "can't be created with multiple routes"
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #":fast-router requires exactly 1 static route"
+              (r/fast-router
+                (r/resolve-routes
+                  [["/ping"]
+                   ["/pong"]] {})))))))
+
   (testing "route coercion & compilation"
 
     (testing "custom compile"
