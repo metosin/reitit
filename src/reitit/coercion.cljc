@@ -151,7 +151,7 @@
 (defn wrap-coerce-response
   "Pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route meta, otherwise does not mount."
+  and :responses from route meta, otherwise will do nothing."
   [handler]
   (fn
     ([request]
@@ -162,20 +162,17 @@
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)
-               coerced (coerce-response coercers request response)]
-           (coerce-response coercers request (handler request)))
+         (let [coercers (response-coercers coercion responses opts)]
+           (coerce-response coercers request response))
          (handler request))))
     ([request respond raise]
-     (let [response (handler request)
-           method (:request-method request)
+     (let [method (:request-method request)
            match (ring/get-match request)
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)
-               coerced (coerce-response coercers request response)]
+         (let [coercers (response-coercers coercion responses opts)]
            (handler request #(respond (coerce-response coercers request %))))
          (handler request respond raise))))))
 
