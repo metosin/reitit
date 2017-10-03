@@ -98,6 +98,9 @@
 (defn- compile-routes [routes opts]
   (into [] (keep #(compile-route % opts) routes)))
 
+(defn route-info [route]
+  (select-keys (impl/create route) [:path :parts :params :result :meta]))
+
 (defprotocol Router
   (router-name [this])
   (routes [this])
@@ -256,6 +259,7 @@
    (mixed-router routes {}))
   ([routes opts]
    (let [{linear true, lookup false} (group-by impl/wild-route? routes)
+         compiled (compile-routes routes opts)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (linear-router linear opts)
          static-router (->static-router lookup opts)
@@ -264,7 +268,7 @@
        (router-name [_]
          :mixed-router)
        (routes [_]
-         routes)
+         compiled)
        (options [_]
          opts)
        (route-names [_]

@@ -105,22 +105,19 @@
 
 (defn create [[path meta result]]
   (let [path #?(:clj (.intern ^String path) :cljs path)]
-    (if (contains-wilds? path)
-      (as-> (parse-path path) $
-            (assoc $ :path-re (path-regex $))
-            (merge $ {:path path
-                      :matcher (path-matcher $)
-                      :result result
-                      :meta meta})
-            (dissoc $ :path-re :path-constraints)
-            (update $ :path-params set)
-            (set/rename-keys $ {:path-parts :parts
-                                :path-params :params})
-            (map->Route $))
-      (map->Route {:path path
-                   :meta meta
-                   :matcher #(if (#?(:clj .equals, :cljs =) path %) {})
-                   :result result}))))
+    (as-> (parse-path path) $
+          (assoc $ :path-re (path-regex $))
+          (merge $ {:path path
+                    :matcher (if (contains-wilds? path)
+                               (path-matcher $)
+                               #(if (#?(:clj .equals, :cljs =) path %) {}))
+                    :result result
+                    :meta meta})
+          (dissoc $ :path-re :path-constraints)
+          (update $ :path-params set)
+          (set/rename-keys $ {:path-parts :parts
+                              :path-params :params})
+          (map->Route $))))
 
 (defn segments [path]
   (let [ss (-> (str/split path #"/") rest vec)]
