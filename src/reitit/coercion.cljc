@@ -164,7 +164,7 @@
        (if (and coercion responses)
          (let [coercers (response-coercers coercion responses opts)]
            (coerce-response coercers request response))
-         (handler request))))
+         response)))
     ([request respond raise]
      (let [method (:request-method request)
            match (ring/get-match request)
