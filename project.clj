@@ -13,34 +13,35 @@
 
   :dependencies [[meta-merge "1.0.0"]]
 
-  :profiles {:dev {:plugins [[jonase/eastwood "0.2.3"]
+  :profiles {:dev {:plugins [[jonase/eastwood "0.2.5"]
                              [lein-tach "0.3.0"]
                              [lein-doo "0.1.8"]
-                             [lein-cljsbuild "1.1.6"]
+                             [lein-cljsbuild "1.1.7"]
                              [lein-cloverage "1.0.9"]
                              [lein-codox "0.10.3"]]
                    :jvm-opts ^:replace ["-server"]
-                   :dependencies [[org.clojure/clojure "1.9.0-alpha19"]
+                   :dependencies [[org.clojure/clojure "1.9.0-beta2"]
                                   [org.clojure/clojurescript "1.9.660"]
 
-                                  [metosin/spec-tools "0.3.3"]
-                                  [org.clojure/spec.alpha "0.1.123"]
+                                  [metosin/spec-tools "0.5.0"]
+                                  [org.clojure/spec.alpha "0.1.134"]
 
-                                  [expound "0.3.0"]
+                                  [expound "0.3.1"]
                                   [orchestra "2017.08.13"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
-                                  [com.gfredericks/test.chuck "0.2.7"]]}
+                                  [com.gfredericks/test.chuck "0.2.8"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
-                                         "-Dclojure.compiler.direct-linking=true"]                    :test-paths ["perf-test/clj"]
-                    :dependencies [[metosin/compojure-api "2.0.0-alpha7"]
-                                   [io.pedestal/pedestal.route "0.5.2"]
+                                         "-Dclojure.compiler.direct-linking=true"]
+                    :test-paths ["perf-test/clj"]
+                    :dependencies [[metosin/compojure-api "2.0.0-alpha10"]
+                                   [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.3.443"]
                                    [ataraxy "0.4.0"]
-                                   [bidi "2.0.9"]]}
+                                   [bidi "2.1.2"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"

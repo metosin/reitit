@@ -123,24 +123,24 @@
                :uri "/api/ping"
                :body-params {:x 1, :y 2}}]
 
-      ;;   210ns
-      ;;  1300ns
-      ;;  7400ns
+      ;;   215ns
+      ;;  1000ns
+      ;;  5780ns
       (bench! "wrap-coerce-parameters" (app req))
 
-      ;;   170ns (-19%)
-      ;;   500ns (-62%)
-      ;;  5400ns (-26%)
+      ;;   175ns (-19%)
+      ;;   360ns (-64%)
+      ;;  4080ns (-30%)
       (bench! "gen-wrap-coerce-parameters" (app2 req))
 
-      ;;   340ns
-      ;;  2400ns
-      ;; 14800ns
+      ;;   300ns
+      ;;  1740ns
+      ;;  9400ns
       (bench! "wrap-coerce-parameters & responses" (app3 req))
 
-      ;;  180ns (-47%)
-      ;;  580ns (-76%)
-      ;; 8300ns (-44%)
+      ;;  175ns (-42%)
+      ;;  384ns (-78%)
+      ;; 6100ns (-35%)
       (bench! "gen-wrap-coerce-parameters & responses" (app4 req)))))
 
 (comment
