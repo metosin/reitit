@@ -6,7 +6,7 @@ A friendly data-driven router for Clojure(Script).
 * First-class [route meta-data](https://metosin.github.io/reitit/basics.html#route-data)
 * Generic, not tied to HTTP
 * [Route conflict resolution](https://metosin.github.io/reitit/route_conflicts.html)
-* [Pluggable coercion](https://metosin.github.io/reitit/route_validation.html) ([clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](https://metosin.github.io/reitit/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
 * both [Middleware](https://metosin.github.io/reitit/compiling_middleware.html) & Interceptors
 * Extendable
 * Fast

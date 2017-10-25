@@ -2,11 +2,11 @@
 
 [Reitit](https://github.com/metosin/reitit) is a small Clojure(Script) library for data-driven routing.
 
-* Simple data-driven [route syntax](./routing/route_syntax.md)
-* First-class [route meta-data](./routing/route_metadata.md)
+* Simple data-driven [route syntax](./basics.md#route-syntax)
+* First-class [route meta-data](./basics.md#route-data)
 * Bi-directional-routing
-* [Route conflict resolution](./routing/route_conflicts.md)
-* [Pluggable coercion](./parameter-coercion.md) ([clojure.spec](https://clojure.org/about/spec))
+* [Route conflict resolution](./route_conflicts.md)
+* [Pluggable coercion](./parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
 * Both [Middleware](./ring.md#middleware) & Interceptors
 * Extendable
 * Fast
