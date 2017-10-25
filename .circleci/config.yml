@@ -27,9 +27,6 @@ jobs:
     working_directory: ~/build
     docker:
       - image: circleci/node:latest
-    branches:
-      only:
-        - master
     steps:
       - checkout
       - restore_cache:
@@ -69,4 +66,8 @@ workflows:
   test-and-build-docs:
     jobs:
       - test
-      - build-docs
+      - build-docs:
+          filters:
+            branches:
+              only:
+                - master
