@@ -1,6 +1,9 @@
 sudo: false
 language: clojure
 lein: 2.7.1
+install:
+  - lein deps
+  - npm install
 script:
   - ./scripts/test.sh $TEST
   - ./scripts/submit-to-coveralls.sh $TEST
@@ -11,7 +14,7 @@ env:
 jdk:
   - oraclejdk8
 node_js:
-  - "8.6"
+  - "8"
 cache:
   directories:
   - "$HOME/.m2"
