@@ -10,5 +10,4 @@ pom.xml.asc
 /.nrepl-history
 /gh-pages
 /node_modules
-/package-lock.json
 /_book

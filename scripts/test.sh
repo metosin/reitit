@@ -2,7 +2,8 @@
 set -e
 case $1 in
     cljs)
-        lein "do" test-phantom once, test-node once, test-advanced once
+        npm install -g karma-cli
+        lein "do" test-browser once, test-node once, test-advanced once
         ;;
     clj)
         lein test-clj

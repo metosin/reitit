@@ -51,7 +51,7 @@
   :aliases {"all" ["with-profile" "dev"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["alt-test"] ["check"]]
-            "test-phantom" ["doo" "chrome-headless" "test"]
+            "test-browser" ["doo" "chrome-headless" "test"]
             "test-advanced" ["doo" "chrome-headless" "advanced-test"]
             "test-node" ["doo" "node" "node-test"]}
 

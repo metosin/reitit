@@ -11,7 +11,7 @@ env:
 jdk:
   - oraclejdk8
 node_js:
-  - "6.1"
+  - "8.6"
 cache:
   directories:
   - "$HOME/.m2"
