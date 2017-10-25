@@ -13,15 +13,16 @@
 
   :dependencies [[meta-merge "1.0.0"]]
 
-  :profiles {:dev {:plugins [[jonase/eastwood "0.2.5"]
-                             [lein-tach "0.3.0"]
-                             [lein-doo "0.1.8"]
-                             [lein-cljsbuild "1.1.7"]
-                             [lein-cloverage "1.0.9"]
-                             [lein-codox "0.10.3"]]
-                   :jvm-opts ^:replace ["-server"]
+  :plugins [[jonase/eastwood "0.2.5"]
+            [lein-doo "0.1.8"]
+            [lein-cljsbuild "1.1.7"]
+            [lein-cloverage "1.0.9"]
+            [lein-codox "0.10.3"]
+            [metosin/boot-alt-test "0.4.0-20171019.180106-3"]]
+
+  :profiles {:dev {:jvm-opts ^:replace ["-server"]
                    :dependencies [[org.clojure/clojure "1.9.0-beta2"]
-                                  [org.clojure/clojurescript "1.9.660"]
+                                  [org.clojure/clojurescript "1.9.946"]
 
                                   [metosin/spec-tools "0.5.0"]
                                   [org.clojure/spec.alpha "0.1.134"]
@@ -49,10 +50,15 @@
                                             "-XX:+PrintInlining"]}}
   :aliases {"all" ["with-profile" "dev"]
             "perf" ["with-profile" "default,dev,perf"]
-            "test-clj" ["all" "do" ["test"] ["check"]]
-            "test-phantom" ["doo" "phantom" "test"]
-            "test-advanced" ["doo" "phantom" "advanced-test"]
+            "test-clj" ["all" "do" ["alt-test"] ["check"]]
+            "test-phantom" ["doo" "chrome-headless" "test"]
+            "test-advanced" ["doo" "chrome-headless" "advanced-test"]
             "test-node" ["doo" "node" "node-test"]}
+
+  :alt-test {:report [:pretty
+                      {:type :junit
+                       :output-to "target/junit.xml"}]}
+
   :cljsbuild {:builds [{:id "test"
                         :source-paths ["src" "test/cljc" "test/cljs"]
                         :compiler {:output-to "target/out/test.js"
