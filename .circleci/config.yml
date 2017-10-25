@@ -29,13 +29,14 @@ jobs:
       - image: circleci/node:latest
     steps:
       - checkout
+      - run: rm package.json package-lock.json
       - restore_cache:
           keys:
             - 'v1-gitbook-{{ checksum "book.json" }}'
             - 'v1-gitbook-'
       - run:
           name: "Install GitBook"
-          command: npm install -g gitbook-cli && gitbook install
+          command: npm install gitbook-cli && ./node_modules/.bin/gitbook install
       - run:
           name: "Clone gh-pages"
           command: git clone --branch gh-pages git@github.com:metosin/reitit.git ~/gh-pages
