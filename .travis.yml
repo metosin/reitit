@@ -18,3 +18,4 @@ node_js:
 cache:
   directories:
   - "$HOME/.m2"
+  - "node_modules"

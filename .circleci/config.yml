@@ -1,6 +1,29 @@
 version: 2
 jobs:
-  build:
+  test:
+    working_directory: ~/test
+    docker:
+      - image: clojure:lein-2.7.1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-test-{{ checksum "project.clj" }}'
+            - 'v1-test-'
+      - run:
+          name: Run tests
+          command: ./scripts/test.sh clj
+      - store_test_results:
+         path: ~/test/target/junit.xml
+      - run:
+          name: Run coverage
+          command: ./scripts/submit-to-coveralls.sh clj
+      - save_cache:
+          key: 'v1-test-{{ checksum "project.clj" }}'
+          paths:
+            - ~/.m2
+
+  build-docs:
     working_directory: ~/build
     docker:
       - image: circleci/node:latest
@@ -11,11 +34,11 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - 'v1-{{ checksum "book.json" }}'
-            - 'v1-'
+            - 'v1-gitbook-{{ checksum "book.json" }}'
+            - 'v1-gitbook-'
       - run:
           name: "Install GitBook"
-          command: npm install gitbook-cli && ./node_modules/.bin/gitbook install
+          command: npm install -g gitbook-cli && gitbook install
       - run:
           name: "Clone gh-pages"
           command: git clone --branch gh-pages git@github.com:metosin/reitit.git ~/gh-pages
@@ -37,6 +60,13 @@ jobs:
             git commit -m "Build book from commit $CIRCLE_SHA1 [skip ci]"
             git push
       - save_cache:
-          key: 'v1-{{ checksum "book.json" }}'
+          key: 'v1-gitbook-{{ checksum "book.json" }}'
           paths:
             - node_modules
+
+workflows:
+  version: 2
+  test-and-build-docs:
+    jobs:
+      - test
+      - build-docs
