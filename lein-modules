@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# A script that walks the tree of Leiningen projects and does $* on them
+# original: https://github.com/juxt/yada/blob/master/treelein
+
+# Modules
+for ext in reitit-core reitit-ring; do
+    cd modules/$ext; lein $*; cd ../..;
+    done
+
+# Core
+lein $*
