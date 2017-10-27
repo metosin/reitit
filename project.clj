@@ -13,9 +13,6 @@
   :dependencies [[metosin/reitit-core ~reitit-version]
                  [metosin/reitit-ring ~reitit-version]]
 
-  :source-paths ["modules/reitit-core/src"
-                 "modules/reitit-ring/src"]
-
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
             [lein-cljsbuild "1.1.7"]
@@ -24,6 +21,8 @@
             [metosin/boot-alt-test "0.4.0-20171019.180106-3"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
+                   :source-paths ["modules/reitit-core/src"
+                                  "modules/reitit-ring/src"]
                    :dependencies [[org.clojure/clojure "1.9.0-beta2"]
                                   [org.clojure/clojurescript "1.9.946"]
 

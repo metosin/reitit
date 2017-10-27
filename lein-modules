@@ -3,10 +3,12 @@
 # A script that walks the tree of Leiningen projects and does $* on them
 # original: https://github.com/juxt/yada/blob/master/treelein
 
+set -e
+
 # Modules
 for ext in reitit-core reitit-ring; do
-    cd modules/$ext; lein $*; cd ../..;
-    done
+  cd modules/$ext; lein $@; cd ../..;
+done
 
 # Core
-lein $*
+lein $@
