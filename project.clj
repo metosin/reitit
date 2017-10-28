@@ -11,7 +11,8 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :managed-dependencies [[metosin/reitit-core ~VERSION]
+  :managed-dependencies [[metosin/reitit ~VERSION]
+                         [metosin/reitit-core ~VERSION]
                          [metosin/reitit-ring ~VERSION]
                          [metosin/reitit-spec ~VERSION]
 
@@ -42,7 +43,7 @@
                                   [expound "0.3.1"]
                                   [orchestra "2017.08.13"]
 
-                                  [criterium]
+                                  [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.8"]]}
