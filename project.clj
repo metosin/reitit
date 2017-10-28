@@ -1,5 +1,6 @@
-(load-file ".deps-versions.clj")
-(defproject metosin/reitit reitit-version
+(def VERSION "0.1.0-SNAPSHOT")
+
+(defproject metosin/reitit VERSION
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,6 +10,13 @@
   :codox {:output-path "doc"
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
+
+  :managed-dependencies [[metosin/reitit-core ~VERSION]
+                         [metosin/reitit-ring ~VERSION]
+                         [metosin/reitit-spec ~VERSION]
+
+                         [meta-merge "1.0.0"]
+                         [metosin/spec-tools "0.5.0"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
@@ -29,12 +37,12 @@
                                   [org.clojure/clojurescript "1.9.946"]
 
                                   ;; all modules dependencies
-                                  [metosin/reitit ~reitit-version]
+                                  [metosin/reitit]
 
                                   [expound "0.3.1"]
                                   [orchestra "2017.08.13"]
 
-                                  [criterium "0.4.4"]
+                                  [criterium]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.8"]]}
