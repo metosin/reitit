@@ -1,7 +1,7 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.middleware :as middleware]
-            [reitit.core :as reitit]
+            [reitit.ring.middleware :as middleware]
+            [reitit.core :as r]
             [reitit.impl :as impl]))
 
 (def http-methods #{:get :head :patch :delete :options :post :put})
@@ -18,7 +18,7 @@
   (with-meta
     (fn
       ([request]
-       (if-let [match (reitit/match-by-path router (:uri request))]
+       (if-let [match (r/match-by-path router (:uri request))]
          (let [method (:request-method request :any)
                params (:params match)
                result (:result match)
@@ -29,7 +29,7 @@
                (cond-> (impl/fast-assoc request ::match match)
                        (seq params) (impl/fast-assoc :path-params params)))))))
       ([request respond raise]
-       (if-let [match (reitit/match-by-path router (:uri request))]
+       (if-let [match (r/match-by-path router (:uri request))]
          (let [method (:request-method request :any)
                params (:params match)
                result (:result match)
@@ -73,4 +73,4 @@
    (router data nil))
   ([data opts]
    (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
-     (reitit/router data opts))))
+     (r/router data opts))))

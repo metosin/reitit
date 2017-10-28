@@ -1,8 +1,8 @@
-(ns reitit.coercion
+(ns reitit.ring.coercion
   (:require [clojure.walk :as walk]
             [spec-tools.core :as st]
-            [reitit.coercion.protocol :as protocol]
-            [reitit.middleware :as middleware]
+            [reitit.ring.middleware :as middleware]
+            [reitit.ring.coercion.protocol :as protocol]
             [reitit.ring :as ring]
             [reitit.impl :as impl]))
 

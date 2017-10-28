@@ -10,9 +10,6 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :dependencies [[metosin/reitit-core ~reitit-version]
-                 [metosin/reitit-ring ~reitit-version]]
-
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
             [lein-cljsbuild "1.1.7"]
@@ -21,13 +18,18 @@
             [metosin/boot-alt-test "0.4.0-20171019.180106-3"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
-                   :source-paths ["modules/reitit-core/src"
-                                  "modules/reitit-ring/src"]
+
+                   ;; all module sources for development
+                   :source-paths ["modules/reitit/src"
+                                  "modules/reitit-core/src"
+                                  "modules/reitit-ring/src"
+                                  "modules/reitit-spec/src"]
+
                    :dependencies [[org.clojure/clojure "1.9.0-beta2"]
                                   [org.clojure/clojurescript "1.9.946"]
 
-                                  [metosin/spec-tools "0.5.0"]
-                                  [org.clojure/spec.alpha "0.1.134"]
+                                  ;; all modules dependencies
+                                  [metosin/reitit ~reitit-version]
 
                                   [expound "0.3.1"]
                                   [orchestra "2017.08.13"]
@@ -40,7 +42,7 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[metosin/compojure-api "2.0.0-alpha10"]
+                    :dependencies [[metosin/compojure-api "2.0.0-alpha12"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.3.443"]
                                    [ataraxy "0.4.0"]
