@@ -1,0 +1,6 @@
+#!/bin/sh
+
+ext="sedbak$$"
+
+find . -name project.clj -exec sed -i.$ext "s/(def VERSION \".*\")/(def VERSION \"$1\")/g" '{}' \;
+find . -name "*.$ext" -exec rm '{}' \;
