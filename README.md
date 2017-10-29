@@ -41,6 +41,20 @@ gitbook install
 gitbook serve
 ```
 
+To raise the version:
+
+```bash
+# new version
+./scripts/set-version "1.0.0"
+./scripts/lein-modules install
+
+# works
+lein test
+
+# deploy to clojars
+./scripts/lein-modules do clean, deploy clojars
+```
+
 ## License
 
 Copyright © 2017 [Metosin Oy](http://www.metosin.fi)
