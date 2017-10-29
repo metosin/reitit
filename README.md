@@ -2,12 +2,12 @@
 
 A friendly data-driven router for Clojure(Script).
 
-* Simple data-driven [route syntax](https://metosin.github.io/reitit/basics.html#route-syntax)
-* First-class [route meta-data](https://metosin.github.io/reitit/basics.html#route-data)
-* Generic, not tied to HTTP
-* [Route conflict resolution](https://metosin.github.io/reitit/route_conflicts.html)
-* [Pluggable coercion](https://metosin.github.io/reitit/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
-* both [Middleware](https://metosin.github.io/reitit/compiling_middleware.html) & Interceptors
+* Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.md)
+* [Route conflict resolution](https://metosin.github.io/reitit/advanced/route_conflicts.md)
+* First-class [route meta-data](https://metosin.github.io/reitit/basics/route_data.md)
+* Bi-directional routing
+* [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
+* supports both [Middleware](https://metosin.github.io/reitit/ring/compiling_middleware.md) & Interceptors
 * Extendable
 * Fast
 
