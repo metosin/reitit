@@ -1,6 +1,4 @@
-(def VERSION "0.1.0-SNAPSHOT")
-
-(defproject metosin/reitit-parent VERSION
+(defproject metosin/reitit-parent "0.1.0-SNAPSHOT"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -11,10 +9,10 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :managed-dependencies [[metosin/reitit ~VERSION]
-                         [metosin/reitit-core ~VERSION]
-                         [metosin/reitit-ring ~VERSION]
-                         [metosin/reitit-spec ~VERSION]
+  :managed-dependencies [[metosin/reitit "0.1.0-SNAPSHOT"]
+                         [metosin/reitit-core "0.1.0-SNAPSHOT"]
+                         [metosin/reitit-ring "0.1.0-SNAPSHOT"]
+                         [metosin/reitit-spec "0.1.0-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
                          [metosin/spec-tools "0.5.0"]]
