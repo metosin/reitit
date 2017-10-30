@@ -1,6 +1,12 @@
 # Route Syntax
 
-Raw routes are defined as vectors, which have a String path, optional (non-sequential) route argument and optional child routes. Routes can be wrapped in vectors and lists and `nil` routes are ignored. Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`).
+Routes are defined as vectors of String path and optional (non-sequential) route argument child routes.
+
+Routes can be wrapped in vectors and lists and `nil` routes are ignored.
+
+Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`).
+
+### Examples
 
 Simple route:
 
@@ -53,7 +59,8 @@ Same routes flattened:
  ["/api/ping" {:name ::ping}]]
 ```
 
-As routes are just data, it's easy to create them programamtically:
+### Generating routes
+As routes are just data, it's easy to create them programmatically:
 
 ```clj
 (defn cqrs-routes [actions dev-mode?]

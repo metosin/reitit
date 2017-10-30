@@ -26,7 +26,7 @@ Applying the handler:
 ; {:status 200, :body "ok"}
 ```
 
-The expanded routes:
+The expanded routes shows the compilation results:
 
 ```clj
 (-> app (ring/get-router) (reitit/routes))
@@ -58,7 +58,7 @@ Handler are also looked under request-method keys: `:get`, `:head`, `:patch`, `:
 ; nil
 ```
 
-Reverse routing:
+Name-based reverse routing:
 
 ```clj
 (-> app
@@ -70,9 +70,9 @@ Reverse routing:
 
 # Middleware
 
-Middleware can be added with a `:middleware` key, with a vector value of the following:
+Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector value of the following:
 
-1. ring middleware function `handler -> request -> response`
+1. normal ring middleware function `handler -> request -> response`
 2. vector of middleware function `handler ?args -> request -> response` and optinally it's args.
 
 A middleware and a handler:
@@ -96,7 +96,7 @@ App with nested middleware:
        ["/ping" handler]
        ["/admin" {:middleware [[wrap :admin]]}
         ["/db" {:middleware [[wrap :db]]
-                :delete {:middleware [#(wrap % :delete)]
+                :delete {:middleware [[wrap :delete]]
                          :handler handler}}]]])))
 ```
 

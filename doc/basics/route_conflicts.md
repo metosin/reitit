@@ -1,13 +1,13 @@
 # Route conflicts
 
-Many routing libraries allow single path lookup could match multiple routes. Usually, first match is used. This is not good, especially if route tree is merged from multiple sources - routes might regress to be unreachable without a warning.
+Many routing libraries allow multiple matches for a single path lookup. Usually, the first match is used and the rest are effecively unreachanle. This is not good, especially if route tree is merged from multiple sources.
 
-Reitit resolves this by running explicit conflicit resolution when a `Router` is created. Conflicting routes are passed into a `:conflicts` callback. Default implementation throws `ex-info` with a descriptive message.
+Reitit resolves this by running explicit conflicit resolution when a `router` is called. Conflicting routes are passed into a `:conflicts` callback. Default implementation throws `ex-info` with a descriptive message.
 
-Examples routes with conflicts:
+Examples router with conflicting routes:
 
 ```clj
-(require '[reitit.core :as reitit])
+(require '[reitit.core :as r])
 
 (def routes
   [["/ping"]
@@ -20,7 +20,7 @@ Examples routes with conflicts:
 By default, `ExceptionInfo` is thrown:
 
 ```clj
-(reitit/router routes)
+(r/router routes)
 ; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting routes:
 ;
 ;    /:user-id/orders
@@ -38,7 +38,7 @@ By default, `ExceptionInfo` is thrown:
 Just logging the conflicts:
 
 ```clj
-(reitit/router
+(r/router
   routes
   {:conflicts (comp println reitit/conflicts-str)})
 ; Router contains conflicting routes:

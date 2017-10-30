@@ -1,6 +1,18 @@
-## Name-based routing
+## Name-based (reverse) routing
 
-All routes which `:name` route data defined, can be matched by name.
+All routes which have `:name` route data defined, can also be matched by name.
+
+Given a router:
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/api"
+      ["/ping" ::ping]
+      ["/user/:id" ::user]]]))
+```
 
 Listing all route names:
 
@@ -9,7 +21,25 @@ Listing all route names:
 ; [:user/ping :user/user]
 ```
 
-Matching by name:
+No match returns `nil`:
+
+```clj
+(r/match-by-name router ::kikka)
+nil
+```
+
+Matching a route:
+
+```clj
+(r/match-by-name router ::ping)
+; #Match{:template "/api/ping"
+;        :meta {:name :user/ping}
+;        :result nil
+;        :params {}
+;        :path "/api/ping"}
+```
+
+If not all path-parameters are set, a `PartialMatch` is returned:
 
 ```clj
 (r/match-by-name router ::user)
@@ -23,7 +53,7 @@ Matching by name:
 ; true
 ```
 
-We only got a partial match as we didn't provide the needed path-parameters. Let's provide the them too:
+With provided path-parameters:
 
 ```clj
 (r/match-by-name router ::user {:id "1"})

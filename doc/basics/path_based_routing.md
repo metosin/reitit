@@ -6,10 +6,26 @@ Path-based routing is done using the `reitit.core/match-by-path` function. It ta
 * `PartialMatch`, path matched, missing path-parameters (only in reverse-routing)
 * `Match`, exact match
 
+Given a router:
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/api"
+      ["/ping" ::ping]
+      ["/user/:id" ::user]]]))
+```
+
+No match returns `nil`:
+
 ```clj
 (r/match-by-path router "/hello")
 ; nil
 ```
+
+Match provides the route information:
 
 ```clj
 (r/match-by-path router "/api/user/1")

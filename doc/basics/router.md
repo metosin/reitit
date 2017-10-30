@@ -1,8 +1,8 @@
 # Router
 
-Routes are just data and to do actual routing, we need a Router satisfying the `reitit.core/Router` protocol. Routers are created with `reitit.core/router` function, taking the raw routes and optionally an options map. Raw routes gets expanded and optionally coerced and compiled.
+Routes are just data and for routing, we need a router instance satisfying the `reitit.core/Router` protocol. Routers are created with `reitit.core/router` function, taking the raw routes and optionally an options map.
 
-`Router` protocol:
+The `Router` protocol:
 
 ```clj
 (defprotocol Router
@@ -26,10 +26,25 @@ Creating a router:
       ["/user/:id" ::user]]]))
 ```
 
-Router flattens the raw routes and expands the route arguments using `reitit.core/Expand` protocol. By default, `Keyword`s are expanded to `:name` and functions are expaned to `:handler`. `nil` routes are removed. The expanded routes can be retrieved with router:
+Name of the created router:
+
+```clj
+(r/router-name router)
+; :mixed-router
+```
+
+The flattened route tree:
 
 ```clj
 (r/routes router)
 ; [["/api/ping" {:name :user/ping}]
 ;  ["/api/user/:id" {:name :user/user}]]
 ```
+
+### Behind the scenes
+When router is created, the following steps are done:
+* route tree is flattened
+* route arguments are expanded (via `reitit.core/Expand` protocol) and optionally coerced
+* [route conflicts](advanced/route_conflicts.md) are resolved
+* actual [router implementation](../advanced/different_routers.md) is selected and created
+* optionally route meta-data gets compiled

@@ -1,12 +1,12 @@
 # Compiling Middleware
 
-The [meta-data extensions](ring.md#meta-data-based-extensions) are a easy way to extend the system. Routes meta-data can be transformed into any shape (records, functions etc.) in route compilation, enabling fast access at request-time.
+The [dynamic extensions](dynamic_extensions.md) is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.
 
-Still, we can do better. As we know the exact route that interceptor/middleware is linked to, we can pass the (compiled) route information into the interceptor/middleware at creation-time. It can extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding faster runtime processing.
+Still, we can do better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. Middleware/interceptor can also decide not to mount itself. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
-To do this we use [middleware records](ring.md#middleware-records) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
+To enable this we use [middleware records](data_driven_middleware.md) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware.
 
-To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/coercion.cljc):
+To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.ring.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/ring/coercion.cljc):
 
 ## Naive
 
@@ -16,7 +16,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
 (defn wrap-coerce-response
   "Pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route meta, otherwise does not mount."
+  and :responses from route meta, otherwise will do nothing."
   [handler]
   (fn
     ([request]
@@ -27,20 +27,17 @@ To demonstrate the two approaches, below are response coercion middleware writte
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)
-               coerced (coerce-response coercers request response)]
-           (coerce-response coercers request (handler request)))
-         (handler request))))
+         (let [coercers (response-coercers coercion responses opts)]
+           (coerce-response coercers request response))
+         response)))
     ([request respond raise]
-     (let [response (handler request)
-           method (:request-method request)
+     (let [method (:request-method request)
            match (ring/get-match request)
            responses (-> match :result method :meta :responses)
            coercion (-> match :meta :coercion)
            opts (-> match :meta :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)
-               coerced (coerce-response coercers request response)]
+         (let [coercers (response-coercers coercion responses opts)]
            (handler request #(respond (coerce-response coercers request %))))
          (handler request respond raise))))))
 ```
@@ -69,4 +66,4 @@ To demonstrate the two approaches, below are response coercion middleware writte
                      (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 ```
 
-The `:gen` -version has 50% less code, is easier to reason about and is 2-4x faster on basic perf tests.
+The `:gen` -version has 50% less code, is easier to reason about and is twice as faster on basic perf tests.

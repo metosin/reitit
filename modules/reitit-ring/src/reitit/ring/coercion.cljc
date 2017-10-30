@@ -107,7 +107,7 @@
 (defn wrap-coerce-parameters
   "Pluggable request coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :parameters from route meta, otherwise does not mount."
+  and :parameters from route meta, otherwise will do nothing."
   [handler]
   (fn
     ([request]
