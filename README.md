@@ -36,7 +36,7 @@ See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 
 (r/match-by-name router ::order {:id 2})
 ; #Match{:template "/api/orders/:id",
-;        :meta {:name ::order-by-id},
+;        :meta {:name ::order},
 ;        :result nil,
 ;        :params {:id 2},
 ;        :path "/api/orders/2"}
