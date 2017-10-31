@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="configuring_routers.html" />
+    <link rel="next" href="different_routers.html" />
     
     
-    <link rel="prev" href="route_conflicts.html" />
+    <link rel="prev" href="./" />
     
 
     </head>
@@ -181,12 +181,12 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="../basics/different_routers.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
             
-                <a href="../basics/different_routers.html">
+                <a href="../basics/route_conflicts.html">
             
                     
-                    Different Routers
+                    Route conflicts
             
                 </a>
             
@@ -213,12 +213,12 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.3.1" data-path="route_conflicts.html">
+        <li class="chapter active" data-level="1.3.1" data-path="route_validation.html">
             
-                <a href="route_conflicts.html">
+                <a href="route_validation.html">
             
                     
-                    Route conflicts
+                    Route Validation
             
                 </a>
             
@@ -226,12 +226,12 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.3.2" data-path="route_validation.html">
+        <li class="chapter " data-level="1.3.2" data-path="different_routers.html">
             
-                <a href="route_validation.html">
+                <a href="different_routers.html">
             
                     
-                    Route Validation
+                    Different Routers
             
                 </a>
             
@@ -297,7 +297,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.3" data-path="../ring/parameter_coercion.html">
+        <li class="chapter " data-level="1.4.3" data-path="../ring/data_driven_middleware.html">
+            
+                <a href="../ring/data_driven_middleware.html">
+            
+                    
+                    Data-driven Middleware
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.4" data-path="../ring/parameter_coercion.html">
             
                 <a href="../ring/parameter_coercion.html">
             
@@ -310,7 +323,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.4" data-path="../ring/compiling_middleware.html">
+        <li class="chapter " data-level="1.4.5" data-path="../ring/compiling_middleware.html">
             
                 <a href="../ring/compiling_middleware.html">
             
@@ -403,12 +416,11 @@
 <p>Namespace <code>reitit.spec</code> contains <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> definitions for raw-routes, routes, router and router options.</p>
 <p><strong>NOTE:</strong> Use of specs requires to use one of the following:</p>
 <ul>
-<li><code>[org.clojure/clojurescript &quot;1.9.660&quot;]</code></li>
-<li><code>[org.clojure/clojure &quot;1.9.0-alpha19&quot;]</code></li>
-<li><code>[clojure-future-spec &quot;1.9.0-alpha17&quot;]</code> (Clojure 1.8)</li>
+<li><code>[org.clojure/clojurescript &quot;1.9.660&quot;]</code> (or higher)</li>
+<li><code>[org.clojure/clojure &quot;1.9.0-beta2&quot;]</code> (or higher)</li>
+<li><code>[clojure-future-spec &quot;1.9.0-alpha17&quot;]</code> (if Clojure 1.8 is used)</li>
 </ul>
-<h2 id="at-runtime">At runtime</h2>
-<p>If route trees are generated at runtime (e.g. from external source like the database), one can use directly the <code>clojure.spec</code> functions.</p>
+<h2 id="example">Example</h2>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
 (<span class="hljs-name">require</span> &apos;[reitit.spec <span class="hljs-symbol">:as</span> spec])
 
@@ -428,7 +440,7 @@
 <h2 id="at-development-time">At development time</h2>
 <p><code>reitit.core/router</code> can be instrumented and use something like <a href="https://github.com/bhb/expound" target="_blank">expound</a> to pretty-print the spec problems.</p>
 <p>First add a <code>:dev</code> dependency to:</p>
-<pre><code class="lang-clj">[expound <span class="hljs-string">&quot;0.3.0&quot;</span>]
+<pre><code class="lang-clj">[expound <span class="hljs-string">&quot;0.3.0&quot;</span>] <span class="hljs-comment">; or higher</span>
 </code></pre>
 <p>Some bootstrapping:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.test.alpha <span class="hljs-symbol">:as</span> stest])
@@ -440,8 +452,9 @@
 (<span class="hljs-name"><span class="hljs-builtin-name">set!</span></span> s/*explain-out* expound/printer)
 </code></pre>
 <p>And we are ready to go:</p>
-<pre><code class="lang-clj">
-(<span class="hljs-name">reitit/router</span>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+
+(<span class="hljs-name">r/router</span>
   [<span class="hljs-string">&quot;/api&quot;</span>
    [<span class="hljs-string">&quot;/public&quot;</span>
     [<span class="hljs-string">&quot;/ping&quot;</span>]
@@ -581,12 +594,12 @@
 
             
                 
-                <a href="route_conflicts.html" class="navigation navigation-prev " aria-label="Previous page: Route conflicts">
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: Advanced">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="configuring_routers.html" class="navigation navigation-next " aria-label="Next page: Configuring routers">
+                <a href="different_routers.html" class="navigation navigation-next " aria-label="Next page: Different Routers">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -597,7 +610,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Validation","level":"1.3.2","depth":2,"next":{"title":"Configuring routers","level":"1.3.3","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"previous":{"title":"Route conflicts","level":"1.3.1","depth":2,"path":"advanced/route_conflicts.md","ref":"advanced/route_conflicts.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/route_validation.md","mtime":"2017-10-29T07:29:44.989Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-29T07:30:20.667Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Validation","level":"1.3.1","depth":2,"next":{"title":"Different Routers","level":"1.3.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Advanced","level":"1.3","depth":1,"path":"advanced/README.md","ref":"advanced/README.md","articles":[{"title":"Route Validation","level":"1.3.1","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},{"title":"Different Routers","level":"1.3.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},{"title":"Configuring routers","level":"1.3.3","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/route_validation.md","mtime":"2017-10-31T08:26:00.327Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-31T08:26:38.332Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

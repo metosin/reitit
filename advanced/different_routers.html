@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Name-based Routing · GitBook</title>
+        <title>Different Routers · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="route_data.html" />
+    <link rel="next" href="configuring_routers.html" />
     
     
-    <link rel="prev" href="path_based_routing.html" />
+    <link rel="prev" href="route_validation.html" />
     
 
     </head>
@@ -102,9 +102,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2" data-path="./">
+        <li class="chapter " data-level="1.2" data-path="../basics/">
             
-                <a href="./">
+                <a href="../basics/">
             
                     
                     Basics
@@ -116,9 +116,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="route_syntax.html">
+        <li class="chapter " data-level="1.2.1" data-path="../basics/route_syntax.html">
             
-                <a href="route_syntax.html">
+                <a href="../basics/route_syntax.html">
             
                     
                     Route syntax
@@ -129,9 +129,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="router.html">
+        <li class="chapter " data-level="1.2.2" data-path="../basics/router.html">
             
-                <a href="router.html">
+                <a href="../basics/router.html">
             
                     
                     Router
@@ -142,9 +142,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.3" data-path="path_based_routing.html">
+        <li class="chapter " data-level="1.2.3" data-path="../basics/path_based_routing.html">
             
-                <a href="path_based_routing.html">
+                <a href="../basics/path_based_routing.html">
             
                     
                     Path-based Routing
@@ -155,9 +155,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.2.4" data-path="name_based_routing.html">
+        <li class="chapter " data-level="1.2.4" data-path="../basics/name_based_routing.html">
             
-                <a href="name_based_routing.html">
+                <a href="../basics/name_based_routing.html">
             
                     
                     Name-based Routing
@@ -168,9 +168,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.5" data-path="route_data.html">
+        <li class="chapter " data-level="1.2.5" data-path="../basics/route_data.html">
             
-                <a href="route_data.html">
+                <a href="../basics/route_data.html">
             
                     
                     Route data
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
             
-                <a href="route_conflicts.html">
+                <a href="../basics/route_conflicts.html">
             
                     
                     Route conflicts
@@ -199,9 +199,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3" data-path="../advanced/">
+        <li class="chapter " data-level="1.3" data-path="./">
             
-                <a href="../advanced/">
+                <a href="./">
             
                     
                     Advanced
@@ -213,9 +213,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.3.1" data-path="../advanced/route_validation.html">
+        <li class="chapter " data-level="1.3.1" data-path="route_validation.html">
             
-                <a href="../advanced/route_validation.html">
+                <a href="route_validation.html">
             
                     
                     Route Validation
@@ -226,9 +226,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.2" data-path="../advanced/different_routers.html">
+        <li class="chapter active" data-level="1.3.2" data-path="different_routers.html">
             
-                <a href="../advanced/different_routers.html">
+                <a href="different_routers.html">
             
                     
                     Different Routers
@@ -239,9 +239,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.3" data-path="../advanced/configuring_routers.html">
+        <li class="chapter " data-level="1.3.3" data-path="configuring_routers.html">
             
-                <a href="../advanced/configuring_routers.html">
+                <a href="configuring_routers.html">
             
                     
                     Configuring routers
@@ -397,7 +397,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Name-based Routing</a>
+        <a href=".." >Different Routers</a>
     </h1>
 </div>
 
@@ -412,55 +412,41 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h2 id="name-based-reverse-routing">Name-based (reverse) routing</h2>
-<p>All routes which have <code>:name</code> route data defined, can also be matched by name.</p>
-<p>Given a router:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
-  (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/api&quot;</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-      [<span class="hljs-string">&quot;/user/:id&quot;</span> <span class="hljs-symbol">::user</span>]]]))
-</code></pre>
-<p>Listing all route names:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/route-names</span> router)
-<span class="hljs-comment">; [:user/ping :user/user]</span>
-</code></pre>
-<p>No match returns <code>nil</code>:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::kikka</span>)
-<span class="hljs-literal">nil</span>
-</code></pre>
-<p>Matching a route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name :user/ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-</code></pre>
-<p>If not all path-parameters are set, a <code>PartialMatch</code> is returned:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; #PartialMatch{:template &quot;/api/user/:id&quot;,</span>
-<span class="hljs-comment">;               :meta {:name :user/user},</span>
-<span class="hljs-comment">;               :result nil,</span>
-<span class="hljs-comment">;               :params nil,</span>
-<span class="hljs-comment">;               :required #{:id}}</span>
-
-(<span class="hljs-name">r/partial-match?</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>))
-<span class="hljs-comment">; true</span>
-</code></pre>
-<p>With provided path-parameters:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;1&quot;</span>})
-<span class="hljs-comment">; #Match{:template &quot;/api/user/:id&quot;</span>
-<span class="hljs-comment">;        :meta {:name :user/user}</span>
-<span class="hljs-comment">;        :path &quot;/api/user/1&quot;</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {:id &quot;1&quot;}}</span>
-</code></pre>
-<p>There is also a exception throwing version:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name!</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; ExceptionInfo missing path-params for route /api/user/:id: #{:id}</span>
+                                <h1 id="different-routers">Different Routers</h1>
+<p>Reitit ships with several different implementations for the <code>Router</code> protocol, originally based on the <a href="https://github.com/pedestal/pedestal/tree/master/route" target="_blank">Pedestal</a> implementation. <code>router</code> selects the most suitable implementation by inspecting the expanded routes. The implementation can be set manually using <code>:router</code> option, see <a href="advanced/configuring_routers.md">configuring routers</a>.</p>
+<table>
+<thead>
+<tr>
+<th>router</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:linear-router</code></td>
+<td>Matches the routes one-by-one starting from the top until a match is found. Works with any kind of routes.</td>
+</tr>
+<tr>
+<td><code>:lookup-router</code></td>
+<td>Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters.</td>
+</tr>
+<tr>
+<td><code>:mixed-router</code></td>
+<td>Creates internally a <code>:linear-router</code> and a <code>:lookup-router</code> and used them to effectively get best-of-both-worlds. Valid if there are no <a href="../basics/route_conflicts.html">Route conflicts</a>.</td>
+</tr>
+<tr>
+<td><code>::single-static-path-router</code></td>
+<td>Fastest possible router: valid only if there is one static route.</td>
+</tr>
+<tr>
+<td><code>:prefix-tree-router</code></td>
+<td>TODO: <a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">https://github.com/julienschmidt/httprouter#how-does-it-work</a></td>
+</tr>
+</tbody>
+</table>
+<p>The router name can be asked from the router</p>
+<pre><code class="lang-clj">(<span class="hljs-name">r/router-name</span> router)
+<span class="hljs-comment">; :mixed-router</span>
 </code></pre>
 
                                 
@@ -489,12 +475,12 @@
 
             
                 
-                <a href="path_based_routing.html" class="navigation navigation-prev " aria-label="Previous page: Path-based Routing">
+                <a href="route_validation.html" class="navigation navigation-prev " aria-label="Previous page: Route Validation">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="route_data.html" class="navigation navigation-next " aria-label="Next page: Route data">
+                <a href="configuring_routers.html" class="navigation navigation-next " aria-label="Next page: Configuring routers">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -505,7 +491,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Name-based Routing","level":"1.2.4","depth":2,"next":{"title":"Route data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"previous":{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/name_based_routing.md","mtime":"2017-10-31T08:26:00.331Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-31T08:26:38.332Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Different Routers","level":"1.3.2","depth":2,"next":{"title":"Configuring routers","level":"1.3.3","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"previous":{"title":"Route Validation","level":"1.3.1","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/different_routers.md","mtime":"2017-10-31T08:26:00.327Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-31T08:26:38.332Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

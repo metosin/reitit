@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Name-based Routing · GitBook</title>
+        <title>Data-driven Middleware · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="route_data.html" />
+    <link rel="next" href="parameter_coercion.html" />
     
     
-    <link rel="prev" href="path_based_routing.html" />
+    <link rel="prev" href="dynamic_extensions.html" />
     
 
     </head>
@@ -102,9 +102,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2" data-path="./">
+        <li class="chapter " data-level="1.2" data-path="../basics/">
             
-                <a href="./">
+                <a href="../basics/">
             
                     
                     Basics
@@ -116,9 +116,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="route_syntax.html">
+        <li class="chapter " data-level="1.2.1" data-path="../basics/route_syntax.html">
             
-                <a href="route_syntax.html">
+                <a href="../basics/route_syntax.html">
             
                     
                     Route syntax
@@ -129,9 +129,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="router.html">
+        <li class="chapter " data-level="1.2.2" data-path="../basics/router.html">
             
-                <a href="router.html">
+                <a href="../basics/router.html">
             
                     
                     Router
@@ -142,9 +142,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.3" data-path="path_based_routing.html">
+        <li class="chapter " data-level="1.2.3" data-path="../basics/path_based_routing.html">
             
-                <a href="path_based_routing.html">
+                <a href="../basics/path_based_routing.html">
             
                     
                     Path-based Routing
@@ -155,9 +155,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.2.4" data-path="name_based_routing.html">
+        <li class="chapter " data-level="1.2.4" data-path="../basics/name_based_routing.html">
             
-                <a href="name_based_routing.html">
+                <a href="../basics/name_based_routing.html">
             
                     
                     Name-based Routing
@@ -168,9 +168,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.5" data-path="route_data.html">
+        <li class="chapter " data-level="1.2.5" data-path="../basics/route_data.html">
             
-                <a href="route_data.html">
+                <a href="../basics/route_data.html">
             
                     
                     Route data
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
             
-                <a href="route_conflicts.html">
+                <a href="../basics/route_conflicts.html">
             
                     
                     Route conflicts
@@ -257,9 +257,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4" data-path="../ring/">
+        <li class="chapter " data-level="1.4" data-path="./">
             
-                <a href="../ring/">
+                <a href="./">
             
                     
                     Ring
@@ -271,9 +271,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.4.1" data-path="../ring/ring.html">
+        <li class="chapter " data-level="1.4.1" data-path="ring.html">
             
-                <a href="../ring/ring.html">
+                <a href="ring.html">
             
                     
                     Ring-router
@@ -284,9 +284,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.2" data-path="../ring/dynamic_extensions.html">
+        <li class="chapter " data-level="1.4.2" data-path="dynamic_extensions.html">
             
-                <a href="../ring/dynamic_extensions.html">
+                <a href="dynamic_extensions.html">
             
                     
                     Dynamic extensions
@@ -297,9 +297,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.3" data-path="../ring/data_driven_middleware.html">
+        <li class="chapter active" data-level="1.4.3" data-path="data_driven_middleware.html">
             
-                <a href="../ring/data_driven_middleware.html">
+                <a href="data_driven_middleware.html">
             
                     
                     Data-driven Middleware
@@ -310,9 +310,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.4" data-path="../ring/parameter_coercion.html">
+        <li class="chapter " data-level="1.4.4" data-path="parameter_coercion.html">
             
-                <a href="../ring/parameter_coercion.html">
+                <a href="parameter_coercion.html">
             
                     
                     Parameter coercion
@@ -323,9 +323,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.5" data-path="../ring/compiling_middleware.html">
+        <li class="chapter " data-level="1.4.5" data-path="compiling_middleware.html">
             
-                <a href="../ring/compiling_middleware.html">
+                <a href="compiling_middleware.html">
             
                     
                     Compiling middleware
@@ -397,7 +397,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Name-based Routing</a>
+        <a href=".." >Data-driven Middleware</a>
     </h1>
 </div>
 
@@ -412,56 +412,50 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h2 id="name-based-reverse-routing">Name-based (reverse) routing</h2>
-<p>All routes which have <code>:name</code> route data defined, can also be matched by name.</p>
-<p>Given a router:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+                                <h1 id="data-driven-middleware">Data-driven Middleware</h1>
+<p>Reitit supports first-class data-driven middleware via <code>reitit.ring.middleware/Middleware</code> records, created with <code>reitit.ring.middleware/create</code> function. The following keys have special purpose:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:name</code></td>
+<td>Name of the middleware as qualified keyword (optional,recommended for libs)</td>
+</tr>
+<tr>
+<td><code>:wrap</code></td>
+<td>The actual middleware function of <code>handler args? =&gt; request =&gt; response</code></td>
+</tr>
+<tr>
+<td><code>:gen</code></td>
+<td>Middleware compile function, see <a href="compiling_middleware.html">compiling middleware</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>When routes are compiled, all middleware are expanded (and optionally compiled) into <code>Middleware</code> Records and stored in compilation results for later use (api-docs etc). For actual request processing, they are unwrapped into normal middleware functions and composed together producing zero runtime performance penalty. Middleware expansion is backed by <code>reitit.middleware/IntoMiddleware</code> protocol, enabling plain clojure(script) maps to be used.</p>
+<p>A Record:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.middleware <span class="hljs-symbol">:as</span> middleware])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
-  (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/api&quot;</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-      [<span class="hljs-string">&quot;/user/:id&quot;</span> <span class="hljs-symbol">::user</span>]]]))
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap2
+  (<span class="hljs-name">middleware/create</span>
+    {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap2</span>
+     <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;a nice little mw, takes 1 arg.&quot;</span>
+     <span class="hljs-symbol">:wrap</span> wrap}))
 </code></pre>
-<p>Listing all route names:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/route-names</span> router)
-<span class="hljs-comment">; [:user/ping :user/user]</span>
+<p>As plain map:</p>
+<pre><code class="lang-clj"><span class="hljs-comment">;; plain map</span>
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap3
+  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap3</span>
+   <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;a nice little mw, :api as arg&quot;</span>
+   <span class="hljs-symbol">:wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
+           (<span class="hljs-name">wrap</span> handler <span class="hljs-symbol">:api</span>))})
 </code></pre>
-<p>No match returns <code>nil</code>:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::kikka</span>)
-<span class="hljs-literal">nil</span>
-</code></pre>
-<p>Matching a route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name :user/ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-</code></pre>
-<p>If not all path-parameters are set, a <code>PartialMatch</code> is returned:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; #PartialMatch{:template &quot;/api/user/:id&quot;,</span>
-<span class="hljs-comment">;               :meta {:name :user/user},</span>
-<span class="hljs-comment">;               :result nil,</span>
-<span class="hljs-comment">;               :params nil,</span>
-<span class="hljs-comment">;               :required #{:id}}</span>
-
-(<span class="hljs-name">r/partial-match?</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>))
-<span class="hljs-comment">; true</span>
-</code></pre>
-<p>With provided path-parameters:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;1&quot;</span>})
-<span class="hljs-comment">; #Match{:template &quot;/api/user/:id&quot;</span>
-<span class="hljs-comment">;        :meta {:name :user/user}</span>
-<span class="hljs-comment">;        :path &quot;/api/user/1&quot;</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {:id &quot;1&quot;}}</span>
-</code></pre>
-<p>There is also a exception throwing version:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name!</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; ExceptionInfo missing path-params for route /api/user/:id: #{:id}</span>
-</code></pre>
+<h3 id="todo">TODO</h3>
+<p>more!</p>
 
                                 
                                 </section>
@@ -489,12 +483,12 @@
 
             
                 
-                <a href="path_based_routing.html" class="navigation navigation-prev " aria-label="Previous page: Path-based Routing">
+                <a href="dynamic_extensions.html" class="navigation navigation-prev " aria-label="Previous page: Dynamic extensions">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="route_data.html" class="navigation navigation-next " aria-label="Next page: Route data">
+                <a href="parameter_coercion.html" class="navigation navigation-next " aria-label="Next page: Parameter coercion">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -505,7 +499,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Name-based Routing","level":"1.2.4","depth":2,"next":{"title":"Route data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"previous":{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/name_based_routing.md","mtime":"2017-10-31T08:26:00.331Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-31T08:26:38.332Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"next":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"previous":{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2017-10-31T08:26:00.331Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-10-31T08:26:38.332Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
