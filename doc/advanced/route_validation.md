@@ -4,12 +4,11 @@ Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) 
 
 **NOTE:** Use of specs requires to use one of the following:
 
-* `[org.clojure/clojurescript "1.9.660"]`
-* `[org.clojure/clojure "1.9.0-alpha19"]`
-* `[clojure-future-spec "1.9.0-alpha17"]` (Clojure 1.8)
+* `[org.clojure/clojurescript "1.9.660"]` (or higher)
+* `[org.clojure/clojure "1.9.0-beta2"]` (or higher)
+* `[clojure-future-spec "1.9.0-alpha17"]` (if Clojure 1.8 is used)
 
-## At runtime
-If route trees are generated at runtime (e.g. from external source like the database), one can use directly the `clojure.spec` functions.
+## Example
 
 ```clj
 (require '[clojure.spec.alpha :as s])
@@ -36,7 +35,7 @@ If route trees are generated at runtime (e.g. from external source like the data
 First add a `:dev` dependency to:
 
 ```clj
-[expound "0.3.0"]
+[expound "0.3.0"] ; or higher
 ```
 
 Some bootstrapping:
@@ -54,8 +53,9 @@ Some bootstrapping:
 And we are ready to go:
 
 ```clj
+(require '[reitit.core :as r])
 
-(reitit/router
+(r/router
   ["/api"
    ["/public"
     ["/ping"]

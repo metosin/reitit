@@ -6,7 +6,7 @@
             [spec-tools.core :as st]
 
             [reitit.core :as reitit]
-            [reitit.ring :as ring]
+            [reitit.core :as ring]
             [reitit.coercion :as coercion]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.protocol :as protocol]
@@ -145,7 +145,7 @@
 
 (comment
   (do
-    (require '[reitit.ring :as ring])
+    (require '[reitit.core :as ring])
     (require '[reitit.coercion :as coercion])
     (require '[reitit.coercion.spec :as spec])
 

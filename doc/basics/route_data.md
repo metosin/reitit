@@ -1,6 +1,47 @@
 # Route data
 
-Routes can have arbitrary meta-data, interpreted by the router (via it's `:compile` hook) or the application itself. For nested routes, route data is accumulated recursively using [meta-merge](https://github.com/weavejester/meta-merge). By default, it appends collections, but it can be overridden to do `:prepend`, `:replace` or `:displace`.
+Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. This enables  co-existence of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+
+Routes can have a non-sequential route argument that is expanded into route data map when a router is created.
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/ping" ::ping]
+     ["/pong" identity]
+     ["/users" {:get {:roles #{:admin}
+                      :handler identity}}]]))
+```
+
+The expanded route data can be retrieved from a router with `routes` and is returned with `match-by-path` and `match-by-name` in case of a route match.
+
+```clj
+(r/routes router)
+; [["/ping" {:name :user/ping}]
+;  ["/pong" {:handler identity]}
+;  ["/users" {:get {:roles #{:admin}
+;                   :handler identity}}]]
+
+(r/match-by-path router "/ping")
+; #Match{:template "/ping"
+;        :meta {:name :user/ping}
+;        :result nil
+;        :params {}
+;        :path "/ping"}
+
+(r/match-by-name router ::ping)
+; #Match{:template "/ping"
+;        :meta {:name :user/ping}
+;        :result nil
+;        :params {}
+;        :path "/ping"}
+```
+
+## Nested route data
+
+For nested route trees, route data is accumulated recursively from root towards leafs using [meta-merge](https://github.com/weavejester/meta-merge). Default behavior for colections is `:append`, but this can be overridden to `:prepend`, `:replace` or `:displace` using the target meta-data.
 
 An example router with nested data:
 
@@ -12,41 +53,47 @@ An example router with nested data:
      ["/admin" {:roles #{:admin}}
       ["/users" ::users]
       ["/db" {:interceptors [::db]
-              :roles ^:replace #{:db-admin}}
-       ["/:db" {:parameters {:db String}}
-        ["/drop" ::drop-db]
-        ["/stats" ::db-stats]]]]]))
+              :roles ^:replace #{:db-admin}}]]]))
 ```
 
 Resolved route tree:
 
 ```clj
-(reitit/routes router)
+(r/routes router)
 ; [["/api/ping" {:interceptors [::api]
-;                :name ::ping}]
+;                :name :user/ping}]
 ;  ["/api/admin/users" {:interceptors [::api]
 ;                       :roles #{:admin}
-;                       :name ::users}]
-;  ["/api/admin/db/:db/drop" {:interceptors [::api ::db]
-;                             :roles #{:db-admin}
-;                             :parameters {:db String}
-;                             :name ::drop-db}]
-;  ["/api/admin/db/:db/stats" {:interceptors [::api ::db]
-;                              :roles #{:db-admin}
-;                              :parameters {:db String}
-;                              :name ::db-stats}]]
+;                       :name ::users} nil]
+;  ["/api/admin/db" {:interceptors [::api ::db]
+;                    :roles #{:db-admin}}]]
 ```
 
-Route data is returned with `Match` and the application can act based on it.
+
+## Expansion
+
+By default, `reitit/Expand` protocol is used to expand the route arguments. It expands keywords into `:name` and functions into `:handler` key in the route data map. It's easy to add custom expanders and one can chenge the whole expand implementation via [router options](../advanced/configuring_routers.md).
 
 ```clj
-(r/match-by-path router "/api/admin/db/users/drop")
-; #Match{:template "/api/admin/db/:db/drop"
-;        :meta {:interceptors [::api ::db]
-;               :roles #{:db-admin}
-;                :parameters {:db String}
-;        :name ::drop-db}
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/ping" ::ping]
+     ["/pong" identity]
+     ["/users" {:get {:roles #{:admin}
+                      :handler identity}}]]))
+
+(r/routes router)
+; [["/ping" {:name :user/ping}]
+;  ["/pong" {:handler identity]}
+;  ["/users" {:get {:roles #{:admin}
+;                   :handler identity}}]]
+
+(r/match-by-path router "/ping")
+; #Match{:template "/ping"
+;        :meta {:name :user/ping}
 ;        :result nil
-;        :params {:db "users"}
-;        :path "/api/admin/db/users/drop"}
+;        :params {}
+;        :path "/ping"}
 ```

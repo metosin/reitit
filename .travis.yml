@@ -2,6 +2,7 @@ sudo: false
 language: clojure
 lein: 2.7.1
 install:
+  - ./scripts/lein-modules install
   - lein deps
   - npm install
 script:

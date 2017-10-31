@@ -5,7 +5,7 @@
             [cheshire.core :as json]
             [clojure.string :as str]
             [reitit.core :as reitit]
-            [reitit.ring :as ring]
+            [reitit.core :as ring]
 
             [bidi.bidi :as bidi]
 

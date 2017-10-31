@@ -1,6 +1,6 @@
 # Dynamic extensions
 
-`ring-handler` injects the `Match` into a request and it can be extracted at runtime with `reitit.ring/get-match`. This can be used to build dynamic extensions to the system.
+`ring-handler` injects the `Match` into a request and it can be extracted at runtime with `reitit.ring/get-match`. This can be used to build ad-hoc extensions to the system.
 
 Example middleware to guard routes based on user roles:
 
@@ -10,7 +10,7 @@ Example middleware to guard routes based on user roles:
 (defn wrap-enforce-roles [handler]
   (fn [{:keys [::roles] :as request}]
     (let [required (some-> request (ring/get-match) :meta ::roles)]
-      (if (and (seq required) (not (set/intersection required roles)))
+      (if (and (seq required) (not (set/subset? required roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
 ```

@@ -1,4 +1,4 @@
-(ns reitit.coercion.protocol
+(ns reitit.ring.coercion.protocol
   (:refer-clojure :exclude [compile]))
 
 (defprotocol Coercion

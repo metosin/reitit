@@ -1,5 +1,5 @@
 # Advanced
 
-* [Route conflicts](advanced/route_conflicts.md)
-* [Route Validation](advanced/route_validation.md)
-* [Configuring routers](advanced/configuring_routers.md)
+* [Route Validation](route_validation.md)
+* [Different Routers](different_routers.md)
+* [Configuring routers](configuring_routers.md)

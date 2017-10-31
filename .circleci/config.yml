@@ -11,6 +11,9 @@ jobs:
             - 'v1-test-{{ checksum "project.clj" }}'
             - 'v1-test-'
       - run:
+          name: Install modules
+          command: ./scripts/lein-modules install
+      - run:
           name: Run tests
           command: ./scripts/test.sh clj
       - store_test_results:

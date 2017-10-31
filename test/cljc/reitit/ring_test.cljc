@@ -1,8 +1,8 @@
 (ns reitit.ring-test
   (:require [clojure.test :refer [deftest testing is]]
-            [reitit.middleware :as middleware]
-            [reitit.ring :as ring]
             [clojure.set :as set]
+            [reitit.ring.middleware :as middleware]
+            [reitit.ring :as ring]
             [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))

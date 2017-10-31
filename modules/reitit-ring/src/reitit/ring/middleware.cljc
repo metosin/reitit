@@ -1,6 +1,6 @@
-(ns reitit.middleware
+(ns reitit.ring.middleware
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.core :as reitit]))
+            [reitit.core :as r]))
 
 (defprotocol IntoMiddleware
   (into-middleware [this meta opts]))
@@ -91,13 +91,13 @@
    (router data nil))
   ([data opts]
    (let [opts (meta-merge {:compile compile-result} opts)]
-     (reitit/router data opts))))
+     (r/router data opts))))
 
 (defn middleware-handler [router]
   (with-meta
     (fn [path]
       (some->> path
-               (reitit/match-by-path router)
+               (r/match-by-path router)
                :result
                :handler))
     {::router router}))

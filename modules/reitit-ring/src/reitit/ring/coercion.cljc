@@ -1,8 +1,8 @@
-(ns reitit.coercion
+(ns reitit.ring.coercion
   (:require [clojure.walk :as walk]
             [spec-tools.core :as st]
-            [reitit.coercion.protocol :as protocol]
-            [reitit.middleware :as middleware]
+            [reitit.ring.middleware :as middleware]
+            [reitit.ring.coercion.protocol :as protocol]
             [reitit.ring :as ring]
             [reitit.impl :as impl]))
 
@@ -107,7 +107,7 @@
 (defn wrap-coerce-parameters
   "Pluggable request coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :parameters from route meta, otherwise does not mount."
+  and :parameters from route meta, otherwise will do nothing."
   [handler]
   (fn
     ([request]

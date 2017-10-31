@@ -1,21 +1,46 @@
-# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit) [![Dependencies Status](https://jarkeeper.com/metosin/reitit/status.svg)](https://jarkeeper.com/metosin/reitit)
+# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit)
 
 A friendly data-driven router for Clojure(Script).
 
-* Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.md)
-* [Route conflict resolution](https://metosin.github.io/reitit/advanced/route_conflicts.md)
-* First-class [route meta-data](https://metosin.github.io/reitit/basics/route_data.md)
+* Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
+* Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
+* First-class [route meta-data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
-* [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
-* supports both [Middleware](https://metosin.github.io/reitit/ring/compiling_middleware.md) & Interceptors
+* [Ring-router](https://metosin.github.io/reitit/ring.html) with data-driven [middleware](https://metosin.github.io/reitit/ring/compiling_middleware.html)
+* [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
 * Extendable
 * Fast
 
-Ships with example router for [Ring](#ring). See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
+See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 
 ## Latest version
 
 [![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
+
+## Quick start
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/api/ping" ::ping]
+     ["/api/orders/:id" ::order-by-id]]))
+
+(r/match-by-path router "/api/ping")
+; #Match{:template "/api/ping"
+;        :meta {:name ::ping}
+;        :result nil
+;        :params {}
+;        :path "/api/ping"}
+
+(r/match-by-name router ::order-by-id {:id 2})
+; #Match{:template "/api/orders/:id",
+;        :meta {:name ::order-by-id},
+;        :result nil,
+;        :params {:id 2},
+;        :path "/api/orders/2"}
+```
 
 ## Documentation
 
@@ -39,6 +64,20 @@ The documentation is built with [gitbook](https://toolchain.gitbook.com). To pre
 npm install -g gitbook-cli
 gitbook install
 gitbook serve
+```
+
+To bump up version:
+
+```bash
+# new version
+./scripts/set-version "1.0.0"
+./scripts/lein-modules install
+
+# works
+lein test
+
+# deploy to clojars
+./scripts/lein-modules do clean, deploy clojars
 ```
 
 ## License

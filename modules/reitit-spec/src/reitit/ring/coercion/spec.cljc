@@ -1,10 +1,10 @@
-(ns reitit.coercion.spec
+(ns reitit.ring.coercion.spec
   (:require [clojure.spec.alpha :as s]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds]
             [spec-tools.conform :as conform]
             [spec-tools.swagger.core :as swagger]
-            [reitit.coercion.protocol :as protocol])
+            [reitit.ring.coercion.protocol :as protocol])
   #?(:clj
      (:import (spec_tools.core Spec))))
 
