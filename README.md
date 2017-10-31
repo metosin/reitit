@@ -25,7 +25,7 @@ See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 (def router
   (r/router
     [["/api/ping" ::ping]
-     ["/api/orders/:id" ::order-by-id]]))
+     ["/api/orders/:id" ::order]]))
 
 (r/match-by-path router "/api/ping")
 ; #Match{:template "/api/ping"
@@ -34,7 +34,7 @@ See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 ;        :params {}
 ;        :path "/api/ping"}
 
-(r/match-by-name router ::order-by-id {:id 2})
+(r/match-by-name router ::order {:id 2})
 ; #Match{:template "/api/orders/:id",
 ;        :meta {:name ::order-by-id},
 ;        :result nil,
