@@ -439,13 +439,15 @@
 <li>Don&apos;t trust the (micro-)benchmarks</li>
 </ul>
 <h3 id="performance-guides">Performance guides</h3>
-<p>As a library user, some things related to performance:</p>
+<p>Some things related to performance:</p>
 <ul>
 <li>avoid wildcard-routes - it&apos;s an order of magnitude slower to match than non-wildcard routes</li>
 <li>it&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which collects all non-wildcard routes into a separate fast subrouter.</li>
 </ul>
+<h3 id="does-routing-performance-matter">Does routing performance matter?</h3>
+<p>Well, it depends. Some tested routing libs seem to spend more time resolving the routes than it takes to encode &amp; decode a 1k JSON payload. For busy sites, this actually matters.</p>
 <h3 id="example">Example</h3>
-<p>The routing sample taken from <a href="https://github.com/funcool/bide" target="_blank">bide</a> perf suite, run with a Late 2013 MacBook Pro, with the <code>perf</code> profile:</p>
+<p>The routing sample taken from <a href="https://github.com/funcool/bide" target="_blank">bide</a> README, run with a Late 2013 MacBook Pro, with the <code>perf</code> profile:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 (<span class="hljs-name">require</span> &apos;[criterium.core <span class="hljs-symbol">:as</span> cc])
 
@@ -466,13 +468,15 @@
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/workspace/1/1&quot;</span>)))
 </code></pre>
 <h3 id="is-that-good">Is that good?</h3>
-<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick tests</a>, the first lookup is order of 100 times faster than other tested Clojure routing libraries. The second being 3-18x faster. But as like most microbenchmarks, test usually lie as they test different test things with different libs. For example, Pedestal also matches on the <code>:request-method</code> which makes it do more work. With real life routing trees, the differences are most likely more subtle, or even the order might be totally different.</p>
+<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick perf tests</a>, the first lookup is two orders of magnitude faster than other tested Clojure routing libraries. The second lookup is 3-18x faster.</p>
+<p>But, most micro-benchmarks lie. For example, Pedestal is always matching the <code>:request-method</code> which means it does more work. With real life routing trees, the differences are most likely more subtle, or some other lib might be actually faster.</p>
 <h3 id="so-why-test">So why test?</h3>
-<p>Real value of perf tests is to have a internal baseline and optimize against it. Also, to ensure that new features don&apos;t regress the performance.</p>
-<p>It might be interesting to look out of the box and compare Clojure routing libs to routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
-<h3 id="plans-ahead">Plans ahead</h3>
+<p>Real value of perf tests is to get a internal baseline to optimize against. Also, to ensure that new features don&apos;t regress the performance.</p>
+<p>It might be interesting to look out of the box and compare the fast Clojure routing libs to routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
+<h3 id="roadmap">Roadmap</h3>
 <p>Currently, the non-wildcard routes are already really fast to match, but wildcard routes use only a naive linear scan. Plan is to add a optimized <a href="https://en.wikipedia.org/wiki/Trie" target="_blank">Trie</a>-based router. See
-<a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">httprouter</a> and <a href="https://github.com/pedestal/pedestal/pull/330" target="_blank">Pedestal</a> for details. New routing algorithms can be plugged in easily, without changes in the public apis.</p>
+<a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">httprouter</a> and <a href="https://github.com/pedestal/pedestal/pull/330" target="_blank">Pedestal</a> for details.</p>
+<p>PRs welcome.</p>
 
                                 
                                 </section>
@@ -512,7 +516,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-01T16:56:44.144Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-01T16:57:22.640Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-01T16:57:20.197Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-01T16:57:59.846Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
