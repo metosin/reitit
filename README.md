@@ -17,15 +17,17 @@ See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 
 All bundled:
 
-[![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
+```clj
+[metosin/reitit "0.1.0-SNAPSHOT"]
+```
 
-In parts:
+Optionally, the parts can be required separately:
 
-[![Clojars Project](http://clojars.org/metosin/reitit-core/latest-version.svg)](http://clojars.org/metosin/reitit-core)
-
-[![Clojars Project](http://clojars.org/metosin/reitit-ring/latest-version.svg)](http://clojars.org/metosin/reitit-ring)
-
-[![Clojars Project](http://clojars.org/metosin/reitit-spec/latest-version.svg)](http://clojars.org/metosin/reitit-spec)
+```clj
+[metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
+[metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
+[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
+```
 
 ## Quick start
 

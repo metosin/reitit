@@ -15,7 +15,7 @@
                          [metosin/reitit-spec "0.1.0-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
-                         [metosin/spec-tools "0.5.0"]]
+                         [metosin/spec-tools "0.5.1"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
@@ -32,13 +32,13 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-spec/src"]
 
-                   :dependencies [[org.clojure/clojure "1.9.0-beta2"]
+                   :dependencies [[org.clojure/clojure "1.9.0-beta4"]
                                   [org.clojure/clojurescript "1.9.946"]
 
                                   ;; all modules dependencies
                                   [metosin/reitit]
 
-                                  [expound "0.3.1"]
+                                  [expound "0.3.2"]
                                   [orchestra "2017.08.13"]
 
                                   [criterium "0.4.4"]
