@@ -9,7 +9,7 @@
 * [Pluggable coercion](./ring/parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
 * supports both [Middleware](./ring/compiling_middleware.md) & Interceptors
 * Extendable
-* Fast
+* [Fast](performance.md)
 
 To use Reitit, add the following dependecy to your project:
 

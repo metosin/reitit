@@ -9,7 +9,7 @@ A friendly data-driven router for Clojure(Script).
 * [Ring-router](https://metosin.github.io/reitit/ring.html) with data-driven [middleware](https://metosin.github.io/reitit/ring/compiling_middleware.html)
 * [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
 * Extendable
-* Fast
+* [Fast](https://metosin.github.io/reitit/performance.html)
 
 See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 
