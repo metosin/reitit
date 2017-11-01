@@ -49,7 +49,7 @@ The routing sample taken from [bide](https://github.com/funcool/bide) perf suite
 
 ### Is that good?
 
-Based on some [quick tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit), the first lookup is order of 100 times faster than other tested Clojure routing libraries. The second being 3-18x faster. But as like most microbenchmarks, test usually lie as they might test things with different libs. For example, Pedestal also matches on the `:request-method` which makes it do more work. With real life routing trees, the differences are most likely more subtle, or even the order might be totally different.
+Based on some [quick tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit), the first lookup is order of 100 times faster than other tested Clojure routing libraries. The second being 3-18x faster. But as like most microbenchmarks, test usually lie as they test different test things with different libs. For example, Pedestal also matches on the `:request-method` which makes it do more work. With real life routing trees, the differences are most likely more subtle, or even the order might be totally different.
 
 ### So why test?
 
