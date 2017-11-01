@@ -17,6 +17,14 @@ To use Reitit, add the following dependecy to your project:
 [metosin/reitit "0.1.0-SNAPSHOT"]
 ```
 
+Optionally, the parts can be required separately:
+
+```clj
+[metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
+[metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
+[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
+```
+
 # Examples
 
 ## Simple router

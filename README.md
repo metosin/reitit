@@ -15,7 +15,17 @@ See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
 
 ## Latest version
 
+All bundled:
+
 [![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
+
+In parts:
+
+[![Clojars Project](http://clojars.org/metosin/reitit-core/latest-version.svg)](http://clojars.org/metosin/reitit-core)
+
+[![Clojars Project](http://clojars.org/metosin/reitit-ring/latest-version.svg)](http://clojars.org/metosin/reitit-ring)
+
+[![Clojars Project](http://clojars.org/metosin/reitit-spec/latest-version.svg)](http://clojars.org/metosin/reitit-spec)
 
 ## Quick start
 
