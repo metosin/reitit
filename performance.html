@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Introduction · GitBook</title>
+        <title>Performance · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,8 +57,8 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="basics/" />
     
+    <link rel="prev" href="ring/compiling_middleware.html" />
     
 
     </head>
@@ -87,7 +87,7 @@
         
         
     
-        <li class="chapter active" data-level="1.1" data-path="./">
+        <li class="chapter " data-level="1.1" data-path="./">
             
                 <a href="./">
             
@@ -339,7 +339,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5" data-path="performance.html">
+        <li class="chapter active" data-level="1.5" data-path="performance.html">
             
                 <a href="performance.html">
             
@@ -408,7 +408,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Introduction</a>
+        <a href="." >Performance</a>
     </h1>
 </div>
 
@@ -423,116 +423,56 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="introduction">Introduction</h1>
-<p><a href="https://github.com/metosin/reitit" target="_blank">Reitit</a> is a small Clojure(Script) library for data-driven routing.</p>
+                                <h1 id="performance">Performance</h1>
+<p>There are many great routing libraries for Clojure(Script), but not many are optimized for perf. Reitit tries to be both great in features and really fast. Originally the routing was adopted from <a href="http://pedestal.io/" target="_blank">Pedestal</a>, but it has been since mostly rewritten.</p>
+<h3 id="rationale">Rationale</h3>
 <ul>
-<li>Simple data-driven <a href="basics/route_syntax.html">route syntax</a></li>
-<li><a href="advanced/route_conflicts.md">Route conflict resolution</a></li>
-<li>First-class <a href="basics/route_data.html">route meta-data</a></li>
-<li>Bi-directional routing</li>
-<li><a href="ring/parameter_coercion.html">Pluggable coercion</a> (<a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a>)</li>
-<li>supports both <a href="ring/compiling_middleware.html">Middleware</a> &amp; Interceptors</li>
-<li>Extendable</li>
-<li>Fast</li>
+<li>Multiple routing algorithms, select for for a given route tree</li>
+<li>Route flattening and re-ordering</li>
+<li>Managed mutability over Immutability</li>
+<li>Precompute/compile as much as possible (matches, middleware, routes)</li>
+<li>Use abstractions that enable JVM optimizations</li>
+<li>Use small functions to enable JVM Inlining</li>
+<li>Protocols over Multimethods</li>
+<li>Records over Maps</li>
+<li>Always be measuring</li>
+<li>Don&apos;t trust the (micro-)benchmarks</li>
 </ul>
-<p>To use Reitit, add the following dependecy to your project:</p>
-<pre><code class="lang-clj">[metosin/reitit <span class="hljs-string">&quot;0.1.0-SNAPSHOT&quot;</span>]
-</code></pre>
-<h1 id="examples">Examples</h1>
-<h2 id="simple-router">Simple router</h2>
+<h3 id="performance-guides">Performance guides</h3>
+<p>As a library user, some things related to performance:</p>
+<ul>
+<li>avoid wildcard-routes - it&apos;s an order of magnitude slower to match than non-wildcard routes</li>
+<li>it&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which collects all non-wildcard routes into a separate fast subrouter.</li>
+</ul>
+<h3 id="example">Example</h3>
+<p>The routing sample taken from <a href="https://github.com/funcool/bide" target="_blank">bide</a> perf suite, run with a Late 2013 MacBook Pro, with the <code>perf</code> profile:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+(<span class="hljs-name">require</span> &apos;[criterium.core <span class="hljs-symbol">:as</span> cc])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
   (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-     [<span class="hljs-string">&quot;/api/orders/:id&quot;</span> <span class="hljs-symbol">::order-by-id</span>]]))
+    [[<span class="hljs-string">&quot;/auth/login&quot;</span> <span class="hljs-symbol">:auth/login</span>]
+     [<span class="hljs-string">&quot;/auth/recovery/token/:token&quot;</span> <span class="hljs-symbol">:auth/recovery</span>]
+     [<span class="hljs-string">&quot;/workspace/:project/:page&quot;</span> <span class="hljs-symbol">:workspace/page</span>]]))
+
+<span class="hljs-comment">;; Execution time mean : 3.488297 &#xB5;s -&gt; 286M ops/sec</span>
+(<span class="hljs-name">cc/quick-bench</span>
+  (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
+    (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/auth/login&quot;</span>)))
+
+<span class="hljs-comment">;; Execution time mean : 692.905995 &#xB5;s -&gt; 1.4M ops/sec</span>
+(<span class="hljs-name">cc/quick-bench</span>
+  (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
+    (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/workspace/1/1&quot;</span>)))
 </code></pre>
-<p>Routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/ipa&quot;</span>)
-<span class="hljs-comment">; nil</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/ping&quot;</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/orders/1&quot;</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::order-by-id}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {:id &quot;1&quot;}</span>
-<span class="hljs-comment">;        :path &quot;/api/orders/1&quot;}</span>
-</code></pre>
-<p>Reverse-routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ipa</span>)
-<span class="hljs-comment">; nil</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span>)
-<span class="hljs-comment">; #PartialMatch{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;               :meta {:name :user/order-by-id}</span>
-<span class="hljs-comment">;               :result nil</span>
-<span class="hljs-comment">;               :params nil</span>
-<span class="hljs-comment">;               :required #{:id}}</span>
-
-(<span class="hljs-name">r/partial-match?</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span>))
-<span class="hljs-comment">; true</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span> {<span class="hljs-symbol">:id</span> <span class="hljs-number">2</span>})
-<span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;,</span>
-<span class="hljs-comment">;        :meta {:name ::order-by-id},</span>
-<span class="hljs-comment">;        :result nil,</span>
-<span class="hljs-comment">;        :params {:id 2},</span>
-<span class="hljs-comment">;        :path &quot;/api/orders/2&quot;}</span>
-</code></pre>
-<h2 id="ring-router">Ring-router</h2>
-<p>Ring-router adds support for <code>:handler</code> functions, <code>:middleware</code> and routing based on <code>:request-method</code>. It also supports pluggable parameter coercion (<code>clojure.spec</code>), data-driven middleware, route and middleware compilation, dynamic extensions and more.</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> handler [_]
-  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>})
-
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap [handler id]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
-    (<span class="hljs-name">update</span> (<span class="hljs-name">handler</span> request) <span class="hljs-symbol">:wrap</span> (<span class="hljs-name">fnil</span> conj &apos;()) id)))
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">ring/ring-handler</span>
-    (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-symbol">:api</span>]]}
-       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> handler
-                 <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]
-       [<span class="hljs-string">&quot;/admin&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-symbol">:admin</span>]]}
-        [<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> handler
-                   <span class="hljs-symbol">:post</span> handler}]]])))
-</code></pre>
-<p>Routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/users&quot;</span>})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;, :wrap (:api :admin}</span>
-
-(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:put</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/users&quot;</span>})
-<span class="hljs-comment">; nil</span>
-</code></pre>
-<p>Reverse-routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
-
-(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app (<span class="hljs-name">ring/get-router</span>) (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::ping</span>))
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:middleware [[#object[user$wrap] :api]]</span>
-<span class="hljs-comment">;               :get {:handler #object[user$handler]}</span>
-<span class="hljs-comment">;        :name ::ping}</span>
-<span class="hljs-comment">;        :result #Methods{...}</span>
-<span class="hljs-comment">;        :params nil</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-</code></pre>
+<h3 id="is-that-good">Is that good?</h3>
+<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick tests</a>, the first lookup is order of 100 times faster than other tested Clojure routing libraries. The second being 3-18x faster. But as like most microbenchmarks, test usually lie as they might test things with different libs. For example, Pedestal also matches on the <code>:request-method</code> which makes it do more work. With real life routing trees, the differences are most likely more subtle, or even the order might be totally different.</p>
+<h3 id="so-why-test">So why test?</h3>
+<p>Real value of perf tests is to have a internal baseline and optimize against it. Also, to ensure that new features don&apos;t regress the performance.</p>
+<p>It might be interesting to look out of the box and compare Clojure routing libs to routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
+<h3 id="plans-ahead">Plans ahead</h3>
+<p>Currently, the non-wildcard routes are already really fast to match, but wildcard routes use only a naive linear scan. Plan is to add a optimized <a href="https://en.wikipedia.org/wiki/Trie" target="_blank">Trie</a>-based router. See
+<a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">httprouter</a> and <a href="https://github.com/pedestal/pedestal/pull/330" target="_blank">Pedestal</a> for details. New routing algorithms can be plugged in easily, without changes in the public apis.</p>
 
                                 
                                 </section>
@@ -560,10 +500,10 @@
 
             
                 
-                
-                <a href="basics/" class="navigation navigation-next navigation-unique" aria-label="Next page: Basics">
-                    <i class="fa fa-angle-right"></i>
+                <a href="ring/compiling_middleware.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Compiling middleware">
+                    <i class="fa fa-angle-left"></i>
                 </a>
+                
                 
             
         
@@ -572,7 +512,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route conflicts","level":"1.2.6","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2017-11-01T07:28:57.025Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-01T07:29:35.540Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-01T07:28:57.025Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-01T07:29:35.540Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
