@@ -1,4 +1,4 @@
-# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit)
+# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit) [![Clojars Project](https://img.shields.io/clojars/v/metosin/reitit.svg)](https://clojars.org/metosin/reitit)
 
 A friendly data-driven router for Clojure(Script).
 
