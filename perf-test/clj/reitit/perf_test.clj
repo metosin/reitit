@@ -11,7 +11,8 @@
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
-            [io.pedestal.http.route :as route]))
+            [io.pedestal.http.route :as route]
+            [reitit.core :as r]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -70,80 +71,89 @@
 
   (suite "static route")
 
-  ;; 2.2µs
+  ;; 1800 µs
   (title "bidi")
   (let [call #(bidi/match-route bidi-routes "/auth/login")]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 1.5µs (-40%)
+  ;; 1400 µs
   (title "ataraxy")
   (let [call #(ataraxy/matches ataraxy-routes {:uri "/auth/login"})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 1.1µs (-50%)
+  ;; 1200 µs
   (title "pedestal - map-tree => prefix-tree")
   (let [call #(pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 1.5µs (-40%)
+  ;; 1400 µs
   (title "compojure-api")
   (let [call #(compojure-api-routes {:uri "/auth/login", :request-method :get})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 11.5ns (-99,5%)
+  ;; 3.5 µs (300-500x)
   (title "reitit")
   (let [call #(reitit/match-by-path reitit-routes "/auth/login")]
     (assert (call))
     (cc/quick-bench
-      (call))))
+      (dotimes [_ 1000]
+        (call)))))
 
 (defn routing-test2 []
 
   (suite "wildcard route")
 
-  ;; 15.4µs
+  ;; 12800 µs
   (title "bidi")
   (let [call #(bidi/match-route bidi-routes "/workspace/1/1")]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 2.9µs (-81%)
+  ;; 2800 µs
   (title "ataraxy")
   (let [call #(ataraxy/matches ataraxy-routes {:uri "/workspace/1/1"})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 2.4µs (-84%)
+  ;; 2300 µs
   (title "pedestal - map-tree => prefix-tree")
   (let [call #(pedestal/find-route pedestal-router {:path-info "/workspace/1/1" :request-method :get})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 3.8µs (-75%)
+  ;; 3800 µs
   (title "compojure-api")
   (let [call #(compojure-api-routes {:uri "/workspace/1/1", :request-method :get})]
     (assert (call))
     (cc/quick-bench
-      (call)))
+      (dotimes [_ 1000]
+        (call))))
 
-  ;; 1.0µs (-94%)
-  ;; 690ns (-96%)
+  ;; 710 µs (3-18x)
   (title "reitit")
   (let [call #(reitit/match-by-path reitit-routes "/workspace/1/1")]
     (assert (call))
     (cc/quick-bench
-      (call))))
+      (dotimes [_ 1000]
+        (call)))))
 
 (defn reverse-routing-test []
 
