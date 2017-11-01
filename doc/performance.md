@@ -17,14 +17,18 @@ There are many great routing libraries for Clojure(Script), but not many are opt
 
 ### Performance guides
 
-As a library user, some things related to performance:
+Some things related to performance:
 
 * avoid wildcard-routes - it's an order of magnitude slower to match than non-wildcard routes
 * it's ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don't disable the [conflict resolution](basics/route_conflicts.md) => if no conflicting routes are found, a `:mixed-router` can be created, which collects all non-wildcard routes into a separate fast subrouter.
 
+### Does routing performance matter?
+
+Well, it depends. Some tested routing libs seem to spend more time resolving the routes than it takes to encode & decode a 1k JSON payload. For busy sites, this actually matters.
+
 ### Example
 
-The routing sample taken from [bide](https://github.com/funcool/bide) perf suite, run with a Late 2013 MacBook Pro, with the `perf` profile:
+The routing sample taken from [bide](https://github.com/funcool/bide) README, run with a Late 2013 MacBook Pro, with the `perf` profile:
 
 ```clj
 (require '[reitit.core :as r])
@@ -49,15 +53,19 @@ The routing sample taken from [bide](https://github.com/funcool/bide) perf suite
 
 ### Is that good?
 
-Based on some [quick tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit), the first lookup is order of 100 times faster than other tested Clojure routing libraries. The second being 3-18x faster. But as like most microbenchmarks, test usually lie as they test different test things with different libs. For example, Pedestal also matches on the `:request-method` which makes it do more work. With real life routing trees, the differences are most likely more subtle, or even the order might be totally different.
+Based on some [quick perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit), the first lookup is two orders of magnitude faster than other tested Clojure routing libraries. The second lookup is 3-18x faster.
+
+But, most micro-benchmarks lie. For example, Pedestal is always matching the `:request-method` which means it does more work. With real life routing trees, the differences are most likely more subtle, or some other lib might be actually faster.
 
 ### So why test?
 
-Real value of perf tests is to have a internal baseline and optimize against it. Also, to ensure that new features don't regress the performance.
+Real value of perf tests is to get a internal baseline to optimize against. Also, to ensure that new features don't regress the performance.
 
-It might be interesting to look out of the box and compare Clojure routing libs to routers in other languages, like the [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark).
+It might be interesting to look out of the box and compare the fast Clojure routing libs to routers in other languages, like the [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark).
 
-### Plans ahead
+### Roadmap
 
 Currently, the non-wildcard routes are already really fast to match, but wildcard routes use only a naive linear scan. Plan is to add a optimized [Trie](https://en.wikipedia.org/wiki/Trie)-based router. See
-[httprouter](https://github.com/julienschmidt/httprouter#how-does-it-work) and [Pedestal](https://github.com/pedestal/pedestal/pull/330) for details. New routing algorithms can be plugged in easily, without changes in the public apis.
+[httprouter](https://github.com/julienschmidt/httprouter#how-does-it-work) and [Pedestal](https://github.com/pedestal/pedestal/pull/330) for details.
+
+PRs welcome.
