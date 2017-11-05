@@ -161,7 +161,7 @@
       :cljs [[a k v] (assoc a k v)]))
 
 (defn fast-map [m]
-  #?@(:clj  [(java.util.HashMap. m)]
+  #?@(:clj  [(java.util.HashMap. (or m {}))]
       :cljs [m]))
 
 (defn fast-get
