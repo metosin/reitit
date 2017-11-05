@@ -73,19 +73,11 @@
         total 10000
         dropped (int (* total 0.45))]
     (mapv
-      #(let [times (->> (range total)
-                        (mapv
-                          (fn [_]
-                            (let [now (System/nanoTime)
-                                  result (f %)
-                                  total (- (System/nanoTime) now)]
-                              (assert result)
-                              total)))
-                        (sort)
-                        (drop dropped)
-                        (drop-last dropped))
-             avg (int (/ (reduce + times) (count times)))]
-         [% avg]) urls)))
+      (fn [path]
+        (let [time (int (* (first (:sample-mean (cc/quick-benchmark (dotimes [_ 1000] (f path)) {}))) 1e6))]
+          (println path "=>" time "ns")
+          [path time]))
+      urls)))
 
 (defn bench [routes no-paths?]
   (let [routes (mapv (fn [[path name]]
