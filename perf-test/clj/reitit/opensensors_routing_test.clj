@@ -5,13 +5,14 @@
             [cheshire.core :as json]
             [clojure.string :as str]
             [reitit.core :as reitit]
-            [reitit.core :as ring]
+            [reitit.ring :as ring]
 
             [bidi.bidi :as bidi]
 
             [ataraxy.core :as ataraxy]
 
             [compojure.api.sweet :refer [api routes context ANY]]
+            [compojure.core :as compojure]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
@@ -278,6 +279,82 @@
               ["topics/" topic] [:test/route47 topic]
               "topics" [:test/route50]}}))
 
+(def opensensors-compojure-routes
+  (compojure/routes
+    (compojure/context "/v1" []
+      (compojure/context "/public" []
+        (compojure/ANY "/topics/:topic" [] {:name :test/route4} handler)
+        (compojure/ANY "/users/:user-id" [] {:name :test/route16} handler)
+        (compojure/ANY "/orgs/:org-id" [] {:name :test/route18} handler))
+      (compojure/context "/users/:user-id" []
+        (compojure/ANY "/orgs/:org-id" [] {:name :test/route5} handler)
+        (compojure/ANY "/invitations" [] {:name :test/route7} handler)
+        (compojure/ANY "/topics" [] {:name :test/route9} handler)
+        (compojure/ANY "/bookmarks/followers" [] {:name :test/route10} handler)
+        (compojure/context "/devices" []
+          (compojure/ANY "/" [] {:name :test/route15} handler)
+          #_(compojure/ANY "/bulk" [] {:name :test/route21} handler)
+          (compojure/ANY "/:client-id" [] {:name :test/route35} handler)
+          (compojure/ANY "/:client-id/reset-password" [] {:name :test/route49} handler))
+        (compojure/ANY "/device-errors" [] {:name :test/route22} handler)
+        (compojure/ANY "/usage-stats" [] {:name :test/route24} handler)
+        (compojure/ANY "/claim-device/:client-id" [] {:name :test/route26} handler)
+        (compojure/ANY "/owned-orgs" [] {:name :test/route31} handler)
+        (compojure/ANY "/bookmark/:topic" [] {:name :test/route33} handler)
+        (compojure/ANY "/" [] {:name :test/route36} handler)
+        (compojure/ANY "/orgs" [] {:name :test/route52} handler)
+        (compojure/ANY "/api-key" [] {:name :test/route43} handler)
+        (compojure/ANY "/bookmarks" [] {:name :test/route56} handler))
+      (compojure/ANY "/search/topics/:term" [] {:name :test/route6} handler)
+      (compojure/context "/orgs" []
+        (compojure/ANY "/" [] {:name :test/route55} handler)
+        (compojure/context "/:org-id" []
+          (compojure/context "/devices" []
+            (compojure/ANY "/" [] {:name :test/route37} handler)
+            (compojure/ANY "/:device-id" [] {:name :test/route13} handler)
+            #_(compojure/ANY "/:batch/:type" [] {:name :test/route8} handler))
+          (compojure/ANY "/usage-stats" [] {:name :test/route12} handler)
+          (compojure/ANY "/invitations" [] {:name :test/route19} handler)
+          (compojure/context "/members" []
+            (compojure/ANY "/:user-id" [] {:name :test/route34} handler)
+            (compojure/ANY "/" [] {:name :test/route38} handler)
+            #_(compojure/ANY "/invitation-data/:user-id" [] {:name :test/route39} handler))
+          (compojure/ANY "/errors" [] {:name :test/route17} handler)
+          (compojure/ANY "/" [] {:name :test/route42} handler)
+          (compojure/ANY "/confirm-membership/:token" [] {:name :test/route46} handler)
+          (compojure/ANY "/topics" [] {:name :test/route57} handler)))
+      (compojure/context "/messages" []
+        (compojure/ANY "/user/:user-id" [] {:name :test/route14} handler)
+        (compojure/ANY "/device/:client-id" [] {:name :test/route30} handler)
+        (compojure/ANY "/topic/:topic" [] {:name :test/route48} handler))
+      (compojure/context "/topics" []
+        (compojure/ANY "/:topic" [] {:name :test/route32} handler)
+        (compojure/ANY "/" [] {:name :test/route54} handler))
+      (compojure/ANY "/whoami" [] {:name :test/route41} handler)
+      (compojure/ANY "/login" [] {:name :test/route51} handler))
+    (compojure/context "/v2" []
+      (compojure/ANY "/whoami" [] {:name :test/route1} handler)
+      (compojure/context "/users/:user-id" []
+        (compojure/ANY "/datasets" [] {:name :test/route2} handler)
+        (compojure/ANY "/devices" [] {:name :test/route25} handler)
+        (compojure/context "/topics" []
+          (compojure/ANY "/bulk" [] {:name :test/route29} handler)
+          (compojure/ANY "/" [] {:name :test/route54} handler))
+        (compojure/ANY "/" [] {:name :test/route45} handler))
+      (compojure/context "/public" []
+        (compojure/context "/projects/:project-id" []
+          (compojure/ANY "/datasets" [] {:name :test/route3} handler)
+          (compojure/ANY "/" [] {:name :test/route27} handler))
+        #_(compojure/ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
+        (compojure/ANY "/datasets/:dataset-id" [] {:name :test/route28} handler)
+        (compojure/ANY "/messages/dataset/:dataset-id" [] {:name :test/route53} handler))
+      (compojure/ANY "/datasets/:dataset-id" [] {:name :test/route11} handler)
+      (compojure/ANY "/login" [] {:name :test/route23} handler)
+      (compojure/ANY "/orgs/:org-id/topics" [] {:name :test/route40} handler)
+      (compojure/ANY "/schemas" [] {:name :test/route44} handler)
+      (compojure/ANY "/topics/:topic" [] {:name :test/route47} handler)
+      (compojure/ANY "/topics" [] {:name :test/route50} handler))))
+
 (def opensensors-compojure-api-routes
   (routes
     (context "/v1" []
@@ -490,25 +567,31 @@
                         #(app {:uri % :request-method :get}))
         bidi-f #(bidi/match-route opensensors-bidi-routes %)
         ataraxy-f #(ataraxy/matches opensensors-ataraxy-routes {:uri %})
+        compojure-f #(opensensors-compojure-routes {:uri % :request-method :get})
         compojure-api-f #(opensensors-compojure-api-routes {:uri % :request-method :get})
         pedestal-f #(pedestal/find-route opensensors-pedestal-routes {:path-info % :request-method :get})]
 
-    ;;  2538ns -> 2028ns
+    ;;  2538ns
+    ;;  2065ns
     (bench!! routes true "reitit" reitit-f)
 
-    ;;  2845ns -> 2299ns
+    ;;  2845ns
+    ;;  2316ns
     (bench!! routes true "reitit-ring" reitit-ring-f)
 
-    ;;  2737ns
+    ;;  2541ns
     (bench!! routes true "pedestal" pedestal-f)
 
-    ;;  9823ns
+    ;;  9462ns
     (bench!! routes true "compojure-api" compojure-api-f)
 
-    ;; 16716ns
+    ;; 11041ns
+    (bench!! routes true "compojure" compojure-f)
+
+    ;; 16820ns
     (bench!! routes true "bidi" bidi-f)
 
-    ;; 24467ns
+    ;; 24134ns
     (bench!! routes true "ataraxy" ataraxy-f)))
 
 (comment
