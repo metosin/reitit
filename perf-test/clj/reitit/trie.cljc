@@ -44,14 +44,15 @@
     (reify
       Node
       (lookup [this path params]
-        #_(println "w=>" segment "..." path)
         (let [i (.indexOf ^String path "/")]
           (if (pos? i)
             (let [value (subs path 0 i)]
-              (let [childs [(impl/fast-get children' (char-key path (inc i))) ?wild ?catch]
+              (let [child (impl/fast-get children' (char-key path (inc i)))
                     path' (subs path (inc i))
                     params (assoc params param value)]
-                (some #(lookup % path' params) childs)))
+                (or (lookup child path' params)
+                    (lookup ?wild path' params)
+                    (lookup ?catch path' params))))
             (assoc params param path))))
       (get-segment [this]
         segment)
@@ -76,14 +77,15 @@
     (reify
       Node
       (lookup [this path params]
-        #_(println "s=>" segment "..." path)
         (if (.equals segment path)
           params
           (let [p (if (>= (count path) size) (subs path 0 size))]
             (if (.equals segment p)
-              (let [childs [(impl/fast-get children' (char-key path size)) ?wild ?catch]
+              (let [child (impl/fast-get children' (char-key path size))
                     path (subs path size)]
-                (some #(lookup % path params) childs))))))
+                (or (lookup child path params)
+                    (lookup ?wild path params)
+                    (lookup ?catch path params)))))))
       (get-segment [this]
         segment)
       (update-segment [this subs lcs]
@@ -315,4 +317,5 @@
   ;; 1.3ms (fast-map)
   ;; 1.3ms (dissoc wild & catch-all from children)
   ;; 1.3ms (reified protocols)
+  ;; 0.8ms (flattened matching)
   (cc/quick-bench (dotimes [_ 1000] (lookup tree-new "/v1/orgs/1/topics" {}))))
