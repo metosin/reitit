@@ -29,6 +29,7 @@
   (lookup [this path params])
   (get-segment [this])
   (update-segment [this subs lcs])
+  (set-data [this data])
   (add-child [this key child])
   (insert-child [this key path-spec o]))
 
@@ -58,6 +59,8 @@
             (->Match data (assoc params param path)))))
       (get-segment [this]
         segment)
+      (set-data [this data]
+        (wild-node segment param children data))
       (add-child [this key child]
         (wild-node segment param (assoc children key child) data))
       (insert-child [this key path-spec o]
@@ -92,10 +95,12 @@
         segment)
       (update-segment [this subs lcs]
         (static-node (subs segment lcs) children data))
+      (set-data [this data]
+        (static-node segment children data))
       (add-child [this key child]
         (static-node segment (assoc children key child) data))
-      (insert-child [this key path-spec o]
-        (static-node segment (update children key insert path-spec o) data)))))
+      (insert-child [this key path-spec child-data]
+        (static-node segment (update children key insert path-spec child-data) data)))))
 
 (defn- wild? [s]
   (contains? #{\: \*} (first s)))
@@ -138,22 +143,22 @@
 (defn- make-node
   "Given a path-spec segment string and a payload object, return a new
   tree node."
-  [segment o]
+  [segment data]
   (cond
     (wild-param? segment)
-    (wild-node segment (keyword (subs segment 1)) nil o)
+    (wild-node segment (keyword (subs segment 1)) nil data)
 
     (catch-all-param? segment)
-    (catch-all-node segment (keyword (subs segment 1)) nil o)
+    (catch-all-node segment (keyword (subs segment 1)) nil data)
 
     :else
-    (static-node segment nil o)))
+    (static-node segment nil data)))
 
 (defn- new-node
   "Given a path-spec and a payload object, return a new tree node. If
   the path-spec contains wildcards or catch-alls, will return parent
   node of a tree (linked list)."
-  [path-spec o]
+  [path-spec data]
   (if (contains-wilds? path-spec)
     (let [parts (partition-wilds path-spec)]
       (reduce (fn [child segment]
@@ -163,9 +168,9 @@
                 (-> (make-node segment nil)
                     (add-child (subs (get-segment child) 0 1) child)))
               (let [segment (last parts)]
-                (make-node segment o))
+                (make-node segment data))
               (reverse (butlast parts))))
-    (make-node path-spec o)))
+    (make-node path-spec data)))
 
 (defn- calc-lcs
   "Given two strings, return the end index of the longest common
@@ -188,27 +193,27 @@
   old contents of node and the new item as children.
   lcs is the index of the longest common string in path-spec and the
   segment of node."
-  [node path-spec o lcs]
+  [node path-spec data lcs]
   (let [segment (get-segment node)
         common (subs path-spec 0 lcs)
         parent (new-node common nil)]
     (if (= common path-spec)
-      (-> parent
+      (-> (set-data parent data)
           (add-child (char-key segment lcs) (update-segment node subs lcs)))
       (-> parent
           (add-child (char-key segment lcs) (update-segment node subs lcs))
-          (insert-child (char-key path-spec lcs) (subs path-spec lcs) o)))))
+          (insert-child (char-key path-spec lcs) (subs path-spec lcs) data)))))
 
 (defn insert
   "Given a tree node, a path-spec and a payload object, return a new
   tree with payload inserted."
-  [node path-spec o]
+  [node path-spec data]
   (let [segment (get-segment node)]
     (cond (nil? node)
-          (new-node path-spec o)
+          (new-node path-spec data)
 
           (= segment path-spec)
-          node
+          (set-data node data)
 
           ;; handle case where path-spec is a wildcard param
           (wild-param? path-spec)
@@ -216,7 +221,7 @@
                 common (subs path-spec 0 lcs)]
             (if (= common segment)
               (let [path-spec (subs path-spec (inc lcs))]
-                (insert-child node (subs path-spec 0 1) path-spec o))
+                (insert-child node (subs path-spec 0 1) path-spec data))
               (throw (ex-info "route conflict"
                               {:node node
                                :path-spec path-spec
@@ -233,10 +238,10 @@
           :else
           (let [lcs (calc-lcs segment path-spec)]
             (cond (= lcs (count segment))
-                  (insert-child node (char-key path-spec lcs) (subs path-spec lcs) o)
+                  (insert-child node (char-key path-spec lcs) (subs path-spec lcs) data)
 
                   :else
-                  (split node path-spec o lcs))))))
+                  (split node path-spec data lcs))))))
 
 ;;
 ;; testing
@@ -321,4 +326,5 @@
   ;; 1.3ms (reified protocols)
   ;; 0.8ms (flattened matching)
   ;; 0.8ms (return route-data)
+  ;; 0.8ms (fix payloads)
   (cc/quick-bench (dotimes [_ 1000] (lookup tree-new "/v1/orgs/1/topics" {}))))
