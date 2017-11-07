@@ -37,7 +37,9 @@
   (lookup [_ _ _])
   (get-segment [this]))
 
-(defn wild-node [segment param children]
+(defrecord Match [data params])
+
+(defn wild-node [segment param children data]
   (let [?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
         children' (impl/fast-map children)]
@@ -53,23 +55,23 @@
                 (or (lookup child path' params)
                     (lookup ?wild path' params)
                     (lookup ?catch path' params))))
-            (assoc params param path))))
+            (->Match data (assoc params param path)))))
       (get-segment [this]
         segment)
       (add-child [this key child]
-        (wild-node segment param (assoc children key child)))
+        (wild-node segment param (assoc children key child) data))
       (insert-child [this key path-spec o]
-        (wild-node segment param (update children key insert path-spec o))))))
+        (wild-node segment param (update children key insert path-spec o) data)))))
 
-(defn catch-all-node [segment children param]
+(defn catch-all-node [segment children param data]
   (reify
     Node
     (lookup [this path params]
-      (assoc params param path))
+      (->Match data (assoc params param path)))
     (get-segment [this]
       segment)))
 
-(defn static-node [^String segment children]
+(defn static-node [^String segment children data]
   (let [size (count segment)
         ?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
@@ -78,7 +80,7 @@
       Node
       (lookup [this path params]
         (if (.equals segment path)
-          params
+          (->Match data params)
           (let [p (if (>= (count path) size) (subs path 0 size))]
             (if (.equals segment p)
               (let [child (impl/fast-get children' (char-key path size))
@@ -89,11 +91,11 @@
       (get-segment [this]
         segment)
       (update-segment [this subs lcs]
-        (static-node (subs segment lcs) children))
+        (static-node (subs segment lcs) children data))
       (add-child [this key child]
-        (static-node segment (assoc children key child)))
+        (static-node segment (assoc children key child) data))
       (insert-child [this key path-spec o]
-        (static-node segment (update children key insert path-spec o))))))
+        (static-node segment (update children key insert path-spec o) data)))))
 
 (defn- wild? [s]
   (contains? #{\: \*} (first s)))
@@ -139,13 +141,13 @@
   [segment o]
   (cond
     (wild-param? segment)
-    (wild-node segment (keyword (subs segment 1)) nil)
+    (wild-node segment (keyword (subs segment 1)) nil o)
 
     (catch-all-param? segment)
-    (catch-all-node segment (keyword (subs segment 1)) nil)
+    (catch-all-node segment (keyword (subs segment 1)) nil o)
 
     :else
-    (static-node segment nil)))
+    (static-node segment nil o)))
 
 (defn- new-node
   "Given a path-spec and a payload object, return a new tree node. If
@@ -318,4 +320,5 @@
   ;; 1.3ms (dissoc wild & catch-all from children)
   ;; 1.3ms (reified protocols)
   ;; 0.8ms (flattened matching)
+  ;; 0.8ms (return route-data)
   (cc/quick-bench (dotimes [_ 1000] (lookup tree-new "/v1/orgs/1/topics" {}))))
