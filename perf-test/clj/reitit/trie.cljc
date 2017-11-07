@@ -31,12 +31,12 @@
   (update-segment [this subs lcs])
   (set-data [this data])
   (add-child [this key child])
-  (insert-child [this key path-spec o]))
+  (insert-child [this key path-spec data]))
 
 (extend-protocol Node
   nil
   (lookup [_ _ _])
-  (get-segment [this]))
+  (get-segment [_]))
 
 (defrecord Match [data params])
 
@@ -46,7 +46,7 @@
         children' (impl/fast-map children)]
     (reify
       Node
-      (lookup [this path params]
+      (lookup [_ path params]
         (let [i (.indexOf ^String path "/")]
           (if (pos? i)
             (let [value (subs path 0 i)]
@@ -57,21 +57,21 @@
                     (lookup ?wild path' params)
                     (lookup ?catch path' params))))
             (->Match data (assoc params param path)))))
-      (get-segment [this]
+      (get-segment [_]
         segment)
-      (set-data [this data]
+      (set-data [_ data]
         (wild-node segment param children data))
-      (add-child [this key child]
+      (add-child [_ key child]
         (wild-node segment param (assoc children key child) data))
-      (insert-child [this key path-spec o]
-        (wild-node segment param (update children key insert path-spec o) data)))))
+      (insert-child [_ key path-spec child-data]
+        (wild-node segment param (update children key insert path-spec child-data) data)))))
 
 (defn catch-all-node [segment children param data]
   (reify
     Node
-    (lookup [this path params]
+    (lookup [_ path params]
       (->Match data (assoc params param path)))
-    (get-segment [this]
+    (get-segment [_]
       segment)))
 
 (defn static-node [^String segment children data]
@@ -81,7 +81,7 @@
         children' (impl/fast-map children)]
     (reify
       Node
-      (lookup [this path params]
+      (lookup [_ path params]
         (if (.equals segment path)
           (->Match data params)
           (let [p (if (>= (count path) size) (subs path 0 size))]
@@ -91,15 +91,15 @@
                 (or (lookup child path params)
                     (lookup ?wild path params)
                     (lookup ?catch path params)))))))
-      (get-segment [this]
+      (get-segment [_]
         segment)
-      (update-segment [this subs lcs]
+      (update-segment [_ subs lcs]
         (static-node (subs segment lcs) children data))
-      (set-data [this data]
+      (set-data [_ data]
         (static-node segment children data))
-      (add-child [this key child]
+      (add-child [_ key child]
         (static-node segment (assoc children key child) data))
-      (insert-child [this key path-spec child-data]
+      (insert-child [_ key path-spec child-data]
         (static-node segment (update children key insert path-spec child-data) data)))))
 
 (defn- wild? [s]
