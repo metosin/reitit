@@ -1,21 +1,13 @@
 (ns reitit.trie
-  (:require [clojure.walk :as walk]
-            [clojure.string :as str]
-            [criterium.core :as cc]
-            [reitit.impl :as impl]))
-
-(set! *warn-on-reflection* true)
+  (:require [reitit.impl :as impl]))
 
 ;;
-;; Prefix-tree-router
+;; original https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
 ;;
 
 (declare insert)
 
-(defn- char-key
-  "Return the single character child key for the string started at
-  index i."
-  [s i]
+(defn- char-key [s i]
   (if (< i (count s))
     (subs s i (inc i))))
 
@@ -40,7 +32,7 @@
 
 (defrecord Match [data params])
 
-(defn wild-node [segment param children data]
+(defn- wild-node [segment param children data]
   (let [?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
         children' (impl/fast-map children)]
@@ -66,7 +58,7 @@
       (insert-child [_ key path-spec child-data]
         (wild-node segment param (update children key insert path-spec child-data) data)))))
 
-(defn catch-all-node [segment children param data]
+(defn- catch-all-node [segment children param data]
   (reify
     Node
     (lookup [_ path params]
@@ -74,7 +66,7 @@
     (get-segment [_]
       segment)))
 
-(defn static-node [^String segment children data]
+(defn- static-node [^String segment children data]
   (let [size (count segment)
         ?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
@@ -82,10 +74,10 @@
     (reify
       Node
       (lookup [_ path params]
-        (if (.equals segment path)
+        (if (#?(:clj .equals, :cljs =) segment path)
           (->Match data params)
           (let [p (if (>= (count path) size) (subs path 0 size))]
-            (if (.equals segment p)
+            (if (#?(:clj .equals, :cljs =) segment p)
               (let [child (impl/fast-get children' (char-key path size))
                     path (subs path size)]
                 (or (lookup child path params)
@@ -102,53 +94,15 @@
       (insert-child [_ key path-spec child-data]
         (static-node segment (update children key insert path-spec child-data) data)))))
 
-(defn- wild? [s]
-  (contains? #{\: \*} (first s)))
-
-(defn- wild-param?
-  "Return true if a string segment starts with a wildcard string."
-  [segment]
-  (= \: (first segment)))
-
-(defn- catch-all-param?
-  "Return true if a string segment starts with a catch-all string."
-  [segment]
-  (= \* (first segment)))
-
-(defn partition-wilds
-  "Given a path-spec string, return a seq of strings with wildcards
-  and catch-alls separated into their own strings. Eats the forward
-  slash following a wildcard."
-  [path-spec]
-  (let [groups (partition-by wild? (str/split path-spec #"/"))
-        first-groups (butlast groups)
-        last-group (last groups)]
-    (flatten
-      (conj (mapv #(if (wild? (first %))
-                     %
-                     (str (str/join "/" %) "/"))
-                  first-groups)
-            (if (wild? (first last-group))
-              last-group
-              (str/join "/" last-group))))))
-
-(defn contains-wilds?
-  "Return true if the given path-spec contains any wildcard params or
-  catch-alls."
-  [path-spec]
-  (let [parts (partition-wilds path-spec)]
-    (or (> (count parts) 1)
-        (wild? (first parts)))))
-
 (defn- make-node
   "Given a path-spec segment string and a payload object, return a new
   tree node."
   [segment data]
   (cond
-    (wild-param? segment)
+    (impl/wild-param? segment)
     (wild-node segment (keyword (subs segment 1)) nil data)
 
-    (catch-all-param? segment)
+    (impl/catch-all-param? segment)
     (catch-all-node segment (keyword (subs segment 1)) nil data)
 
     :else
@@ -159,10 +113,10 @@
   the path-spec contains wildcards or catch-alls, will return parent
   node of a tree (linked list)."
   [path-spec data]
-  (if (contains-wilds? path-spec)
-    (let [parts (partition-wilds path-spec)]
+  (if (impl/contains-wilds? path-spec)
+    (let [parts (impl/partition-wilds path-spec)]
       (reduce (fn [child segment]
-                (when (catch-all-param? segment)
+                (when (impl/catch-all-param? segment)
                   (throw (ex-info "catch-all may only appear at the end of a path spec"
                                   {:patch-spec path-spec})))
                 (-> (make-node segment nil)
@@ -216,7 +170,7 @@
           (set-data node data)
 
           ;; handle case where path-spec is a wildcard param
-          (wild-param? path-spec)
+          (impl/wild-param? path-spec)
           (let [lcs (calc-lcs segment path-spec)
                 common (subs path-spec 0 lcs)]
             (if (= common segment)
@@ -229,7 +183,7 @@
 
           ;; in the case where path-spec is a catch-all, node should always be nil.
           ;; getting here means we have an invalid route specification
-          (catch-all-param? path-spec)
+          (impl/catch-all-param? path-spec)
           (throw (ex-info "route conflict"
                           {:node node
                            :path-spec path-spec

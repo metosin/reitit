@@ -565,10 +565,12 @@
 
     ;;  2538ns
     ;;  2065ns
+    ;;   680ns (prefix-tree-router)
     (bench!! routes true "reitit" reitit-f)
 
     ;;  2845ns
     ;;  2316ns
+    ;;   947ns (prefix-tree-router)
     (bench!! routes true "reitit-ring" reitit-ring-f)
 
     ;;  2541ns

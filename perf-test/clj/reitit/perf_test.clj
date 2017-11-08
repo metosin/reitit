@@ -148,6 +148,7 @@
         (call))))
 
   ;; 710 µs (3-18x)
+  ;; 540 µs (4-23x) -23% prefix-tree-router
   (title "reitit")
   (let [call #(reitit/match-by-path reitit-routes "/workspace/1/1")]
     (assert (call))

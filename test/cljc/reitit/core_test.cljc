@@ -7,8 +7,42 @@
 
 (deftest reitit-test
 
-  (testing "linear-router"
+  (testing "prefix-tree-router"
     (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]])]
+      (is (= :prefix-tree-router (r/router-name router)))
+      (is (= [["/api/ipa/:size" {:name ::beer} nil]]
+             (r/routes router)))
+      (is (= true (map? (r/options router))))
+      (is (= (r/map->Match
+               {:template "/api/ipa/:size"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (r/match-by-path router "/api/ipa/large")))
+      (is (= (r/map->Match
+               {:template "/api/ipa/:size"
+                :meta {:name ::beer}
+                :path "/api/ipa/large"
+                :params {:size "large"}})
+             (r/match-by-name router ::beer {:size "large"})))
+      (is (= nil (r/match-by-name router "ILLEGAL")))
+      (is (= [::beer] (r/route-names router)))
+
+      (testing "name-based routing with missing parameters"
+        (is (= (r/map->PartialMatch
+                 {:template "/api/ipa/:size"
+                  :meta {:name ::beer}
+                  :required #{:size}
+                  :params nil})
+               (r/match-by-name router ::beer)))
+        (is (= true (r/partial-match? (r/match-by-name router ::beer))))
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+              (r/match-by-name! router ::beer))))))
+
+  (testing "linear-router"
+    (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r/linear-router})]
       (is (= :linear-router (r/router-name router)))
       (is (= [["/api/ipa/:size" {:name ::beer} nil]]
              (r/routes router)))
