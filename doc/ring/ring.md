@@ -112,6 +112,24 @@ Middleware is applied correctly:
 ; {:status 200, :body [:api :admin :db :delete :handler]}
 ```
 
+# Not found
+
+If no routes match, `nil` is returned, which is not understood by Ring.
+
+Enabling custom error messages:
+
+```clj
+(def app
+  (some-fn
+    (ring/ring-handler
+      (ring/router
+        ["/ping" handler]))
+    (constantly {:status 404})))
+
+(app {:uri "/invalid"})
+; {:status 404}
+```
+
 # Async Ring
 
 All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure & ClojureScript, so they work with [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) and [Node.js](https://nodejs.org) too.
