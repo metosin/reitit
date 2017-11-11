@@ -350,10 +350,10 @@
          router (cond
                   router router
                   (and (= 1 (count routes)) (not wilds?)) single-static-path-router
+                  conflicting linear-router
                   (not wilds?) lookup-router
                   all-wilds? prefix-tree-router
-                  (not conflicting) mixed-router
-                  :else prefix-tree-router)]
+                  :else mixed-router)]
 
      (when-let [conflicts (:conflicts opts)]
        (when conflicting (conflicts conflicting)))
