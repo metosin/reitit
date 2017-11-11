@@ -21,7 +21,9 @@
   (lookup [this path params])
   (get-segment [this])
   (update-segment [this subs lcs])
+  (get-data [this])
   (set-data [this data])
+  (get-chidren [this])
   (add-child [this key child])
   (insert-child [this key path-spec data]))
 
@@ -36,6 +38,7 @@
   (let [?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
         children' (impl/fast-map children)]
+    ^{:type ::node}
     (reify
       Node
       (lookup [_ path params]
@@ -51,26 +54,36 @@
             (->Match data (assoc params param path)))))
       (get-segment [_]
         segment)
+      (get-data [_]
+        data)
       (set-data [_ data]
         (wild-node segment param children data))
+      (get-chidren [_]
+        children)
       (add-child [_ key child]
         (wild-node segment param (assoc children key child) data))
       (insert-child [_ key path-spec child-data]
         (wild-node segment param (update children key insert path-spec child-data) data)))))
 
 (defn- catch-all-node [segment children param data]
+  ^{:type ::node}
   (reify
     Node
     (lookup [_ path params]
       (->Match data (assoc params param path)))
     (get-segment [_]
-      segment)))
+      segment)
+    (get-data [_]
+      data)
+    (get-chidren [_]
+      children)))
 
 (defn- static-node [^String segment children data]
   (let [size (count segment)
         ?wild (maybe-wild-node children)
         ?catch (maybe-catch-all-node children)
         children' (impl/fast-map children)]
+    ^{:type ::node}
     (reify
       Node
       (lookup [_ path params]
@@ -87,8 +100,12 @@
         segment)
       (update-segment [_ subs lcs]
         (static-node (subs segment lcs) children data))
+      (get-data [_]
+        data)
       (set-data [_ data]
         (static-node segment children data))
+      (get-chidren [_]
+        children)
       (add-child [_ key child]
         (static-node segment (assoc children key child) data))
       (insert-child [_ key path-spec child-data]
@@ -196,3 +213,11 @@
 
                   :else
                   (split node path-spec data lcs))))))
+
+(defn view
+  "Returns a view representation of a prefix-tree."
+  [x]
+  (vec (concat
+         [(get-segment x)]
+         (some->> (get-chidren x) vals seq (map view))
+         (some->> (get-data x) vector))))
