@@ -438,12 +438,6 @@
 <li>Always be measuring</li>
 <li>Don&apos;t trust the (micro-)benchmarks</li>
 </ul>
-<h3 id="performance-guides">Performance guides</h3>
-<p>Some things related to performance:</p>
-<ul>
-<li>avoid wildcard-routes - it&apos;s an order of magnitude slower to match than non-wildcard routes</li>
-<li>it&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which collects all non-wildcard routes into a separate fast subrouter.</li>
-</ul>
 <h3 id="does-routing-performance-matter">Does routing performance matter?</h3>
 <p>Well, it depends. Some tested routing libs seem to spend more time resolving the routes than it takes to encode &amp; decode a 1k JSON payload. For busy sites, this actually matters.</p>
 <h3 id="example">Example</h3>
@@ -457,26 +451,30 @@
      [<span class="hljs-string">&quot;/auth/recovery/token/:token&quot;</span> <span class="hljs-symbol">:auth/recovery</span>]
      [<span class="hljs-string">&quot;/workspace/:project/:page&quot;</span> <span class="hljs-symbol">:workspace/page</span>]]))
 
-<span class="hljs-comment">;; Execution time mean : 3.488297 &#xB5;s -&gt; 286M ops/sec</span>
+<span class="hljs-comment">;; Execution time mean : 3.2 &#xB5;s -&gt; 312M ops/sec</span>
 (<span class="hljs-name">cc/quick-bench</span>
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/auth/login&quot;</span>)))
 
-<span class="hljs-comment">;; Execution time mean : 692.905995 &#xB5;s -&gt; 1.4M ops/sec</span>
+<span class="hljs-comment">;; Execution time mean : 530 &#xB5;s -&gt; 1.9M ops/sec</span>
 (<span class="hljs-name">cc/quick-bench</span>
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/workspace/1/1&quot;</span>)))
 </code></pre>
 <h3 id="is-that-good">Is that good?</h3>
-<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick perf tests</a>, the first lookup is two orders of magnitude faster than other tested Clojure routing libraries. The second lookup is 3-18x faster.</p>
-<p>But, most micro-benchmarks lie. For example, Pedestal is always matching the <code>:request-method</code> which means it does more work. With real life routing trees, the differences are most likely more subtle, or some other lib might be actually faster.</p>
-<h3 id="so-why-test">So why test?</h3>
+<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick perf tests</a>, the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (ataraxy, bidi, compojure and pedestal).</p>
+<p>But, one shoudn&apos;t trust the benchmarks. Many libraries (here: compojure, pedestal and ataraxy) always match also on the request-method so they do more work. Also, real-life routing tables might look different and different libs might behave differently.</p>
+<p>But, the perf should be good.</p>
+<h3 id="value-of-perf-tests">Value of perf tests?</h3>
 <p>Real value of perf tests is to get a internal baseline to optimize against. Also, to ensure that new features don&apos;t regress the performance.</p>
 <p>It might be interesting to look out of the box and compare the fast Clojure routing libs to routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
-<h3 id="roadmap">Roadmap</h3>
-<p>Currently, the non-wildcard routes are already really fast to match, but wildcard routes use only a naive linear scan. Plan is to add a optimized <a href="https://en.wikipedia.org/wiki/Trie" target="_blank">Trie</a>-based router. See
-<a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">httprouter</a> and <a href="https://github.com/pedestal/pedestal/pull/330" target="_blank">Pedestal</a> for details.</p>
-<p>PRs welcome.</p>
+<h3 id="performance-guides">Performance guides</h3>
+<p>Few things that have an effect on performance:</p>
+<ul>
+<li>Wildcard-routes are an order of magnitude slower than static routes</li>
+<li>It&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which internally has a fast static path router and a separate wildcard-router. So, the static paths are still fast.</li>
+<li>Move computation from request processing time into creation time, using by compiling <a href="ring/compiling_middleware.html">middleware</a> &amp; <a href="advanced/configuring_routers.html">route data</a>.</li>
+</ul>
 
                                 
                                 </section>
@@ -516,7 +514,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-11T15:27:32.062Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-11T15:28:09.543Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-11T15:37:51.825Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-11T15:38:28.608Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
