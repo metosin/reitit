@@ -1,17 +1,17 @@
 # Data-driven Middleware
 
-Ring [defines middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) as a function of type `handler & opts => request => response`. It's easy to undrstand and enables great performance, but makes the middleware-chain opaque, making things like documentation and debugging hard.
+Ring [defines middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) as a function of type `handler & args => request => response`. It's easy to undrstand and enables great performance. Still, in the end - the middleware-chain is just a opaque function, making things like documentation and debugging hard.
 
 Reitit does things bit differently:
 
-1. middleware is defined as a vector (of middleware) enabling the chain to be malipulated before turned into the optimized runtime chain.
-2. middleware can be defined as first-class data entries
+1. Middleware is defined as a vector (of middleware) enabling the chain to be malipulated before turned into the runtime middleware function.
+2. Middleware can be defined as first-class data entries
 
 ### Middleware as data
 
-Everything that is defined inside the `:middleware` vector in the route data is coerced into `reitit.ring.middleware/Middleware` Records with the help of `reitit.ring.middleware/IntoMiddleware` Protocol. By default, it transforms functions, maps and `Middleware` records. For the actual
+All values in the `:middleware` vector in the route data are coerced into `reitit.ring.middleware/Middleware` Records with using the `reitit.ring.middleware/IntoMiddleware` Protocol. By default, functions, maps and `Middleware` records are allowed.
 
-Records can have arbitrary keys, but the default keys have a special purpose:
+Records can have arbitrary keys, but the following keys have a special purpose:
 
 | key         | description |
 | ------------|-------------|
@@ -21,7 +21,7 @@ Records can have arbitrary keys, but the default keys have a special purpose:
 
 Middleware Records are accessible in their raw form in the compiled route results, thus available for inventories, creating api-docs etc.
 
-For the actual request processing, the Records are unwrapped into normal functions, yielding zero runtime penalty.
+For the actual request processing, the Records are unwrapped into normal functions and composed into a middleware function chain, yielding zero runtime penalty.
 
 ### Creating Middleware
 
