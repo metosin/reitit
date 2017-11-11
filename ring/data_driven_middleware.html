@@ -426,15 +426,15 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="data-driven-middleware">Data-driven Middleware</h1>
-<p>Ring <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">defines middleware</a> as a function of type <code>handler &amp; opts =&gt; request =&gt; response</code>. It&apos;s easy to undrstand and enables great performance, but makes the middleware-chain opaque, making things like documentation and debugging hard.</p>
+<p>Ring <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">defines middleware</a> as a function of type <code>handler &amp; args =&gt; request =&gt; response</code>. It&apos;s easy to undrstand and enables great performance. Still, in the end - the middleware-chain is just a opaque function, making things like documentation and debugging hard.</p>
 <p>Reitit does things bit differently:</p>
 <ol>
-<li>middleware is defined as a vector (of middleware) enabling the chain to be malipulated before turned into the optimized runtime chain.</li>
-<li>middleware can be defined as first-class data entries</li>
+<li>Middleware is defined as a vector (of middleware) enabling the chain to be malipulated before turned into the runtime middleware function.</li>
+<li>Middleware can be defined as first-class data entries</li>
 </ol>
 <h3 id="middleware-as-data">Middleware as data</h3>
-<p>Everything that is defined inside the <code>:middleware</code> vector in the route data is coerced into <code>reitit.ring.middleware/Middleware</code> Records with the help of <code>reitit.ring.middleware/IntoMiddleware</code> Protocol. By default, it transforms functions, maps and <code>Middleware</code> records. For the actual</p>
-<p>Records can have arbitrary keys, but the default keys have a special purpose:</p>
+<p>All values in the <code>:middleware</code> vector in the route data are coerced into <code>reitit.ring.middleware/Middleware</code> Records with using the <code>reitit.ring.middleware/IntoMiddleware</code> Protocol. By default, functions, maps and <code>Middleware</code> records are allowed.</p>
+<p>Records can have arbitrary keys, but the following keys have a special purpose:</p>
 <table>
 <thead>
 <tr>
@@ -458,7 +458,7 @@
 </tbody>
 </table>
 <p>Middleware Records are accessible in their raw form in the compiled route results, thus available for inventories, creating api-docs etc.</p>
-<p>For the actual request processing, the Records are unwrapped into normal functions, yielding zero runtime penalty.</p>
+<p>For the actual request processing, the Records are unwrapped into normal functions and composed into a middleware function chain, yielding zero runtime penalty.</p>
 <h3 id="creating-middleware">Creating Middleware</h3>
 <p>The following produce identical middleware runtime function.</p>
 <h4 id="function">Function</h4>
@@ -563,7 +563,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"next":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"previous":{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2017-11-11T15:37:51.825Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-11T15:38:28.608Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"next":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"previous":{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2017-11-11T15:50:37.140Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-11T15:51:11.283Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
