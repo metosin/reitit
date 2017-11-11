@@ -135,3 +135,28 @@
                (app {:uri "/api/admin/ping"
                      :request-method :get
                      ::roles #{:admin}})))))))
+
+(deftest async-ring-test
+  (let [promise #(let [value (atom ::nil)]
+                   (fn
+                     ([] @value)
+                     ([x] (reset! value x))))
+        response {:status 200, :body "ok"}
+        handler (fn [_ respond raise]
+                  (respond response))
+        app (ring/ring-handler
+              (ring/router
+                ["/ping" handler]))]
+    (testing "match"
+      (let [respond (promise)
+            raise (promise)]
+        (app {:request-method :get, :uri "/ping"} respond raise)
+        (is (= response (respond)))
+        (is (= ::nil (raise)))))
+    (testing "no match"
+      (let [respond (promise)
+            raise (promise)]
+        (app {:request-method :get, :uri "/pong"} respond raise)
+        (is (= nil (respond)))
+        (is (= ::nil (raise)))))))
+

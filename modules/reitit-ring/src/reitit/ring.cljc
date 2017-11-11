@@ -39,7 +39,8 @@
              (handler
                (cond-> (impl/fast-assoc request ::match match)
                        (seq params) (impl/fast-assoc :path-params params))
-               respond raise))))))
+               respond raise)))
+         (respond nil))))
     {::router router}))
 
 (defn get-router [handler]
