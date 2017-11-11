@@ -136,17 +136,17 @@
   and :parameters from route meta, otherwise does not mount."
   (middleware/create
     {:name ::coerce-parameters
-     :gen (fn [{:keys [parameters coercion]} _]
-            (if (and coercion parameters)
-              (let [coercers (request-coercers coercion parameters)]
-                (fn [handler]
-                  (fn
-                    ([request]
-                     (let [coerced (coerce-parameters coercers request)]
-                       (handler (impl/fast-assoc request :parameters coerced))))
-                    ([request respond raise]
-                     (let [coerced (coerce-parameters coercers request)]
-                       (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
+     :gen-wrap (fn [{:keys [parameters coercion]} _]
+                 (if (and coercion parameters)
+                   (let [coercers (request-coercers coercion parameters)]
+                     (fn [handler]
+                       (fn
+                         ([request]
+                          (let [coerced (coerce-parameters coercers request)]
+                            (handler (impl/fast-assoc request :parameters coerced))))
+                         ([request respond raise]
+                          (let [coerced (coerce-parameters coercers request)]
+                            (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
 
 (defn wrap-coerce-response
   "Pluggable response coercion middleware.
@@ -182,12 +182,12 @@
   and :responses from route meta, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen (fn [{:keys [responses coercion opts]} _]
-            (if (and coercion responses)
-              (let [coercers (response-coercers coercion responses opts)]
-                (fn [handler]
-                  (fn
-                    ([request]
-                     (coerce-response coercers request (handler request)))
-                    ([request respond raise]
-                     (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+     :gen-wrap (fn [{:keys [responses coercion opts]} _]
+                 (if (and coercion responses)
+                   (let [coercers (response-coercers coercion responses opts)]
+                     (fn [handler]
+                       (fn
+                         ([request]
+                          (coerce-response coercers request (handler request)))
+                         ([request respond raise]
+                          (handler request #(respond (coerce-response coercers request %)) raise)))))))}))

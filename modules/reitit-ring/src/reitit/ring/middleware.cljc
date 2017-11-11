@@ -8,11 +8,11 @@
 (defrecord Middleware [name wrap])
 (defrecord Endpoint [meta handler middleware])
 
-(defn create [{:keys [name gen wrap] :as m}]
-  (when (and gen wrap)
+(defn create [{:keys [name wrap gen-wrap] :as m}]
+  (when (and wrap gen-wrap)
     (throw
       (ex-info
-        (str "Middleware can't both :wrap and :gen defined " m) m)))
+        (str "Middleware can't both :wrap and :gen-wrap defined " m) m)))
   (map->Middleware m))
 
 (extend-protocol IntoMiddleware
@@ -40,13 +40,13 @@
     (into-middleware (create this) meta opts))
 
   Middleware
-  (into-middleware [{:keys [wrap gen] :as this} meta opts]
-    (if-not gen
+  (into-middleware [{:keys [wrap gen-wrap] :as this} meta opts]
+    (if-not gen-wrap
       this
-      (if-let [wrap (gen meta opts)]
+      (if-let [wrap (gen-wrap meta opts)]
         (map->Middleware
           (-> this
-              (dissoc :gen)
+              (dissoc :gen-wrap)
               (assoc :wrap wrap))))))
 
   nil

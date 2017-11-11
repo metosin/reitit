@@ -71,45 +71,43 @@
 
   (suite "static route")
 
-  ;; 1800 µs
+  ;; 1600 µs
   (title "bidi")
-  (let [call #(bidi/match-route bidi-routes "/auth/login")]
-    (assert (call))
-    (cc/quick-bench
-      (dotimes [_ 1000]
-        (call))))
+  (assert (bidi/match-route bidi-routes "/auth/login"))
+  (cc/quick-bench
+    (dotimes [_ 1000]
+      (bidi/match-route bidi-routes "/auth/login")))
 
   ;; 1400 µs
   (title "ataraxy")
-  (let [call #(ataraxy/matches ataraxy-routes {:uri "/auth/login"})]
-    (assert (call))
+  (let [request {:uri "/auth/login"}]
+    (assert (ataraxy/matches ataraxy-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (ataraxy/matches ataraxy-routes request))))
 
-  ;; 1200 µs
+  ;; 1000 µs
   (title "pedestal - map-tree => prefix-tree")
-  (let [call #(pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get})]
-    (assert (call))
+  (let [request {:path-info "/auth/login" :request-method :get}]
+    (assert (pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get}))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get}))))
 
-  ;; 1400 µs
+  ;; 1500 µs
   (title "compojure-api")
-  (let [call #(compojure-api-routes {:uri "/auth/login", :request-method :get})]
-    (assert (call))
+  (let [request {:uri "/auth/login", :request-method :get}]
+    (assert (compojure-api-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (compojure-api-routes request))))
 
-  ;; 3.5 µs (300-500x)
+  ;; 3.2 µs (300-500x)
   (title "reitit")
-  (let [call #(reitit/match-by-path reitit-routes "/auth/login")]
-    (assert (call))
-    (cc/quick-bench
-      (dotimes [_ 1000]
-        (call)))))
+  (assert (reitit/match-by-path reitit-routes "/auth/login"))
+  (cc/quick-bench
+    (dotimes [_ 1000]
+      (reitit/match-by-path reitit-routes "/auth/login"))))
 
 (defn routing-test2 []
 
@@ -117,44 +115,42 @@
 
   ;; 12800 µs
   (title "bidi")
-  (let [call #(bidi/match-route bidi-routes "/workspace/1/1")]
-    (assert (call))
-    (cc/quick-bench
-      (dotimes [_ 1000]
-        (call))))
+  (assert (bidi/match-route bidi-routes "/workspace/1/1"))
+  (cc/quick-bench
+    (dotimes [_ 1000]
+      (bidi/match-route bidi-routes "/workspace/1/1")))
 
   ;; 2800 µs
   (title "ataraxy")
-  (let [call #(ataraxy/matches ataraxy-routes {:uri "/workspace/1/1"})]
-    (assert (call))
+  (let [request {:uri "/workspace/1/1"}]
+    (assert (ataraxy/matches ataraxy-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (ataraxy/matches ataraxy-routes request))))
 
-  ;; 2300 µs
-  (title "pedestal - map-tree => prefix-tree")
-  (let [call #(pedestal/find-route pedestal-router {:path-info "/workspace/1/1" :request-method :get})]
-    (assert (call))
+  ;; 2100 µs
+  (title "pedestal")
+  (let [request {:path-info "/workspace/1/1" :request-method :get}]
+    (assert (pedestal/find-route pedestal-router request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (pedestal/find-route pedestal-router request))))
 
-  ;; 3800 µs
+  ;; 3500 µs
   (title "compojure-api")
-  (let [call #(compojure-api-routes {:uri "/workspace/1/1", :request-method :get})]
-    (assert (call))
+  (let [request {:uri "/workspace/1/1", :request-method :get}]
+    (assert (compojure-api-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (call))))
+        (compojure-api-routes request))))
 
   ;; 710 µs (3-18x)
-  ;; 540 µs (4-23x) -23% prefix-tree-router
+  ;; 530 µs (4-24x) -25% prefix-tree-router
   (title "reitit")
-  (let [call #(reitit/match-by-path reitit-routes "/workspace/1/1")]
-    (assert (call))
-    (cc/quick-bench
-      (dotimes [_ 1000]
-        (call)))))
+  (assert (reitit/match-by-path reitit-routes "/workspace/1/1"))
+  (cc/quick-bench
+    (dotimes [_ 1000]
+      (reitit/match-by-path reitit-routes "/workspace/1/1"))))
 
 (defn reverse-routing-test []
 

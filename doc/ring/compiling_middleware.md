@@ -2,15 +2,15 @@
 
 The [dynamic extensions](dynamic_extensions.md) is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.
 
-Still, we can do better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. Middleware/interceptor can also decide not to mount itself. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
+Still, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning `nil`. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
-To enable this we use [middleware records](data_driven_middleware.md) `:gen` hook instead of the normal `:wrap`. `:gen` expects a function of `route-meta router-opts => wrap`. Middleware can also return `nil`, which effective unmounts the middleware.
+To enable this we use [middleware records](data_driven_middleware.md) `:gen-wrap` key instead of the normal `:wrap`. `:gen-wrap` expects a function of `route-meta router-opts => ?wrap`.
 
-To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen`. These are the actual codes are from [`reitit.ring.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/ring/coercion.cljc):
+To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen-wrap`. Actual codes can be found in [`reitit.ring.coercion`](https://github.com/metosin/reitit/blob/master/src/reitit/ring/coercion.cljc):
 
 ## Naive
 
-* Extracts the compiled route information on every request.
+* Reads the compiled route information on every request.
 
 ```clj
 (defn wrap-coerce-response
@@ -49,21 +49,23 @@ To demonstrate the two approaches, below are response coercion middleware writte
 * Mounts only if `:coercion` and `:responses` are defined for the route
 
 ```clj
+(require '[reitit.ring.middleware :as middleware])
+
 (def gen-wrap-coerce-response
   "Generator for pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route meta, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen (fn [{:keys [responses coercion opts]} _]
-            (if (and coercion responses)
-              (let [coercers (response-coercers coercion responses opts)]
-                (fn [handler]
-                  (fn
-                    ([request]
-                     (coerce-response coercers request (handler request)))
-                    ([request respond raise]
-                     (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+     :gen-wrap (fn [{:keys [responses coercion opts]} _]
+                (if (and coercion responses)
+                  (let [coercers (response-coercers coercion responses opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (coerce-response coercers request (handler request)))
+                        ([request respond raise]
+                         (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 ```
 
-The `:gen` -version has 50% less code, is easier to reason about and is twice as faster on basic perf tests.
+The latter has 50% less code, is easier to reason about and is much faster.
