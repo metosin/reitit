@@ -426,7 +426,7 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="different-routers">Different Routers</h1>
-<p>Reitit ships with several different implementations for the <code>Router</code> protocol, originally based on the <a href="https://github.com/pedestal/pedestal/tree/master/route" target="_blank">Pedestal</a> implementation. <code>router</code> selects the most suitable implementation by inspecting the expanded routes. The implementation can be set manually using <code>:router</code> option, see <a href="advanced/configuring_routers.md">configuring routers</a>.</p>
+<p>Reitit ships with several different implementations for the <code>Router</code> protocol, originally based on the <a href="https://github.com/pedestal/pedestal/tree/master/route" target="_blank">Pedestal</a> implementation. <code>router</code> function selects the most suitable implementation by inspecting the expanded routes. The implementation can be set manually using <code>:router</code> option, see <a href="advanced/configuring_routers.md">configuring routers</a>.</p>
 <table>
 <thead>
 <tr>
@@ -437,28 +437,35 @@
 <tbody>
 <tr>
 <td><code>:linear-router</code></td>
-<td>Matches the routes one-by-one starting from the top until a match is found. Works with any kind of routes.</td>
+<td>Matches the routes one-by-one starting from the top until a match is found. Works with any kind of routes. Slow, but works with all route trees.</td>
 </tr>
 <tr>
 <td><code>:lookup-router</code></td>
-<td>Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters.</td>
+<td>Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters and there are no <a href="../basics/route_conflicts.html">Route conflicts</a>.</td>
 </tr>
 <tr>
 <td><code>:mixed-router</code></td>
-<td>Creates internally a <code>:linear-router</code> and a <code>:lookup-router</code> and used them to effectively get best-of-both-worlds. Valid if there are no <a href="../basics/route_conflicts.html">Route conflicts</a>.</td>
+<td>Creates internally a <code>:prefix-tree-router</code> and a <code>:lookup-router</code> and used them to effectively get best-of-both-worlds. Valid only if there are no <a href="../basics/route_conflicts.html">Route conflicts</a>.</td>
 </tr>
 <tr>
 <td><code>::single-static-path-router</code></td>
-<td>Fastest possible router: valid only if there is one static route.</td>
+<td>Super fast router: sting-matches the route. Valid only if there is one static route.</td>
 </tr>
 <tr>
 <td><code>:prefix-tree-router</code></td>
-<td>TODO: <a href="https://github.com/julienschmidt/httprouter#how-does-it-work" target="_blank">https://github.com/julienschmidt/httprouter#how-does-it-work</a></td>
+<td>Router that creates a <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">prefix-tree</a> out of an route table. Much faster than <code>:linear-router</code>. Valid only if there are no <a href="../basics/route_conflicts.html">Route conflicts</a>.</td>
 </tr>
 </tbody>
 </table>
-<p>The router name can be asked from the router</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/router-name</span> router)
+<p>The router name can be asked from the router:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">r/router</span>
+    [[<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+     [<span class="hljs-string">&quot;/api/:users&quot;</span> <span class="hljs-symbol">::users</span>]]))
+
+(<span class="hljs-name">r/router-name</span> router)
 <span class="hljs-comment">; :mixed-router</span>
 </code></pre>
 
@@ -504,7 +511,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Different Routers","level":"1.3.2","depth":2,"next":{"title":"Route Validation","level":"1.3.3","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},"previous":{"title":"Configuring routers","level":"1.3.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/different_routers.md","mtime":"2017-11-09T15:59:35.359Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-09T16:00:19.956Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Different Routers","level":"1.3.2","depth":2,"next":{"title":"Route Validation","level":"1.3.3","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},"previous":{"title":"Configuring routers","level":"1.3.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/different_routers.md","mtime":"2017-11-11T15:27:32.062Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-11T15:28:09.543Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
