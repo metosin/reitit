@@ -7,106 +7,80 @@
 
 (deftest reitit-test
 
-  (testing "linear-router"
-    (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]])]
-      (is (= :linear-router (r/router-name router)))
-      (is (= [["/api/ipa/:size" {:name ::beer} nil]]
-             (r/routes router)))
-      (is (= true (map? (r/options router))))
-      (is (= (r/map->Match
-               {:template "/api/ipa/:size"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {:size "large"}})
-             (r/match-by-path router "/api/ipa/large")))
-      (is (= (r/map->Match
-               {:template "/api/ipa/:size"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {:size "large"}})
-             (r/match-by-name router ::beer {:size "large"})))
-      (is (= nil (r/match-by-name router "ILLEGAL")))
-      (is (= [::beer] (r/route-names router)))
-
-      (testing "name-based routing with missing parameters"
-        (is (= (r/map->PartialMatch
+  (testing "routers handling wildcard paths"
+    (are [r name]
+      (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
+        (is (= name (r/router-name router)))
+        (is (= [["/api/ipa/:size" {:name ::beer} nil]]
+               (r/routes router)))
+        (is (= true (map? (r/options router))))
+        (is (= (r/map->Match
                  {:template "/api/ipa/:size"
                   :meta {:name ::beer}
-                  :required #{:size}
-                  :params nil})
-               (r/match-by-name router ::beer)))
-        (is (= true (r/partial-match? (r/match-by-name router ::beer))))
-        (is (thrown-with-msg?
-              ExceptionInfo
-              #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
-              (r/match-by-name! router ::beer))))))
+                  :path "/api/ipa/large"
+                  :params {:size "large"}})
+               (r/match-by-path router "/api/ipa/large")))
+        (is (= (r/map->Match
+                 {:template "/api/ipa/:size"
+                  :meta {:name ::beer}
+                  :path "/api/ipa/large"
+                  :params {:size "large"}})
+               (r/match-by-name router ::beer {:size "large"})))
+        (is (= nil (r/match-by-name router "ILLEGAL")))
+        (is (= [::beer] (r/route-names router)))
 
-  (testing "lookup-router"
-    (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]] {:router r/lookup-router})]
-      (is (= :lookup-router (r/router-name router)))
-      (is (= [["/api/ipa/large" {:name ::beer} nil]]
-             (r/routes router)))
-      (is (= true (map? (r/options router))))
-      (is (= (r/map->Match
-               {:template "/api/ipa/large"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {}})
-             (r/match-by-path router "/api/ipa/large")))
-      (is (= (r/map->Match
-               {:template "/api/ipa/large"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {:size "large"}})
-             (r/match-by-name router ::beer {:size "large"})))
-      (is (= nil (r/match-by-name router "ILLEGAL")))
-      (is (= [::beer] (r/route-names router)))
+        (testing "name-based routing with missing parameters"
+          (is (= (r/map->PartialMatch
+                   {:template "/api/ipa/:size"
+                    :meta {:name ::beer}
+                    :required #{:size}
+                    :params nil})
+                 (r/match-by-name router ::beer)))
+          (is (= true (r/partial-match? (r/match-by-name router ::beer))))
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+                (r/match-by-name! router ::beer)))))
 
-      (testing "can't be created with wildcard routes"
-        (is (thrown-with-msg?
-              ExceptionInfo
-              #"can't create :lookup-router with wildcard routes"
-              (r/lookup-router
-                (r/resolve-routes
-                  ["/api/:version/ping"] {})))))))
+      r/linear-router :linear-router
+      r/prefix-tree-router :prefix-tree-router
+      r/mixed-router :mixed-router))
 
-  (testing "single-static-path-router"
-    (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]])]
-      (is (= :single-static-path-router (r/router-name router)))
-      (is (= [["/api/ipa/large" {:name ::beer} nil]]
-             (r/routes router)))
-      (is (= true (map? (r/options router))))
-      (is (= (r/map->Match
-               {:template "/api/ipa/large"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {}})
-             (r/match-by-path router "/api/ipa/large")))
-      (is (= (r/map->Match
-               {:template "/api/ipa/large"
-                :meta {:name ::beer}
-                :path "/api/ipa/large"
-                :params {:size "large"}})
-             (r/match-by-name router ::beer {:size "large"})))
-      (is (= nil (r/match-by-name router "ILLEGAL")))
-      (is (= [::beer] (r/route-names router)))
+  (testing "routers handling static paths"
+    (are [r name]
+      (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]] {:router r})]
+        (is (= name (r/router-name router)))
+        (is (= [["/api/ipa/large" {:name ::beer} nil]]
+               (r/routes router)))
+        (is (= true (map? (r/options router))))
+        (is (= (r/map->Match
+                 {:template "/api/ipa/large"
+                  :meta {:name ::beer}
+                  :path "/api/ipa/large"
+                  :params {}})
+               (r/match-by-path router "/api/ipa/large")))
+        (is (= (r/map->Match
+                 {:template "/api/ipa/large"
+                  :meta {:name ::beer}
+                  :path "/api/ipa/large"
+                  :params {:size "large"}})
+               (r/match-by-name router ::beer {:size "large"})))
+        (is (= nil (r/match-by-name router "ILLEGAL")))
+        (is (= [::beer] (r/route-names router)))
 
-      (testing "can't be created with wildcard routes"
-        (is (thrown-with-msg?
-              ExceptionInfo
-              #":single-static-path-router requires exactly 1 static route"
-              (r/single-static-path-router
-                (r/resolve-routes
-                  ["/api/:version/ping"] {})))))
+        (testing "can't be created with wildcard routes"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"can't create :lookup-router with wildcard routes"
+                (r/lookup-router
+                  (r/resolve-routes
+                    ["/api/:version/ping"] {}))))))
 
-      (testing "can't be created with multiple routes"
-        (is (thrown-with-msg?
-              ExceptionInfo
-              #":single-static-path-router requires exactly 1 static route"
-              (r/single-static-path-router
-                (r/resolve-routes
-                  [["/ping"]
-                   ["/pong"]] {})))))))
+      r/lookup-router :lookup-router
+      r/single-static-path-router :single-static-path-router
+      r/linear-router :linear-router
+      r/prefix-tree-router :prefix-tree-router
+      r/mixed-router :mixed-router))
 
   (testing "route coercion & compilation"
 

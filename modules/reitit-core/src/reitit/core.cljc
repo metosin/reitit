@@ -1,6 +1,7 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
+            [reitit.trie :as trie]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -216,6 +217,46 @@
          (if-let [match (impl/fast-get lookup name)]
            (match params)))))))
 
+(defn prefix-tree-router
+  "Creates a prefix-tree router from resolved routes and optional
+  expanded options. See [[router]] for available options"
+  ([routes]
+   (prefix-tree-router routes {}))
+  ([routes opts]
+   (let [compiled (compile-routes routes opts)
+         names (find-names routes opts)
+         [node lookup] (reduce
+                         (fn [[node lookup] [p {:keys [name] :as meta} result]]
+                           (let [{:keys [params] :as route} (impl/create [p meta result])
+                                 f #(if-let [path (impl/path-for route %)]
+                                      (->Match p meta result % path)
+                                      (->PartialMatch p meta result % params))]
+                             [(trie/insert node p (->Match p meta result nil nil))
+                              (if name (assoc lookup name f) lookup)]))
+                         [nil {}] compiled)
+         lookup (impl/fast-map lookup)]
+     (reify
+       Router
+       (router-name [_]
+         :prefix-tree-router)
+       (routes [_]
+         compiled)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (if-let [match (trie/lookup node path {})]
+           (-> (:data match)
+               (assoc :params (:params match))
+               (assoc :path path))))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
+
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
   expanded options. See [[router]] for available options"
@@ -252,16 +293,16 @@
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
-  static routes and [[linear-router]] for wildcard routes. All
+  static routes and [[prefix-tree-router]] for wildcard routes. All
   routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
   ([routes]
    (mixed-router routes {}))
   ([routes opts]
-   (let [{linear true, lookup false} (group-by impl/wild-route? routes)
+   (let [{wild true, lookup false} (group-by impl/wild-route? routes)
          compiled (compile-routes routes opts)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
-         wildcard-router (linear-router linear opts)
+         wildcard-router (prefix-tree-router wild opts)
          static-router (->static-router lookup opts)
          names (find-names routes opts)]
      (reify Router
@@ -309,10 +350,10 @@
          router (cond
                   router router
                   (and (= 1 (count routes)) (not wilds?)) single-static-path-router
+                  conflicting linear-router
                   (not wilds?) lookup-router
-                  all-wilds? linear-router
-                  (not conflicting) mixed-router
-                  :else linear-router)]
+                  all-wilds? prefix-tree-router
+                  :else mixed-router)]
 
      (when-let [conflicts (:conflicts opts)]
        (when conflicting (conflicts conflicting)))

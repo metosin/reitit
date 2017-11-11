@@ -69,10 +69,20 @@
 ;; (c) https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
 ;;
 
-(defn- wild? [s]
+(defn wild? [s]
   (contains? #{\: \*} (first s)))
 
-(defn- partition-wilds
+(defn wild-param?
+  "Return true if a string segment starts with a wildcard string."
+  [segment]
+  (= \: (first segment)))
+
+(defn catch-all-param?
+  "Return true if a string segment starts with a catch-all string."
+  [segment]
+  (= \* (first segment)))
+
+(defn partition-wilds
   "Given a path-spec string, return a seq of strings with wildcards
   and catch-alls separated into their own strings. Eats the forward
   slash following a wildcard."
@@ -161,7 +171,7 @@
       :cljs [[a k v] (assoc a k v)]))
 
 (defn fast-map [m]
-  #?@(:clj  [(java.util.HashMap. m)]
+  #?@(:clj  [(java.util.HashMap. (or m {}))]
       :cljs [m]))
 
 (defn fast-get

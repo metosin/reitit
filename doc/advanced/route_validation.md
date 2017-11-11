@@ -5,7 +5,7 @@ Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) 
 **NOTE:** Use of specs requires to use one of the following:
 
 * `[org.clojure/clojurescript "1.9.660"]` (or higher)
-* `[org.clojure/clojure "1.9.0-beta2"]` (or higher)
+* `[org.clojure/clojure "1.9.0-RC1"]` (or higher)
 * `[clojure-future-spec "1.9.0-alpha17"]` (if Clojure 1.8 is used)
 
 ## Example
