@@ -14,7 +14,10 @@
         [top (assoc childs k v)]
         [(assoc top k v) childs])) [{} {}] meta))
 
-(defn ring-handler [router]
+(defn ring-handler
+  "Creates a ring-handler out of a ring-router.
+  Supports both 1 (sync) and 3 (async) arities."
+  [router]
   (with-meta
     (fn
       ([request]
@@ -23,23 +26,20 @@
                params (:params match)
                result (:result match)
                handler (or (-> result method :handler)
-                           (-> result :any :handler))]
-           (if handler
-             (handler
-               (cond-> (impl/fast-assoc request ::match match)
-                       (seq params) (impl/fast-assoc :path-params params)))))))
+                           (-> result :any :handler))
+               request (cond-> (impl/fast-assoc request ::match match)
+                               (seq params) (impl/fast-assoc :path-params params))]
+           (handler request))))
       ([request respond raise]
        (if-let [match (r/match-by-path router (:uri request))]
          (let [method (:request-method request :any)
                params (:params match)
                result (:result match)
                handler (or (-> result method :handler)
-                           (-> result :any :handler))]
-           (if handler
-             (handler
-               (cond-> (impl/fast-assoc request ::match match)
-                       (seq params) (impl/fast-assoc :path-params params))
-               respond raise)))
+                           (-> result :any :handler))
+               request (cond-> (impl/fast-assoc request ::match match)
+                               (seq params) (impl/fast-assoc :path-params params))]
+           (handler request respond raise))
          (respond nil))))
     {::router router}))
 
