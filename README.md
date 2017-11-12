@@ -11,7 +11,7 @@ A friendly data-driven router for Clojure(Script).
 * Extendable
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-See [Issues](https://github.com/metosin/reitit/issues) for roadmap.
+See the [full documentation](https://metosin.github.io/reitit/) for details.
 
 ## Latest version
 
@@ -54,9 +54,13 @@ Optionally, the parts can be required separately:
 ;        :path "/api/orders/2"}
 ```
 
-## Documentation
+## More info
 
 [Check out the full documentation!](https://metosin.github.io/reitit/)
+
+Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
+
+There is also a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
 
 ## Special thanks
 
@@ -64,9 +68,9 @@ To all Clojure(Script) routing libs out there, expecially to
 [Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [Compojure](https://github.com/weavejester/compojure) and
 [Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
 
-Also to [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen) and [Ring-swagger](https://github.com/metosin/ring-swagger) and  for the data-driven syntax, coercion & stuff.
+Also to [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
 
-And some [Yada](https://github.com/juxt/yada) too.
+And, of course, to: [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec).
 
 ## Development instructions
 

@@ -6,11 +6,12 @@
             [spec-tools.core :as st]
 
             [reitit.core :as reitit]
-            [reitit.core :as ring]
-            [reitit.coercion :as coercion]
-            [reitit.coercion.spec :as spec]
-            [reitit.coercion.protocol :as protocol]
-            [spec-tools.data-spec :as ds]))
+            [reitit.ring :as ring]
+            [reitit.ring.coercion :as coercion]
+            [reitit.ring.coercion.spec :as spec]
+            [reitit.ring.coercion.protocol :as protocol]
+            [spec-tools.data-spec :as ds]
+            [reitit.core :as r]))
 
 ;;
 ;; start repl with `lein perf repl`

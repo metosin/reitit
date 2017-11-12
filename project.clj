@@ -32,7 +32,7 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-spec/src"]
 
-                   :dependencies [[org.clojure/clojure "1.9.0-beta4"]
+                   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                                   [org.clojure/clojurescript "1.9.946"]
 
                                   ;; all modules dependencies
