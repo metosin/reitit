@@ -18,30 +18,31 @@
   "Creates a ring-handler out of a ring-router.
   Supports both 1 (sync) and 3 (async) arities."
   [router]
-  (with-meta
-    (fn
-      ([request]
-       (if-let [match (r/match-by-path router (:uri request))]
-         (let [method (:request-method request :any)
-               params (:params match)
-               result (:result match)
-               handler (or (-> result method :handler)
-                           (-> result :any :handler))
-               request (cond-> (impl/fast-assoc request ::match match)
-                               (seq params) (impl/fast-assoc :path-params params))]
-           (handler request))))
-      ([request respond raise]
-       (if-let [match (r/match-by-path router (:uri request))]
-         (let [method (:request-method request :any)
-               params (:params match)
-               result (:result match)
-               handler (or (-> result method :handler)
-                           (-> result :any :handler))
-               request (cond-> (impl/fast-assoc request ::match match)
-                               (seq params) (impl/fast-assoc :path-params params))]
-           (handler request respond raise))
-         (respond nil))))
-    {::router router}))
+  (let [default-handler (constantly nil)]
+    (with-meta
+      (fn
+        ([request]
+         (if-let [match (r/match-by-path router (:uri request))]
+           (let [method (:request-method request :any)
+                 params (:params match)
+                 result (:result match)
+                 handler (or (-> result method :handler)
+                             (-> result :any (:handler default-handler)))
+                 request (cond-> (impl/fast-assoc request ::match match)
+                                 (seq params) (impl/fast-assoc :path-params params))]
+             (handler request))))
+        ([request respond raise]
+         (if-let [match (r/match-by-path router (:uri request))]
+           (let [method (:request-method request :any)
+                 params (:params match)
+                 result (:result match)
+                 handler (or (-> result method :handler)
+                             (-> result :any (:handler default-handler)))
+                 request (cond-> (impl/fast-assoc request ::match match)
+                                 (seq params) (impl/fast-assoc :path-params params))]
+             (handler request respond raise))
+           (respond nil))))
+      {::router router})))
 
 (defn get-router [handler]
   (some-> handler meta ::router))
