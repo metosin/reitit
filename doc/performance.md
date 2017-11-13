@@ -69,7 +69,7 @@ The routing sample taken from [bide](https://github.com/funcool/bide) README:
 
 Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
 
-But, the example is too simple for any real benchmark. Also, some of the libraries always match on the `:request-method` too and by doing so, do more work than just match by path.
+But, the example is too simple for any real benchmark. Also, some of the libraries always match on the `:request-method` too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.
 
 So, we need to test something more realistic.
 
@@ -95,7 +95,7 @@ Again, both `reitit-ring` and Pedestal shine here, thanks to the fast lookup-rou
 
 The routing perf needs to be measured to get an internal baseline to optimize against. We also want to ensure that new features don't regress the performance. Perf tests should be run in a stable CI environment. Help welcome.
 
-### Looking out of the box?
+### Looking out of the box
 
 It might be interesting to compare reitit with the routers in other languages, like the [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark).
 
