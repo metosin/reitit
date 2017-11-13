@@ -25,6 +25,8 @@ Optionally, the parts can be required separately:
 [metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
 ```
 
+For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
+
 # Examples
 
 ## Simple router
