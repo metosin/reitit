@@ -1,4 +1,4 @@
-(ns reitit.perf-test
+(ns reitit.bide-perf-test
   (:require [criterium.core :as cc]
             [reitit.core :as reitit]
             [reitit.perf-utils :refer :all]
