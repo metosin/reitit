@@ -424,24 +424,41 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="performance">Performance</h1>
-<p>There are many great routing libraries for Clojure(Script), but not many are optimized for perf. Reitit tries to be both great in features and really fast. Originally the routing was adopted from <a href="http://pedestal.io/" target="_blank">Pedestal</a>, but it has been since mostly rewritten.</p>
+<p>There are many great routing libraries for Clojure(Script), but not many are optimized for perf. Reitit tries to be both great in features and be really fast. Originally the routing was adopted from <a href="http://pedestal.io/" target="_blank">Pedestal</a> (which is known to be fast), but has been partially rewritten performance in mind. Hopefully some optimizations can be back-ported to Pedestal.</p>
 <h3 id="rationale">Rationale</h3>
 <ul>
-<li>Multiple routing algorithms, select for for a given route tree</li>
+<li>Multiple routing algorithms, choose based on the route tree</li>
 <li>Route flattening and re-ordering</li>
 <li>Managed mutability over Immutability</li>
 <li>Precompute/compile as much as possible (matches, middleware, routes)</li>
 <li>Use abstractions that enable JVM optimizations</li>
 <li>Use small functions to enable JVM Inlining</li>
-<li>Protocols over Multimethods</li>
+<li>Protocols over Multimethods (or Maps)</li>
 <li>Records over Maps</li>
 <li>Always be measuring</li>
 <li>Don&apos;t trust the (micro-)benchmarks</li>
 </ul>
 <h3 id="does-routing-performance-matter">Does routing performance matter?</h3>
-<p>Well, it depends. Some tested routing libs seem to spend more time resolving the routes than it takes to encode &amp; decode a 1k JSON payload. For busy sites, this actually matters.</p>
-<h3 id="example">Example</h3>
-<p>The routing sample taken from <a href="https://github.com/funcool/bide" target="_blank">bide</a> README, run with a Late 2013 MacBook Pro, with the <code>perf</code> profile:</p>
+<p>Well, it depends. With small route trees, it might not. But, with large (real-life) route trees, difference between the fastest and the slowest tested libs can be two or three orders of magnitude. For busy sites it actually matters if you routing request takes 100 ns or 100 &#xB5;s. A lot.</p>
+<h3 id="tests">Tests</h3>
+<p>All perf tests are found in <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">the repo</a> and have been run with the following setup:</p>
+<pre><code>;;
+;; start repl with `lein perf repl`
+;; perf measured with the following setup:
+;;
+;; Model Name:            MacBook Pro
+;; Model Identifier:      MacBookPro11,3
+;; Processor Name:        Intel Core i7
+;; Processor Speed:       2,5 GHz
+;; Number of Processors:  1
+;; Total Number of Cores: 4
+;; L2 Cache (per Core):   256 KB
+;; L3 Cache:              6 MB
+;; Memory:                16 GB
+;;
+</code></pre><p><strong>NOTE:</strong> Tests are not scientific proof and may contain errors. You should always run the perf tests with your own (real-life) routing tables to get more accurate results for your use case. Also, if you have idea how to test things better, please let us know.</p>
+<h3 id="simple-example">Simple Example</h3>
+<p>The routing sample taken from <a href="https://github.com/funcool/bide" target="_blank">bide</a> README:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 (<span class="hljs-name">require</span> &apos;[criterium.core <span class="hljs-symbol">:as</span> cc])
 
@@ -451,29 +468,41 @@
      [<span class="hljs-string">&quot;/auth/recovery/token/:token&quot;</span> <span class="hljs-symbol">:auth/recovery</span>]
      [<span class="hljs-string">&quot;/workspace/:project/:page&quot;</span> <span class="hljs-symbol">:workspace/page</span>]]))
 
-<span class="hljs-comment">;; Execution time mean : 3.2 &#xB5;s -&gt; 312M ops/sec</span>
+<span class="hljs-comment">;; Execution time mean (per 1000) : 3.2 &#xB5;s -&gt; 312M ops/sec</span>
 (<span class="hljs-name">cc/quick-bench</span>
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/auth/login&quot;</span>)))
 
-<span class="hljs-comment">;; Execution time mean : 530 &#xB5;s -&gt; 1.9M ops/sec</span>
+<span class="hljs-comment">;; Execution time mean (per 1000): 530 &#xB5;s -&gt; 1.9M ops/sec</span>
 (<span class="hljs-name">cc/quick-bench</span>
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/workspace/1/1&quot;</span>)))
 </code></pre>
-<h3 id="is-that-good">Is that good?</h3>
-<p>Based on some <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit" target="_blank">quick perf tests</a>, the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (ataraxy, bidi, compojure and pedestal).</p>
-<p>But, one shoudn&apos;t trust the benchmarks. Many libraries (here: compojure, pedestal and ataraxy) always match also on the request-method so they do more work. Also, real-life routing tables might look different and different libs might behave differently.</p>
-<p>But, the perf should be good.</p>
-<h3 id="value-of-perf-tests">Value of perf tests?</h3>
-<p>Real value of perf tests is to get a internal baseline to optimize against. Also, to ensure that new features don&apos;t regress the performance.</p>
-<p>It might be interesting to look out of the box and compare the fast Clojure routing libs to routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
-<h3 id="performance-guides">Performance guides</h3>
+<p>Based on the <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj" target="_blank">perf tests</a>, the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).</p>
+<p>But, the example is too simple for any real benchmark. Also, some of the libraries always match on the <code>:request-method</code> too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.</p>
+<p>So, we need to test something more realistic.</p>
+<h3 id="restful-apis">RESTful apis</h3>
+<p>To get better view on the real life routing performance, there is <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj" target="_blank">test</a> of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the <a href="https://opensensors.io/" target="_blank">OpenSensors</a> swagger definitions.</p>
+<p>Thanks to the <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">prefix-tree</a> algorithm, <code>reitit-ring</code> and Pedestal are fastest here.</p>
+<p><img src="images/opensensors.png" alt="Opensensors perf test"></p>
+<h3 id="cqrs-apis">CQRS apis</h3>
+<p>Another real-life <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj" target="_blank">test scenario</a> is a <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank">CQRS</a>-style route tree, where all the paths are static, e.g. <code>/api/command/add-order</code>. The route definitions are pulled out from <a href="https://github.com/lupapiste/lupapiste" target="_blank">Lupapiste</a>. The test consists of ~300 static routes (just the commands here, there would be ~200 queries too).</p>
+<p>Again, both <code>reitit-ring</code> and Pedestal shine here, thanks to the fast lookup-routers. On average, they are two orders of magnitude faster and on best/worst case, three orders of magnitude faster than the other tested libs. Ataraxy failed this test on <code>Method code too large</code> error.</p>
+<p><img src="images/lupapiste.png" alt="Opensensors perf test"></p>
+<p><strong>NOTE</strong>: If there would be even one wildcard route in the route-tree, Pedestal would fallback from lookup-router to the prefix-tree router, yielding constant, but order of magnitude slower perf. Reitit instead fallbacks to <code>:mixed-router</code>, still serving the static routes with lookup-router, just the wildcard route(s) with prefix-tree. So, the performance would not notably degrade.</p>
+<h3 id="why-measure">Why measure?</h3>
+<p>The routing perf needs to be measured to get an internal baseline to optimize against. We also want to ensure that new features don&apos;t regress the performance. Perf tests should be run in a stable CI environment. Help welcome.</p>
+<h3 id="looking-out-of-the-box">Looking out of the box</h3>
+<p>It might be interesting to compare reitit with the routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
+<h3 id="performance-tips">Performance tips</h3>
 <p>Few things that have an effect on performance:</p>
 <ul>
 <li>Wildcard-routes are an order of magnitude slower than static routes</li>
 <li>It&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which internally has a fast static path router and a separate wildcard-router. So, the static paths are still fast.</li>
-<li>Move computation from request processing time into creation time, using by compiling <a href="ring/compiling_middleware.html">middleware</a> &amp; <a href="advanced/configuring_routers.html">route data</a>.</li>
+<li>Move computation from request processing time into creation time, using by compiling <a href="ring/compiling_middleware.html">middleware</a> &amp; <a href="advanced/configuring_routers.html">route data</a>.<ul>
+<li>Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.</li>
+</ul>
+</li>
 </ul>
 
                                 
@@ -514,7 +543,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-12T14:00:46.788Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-12T14:01:25.259Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.5","depth":1,"next":{"title":"TODO: Swagger & OpenAPI","level":"1.6","depth":1,"ref":"","articles":[]},"previous":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2017-11-13T05:56:35.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-13T05:57:08.948Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
