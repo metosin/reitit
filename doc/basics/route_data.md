@@ -26,14 +26,14 @@ The expanded route data can be retrieved from a router with `routes` and is retu
 
 (r/match-by-path router "/ping")
 ; #Match{:template "/ping"
-;        :meta {:name :user/ping}
+;        :data {:name :user/ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/ping"}
 
 (r/match-by-name router ::ping)
 ; #Match{:template "/ping"
-;        :meta {:name :user/ping}
+;        :data {:name :user/ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/ping"}
@@ -92,7 +92,7 @@ By default, `reitit/Expand` protocol is used to expand the route arguments. It e
 
 (r/match-by-path router "/ping")
 ; #Match{:template "/ping"
-;        :meta {:name :user/ping}
+;        :data {:name :user/ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/ping"}

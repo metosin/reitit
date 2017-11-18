@@ -7,12 +7,12 @@
 (def http-methods #{:get :head :patch :delete :options :post :put})
 (defrecord Methods [get head post put delete trace options connect patch any])
 
-(defn- group-keys [meta]
+(defn- group-keys [data]
   (reduce-kv
     (fn [[top childs] k v]
       (if (http-methods k)
         [top (assoc childs k v)]
-        [(assoc top k v) childs])) [{} {}] meta))
+        [(assoc top k v) childs])) [{} {}] data))
 
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.
@@ -50,23 +50,23 @@
 (defn get-match [request]
   (::match request))
 
-(defn coerce-handler [[path meta] {:keys [expand] :as opts}]
+(defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
           (fn [acc method]
             (if (contains? acc method)
               (update acc method expand opts)
-              acc)) meta http-methods)])
+              acc)) data http-methods)])
 
-(defn compile-result [[path meta] opts]
-  (let [[top childs] (group-keys meta)]
+(defn compile-result [[path data] opts]
+  (let [[top childs] (group-keys data)]
     (if-not (seq childs)
       (let [middleware (middleware/compile-result [path top] opts)]
         (map->Methods {:any (middleware/compile-result [path top] opts)}))
-      (let [any-handler (if (:handler top) (middleware/compile-result [path meta] opts))]
+      (let [any-handler (if (:handler top) (middleware/compile-result [path data] opts))]
         (reduce-kv
-          (fn [acc method meta]
-            (let [meta (meta-merge top meta)]
-              (assoc acc method (middleware/compile-result [path meta] opts method))))
+          (fn [acc method data]
+            (let [data (meta-merge top data)]
+              (assoc acc method (middleware/compile-result [path data] opts method))))
           (map->Methods {:any any-handler})
           childs)))))
 

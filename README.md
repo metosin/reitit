@@ -4,7 +4,7 @@ A friendly data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
 * Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
-* First-class [route meta-data](https://metosin.github.io/reitit/basics/route_data.html)
+* First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
 * [Ring-router](https://metosin.github.io/reitit/ring.html) with data-driven [middleware](https://metosin.github.io/reitit/ring/compiling_middleware.html)
 * [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
@@ -41,14 +41,14 @@ Optionally, the parts can be required separately:
 
 (r/match-by-path router "/api/ping")
 ; #Match{:template "/api/ping"
-;        :meta {:name ::ping}
+;        :data {:name ::ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/api/ping"}
 
 (r/match-by-name router ::order {:id 2})
 ; #Match{:template "/api/orders/:id",
-;        :meta {:name ::order},
+;        :data {:name ::order},
 ;        :result nil,
 ;        :params {:id 2},
 ;        :path "/api/orders/2"}

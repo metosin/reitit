@@ -33,7 +33,7 @@ Matching a route:
 ```clj
 (r/match-by-name router ::ping)
 ; #Match{:template "/api/ping"
-;        :meta {:name :user/ping}
+;        :data {:name :user/ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/api/ping"}
@@ -44,7 +44,7 @@ If not all path-parameters are set, a `PartialMatch` is returned:
 ```clj
 (r/match-by-name router ::user)
 ; #PartialMatch{:template "/api/user/:id",
-;               :meta {:name :user/user},
+;               :data {:name :user/user},
 ;               :result nil,
 ;               :params nil,
 ;               :required #{:id}}
@@ -58,7 +58,7 @@ With provided path-parameters:
 ```clj
 (r/match-by-name router ::user {:id "1"})
 ; #Match{:template "/api/user/:id"
-;        :meta {:name :user/user}
+;        :data {:name :user/user}
 ;        :path "/api/user/1"
 ;        :result nil
 ;        :params {:id "1"}}

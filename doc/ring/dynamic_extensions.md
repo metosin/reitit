@@ -9,13 +9,13 @@ Example middleware to guard routes based on user roles:
 
 (defn wrap-enforce-roles [handler]
   (fn [{:keys [::roles] :as request}]
-    (let [required (some-> request (ring/get-match) :meta ::roles)]
+    (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/subset? required roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
 ```
 
-Mounted to an app via router meta-data (effecting all routes):
+Mounted to an app via router data (effecting all routes):
 
 ```clj
 (def handler (constantly {:status 200, :body "ok"}))
@@ -27,7 +27,7 @@ Mounted to an app via router meta-data (effecting all routes):
         ["/ping" handler]
         ["/admin" {::roles #{:admin}}
          ["/ping" handler]]]]
-      {:meta {:middleware [wrap-enforce-roles]}})))
+      {:data {:middleware [wrap-enforce-roles]}})))
 ```
 
 Anonymous access to public route:

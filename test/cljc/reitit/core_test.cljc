@@ -16,13 +16,13 @@
         (is (= true (map? (r/options router))))
         (is (= (r/map->Match
                  {:template "/api/ipa/:size"
-                  :meta {:name ::beer}
+                  :data {:name ::beer}
                   :path "/api/ipa/large"
                   :params {:size "large"}})
                (r/match-by-path router "/api/ipa/large")))
         (is (= (r/map->Match
                  {:template "/api/ipa/:size"
-                  :meta {:name ::beer}
+                  :data {:name ::beer}
                   :path "/api/ipa/large"
                   :params {:size "large"}})
                (r/match-by-name router ::beer {:size "large"})))
@@ -32,7 +32,7 @@
         (testing "name-based routing with missing parameters"
           (is (= (r/map->PartialMatch
                    {:template "/api/ipa/:size"
-                    :meta {:name ::beer}
+                    :data {:name ::beer}
                     :required #{:size}
                     :params nil})
                  (r/match-by-name router ::beer)))
@@ -55,13 +55,13 @@
         (is (= true (map? (r/options router))))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
-                  :meta {:name ::beer}
+                  :data {:name ::beer}
                   :path "/api/ipa/large"
                   :params {}})
                (r/match-by-path router "/api/ipa/large")))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
-                  :meta {:name ::beer}
+                  :data {:name ::beer}
                   :path "/api/ipa/large"
                   :params {:size "large"}})
                (r/match-by-name router ::beer {:size "large"})))
@@ -86,10 +86,10 @@
 
     (testing "custom compile"
       (let [compile-times (atom 0)
-            coerce (fn [[path meta] _]
-                     (if-not (:invalid? meta)
-                       [path (assoc meta :path path)]))
-            compile (fn [[path meta] _]
+            coerce (fn [[path data] _]
+                     (if-not (:invalid? data)
+                       [path (assoc data :path path)]))
+            compile (fn [[path data] _]
                       (swap! compile-times inc)
                       (constantly path))
             router (r/router
@@ -159,7 +159,7 @@
       (is (= expected (r/resolve-routes routes {})))
       (is (= (r/map->Match
                {:template "/api/user/:id/:sub-id"
-                :meta {:mw [:api], :parameters {:id "String", :sub-id "String"}}
+                :data {:mw [:api], :parameters {:id "String", :sub-id "String"}}
                 :path "/api/user/1/2"
                 :params {:id "1", :sub-id "2"}})
              (r/match-by-path router "/api/user/1/2"))))))

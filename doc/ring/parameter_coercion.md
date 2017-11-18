@@ -14,10 +14,10 @@ Reitit provides pluggable parameter coercion via `reitit.ring.coercion.protocol/
 
 To use `Coercion` with Ring, one needs to do the following:
 
-1. Define parameters and responses as data into route meta-data, in format adopted from [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example):
+1. Define parameters and responses as data into route data, in format adopted from [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example):
   * `:parameters` map, with submaps for different parameters: `:query`, `:body`, `:form`, `:header` and `:path`. Parameters are defined in the format understood by the `Coercion`.
   * `:responses` map, with response status codes as keys (or `:default` for "everything else") with maps with `:schema` and optionally `:description` as values.
-2. Define a `Coercion` to route meta-data under `:coercion`
+2. Define a `Coercion` to route data under `:coercion`
 3. Mount request & response coercion middleware to the routes (recommended to mount to all routes under router as they mounted only to routes which have the parameters / responses defined):
   * `reitit.ring.coercion/gen-wrap-coerce-parameters`
   * `gen-wrap-coerce-parameters/gen-wrap-coerce-responses`
@@ -42,7 +42,7 @@ If either request or response coercion fails, an descriptive error is thrown.
                  :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                   {:status 200
                                    :body {:total (+ x y)}})}}]]
-      {:meta {:middleware [coercion/gen-wrap-coerce-parameters
+      {:data {:middleware [coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
               :coercion spec/coercion}})))
 ```
@@ -82,7 +82,7 @@ Currently, `clojure.spec` [doesn't support runtime transformations via conformin
                  :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                   {:status 200
                                    :body {:total (+ x y)}})}}]]
-      {:meta {:middleware [coercion/gen-wrap-coerce-parameters
+      {:data {:middleware [coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
               :coercion spec/coercion}})))
 ```
