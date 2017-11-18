@@ -428,7 +428,7 @@
                                 <h1 id="compiling-middleware">Compiling Middleware</h1>
 <p>The <a href="dynamic_extensions.html">dynamic extensions</a> is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.</p>
 <p>Still, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning <code>nil</code>. Why mount a <code>wrap-enforce-roles</code> middleware for a route if there are no roles required for it?</p>
-<p>To enable this we use <a href="data_driven_middleware.html">middleware records</a> <code>:gen-wrap</code> key instead of the normal <code>:wrap</code>. <code>:gen-wrap</code> expects a function of <code>route-meta router-opts =&gt; ?wrap</code>.</p>
+<p>To enable this we use <a href="data_driven_middleware.html">middleware records</a> <code>:gen-wrap</code> key instead of the normal <code>:wrap</code>. <code>:gen-wrap</code> expects a function of <code>route-data router-opts =&gt; ?wrap</code>.</p>
 <p>To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with <code>:gen-wrap</code>. Actual codes can be found in <a href="https://github.com/metosin/reitit/blob/master/src/reitit/ring/coercion.cljc" target="_blank"><code>reitit.ring.coercion</code></a>:</p>
 <h2 id="naive">Naive</h2>
 <ul>
@@ -437,16 +437,16 @@
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-coerce-response
   <span class="hljs-string">&quot;Pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route meta, otherwise will do nothing.&quot;</span>
+  and :responses from route data, otherwise will do nothing.&quot;</span>
   [handler]
   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
     ([request]
      (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [response (<span class="hljs-name">handler</span> request)
            method (<span class="hljs-symbol">:request-method</span> request)
            match (<span class="hljs-name">ring/get-match</span> request)
-           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:responses</span>)
-           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:coercion</span>)
-           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:opts</span>)]
+           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:responses</span>)
+           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:coercion</span>)
+           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:opts</span>)]
        (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
          (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
            (<span class="hljs-name">coerce-response</span> coercers request response))
@@ -454,9 +454,9 @@
     ([request respond raise]
      (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [method (<span class="hljs-symbol">:request-method</span> request)
            match (<span class="hljs-name">ring/get-match</span> request)
-           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:responses</span>)
-           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:coercion</span>)
-           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:meta</span> <span class="hljs-symbol">:opts</span>)]
+           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:responses</span>)
+           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:coercion</span>)
+           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:opts</span>)]
        (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
          (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
            (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %))))
@@ -473,7 +473,7 @@
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> gen-wrap-coerce-response
   <span class="hljs-string">&quot;Generator for pluggable response coercion middleware.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route meta, otherwise does not mount.&quot;</span>
+  and :responses from route data, otherwise does not mount.&quot;</span>
   (<span class="hljs-name">middleware/create</span>
     {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::coerce-response</span>
      <span class="hljs-symbol">:gen-wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [responses coercion opts]} _]
@@ -530,7 +530,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Compiling middleware","level":"1.4.5","depth":2,"next":{"title":"Performance","level":"1.5","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-11-13T05:56:35.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-13T05:57:08.948Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Compiling middleware","level":"1.4.5","depth":2,"next":{"title":"Performance","level":"1.5","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-11-18T11:35:00.453Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-18T11:35:37.249Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

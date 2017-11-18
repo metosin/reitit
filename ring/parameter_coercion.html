@@ -435,12 +435,12 @@
 <h3 id="ring-request-and-response-coercion">Ring request and response coercion</h3>
 <p>To use <code>Coercion</code> with Ring, one needs to do the following:</p>
 <ol>
-<li>Define parameters and responses as data into route meta-data, in format adopted from <a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a>:<ul>
+<li>Define parameters and responses as data into route data, in format adopted from <a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a>:<ul>
 <li><code>:parameters</code> map, with submaps for different parameters: <code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>. Parameters are defined in the format understood by the <code>Coercion</code>.</li>
 <li><code>:responses</code> map, with response status codes as keys (or <code>:default</code> for &quot;everything else&quot;) with maps with <code>:schema</code> and optionally <code>:description</code> as values.</li>
 </ul>
 </li>
-<li>Define a <code>Coercion</code> to route meta-data under <code>:coercion</code></li>
+<li>Define a <code>Coercion</code> to route data under <code>:coercion</code></li>
 <li>Mount request &amp; response coercion middleware to the routes (recommended to mount to all routes under router as they mounted only to routes which have the parameters / responses defined):<ul>
 <li><code>reitit.ring.coercion/gen-wrap-coerce-parameters</code></li>
 <li><code>gen-wrap-coerce-parameters/gen-wrap-coerce-responses</code></li>
@@ -463,7 +463,7 @@
                  <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
                                   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
                                    <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
-      {<span class="hljs-symbol">:meta</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-parameters
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
               <span class="hljs-symbol">:coercion</span> spec/coercion}})))
 </code></pre>
@@ -496,7 +496,7 @@
                  <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
                                   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
                                    <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
-      {<span class="hljs-symbol">:meta</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-parameters
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
               <span class="hljs-symbol">:coercion</span> spec/coercion}})))
 </code></pre>
@@ -549,7 +549,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Parameter coercion","level":"1.4.4","depth":2,"next":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/parameter_coercion.md","mtime":"2017-11-13T05:56:35.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-13T05:57:08.948Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Parameter coercion","level":"1.4.4","depth":2,"next":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/parameter_coercion.md","mtime":"2017-11-18T11:35:00.453Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-18T11:35:37.249Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

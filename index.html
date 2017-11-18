@@ -428,7 +428,7 @@
 <ul>
 <li>Simple data-driven <a href="basics/route_syntax.html">route syntax</a></li>
 <li><a href="advanced/route_conflicts.md">Route conflict resolution</a></li>
-<li>First-class <a href="basics/route_data.html">route meta-data</a></li>
+<li>First-class <a href="basics/route_data.html">route data</a></li>
 <li>Bi-directional routing</li>
 <li><a href="ring/parameter_coercion.html">Pluggable coercion</a> (<a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a>)</li>
 <li>supports both <a href="ring/compiling_middleware.html">Middleware</a> &amp; Interceptors</li>
@@ -459,14 +459,14 @@
 
 (<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/ping&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::ping}</span>
+<span class="hljs-comment">;        :data {:name ::ping}</span>
 <span class="hljs-comment">;        :result nil</span>
 <span class="hljs-comment">;        :params {}</span>
 <span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
 
 (<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/orders/1&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::order-by-id}</span>
+<span class="hljs-comment">;        :data {:name ::order-by-id}</span>
 <span class="hljs-comment">;        :result nil</span>
 <span class="hljs-comment">;        :params {:id &quot;1&quot;}</span>
 <span class="hljs-comment">;        :path &quot;/api/orders/1&quot;}</span>
@@ -477,14 +477,14 @@
 
 (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
 <span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:name ::ping}</span>
+<span class="hljs-comment">;        :data {:name ::ping}</span>
 <span class="hljs-comment">;        :result nil</span>
 <span class="hljs-comment">;        :params {}</span>
 <span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
 
 (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span>)
 <span class="hljs-comment">; #PartialMatch{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;               :meta {:name :user/order-by-id}</span>
+<span class="hljs-comment">;               :data {:name :user/order-by-id}</span>
 <span class="hljs-comment">;               :result nil</span>
 <span class="hljs-comment">;               :params nil</span>
 <span class="hljs-comment">;               :required #{:id}}</span>
@@ -494,7 +494,7 @@
 
 (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span> {<span class="hljs-symbol">:id</span> <span class="hljs-number">2</span>})
 <span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;,</span>
-<span class="hljs-comment">;        :meta {:name ::order-by-id},</span>
+<span class="hljs-comment">;        :data {:name ::order-by-id},</span>
 <span class="hljs-comment">;        :result nil,</span>
 <span class="hljs-comment">;        :params {:id 2},</span>
 <span class="hljs-comment">;        :path &quot;/api/orders/2&quot;}</span>
@@ -532,7 +532,7 @@
 
 (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app (<span class="hljs-name">ring/get-router</span>) (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::ping</span>))
 <span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :meta {:middleware [[#object[user$wrap] :api]]</span>
+<span class="hljs-comment">;        :data {:middleware [[#object[user$wrap] :api]]</span>
 <span class="hljs-comment">;               :get {:handler #object[user$handler]}</span>
 <span class="hljs-comment">;        :name ::ping}</span>
 <span class="hljs-comment">;        :result #Methods{...}</span>
@@ -578,7 +578,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route conflicts","level":"1.2.6","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2017-11-13T05:56:35.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-13T05:57:08.948Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route conflicts","level":"1.2.6","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2017-11-18T11:35:00.453Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-18T11:35:37.249Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
