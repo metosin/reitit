@@ -30,7 +30,7 @@ Match provides the route information:
 ```clj
 (r/match-by-path router "/api/user/1")
 ; #Match{:template "/api/user/:id"
-;        :meta {:name :user/user}
+;        :data {:name :user/user}
 ;        :path "/api/user/1"
 ;        :result nil
 ;        :params {:id "1"}}

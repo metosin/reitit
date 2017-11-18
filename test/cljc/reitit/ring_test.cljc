@@ -102,16 +102,16 @@
 
       (testing "all named routes can be matched"
         (doseq [name (r/route-names router)]
-          (is (= name (-> (r/match-by-name router name) :meta :name))))))))
+          (is (= name (-> (r/match-by-name router name) :data :name))))))))
 
 (defn wrap-enforce-roles [handler]
   (fn [{:keys [::roles] :as request}]
-    (let [required (some-> request (ring/get-match) :meta ::roles)]
+    (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/intersection required roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
 
-(deftest enforcing-meta-data-rules-at-runtime-test
+(deftest enforcing-data-rules-at-runtime-test
   (let [handler (constantly {:status 200, :body "ok"})
         app (ring/ring-handler
               (ring/router
@@ -119,7 +119,7 @@
                   ["/ping" handler]
                   ["/admin" {::roles #{:admin}}
                    ["/ping" handler]]]]
-                {:meta {:middleware [wrap-enforce-roles]}}))]
+                {:data {:middleware [wrap-enforce-roles]}}))]
 
     (testing "public handler"
       (is (= {:status 200, :body "ok"}

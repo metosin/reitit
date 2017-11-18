@@ -101,23 +101,23 @@
           app (ring/ring-handler
                 (ring/router
                   routes
-                  {:meta {:middleware [coercion/wrap-coerce-parameters]
+                  {:data {:middleware [coercion/wrap-coerce-parameters]
                           :coercion coercion}}))
           app2 (ring/ring-handler
                  (ring/router
                    routes
-                   {:meta {:middleware [coercion/gen-wrap-coerce-parameters]
+                   {:data {:middleware [coercion/gen-wrap-coerce-parameters]
                            :coercion coercion}}))
           app3 (ring/ring-handler
                  (ring/router
                    routes
-                   {:meta {:middleware [coercion/wrap-coerce-parameters
+                   {:data {:middleware [coercion/wrap-coerce-parameters
                                         coercion/wrap-coerce-response]
                            :coercion coercion}}))
           app4 (ring/ring-handler
                  (ring/router
                    routes
-                   {:meta {:middleware [coercion/gen-wrap-coerce-parameters
+                   {:data {:middleware [coercion/gen-wrap-coerce-parameters
                                         coercion/gen-wrap-coerce-response]
                            :coercion coercion}}))
           req {:request-method :get
@@ -159,7 +159,7 @@
                      :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                       {:status 200
                                        :body {:total (+ x y)}})}}]]
-          {:meta {:middleware [coercion/gen-wrap-coerce-parameters
+          {:data {:middleware [coercion/gen-wrap-coerce-parameters
                                coercion/gen-wrap-coerce-response]
                   :coercion spec/coercion}})))
 

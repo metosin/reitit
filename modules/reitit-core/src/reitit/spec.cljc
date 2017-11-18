@@ -12,7 +12,7 @@
                           #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
 (s/def ::arg (s/and any? (complement vector?)))
-(s/def ::meta (s/map-of keyword? any?))
+(s/def ::data (s/map-of keyword? any?))
 (s/def ::result any?)
 
 (s/def ::raw-route
@@ -26,7 +26,7 @@
 
 (s/def ::route
   (s/cat :path ::path
-         :meta ::meta
+         :data ::data
          :result (s/? any?)))
 
 (s/def ::routes
@@ -40,7 +40,7 @@
 (s/def ::router reitit/router?)
 (s/def :reitit.router/path ::path)
 (s/def :reitit.router/routes ::routes)
-(s/def :reitit.router/meta ::meta)
+(s/def :reitit.router/data ::data)
 (s/def :reitit.router/expand fn?)
 (s/def :reitit.router/coerce fn?)
 (s/def :reitit.router/compile fn?)
@@ -51,7 +51,7 @@
   (s/nilable
     (s/keys :opt-un [:reitit.router/path
                      :reitit.router/routes
-                     :reitit.router/meta
+                     :reitit.router/data
                      :reitit.router/expand
                      :reitit.router/coerce
                      :reitit.router/compile

@@ -111,9 +111,9 @@
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher parts params meta result])
+(defrecord Route [path matcher parts params data result])
 
-(defn create [[path meta result]]
+(defn create [[path data result]]
   (let [path #?(:clj (.intern ^String path) :cljs path)]
     (as-> (parse-path path) $
           (assoc $ :path-re (path-regex $))
@@ -122,7 +122,7 @@
                                (path-matcher $)
                                #(if (#?(:clj .equals, :cljs =) path %) {}))
                     :result result
-                    :meta meta})
+                    :data data})
           (dissoc $ :path-re :path-constraints)
           (update $ :path-params set)
           (set/rename-keys $ {:path-parts :parts

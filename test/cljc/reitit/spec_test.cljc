@@ -40,7 +40,7 @@
           ;; path
           [:invalid {}]
 
-          ;; vector meta
+          ;; vector data
           ["/api" []
            ["/ipa"]])))
 
@@ -53,7 +53,7 @@
         (is (= true (r/router? (r/router ["/api"] opts))))
 
         {:path "/"}
-        {:meta {}}
+        {:data {}}
         {:expand (fn [_ _] {})}
         {:coerce (fn [route _] route)}
         {:compile (fn [_ _])}
@@ -69,7 +69,7 @@
 
         {:path "api"}
         {:path nil}
-        {:meta nil}
+        {:data nil}
         {:expand nil}
         {:coerce nil}
         {:compile nil}

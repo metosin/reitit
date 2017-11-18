@@ -4,7 +4,7 @@
 
 * Simple data-driven [route syntax](./basics/route_syntax.md)
 * [Route conflict resolution](./advanced/route_conflicts.md)
-* First-class [route meta-data](./basics/route_data.md)
+* First-class [route data](./basics/route_data.md)
 * Bi-directional routing
 * [Pluggable coercion](./ring/parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
 * supports both [Middleware](./ring/compiling_middleware.md) & Interceptors
@@ -48,14 +48,14 @@ Routing:
 
 (r/match-by-path router "/api/ping")
 ; #Match{:template "/api/ping"
-;        :meta {:name ::ping}
+;        :data {:name ::ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/api/ping"}
 
 (r/match-by-path router "/api/orders/1")
 ; #Match{:template "/api/orders/:id"
-;        :meta {:name ::order-by-id}
+;        :data {:name ::order-by-id}
 ;        :result nil
 ;        :params {:id "1"}
 ;        :path "/api/orders/1"}
@@ -69,14 +69,14 @@ Reverse-routing:
 
 (r/match-by-name router ::ping)
 ; #Match{:template "/api/ping"
-;        :meta {:name ::ping}
+;        :data {:name ::ping}
 ;        :result nil
 ;        :params {}
 ;        :path "/api/ping"}
 
 (r/match-by-name router ::order-by-id)
 ; #PartialMatch{:template "/api/orders/:id"
-;               :meta {:name :user/order-by-id}
+;               :data {:name :user/order-by-id}
 ;               :result nil
 ;               :params nil
 ;               :required #{:id}}
@@ -86,7 +86,7 @@ Reverse-routing:
 
 (r/match-by-name router ::order-by-id {:id 2})
 ; #Match{:template "/api/orders/:id",
-;        :meta {:name ::order-by-id},
+;        :data {:name ::order-by-id},
 ;        :result nil,
 ;        :params {:id 2},
 ;        :path "/api/orders/2"}
@@ -134,7 +134,7 @@ Reverse-routing:
 
 (-> app (ring/get-router) (r/match-by-name ::ping))
 ; #Match{:template "/api/ping"
-;        :meta {:middleware [[#object[user$wrap] :api]]
+;        :data {:middleware [[#object[user$wrap] :api]]
 ;               :get {:handler #object[user$handler]}
 ;        :name ::ping}
 ;        :result #Methods{...}

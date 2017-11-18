@@ -27,7 +27,7 @@
                      [value request]))
             ->app (fn [ast handler]
                     (middleware/compile-handler
-                      (middleware/expand ast :meta {})
+                      (middleware/expand ast :data {})
                       handler))]
 
         (testing "as middleware function"
@@ -74,29 +74,29 @@
 
     (testing "compiled Middleware"
       (let [calls (atom 0)
-            mw {:gen-wrap (fn [meta _]
+            mw {:gen-wrap (fn [data _]
                             (swap! calls inc)
                             (fn [handler value]
                               (swap! calls inc)
                               (fn [request]
-                                [meta value request])))}
+                                [data value request])))}
             ->app (fn [ast handler]
                     (middleware/compile-handler
-                      (middleware/expand ast :meta {})
+                      (middleware/expand ast :data {})
                       handler))]
 
         (testing "as map"
           (reset! calls 0)
           (let [app (->app [[mw :value]] identity)]
             (dotimes [_ 10]
-              (is (= [:meta :value :request] (app :request)))
+              (is (= [:data :value :request] (app :request)))
               (is (= 2 @calls)))))
 
         (testing "as Middleware"
           (reset! calls 0)
           (let [app (->app [[(middleware/create mw) :value]] identity)]
             (dotimes [_ 10]
-              (is (= [:meta :value :request] (app :request)))
+              (is (= [:data :value :request] (app :request)))
               (is (= 2 @calls)))))
 
         (testing "nil unmounts the middleware"
@@ -169,3 +169,4 @@
                                       :result
                                       :middleware
                                       (map :name))))))))))
+

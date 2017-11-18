@@ -30,7 +30,7 @@
                                          {:keys [e]} :path} :parameters}]
                                     {:status 200
                                      :body {:total (+ a b c d e)}})}}]]
-                {:meta {:middleware [coercion/gen-wrap-coerce-parameters
+                {:data {:middleware [coercion/gen-wrap-coerce-parameters
                                      coercion/gen-wrap-coerce-response]
                         :coercion spec/coercion}}))]
 

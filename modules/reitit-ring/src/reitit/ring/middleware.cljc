@@ -3,10 +3,10 @@
             [reitit.core :as r]))
 
 (defprotocol IntoMiddleware
-  (into-middleware [this meta opts]))
+  (into-middleware [this data opts]))
 
 (defrecord Middleware [name wrap])
-(defrecord Endpoint [meta handler middleware])
+(defrecord Endpoint [data handler middleware])
 
 (defn create [{:keys [name wrap gen-wrap] :as m}]
   (when (and wrap gen-wrap)
@@ -19,8 +19,8 @@
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
-  (into-middleware [[f & args] meta opts]
-    (if-let [{:keys [wrap] :as mw} (into-middleware f meta opts)]
+  (into-middleware [[f & args] data opts]
+    (if-let [{:keys [wrap] :as mw} (into-middleware f data opts)]
       (assoc mw :wrap #(apply wrap % args))))
 
   #?(:clj  clojure.lang.Fn
@@ -31,19 +31,19 @@
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
-  (into-middleware [this meta opts]
-    (into-middleware (create this) meta opts))
+  (into-middleware [this data opts]
+    (into-middleware (create this) data opts))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
-  (into-middleware [this meta opts]
-    (into-middleware (create this) meta opts))
+  (into-middleware [this data opts]
+    (into-middleware (create this) data opts))
 
   Middleware
-  (into-middleware [{:keys [wrap gen-wrap] :as this} meta opts]
+  (into-middleware [{:keys [wrap gen-wrap] :as this} data opts]
     (if-not gen-wrap
       this
-      (if-let [wrap (gen-wrap meta opts)]
+      (if-let [wrap (gen-wrap data opts)]
         (map->Middleware
           (-> this
               (dissoc :gen-wrap)
@@ -52,17 +52,17 @@
   nil
   (into-middleware [_ _ _]))
 
-(defn- ensure-handler! [path meta scope]
-  (when-not (:handler meta)
+(defn- ensure-handler! [path data scope]
+  (when-not (:handler data)
     (throw (ex-info
              (str "path \"" path "\" doesn't have a :handler defined"
                   (if scope (str " for " scope)))
-             (merge {:path path, :meta meta}
+             (merge {:path path, :data data}
                     (if scope {:scope scope}))))))
 
-(defn expand [middleware meta opts]
+(defn expand [middleware data opts]
   (->> middleware
-       (keep #(into-middleware % meta opts))
+       (keep #(into-middleware % data opts))
        (into [])))
 
 (defn compile-handler [middleware handler]
@@ -78,13 +78,13 @@
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[path {:keys [middleware handler] :as meta}] opts scope]
-   (ensure-handler! path meta scope)
-   (let [middleware (expand middleware meta opts)]
+  ([[path {:keys [middleware handler] :as data}] opts scope]
+   (ensure-handler! path data scope)
+   (let [middleware (expand middleware data opts)]
      (map->Endpoint
        {:handler (compile-handler middleware handler)
         :middleware middleware
-        :meta meta}))))
+        :data data}))))
 
 (defn router
   ([data]

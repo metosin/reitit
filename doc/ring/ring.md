@@ -32,7 +32,7 @@ The expanded routes shows the compilation results:
 (-> app (ring/get-router) (reitit/routes))
 ; [["/ping"
 ;   {:handler #object[...]}
-;   #Methods{:any #Endpoint{:meta {:handler #object[...]},
+;   #Methods{:any #Endpoint{:data {:handler #object[...]},
 ;                           :handler #object[...],
 ;                           :middleware []}}]]
 ```

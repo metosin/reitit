@@ -47,4 +47,4 @@ When router is created, the following steps are done:
 * route arguments are expanded (via `reitit.core/Expand` protocol) and optionally coerced
 * [route conflicts](advanced/route_conflicts.md) are resolved
 * actual [router implementation](../advanced/different_routers.md) is selected and created
-* optionally route meta-data gets compiled
+* optionally route data gets compiled
