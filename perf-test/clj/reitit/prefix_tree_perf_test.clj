@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [io.pedestal.http.route.prefix-tree :as p]
             [reitit.trie :as trie]
+            [reitit.segment :as segment]
             [criterium.core :as cc]))
 
 ;;
@@ -75,6 +76,9 @@
       (trie/insert acc p d))
     nil routes))
 
+(def reitit-segment
+  (segment/create routes))
+
 (defn bench! []
 
   ;; 2.3ms
@@ -99,7 +103,22 @@
   ;; 0.8ms (fix payloads)
   (cc/quick-bench
     (dotimes [_ 1000]
-      (trie/lookup reitit-tree "/v1/orgs/1/topics" {}))))
+      (trie/lookup reitit-tree "/v1/orgs/1/topics" {})))
+
+  ;;  0.9ms (initial)
+  ;;  0.5ms (protocols)
+  ;;  1.0ms (with path params)
+  ;;  1.0ms (Match records)
+  ;; 0.63ms (Single sweep path params)
+  ;; 0.51ms (Cleanup)
+  (cc/quick-bench
+    (dotimes [_ 1000]
+      (segment/lookup reitit-segment "/v1/orgs/1/topics"))))
 
 (comment
   (bench!))
+
+(comment
+  (p/lookup pedestal-tree "/v1/orgs/1/topics")
+  (trie/lookup reitit-tree "/v1/orgs/1/topics" {})
+  (segment/lookup reitit-segment "/v1/orgs/1/topics"))
