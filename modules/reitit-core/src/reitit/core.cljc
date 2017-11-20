@@ -154,6 +154,7 @@
                         (if name (assoc nl name f) nl)]))
                    [[] {}] compiled)
          lookup (impl/fast-map nl)]
+     ^{:type ::router}
      (reify
        Router
        (router-name [_]
@@ -199,6 +200,7 @@
                         nl)]) [{} {}] compiled)
          data (impl/fast-map pl)
          lookup (impl/fast-map nl)]
+     ^{:type ::router}
      (reify Router
        (router-name [_]
          :lookup-router)
@@ -235,6 +237,7 @@
                         (if name (assoc nl name f) nl)]))
                    [nil {}] compiled)
          lookup (impl/fast-map nl)]
+     ^{:type ::router}
      (reify
        Router
        (router-name [_]
@@ -272,6 +275,7 @@
          [[p data result] :as compiled] (compile-routes routes opts)
          p #?(:clj (.intern ^String p) :cljs p)
          match (->Match p data result {} p)]
+     ^{:type ::router}
      (reify Router
        (router-name [_]
          :single-static-path-router)
@@ -305,6 +309,7 @@
          wildcard-router (prefix-tree-router wild opts)
          static-router (->static-router lookup opts)
          names (find-names routes opts)]
+     ^{:type ::router}
      (reify Router
        (router-name [_]
          :mixed-router)
