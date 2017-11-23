@@ -1,5 +1,6 @@
 (ns reitit.trie
-  (:require [reitit.impl :as impl]))
+  (:require [reitit.impl :as impl]
+            [clojure.string :as str]))
 
 ;;
 ;; original https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
@@ -116,14 +117,31 @@
   tree node."
   [segment data]
   (cond
-    (impl/wild-param? segment)
+    (impl/wild-param segment)
     (wild-node segment (keyword (subs segment 1)) nil data)
 
-    (impl/catch-all-param? segment)
+    (impl/catch-all-param segment)
     (catch-all-node segment (keyword (subs segment 1)) nil data)
 
     :else
     (static-node segment nil data)))
+
+(defn partition-wilds
+  "Given a path-spec string, return a seq of strings with wildcards
+  and catch-alls separated into their own strings. Eats the forward
+  slash following a wildcard."
+  [path-spec]
+  (let [groups (partition-by impl/wild? (str/split path-spec #"/"))
+        first-groups (butlast groups)
+        last-group (last groups)]
+    (flatten
+      (conj (mapv #(if (impl/wild? (first %))
+                     %
+                     (str (str/join "/" %) "/"))
+                  first-groups)
+            (if (impl/wild? (first last-group))
+              last-group
+              (str/join "/" last-group))))))
 
 (defn- new-node
   "Given a path-spec and a payload object, return a new tree node. If
@@ -131,9 +149,9 @@
   node of a tree (linked list)."
   [path-spec data]
   (if (impl/contains-wilds? path-spec)
-    (let [parts (impl/partition-wilds path-spec)]
+    (let [parts (partition-wilds path-spec)]
       (reduce (fn [child segment]
-                (when (impl/catch-all-param? segment)
+                (when (impl/catch-all-param segment)
                   (throw (ex-info "catch-all may only appear at the end of a path spec"
                                   {:patch-spec path-spec})))
                 (-> (make-node segment nil)
@@ -187,7 +205,7 @@
           (set-data node data)
 
           ;; handle case where path-spec is a wildcard param
-          (impl/wild-param? path-spec)
+          (impl/wild-param path-spec)
           (let [lcs (calc-lcs segment path-spec)
                 common (subs path-spec 0 lcs)]
             (if (= common segment)
@@ -200,7 +218,7 @@
 
           ;; in the case where path-spec is a catch-all, node should always be nil.
           ;; getting here means we have an invalid route specification
-          (impl/catch-all-param? path-spec)
+          (impl/catch-all-param path-spec)
           (throw (ex-info "route conflict"
                           {:node node
                            :path-spec path-spec

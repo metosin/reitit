@@ -15,6 +15,31 @@
             [clojure.set :as set])
   (:import #?(:clj (java.util.regex Pattern))))
 
+(defn wild? [s]
+  (contains? #{\: \*} (first (str s))))
+
+(defn catch-all? [s]
+  (= \* (first (str s))))
+
+(defn wild-param [s]
+  (let [ss (str s)]
+    (if (= \: (first ss))
+      (keyword (subs ss 1)))))
+
+(defn catch-all-param [s]
+  (let [ss (str s)]
+    (if (= \* (first ss))
+      (keyword ss))))
+
+(defn wild-or-catch-all-param? [x]
+  (boolean (or (wild-param x) (catch-all-param x))))
+
+(defn segments [^String path]
+  (into [] (.split path "/" 666)))
+
+(defn contains-wilds? [path]
+  (boolean (some wild-or-catch-all-param? (segments path))))
+
 ;;
 ;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/path.clj
 ;;
@@ -66,48 +91,6 @@
         (zipmap path-params (rest m))))))
 
 ;;
-;; (c) https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
-;;
-
-(defn wild? [s]
-  (contains? #{\: \*} (first s)))
-
-(defn wild-param?
-  "Return true if a string segment starts with a wildcard string."
-  [segment]
-  (= \: (first segment)))
-
-(defn catch-all-param?
-  "Return true if a string segment starts with a catch-all string."
-  [segment]
-  (= \* (first segment)))
-
-(defn partition-wilds
-  "Given a path-spec string, return a seq of strings with wildcards
-  and catch-alls separated into their own strings. Eats the forward
-  slash following a wildcard."
-  [path-spec]
-  (let [groups (partition-by wild? (str/split path-spec #"/"))
-        first-groups (butlast groups)
-        last-group (last groups)]
-    (flatten
-      (conj (mapv #(if (wild? (first %))
-                     %
-                     (str (str/join "/" %) "/"))
-                  first-groups)
-            (if (wild? (first last-group))
-              last-group
-              (str/join "/" last-group))))))
-
-(defn contains-wilds?
-  "Return true if the given path-spec contains any wildcard params or
-  catch-alls."
-  [path-spec]
-  (let [parts (partition-wilds path-spec)]
-    (or (> (count parts) 1)
-        (wild? (first parts)))))
-
-;;
 ;; Routing (c) Metosin
 ;;
 
@@ -128,14 +111,6 @@
           (set/rename-keys $ {:path-parts :parts
                               :path-params :params})
           (map->Route $))))
-
-(defn segments [path]
-  (let [ss (-> (str/split path #"/") rest vec)]
-    (if (str/ends-with? path "/")
-      (conj ss "") ss)))
-
-(defn- catch-all? [segment]
-  (= \* (first segment)))
 
 (defn wild-route? [[path]]
   (contains-wilds? path))
