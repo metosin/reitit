@@ -39,11 +39,14 @@
                (some #(-lookup (impl/fast-get children' %) ps (assoc params % p)) wilds)
                (-catch-all catch-all data params p ps))))))))
 
+(defn insert [root path data]
+  (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))
+
 (defn create [paths]
   (reduce
     (fn [segment [p data]]
-      (-insert segment (impl/segments p) (map->Match {:data data})))
-    (segment) paths))
+      (insert segment p data))
+    nil paths))
 
 (defn lookup [segment ^String path]
   (-lookup segment (.split path "/") {}))

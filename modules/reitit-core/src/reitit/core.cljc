@@ -2,6 +2,7 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
             [reitit.trie :as trie]
+            [reitit.segment :as segment]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -250,6 +251,47 @@
          names)
        (match-by-path [_ path]
          (if-let [match (trie/lookup pl path {})]
+           (-> (:data match)
+               (assoc :params (:params match))
+               (assoc :path path))))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match params)))))))
+
+(defn segment-router
+  "Creates a special prefix-tree style segment router from resolved routes and optional
+  expanded options. See [[router]] for available options"
+  ([routes]
+   (segment-router routes {}))
+  ([routes opts]
+   (let [compiled (compile-routes routes opts)
+         names (find-names routes opts)
+         [pl nl] (reduce
+                   (fn [[pl nl] [p {:keys [name] :as data} result]]
+                     (let [{:keys [params] :as route} (impl/create [p data result])
+                           f #(if-let [path (impl/path-for route %)]
+                                (->Match p data result % path)
+                                (->PartialMatch p data result % params))]
+                       [(segment/insert pl p (->Match p data result nil nil))
+                        (if name (assoc nl name f) nl)]))
+                   [nil {}] compiled)
+         lookup (impl/fast-map nl)]
+     ^{:type ::router}
+     (reify
+       Router
+       (router-name [_]
+         :segment-router)
+       (routes [_]
+         compiled)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (if-let [match (segment/lookup pl path)]
            (-> (:data match)
                (assoc :params (:params match))
                (assoc :path path))))
