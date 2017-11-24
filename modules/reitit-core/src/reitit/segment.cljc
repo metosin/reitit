@@ -48,8 +48,8 @@
       (insert segment p data))
     nil paths))
 
-(defn lookup [segment ^String path]
-  (-lookup segment (.split path "/") {}))
+(defn lookup [segment path]
+  (-lookup segment (impl/segments path) {}))
 
 (comment
   (-> [["/:abba" 1]

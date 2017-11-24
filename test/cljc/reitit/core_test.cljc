@@ -45,20 +45,27 @@
                     #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
                     (r/match-by-name! router ::beer))))))
 
+        ;; TODO
         (testing "complex"
           (let [router (r/router
-                           [["/:abba" ::abba]
-                            ["/abba/1" ::abba1]
-                            ["/:abba/:dabba/doo" ::doo]
-                            ["/abba/:dabba/boo" ::boo]] {:router r})
+                         [["/:abba" ::abba]
+                          ["/abba/1" ::abba2]
+                          ["/:jabba/2" ::jabba2]
+                          ["/:abba/:dabba/doo" ::doo]
+                          ["/abba/:dabba/boo" ::boo]
+                          #_["/:jabba/:dabba/:doo/*foo" ::wild]]
+                         {:router r})
                 matches #(-> router (r/match-by-path %) :data :name)]
             (is (= ::abba (matches "/abba")))
-            (is (= ::abba1 (matches "/abba/1")))
+            (is (= ::abba2 (matches "/abba/1")))
+            (is (= ::jabba2 (matches "/abba/2")))
             (is (= ::doo (matches "/abba/1/doo")))
-            (is (= ::boo (matches "/abba/1/boo"))))))
+            (is (= ::boo (matches "/abba/1/boo")))
+            #_(is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
+            )))
 
       r/linear-router :linear-router
-      r/prefix-tree-router :prefix-tree-router
+      #_#_r/prefix-tree-router :prefix-tree-router
       r/segment-router :segment-router
       r/mixed-router :mixed-router))
 

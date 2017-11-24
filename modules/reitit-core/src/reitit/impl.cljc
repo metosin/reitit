@@ -34,8 +34,9 @@
 (defn wild-or-catch-all-param? [x]
   (boolean (or (wild-param x) (catch-all-param x))))
 
-(defn segments [^String path]
-  (into [] (.split path "/" 666)))
+(defn segments [path]
+  #?(:clj  (.split ^String path "/" 666)
+     :cljs (.split path #"/" 666)))
 
 (defn contains-wilds? [path]
   (boolean (some wild-or-catch-all-param? (segments path))))

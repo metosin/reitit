@@ -339,7 +339,7 @@
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
-  static routes and [[prefix-tree-router]] for wildcard routes. All
+  static routes and [[segment-router]] for wildcard routes. All
   routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
   ([routes]
@@ -348,7 +348,7 @@
    (let [{wild true, lookup false} (group-by impl/wild-route? routes)
          compiled (compile-routes routes opts)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
-         wildcard-router (prefix-tree-router wild opts)
+         wildcard-router (segment-router wild opts)
          static-router (->static-router lookup opts)
          names (find-names routes opts)]
      ^{:type ::router}
@@ -399,7 +399,7 @@
                   (and (= 1 (count routes)) (not wilds?)) single-static-path-router
                   conflicting linear-router
                   (not wilds?) lookup-router
-                  all-wilds? prefix-tree-router
+                  all-wilds? segment-router
                   :else mixed-router)]
 
      (when-let [conflicts (:conflicts opts)]
