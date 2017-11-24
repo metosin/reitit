@@ -29,7 +29,7 @@
 (defn catch-all-param [s]
   (let [ss (str s)]
     (if (= \* (first ss))
-      (keyword ss))))
+      (keyword (subs ss 1)))))
 
 (defn wild-or-catch-all-param? [x]
   (boolean (or (wild-param x) (catch-all-param x))))
