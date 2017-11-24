@@ -65,7 +65,6 @@
             )))
 
       r/linear-router :linear-router
-      #_#_r/prefix-tree-router :prefix-tree-router
       r/segment-router :segment-router
       r/mixed-router :mixed-router))
 
@@ -102,7 +101,6 @@
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
       r/linear-router :linear-router
-      r/prefix-tree-router :prefix-tree-router
       r/segment-router :segment-router
       r/mixed-router :mixed-router))
 

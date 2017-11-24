@@ -1,7 +1,6 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
-            [reitit.trie :as trie]
             [reitit.segment :as segment]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
@@ -213,47 +212,6 @@
          names)
        (match-by-path [_ path]
          (impl/fast-get data path))
-       (match-by-name [_ name]
-         (if-let [match (impl/fast-get lookup name)]
-           (match nil)))
-       (match-by-name [_ name params]
-         (if-let [match (impl/fast-get lookup name)]
-           (match params)))))))
-
-(defn prefix-tree-router
-  "Creates a prefix-tree router from resolved routes and optional
-  expanded options. See [[router]] for available options"
-  ([routes]
-   (prefix-tree-router routes {}))
-  ([routes opts]
-   (let [compiled (compile-routes routes opts)
-         names (find-names routes opts)
-         [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [params] :as route} (impl/create [p data result])
-                           f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result % path)
-                                (->PartialMatch p data result % params))]
-                       [(trie/insert pl p (->Match p data result nil nil))
-                        (if name (assoc nl name f) nl)]))
-                   [nil {}] compiled)
-         lookup (impl/fast-map nl)]
-     ^{:type ::router}
-     (reify
-       Router
-       (router-name [_]
-         :prefix-tree-router)
-       (routes [_]
-         compiled)
-       (options [_]
-         opts)
-       (route-names [_]
-         names)
-       (match-by-path [_ path]
-         (if-let [match (trie/lookup pl path {})]
-           (-> (:data match)
-               (assoc :params (:params match))
-               (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
