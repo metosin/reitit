@@ -49,7 +49,7 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[metosin/compojure-api "2.0.0-alpha12"]
+                    :dependencies [[compojure "1.6.0"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.3.443"]
                                    [ataraxy "0.4.0"]
