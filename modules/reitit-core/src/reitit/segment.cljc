@@ -13,9 +13,12 @@
   (-insert [this ps data])
   (-lookup [this ps params]))
 
-(defn- -catch-all [catch-all data params p ps]
+(defn- -catch-all [children catch-all data params p ps]
   (if catch-all
-    (assoc data :params (assoc params catch-all (str/join "/" (cons p ps))))))
+    (-lookup
+      (impl/fast-get children catch-all)
+      nil
+      (assoc data :params (assoc params catch-all (str/join "/" (cons p ps)))))))
 
 (defn- segment
   ([] (segment {} #{} nil nil))
@@ -37,7 +40,7 @@
            (if data (assoc data :params params))
            (or (-lookup (impl/fast-get children' p) ps params)
                (some #(-lookup (impl/fast-get children' %) ps (assoc params % p)) wilds)
-               (-catch-all catch-all data params p ps))))))))
+               (-catch-all children' catch-all data params p ps))))))))
 
 (defn insert [root path data]
   (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))
