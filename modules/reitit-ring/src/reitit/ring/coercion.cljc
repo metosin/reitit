@@ -172,10 +172,10 @@
                        ([request]
                         (try
                           (handler request)
-                          (catch Exception e
+                          (catch #?(:clj Exception :cljs js/Error) e
                             (handle-coercion-exception e identity #(throw %)))))
                        ([request respond raise]
                         (try
                           (handler request respond (fn [e] (handle-coercion-exception e respond raise)))
-                          (catch Throwable e
+                          (catch #?(:clj Exception :cljs js/Error) e
                             (handle-coercion-exception e respond raise))))))))}))
