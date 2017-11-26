@@ -81,9 +81,11 @@
             (response-coercion-failed! result coercion value request response)
             result))))))
 
-;;
-;; middleware
-;;
+(defn encode-error [data]
+  (-> data
+      (dissoc :request :response)
+      (update :coercion protocol/get-name)
+      (->> (protocol/encode-error (:coercion data)))))
 
 (defn- coerce-request [coercers request]
   (reduce-kv
@@ -133,6 +135,20 @@
          (let [coercers (request-coercers coercion parameters)
                coerced (coerce-parameters coercers request)]
            (handler (impl/fast-assoc request :parameters coerced) respond raise)))))))
+(defn handle-coercion-exception [e respond raise]
+  (let [data (ex-data e)]
+    (if-let [status (condp = (:type data)
+                      ::request-coercion 400
+                      ::response-coercion 500
+                      nil)]
+      (respond
+        {:status status
+         :body (encode-error data)})
+      (raise e))))
+
+;;
+;; middleware
+;;
 
 (def gen-wrap-coerce-parameters
   "Middleware for pluggable request coercion.
@@ -195,3 +211,24 @@
                           (coerce-response coercers request (handler request)))
                          ([request respond raise]
                           (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+
+(def gen-wrap-coerce-exceptions
+  "Middleare for coercion exception handling.
+  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  and :parameters or :responses from route data, otherwise does not mount."
+  (middleware/create
+    {:name ::coerce-exceptions
+     :gen-wrap (fn [{:keys [coercion parameters responses]} _]
+                 (if (and coercion (or parameters responses))
+                   (fn [handler]
+                     (fn
+                       ([request]
+                        (try
+                          (handler request)
+                          (catch Exception e
+                            (handle-coercion-exception e identity #(throw %)))))
+                       ([request respond raise]
+                        (try
+                          (handler request respond (fn [e] (handle-coercion-exception e respond raise)))
+                          (catch Throwable e
+                            (handle-coercion-exception e respond raise))))))))}))
