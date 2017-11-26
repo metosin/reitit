@@ -110,31 +110,6 @@
          [status (response-coercer coercion schema opts)])
        (into {})))
 
-(defn wrap-coerce-parameters
-  "Pluggable request coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :parameters from route data, otherwise will do nothing."
-  [handler]
-  (fn
-    ([request]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           parameters (-> match :result method :data :parameters)
-           coercion (-> match :data :coercion)]
-       (if (and coercion parameters)
-         (let [coercers (request-coercers coercion parameters)
-               coerced (coerce-parameters coercers request)]
-           (handler (impl/fast-assoc request :parameters coerced)))
-         (handler request))))
-    ([request respond raise]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           parameters (-> match :result method :data :parameters)
-           coercion (-> match :data :coercion)]
-       (if (and coercion parameters)
-         (let [coercers (request-coercers coercion parameters)
-               coerced (coerce-parameters coercers request)]
-           (handler (impl/fast-assoc request :parameters coerced) respond raise)))))))
 (defn handle-coercion-exception [e respond raise]
   (let [data (ex-data e)]
     (if-let [status (condp = (:type data)
@@ -167,34 +142,6 @@
                          ([request respond raise]
                           (let [coerced (coerce-request coercers request)]
                             (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
-
-(defn wrap-coerce-response
-  "Pluggable response coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route data, otherwise will do nothing."
-  [handler]
-  (fn
-    ([request]
-     (let [response (handler request)
-           method (:request-method request)
-           match (ring/get-match request)
-           responses (-> match :result method :data :responses)
-           coercion (-> match :data :coercion)
-           opts (-> match :data :opts)]
-       (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (coerce-response coercers request response))
-         response)))
-    ([request respond raise]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           responses (-> match :result method :data :responses)
-           coercion (-> match :data :coercion)
-           opts (-> match :data :opts)]
-       (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (handler request #(respond (coerce-response coercers request %))))
-         (handler request respond raise))))))
 
 (def gen-wrap-coerce-response
   "Middleware for pluggable response coercion.
