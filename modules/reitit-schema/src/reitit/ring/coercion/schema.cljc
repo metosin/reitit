@@ -1,112 +1,90 @@
 (ns reitit.ring.coercion.schema
-  (:require [clojure.spec.alpha :as s]
-            [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
-            [spec-tools.data-spec :as ds]
-            [spec-tools.conform :as conform]
+  (:require [schema.core :as s]
+            [schema-tools.core :as st]
+            [schema.coerce :as sc]
+            [schema.utils :as su]
+            [schema-tools.coerce :as stc]
             [spec-tools.swagger.core :as swagger]
+            [clojure.walk :as walk]
             [reitit.ring.coercion.protocol :as protocol])
-  #?(:clj
-     (:import (spec_tools.core Spec))))
+  (:import (schema.core OptionalKey RequiredKey)
+           (schema.utils ValidationError NamedError)))
 
-(def string-conforming
-  (st/type-conforming
-    (merge
-      conform/string-type-conforming
-      conform/strip-extra-keys-type-conforming)))
+(def string-coercion-matcher
+  stc/string-coercion-matcher)
 
-(def json-conforming
-  (st/type-conforming
-    (merge
-      conform/json-type-conforming
-      conform/strip-extra-keys-type-conforming)))
+(def json-coercion-matcher
+  stc/json-coercion-matcher)
 
-(def default-conforming
-  ::default)
-
-(defprotocol IntoSpec
-  (into-spec [this name]))
-
-(extend-protocol IntoSpec
-
-  #?(:clj  clojure.lang.PersistentArrayMap
-     :cljs cljs.core.PersistentArrayMap)
-  (into-spec [this name]
-    (ds/spec name this))
-
-  #?(:clj  clojure.lang.PersistentHashMap
-     :cljs cljs.core.PersistentHashMap)
-  (into-spec [this name]
-    (ds/spec name this))
-
-  Spec
-  (into-spec [this _] this)
-
-  #?(:clj  Object
-     :cljs default)
-  (into-spec [this _]
-    (st/create-spec {:spec this})))
-
-;; TODO: proper name!
-(def memoized-into-spec
-  (memoize #(into-spec %1 (gensym "spec"))))
+(def default-coercion-matcher
+  (constantly nil))
 
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
 
-(defrecord SpecCoercion [name conforming coerce-response?]
+(defn stringify [schema]
+  (walk/prewalk
+    (fn [x]
+      (cond
+        (class? x) (.getName ^Class x)
+        (instance? OptionalKey x) (pr-str (list 'opt (:k x)))
+        (instance? RequiredKey x) (pr-str (list 'req (:k x)))
+        (and (satisfies? s/Schema x) (record? x)) (try (pr-str (s/explain x)) (catch Exception _ x))
+        (instance? ValidationError x) (str (su/validation-error-explain x))
+        (instance? NamedError x) (str (su/named-error-explain x))
+        :else x))
+    schema))
+
+(defrecord SchemaCoercion [name matchers coerce-response?]
 
   protocol/Coercion
   (get-name [_] name)
 
   (compile [_ model _]
-    (memoized-into-spec model))
+    model)
 
   (get-apidocs [_ _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
             parameters (assoc
                          ::swagger/parameters
-                         (into
-                           (empty parameters)
-                           (for [[k v] parameters]
-                             [k memoized-into-spec])))
+                         parameters)
             responses (assoc
                         ::swagger/responses
-                        (into
-                          (empty responses)
-                          (for [[k response] responses]
-                            [k (update response :schema memoized-into-spec)])))))
+                        responses)))
 
-  (make-open [_ spec] spec)
+  (make-open [_ schema] (st/open-schema schema))
 
   (encode-error [_ error]
-    (update error :spec (comp str s/form)))
+    (-> error
+        (update :schema stringify)
+        (update :errors stringify)))
 
-  (request-coercer [_ type spec]
-    (let [spec (memoized-into-spec spec)
-          {:keys [formats default]} (conforming type)]
+  ;; TODO: create all possible coercers ahead of time
+  (request-coercer [_ type schema]
+    (let [{:keys [formats default]} (matchers type)]
       (fn [value format]
-        (if-let [conforming (or (get formats format) default)]
-          (let [conformed (st/conform spec value conforming)]
-            (if (s/invalid? conformed)
-              (let [problems (st/explain-data spec value conforming)]
-                (protocol/map->CoercionError
-                  {:spec spec
-                   :problems (::s/problems problems)}))
-              (s/unform spec conformed)))
+        (if-let [matcher (or (get formats format) default)]
+          (let [coercer (sc/coercer schema matcher)
+                coerced (coercer value)]
+            (if-let [error (su/error-val coerced)]
+              (protocol/map->CoercionError
+                {:schema schema
+                 :errors error})
+              coerced))
           value))))
 
-  (response-coercer [this spec]
-    (if (coerce-response? spec)
-      (protocol/request-coercer this :response spec))))
+  (response-coercer [this schema]
+    (if (coerce-response? schema)
+      (protocol/request-coercer this :response schema))))
 
 (def default-options
   {:coerce-response? coerce-response?
-   :conforming {:body {:default default-conforming
-                       :formats {"application/json" json-conforming}}
-                :string {:default string-conforming}
-                :response {:default default-conforming}}})
+   :matchers {:body {:default default-coercion-matcher
+                     :formats {"application/json" json-coercion-matcher}}
+              :string {:default string-coercion-matcher}
+              :response {:default default-coercion-matcher}}})
 
-(defn create [{:keys [conforming coerce-response?]}]
-  (->SpecCoercion :spec conforming coerce-response?))
+(defn create [{:keys [matchers coerce-response?]}]
+  (->SchemaCoercion :schema matchers coerce-response?))
 
 (def coercion (create default-options))

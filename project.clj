@@ -17,7 +17,7 @@
 
                          [meta-merge "1.0.0"]
                          [metosin/spec-tools "0.5.1"]
-                         [metosin/schema-tools "0.9.1"]]
+                         [metosin/schema-tools "0.10.0-SNAPSHOT"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
@@ -38,8 +38,9 @@
                    :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                                   [org.clojure/clojurescript "1.9.946"]
 
-                                  ;; all modules dependencies
+                                  ;; modules dependencies
                                   [metosin/reitit]
+                                  [metosin/schema-tools "0.10.0-SNAPSHOT"]
 
                                   [expound "0.3.2"]
                                   [orchestra "2017.08.13"]
