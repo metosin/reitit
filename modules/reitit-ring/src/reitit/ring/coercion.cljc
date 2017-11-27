@@ -19,7 +19,7 @@
 
 (def ring-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
-   :body (->ParameterCoercion :body-params :string false true)
+   :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :header-params :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
