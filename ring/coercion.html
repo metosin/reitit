@@ -1,0 +1,704 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Pluggable Coercion · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="../gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="../gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="../gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="compiling_middleware.html" />
+    
+    
+    <link rel="prev" href="data_driven_middleware.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="../">
+            
+                <a href="../">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="../basics/">
+            
+                <a href="../basics/">
+            
+                    
+                    Basics
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.2.1" data-path="../basics/route_syntax.html">
+            
+                <a href="../basics/route_syntax.html">
+            
+                    
+                    Route syntax
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.2" data-path="../basics/router.html">
+            
+                <a href="../basics/router.html">
+            
+                    
+                    Router
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.3" data-path="../basics/path_based_routing.html">
+            
+                <a href="../basics/path_based_routing.html">
+            
+                    
+                    Path-based Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.4" data-path="../basics/name_based_routing.html">
+            
+                <a href="../basics/name_based_routing.html">
+            
+                    
+                    Name-based Routing
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.5" data-path="../basics/route_data.html">
+            
+                <a href="../basics/route_data.html">
+            
+                    
+                    Route data
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
+            
+                <a href="../basics/route_conflicts.html">
+            
+                    
+                    Route conflicts
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="../advanced/">
+            
+                <a href="../advanced/">
+            
+                    
+                    Advanced
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.3.1" data-path="../advanced/configuring_routers.html">
+            
+                <a href="../advanced/configuring_routers.html">
+            
+                    
+                    Configuring routers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.2" data-path="../advanced/different_routers.html">
+            
+                <a href="../advanced/different_routers.html">
+            
+                    
+                    Different Routers
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3.3" data-path="../advanced/route_validation.html">
+            
+                <a href="../advanced/route_validation.html">
+            
+                    
+                    Route Validation
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Ring
+            
+                </a>
+            
+
+            
+            <ul class="articles">
+                
+    
+        <li class="chapter " data-level="1.4.1" data-path="ring.html">
+            
+                <a href="ring.html">
+            
+                    
+                    Ring-router
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.2" data-path="dynamic_extensions.html">
+            
+                <a href="dynamic_extensions.html">
+            
+                    
+                    Dynamic extensions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.3" data-path="data_driven_middleware.html">
+            
+                <a href="data_driven_middleware.html">
+            
+                    
+                    Data-driven Middleware
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.4.4" data-path="coercion.html">
+            
+                <a href="coercion.html">
+            
+                    
+                    Pluggable Coercion
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4.5" data-path="compiling_middleware.html">
+            
+                <a href="compiling_middleware.html">
+            
+                    
+                    Compiling middleware
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+            </ul>
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="../performance.html">
+            
+                <a href="../performance.html">
+            
+                    
+                    Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="../faq.html">
+            
+                <a href="../faq.html">
+            
+                    
+                    FAQ
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" >
+            
+                <span>
+            
+                    
+                    TODO: Swagger & OpenAPI
+            
+                </span>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" >
+            
+                <span>
+            
+                    
+                    TODO: Interceptors
+            
+                </span>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href=".." >Pluggable Coercion</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="pluggable-coercion">Pluggable Coercion</h1>
+<p>Reitit provides pluggable parameter coercion via <code>reitit.ring.coercion.protocol/Coercion</code> protocol, originally introduced in <a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a>.</p>
+<p>Reitit ships with the following coercion modules:</p>
+<ul>
+<li><code>reitit.ring.coercion.schema/SchemaCoercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a>.</li>
+<li><code>reitit.ring.coercion.spec/SpecCoercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a>.</li>
+</ul>
+<h3 id="ring-request-and-response-coercion">Ring request and response coercion</h3>
+<p>To use <code>Coercion</code> with Ring, one needs to do the following:</p>
+<ol>
+<li>Define parameters and responses as data into route data, in format adopted from <a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a>:<ul>
+<li><code>:parameters</code> map, with submaps for different parameters: <code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>. Parameters are defined in the format understood by the <code>Coercion</code>.</li>
+<li><code>:responses</code> map, with response status codes as keys (or <code>:default</code> for &quot;everything else&quot;) with maps with <code>:schema</code> and optionally <code>:description</code> as values.</li>
+</ul>
+</li>
+<li>Set a <code>Coercion</code> implementation to route data under <code>:coercion</code></li>
+<li>Mount request &amp; response coercion middleware to the routes (can be done for all routes as the middleware are only mounted to routes which have the parameters &amp;/ responses defined):<ul>
+<li><code>reitit.ring.coercion/gen-wrap-coerce-parameters</code></li>
+<li><code>reitit.ring.coercion/gen-wrap-coerce-response</code></li>
+</ul>
+</li>
+</ol>
+<p>If the request coercion succeeds, the coerced parameters are injected into request under <code>:parameters</code>.</p>
+<p>If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the <code>reitit.ring.coercion/gen-wrap-coerce-exceptions</code> middleware</p>
+<h3 id="example-with-schema">Example with Schema</h3>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion.schema <span class="hljs-symbol">:as</span> schema])
+(<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span>
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> s/Int, <span class="hljs-symbol">:y</span> s/Int}}
+                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name">s/constrained</span> s/Int pos?}}}
+                 <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
+                                  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                                   <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-exceptions
+                           coercion/gen-wrap-coerce-parameters
+                           coercion/gen-wrap-coerce-response]
+              <span class="hljs-symbol">:coercion</span> schema/coercion}})))
+</code></pre>
+<p>Valid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
+<span class="hljs-comment">; {:status 200</span>
+<span class="hljs-comment">;  :body {:total 3}}</span>
+</code></pre>
+<p>Invalid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
+<span class="hljs-comment">; {:status 400,</span>
+<span class="hljs-comment">;  :body {:type :reitit.ring.coercion/request-coercion</span>
+<span class="hljs-comment">;         :coercion :schema</span>
+<span class="hljs-comment">;         :in [:request :body-params]</span>
+<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
+<span class="hljs-comment">;         :schema {:x &quot;Int&quot;, :y &quot;Int&quot;}</span>
+<span class="hljs-comment">;         :errors {:y &quot;(not (integer? \&quot;2\&quot;))&quot;}}}</span>
+</code></pre>
+<h3 id="example-with-data-specs">Example with data-specs</h3>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion.spec <span class="hljs-symbol">:as</span> spec])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span>
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> pos-int?}}}
+                 <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
+                                  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                                   <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-exceptions
+                           coercion/gen-wrap-coerce-parameters
+                           coercion/gen-wrap-coerce-response]
+              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
+</code></pre>
+<p>Valid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
+<span class="hljs-comment">; {:status 200</span>
+<span class="hljs-comment">;  :body {:total 3}}</span>
+</code></pre>
+<p>Invalid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
+<span class="hljs-comment">; {:status 400,</span>
+<span class="hljs-comment">;  :body {:type ::coercion/request-coercion</span>
+<span class="hljs-comment">;         :coercion :spec</span>
+<span class="hljs-comment">;         :in [:request :body-params]</span>
+<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
+<span class="hljs-comment">;         :spec &quot;(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec37747/x :$spec37747/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})&quot;</span>
+<span class="hljs-comment">;         :problems [{:path [:y]</span>
+<span class="hljs-comment">;                     :pred &quot;clojure.core/int?&quot;</span>
+<span class="hljs-comment">;                     :val &quot;2&quot;</span>
+<span class="hljs-comment">;                     :via [:$spec37747/y]</span>
+<span class="hljs-comment">;                     :in [:y]}]}}</span>
+</code></pre>
+<h3 id="example-with-clojurespec">Example with clojure.spec</h3>
+<p>Currently, <code>clojure.spec</code> <a href="https://dev.clojure.org/jira/browse/CLJ-2116" target="_blank">doesn&apos;t support runtime transformations via conforming</a>, so one needs to wrap all specs with <code>spec-tools.core/spec</code>.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion.spec <span class="hljs-symbol">:as</span> spec])
+(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
+(<span class="hljs-name">require</span> &apos;[spec-tools.core <span class="hljs-symbol">:as</span> st])
+
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::x</span> (<span class="hljs-name">st/spec</span> int?))
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::y</span> (<span class="hljs-name">st/spec</span> int?))
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::total</span> int?)
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::request</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::x</span> <span class="hljs-symbol">::y</span>]))
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::response</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::total</span>]))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span>
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> <span class="hljs-symbol">::request</span>}
+                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> <span class="hljs-symbol">::response</span>}}
+                 <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
+                                  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                                   <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion/gen-wrap-coerce-exceptions
+                           coercion/gen-wrap-coerce-parameters
+                           coercion/gen-wrap-coerce-response]
+              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
+</code></pre>
+<p>Valid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
+<span class="hljs-comment">; {:status 200</span>
+<span class="hljs-comment">;  :body {:total 3}}</span>
+</code></pre>
+<p>Invalid request:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
+   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
+<span class="hljs-comment">; {:status 400,</span>
+<span class="hljs-comment">;  :body {:type ::coercion/request-coercion</span>
+<span class="hljs-comment">;         :coercion :spec</span>
+<span class="hljs-comment">;         :in [:request :body-params]</span>
+<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
+<span class="hljs-comment">;         :spec &quot;(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:reitit.coercion-test/x :reitit.coercion-test/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})&quot;</span>
+<span class="hljs-comment">;         :problems [{:path [:y]</span>
+<span class="hljs-comment">;                     :pred &quot;clojure.core/int?&quot;</span>
+<span class="hljs-comment">;                     :val &quot;2&quot;</span>
+<span class="hljs-comment">;                     :via [::request ::y]</span>
+<span class="hljs-comment">;                     :in [:y]}]}}</span>
+</code></pre>
+<h3 id="custom-coercion">Custom coercion</h3>
+<p>Both Schema and Spec Coercion can be configured via options, see the source code for details.</p>
+<p>To plug in new validation engine, see the
+<code>reitit.ring.coercion.protocol/Coercion</code> protocol.</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defprotocol</span></span> Coercion
+  <span class="hljs-string">&quot;Pluggable coercion protocol&quot;</span>
+  (<span class="hljs-name">get-name</span> [this] <span class="hljs-string">&quot;Keyword name for the coercion&quot;</span>)
+  (<span class="hljs-name"><span class="hljs-builtin-name">compile</span></span> [this model name] <span class="hljs-string">&quot;Compiles a coercion model&quot;</span>)
+  (<span class="hljs-name">get-apidocs</span> [this model data] <span class="hljs-string">&quot;???&quot;</span>)
+  (<span class="hljs-name">make-open</span> [this model] <span class="hljs-string">&quot;Returns a new map model which doesn&apos;t fail on extra keys&quot;</span>)
+  (<span class="hljs-name">encode-error</span> [this error] <span class="hljs-string">&quot;Converts error in to a serializable format&quot;</span>)
+  (<span class="hljs-name">request-coercer</span> [this type model] <span class="hljs-string">&quot;Returns a `value format =&gt; value` request coercion function&quot;</span>)
+  (<span class="hljs-name">response-coercer</span> [this model] <span class="hljs-string">&quot;Returns a `value format =&gt; value` response coercion function&quot;</span>))
+</code></pre>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="data_driven_middleware.html" class="navigation navigation-prev " aria-label="Previous page: Data-driven Middleware">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="compiling_middleware.html" class="navigation navigation-next " aria-label="Next page: Compiling middleware">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"1.4.4","depth":2,"next":{"title":"Compiling middleware","level":"1.4.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2017-11-27T06:15:18.211Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-27T06:15:56.278Z"},"basePath":"..","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="../gitbook/gitbook.js"></script>
+    <script src="../gitbook/theme.js"></script>
+    
+        
+        <script src="../gitbook/gitbook-plugin-editlink/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-github/plugin.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="../gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

@@ -60,7 +60,7 @@
     <link rel="next" href="../performance.html" />
     
     
-    <link rel="prev" href="parameter_coercion.html" />
+    <link rel="prev" href="coercion.html" />
     
 
     </head>
@@ -310,12 +310,12 @@
             
         </li>
     
-        <li class="chapter " data-level="1.4.4" data-path="parameter_coercion.html">
+        <li class="chapter " data-level="1.4.4" data-path="coercion.html">
             
-                <a href="parameter_coercion.html">
+                <a href="coercion.html">
             
                     
-                    Parameter coercion
+                    Pluggable Coercion
             
                 </a>
             
@@ -354,7 +354,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" >
+        <li class="chapter " data-level="1.6" data-path="../faq.html">
+            
+                <a href="../faq.html">
+            
+                    
+                    FAQ
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" >
             
                 <span>
             
@@ -367,7 +380,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.7" >
+        <li class="chapter " data-level="1.8" >
             
                 <span>
             
@@ -427,10 +440,10 @@
                                 
                                 <h1 id="compiling-middleware">Compiling Middleware</h1>
 <p>The <a href="dynamic_extensions.html">dynamic extensions</a> is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.</p>
-<p>Still, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning <code>nil</code>. Why mount a <code>wrap-enforce-roles</code> middleware for a route if there are no roles required for it?</p>
+<p>But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning <code>nil</code>. Why mount a <code>wrap-enforce-roles</code> middleware for a route if there are no roles required for it?</p>
 <p>To enable this we use <a href="data_driven_middleware.html">middleware records</a> <code>:gen-wrap</code> key instead of the normal <code>:wrap</code>. <code>:gen-wrap</code> expects a function of <code>route-data router-opts =&gt; ?wrap</code>.</p>
-<p>To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with <code>:gen-wrap</code>. Actual codes can be found in <a href="https://github.com/metosin/reitit/blob/master/src/reitit/ring/coercion.cljc" target="_blank"><code>reitit.ring.coercion</code></a>:</p>
-<h2 id="naive">Naive</h2>
+<p>To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with <code>:gen-wrap</code>.</p>
+<h2 id="normal-middleware">Normal Middleware</h2>
 <ul>
 <li>Reads the compiled route information on every request.</li>
 </ul>
@@ -462,7 +475,7 @@
            (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %))))
          (<span class="hljs-name">handler</span> request respond raise))))))
 </code></pre>
-<h2 id="compiled">Compiled</h2>
+<h2 id="compiled-middleware">Compiled Middleware</h2>
 <ul>
 <li>Route information is provided via a closure</li>
 <li>Pre-compiled coercers</li>
@@ -471,20 +484,20 @@
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware <span class="hljs-symbol">:as</span> middleware])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> gen-wrap-coerce-response
-  <span class="hljs-string">&quot;Generator for pluggable response coercion middleware.
+  <span class="hljs-string">&quot;Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route data, otherwise does not mount.&quot;</span>
   (<span class="hljs-name">middleware/create</span>
     {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::coerce-response</span>
-     <span class="hljs-symbol">:gen-wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [responses coercion opts]} _]
-                (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
-                  (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
-                    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
-                      (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
-                        ([request]
-                         (<span class="hljs-name">coerce-response</span> coercers request (<span class="hljs-name">handler</span> request)))
-                        ([request respond raise]
-                         (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %)) raise)))))))}))
+     <span class="hljs-symbol">:gen-wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [coercion responses opts]} _]
+                 (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
+                   (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
+                     (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
+                       (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
+                         ([request]
+                          (<span class="hljs-name">coerce-response</span> coercers request (<span class="hljs-name">handler</span> request)))
+                         ([request respond raise]
+                          (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %)) raise)))))))}))
 </code></pre>
 <p>The latter has 50% less code, is easier to reason about and is much faster.</p>
 
@@ -514,7 +527,7 @@
 
             
                 
-                <a href="parameter_coercion.html" class="navigation navigation-prev " aria-label="Previous page: Parameter coercion">
+                <a href="coercion.html" class="navigation navigation-prev " aria-label="Previous page: Pluggable Coercion">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
@@ -530,7 +543,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Compiling middleware","level":"1.4.5","depth":2,"next":{"title":"Performance","level":"1.5","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Parameter coercion","level":"1.4.4","depth":2,"path":"ring/parameter_coercion.md","ref":"ring/parameter_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-11-20T13:17:36.673Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-20T13:18:13.394Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Compiling middleware","level":"1.4.5","depth":2,"next":{"title":"Performance","level":"1.5","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Pluggable Coercion","level":"1.4.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-11-27T06:15:18.211Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-27T06:15:56.278Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
