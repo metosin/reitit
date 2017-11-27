@@ -50,6 +50,9 @@
 (def memoized-into-spec
   (memoize #(into-spec %1 (gensym "spec"))))
 
+(defn stringify-pred [pred]
+  (str (if (seq? pred) (seq pred) pred)))
+
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
 
@@ -79,7 +82,9 @@
   (make-open [_ spec] spec)
 
   (encode-error [_ error]
-    (update error :spec (comp str s/form)))
+    (-> error
+        (update :spec (comp str s/form))
+        (update :problems (partial mapv #(update % :pred stringify-pred)))))
 
   (request-coercer [_ type spec]
     (let [spec (memoized-into-spec spec)

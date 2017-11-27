@@ -13,9 +13,11 @@
                          [metosin/reitit-core "0.1.0-SNAPSHOT"]
                          [metosin/reitit-ring "0.1.0-SNAPSHOT"]
                          [metosin/reitit-spec "0.1.0-SNAPSHOT"]
+                         [metosin/reitit-schema "0.1.0-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
-                         [metosin/spec-tools "0.5.1"]]
+                         [metosin/spec-tools "0.5.1"]
+                         [metosin/schema-tools "0.10.0-SNAPSHOT"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
@@ -30,13 +32,15 @@
                    :source-paths ["modules/reitit/src"
                                   "modules/reitit-core/src"
                                   "modules/reitit-ring/src"
-                                  "modules/reitit-spec/src"]
+                                  "modules/reitit-spec/src"
+                                  "modules/reitit-schema/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                                   [org.clojure/clojurescript "1.9.946"]
 
-                                  ;; all modules dependencies
+                                  ;; modules dependencies
                                   [metosin/reitit]
+                                  [metosin/schema-tools "0.10.0-SNAPSHOT"]
 
                                   [expound "0.3.2"]
                                   [orchestra "2017.08.13"]
@@ -49,7 +53,7 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[metosin/compojure-api "2.0.0-alpha12"]
+                    :dependencies [[compojure "1.6.0"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.3.443"]
                                    [ataraxy "0.4.0"]

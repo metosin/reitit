@@ -4,9 +4,8 @@
             [reitit.perf-utils :refer :all]
 
             [bidi.bidi :as bidi]
-            [compojure.api.sweet :refer [api routes GET]]
-            [compojure.api.routes :as routes]
             [ataraxy.core :as ataraxy]
+            [compojure.core :as compojure]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
@@ -34,14 +33,11 @@
         [["auth/recovery/token/" :token] :auth/recovery]
         ["workspace/" [[[:project "/" :page] :workspace/page]]]]])
 
-(def compojure-api-routes
-  (routes
-    (GET "/auth/login" [] {:name :auth/login} (constantly ""))
-    (GET "/auth/recovery/token/:token" [] {:name :auth/recovery} (constantly ""))
-    (GET "/workspace/:project/:page" [] {:name :workspace/page} (constantly ""))))
-
-(def compojure-api-request
-  {:compojure.api.request/lookup (routes/route-lookup-table (routes/get-routes (api compojure-api-routes)))})
+(def compojure-routes
+  (compojure/routes
+    (compojure/GET "/auth/login" [] (constantly ""))
+    (compojure/GET "/auth/recovery/token/:token" [] (constantly ""))
+    (compojure/GET "/workspace/:project/:page" [] (constantly ""))))
 
 (def ataraxy-routes
   (ataraxy/compile
@@ -94,13 +90,13 @@
       (dotimes [_ 1000]
         (pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get}))))
 
-  ;; 1500 µs
-  (title "compojure-api")
+  ;; 1400 µs
+  (title "compojure")
   (let [request {:uri "/auth/login", :request-method :get}]
-    (assert (compojure-api-routes request))
+    (assert (compojure-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (compojure-api-routes request))))
+        (compojure-routes request))))
 
   ;; 3.2 µs (300-500x)
   (title "reitit")
@@ -136,16 +132,17 @@
       (dotimes [_ 1000]
         (pedestal/find-route pedestal-router request))))
 
-  ;; 3500 µs
-  (title "compojure-api")
+  ;; 3400 µs
+  (title "compojure")
   (let [request {:uri "/workspace/1/1", :request-method :get}]
-    (assert (compojure-api-routes request))
+    (assert (compojure-routes request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (compojure-api-routes request))))
+        (compojure-routes request))))
 
   ;; 710 µs (3-18x)
   ;; 530 µs (4-24x) -25% prefix-tree-router
+  ;; 710 µs (3-18x) segment-router
   (title "reitit")
   (assert (reitit/match-by-path reitit-routes "/workspace/1/1"))
   (cc/quick-bench
@@ -174,10 +171,6 @@
 
   ;; 4.9µs
   (title "compojure-api")
-  (let [call #(routes/path-for* :workspace/page compojure-api-request {:project "1", :page "1"})]
-    (assert (= "/workspace/1/1" (call)))
-    (cc/quick-bench
-      (call)))
 
   ;; 850ns (-83%)
   (title "reitit")

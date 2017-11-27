@@ -9,41 +9,61 @@
 
   (testing "routers handling wildcard paths"
     (are [r name]
-      (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
-        (is (= name (r/router-name router)))
-        (is (= [["/api/ipa/:size" {:name ::beer} nil]]
-               (r/routes router)))
-        (is (= true (map? (r/options router))))
-        (is (= (r/map->Match
-                 {:template "/api/ipa/:size"
-                  :data {:name ::beer}
-                  :path "/api/ipa/large"
-                  :params {:size "large"}})
-               (r/match-by-path router "/api/ipa/large")))
-        (is (= (r/map->Match
-                 {:template "/api/ipa/:size"
-                  :data {:name ::beer}
-                  :path "/api/ipa/large"
-                  :params {:size "large"}})
-               (r/match-by-name router ::beer {:size "large"})))
-        (is (= nil (r/match-by-name router "ILLEGAL")))
-        (is (= [::beer] (r/route-names router)))
+      (testing "wild"
 
-        (testing "name-based routing with missing parameters"
-          (is (= (r/map->PartialMatch
-                   {:template "/api/ipa/:size"
-                    :data {:name ::beer}
-                    :required #{:size}
-                    :params nil})
-                 (r/match-by-name router ::beer)))
-          (is (= true (r/partial-match? (r/match-by-name router ::beer))))
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
-                (r/match-by-name! router ::beer)))))
+        (testing "simple"
+          (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
+            (is (= name (r/router-name router)))
+            (is (= [["/api/ipa/:size" {:name ::beer} nil]]
+                   (r/routes router)))
+            (is (= true (map? (r/options router))))
+            (is (= (r/map->Match
+                     {:template "/api/ipa/:size"
+                      :data {:name ::beer}
+                      :path "/api/ipa/large"
+                      :params {:size "large"}})
+                   (r/match-by-path router "/api/ipa/large")))
+            (is (= (r/map->Match
+                     {:template "/api/ipa/:size"
+                      :data {:name ::beer}
+                      :path "/api/ipa/large"
+                      :params {:size "large"}})
+                   (r/match-by-name router ::beer {:size "large"})))
+            (is (= nil (r/match-by-name router "ILLEGAL")))
+            (is (= [::beer] (r/route-names router)))
+
+            (testing "name-based routing with missing parameters"
+              (is (= (r/map->PartialMatch
+                       {:template "/api/ipa/:size"
+                        :data {:name ::beer}
+                        :required #{:size}
+                        :params nil})
+                     (r/match-by-name router ::beer)))
+              (is (= true (r/partial-match? (r/match-by-name router ::beer))))
+              (is (thrown-with-msg?
+                    ExceptionInfo
+                    #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+                    (r/match-by-name! router ::beer))))))
+
+        (testing "complex"
+          (let [router (r/router
+                         [["/:abba" ::abba]
+                          ["/abba/1" ::abba2]
+                          ["/:jabba/2" ::jabba2]
+                          ["/:abba/:dabba/doo" ::doo]
+                          ["/abba/:dabba/boo" ::boo]
+                          ["/:jabba/:dabba/:doo/*foo" ::wild]]
+                         {:router r})
+                matches #(-> router (r/match-by-path %) :data :name)]
+            (is (= ::abba (matches "/abba")))
+            (is (= ::abba2 (matches "/abba/1")))
+            (is (= ::jabba2 (matches "/abba/2")))
+            (is (= ::doo (matches "/abba/1/doo")))
+            (is (= ::boo (matches "/abba/1/boo")))
+            (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa"))))))
 
       r/linear-router :linear-router
-      r/prefix-tree-router :prefix-tree-router
+      r/segment-router :segment-router
       r/mixed-router :mixed-router))
 
   (testing "routers handling static paths"
@@ -79,7 +99,7 @@
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
       r/linear-router :linear-router
-      r/prefix-tree-router :prefix-tree-router
+      r/segment-router :segment-router
       r/mixed-router :mixed-router))
 
   (testing "route coercion & compilation"

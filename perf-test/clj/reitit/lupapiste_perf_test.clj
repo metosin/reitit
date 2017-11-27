@@ -11,7 +11,6 @@
 
             [ataraxy.core :as ataraxy]
 
-            [compojure.api.sweet :refer [api routes context ANY]]
             [compojure.core :as compojure]
 
             [io.pedestal.http.route.definition.table :as table]
@@ -342,7 +341,7 @@
 (def cqrs-routes-compojure
   (apply routes (map (fn [command] (compojure/ANY (str "/command/" (name command)) [] handler)) commands)))
 
-;; Method code too large
+;; Method code too large!
 #_(def cqrs-routes-ataraxy
     (ataraxy/compile
       (into {} (mapv (fn [command] [(str "/command/" (name command)) [command]]) commands))))

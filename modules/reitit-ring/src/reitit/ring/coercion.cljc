@@ -15,9 +15,11 @@
 
 (defrecord ParameterCoercion [in style keywordize? open?])
 
+(def valid-type? #{::request-coercion ::response-coercion})
+
 (def ring-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
-   :body (->ParameterCoercion :body-params :string false true)
+   :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :header-params :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
@@ -46,6 +48,8 @@
          :in [:response :body]
          :request request
          :response response}))))
+
+;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
 
 (defn request-coercer [coercion type model]
   (if coercion
@@ -77,11 +81,13 @@
             (response-coercion-failed! result coercion value request response)
             result))))))
 
-;;
-;; middleware
-;;
+(defn encode-error [data]
+  (-> data
+      (dissoc :request :response)
+      (update :coercion protocol/get-name)
+      (->> (protocol/encode-error (:coercion data)))))
 
-(defn- coerce-parameters [coercers request]
+(defn- coerce-request [coercers request]
   (reduce-kv
     (fn [acc k coercer]
       (impl/fast-assoc acc k (coercer request)))
@@ -104,85 +110,46 @@
          [status (response-coercer coercion schema opts)])
        (into {})))
 
-(defn wrap-coerce-parameters
-  "Pluggable request coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :parameters from route data, otherwise will do nothing."
-  [handler]
-  (fn
-    ([request]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           parameters (-> match :result method :data :parameters)
-           coercion (-> match :data :coercion)]
-       (if (and coercion parameters)
-         (let [coercers (request-coercers coercion parameters)
-               coerced (coerce-parameters coercers request)]
-           (handler (impl/fast-assoc request :parameters coerced)))
-         (handler request))))
-    ([request respond raise]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           parameters (-> match :result method :data :parameters)
-           coercion (-> match :data :coercion)]
-       (if (and coercion parameters)
-         (let [coercers (request-coercers coercion parameters)
-               coerced (coerce-parameters coercers request)]
-           (handler (impl/fast-assoc request :parameters coerced) respond raise)))))))
+(defn handle-coercion-exception [e respond raise]
+  (let [data (ex-data e)]
+    (if-let [status (condp = (:type data)
+                      ::request-coercion 400
+                      ::response-coercion 500
+                      nil)]
+      (respond
+        {:status status
+         :body (encode-error data)})
+      (raise e))))
+
+;;
+;; middleware
+;;
 
 (def gen-wrap-coerce-parameters
-  "Generator for pluggable request coercion middleware.
+  "Middleware for pluggable request coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :parameters from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-parameters
-     :gen-wrap (fn [{:keys [parameters coercion]} _]
+     :gen-wrap (fn [{:keys [coercion parameters]} _]
                  (if (and coercion parameters)
                    (let [coercers (request-coercers coercion parameters)]
                      (fn [handler]
                        (fn
                          ([request]
-                          (let [coerced (coerce-parameters coercers request)]
+                          (let [coerced (coerce-request coercers request)]
                             (handler (impl/fast-assoc request :parameters coerced))))
                          ([request respond raise]
-                          (let [coerced (coerce-parameters coercers request)]
+                          (let [coerced (coerce-request coercers request)]
                             (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
 
-(defn wrap-coerce-response
-  "Pluggable response coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
-  and :responses from route data, otherwise will do nothing."
-  [handler]
-  (fn
-    ([request]
-     (let [response (handler request)
-           method (:request-method request)
-           match (ring/get-match request)
-           responses (-> match :result method :data :responses)
-           coercion (-> match :data :coercion)
-           opts (-> match :data :opts)]
-       (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (coerce-response coercers request response))
-         response)))
-    ([request respond raise]
-     (let [method (:request-method request)
-           match (ring/get-match request)
-           responses (-> match :result method :data :responses)
-           coercion (-> match :data :coercion)
-           opts (-> match :data :opts)]
-       (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (handler request #(respond (coerce-response coercers request %))))
-         (handler request respond raise))))))
-
 (def gen-wrap-coerce-response
-  "Generator for pluggable response coercion middleware.
+  "Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen-wrap (fn [{:keys [responses coercion opts]} _]
+     :gen-wrap (fn [{:keys [coercion responses opts]} _]
                  (if (and coercion responses)
                    (let [coercers (response-coercers coercion responses opts)]
                      (fn [handler]
@@ -191,3 +158,24 @@
                           (coerce-response coercers request (handler request)))
                          ([request respond raise]
                           (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+
+(def gen-wrap-coerce-exceptions
+  "Middleware for handling coercion exceptions.
+  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  and :parameters or :responses from route data, otherwise does not mount."
+  (middleware/create
+    {:name ::coerce-exceptions
+     :gen-wrap (fn [{:keys [coercion parameters responses]} _]
+                 (if (and coercion (or parameters responses))
+                   (fn [handler]
+                     (fn
+                       ([request]
+                        (try
+                          (handler request)
+                          (catch #?(:clj Exception :cljs js/Error) e
+                            (handle-coercion-exception e identity #(throw %)))))
+                       ([request respond raise]
+                        (try
+                          (handler request respond #(handle-coercion-exception % respond raise))
+                          (catch #?(:clj Exception :cljs js/Error) e
+                            (handle-coercion-exception e respond raise))))))))}))

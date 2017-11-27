@@ -1,7 +1,7 @@
 (ns reitit.core
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
-            [reitit.trie :as trie]
+            [reitit.segment :as segment]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -219,11 +219,11 @@
          (if-let [match (impl/fast-get lookup name)]
            (match params)))))))
 
-(defn prefix-tree-router
-  "Creates a prefix-tree router from resolved routes and optional
+(defn segment-router
+  "Creates a special prefix-tree style segment router from resolved routes and optional
   expanded options. See [[router]] for available options"
   ([routes]
-   (prefix-tree-router routes {}))
+   (segment-router routes {}))
   ([routes opts]
    (let [compiled (compile-routes routes opts)
          names (find-names routes opts)
@@ -233,7 +233,7 @@
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result % path)
                                 (->PartialMatch p data result % params))]
-                       [(trie/insert pl p (->Match p data result nil nil))
+                       [(segment/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
                    [nil {}] compiled)
          lookup (impl/fast-map nl)]
@@ -241,7 +241,7 @@
      (reify
        Router
        (router-name [_]
-         :prefix-tree-router)
+         :segment-router)
        (routes [_]
          compiled)
        (options [_]
@@ -249,7 +249,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (trie/lookup pl path {})]
+         (if-let [match (segment/lookup pl path)]
            (-> (:data match)
                (assoc :params (:params match))
                (assoc :path path))))
@@ -297,7 +297,7 @@
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
-  static routes and [[prefix-tree-router]] for wildcard routes. All
+  static routes and [[segment-router]] for wildcard routes. All
   routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
   ([routes]
@@ -306,7 +306,7 @@
    (let [{wild true, lookup false} (group-by impl/wild-route? routes)
          compiled (compile-routes routes opts)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
-         wildcard-router (prefix-tree-router wild opts)
+         wildcard-router (segment-router wild opts)
          static-router (->static-router lookup opts)
          names (find-names routes opts)]
      ^{:type ::router}
@@ -357,7 +357,7 @@
                   (and (= 1 (count routes)) (not wilds?)) single-static-path-router
                   conflicting linear-router
                   (not wilds?) lookup-router
-                  all-wilds? prefix-tree-router
+                  all-wilds? segment-router
                   :else mixed-router)]
 
      (when-let [conflicts (:conflicts opts)]
