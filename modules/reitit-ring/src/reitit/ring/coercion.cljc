@@ -160,7 +160,7 @@
                           (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 
 (def gen-wrap-coerce-exceptions
-  "Middleare for coercion exception handling.
+  "Middleware for handling coercion exceptions.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :parameters or :responses from route data, otherwise does not mount."
   (middleware/create
@@ -176,6 +176,6 @@
                             (handle-coercion-exception e identity #(throw %)))))
                        ([request respond raise]
                         (try
-                          (handler request respond (fn [e] (handle-coercion-exception e respond raise)))
+                          (handler request respond #(handle-coercion-exception % respond raise))
                           (catch #?(:clj Exception :cljs js/Error) e
                             (handle-coercion-exception e respond raise))))))))}))

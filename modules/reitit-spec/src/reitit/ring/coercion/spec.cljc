@@ -51,9 +51,7 @@
   (memoize #(into-spec %1 (gensym "spec"))))
 
 (defn stringify-pred [pred]
-  (str (if (instance? clojure.lang.LazySeq pred)
-         (seq pred)
-         pred)))
+  (str (if (seq? pred) (seq pred) pred)))
 
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)

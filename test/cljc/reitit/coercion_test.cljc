@@ -1,9 +1,9 @@
 (ns reitit.coercion-test
   (:require [clojure.test :refer [deftest testing is]]
+            [schema.core :as s]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as coercion]
             [reitit.ring.coercion.spec :as spec]
-            [schema.core :as s]
             [reitit.ring.coercion.schema :as schema])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))

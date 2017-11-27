@@ -6,9 +6,7 @@
             [schema-tools.coerce :as stc]
             [spec-tools.swagger.core :as swagger]
             [clojure.walk :as walk]
-            [reitit.ring.coercion.protocol :as protocol])
-  (:import (schema.core OptionalKey RequiredKey)
-           (schema.utils ValidationError NamedError)))
+            [reitit.ring.coercion.protocol :as protocol]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)
@@ -26,12 +24,12 @@
   (walk/prewalk
     (fn [x]
       (cond
-        (class? x) (.getName ^Class x)
-        (instance? OptionalKey x) (pr-str (list 'opt (:k x)))
-        (instance? RequiredKey x) (pr-str (list 'req (:k x)))
-        (and (satisfies? s/Schema x) (record? x)) (try (pr-str (s/explain x)) (catch Exception _ x))
-        (instance? ValidationError x) (str (su/validation-error-explain x))
-        (instance? NamedError x) (str (su/named-error-explain x))
+        #?@(:clj [(class? x) (.getName ^Class x)])
+        (instance? schema.core.OptionalKey x) (pr-str (list 'opt (:k x)))
+        (instance? schema.core.RequiredKey x) (pr-str (list 'req (:k x)))
+        (and (satisfies? s/Schema x) (record? x)) (try (pr-str (s/explain x)) (catch #?(:clj Exception :cljs js/Error) _ x))
+        (instance? schema.utils.ValidationError x) (str (su/validation-error-explain x))
+        (instance? schema.utils.NamedError x) (str (su/named-error-explain x))
         :else x))
     schema))
 
@@ -45,12 +43,8 @@
 
   (get-apidocs [_ _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
-            parameters (assoc
-                         ::swagger/parameters
-                         parameters)
-            responses (assoc
-                        ::swagger/responses
-                        responses)))
+            parameters (assoc ::swagger/parameters parameters)
+            responses (assoc ::swagger/responses responses)))
 
   (make-open [_ schema] (st/open-schema schema))
 
