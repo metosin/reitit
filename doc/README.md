@@ -3,12 +3,13 @@
 [Reitit](https://github.com/metosin/reitit) is a small Clojure(Script) library for data-driven routing.
 
 * Simple data-driven [route syntax](./basics/route_syntax.md)
-* [Route conflict resolution](./advanced/route_conflicts.md)
+* [Route conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
-* [Pluggable coercion](./ring/parameter_coercion.md) ([clojure.spec](https://clojure.org/about/spec))
-* supports both [Middleware](./ring/compiling_middleware.md) & Interceptors
+* [Ring-router](./ring/ring.html) with [data-driven middleware](./ring/data_driven_middleware.html)
+* [Pluggable coercion](./ring/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Extendable
+* Modular
 * [Fast](performance.md)
 
 To use Reitit, add the following dependecy to your project:
@@ -23,6 +24,7 @@ Optionally, the parts can be required separately:
 [metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
 [metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
 [metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
+[metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).

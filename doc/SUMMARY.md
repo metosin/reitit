@@ -16,8 +16,9 @@
     * [Ring-router](ring/ring.md)
     * [Dynamic extensions](ring/dynamic_extensions.md)
     * [Data-driven Middleware](ring/data_driven_middleware.md)
-    * [Parameter coercion](ring/parameter_coercion.md)
+    * [Pluggable Coercion](ring/coercion.md)
     * [Compiling middleware](ring/compiling_middleware.md)
 * [Performance](performance.md)
+* [FAQ](faq.md)
 * TODO: Swagger & OpenAPI
 * TODO: Interceptors
