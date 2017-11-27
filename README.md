@@ -6,9 +6,10 @@ A friendly data-driven router for Clojure(Script).
 * Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
-* [Ring-router](https://metosin.github.io/reitit/ring.html) with data-driven [middleware](https://metosin.github.io/reitit/ring/compiling_middleware.html)
-* [Pluggable coercion](https://metosin.github.io/reitit/ring/parameter_coercion.html) ([clojure.spec](https://clojure.org/about/spec))
+* [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* [Pluggable coercion](https://metosin.github.io/reitit/ring/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Extendable
+* Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
 See the [full documentation](https://metosin.github.io/reitit/) for details.
@@ -26,7 +27,8 @@ Optionally, the parts can be required separately:
 ```clj
 [metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
 [metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
-[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
+[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec coercion
+[metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion
 ```
 
 ## Quick start
