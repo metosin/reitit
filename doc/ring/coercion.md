@@ -35,11 +35,11 @@ If either request or response coercion fails, an descriptive error is thrown. To
   (ring/ring-handler
     (ring/router
       ["/api"
-       ["/ping" {:parameters {:body {:x s/Int, :y s/Int}}
-                 :responses {200 {:schema {:total (s/constrained s/Int pos?}}}
-                 :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                  {:status 200
-                                   :body {:total (+ x y)}})}}]]
+       ["/ping" {:post {:parameters {:body {:x s/Int, :y s/Int}}
+                        :responses {200 {:schema {:total (s/constrained s/Int pos?}}}
+                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                                   {:status 200
+                                    :body {:total (+ x y)}})}}]]
       {:data {:middleware [coercion/gen-wrap-coerce-exceptions
                            coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
@@ -50,7 +50,7 @@ Valid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y 2}})
 ; {:status 200
@@ -61,7 +61,7 @@ Invalid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y "2"}})
 ; {:status 400,
@@ -84,11 +84,11 @@ Invalid request:
   (ring/ring-handler
     (ring/router
       ["/api"
-       ["/ping" {:parameters {:body {:x int?, :y int?}}
-                 :responses {200 {:schema {:total pos-int?}}}
-                 :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                  {:status 200
-                                   :body {:total (+ x y)}})}}]]
+       ["/ping" {:post {:parameters {:body {:x int?, :y int?}}
+                        :responses {200 {:schema {:total pos-int?}}}
+                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                                   {:status 200
+                                    :body {:total (+ x y)}})}}]]
       {:data {:middleware [coercion/gen-wrap-coerce-exceptions
                            coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
@@ -99,7 +99,7 @@ Valid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y 2}})
 ; {:status 200
@@ -110,7 +110,7 @@ Invalid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y "2"}})
 ; {:status 400,
@@ -147,11 +147,11 @@ Currently, `clojure.spec` [doesn't support runtime transformations via conformin
   (ring/ring-handler
     (ring/router
       ["/api"
-       ["/ping" {:parameters {:body ::request}
-                 :responses {200 {:schema ::response}}
-                 :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                  {:status 200
-                                   :body {:total (+ x y)}})}}]]
+       ["/ping" {:post {:parameters {:body ::request}
+                        :responses {200 {:schema ::response}}
+                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                                   {:status 200
+                                    :body {:total (+ x y)}})}}]]
       {:data {:middleware [coercion/gen-wrap-coerce-exceptions
                            coercion/gen-wrap-coerce-parameters
                            coercion/gen-wrap-coerce-response]
@@ -162,7 +162,7 @@ Valid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y 2}})
 ; {:status 200
@@ -173,7 +173,7 @@ Invalid request:
 
 ```clj
 (app
-  {:request-method :get
+  {:request-method :post
    :uri "/api/ping"
    :body-params {:x 1, :y "2"}})
 ; {:status 400,
