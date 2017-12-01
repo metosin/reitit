@@ -53,12 +53,14 @@
         (update :schema stringify)
         (update :errors stringify)))
 
-  ;; TODO: create all possible coercers ahead of time
   (request-coercer [_ type schema]
-    (let [{:keys [formats default]} (matchers type)]
+    (let [{:keys [formats default]} (matchers type)
+          coercers (->> (for [m (conj (vals formats) default)]
+                          [m (sc/coercer schema m)])
+                        (into {}))]
       (fn [value format]
         (if-let [matcher (or (get formats format) default)]
-          (let [coercer (sc/coercer schema matcher)
+          (let [coercer (coercers matcher)
                 coerced (coercer value)]
             (if-let [error (su/error-val coerced)]
               (protocol/map->CoercionError

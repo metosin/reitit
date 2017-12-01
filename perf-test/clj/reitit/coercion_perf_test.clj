@@ -9,9 +9,15 @@
             [reitit.ring :as ring]
             [reitit.ring.coercion :as coercion]
             [reitit.ring.coercion.spec :as spec]
+            [reitit.ring.coercion.schema :as schema]
             [reitit.ring.coercion.protocol :as protocol]
             [spec-tools.data-spec :as ds]
-            [reitit.core :as r]))
+            [muuntaja.middleware :as mm]
+            [muuntaja.core :as m]
+            [muuntaja.format.jsonista :as jsonista-format]
+            [jsonista.core :as j]
+            [reitit.core :as r])
+  (:import (java.io ByteArrayInputStream)))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -146,10 +152,6 @@
 
 (comment
   (do
-    (require '[reitit.core :as ring])
-    (require '[reitit.coercion :as coercion])
-    (require '[reitit.coercion.spec :as spec])
-
     (def app
       (ring/ring-handler
         (ring/router
@@ -173,3 +175,126 @@
                :uri "/api/ping"
                :body-params {:x 1, :y 2}}]
       (cc/quick-bench (app req)))))
+
+(defn json-perf-test []
+  (let [m (m/create (jsonista-format/with-json-format m/default-options))
+        app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:handler (fn [{{:keys [x y]} :body-params}]
+                                            {:status 200, :body {:result (+ x y)}})}}]
+                {:data {:middleware [[mm/wrap-format m]]}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :headers {"content-type" "application/json"}
+                 :body (j/write-value-as-string {:x 1, :y 2})}
+        call (fn [] (-> request app :body slurp))]
+    (prn (-> request app :body slurp))
+
+    ;; 7.8µs (cheshire)
+    ;; 6.5µs (jsonista)
+    (cc/quick-bench
+      (-> request app :body slurp))))
+
+(defn schema-json-perf-test []
+  (let [m (m/create (jsonista-format/with-json-format m/default-options))
+        app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:responses {200 {:schema {:result Long}}}
+                                 :parameters {:body {:x Long, :y Long}}
+                                 :handler (fn [request]
+                                            (let [body (-> request :parameters :body)]
+                                              {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
+                {:data {:middleware [[mm/wrap-format m]
+                                     coercion/gen-wrap-coerce-parameters
+                                     coercion/gen-wrap-coerce-response]
+                        :coercion schema/coercion}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :headers {"content-type" "application/json"}
+                 :body (j/write-value-as-string {:x 1, :y 2})}
+        call (fn [] (-> request app :body slurp))]
+    (prn (-> request app :body slurp))
+
+    ;; 11.6µs (cheshire)
+    ;; 10.0µs (jsonista)
+    (cc/quick-bench
+      (-> request app :body slurp))))
+
+(defn schema-perf-test []
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:responses {200 {:schema {:result Long}}}
+                                 :parameters {:body {:x Long, :y Long}}
+                                 :handler (fn [request]
+                                            (let [body (-> request :parameters :body)]
+                                              {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
+                {:data {:middleware [coercion/gen-wrap-coerce-parameters
+                                     coercion/gen-wrap-coerce-response]
+                        :coercion schema/coercion}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :body-params {:x 1, :y 2}}
+        call (fn [] (-> request app :body))]
+    (assert (= {:result 3} (call)))
+
+    ;; 0.23µs (no coercion)
+    ;; 12.8µs
+    ;;  1.9µs (cached coercers)
+    (cc/quick-bench
+      (call))))
+
+(defn data-spec-perf-test []
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:responses {200 {:schema {:result int?}}}
+                                 :parameters {:body {:x int?, :y int?}}
+                                 :handler (fn [request]
+                                            (let [body (-> request :parameters :body)]
+                                              {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
+                {:data {:middleware [coercion/gen-wrap-coerce-parameters
+                                     coercion/gen-wrap-coerce-response]
+                        :coercion spec/coercion}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :body-params {:x 1, :y 2}}
+        call (fn [] (-> request app :body))]
+    (assert (= {:result 3} (call)))
+
+    ;;  6.0µs
+    (cc/quick-bench
+      (call))))
+
+(s/def ::x int?)
+(s/def ::y int?)
+(s/def ::request (s/keys :req-un [::x ::y]))
+
+(s/def ::result int?)
+(s/def ::response (s/keys :req-un [::result]))
+
+(defn spec-perf-test []
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:responses {200 {:schema ::response}}
+                                 :parameters {:body ::request}
+                                 :handler (fn [request]
+                                            (let [body (-> request :parameters :body)]
+                                              {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
+                {:data {:middleware [coercion/gen-wrap-coerce-parameters
+                                     coercion/gen-wrap-coerce-response]
+                        :coercion spec/coercion}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :body-params {:x 1, :y 2}}
+        call (fn [] (-> request app :body))]
+    (assert (= {:result 3} (call)))
+
+    ;;  3.2µs
+    (cc/quick-bench
+      (call))))
+
+(comment
+  (json-perf-test)
+  (schema-json-perf-test)
+  (schema-perf-test)
+  (data-spec-perf-test)
+  (spec-perf-test))

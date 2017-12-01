@@ -45,6 +45,9 @@
                                   [expound "0.3.2"]
                                   [orchestra "2017.08.13"]
 
+                                  [metosin/muuntaja "0.4.1"]
+                                  [metosin/jsonista "0.1.0-SNAPSHOT"]
+
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
