@@ -15,16 +15,14 @@
 
 (defrecord ParameterCoercion [in style keywordize? open?])
 
-(def valid-type? #{::request-coercion ::response-coercion})
-
-(def ring-parameter-coercion
+(def ^:no-doc ring-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :header-params :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
 
-(defn request-coercion-failed! [result coercion value in request]
+(defn ^:no-doc request-coercion-failed! [result coercion value in request]
   (throw
     (ex-info
       (str "Request coercion failed: " (pr-str result))
@@ -36,7 +34,7 @@
          :in [:request in]
          :request request}))))
 
-(defn response-coercion-failed! [result coercion value request response]
+(defn ^:no-doc response-coercion-failed! [result coercion value request response]
   (throw
     (ex-info
       (str "Response coercion failed: " (pr-str result))
@@ -50,27 +48,23 @@
          :response response}))))
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-
-(defn request-coercer [coercion type model]
+(defn ^:no-doc request-coercer [coercion type model {:keys [extract-request-format]
+                                                     :or {extract-request-format (constantly nil)}}]
   (if coercion
     (let [{:keys [keywordize? open? in style]} (ring-parameter-coercion type)
           transform (comp (if keywordize? walk/keywordize-keys identity) in)
-          model (if open? (protocol/make-open coercion model) model)
+          model (if open? (protocol/open-model coercion model) model)
           coercer (protocol/request-coercer coercion style model)]
       (fn [request]
         (let [value (transform request)
-              format (some-> request :muuntaja/request :format)
+              format (extract-request-format request)
               result (coercer value format)]
           (if (protocol/error? result)
             (request-coercion-failed! result coercion value in request)
             result))))))
 
-#_(defn muuntaja-response-format [request response]
-    (or (-> response :muuntaja/content-type)
-        (some-> request :muuntaja/response :format)))
-
-(defn response-coercer [coercion model {:keys [extract-response-format]
-                                        :or {extract-response-format (constantly nil)}}]
+(defn ^:no-doc response-coercer [coercion model {:keys [extract-response-format]
+                                                 :or {extract-response-format (constantly nil)}}]
   (if coercion
     (let [coercer (protocol/response-coercer coercion model)]
       (fn [request response]
@@ -81,28 +75,28 @@
             (response-coercion-failed! result coercion value request response)
             result))))))
 
-(defn encode-error [data]
+(defn ^:no-doc encode-error [data]
   (-> data
       (dissoc :request :response)
       (update :coercion protocol/get-name)
       (->> (protocol/encode-error (:coercion data)))))
 
-(defn- coerce-request [coercers request]
+(defn ^:no-doc coerce-request [coercers request]
   (reduce-kv
     (fn [acc k coercer]
       (impl/fast-assoc acc k (coercer request)))
     {}
     coercers))
 
-(defn- coerce-response [coercers request response]
+(defn ^:no-doc coerce-response [coercers request response]
   (if response
     (if-let [coercer (or (coercers (:status response)) (coercers :default))]
       (impl/fast-assoc response :body (coercer request response)))))
 
-(defn ^:no-doc request-coercers [coercion parameters]
+(defn ^:no-doc request-coercers [coercion parameters opts]
   (->> (for [[k v] parameters
              :when v]
-         [k (request-coercer coercion k v)])
+         [k (request-coercer coercion k v opts)])
        (into {})))
 
 (defn ^:no-doc response-coercers [coercion responses opts]
@@ -110,7 +104,7 @@
          [status (response-coercer coercion schema opts)])
        (into {})))
 
-(defn handle-coercion-exception [e respond raise]
+(defn ^:no-doc handle-coercion-exception [e respond raise]
   (let [data (ex-data e)]
     (if-let [status (condp = (:type data)
                       ::request-coercion 400
@@ -125,15 +119,15 @@
 ;; middleware
 ;;
 
-(def gen-wrap-coerce-parameters
+(def coerce-request-middleware
   "Middleware for pluggable request coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :parameters from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-parameters
-     :gen-wrap (fn [{:keys [coercion parameters]} _]
+     :gen-wrap (fn [{:keys [coercion parameters]} opts]
                  (if (and coercion parameters)
-                   (let [coercers (request-coercers coercion parameters)]
+                   (let [coercers (request-coercers coercion parameters opts)]
                      (fn [handler]
                        (fn
                          ([request]
@@ -143,13 +137,13 @@
                           (let [coerced (coerce-request coercers request)]
                             (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
 
-(def gen-wrap-coerce-response
+(def coerce-response-middleware
   "Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen-wrap (fn [{:keys [coercion responses opts]} _]
+     :gen-wrap (fn [{:keys [coercion responses]} opts]
                  (if (and coercion responses)
                    (let [coercers (response-coercers coercion responses opts)]
                      (fn [handler]
@@ -159,7 +153,7 @@
                          ([request respond raise]
                           (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 
-(def gen-wrap-coerce-exceptions
+(def coerce-exceptions-middleware
   "Middleware for handling coercion exceptions.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :parameters or :responses from route data, otherwise does not mount."

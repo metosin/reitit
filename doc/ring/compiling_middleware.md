@@ -51,7 +51,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
 ```clj
 (require '[reitit.ring.middleware :as middleware])
 
-(def gen-wrap-coerce-response
+(def coerce-response-middleware
   "Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion.protocol/Coercion`
   and :responses from route data, otherwise does not mount."

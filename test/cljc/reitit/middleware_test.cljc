@@ -170,3 +170,20 @@
                                       :middleware
                                       (map :name))))))))))
 
+(deftest chain-test
+  (testing "chain can produce middlware chain of any IntoMiddleware"
+    (let [mw (fn [handler value]
+               #(conj (handler (conj % value)) value))
+          handler #(conj % :ok)
+          mw1 {:gen-wrap (constantly #(mw % ::mw1))}
+          mw2 {:gen-wrap (constantly nil)}
+          mw3 {:wrap #(mw % ::mw3)}
+          mw4 #(mw % ::mw4)
+          mw5 {:gen-wrap (fn [{:keys [mount?]} _]
+                           (when mount?
+                             #(mw % ::mw5)))}
+          chain1 (middleware/chain [mw1 mw2 mw3 mw4 mw5] handler {:mount? true})
+          chain2 (middleware/chain [mw1 mw2 mw3 mw4 mw5] handler {:mount? false})]
+      (is (= [::mw1 ::mw3 ::mw4 ::mw5 :ok ::mw5 ::mw4 ::mw3 ::mw1] (chain1 [])))
+      (is (= [::mw1 ::mw3 ::mw4 :ok ::mw4 ::mw3 ::mw1] (chain2 []))))))
+
