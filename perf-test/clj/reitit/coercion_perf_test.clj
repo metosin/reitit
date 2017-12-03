@@ -107,24 +107,24 @@
           app (ring/ring-handler
                 (ring/router
                   routes
-                  {:data {:middleware [coercion/wrap-coerce-parameters]
+                  {:data {:middleware [coercion/coerce-request-middleware]
                           :coercion coercion}}))
           app2 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/gen-wrap-coerce-parameters]
+                   {:data {:middleware [coercion/coerce-request-middleware]
                            :coercion coercion}}))
           app3 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/wrap-coerce-parameters
+                   {:data {:middleware [coercion/coerce-request-middleware
                                         coercion/wrap-coerce-response]
                            :coercion coercion}}))
           app4 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/gen-wrap-coerce-parameters
-                                        coercion/gen-wrap-coerce-response]
+                   {:data {:middleware [coercion/coerce-request-middleware
+                                        coercion/coerce-response-middleware]
                            :coercion coercion}}))
           req {:request-method :get
                :uri "/api/ping"
@@ -138,17 +138,17 @@
       ;;   175ns (-19%)
       ;;   360ns (-64%)
       ;;  4080ns (-30%)
-      (bench! "gen-wrap-coerce-parameters" (app2 req))
+      (bench! "coerce-request-middleware" (app2 req))
 
       ;;   300ns
       ;;  1740ns
       ;;  9400ns
-      (bench! "wrap-coerce-parameters & responses" (app3 req))
+      (bench! "wrap-coerce-request & responses" (app3 req))
 
       ;;  175ns (-42%)
       ;;  384ns (-78%)
       ;; 6100ns (-35%)
-      (bench! "gen-wrap-coerce-parameters & responses" (app4 req)))))
+      (bench! "coerce-request-middleware & responses" (app4 req)))))
 
 (comment
   (do
@@ -161,8 +161,8 @@
                      :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                       {:status 200
                                        :body {:total (+ x y)}})}}]]
-          {:data {:middleware [coercion/gen-wrap-coerce-parameters
-                               coercion/gen-wrap-coerce-response]
+          {:data {:middleware [coercion/coerce-request-middleware
+                               coercion/coerce-response-middleware]
                   :coercion spec/coercion}})))
 
     (app
@@ -205,8 +205,8 @@
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
                 {:data {:middleware [[mm/wrap-format m]
-                                     coercion/gen-wrap-coerce-parameters
-                                     coercion/gen-wrap-coerce-response]
+                                     coercion/coerce-request-middleware
+                                     coercion/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -228,8 +228,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/gen-wrap-coerce-parameters
-                                     coercion/gen-wrap-coerce-response]
+                {:data {:middleware [coercion/coerce-request-middleware
+                                     coercion/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -251,8 +251,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/gen-wrap-coerce-parameters
-                                     coercion/gen-wrap-coerce-response]
+                {:data {:middleware [coercion/coerce-request-middleware
+                                     coercion/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -279,8 +279,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/gen-wrap-coerce-parameters
-                                     coercion/gen-wrap-coerce-response]
+                {:data {:middleware [coercion/coerce-request-middleware
+                                     coercion/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"

@@ -16,12 +16,12 @@ To use `Coercion` with Ring, one needs to do the following:
   * `:responses` map, with response status codes as keys (or `:default` for "everything else") with maps with `:schema` and optionally `:description` as values.
 2. Set a `Coercion` implementation to route data under `:coercion`
 3. Mount request & response coercion middleware to the routes (can be done for all routes as the middleware are only mounted to routes which have the parameters &/ responses defined):
-  * `reitit.ring.coercion/gen-wrap-coerce-parameters`
-  * `reitit.ring.coercion/gen-wrap-coerce-response`
+  * `reitit.ring.coercion/coerce-request-middleware`
+  * `reitit.ring.coercion/coerce-response-middleware`
 
 If the request coercion succeeds, the coerced parameters are injected into request under `:parameters`.
 
-If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the `reitit.ring.coercion/gen-wrap-coerce-exceptions` middleware
+If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the `reitit.ring.coercion/coerce-exceptions-middleware` middleware
 
 ### Example with Schema
 
@@ -40,9 +40,9 @@ If either request or response coercion fails, an descriptive error is thrown. To
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/gen-wrap-coerce-exceptions
-                           coercion/gen-wrap-coerce-parameters
-                           coercion/gen-wrap-coerce-response]
+      {:data {:middleware [coercion/coerce-exceptions-middleware
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]
               :coercion schema/coercion}})))
 ```
 
@@ -89,9 +89,9 @@ Invalid request:
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/gen-wrap-coerce-exceptions
-                           coercion/gen-wrap-coerce-parameters
-                           coercion/gen-wrap-coerce-response]
+      {:data {:middleware [coercion/coerce-exceptions-middleware
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]
               :coercion spec/coercion}})))
 ```
 
@@ -152,9 +152,9 @@ Currently, `clojure.spec` [doesn't support runtime transformations via conformin
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/gen-wrap-coerce-exceptions
-                           coercion/gen-wrap-coerce-parameters
-                           coercion/gen-wrap-coerce-response]
+      {:data {:middleware [coercion/coerce-exceptions-middleware
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]
               :coercion spec/coercion}})))
 ```
 

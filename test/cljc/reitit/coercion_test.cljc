@@ -53,8 +53,8 @@
                              :coercion spec/coercion}})))]
 
     (testing "withut exception handling"
-      (let [app (create [coercion/gen-wrap-coerce-parameters
-                         coercion/gen-wrap-coerce-response])]
+      (let [app (create [coercion/coerce-request-middleware
+                         coercion/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -74,9 +74,9 @@
                 (app invalid-request2))))))
 
     (testing "with exception handling"
-      (let [app (create [coercion/gen-wrap-coerce-exceptions
-                         coercion/gen-wrap-coerce-parameters
-                         coercion/gen-wrap-coerce-response])]
+      (let [app (create [coercion/coerce-exceptions-middleware
+                         coercion/coerce-request-middleware
+                         coercion/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -108,8 +108,8 @@
                              :coercion schema/coercion}})))]
 
     (testing "withut exception handling"
-      (let [app (create [coercion/gen-wrap-coerce-parameters
-                         coercion/gen-wrap-coerce-response])]
+      (let [app (create [coercion/coerce-request-middleware
+                         coercion/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -129,9 +129,9 @@
                 (app invalid-request2))))
 
         (testing "with exception handling"
-          (let [app (create [coercion/gen-wrap-coerce-exceptions
-                             coercion/gen-wrap-coerce-parameters
-                             coercion/gen-wrap-coerce-response])]
+          (let [app (create [coercion/coerce-exceptions-middleware
+                             coercion/coerce-request-middleware
+                             coercion/coerce-response-middleware])]
 
             (testing "all good"
               (is (= {:status 200
