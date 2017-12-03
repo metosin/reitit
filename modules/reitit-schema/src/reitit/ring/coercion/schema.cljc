@@ -38,15 +38,14 @@
   protocol/Coercion
   (get-name [_] name)
 
-  (compile [_ model _]
-    model)
-
   (get-apidocs [_ _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
             parameters (assoc ::swagger/parameters parameters)
             responses (assoc ::swagger/responses responses)))
 
-  (make-open [_ schema] (st/open-schema schema))
+  (compile-model [_ model _] model)
+
+  (open-model [_ schema] (st/open-schema schema))
 
   (encode-error [_ error]
     (-> error

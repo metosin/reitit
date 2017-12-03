@@ -87,9 +87,9 @@
 (defrecord NoOpCoercion []
   protocol/Coercion
   (get-name [_] :no-op)
-  (compile [_ model _] model)
   (get-apidocs [_ _ {:keys [parameters responses] :as info}])
-  (make-open [_ spec] spec)
+  (compile-model [_ model _] model)
+  (open-model [_ spec] spec)
   (encode-error [_ error] error)
   (request-coercer [_ type spec] (fn [value format] value))
   (response-coercer [this spec] (protocol/request-coercer this :response spec)))

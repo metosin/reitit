@@ -46,10 +46,6 @@
   (into-spec [this _]
     (st/create-spec {:spec this})))
 
-;; TODO: proper name!
-(def memoized-into-spec
-  (memoize #(into-spec %1 (gensym "spec"))))
-
 (defn stringify-pred [pred]
   (str (if (seq? pred) (seq pred) pred)))
 
@@ -61,33 +57,33 @@
   protocol/Coercion
   (get-name [_] name)
 
-  (compile [_ model _]
-    (memoized-into-spec model))
-
-  (get-apidocs [_ _ {:keys [parameters responses] :as info}]
+  (get-apidocs [this _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
             parameters (assoc
                          ::swagger/parameters
                          (into
                            (empty parameters)
                            (for [[k v] parameters]
-                             [k memoized-into-spec])))
+                             [k (protocol/compile-model this v nil)])))
             responses (assoc
                         ::swagger/responses
                         (into
                           (empty responses)
                           (for [[k response] responses]
-                            [k (update response :schema memoized-into-spec)])))))
+                            [k (update response :schema #(protocol/compile-model this % nil))])))))
 
-  (make-open [_ spec] spec)
+  (compile-model [_ model _]
+    (into-spec model (or name (gensym "spec"))))
+
+  (open-model [_ spec] spec)
 
   (encode-error [_ error]
     (-> error
         (update :spec (comp str s/form))
         (update :problems (partial mapv #(update % :pred stringify-pred)))))
 
-  (request-coercer [_ type spec]
-    (let [spec (memoized-into-spec spec)
+  (request-coercer [this type spec]
+    (let [spec (protocol/compile-model this spec nil)
           {:keys [formats default]} (conforming type)]
       (fn [value format]
         (if-let [conforming (or (get formats format) default)]
