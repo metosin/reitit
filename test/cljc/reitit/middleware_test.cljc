@@ -188,3 +188,27 @@
       (is (= [::mw1 ::mw3 ::mw4 ::mw5 :ok ::mw5 ::mw4 ::mw3 ::mw1] (chain1 [])))
       (is (= [::mw1 ::mw3 ::mw4 :ok ::mw4 ::mw3 ::mw1] (chain2 []))))))
 
+(deftest middleware-transform-test
+  (let [wrap (fn [handler value]
+               #(handler (conj % value)))
+        debug-mw {:name ::debug, :wrap #(wrap % ::debug)}
+        create (fn [options]
+                 (create-app
+                   (middleware/router
+                     ["/ping" {:middleware [{:name ::olipa, :wrap #(wrap % ::olipa)}
+                                            {:name ::kerran, :wrap #(wrap % ::kerran)}
+                                            {:name ::avaruus, :wrap #(wrap % ::avaruus)}]
+                               :handler #(conj % :ok)}]
+                     options)))]
+
+    (testing "by default, all middleware are applied in order"
+      (let [app (create nil)]
+        (is (= [::olipa ::kerran ::avaruus :ok] (app "/ping")))))
+
+    (testing "middleware can be re-ordered"
+      (let [app (create {::middleware/transform (partial sort-by :name)})]
+        (is (= [::avaruus ::kerran ::olipa :ok] (app "/ping")))))
+
+    (testing "adding debug middleware between middleware"
+      (let [app (create {::middleware/transform #(interleave % (repeat debug-mw))})]
+        (is (= [::olipa ::debug ::kerran ::debug ::avaruus ::debug :ok] (app "/ping")))))))
