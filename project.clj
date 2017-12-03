@@ -45,6 +45,7 @@
                                   [expound "0.3.2"]
                                   [orchestra "2017.08.13"]
 
+                                  [ring "1.6.3"]
                                   [metosin/muuntaja "0.4.1"]
                                   [metosin/jsonista "0.1.0-SNAPSHOT"]
 
