@@ -60,17 +60,29 @@
 (defn compile-result [[path data] opts]
   (let [[top childs] (group-keys data)]
     (if-not (seq childs)
-      (let [middleware (middleware/compile-result [path top] opts)]
-        (map->Methods {:any (middleware/compile-result [path top] opts)}))
-      (let [any-handler (if (:handler top) (middleware/compile-result [path data] opts))]
-        (reduce-kv
-          (fn [acc method data]
-            (let [data (meta-merge top data)]
-              (assoc acc method (middleware/compile-result [path data] opts method))))
-          (map->Methods {:any any-handler})
-          childs)))))
+      (map->Methods {:any (middleware/compile-result [path top] opts)})
+      (reduce-kv
+        (fn [acc method data]
+          (let [data (meta-merge top data)]
+            (assoc acc method (middleware/compile-result [path data] opts method))))
+        (map->Methods {:any (if (:handler top) (middleware/compile-result [path data] opts))})
+        childs))))
 
 (defn router
+  "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
+  support for http-methods and Middleware. See [docs](https://metosin.github.io/reitit/)
+  for details.
+
+  Example:
+
+      (router
+        [\"/api\" {:middleware [wrap-format wrap-oauth2]}
+          [\"/users\" {:get get-user
+                       :post update-user
+                       :delete {:middleware [wrap-delete]
+                               :handler delete-user}}]])
+
+  See router options from [[reitit.core/router]] and [[reitit.ring.middleware/router]]."
   ([data]
    (router data nil))
   ([data opts]

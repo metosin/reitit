@@ -87,6 +87,17 @@
         :data data}))))
 
 (defn router
+  "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
+  support for Middleware. See [docs](https://metosin.github.io/reitit/) for details.
+
+  Example:
+
+    (router
+      [\"/api\" {:middleware [wrap-format wrap-oauth2]}
+        [\"/users\" {:middleware [wrap-delete]
+                     :handler get-user}]])
+
+  See router options from [[reitit.core/router]]."
   ([data]
    (router data nil))
   ([data opts]
@@ -106,6 +117,6 @@
   "Creates a vanilla ring middleware chain out of sequence of
   IntoMiddleware thingies."
   ([middleware handler data]
-    (chain middleware handler data nil))
+   (chain middleware handler data nil))
   ([middleware handler data opts]
    (compile-handler (expand middleware data opts) handler)))
