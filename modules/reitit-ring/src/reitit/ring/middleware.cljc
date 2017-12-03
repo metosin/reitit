@@ -101,3 +101,11 @@
                :result
                :handler))
     {::router router}))
+
+(defn chain
+  "Creates a vanilla ring middleware chain out of sequence of
+  IntoMiddleware thingies."
+  ([middleware handler data]
+    (chain middleware handler data nil))
+  ([middleware handler data opts]
+   (compile-handler (expand middleware data opts) handler)))
