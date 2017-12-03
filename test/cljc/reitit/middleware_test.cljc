@@ -105,6 +105,12 @@
             (dotimes [_ 10]
               (is (= :request (app :request))))))))))
 
+(defn create-app [router]
+  (let [h (middleware/middleware-handler router)]
+    (fn [path]
+      (if-let [f (h path)]
+        (f [])))))
+
 (deftest middleware-handler-test
 
   (testing "all paths should have a handler"
@@ -125,12 +131,7 @@
                      ["/ping" handler]
                      ["/admin" {:middleware [[mw :admin]]}
                       ["/ping" handler]]]])
-          ->app (fn [router]
-                  (let [h (middleware/middleware-handler router)]
-                    (fn [path]
-                      (if-let [f (h path)]
-                        (f [])))))
-          app (->app router)]
+          app (create-app router)]
 
       (testing "not found"
         (is (= nil (app "/favicon.ico"))))
@@ -152,7 +153,7 @@
                        ["/api" {:name ::api
                                 :middleware [mw1 mw2 mw3 mw2]
                                 :handler handler}])
-              app (->app router)]
+              app (create-app router)]
 
           (is (= [::mw1 ::mw3 :ok ::mw3 ::mw1] (app "/api")))
 
