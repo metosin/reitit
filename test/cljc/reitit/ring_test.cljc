@@ -182,4 +182,5 @@
 
     (testing "adding debug middleware between middleware"
       (let [app (create {::middleware/transform #(interleave % (repeat (middleware "debug")))})]
-        (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]} (app request)))))))
+        (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]}
+               (app request)))))))
