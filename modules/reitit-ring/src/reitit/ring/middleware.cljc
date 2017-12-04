@@ -81,7 +81,7 @@
   ([[path {:keys [middleware handler] :as data}]
     {:keys [::transform] :or {transform identity} :as opts} scope]
    (ensure-handler! path data scope)
-   (let [middleware (transform (expand middleware data opts))]
+   (let [middleware (expand (transform (expand middleware data opts)) data opts)]
      (map->Endpoint
        {:handler (compile-handler middleware handler)
         :middleware middleware
