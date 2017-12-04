@@ -10,15 +10,9 @@
 (defn mw [handler name]
   (fn
     ([request]
-     (-> request
-         (update ::mw (fnil conj []) name)
-         (handler)
-         (update :body (fnil conj []) name)))
+     (handler (update request ::mw (fnil conj []) name)))
     ([request respond raise]
-     (handler
-       (update request ::mw (fnil conj []) name)
-       #(respond (update % :body (fnil conj []) name))
-       raise))))
+     (handler (update request ::mw (fnil conj []) name) respond raise))))
 
 (defn handler
   ([{:keys [::mw]}]
@@ -37,14 +31,14 @@
   (testing "ring-handler"
     (let [api-mw #(mw % :api)
           router (ring/router
-                   [["/api" {:middleware [api-mw]}
-                     ["/all" handler]
-                     ["/get" {:get handler}]
-                     ["/users" {:middleware [[mw :users]]
-                                :get handler
-                                :post {:handler handler
-                                       :middleware [[mw :post]]}
-                                :handler handler}]]])
+                   ["/api" {:middleware [api-mw]}
+                    ["/all" handler]
+                    ["/get" {:get handler}]
+                    ["/users" {:middleware [[mw :users]]
+                               :get handler
+                               :post {:handler handler
+                                      :middleware [[mw :post]]}
+                               :handler handler}]])
           app (ring/ring-handler router)]
 
       (testing "router can be extracted"
@@ -54,31 +48,31 @@
         (is (= nil (app {:uri "/favicon.ico"}))))
 
       (testing "catch all handler"
-        (is (= {:status 200, :body [:api :ok :api]}
+        (is (= {:status 200, :body [:api :ok]}
                (app {:uri "/api/all" :request-method :get}))))
 
       (testing "just get handler"
-        (is (= {:status 200, :body [:api :ok :api]}
+        (is (= {:status 200, :body [:api :ok]}
                (app {:uri "/api/get" :request-method :get})))
         (is (= nil (app {:uri "/api/get" :request-method :post}))))
 
       (testing "expanded method handler"
-        (is (= {:status 200, :body [:api :users :ok :users :api]}
+        (is (= {:status 200, :body [:api :users :ok]}
                (app {:uri "/api/users" :request-method :get}))))
 
       (testing "method handler with middleware"
-        (is (= {:status 200, :body [:api :users :post :ok :post :users :api]}
+        (is (= {:status 200, :body [:api :users :post :ok]}
                (app {:uri "/api/users" :request-method :post}))))
 
       (testing "fallback handler"
-        (is (= {:status 200, :body [:api :users :ok :users :api]}
+        (is (= {:status 200, :body [:api :users :ok]}
                (app {:uri "/api/users" :request-method :put}))))
 
       (testing "3-arity"
         (let [result (atom nil)
               respond (partial reset! result), raise ::not-called]
           (app {:uri "/api/users" :request-method :post} respond raise)
-          (is (= {:status 200, :body [:api :users :post :ok :post :users :api]}
+          (is (= {:status 200, :body [:api :users :post :ok]}
                  @result))))))
 
   (testing "named routes"
@@ -160,3 +154,32 @@
         (is (= nil (respond)))
         (is (= ::nil (raise)))))))
 
+(deftest middleware-transform-test
+  (let [middleware (fn [name] {:name name
+                               :wrap (fn [handler]
+                                       (fn [request]
+                                         (handler (update request ::mw (fnil conj []) name))))})
+        handler (fn [{:keys [::mw]}] {:status 200 :body (conj mw :ok)})
+        request {:uri "/api/avaruus" :request-method :get}
+        create (fn [options]
+                 (ring/ring-handler
+                   (ring/router
+                     ["/api" {:middleware [(middleware :olipa)]}
+                      ["/avaruus" {:middleware [(middleware :kerran)]
+                                   :get {:handler handler
+                                         :middleware [(middleware :avaruus)]}}]]
+                     options)))]
+
+    (testing "by default, all middleware are applied in order"
+      (let [app (create nil)]
+        (is (= {:status 200, :body [:olipa :kerran :avaruus :ok]}
+               (app request)))))
+
+    (testing "middleware can be re-ordered"
+      (let [app (create {::middleware/transform (partial sort-by :name)})]
+        (is (= {:status 200, :body [:avaruus :kerran :olipa :ok]}
+               (app request)))))
+
+    (testing "adding debug middleware between middleware"
+      (let [app (create {::middleware/transform #(interleave % (repeat (middleware "debug")))})]
+        (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]} (app request)))))))

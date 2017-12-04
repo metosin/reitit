@@ -78,9 +78,10 @@
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[path {:keys [middleware handler] :as data}] opts scope]
+  ([[path {:keys [middleware handler] :as data}]
+    {:keys [::transform] :or {transform identity} :as opts} scope]
    (ensure-handler! path data scope)
-   (let [middleware (expand middleware data opts)]
+   (let [middleware (expand (transform (expand middleware data opts)) data opts)]
      (map->Endpoint
        {:handler (compile-handler middleware handler)
         :middleware middleware
