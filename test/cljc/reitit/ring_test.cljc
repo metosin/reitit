@@ -155,7 +155,11 @@
         (is (= ::nil (raise)))))))
 
 (deftest middleware-transform-test
-  (let [middleware (fn [name] {:name name, :wrap #(mw % name)})
+  (let [middleware (fn [name] {:name name
+                               :wrap (fn [handler]
+                                       (fn [request]
+                                         (handler (update request ::mw (fnil conj []) name))))})
+        handler (fn [{:keys [::mw]}] {:status 200 :body (conj mw :ok)})
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (ring/ring-handler
