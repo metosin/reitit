@@ -1,6 +1,6 @@
 (ns example.server
   (:require [ring.adapter.jetty :as jetty]
-            [reitit.ring.middleware :as middleware]
+            [reitit.middleware :as middleware]
             [reitit.ring.coercion :as coercion]))
 
 (defonce ^:private server (atom nil))

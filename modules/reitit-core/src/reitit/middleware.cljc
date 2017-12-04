@@ -1,4 +1,4 @@
-(ns reitit.ring.middleware
+(ns reitit.middleware
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.core :as r]
             [reitit.impl :as impl]))

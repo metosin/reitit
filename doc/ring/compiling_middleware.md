@@ -49,7 +49,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
 * Mounts only if `:coercion` and `:responses` are defined for the route
 
 ```clj
-(require '[reitit.ring.middleware :as middleware])
+(require '[reitit.middleware :as middleware])
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.

@@ -1,7 +1,7 @@
 (ns reitit.ring.coercion
   (:require [clojure.walk :as walk]
             [spec-tools.core :as st]
-            [reitit.ring.middleware :as middleware]
+            [reitit.middleware :as middleware]
             [reitit.ring.coercion.protocol :as protocol]
             [reitit.ring :as ring]
             [reitit.impl :as impl]))
@@ -126,16 +126,16 @@
   (middleware/create
     {:name ::coerce-parameters
      :compile (fn [{:keys [coercion parameters]} opts]
-                 (if (and coercion parameters)
-                   (let [coercers (request-coercers coercion parameters opts)]
-                     (fn [handler]
-                       (fn
-                         ([request]
-                          (let [coerced (coerce-request coercers request)]
-                            (handler (impl/fast-assoc request :parameters coerced))))
-                         ([request respond raise]
-                          (let [coerced (coerce-request coercers request)]
-                            (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
+                (if (and coercion parameters)
+                  (let [coercers (request-coercers coercion parameters opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (let [coerced (coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced))))
+                        ([request respond raise]
+                         (let [coerced (coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced) respond raise))))))))}))
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
@@ -144,14 +144,14 @@
   (middleware/create
     {:name ::coerce-response
      :compile (fn [{:keys [coercion responses]} opts]
-                 (if (and coercion responses)
-                   (let [coercers (response-coercers coercion responses opts)]
-                     (fn [handler]
-                       (fn
-                         ([request]
-                          (coerce-response coercers request (handler request)))
-                         ([request respond raise]
-                          (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+                (if (and coercion responses)
+                  (let [coercers (response-coercers coercion responses opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (coerce-response coercers request (handler request)))
+                        ([request respond raise]
+                         (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 
 (def coerce-exceptions-middleware
   "Middleware for handling coercion exceptions.
@@ -160,16 +160,16 @@
   (middleware/create
     {:name ::coerce-exceptions
      :compile (fn [{:keys [coercion parameters responses]} _]
-                 (if (and coercion (or parameters responses))
-                   (fn [handler]
-                     (fn
-                       ([request]
-                        (try
-                          (handler request)
-                          (catch #?(:clj Exception :cljs js/Error) e
-                            (handle-coercion-exception e identity #(throw %)))))
-                       ([request respond raise]
-                        (try
-                          (handler request respond #(handle-coercion-exception % respond raise))
-                          (catch #?(:clj Exception :cljs js/Error) e
-                            (handle-coercion-exception e respond raise))))))))}))
+                (if (and coercion (or parameters responses))
+                  (fn [handler]
+                    (fn
+                      ([request]
+                       (try
+                         (handler request)
+                         (catch #?(:clj Exception :cljs js/Error) e
+                           (handle-coercion-exception e identity #(throw %)))))
+                      ([request respond raise]
+                       (try
+                         (handler request respond #(handle-coercion-exception % respond raise))
+                         (catch #?(:clj Exception :cljs js/Error) e
+                           (handle-coercion-exception e respond raise))))))))}))
