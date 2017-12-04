@@ -19,7 +19,7 @@ Records can have arbitrary keys, but the following keys have a special purpose:
 | ---------------|-------------|
 | `:name`        | Name of the middleware as a qualified keyword (optional)
 | `:wrap`        | The actual middleware function of `handler & args => request => response`
-| `:gen-wrap`    | Middleware function generation function, see [compiling middleware](compiling_middleware.md).
+| `:compile`     | Middleware function generation function, see [compiling middleware](compiling_middleware.md).
 
 Middleware Records are accessible in their raw form in the compiled route results, thus available for inventories, creating api-docs etc.
 

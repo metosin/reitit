@@ -10,14 +10,14 @@
 
   (testing "middleware records"
 
-    (testing ":wrap & :gen-wrap are exclusive"
+    (testing ":wrap & :compile are exclusive"
       (is (thrown-with-msg?
             ExceptionInfo
-            #"Middleware can't both :wrap and :gen-wrap defined"
+            #"Middleware can't both :wrap and :compile defined"
             (middleware/create
               {:name ::test
                :wrap identity
-               :gen-wrap (constantly identity)}))))
+               :compile (constantly identity)}))))
 
     (testing "middleware"
       (let [calls (atom 0)
@@ -74,12 +74,12 @@
 
     (testing "compiled Middleware"
       (let [calls (atom 0)
-            mw {:gen-wrap (fn [data _]
-                            (swap! calls inc)
-                            (fn [handler value]
-                              (swap! calls inc)
-                              (fn [request]
-                                [data value request])))}
+            mw {:compile (fn [data _]
+                           (swap! calls inc)
+                           (fn [handler value]
+                             (swap! calls inc)
+                             (fn [request]
+                               [data value request])))}
             ->app (fn [ast handler]
                     (middleware/compile-handler
                       (middleware/expand ast :data {})
@@ -100,8 +100,8 @@
               (is (= 2 @calls)))))
 
         (testing "nil unmounts the middleware"
-          (let [app (->app [{:gen-wrap (constantly nil)}
-                            {:gen-wrap (constantly nil)}] identity)]
+          (let [app (->app [{:compile (constantly nil)}
+                            {:compile (constantly nil)}] identity)]
             (dotimes [_ 10]
               (is (= :request (app :request))))))))))
 
@@ -145,9 +145,9 @@
       (testing "with nested middleware"
         (is (= [:api :admin :ok :admin :api] (app "/api/admin/ping"))))
 
-      (testing ":gen-wrap middleware can be unmounted at creation-time"
-        (let [mw1 {:name ::mw1, :gen-wrap (constantly #(mw % ::mw1))}
-              mw2 {:name ::mw2, :gen-wrap (constantly nil)}
+      (testing ":compile middleware can be unmounted at creation-time"
+        (let [mw1 {:name ::mw1, :compile (constantly #(mw % ::mw1))}
+              mw2 {:name ::mw2, :compile (constantly nil)}
               mw3 {:name ::mw3, :wrap #(mw % ::mw3)}
               router (middleware/router
                        ["/api" {:name ::api
@@ -176,13 +176,13 @@
     (let [mw (fn [handler value]
                #(conj (handler (conj % value)) value))
           handler #(conj % :ok)
-          mw1 {:gen-wrap (constantly #(mw % ::mw1))}
-          mw2 {:gen-wrap (constantly nil)}
+          mw1 {:compile (constantly #(mw % ::mw1))}
+          mw2 {:compile (constantly nil)}
           mw3 {:wrap #(mw % ::mw3)}
           mw4 #(mw % ::mw4)
-          mw5 {:gen-wrap (fn [{:keys [mount?]} _]
-                           (when mount?
-                             #(mw % ::mw5)))}
+          mw5 {:compile (fn [{:keys [mount?]} _]
+                          (when mount?
+                            #(mw % ::mw5)))}
           chain1 (middleware/chain [mw1 mw2 mw3 mw4 mw5] handler {:mount? true})
           chain2 (middleware/chain [mw1 mw2 mw3 mw4 mw5] handler {:mount? false})]
       (is (= [::mw1 ::mw3 ::mw4 ::mw5 :ok ::mw5 ::mw4 ::mw3 ::mw1] (chain1 [])))

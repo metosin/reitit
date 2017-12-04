@@ -153,3 +153,6 @@
 (defn fast-get
   #?@(:clj  [[^java.util.HashMap m k] (.get m k)]
       :cljs [[m k] (m k)]))
+
+(defn strip-nils [m]
+  (->> m (remove (comp nil? second)) (into {})))

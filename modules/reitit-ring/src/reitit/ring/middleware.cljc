@@ -1,6 +1,7 @@
 (ns reitit.ring.middleware
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.core :as r]))
+            [reitit.core :as r]
+            [reitit.impl :as impl]))
 
 (defprotocol IntoMiddleware
   (into-middleware [this data opts]))
@@ -8,11 +9,11 @@
 (defrecord Middleware [name wrap])
 (defrecord Endpoint [data handler middleware])
 
-(defn create [{:keys [name wrap gen-wrap] :as m}]
-  (when (and wrap gen-wrap)
+(defn create [{:keys [name wrap compile] :as m}]
+  (when (and wrap compile)
     (throw
       (ex-info
-        (str "Middleware can't both :wrap and :gen-wrap defined " m) m)))
+        (str "Middleware can't both :wrap and :compile defined " m) m)))
   (map->Middleware m))
 
 (extend-protocol IntoMiddleware
@@ -40,14 +41,14 @@
     (into-middleware (create this) data opts))
 
   Middleware
-  (into-middleware [{:keys [wrap gen-wrap] :as this} data opts]
-    (if-not gen-wrap
+  (into-middleware [{:keys [wrap compile] :as this} data opts]
+    (if-not compile
       this
-      (if-let [wrap (gen-wrap data opts)]
+      (if-let [middeware (into-middleware (compile data opts) data opts)]
         (map->Middleware
-          (-> this
-              (dissoc :gen-wrap)
-              (assoc :wrap wrap))))))
+          (merge
+            (dissoc this :create)
+            (impl/strip-nils middeware))))))
 
   nil
   (into-middleware [_ _ _]))
@@ -67,13 +68,6 @@
 
 (defn compile-handler [middleware handler]
   ((apply comp identity (keep :wrap middleware)) handler))
-
-(compile-handler
-  [(map->Middleware
-     {:wrap
-      (fn [handler]
-        (fn [request]
-          (handler request)))})] identity)
 
 (defn compile-result
   ([route opts]

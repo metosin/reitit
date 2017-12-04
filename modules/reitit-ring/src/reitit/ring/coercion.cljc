@@ -125,7 +125,7 @@
   and :parameters from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-parameters
-     :gen-wrap (fn [{:keys [coercion parameters]} opts]
+     :compile (fn [{:keys [coercion parameters]} opts]
                  (if (and coercion parameters)
                    (let [coercers (request-coercers coercion parameters opts)]
                      (fn [handler]
@@ -143,7 +143,7 @@
   and :responses from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen-wrap (fn [{:keys [coercion responses]} opts]
+     :compile (fn [{:keys [coercion responses]} opts]
                  (if (and coercion responses)
                    (let [coercers (response-coercers coercion responses opts)]
                      (fn [handler]
@@ -159,7 +159,7 @@
   and :parameters or :responses from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-exceptions
-     :gen-wrap (fn [{:keys [coercion parameters responses]} _]
+     :compile (fn [{:keys [coercion parameters responses]} _]
                  (if (and coercion (or parameters responses))
                    (fn [handler]
                      (fn
