@@ -439,13 +439,15 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="data-driven-middleware">Data-driven Middleware</h1>
-<p>Ring <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">defines middleware</a> as a function of type <code>handler &amp; args =&gt; request =&gt; response</code>. It&apos;s easy to undrstand and enables great performance. Still, in the end - the middleware-chain is just a opaque function, making things like documentation and debugging hard.</p>
-<p>Reitit does things bit differently:</p>
+<p>Ring <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">defines middleware</a> as a function of type <code>handler &amp; args =&gt; request =&gt; response</code>. It&apos;s relatively easy to understand and enables good performance. Downside is that the middleware-chain is just a opaque function, making things like debugging and composition hard. It&apos;s too easy to apply the middleware in wrong order.</p>
+<p>Reitit defines middleware as data:</p>
 <ol>
-<li>Middleware is defined as a vector (of middleware) enabling the chain to be malipulated before turned into the runtime middleware function.</li>
 <li>Middleware can be defined as first-class data entries</li>
+<li>Middleware can be defined as a <a href="https://github.com/duct-framework/duct/wiki/Configuration" target="_blank">duct-style</a> vector (of middleware)</li>
+<li>Middleware can be optimized &amp; <a href="compiling_middleware.html">compiled</a> againt an endpoint</li>
+<li>Middleware chain can be transformed by the router</li>
 </ol>
-<h3 id="middleware-as-data">Middleware as data</h3>
+<h2 id="middleware-as-data">Middleware as data</h2>
 <p>All values in the <code>:middleware</code> vector in the route data are coerced into <code>reitit.ring.middleware/Middleware</code> Records with using the <code>reitit.ring.middleware/IntoMiddleware</code> Protocol. By default, functions, maps and <code>Middleware</code> records are allowed.</p>
 <p>Records can have arbitrary keys, but the following keys have a special purpose:</p>
 <table>
@@ -474,7 +476,7 @@
 <p>For the actual request processing, the Records are unwrapped into normal functions and composed into a middleware function chain, yielding zero runtime penalty.</p>
 <h3 id="creating-middleware">Creating Middleware</h3>
 <p>The following produce identical middleware runtime function.</p>
-<h4 id="function">Function</h4>
+<h3 id="function">Function</h3>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap [handler id]
   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
     (<span class="hljs-name">handler</span> (<span class="hljs-name">update</span> request <span class="hljs-symbol">::acc</span> (<span class="hljs-name">fnil</span> conj []) id))))
@@ -488,13 +490,14 @@
      <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;Middleware that does things.&quot;</span>
      <span class="hljs-symbol">:wrap</span> wrap}))
 </code></pre>
-<h4 id="map">Map</h4>
+<h3 id="map">Map</h3>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap3
   {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap3</span>
    <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;Middleware that does things.&quot;</span>
    <span class="hljs-symbol">:wrap</span> wrap})
 </code></pre>
-<h3 id="using-middleware">Using Middleware</h3>
+<h2 id="using-middleware">Using Middleware</h2>
+<p><code>:middleware</code> is merged to endpoints by the <code>router</code>.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::acc</span>]}]
@@ -507,14 +510,43 @@
        [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:middleware</span> [[wrap3 <span class="hljs-number">3</span>]]
                        <span class="hljs-symbol">:handler</span> handler}}]])))
 </code></pre>
-<p>All the middleware are called correctly:</p>
+<p>All the middleware are applied correctly:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
 <span class="hljs-comment">; {:status 200, :body [1 2 3 :handler]}</span>
 </code></pre>
-<h3 id="future">Future</h3>
+<h2 id="compiling-middleware">Compiling middleware</h2>
+<p>Middleware can be optimized against an endpoint using <a href="compiling_middleware.html">middleware compilation</a>.</p>
+<h2 id="transforming-the-middleware-chain">Transforming the middleware chain</h2>
+<p>There is an extra option in ring-router (actually, in the undelaying middleware-router): <code>:reitit.ring.middleware/transform</code> to transform the middleware chain per endpoint. It sees the vector of compiled middleware and should return a new vector of middleware.</p>
+<h4 id="adding-debug-middleware-between-all-other-middleware">Adding debug middleware between all other middleware</h4>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-number">1</span>] [wrap2 <span class="hljs-number">2</span>]]}
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:middleware</span> [[wrap3 <span class="hljs-number">3</span>]]
+                       <span class="hljs-symbol">:handler</span> handler}}]]
+      {<span class="hljs-symbol">::middleware/transform</span> #(<span class="hljs-name">interleave</span> % (<span class="hljs-name"><span class="hljs-builtin-name">repeat</span></span> [wrap <span class="hljs-symbol">:debug</span>]))})))
+</code></pre>
+<pre><code>(app {:request-method :get, :uri &quot;/api/ping&quot;})
+; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
+</code></pre><h4 id="reversing-the-middleware-chain">Reversing the middleware chain</h4>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-number">1</span>] [wrap2 <span class="hljs-number">2</span>]]}
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:middleware</span> [[wrap3 <span class="hljs-number">3</span>]]
+                       <span class="hljs-symbol">:handler</span> handler}}]]
+      {<span class="hljs-symbol">::middleware/transform</span> reverse)})))
+</code></pre>
+<pre><code>(app {:request-method :get, :uri &quot;/api/ping&quot;})
+; {:status 200, :body [3 2 1 :handler]}
+</code></pre><h2 id="roadmap-for-middleware">Roadmap for middleware</h2>
 <p>Some things bubblin&apos; under:</p>
 <ul>
-<li>Hooks to manipulate the <code>:middleware</code> chain before compilation</li>
+<li>Re-package all useful middleware into (optimized) data-driven Middleware<ul>
+<li>just package or a new community-repo with rehosting stuffm?</li>
+</ul>
+</li>
 <li>Support <code>Keyword</code> expansion into Middleware, enabling external Middleware Registries (duct/integrant/macchiato -style)</li>
 <li>Support Middleware dependency resolution with new keys <code>:requires</code> and <code>:provides</code>. Values are set of top-level keys of the request. e.g.<ul>
 <li><code>InjectUserIntoRequestMiddleware</code> requires <code>#{:session}</code> and provides <code>#{:user}</code></li>
@@ -576,7 +608,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"next":{"title":"Pluggable Coercion","level":"1.4.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2017-12-03T19:00:46.352Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-03T19:01:20.940Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.4.3","depth":2,"next":{"title":"Pluggable Coercion","level":"1.4.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Dynamic extensions","level":"1.4.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2017-12-04T06:49:49.798Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-04T06:50:27.350Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
