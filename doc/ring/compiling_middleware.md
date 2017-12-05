@@ -4,9 +4,9 @@ The [dynamic extensions](dynamic_extensions.md) is a easy way to extend the syst
 
 But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning `nil`. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
-To enable this we use [middleware records](data_driven_middleware.md) `:gen-wrap` key instead of the normal `:wrap`. `:gen-wrap` expects a function of `route-data router-opts => ?wrap`.
+To enable this we use [middleware records](data_driven_middleware.md) `:compile` key instead of the normal `:wrap`. `:compile` expects a function of `route-data router-opts => ?wrap`.
 
-To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:gen-wrap`.
+To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:compile`.
 
 ## Normal Middleware
 
@@ -49,7 +49,7 @@ To demonstrate the two approaches, below are response coercion middleware writte
 * Mounts only if `:coercion` and `:responses` are defined for the route
 
 ```clj
-(require '[reitit.ring.middleware :as middleware])
+(require '[reitit.middleware :as middleware])
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
@@ -57,15 +57,15 @@ To demonstrate the two approaches, below are response coercion middleware writte
   and :responses from route data, otherwise does not mount."
   (middleware/create
     {:name ::coerce-response
-     :gen-wrap (fn [{:keys [coercion responses opts]} _]
-                 (if (and coercion responses)
-                   (let [coercers (response-coercers coercion responses opts)]
-                     (fn [handler]
-                       (fn
-                         ([request]
-                          (coerce-response coercers request (handler request)))
-                         ([request respond raise]
-                          (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+     :compile (fn [{:keys [coercion responses opts]} _]
+                (if (and coercion responses)
+                  (let [coercers (response-coercers coercion responses opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (coerce-response coercers request (handler request)))
+                        ([request respond raise]
+                         (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
 ```
 
 The latter has 50% less code, is easier to reason about and is much faster.

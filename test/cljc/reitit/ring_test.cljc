@@ -1,7 +1,7 @@
 (ns reitit.ring-test
   (:require [clojure.test :refer [deftest testing is]]
             [clojure.set :as set]
-            [reitit.ring.middleware :as middleware]
+            [reitit.middleware :as middleware]
             [reitit.ring :as ring]
             [reitit.core :as r])
   #?(:clj

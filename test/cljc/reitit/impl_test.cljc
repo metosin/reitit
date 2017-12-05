@@ -7,3 +7,6 @@
          (into [] (impl/segments "/api/ipa/beer/craft/bisse"))))
   (is (= ["" "a" "" "b" "" "c" ""]
          (into [] (impl/segments "/a//b//c/")))))
+
+(deftest strip-nils-test
+  (is (= {:a 1, :c false} (impl/strip-nils {:a 1, :b nil, :c false}))))

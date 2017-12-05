@@ -11,7 +11,7 @@ Reitit defines middleware as data:
 
 ## Middleware as data
 
-All values in the `:middleware` vector in the route data are coerced into `reitit.ring.middleware/Middleware` Records with using the `reitit.ring.middleware/IntoMiddleware` Protocol. By default, functions, maps and `Middleware` records are allowed.
+All values in the `:middleware` vector in the route data are coerced into `reitit.middleware/Middleware` Records with using the `reitit.middleware/IntoMiddleware` Protocol. By default, functions, maps and `Middleware` records are allowed.
 
 Records can have arbitrary keys, but the following keys have a special purpose:
 
@@ -19,7 +19,7 @@ Records can have arbitrary keys, but the following keys have a special purpose:
 | ---------------|-------------|
 | `:name`        | Name of the middleware as a qualified keyword (optional)
 | `:wrap`        | The actual middleware function of `handler & args => request => response`
-| `:gen-wrap`    | Middleware function generation function, see [compiling middleware](compiling_middleware.md).
+| `:compile`     | Middleware compilation function, see [compiling middleware](compiling_middleware.md).
 
 Middleware Records are accessible in their raw form in the compiled route results, thus available for inventories, creating api-docs etc.
 
@@ -40,7 +40,7 @@ The following produce identical middleware runtime function.
 ### Record
 
 ```clj
-(require '[reitit.ring.middleware :as middleware])
+(require '[reitit.middleware :as middleware])
 
 (def wrap2
   (middleware/create
@@ -89,7 +89,7 @@ Middleware can be optimized against an endpoint using [middleware compilation](c
 
 ## Transforming the middleware chain
 
-There is an extra option in ring-router (actually, in the undelaying middleware-router): `:reitit.ring.middleware/transform` to transform the middleware chain per endpoint. It sees the vector of compiled middleware and should return a new vector of middleware.
+There is an extra option in ring-router (actually, in the undelaying middleware-router): `:reitit.middleware/transform` to transform the middleware chain per endpoint. It sees the vector of compiled middleware and should return a new vector of middleware.
 
 #### Adding debug middleware between all other middleware
 

@@ -1,6 +1,6 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.ring.middleware :as middleware]
+            [reitit.middleware :as middleware]
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
@@ -82,7 +82,7 @@
                        :delete {:middleware [wrap-delete]
                                :handler delete-user}}]])
 
-  See router options from [[reitit.core/router]] and [[reitit.ring.middleware/router]]."
+  See router options from [[reitit.core/router]] and [[reitit.middleware/router]]."
   ([data]
    (router data nil))
   ([data opts]
