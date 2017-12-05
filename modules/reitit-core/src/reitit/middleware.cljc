@@ -13,7 +13,7 @@
   (when (and wrap compile)
     (throw
       (ex-info
-        (str "Middleware can't both :wrap and :compile defined " m) m)))
+        (str "Middleware can't have both :wrap and :compile defined " m) m)))
   (map->Middleware m))
 
 (extend-protocol IntoMiddleware

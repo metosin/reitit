@@ -13,7 +13,7 @@
     (testing ":wrap & :compile are exclusive"
       (is (thrown-with-msg?
             ExceptionInfo
-            #"Middleware can't both :wrap and :compile defined"
+            #"Middleware can't have both :wrap and :compile defined"
             (middleware/create
               {:name ::test
                :wrap identity
@@ -80,6 +80,11 @@
                              (swap! calls inc)
                              (fn [request]
                                [data value request])))}
+            mw3 {:compile (fn [data _]
+                            (swap! calls inc)
+                            {:compile (fn [data _]
+                                        (swap! calls inc)
+                                        mw)})}
             ->app (fn [ast handler]
                     (middleware/compile-handler
                       (middleware/expand ast :data {})
@@ -98,6 +103,13 @@
             (dotimes [_ 10]
               (is (= [:data :value :request] (app :request)))
               (is (= 2 @calls)))))
+
+        (testing "deeply compiled Middleware"
+          (reset! calls 0)
+          (let [app (->app [[(middleware/create mw3) :value]] identity)]
+            (dotimes [_ 10]
+              (is (= [:data :value :request] (app :request)))
+              (is (= 4 @calls)))))
 
         (testing "nil unmounts the middleware"
           (let [app (->app [{:compile (constantly nil)}
