@@ -113,7 +113,7 @@
 
         (testing "too deeply compiled Middleware fails"
           (binding [middleware/*max-compile-depth* 2]
-            (is (thrown? Exception (->app [[(middleware/create mw3) :value]] identity)))))
+            (is (thrown? ExceptionInfo (->app [[(middleware/create mw3) :value]] identity)))))
 
         (testing "nil unmounts the middleware"
           (let [app (->app [{:compile (constantly nil)}
