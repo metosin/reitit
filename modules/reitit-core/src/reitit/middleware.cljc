@@ -16,6 +16,8 @@
         (str "Middleware can't have both :wrap and :compile defined " m) m)))
   (map->Middleware m))
 
+(def ^:dynamic *max-compile-depth* 10)
+
 (extend-protocol IntoMiddleware
 
   #?(:clj  clojure.lang.APersistentVector
@@ -41,14 +43,21 @@
     (into-middleware (create this) data opts))
 
   Middleware
-  (into-middleware [{:keys [wrap compile] :as this} data opts]
+  (into-middleware [{:keys [compile] :as this} data opts]
     (if-not compile
       this
-      (if-let [middeware (into-middleware (compile data opts) data opts)]
-        (map->Middleware
-          (merge
-            (dissoc this :create)
-            (impl/strip-nils middeware))))))
+      (let [compiled (::compiled opts 0)
+            opts (assoc opts ::compiled (inc compiled))]
+        (when (>= compiled *max-compile-depth*)
+          (throw
+            (ex-info
+              (str "Too deep middleware compilation - " compiled)
+              {:this this, :data data, :opts opts})))
+        (if-let [middeware (into-middleware (compile data opts) data opts)]
+          (map->Middleware
+            (merge
+              (dissoc this :create)
+              (impl/strip-nils middeware)))))))
 
   nil
   (into-middleware [_ _ _]))
