@@ -1,10 +1,10 @@
-(ns reitit.ring.coercion.spec
+(ns reitit.coercion.spec
   (:require [clojure.spec.alpha :as s]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds]
             [spec-tools.conform :as conform]
             [spec-tools.swagger.core :as swagger]
-            [reitit.ring.coercion.protocol :as protocol])
+            [reitit.coercion :as coercion])
   #?(:clj
      (:import (spec_tools.core Spec))))
 
@@ -54,51 +54,51 @@
 
 (defrecord SpecCoercion [name conforming coerce-response?]
 
-  protocol/Coercion
-  (get-name [_] name)
+  coercion/Coercion
+  (-get-name [_] name)
 
-  (get-apidocs [this _ {:keys [parameters responses] :as info}]
+  (-get-apidocs [this _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
             parameters (assoc
                          ::swagger/parameters
                          (into
                            (empty parameters)
                            (for [[k v] parameters]
-                             [k (protocol/compile-model this v nil)])))
+                             [k (coercion/-compile-model this v nil)])))
             responses (assoc
                         ::swagger/responses
                         (into
                           (empty responses)
                           (for [[k response] responses]
-                            [k (update response :schema #(protocol/compile-model this % nil))])))))
+                            [k (update response :schema #(coercion/-compile-model this % nil))])))))
 
-  (compile-model [_ model _]
+  (-compile-model [_ model _]
     (into-spec model (or name (gensym "spec"))))
 
-  (open-model [_ spec] spec)
+  (-open-model [_ spec] spec)
 
-  (encode-error [_ error]
+  (-encode-error [_ error]
     (-> error
         (update :spec (comp str s/form))
         (update :problems (partial mapv #(update % :pred stringify-pred)))))
 
-  (request-coercer [this type spec]
-    (let [spec (protocol/compile-model this spec nil)
+  (-request-coercer [this type spec]
+    (let [spec (coercion/-compile-model this spec nil)
           {:keys [formats default]} (conforming type)]
       (fn [value format]
         (if-let [conforming (or (get formats format) default)]
           (let [conformed (st/conform spec value conforming)]
             (if (s/invalid? conformed)
               (let [problems (st/explain-data spec value conforming)]
-                (protocol/map->CoercionError
+                (coercion/map->CoercionError
                   {:spec spec
                    :problems (::s/problems problems)}))
               (s/unform spec conformed)))
           value))))
 
-  (response-coercer [this spec]
+  (-response-coercer [this spec]
     (if (coerce-response? spec)
-      (protocol/request-coercer this :response spec))))
+      (coercion/-request-coercer this :response spec))))
 
 (def default-options
   {:coerce-response? coerce-response?

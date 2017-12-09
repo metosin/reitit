@@ -1,6 +1,6 @@
 (ns example.schema
   (:require [schema.core :as s]
-            [reitit.ring.coercion :as coercion]
+            [reitit.ring.coercion-middleware :as coercion]
             [reitit.ring.coercion.schema :as schema-coercion]))
 
 (def routes

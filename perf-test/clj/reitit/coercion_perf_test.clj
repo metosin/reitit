@@ -4,18 +4,16 @@
             [reitit.perf-utils :refer :all]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
-
-            [reitit.core :as reitit]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as coercion]
-            [reitit.ring.coercion.spec :as spec]
-            [reitit.ring.coercion.schema :as schema]
-            [reitit.ring.coercion.protocol :as protocol]
             [spec-tools.data-spec :as ds]
             [muuntaja.middleware :as mm]
             [muuntaja.core :as m]
             [muuntaja.format.jsonista :as jsonista-format]
             [jsonista.core :as j]
+            [reitit.coercion-middleware :as coercion-middleware]
+            [reitit.coercion.spec :as spec]
+            [reitit.coercion.schema :as schema]
+            [reitit.coercion :as coercion]
+            [reitit.ring :as ring]
             [reitit.core :as r])
   (:import (java.io ByteArrayInputStream)))
 
@@ -41,14 +39,14 @@
     (s/def ::k (s/keys :req-un [::x ::y]))
 
     (let [spec (spec/into-spec {:x int?, :y int?} ::jeah)
-          coercers (#'coercion/request-coercers spec/coercion {:body spec})
+          coercers (#'coercion-middleware/request-coercers spec/coercion {:body spec})
           params {:x "1", :y "2"}
           request {:body-params {:x "1", :y "2"}}]
 
       ;; 4600ns
       (bench!
         "coerce-parameters"
-        (#'coercion/coerce-parameters coercers request))
+        (#'coercion-middleware/coerce-parameters coercers request))
 
       ;; 2700ns
       (bench!
@@ -85,14 +83,14 @@
             params))))))
 
 (defrecord NoOpCoercion []
-  protocol/Coercion
-  (get-name [_] :no-op)
-  (get-apidocs [_ _ {:keys [parameters responses] :as info}])
-  (compile-model [_ model _] model)
-  (open-model [_ spec] spec)
-  (encode-error [_ error] error)
-  (request-coercer [_ type spec] (fn [value format] value))
-  (response-coercer [this spec] (protocol/request-coercer this :response spec)))
+  coercion/Coercion
+  (-get-name [_] :no-op)
+  (-get-apidocs [_ _ {:keys [parameters responses] :as info}])
+  (-compile-model [_ model _] model)
+  (-open-model [_ spec] spec)
+  (-encode-error [_ error] error)
+  (-request-coercer [_ type spec] (fn [value format] value))
+  (-response-coercer [this spec] (protocol/request-coercer this :response spec)))
 
 (comment
   (doseq [coercion [nil (->NoOpCoercion) spec/coercion]]
@@ -107,24 +105,24 @@
           app (ring/ring-handler
                 (ring/router
                   routes
-                  {:data {:middleware [coercion/coerce-request-middleware]
+                  {:data {:middleware [coercion-middleware/coerce-request-middleware]
                           :coercion coercion}}))
           app2 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/coerce-request-middleware]
+                   {:data {:middleware [coercion-middleware/coerce-request-middleware]
                            :coercion coercion}}))
           app3 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/coerce-request-middleware
-                                        coercion/wrap-coerce-response]
+                   {:data {:middleware [coercion-middleware/coerce-request-middleware
+                                        coercion-middleware/wrap-coerce-response]
                            :coercion coercion}}))
           app4 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion/coerce-request-middleware
-                                        coercion/coerce-response-middleware]
+                   {:data {:middleware [coercion-middleware/coerce-request-middleware
+                                        coercion-middleware/coerce-response-middleware]
                            :coercion coercion}}))
           req {:request-method :get
                :uri "/api/ping"
@@ -161,8 +159,8 @@
                      :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                       {:status 200
                                        :body {:total (+ x y)}})}}]]
-          {:data {:middleware [coercion/coerce-request-middleware
-                               coercion/coerce-response-middleware]
+          {:data {:middleware [coercion-middleware/coerce-request-middleware
+                               coercion-middleware/coerce-response-middleware]
                   :coercion spec/coercion}})))
 
     (app
@@ -205,8 +203,8 @@
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
                 {:data {:middleware [[mm/wrap-format m]
-                                     coercion/coerce-request-middleware
-                                     coercion/coerce-response-middleware]
+                                     coercion-middleware/coerce-request-middleware
+                                     coercion-middleware/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -228,8 +226,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/coerce-request-middleware
-                                     coercion/coerce-response-middleware]
+                {:data {:middleware [coercion-middleware/coerce-request-middleware
+                                     coercion-middleware/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -251,8 +249,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/coerce-request-middleware
-                                     coercion/coerce-response-middleware]
+                {:data {:middleware [coercion-middleware/coerce-request-middleware
+                                     coercion-middleware/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -279,8 +277,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion/coerce-request-middleware
-                                     coercion/coerce-response-middleware]
+                {:data {:middleware [coercion-middleware/coerce-request-middleware
+                                     coercion-middleware/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"

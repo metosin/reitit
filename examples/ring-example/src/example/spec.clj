@@ -1,7 +1,7 @@
 (ns example.spec
   (:require [clojure.spec.alpha :as s]
             [spec-tools.spec :as spec]
-            [reitit.ring.coercion :as coercion]
+            [reitit.ring.coercion-middleware :as coercion]
             [reitit.ring.coercion.spec :as spec-coercion]))
 
 ;; wrap into Spec Records to enable runtime conforming

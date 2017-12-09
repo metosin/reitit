@@ -1,5 +1,5 @@
 (ns example.schema
-  (:require [reitit.ring.coercion :as coercion]
+  (:require [reitit.ring.coercion-middleware :as coercion]
             [reitit.ring.coercion.schema :as schema-coercion]
             [example.server :as server]))
 

@@ -51,7 +51,7 @@
         (when (>= compiled *max-compile-depth*)
           (throw
             (ex-info
-              (str "Too deep middleware compilation - " compiled)
+              (str "Too deep Middleware compilation - " compiled)
               {:this this, :data data, :opts opts})))
         (if-let [middeware (into-middleware (compile data opts) data opts)]
           (map->Middleware

@@ -93,8 +93,8 @@
   "httpRouter"
 
   ;;  77ns
-  ;; 730ns
-  ;; 960ns
+  ;; 700ns
+  ;; 890ns
   (title "reitit-ring")
   (let [r1 (map->Request {:request-method :get, :uri "/1/users"})
         r2 (map->Request {:request-method :get, :uri "/1/classes/go"})

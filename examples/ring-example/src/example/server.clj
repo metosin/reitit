@@ -3,7 +3,7 @@
             [ring.middleware.params]
             [muuntaja.middleware]
             [reitit.ring :as ring]
-            [reitit.ring.coercion :as coercion]
+            [reitit.ring.coercion-middleware :as coercion]
             [example.dspec]
             [example.schema]
             [example.spec]))
