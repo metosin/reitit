@@ -234,19 +234,3 @@
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
       (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
-
-(require '[reitit.coercion :as coercion])
-(require '[reitit.coercion.spec :as spec])
-
-(def r
-  (r/router
-    ["/user/:user-id" {:name ::user
-                       :parameters {:path {:user-id int?}}}]
-    {:compile coercion/compile-request-coercers
-     :data {:coercion spec/coercion}}))
-
-(def m
-  (r/match-by-path r "/user/123"))
-
-(let [m (r/match-by-path r "/user/123")]
-  (coercion/coerce-request (:result m) {:path-params (:params m)}))
