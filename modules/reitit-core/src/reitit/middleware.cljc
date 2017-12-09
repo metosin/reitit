@@ -9,7 +9,7 @@
 (defrecord Middleware [name wrap])
 (defrecord Endpoint [data handler middleware])
 
-(defn create [{:keys [name wrap compile] :as m}]
+(defn create [{:keys [wrap compile] :as m}]
   (when (and wrap compile)
     (throw
       (ex-info
