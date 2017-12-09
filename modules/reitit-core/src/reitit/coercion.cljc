@@ -132,3 +132,6 @@
 (defn compile-request-coercers [[p {:keys [parameters coercion]}] opts]
   (if (and parameters coercion)
     (request-coercers coercion parameters opts)))
+
+(defn coerce! [match]
+  (coerce-request (:result match) {:path-params (:params match)}))
