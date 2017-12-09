@@ -3,7 +3,7 @@
             [ring.middleware.params]
             [muuntaja.middleware]
             [reitit.ring :as ring]
-            [reitit.ring.coercion-middleware :as coercion]
+            [reitit.ring.coercion-middleware :as coercion-middleware]
             [example.dspec]
             [example.schema]
             [example.spec]))
@@ -18,9 +18,9 @@
        example.spec/routes]
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
-                           coercion/coerce-exceptions-middleware
-                           coercion/coerce-request-middleware
-                           coercion/coerce-response-middleware]}})))
+                           coercion-middleware/coerce-exceptions-middleware
+                           coercion-middleware/coerce-request-middleware
+                           coercion-middleware/coerce-response-middleware]}})))
 
 (defn restart []
   (swap! server (fn [x]

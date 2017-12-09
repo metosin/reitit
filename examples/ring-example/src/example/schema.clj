@@ -1,12 +1,10 @@
 (ns example.schema
   (:require [schema.core :as s]
-            [reitit.ring.coercion-middleware :as coercion]
-            [reitit.ring.coercion.schema :as schema-coercion]))
+            [reitit.coercion.schema :as schema-coercion]))
 
 (def routes
-  ["/schema"
+  ["/schema" {:coercion schema-coercion/coercion}
    ["/plus" {:name ::plus
-             :coercion schema-coercion/coercion
              :responses {200 {:schema {:total s/Int}}}
              :get {:summary "plus with query-params"
                    :parameters {:query {:x s/Int, :y s/Int}}
