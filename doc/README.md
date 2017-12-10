@@ -7,7 +7,7 @@
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
 * [Ring-router](./ring/ring.html) with [data-driven middleware](./ring/data_driven_middleware.html)
-* [Pluggable coercion](./ring/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](./coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Extendable
 * Modular
 * [Fast](performance.md)
