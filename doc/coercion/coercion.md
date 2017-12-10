@@ -1,6 +1,6 @@
 # Coercion Explained
 
-Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into separate steps.
+Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into two separate steps.
 
 By default, all wildcard and catch-all parameters are parsed as Strings:
 
@@ -12,7 +12,7 @@ By default, all wildcard and catch-all parameters are parsed as Strings:
     ["/:company/users/:user-id" ::user-view]))
 ```
 
-Here's a match with the String `:params`:
+Match with the String `:params`:
 
 ```clj
 (r/match-by-path r "/metosin/users/123")
@@ -23,7 +23,7 @@ Here's a match with the String `:params`:
 ;        :path "/metosin/users/123"}
 ```
 
-To enable parameter coercion, we need to do few things:
+To enable parameter coercion, the following things need to be done:
 
 1. Define a `Coercion` for the routes
 2. Define types for the parameters
@@ -34,18 +34,18 @@ To enable parameter coercion, we need to do few things:
 
 `reitit.coercion/Coercion` is a protocol defining how types are defined, coerced and inventoried.
 
-Reitit has the following coercion modules:
+Reitit ships with the following coercion modules:
 
 * `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema).
 * `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs).
 
-Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementation into a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
+Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
 
 ## Defining parameters
 
-Route parameters can be defined via route data `:parameters`. It has keys for different type of parameters: `:query`, `:body`, `:form`, `:header` and `:path`. Syntax for the actual parameters is defined by the `Coercion`.
+Route parameters can be defined via route data `:parameters`. It has keys for different type of parameters: `:query`, `:body`, `:form`, `:header` and `:path`. Syntax for the actual parameters depends on the `Coercion` implementation.
 
-Here's the example with Schema path-parameters:
+Example with Schema path-parameters:
 
 ```clj
 (require '[reitit.coercion.schema])
@@ -59,7 +59,7 @@ Here's the example with Schema path-parameters:
                                                      :user-id s/Int}}}]))
 ```
 
-Routing again:
+A Match:
 
 ```clj
 (r/match-by-path r "/metosin/users/123")
@@ -73,15 +73,17 @@ Routing again:
 ;        :path "/metosin/users/123"}
 ```
 
-Coercion was not applied. Why? All we did was just added more data to the route and the routing functions are just responsible for routing, not coercion.
+Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we haven't applied the coercion yet. We need to apply it ourselves after the successfull routing.
 
 But now we should have enough data on the match to apply the coercion.
 
 ## Compiling coercers
 
-Before the actual coercion, we need to compile the coercers against the route data. This is because compiled coercers yield much better performance. A separate step makes thing explicit and non-magical. Compiling could be done via a Middleware, Interceptor but we can also do it at Router-level, effecting all routes.
+Before the actual coercion, we need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.
 
-There is a helper function for the coercer compiling in `reitit.coercion`:
+Compiling can be done via a Middleware, Interceptor or a Router. We apply it now at router-level, effecting all routes (with `:parameters` and `:coercion` defined).
+
+There is a helper function `reitit.coercion/compile-request-coercers` just for this:
 
 ```clj
 (require '[reitit.coercion :as coercion])
@@ -115,7 +117,7 @@ The compiler added a `:result` key into the match (done just once, at router cre
 
 ## Applying coercion
 
-We can use a helper function to do the actual coercion, based on a `Match`:
+We can use a helper function `reitit.coercion/coerce!` to do the actual coercion, based on a `Match`:
 
 ```clj
 (coercion/coerce!
@@ -123,7 +125,7 @@ We can use a helper function to do the actual coercion, based on a `Match`:
 ; {:path {:company "metosin", :user-id 123}}
 ```
 
-If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo is thrown, with descriptive data about the actual error:
+We get the coerced paremeters back. If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo is thrown, with data about the actual error:
 
 ```clj
 (coercion/coerce!
@@ -136,7 +138,7 @@ If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo
 
 ## Full example
 
-Here's an full example of routing + coercion.
+Here's an full example for doing both routing and coercion with Reitit:
 
 ```clj
 (require '[reitit.coercion.schema])
@@ -151,11 +153,11 @@ Here's an full example of routing + coercion.
                                                      :user-id s/Int}}}]
     {:compile coercion/compile-request-coercers}))
 
-(defn route-and-coerce! [path]
+(defn match-by-path-and-coerce! [path]
   (if-let [match (r/match-by-path router path)]
     (assoc match :parameters (coercion/coerce! match))))
 
-(route-and-coerce! "/metosin/users/123")
+(match-by-path-and-coerce! "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
 ;               :coercion #SchemaCoercion{...}
@@ -166,7 +168,7 @@ Here's an full example of routing + coercion.
 ;        :parameters {:path {:company "metosin", :user-id 123}}
 ;        :path "/metosin/users/123"}
 
-(route-and-coerce! "/metosin/users/ikitommi")
+(match-by-path-and-coerce! "/metosin/users/ikitommi")
 ; => ExceptionInfo Request coercion failed...
 ```
 

@@ -15,7 +15,7 @@
                                                      :user-id int?}}}]
     {:compile coercion/compile-request-coercers}))
 
-(defn route-and-coerce! [path]
+(defn match-by-path-and-coerce! [path]
   (if-let [match (r/match-by-path router path)]
     (assoc match :parameters (coercion/coerce! match))))
 ```
@@ -23,7 +23,7 @@
 Successful coercion:
 
 ```clj
-(route-and-coerce! "/metosin/users/123")
+(match-by-path-and-coerce! "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
 ;               :coercion #SpecCoercion{...}
@@ -38,6 +38,6 @@ Successful coercion:
 Failing coercion:
 
 ```clj
-(route-and-coerce! "/metosin/users/ikitommi")
+(match-by-path-and-coerce! "/metosin/users/ikitommi")
 ; => ExceptionInfo Request coercion failed...
 ```
