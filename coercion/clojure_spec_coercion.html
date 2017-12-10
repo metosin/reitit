@@ -530,12 +530,12 @@
                                  <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:path</span> <span class="hljs-symbol">::path-params</span>}}]
     {<span class="hljs-symbol">:compile</span> coercion/compile-request-coercers}))
 
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> route-and-coerce! [path]
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> match-by-path-and-coerce! [path]
   (<span class="hljs-name"><span class="hljs-builtin-name">if-let</span></span> [match (<span class="hljs-name">r/match-by-path</span> router path)]
     (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> match <span class="hljs-symbol">:parameters</span> (<span class="hljs-name">coercion/coerce!</span> match))))
 </code></pre>
 <p>Successful coercion:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
+<pre><code class="lang-clj">(<span class="hljs-name">match-by-path-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view,</span>
 <span class="hljs-comment">;               :coercion #SpecCoercion{...}</span>
@@ -546,7 +546,7 @@
 <span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 </code></pre>
 <p>Failing coercion:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
+<pre><code class="lang-clj">(<span class="hljs-name">match-by-path-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
 <span class="hljs-comment">; =&gt; ExceptionInfo Request coercion failed...</span>
 </code></pre>
 
@@ -592,7 +592,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"1.3.3","depth":2,"next":{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2017-12-10T16:10:44.910Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T16:11:20.831Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"1.3.3","depth":2,"next":{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2017-12-10T19:48:19.237Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T19:48:54.577Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

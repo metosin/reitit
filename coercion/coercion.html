@@ -510,7 +510,7 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="coercion-explained">Coercion Explained</h1>
-<p>Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into separate steps.</p>
+<p>Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into two separate steps.</p>
 <p>By default, all wildcard and catch-all parameters are parsed as Strings:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
@@ -518,7 +518,7 @@
   (<span class="hljs-name">r/router</span>
     [<span class="hljs-string">&quot;/:company/users/:user-id&quot;</span> <span class="hljs-symbol">::user-view</span>]))
 </code></pre>
-<p>Here&apos;s a match with the String <code>:params</code>:</p>
+<p>Match with the String <code>:params</code>:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> r <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view},</span>
@@ -526,7 +526,7 @@
 <span class="hljs-comment">;        :params {:company &quot;metosin&quot;, :user-id &quot;123&quot;},</span>
 <span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 </code></pre>
-<p>To enable parameter coercion, we need to do few things:</p>
+<p>To enable parameter coercion, the following things need to be done:</p>
 <ol>
 <li>Define a <code>Coercion</code> for the routes</li>
 <li>Define types for the parameters</li>
@@ -535,15 +535,15 @@
 </ol>
 <h2 id="define-coercion">Define Coercion</h2>
 <p><code>reitit.coercion/Coercion</code> is a protocol defining how types are defined, coerced and inventoried.</p>
-<p>Reitit has the following coercion modules:</p>
+<p>Reitit ships with the following coercion modules:</p>
 <ul>
 <li><code>reitit.coercion.schema/coercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a>.</li>
 <li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a>.</li>
 </ul>
-<p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementation into a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
+<p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementations within a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
 <h2 id="defining-parameters">Defining parameters</h2>
-<p>Route parameters can be defined via route data <code>:parameters</code>. It has keys for different type of parameters: <code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>. Syntax for the actual parameters is defined by the <code>Coercion</code>.</p>
-<p>Here&apos;s the example with Schema path-parameters:</p>
+<p>Route parameters can be defined via route data <code>:parameters</code>. It has keys for different type of parameters: <code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>. Syntax for the actual parameters depends on the <code>Coercion</code> implementation.</p>
+<p>Example with Schema path-parameters:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
 
@@ -554,7 +554,7 @@
                                  <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:path</span> {<span class="hljs-symbol">:company</span> s/Str
                                                      <span class="hljs-symbol">:user-id</span> s/Int}}}]))
 </code></pre>
-<p>Routing again:</p>
+<p>A Match:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> r <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view,</span>
@@ -565,11 +565,12 @@
 <span class="hljs-comment">;        :params {:company &quot;metosin&quot;, :user-id &quot;123&quot;},</span>
 <span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 </code></pre>
-<p>Coercion was not applied. Why? All we did was just added more data to the route and the routing functions are just responsible for routing, not coercion.</p>
+<p>Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we haven&apos;t applied the coercion yet. We need to apply it ourselves after the successfull routing.</p>
 <p>But now we should have enough data on the match to apply the coercion.</p>
 <h2 id="compiling-coercers">Compiling coercers</h2>
-<p>Before the actual coercion, we need to compile the coercers against the route data. This is because compiled coercers yield much better performance. A separate step makes thing explicit and non-magical. Compiling could be done via a Middleware, Interceptor but we can also do it at Router-level, effecting all routes.</p>
-<p>There is a helper function for the coercer compiling in <code>reitit.coercion</code>:</p>
+<p>Before the actual coercion, we need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.</p>
+<p>Compiling can be done via a Middleware, Interceptor or a Router. We apply it now at router-level, effecting all routes (with <code>:parameters</code> and <code>:coercion</code> defined).</p>
+<p>There is a helper function <code>reitit.coercion/compile-request-coercers</code> just for this:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion <span class="hljs-symbol">:as</span> coercion])
 (<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
@@ -595,12 +596,12 @@
 </code></pre>
 <p>The compiler added a <code>:result</code> key into the match (done just once, at router creation time), which holds the compiled coercers. We are almost done.</p>
 <h2 id="applying-coercion">Applying coercion</h2>
-<p>We can use a helper function to do the actual coercion, based on a <code>Match</code>:</p>
+<p>We can use a helper function <code>reitit.coercion/coerce!</code> to do the actual coercion, based on a <code>Match</code>:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">coercion/coerce!</span>
   (<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/metosin/users/123&quot;</span>))
 <span class="hljs-comment">; {:path {:company &quot;metosin&quot;, :user-id 123}}</span>
 </code></pre>
-<p>If a coercion fails, a typed (<code>:reitit.coercion/request-coercion</code>) ExceptionInfo is thrown, with descriptive data about the actual error:</p>
+<p>We get the coerced paremeters back. If a coercion fails, a typed (<code>:reitit.coercion/request-coercion</code>) ExceptionInfo is thrown, with data about the actual error:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">coercion/coerce!</span>
   (<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>))
 <span class="hljs-comment">; =&gt; ExceptionInfo Request coercion failed:</span>
@@ -609,7 +610,7 @@
 <span class="hljs-comment">; clojure.core/ex-info (core.clj:4739)</span>
 </code></pre>
 <h2 id="full-example">Full example</h2>
-<p>Here&apos;s an full example of routing + coercion.</p>
+<p>Here&apos;s an full example for doing both routing and coercion with Reitit:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[reitit.coercion <span class="hljs-symbol">:as</span> coercion])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
@@ -622,11 +623,11 @@
                                                      <span class="hljs-symbol">:user-id</span> s/Int}}}]
     {<span class="hljs-symbol">:compile</span> coercion/compile-request-coercers}))
 
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> route-and-coerce! [path]
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> match-by-path-and-coerce! [path]
   (<span class="hljs-name"><span class="hljs-builtin-name">if-let</span></span> [match (<span class="hljs-name">r/match-by-path</span> router path)]
     (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> match <span class="hljs-symbol">:parameters</span> (<span class="hljs-name">coercion/coerce!</span> match))))
 
-(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
+(<span class="hljs-name">match-by-path-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view,</span>
 <span class="hljs-comment">;               :coercion #SchemaCoercion{...}</span>
@@ -637,7 +638,7 @@
 <span class="hljs-comment">;        :parameters {:path {:company &quot;metosin&quot;, :user-id 123}}</span>
 <span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 
-(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
+(<span class="hljs-name">match-by-path-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
 <span class="hljs-comment">; =&gt; ExceptionInfo Request coercion failed...</span>
 </code></pre>
 <h2 id="ring-coercion">Ring Coercion</h2>
@@ -691,7 +692,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2017-12-10T16:10:44.910Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T16:11:20.831Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2017-12-10T19:48:19.237Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T19:48:54.577Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
