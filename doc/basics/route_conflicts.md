@@ -1,4 +1,4 @@
-# Route conflicts
+# Route Conflicts
 
 Many routing libraries allow multiple matches for a single path lookup. Usually, the first match is used and the rest are effecively unreachanle. This is not good, especially if route tree is merged from multiple sources.
 

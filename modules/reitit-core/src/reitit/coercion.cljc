@@ -125,13 +125,31 @@
          [status (response-coercer coercion schema opts)])
        (into {})))
 
+(defn- coercers-not-compiled! [match]
+  (throw
+    (ex-info
+      (str
+        "Match didn't have a compiled coercion attached.\n"
+        "Maybe you should have defined a router option:\n"
+        "{:compile reitit.coercion/compile-request-coercers}\n")
+      {:match match})))
+
 ;;
 ;; integration
 ;;
 
-(defn compile-request-coercers [[p {:keys [parameters coercion]}] opts]
+(defn compile-request-coercers
+  "A router :compile implementation which reads the `:parameters`
+  and `:coercion` data to create compiled coercers into Match under
+  `:result. A pre-requisite to use [[coerce!]]."
+  [[_ {:keys [parameters coercion]}] opts]
   (if (and parameters coercion)
     (request-coercers coercion parameters opts)))
 
-(defn coerce! [match]
-  (coerce-request (:result match) {:path-params (:params match)}))
+(defn coerce!
+  "Returns a map of coerced input parameters using pre-compiled
+  coercers under `:result` (provided by [[compile-request-coercers]].
+  If coercion or parameters are not defined, return `nil`"
+  [match]
+  (if-let [result (:result match)]
+    (coerce-request result {:path-params (:params match)})))

@@ -1,4 +1,4 @@
-# Dynamic extensions
+# Dynamic Extensions
 
 `ring-handler` injects the `Match` into a request and it can be extracted at runtime with `reitit.ring/get-match`. This can be used to build ad-hoc extensions to the system.
 

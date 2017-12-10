@@ -17,6 +17,10 @@
              ["/spec" {:coercion spec/coercion}
               ["/:number/:keyword" {:name ::user
                                     :parameters {:path {:number int?
+                                                        :keyword keyword?}}}]]
+             ["/none"
+              ["/:number/:keyword" {:name ::user
+                                    :parameters {:path {:number int?
                                                         :keyword keyword?}}}]]]
             {:compile coercion/compile-request-coercers})]
 
@@ -36,5 +40,12 @@
                  (coercion/coerce! m)))))
       (testing "throws with invalid input"
         (let [m (r/match-by-path r "/spec/kikka/abba")]
-          (is (thrown? ExceptionInfo (coercion/coerce! m))))))))
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))))
+
+    (testing "no coercion defined"
+      (testing "doesn't coerce"
+        (let [m (r/match-by-path r "/none/1/abba")]
+          (is (= nil (coercion/coerce! m))))
+        (let [m (r/match-by-path r "/none/kikka/abba")]
+          (is (= nil (coercion/coerce! m))))))))
 

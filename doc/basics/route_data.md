@@ -1,4 +1,4 @@
-# Route data
+# Route Data
 
 Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. This enables  co-existence of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
 
