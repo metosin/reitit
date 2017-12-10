@@ -1,12 +1,12 @@
-(ns reitit.ring.coercion.schema
-  (:require [schema.core :as s]
+(ns reitit.coercion.schema
+  (:require [clojure.walk :as walk]
+            [schema.core :as s]
             [schema-tools.core :as st]
             [schema.coerce :as sc]
             [schema.utils :as su]
             [schema-tools.coerce :as stc]
             [spec-tools.swagger.core :as swagger]
-            [clojure.walk :as walk]
-            [reitit.ring.coercion.protocol :as protocol]))
+            [reitit.coercion :as coercion]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)
@@ -35,24 +35,24 @@
 
 (defrecord SchemaCoercion [name matchers coerce-response?]
 
-  protocol/Coercion
-  (get-name [_] name)
+  coercion/Coercion
+  (-get-name [_] name)
 
-  (get-apidocs [_ _ {:keys [parameters responses] :as info}]
+  (-get-apidocs [_ _ {:keys [parameters responses] :as info}]
     (cond-> (dissoc info :parameters :responses)
             parameters (assoc ::swagger/parameters parameters)
             responses (assoc ::swagger/responses responses)))
 
-  (compile-model [_ model _] model)
+  (-compile-model [_ model _] model)
 
-  (open-model [_ schema] (st/open-schema schema))
+  (-open-model [_ schema] (st/open-schema schema))
 
-  (encode-error [_ error]
+  (-encode-error [_ error]
     (-> error
         (update :schema stringify)
         (update :errors stringify)))
 
-  (request-coercer [_ type schema]
+  (-request-coercer [_ type schema]
     (let [{:keys [formats default]} (matchers type)
           coercers (->> (for [m (conj (vals formats) default)]
                           [m (sc/coercer schema m)])
@@ -62,15 +62,15 @@
           (let [coercer (coercers matcher)
                 coerced (coercer value)]
             (if-let [error (su/error-val coerced)]
-              (protocol/map->CoercionError
+              (coercion/map->CoercionError
                 {:schema schema
                  :errors error})
               coerced))
           value))))
 
-  (response-coercer [this schema]
+  (-response-coercer [this schema]
     (if (coerce-response? schema)
-      (protocol/request-coercer this :response schema))))
+      (coercion/-request-coercer this :response schema))))
 
 (def default-options
   {:coerce-response? coerce-response?

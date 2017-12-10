@@ -1,11 +1,11 @@
 # Pluggable Coercion
 
-Reitit provides pluggable parameter coercion via `reitit.ring.coercion.protocol/Coercion` protocol, originally introduced in [compojure-api](https://clojars.org/metosin/compojure-api).
+Reitit provides pluggable parameter coercion via `reitit.coercion/Coercion` protocol, originally introduced in [compojure-api](https://clojars.org/metosin/compojure-api).
 
 Reitit ships with the following coercion modules:
 
-* `reitit.ring.coercion.schema/SchemaCoercion` for [plumatic schema](https://github.com/plumatic/schema).
-* `reitit.ring.coercion.spec/SpecCoercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs).
+* `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema).
+* `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs).
 
 ### Ring request and response coercion
 
@@ -16,19 +16,19 @@ To use `Coercion` with Ring, one needs to do the following:
   * `:responses` map, with response status codes as keys (or `:default` for "everything else") with maps with `:schema` and optionally `:description` as values.
 2. Set a `Coercion` implementation to route data under `:coercion`
 3. Mount request & response coercion middleware to the routes (can be done for all routes as the middleware are only mounted to routes which have the parameters &/ responses defined):
-  * `reitit.ring.coercion/coerce-request-middleware`
-  * `reitit.ring.coercion/coerce-response-middleware`
+  * `reitit.ring.coercion-middleware/coerce-request-middleware`
+  * `reitit.ring.coercion-middleware/coerce-response-middleware`
 
 If the request coercion succeeds, the coerced parameters are injected into request under `:parameters`.
 
-If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the `reitit.ring.coercion/coerce-exceptions-middleware` middleware
+If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the `reitit.ring.coercion-middleware/coerce-exceptions-middleware` middleware
 
 ### Example with Schema
 
 ```clj
 (require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion :as coercion])
-(require '[reitit.ring.coercion.schema :as schema])
+(require '[reitit.ring.coercion-middleware :as coercion-middleware])
+(require '[reitit.coercion.schema :as schema])
 (require '[schema.core :as s])
 
 (def app
@@ -36,13 +36,13 @@ If either request or response coercion fails, an descriptive error is thrown. To
     (ring/router
       ["/api"
        ["/ping" {:post {:parameters {:body {:x s/Int, :y s/Int}}
-                        :responses {200 {:schema {:total (s/constrained s/Int pos?}}}
+                        :responses {200 {:schema {:total (s/constrained s/Int pos?)}}}
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/coerce-exceptions-middleware
-                           coercion/coerce-request-middleware
-                           coercion/coerce-response-middleware]
+      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
+                           coercion-middleware/coerce-request-middleware
+                           coercion-middleware/coerce-response-middleware]
               :coercion schema/coercion}})))
 ```
 
@@ -65,7 +65,7 @@ Invalid request:
    :uri "/api/ping"
    :body-params {:x 1, :y "2"}})
 ; {:status 400,
-;  :body {:type :reitit.ring.coercion/request-coercion
+;  :body {:type :reitit.coercion/request-coercion
 ;         :coercion :schema
 ;         :in [:request :body-params]
 ;         :value {:x 1, :y "2"}
@@ -77,8 +77,8 @@ Invalid request:
 
 ```clj
 (require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion :as coercion])
-(require '[reitit.ring.coercion.spec :as spec])
+(require '[reitit.ring.coercion-middleware :as coercion-middleware])
+(require '[reitit.coercion.spec :as spec])
 
 (def app
   (ring/ring-handler
@@ -89,9 +89,9 @@ Invalid request:
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/coerce-exceptions-middleware
-                           coercion/coerce-request-middleware
-                           coercion/coerce-response-middleware]
+      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
+                           coercion-middleware/coerce-request-middleware
+                           coercion-middleware/coerce-response-middleware]
               :coercion spec/coercion}})))
 ```
 
@@ -132,8 +132,8 @@ Currently, `clojure.spec` [doesn't support runtime transformations via conformin
 
 ```clj
 (require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion :as coercion])
-(require '[reitit.ring.coercion.spec :as spec])
+(require '[reitit.ring.coercion-middleware :as coercion-middleware])
+(require '[reitit.coercion.spec :as spec])
 (require '[clojure.spec.alpha :as s])
 (require '[spec-tools.core :as st])
 
@@ -152,9 +152,9 @@ Currently, `clojure.spec` [doesn't support runtime transformations via conformin
                         :handler (fn [{{{:keys [x y]} :body} :parameters}]
                                    {:status 200
                                     :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion/coerce-exceptions-middleware
-                           coercion/coerce-request-middleware
-                           coercion/coerce-response-middleware]
+      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
+                           coercion-middleware/coerce-request-middleware
+                           coercion-middleware/coerce-response-middleware]
               :coercion spec/coercion}})))
 ```
 
@@ -194,16 +194,16 @@ Invalid request:
 Both Schema and Spec Coercion can be configured via options, see the source code for details.
 
 To plug in new validation engine, see the
-`reitit.ring.coercion.protocol/Coercion` protocol.
+`reitit.coercion/Coercion` protocol.
 
 ```clj
 (defprotocol Coercion
   "Pluggable coercion protocol"
-  (get-name [this] "Keyword name for the coercion")
-  (get-apidocs [this model data] "???")
-  (compile-model [this model name] "Compiles a coercion model")
-  (open-model [this model] "Returns a new map model which doesn't fail on extra keys")
-  (encode-error [this error] "Converts error in to a serializable format")
-  (request-coercer [this type model] "Returns a `value format => value` request coercion function")
-  (response-coercer [this model] "Returns a `value format => value` response coercion function"))
+  (-get-name [this] "Keyword name for the coercion")
+  (-get-apidocs [this model data] "???")
+  (-compile-model [this model name] "Compiles a coercion model")
+  (-open-model [this model] "Returns a new map model which doesn't fail on extra keys")
+  (-encode-error [this error] "Converts error in to a serializable format")
+  (-request-coercer [this type model] "Returns a `value format => value` request coercion function")
+  (-response-coercer [this model] "Returns a `value format => value` response coercion function"))
 ```

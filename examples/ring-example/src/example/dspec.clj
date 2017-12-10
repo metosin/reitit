@@ -1,11 +1,9 @@
 (ns example.dspec
-  (:require [reitit.ring.coercion :as coercion]
-            [reitit.ring.coercion.spec :as spec-coercion]))
+  (:require [reitit.coercion.spec :as spec-coercion]))
 
 (def routes
-  ["/dspec"
+  ["/dspec" {:coercion spec-coercion/coercion}
    ["/plus" {:name ::plus
-             :coercion spec-coercion/coercion
              :responses {200 {:schema {:total int?}}}
              :get {:summary "plus with query-params"
                    :parameters {:query {:x int?, :y int?}}

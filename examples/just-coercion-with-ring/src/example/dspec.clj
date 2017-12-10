@@ -1,6 +1,5 @@
 (ns example.dspec
-  (:require [reitit.ring.coercion :as coercion]
-            [reitit.ring.coercion.spec :as spec-coercion]
+  (:require [reitit.coercion.spec :as spec-coercion]
             [example.server :as server]))
 
 (defn handler [{{{:keys [x y]} :query} :parameters}]

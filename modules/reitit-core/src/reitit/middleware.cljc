@@ -9,7 +9,7 @@
 (defrecord Middleware [name wrap])
 (defrecord Endpoint [data handler middleware])
 
-(defn create [{:keys [name wrap compile] :as m}]
+(defn create [{:keys [wrap compile] :as m}]
   (when (and wrap compile)
     (throw
       (ex-info
@@ -51,7 +51,7 @@
         (when (>= compiled *max-compile-depth*)
           (throw
             (ex-info
-              (str "Too deep middleware compilation - " compiled)
+              (str "Too deep Middleware compilation - " compiled)
               {:this this, :data data, :opts opts})))
         (if-let [middeware (into-middleware (compile data opts) data opts)]
           (map->Middleware

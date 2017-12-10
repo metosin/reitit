@@ -1,147 +1,51 @@
 (ns reitit.coercion-test
   (:require [clojure.test :refer [deftest testing is]]
             [schema.core :as s]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as coercion]
-            [reitit.ring.coercion.spec :as spec]
-            [reitit.ring.coercion.schema :as schema])
+            [reitit.core :as r]
+            [reitit.coercion :as coercion]
+            [reitit.coercion.spec :as spec]
+            [reitit.coercion.schema :as schema])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
-(defn handler [{{{:keys [a]} :query
-                 {:keys [b]} :body
-                 {:keys [c]} :form
-                 {:keys [d]} :header
-                 {:keys [e]} :path} :parameters}]
-  {:status 200
-   :body {:total (+ a b c d e)}})
-
-(def valid-request
-  {:uri "/api/plus/5"
-   :request-method :get
-   :query-params {"a" "1"}
-   :body-params {:b 2}
-   :form-params {:c 3}
-   :header-params {:d 4}})
-
-(def invalid-request
-  {:uri "/api/plus/5"
-   :request-method :get})
-
-(def invalid-request2
-  {:uri "/api/plus/5"
-   :request-method :get
-   :query-params {"a" "1"}
-   :body-params {:b 2}
-   :form-params {:c 3}
-   :header-params {:d -40}})
-
 (deftest spec-coercion-test
-  (let [create (fn [middleware]
-                 (ring/ring-handler
-                   (ring/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {:a int?}
-                                           :body {:b int?}
-                                           :form {:c int?}
-                                           :header {:d int?}
-                                           :path {:e int?}}
-                              :responses {200 {:schema {:total pos-int?}}}
-                              :handler handler}}]]
-                     {:data {:middleware middleware
-                             :coercion spec/coercion}})))]
+  (let [r (r/router
+            [["/schema" {:coercion schema/coercion}
+              ["/:number/:keyword" {:name ::user
+                                    :parameters {:path {:number s/Int
+                                                        :keyword s/Keyword}}}]]
+             ["/spec" {:coercion spec/coercion}
+              ["/:number/:keyword" {:name ::user
+                                    :parameters {:path {:number int?
+                                                        :keyword keyword?}}}]]
+             ["/none"
+              ["/:number/:keyword" {:name ::user
+                                    :parameters {:path {:number int?
+                                                        :keyword keyword?}}}]]]
+            {:compile coercion/compile-request-coercers})]
 
-    (testing "withut exception handling"
-      (let [app (create [coercion/coerce-request-middleware
-                         coercion/coerce-response-middleware])]
+    (testing "schema-coercion"
+      (testing "succeeds"
+        (let [m (r/match-by-path r "/schema/1/abba")]
+          (is (= {:path {:keyword :abba, :number 1}}
+                 (coercion/coerce! m)))))
+      (testing "throws with invalid input"
+        (let [m (r/match-by-path r "/schema/kikka/abba")]
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))))
 
-        (testing "all good"
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request))))
+    (testing "spec-coercion"
+      (testing "succeeds"
+        (let [m (r/match-by-path r "/spec/1/abba")]
+          (is (= {:path {:keyword :abba, :number 1}}
+                 (coercion/coerce! m)))))
+      (testing "throws with invalid input"
+        (let [m (r/match-by-path r "/spec/kikka/abba")]
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))))
 
-        (testing "invalid request"
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request))))
+    (testing "no coercion defined"
+      (testing "doesn't coerce"
+        (let [m (r/match-by-path r "/none/1/abba")]
+          (is (= nil (coercion/coerce! m))))
+        (let [m (r/match-by-path r "/none/kikka/abba")]
+          (is (= nil (coercion/coerce! m))))))))
 
-        (testing "invalid response"
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
-
-    (testing "with exception handling"
-      (let [app (create [coercion/coerce-exceptions-middleware
-                         coercion/coerce-request-middleware
-                         coercion/coerce-response-middleware])]
-
-        (testing "all good"
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request))))
-
-        (testing "invalid request"
-          (let [{:keys [status body]} (app invalid-request)]
-            (is (= 400 status))))
-
-        (testing "invalid response"
-          (let [{:keys [status body]} (app invalid-request2)]
-            (is (= 500 status))))))))
-
-(deftest schema-coercion-test
-  (let [create (fn [middleware]
-                 (ring/ring-handler
-                   (ring/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {:a s/Int}
-                                           :body {:b s/Int}
-                                           :form {:c s/Int}
-                                           :header {:d s/Int}
-                                           :path {:e s/Int}}
-                              :responses {200 {:schema {:total (s/constrained s/Int pos? 'positive)}}}
-                              :handler handler}}]]
-                     {:data {:middleware middleware
-                             :coercion schema/coercion}})))]
-
-    (testing "withut exception handling"
-      (let [app (create [coercion/coerce-request-middleware
-                         coercion/coerce-response-middleware])]
-
-        (testing "all good"
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request))))
-
-        (testing "invalid request"
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request))))
-
-        (testing "invalid response"
-          (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))
-
-        (testing "with exception handling"
-          (let [app (create [coercion/coerce-exceptions-middleware
-                             coercion/coerce-request-middleware
-                             coercion/coerce-response-middleware])]
-
-            (testing "all good"
-              (is (= {:status 200
-                      :body {:total 15}}
-                     (app valid-request))))
-
-            (testing "invalid request"
-              (let [{:keys [status body]} (app invalid-request)]
-                (is (= 400 status))))
-
-            (testing "invalid response"
-              (let [{:keys [status body]} (app invalid-request2)]
-                (is (= 500 status))))))))))

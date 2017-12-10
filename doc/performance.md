@@ -77,7 +77,7 @@ So, we need to test something more realistic.
 
 To get better view on the real life routing performance, there is [test](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj) of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the [OpenSensors](https://opensensors.io/) swagger definitions.
 
-Thanks to the [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) algorithm, `reitit-ring` and Pedestal are fastest here.
+Thanks to the snappy [segment-tree](https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc) algorithm, `reitit-ring` is fastest here. Pedestal is also fast with it's [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) implementation.
 
 ![Opensensors perf test](images/opensensors.png)
 
@@ -85,11 +85,11 @@ Thanks to the [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) algorithm,
 
 Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj) is a [CQRS](https://martinfowler.com/bliki/CQRS.html)-style route tree, where all the paths are static, e.g. `/api/command/add-order`. The route definitions are pulled out from [Lupapiste](https://github.com/lupapiste/lupapiste). The test consists of ~300 static routes (just the commands here, there would be ~200 queries too).
 
-Again, both `reitit-ring` and Pedestal shine here, thanks to the fast lookup-routers. On average, they are two orders of magnitude faster and on best/worst case, three orders of magnitude faster than the other tested libs. Ataraxy failed this test on `Method code too large` error.
+Again, both `reitit-ring` and Pedestal shine here, thanks to the fast lookup-routers. On average, they are **two** and on best case, **three orders of magnitude faster** than the other tested libs. Ataraxy failed this test on `Method code too large!` error.
 
 ![Opensensors perf test](images/lupapiste.png)
 
-**NOTE**: If there would be even one wildcard route in the route-tree, Pedestal would fallback from lookup-router to the prefix-tree router, yielding constant, but order of magnitude slower perf. Reitit instead fallbacks to `:mixed-router`, still serving the static routes with lookup-router, just the wildcard route(s) with prefix-tree. So, the performance would not notably degrade.
+**NOTE**: If there would be even one wildcard route in the route-tree, Pedestal would fallback from lookup-router to the prefix-tree router, yielding nearly constant, but an order of magnitude slower perf. Reitit instead fallbacks to `:mixed-router`, serving all the static routes with `:lookup-router`, just the wildcard route(s) with `:segment-tree`. So, the performance would not notably degrade.
 
 ### Why measure?
 

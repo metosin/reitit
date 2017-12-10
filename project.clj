@@ -22,7 +22,7 @@
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
             [lein-cljsbuild "1.1.7"]
-            [lein-cloverage "1.0.9"]
+            [lein-cloverage "1.0.10"]
             [lein-codox "0.10.3"]
             [metosin/boot-alt-test "0.4.0-20171019.180106-3"]]
 
@@ -35,19 +35,19 @@
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"]
 
-                   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
+                   :dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.9.946"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
                                   [metosin/schema-tools "0.10.0-SNAPSHOT"]
 
-                                  [expound "0.3.2"]
-                                  [orchestra "2017.08.13"]
+                                  [expound "0.3.4"]
+                                  [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
                                   [metosin/muuntaja "0.4.1"]
-                                  [metosin/jsonista "0.1.0-SNAPSHOT"]
+                                  [metosin/jsonista "0.1.0"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
@@ -58,8 +58,9 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.6.0"]
+                                   [org.immutant/immutant "2.1.9"]
                                    [io.pedestal/pedestal.route "0.5.3"]
-                                   [org.clojure/core.async "0.3.443"]
+                                   [org.clojure/core.async "0.3.465"]
                                    [ataraxy "0.4.0"]
                                    [bidi "2.1.2"]]}
              :analyze {:jvm-opts ^:replace ["-server"

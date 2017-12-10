@@ -116,7 +116,7 @@
 (defn wild-route? [[path]]
   (contains-wilds? path))
 
-(defn conflicting-routes? [[p1 :as route1] [p2 :as route2]]
+(defn conflicting-routes? [[p1] [p2]]
   (loop [[s1 & ss1] (segments p1)
          [s2 & ss2] (segments p2)]
     (cond
