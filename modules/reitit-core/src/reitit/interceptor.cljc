@@ -116,21 +116,22 @@
                :interceptors))
     {::router router}))
 
-(defn execute [r {{:keys [uri]} :request :as ctx}]
-  (if-let [interceptors (-> (r/match-by-path r uri)
-                            :result
-                            :interceptors)]
-    (as-> ctx $
-          (reduce #(%2 %1) $ (keep :enter interceptors))
-          (reduce #(%2 %1) $ (keep :leave interceptors)))))
+(comment
+  (defn execute [r {{:keys [uri]} :request :as ctx}]
+    (if-let [interceptors (-> (r/match-by-path r uri)
+                              :result
+                              :interceptors)]
+      (as-> ctx $
+            (reduce #(%2 %1) $ (keep :enter interceptors))
+            (reduce #(%2 %1) $ (keep :leave interceptors)))))
 
-(def r
-  (router
-    ["/api" {:interceptors [{:name ::add
-                             :enter (fn [ctx]
-                                      (assoc ctx :enter true))
-                             :leave (fn [ctx]
-                                      (assoc ctx :leave true))}]}
-     ["/ping" (fn [ctx] (assoc ctx :response "ok"))]]))
+  (def r
+    (router
+      ["/api" {:interceptors [{:name ::add
+                               :enter (fn [ctx]
+                                        (assoc ctx :enter true))
+                               :leave (fn [ctx]
+                                        (assoc ctx :leave true))}]}
+       ["/ping" (fn [ctx] (assoc ctx :response "ok"))]]))
 
-(execute r {:request {:uri "/api/ping"}})
+  (execute r {:request {:uri "/api/ping"}}))
