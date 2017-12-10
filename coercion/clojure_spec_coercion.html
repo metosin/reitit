@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Name-based Routing · GitBook</title>
+        <title>Clojure.spec · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="route_data.html" />
+    <link rel="next" href="data_spec_coercion.html" />
     
     
-    <link rel="prev" href="path_based_routing.html" />
+    <link rel="prev" href="schema_coercion.html" />
     
 
     </head>
@@ -102,9 +102,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2" data-path="./">
+        <li class="chapter " data-level="1.2" data-path="../basics/">
             
-                <a href="./">
+                <a href="../basics/">
             
                     
                     Basics
@@ -116,9 +116,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="route_syntax.html">
+        <li class="chapter " data-level="1.2.1" data-path="../basics/route_syntax.html">
             
-                <a href="route_syntax.html">
+                <a href="../basics/route_syntax.html">
             
                     
                     Route Syntax
@@ -129,9 +129,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="router.html">
+        <li class="chapter " data-level="1.2.2" data-path="../basics/router.html">
             
-                <a href="router.html">
+                <a href="../basics/router.html">
             
                     
                     Router
@@ -142,9 +142,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.3" data-path="path_based_routing.html">
+        <li class="chapter " data-level="1.2.3" data-path="../basics/path_based_routing.html">
             
-                <a href="path_based_routing.html">
+                <a href="../basics/path_based_routing.html">
             
                     
                     Path-based Routing
@@ -155,9 +155,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.2.4" data-path="name_based_routing.html">
+        <li class="chapter " data-level="1.2.4" data-path="../basics/name_based_routing.html">
             
-                <a href="name_based_routing.html">
+                <a href="../basics/name_based_routing.html">
             
                     
                     Name-based Routing
@@ -168,9 +168,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.5" data-path="route_data.html">
+        <li class="chapter " data-level="1.2.5" data-path="../basics/route_data.html">
             
-                <a href="route_data.html">
+                <a href="../basics/route_data.html">
             
                     
                     Route Data
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
             
-                <a href="route_conflicts.html">
+                <a href="../basics/route_conflicts.html">
             
                     
                     Route Conflicts
@@ -199,9 +199,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3" data-path="../coercion/">
+        <li class="chapter " data-level="1.3" data-path="./">
             
-                <a href="../coercion/">
+                <a href="./">
             
                     
                     Coercion
@@ -213,9 +213,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.3.1" data-path="../coercion/coercion.html">
+        <li class="chapter " data-level="1.3.1" data-path="coercion.html">
             
-                <a href="../coercion/coercion.html">
+                <a href="coercion.html">
             
                     
                     Coercion Explained
@@ -226,9 +226,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.2" data-path="../coercion/schema_coercion.html">
+        <li class="chapter " data-level="1.3.2" data-path="schema_coercion.html">
             
-                <a href="../coercion/schema_coercion.html">
+                <a href="schema_coercion.html">
             
                     
                     Plumatic Schema
@@ -239,9 +239,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.3" data-path="../coercion/clojure_spec_coercion.html">
+        <li class="chapter active" data-level="1.3.3" data-path="clojure_spec_coercion.html">
             
-                <a href="../coercion/clojure_spec_coercion.html">
+                <a href="clojure_spec_coercion.html">
             
                     
                     Clojure.spec
@@ -252,9 +252,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.3.4" data-path="../coercion/data_spec_coercion.html">
+        <li class="chapter " data-level="1.3.4" data-path="data_spec_coercion.html">
             
-                <a href="../coercion/data_spec_coercion.html">
+                <a href="data_spec_coercion.html">
             
                     
                     Data-specs
@@ -494,7 +494,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Name-based Routing</a>
+        <a href=".." >Clojure.spec</a>
     </h1>
 </div>
 
@@ -509,55 +509,45 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h2 id="name-based-reverse-routing">Name-based (reverse) Routing</h2>
-<p>All routes which have <code>:name</code> route data defined, can also be matched by name.</p>
-<p>Given a router:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+                                <h1 id="clojurespec-coercion">Clojure.spec Coercion</h1>
+<p>The <a href="https://clojure.org/guides/spec" target="_blank">clojure.spec</a> library specifies the structure of data, validates or destructures it, and can generate data based on the spec.</p>
+<p><strong>NOTE</strong>: Currently, <code>clojure.spec</code> <a href="https://dev.clojure.org/jira/browse/CLJ-2116" target="_blank">doesn&apos;t support runtime transformations via conforming</a>, so one needs to wrap all specs into <a href="https://github.com/metosin/spec-tools/blob/master/README.md#spec-records" target="_blank">Spec Records</a> to get the coercion working.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec])
+(<span class="hljs-name">require</span> &apos;[reitit.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[spec-tools.spec <span class="hljs-symbol">:as</span> spec])
+(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
+(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+
+<span class="hljs-comment">;; need to wrap the primitives!</span>
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::company</span> spec/string?)
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::user-id</span> spec/int?)
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::path-params</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::company</span> <span class="hljs-symbol">::user-id</span>]))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/api&quot;</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-      [<span class="hljs-string">&quot;/user/:id&quot;</span> <span class="hljs-symbol">::user</span>]]]))
-</code></pre>
-<p>Listing all route names:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/route-names</span> router)
-<span class="hljs-comment">; [:user/ping :user/user]</span>
-</code></pre>
-<p>No match returns <code>nil</code>:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::kikka</span>)
-<span class="hljs-literal">nil</span>
-</code></pre>
-<p>Matching a route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :data {:name :user/ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-</code></pre>
-<p>If not all path-parameters are set, a <code>PartialMatch</code> is returned:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; #PartialMatch{:template &quot;/api/user/:id&quot;,</span>
-<span class="hljs-comment">;               :data {:name :user/user},</span>
-<span class="hljs-comment">;               :result nil,</span>
-<span class="hljs-comment">;               :params nil,</span>
-<span class="hljs-comment">;               :required #{:id}}</span>
+    [<span class="hljs-string">&quot;/:company/users/:user-id&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::user-view</span>
+                                 <span class="hljs-symbol">:coercion</span> reitit.coercion.spec/coercion
+                                 <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:path</span> <span class="hljs-symbol">::path-params</span>}}]
+    {<span class="hljs-symbol">:compile</span> coercion/compile-request-coercers}))
 
-(<span class="hljs-name">r/partial-match?</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span>))
-<span class="hljs-comment">; true</span>
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> route-and-coerce! [path]
+  (<span class="hljs-name"><span class="hljs-builtin-name">if-let</span></span> [match (<span class="hljs-name">r/match-by-path</span> router path)]
+    (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> match <span class="hljs-symbol">:parameters</span> (<span class="hljs-name">coercion/coerce!</span> match))))
 </code></pre>
-<p>With provided path-parameters:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;1&quot;</span>})
-<span class="hljs-comment">; #Match{:template &quot;/api/user/:id&quot;</span>
-<span class="hljs-comment">;        :data {:name :user/user}</span>
-<span class="hljs-comment">;        :path &quot;/api/user/1&quot;</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :params {:id &quot;1&quot;}}</span>
+<p>Successful coercion:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
+<span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
+<span class="hljs-comment">;        :data {:name :user/user-view,</span>
+<span class="hljs-comment">;               :coercion #SpecCoercion{...}</span>
+<span class="hljs-comment">;               :parameters {:path ::path-params}},</span>
+<span class="hljs-comment">;        :result {:path #object[reitit.coercion$request_coercer$]},</span>
+<span class="hljs-comment">;        :params {:company &quot;metosin&quot;, :user-id &quot;123&quot;},</span>
+<span class="hljs-comment">;        :parameters {:path {:company &quot;metosin&quot;, :user-id 123}}</span>
+<span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 </code></pre>
-<p>There is also a exception throwing version:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name!</span> router <span class="hljs-symbol">::user</span>)
-<span class="hljs-comment">; ExceptionInfo missing path-params for route /api/user/:id: #{:id}</span>
+<p>Failing coercion:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">route-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
+<span class="hljs-comment">; =&gt; ExceptionInfo Request coercion failed...</span>
 </code></pre>
 
                                 
@@ -586,12 +576,12 @@
 
             
                 
-                <a href="path_based_routing.html" class="navigation navigation-prev " aria-label="Previous page: Path-based Routing">
+                <a href="schema_coercion.html" class="navigation navigation-prev " aria-label="Previous page: Plumatic Schema">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="route_data.html" class="navigation navigation-next " aria-label="Next page: Route Data">
+                <a href="data_spec_coercion.html" class="navigation navigation-next " aria-label="Next page: Data-specs">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -602,7 +592,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Name-based Routing","level":"1.2.4","depth":2,"next":{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"previous":{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/name_based_routing.md","mtime":"2017-12-10T16:02:46.579Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T16:03:26.214Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"1.3.3","depth":2,"next":{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2017-12-10T16:02:46.579Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-10T16:03:26.214Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
