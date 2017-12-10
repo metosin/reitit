@@ -1,4 +1,4 @@
-## Name-based (reverse) Routing
+# Name-based (reverse) Routing
 
 All routes which have `:name` route data defined, can also be matched by name.
 

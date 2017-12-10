@@ -1,4 +1,4 @@
-## Configuring Routers
+# Configuring Routers
 
 Routers can be configured via options. Options allow things like [`clojure.spec`](https://clojure.org/about/spec) validation for route data and fast, compiled handlers. The following options are available for the `reitit.core/router`:
 
