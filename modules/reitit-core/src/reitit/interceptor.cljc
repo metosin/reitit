@@ -9,22 +9,19 @@
 (defrecord Interceptor [name enter leave error])
 (defrecord Endpoint [data interceptors])
 
-(defn create [{:keys [name wrap compile] :as m}]
-  (when (and wrap compile)
-    (throw
-      (ex-info
-        (str "Interceptor can't have both :wrap and :compile defined " m) m)))
-  (map->Interceptor m))
-
 (def ^:dynamic *max-compile-depth* 10)
 
 (extend-protocol IntoInterceptor
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
-  (into-interceptor [[f & args] data opts]
-    (if-let [{:keys [wrap] :as mw} (into-interceptor f data opts)]
-      (assoc mw :wrap #(apply wrap % args))))
+  (into-interceptor [[f & args :as form] data opts]
+    (when (and (seq args) (not (fn? f)))
+      (throw
+        (ex-info
+          (str "Invalid Interceptor form: " form "")
+          {:form form})))
+    (into-interceptor (apply f args) data opts))
 
   #?(:clj  clojure.lang.Fn
      :cljs function)
@@ -35,12 +32,12 @@
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
   (into-interceptor [this data opts]
-    (into-interceptor (create this) data opts))
+    (into-interceptor (map->Interceptor this) data opts))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
   (into-interceptor [this data opts]
-    (into-interceptor (create this) data opts))
+    (into-interceptor (map->Interceptor this) data opts))
 
   Interceptor
   (into-interceptor [{:keys [compile] :as this} data opts]
@@ -70,24 +67,37 @@
              (merge {:path path, :data data}
                     (if scope {:scope scope}))))))
 
-(defn expand [interceptors data opts]
+(defn- expand-and-transform
+  [interceptors data {:keys [::transform] :or {transform identity} :as opts}]
   (->> interceptors
+       (keep #(into-interceptor % data opts))
+       (transform)
        (keep #(into-interceptor % data opts))
        (into [])))
 
-(defn interceptor-chain [interceptors handler data opts]
-  (expand (conj interceptors handler) data opts))
+;;
+;; public api
+;;
+
+(defn chain
+  "Creates a Interceptor chain out of sequence of IntoInterceptor
+  and optionally a handler. Optionally takes route data and (Router) opts."
+  ([interceptors handler data]
+   (chain interceptors handler data nil))
+  ([interceptors handler data opts]
+   (let [interceptor (some-> (into-interceptor handler data opts)
+                             (assoc :name (:name data)))]
+     (-> (expand-and-transform interceptors data opts)
+         (cond-> interceptor (conj interceptor))))))
 
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[path {:keys [interceptors handler] :as data}]
-    {:keys [::transform] :or {transform identity} :as opts} scope]
+  ([[path {:keys [interceptors handler] :as data}] opts scope]
    (ensure-handler! path data scope)
-   (let [interceptors (expand (transform (expand interceptors data opts)) data opts)]
-     (map->Endpoint
-       {:interceptors (interceptor-chain interceptors handler data opts)
-        :data data}))))
+   (map->Endpoint
+     {:interceptors (chain interceptors handler data opts)
+      :data data})))
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
@@ -96,9 +106,15 @@
   Example:
 
     (router
-      [\"/api\" {:interceptors [i/format i/oauth2]}
-        [\"/users\" {:interceptors [i/delete]
+      [\"/api\" {:interceptors [format-body oauth2]}
+        [\"/users\" {:interceptors [delete]
                      :handler get-user}]])
+
+  Options:
+
+  | key                             | description |
+  | --------------------------------|-------------|
+  | `:reitit.interceptor/transform` | Function of [Interceptor] => [Interceptor] to transform the expanded Interceptors (default: identity).
 
   See router options from [[reitit.core/router]]."
   ([data]
@@ -110,28 +126,7 @@
 (defn interceptor-handler [router]
   (with-meta
     (fn [path]
-      (some->> path
-               (r/match-by-path router)
+      (some->> (r/match-by-path router path)
                :result
                :interceptors))
     {::router router}))
-
-(comment
-  (defn execute [r {{:keys [uri]} :request :as ctx}]
-    (if-let [interceptors (-> (r/match-by-path r uri)
-                              :result
-                              :interceptors)]
-      (as-> ctx $
-            (reduce #(%2 %1) $ (keep :enter interceptors))
-            (reduce #(%2 %1) $ (keep :leave interceptors)))))
-
-  (def r
-    (router
-      ["/api" {:interceptors [{:name ::add
-                               :enter (fn [ctx]
-                                        (assoc ctx :enter true))
-                               :leave (fn [ctx]
-                                        (assoc ctx :leave true))}]}
-       ["/ping" (fn [ctx] (assoc ctx :response "ok"))]]))
-
-  (execute r {:request {:uri "/api/ping"}}))
