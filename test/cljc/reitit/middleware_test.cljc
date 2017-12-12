@@ -1,75 +1,80 @@
 (ns reitit.middleware-test
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.middleware :as middleware]
-            [clojure.set :as set]
             [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
+(def request [])
+
+(defn handler [request]
+  (conj request :ok))
+
+(defn create [middleware]
+  (middleware/chain
+    middleware
+    handler
+    :data
+    nil))
+
 (deftest expand-middleware-test
 
   (testing "middleware records"
-
-    (testing ":wrap & :compile are exclusive"
-      (is (thrown-with-msg?
-            ExceptionInfo
-            #"Middleware can't have both :wrap and :compile defined"
-            (middleware/create
-              {:name ::test
-               :wrap identity
-               :compile (constantly identity)}))))
 
     (testing "middleware"
       (let [calls (atom 0)
             wrap (fn [handler value]
                    (swap! calls inc)
                    (fn [request]
-                     [value request]))
-            ->app (fn [ast handler]
-                    (middleware/compile-handler
-                      (middleware/expand ast :data {})
-                      handler))]
+                     (handler (conj request value))))]
 
-        (testing "as middleware function"
+        (testing "as function"
           (reset! calls 0)
-          (let [app (->app [[#(wrap % :value)]] identity)]
+          (let [app (create [#(wrap % :value)])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
-        (testing "as middleware vector"
+        (testing "as function vector"
           (reset! calls 0)
-          (let [app (->app [[wrap :value]] identity)]
+          (let [app (create [[#(wrap % :value)]])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
+              (is (= 1 @calls)))))
+
+        (testing "as function vector with value(s)"
+          (reset! calls 0)
+          (let [app (create [[wrap :value]])]
+            (dotimes [_ 10]
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
         (testing "as map"
           (reset! calls 0)
-          (let [app (->app [[{:wrap #(wrap % :value)}]] identity)]
+          (let [app (create [[{:wrap #(wrap % :value)}]])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
         (testing "as map vector"
           (reset! calls 0)
-          (let [app (->app [[{:wrap wrap} :value]] identity)]
+          (let [app (create [[{:wrap wrap} :value]])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
         (testing "as Middleware"
           (reset! calls 0)
-          (let [app (->app [[(middleware/create {:wrap #(wrap % :value)})]] identity)]
+          (let [app (create [[(middleware/map->Middleware {:wrap #(wrap % :value)})]])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
         (testing "as Middleware vector"
           (reset! calls 0)
-          (let [app (->app [[(middleware/create {:wrap wrap}) :value]] identity)]
+          (let [app (create [[(middleware/map->Middleware {:wrap wrap}) :value]])]
             (dotimes [_ 10]
-              (is (= [:value :request] (app :request)))
+              (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))))
 
     (testing "compiled Middleware"
@@ -79,53 +84,52 @@
                            (fn [handler value]
                              (swap! calls inc)
                              (fn [request]
-                               [data value request])))}
+                               (handler (into request [data value])))))}
             mw3 {:compile (fn [data _]
                             (swap! calls inc)
                             {:compile (fn [data _]
                                         (swap! calls inc)
-                                        mw)})}
-            ->app (fn [ast handler]
-                    (middleware/compile-handler
-                      (middleware/expand ast :data {})
-                      handler))]
+                                        mw)})}]
 
         (testing "as map"
           (reset! calls 0)
-          (let [app (->app [[mw :value]] identity)]
+          (let [app (create [[mw :value]])]
             (dotimes [_ 10]
-              (is (= [:data :value :request] (app :request)))
+              (is (= [:data :value :ok] (app request)))
               (is (= 2 @calls)))))
 
         (testing "as Middleware"
           (reset! calls 0)
-          (let [app (->app [[(middleware/create mw) :value]] identity)]
+          (let [app (create [[(middleware/map->Middleware mw) :value]])]
             (dotimes [_ 10]
-              (is (= [:data :value :request] (app :request)))
+              (is (= [:data :value :ok] (app request)))
               (is (= 2 @calls)))))
 
         (testing "deeply compiled Middleware"
           (reset! calls 0)
-          (let [app (->app [[(middleware/create mw3) :value]] identity)]
+          (let [app (create [[(middleware/map->Middleware mw3) :value]])]
             (dotimes [_ 10]
-              (is (= [:data :value :request] (app :request)))
+              (is (= [:data :value :ok] (app request)))
               (is (= 4 @calls)))))
 
         (testing "too deeply compiled Middleware fails"
           (binding [middleware/*max-compile-depth* 2]
-            (is (thrown? ExceptionInfo (->app [[(middleware/create mw3) :value]] identity)))))
+            (is (thrown?
+                  ExceptionInfo
+                  #"Too deep Middleware compilation"
+                  (create [[(middleware/map->Middleware mw3) :value]])))))
 
         (testing "nil unmounts the middleware"
-          (let [app (->app [{:compile (constantly nil)}
-                            {:compile (constantly nil)}] identity)]
+          (let [app (create [{:compile (constantly nil)}
+                             {:compile (constantly nil)}])]
             (dotimes [_ 10]
-              (is (= :request (app :request))))))))))
+              (is (= [:ok] (app request))))))))))
 
 (defn create-app [router]
   (let [h (middleware/middleware-handler router)]
     (fn [path]
       (if-let [f (h path)]
-        (f [])))))
+        (f request)))))
 
 (deftest middleware-handler-test
 
@@ -188,7 +192,7 @@
                                       (map :name))))))))))
 
 (deftest chain-test
-  (testing "chain can produce middlware chain of any IntoMiddleware"
+  (testing "chain can produce middleware chain of any IntoMiddleware"
     (let [mw (fn [handler value]
                #(conj (handler (conj % value)) value))
           handler #(conj % :ok)

@@ -9,13 +9,6 @@
 (defrecord Middleware [name wrap])
 (defrecord Endpoint [data handler middleware])
 
-(defn create [{:keys [wrap compile] :as m}]
-  (when (and wrap compile)
-    (throw
-      (ex-info
-        (str "Middleware can't have both :wrap and :compile defined " m) m)))
-  (map->Middleware m))
-
 (def ^:dynamic *max-compile-depth* 10)
 
 (extend-protocol IntoMiddleware
@@ -35,12 +28,12 @@
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
   (into-middleware [this data opts]
-    (into-middleware (create this) data opts))
+    (into-middleware (map->Middleware this) data opts))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
   (into-middleware [this data opts]
-    (into-middleware (create this) data opts))
+    (into-middleware (map->Middleware this) data opts))
 
   Middleware
   (into-middleware [{:keys [compile] :as this} data opts]
@@ -56,7 +49,7 @@
         (if-let [middeware (into-middleware (compile data opts) data opts)]
           (map->Middleware
             (merge
-              (dissoc this :create)
+              (dissoc this :compile)
               (impl/strip-nils middeware)))))))
 
   nil
@@ -70,21 +63,38 @@
              (merge {:path path, :data data}
                     (if scope {:scope scope}))))))
 
-(defn expand [middleware data opts]
+(defn- expand-and-transform
+  [middleware data {:keys [::transform] :or {transform identity} :as opts}]
   (->> middleware
+       (keep #(into-middleware % data opts))
+       (into [])
+       (transform)
        (keep #(into-middleware % data opts))
        (into [])))
 
-(defn compile-handler [middleware handler]
+(defn- compile-handler [middleware handler]
   ((apply comp identity (keep :wrap middleware)) handler))
+
+;;
+;; public api
+;;
+
+(defn chain
+  "Creates a Ring middleware chain out of sequence of IntoMiddleware
+  and Handler. Optional takes route data and (Router) opts."
+  ([middleware handler]
+   (chain middleware handler nil))
+  ([middleware handler data]
+   (chain middleware handler data nil))
+  ([middleware handler data opts]
+   (compile-handler (expand-and-transform middleware data opts) handler)))
 
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[path {:keys [middleware handler] :as data}]
-    {:keys [::transform] :or {transform identity} :as opts} scope]
+  ([[path {:keys [middleware handler] :as data}] opts scope]
    (ensure-handler! path data scope)
-   (let [middleware (expand (transform (expand middleware data opts)) data opts)]
+   (let [middleware (expand-and-transform middleware data opts)]
      (map->Endpoint
        {:handler (compile-handler middleware handler)
         :middleware middleware
@@ -101,7 +111,13 @@
         [\"/users\" {:middleware [wrap-delete]
                      :handler get-user}]])
 
-  See router options from [[reitit.core/router]]."
+  Options:
+
+  | key                            | description |
+  | -------------------------------|-------------|
+  | `:reitit.middleware/transform` | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
+
+  See other router options from [[reitit.core/router]]."
   ([data]
    (router data nil))
   ([data opts]
@@ -116,11 +132,3 @@
                :result
                :handler))
     {::router router}))
-
-(defn chain
-  "Creates a vanilla ring middleware chain out of sequence of
-  IntoMiddleware thingies."
-  ([middleware handler data]
-   (chain middleware handler data nil))
-  ([middleware handler data opts]
-   (compile-handler (expand middleware data opts) handler)))
