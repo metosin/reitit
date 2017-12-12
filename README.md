@@ -6,8 +6,8 @@ A friendly data-driven router for Clojure(Script).
 * Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
-* [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
