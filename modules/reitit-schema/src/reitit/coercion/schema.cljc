@@ -5,7 +5,6 @@
             [schema.coerce :as sc]
             [schema.utils :as su]
             [schema-tools.coerce :as stc]
-            [spec-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]))
 
 (def string-coercion-matcher
@@ -33,45 +32,6 @@
         :else x))
     schema))
 
-(defrecord SchemaCoercion [name matchers coerce-response?]
-
-  coercion/Coercion
-  (-get-name [_] name)
-
-  (-get-apidocs [_ _ {:keys [parameters responses] :as info}]
-    (cond-> (dissoc info :parameters :responses)
-            parameters (assoc ::swagger/parameters parameters)
-            responses (assoc ::swagger/responses responses)))
-
-  (-compile-model [_ model _] model)
-
-  (-open-model [_ schema] (st/open-schema schema))
-
-  (-encode-error [_ error]
-    (-> error
-        (update :schema stringify)
-        (update :errors stringify)))
-
-  (-request-coercer [_ type schema]
-    (let [{:keys [formats default]} (matchers type)
-          coercers (->> (for [m (conj (vals formats) default)]
-                          [m (sc/coercer schema m)])
-                        (into {}))]
-      (fn [value format]
-        (if-let [matcher (or (get formats format) default)]
-          (let [coercer (coercers matcher)
-                coerced (coercer value)]
-            (if-let [error (su/error-val coerced)]
-              (coercion/map->CoercionError
-                {:schema schema
-                 :errors error})
-              coerced))
-          value))))
-
-  (-response-coercer [this schema]
-    (if (coerce-response? schema)
-      (coercion/-request-coercer this :response schema))))
-
 (def default-options
   {:coerce-response? coerce-response?
    :matchers {:body {:default default-coercion-matcher
@@ -79,7 +39,38 @@
               :string {:default string-coercion-matcher}
               :response {:default default-coercion-matcher}}})
 
-(defn create [{:keys [matchers coerce-response?]}]
-  (->SchemaCoercion :schema matchers coerce-response?))
+(defn create [{:keys [matchers coerce-response?] :as opts}]
+  ^{:type ::coercion/coercion}
+  (reify coercion/Coercion
+    (-get-name [_] :schema)
+    (-get-options [_] opts)
+    (-get-apidocs [_ _ {:keys [parameters responses] :as info}]
+      (cond-> (dissoc info :parameters :responses)
+              parameters (assoc ::parameters parameters)
+              responses (assoc ::responses responses)))
+    (-compile-model [_ model _] model)
+    (-open-model [_ schema] (st/open-schema schema))
+    (-encode-error [_ error]
+      (-> error
+          (update :schema stringify)
+          (update :errors stringify)))
+    (-request-coercer [_ type schema]
+      (let [{:keys [formats default]} (matchers type)
+            coercers (->> (for [m (conj (vals formats) default)]
+                            [m (sc/coercer schema m)])
+                          (into {}))]
+        (fn [value format]
+          (if-let [matcher (or (get formats format) default)]
+            (let [coercer (coercers matcher)
+                  coerced (coercer value)]
+              (if-let [error (su/error-val coerced)]
+                (coercion/map->CoercionError
+                  {:schema schema
+                   :errors error})
+                coerced))
+            value))))
+    (-response-coercer [this schema]
+      (if (coerce-response? schema)
+        (coercion/-request-coercer this :response schema)))))
 
 (def coercion (create default-options))

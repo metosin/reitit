@@ -1,8 +1,8 @@
 (ns reitit.coercion
   (:require [clojure.walk :as walk]
-            [spec-tools.core :as st]
-            [reitit.ring :as ring]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl])
+  #?(:clj
+     (:import (java.io Writer))))
 
 ;;
 ;; Protocol
@@ -11,12 +11,17 @@
 (defprotocol Coercion
   "Pluggable coercion protocol"
   (-get-name [this] "Keyword name for the coercion")
+  (-get-options [this] "Coercion options")
   (-get-apidocs [this model data] "???")
   (-compile-model [this model name] "Compiles a model")
   (-open-model [this model] "Returns a new model which allows extra keys in maps")
   (-encode-error [this error] "Converts error in to a serializable format")
   (-request-coercer [this type model] "Returns a `value format => value` request coercion function")
   (-response-coercer [this model] "Returns a `value format => value` response coercion function"))
+
+#?(:clj
+   (defmethod print-method ::coercion [coercion ^Writer w]
+     (.write w (str "<<" (-get-name coercion) ">>"))))
 
 (defrecord CoercionError [])
 

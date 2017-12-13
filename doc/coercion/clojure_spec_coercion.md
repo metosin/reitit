@@ -34,7 +34,7 @@ Successful coercion:
 (match-by-path-and-coerce! "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
-;               :coercion #SpecCoercion{...}
+;               :coercion <<:spec>>
 ;               :parameters {:path ::path-params}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
 ;        :params {:company "metosin", :user-id "123"},

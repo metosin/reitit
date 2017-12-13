@@ -65,7 +65,7 @@ A Match:
 (r/match-by-path r "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
-;               :coercion #SchemaCoercion{...}
+;               :coercion <<:schema>>
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result nil,
@@ -105,7 +105,7 @@ Routing again:
 (r/match-by-path r "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
-;               :coercion #SchemaCoercion{...}
+;               :coercion <<:schema>>
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
@@ -143,6 +143,7 @@ Here's an full example for doing both routing and coercion with Reitit:
 ```clj
 (require '[reitit.coercion.schema])
 (require '[reitit.coercion :as coercion])
+(require '[reitit.core :as r])
 (require '[schema.core :as s])
 
 (def router
@@ -160,7 +161,7 @@ Here's an full example for doing both routing and coercion with Reitit:
 (match-by-path-and-coerce! "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
-;               :coercion #SchemaCoercion{...}
+;               :coercion <<:schema>>
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
