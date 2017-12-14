@@ -13,7 +13,8 @@
 (ns ^:no-doc reitit.impl
   (:require [clojure.string :as str]
             [clojure.set :as set])
-  (:import #?(:clj (java.util.regex Pattern))))
+  #?(:clj (:import (java.util.regex Pattern)
+                   (java.util HashMap Map))))
 
 (defn wild? [s]
   (contains? #{\: \*} (first (str s))))
@@ -147,11 +148,11 @@
       :cljs [[a k v] (assoc a k v)]))
 
 (defn fast-map [m]
-  #?@(:clj  [(java.util.HashMap. (or m {}))]
-      :cljs [m]))
+  #?(:clj  (let [m (or m {})] (HashMap. ^Map m))
+     :cljs m))
 
 (defn fast-get
-  #?@(:clj  [[^java.util.HashMap m k] (.get m k)]
+  #?@(:clj  [[^HashMap m k] (.get m k)]
       :cljs [[m k] (m k)]))
 
 (defn strip-nils [m]
