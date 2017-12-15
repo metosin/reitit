@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Pluggable Coercion · GitBook</title>
+        <title>Ring Coercion · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -399,7 +399,7 @@
                 <a href="coercion.html">
             
                     
-                    Pluggable Coercion
+                    Ring Coercion
             
                 </a>
             
@@ -494,7 +494,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Pluggable Coercion</a>
+        <a href=".." >Ring Coercion</a>
     </h1>
 </div>
 
@@ -509,182 +509,141 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="pluggable-coercion">Pluggable Coercion</h1>
-<p>Reitit provides pluggable parameter coercion via <code>reitit.coercion/Coercion</code> protocol, originally introduced in <a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a>.</p>
+                                <h1 id="ring-coercion">Ring Coercion</h1>
+<p>Coercion is explained in detail <a href="../coercion/coercion.html">in the Coercion Guide</a>. Both request parameters (<code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>) and response <code>:body</code> can be coerced.</p>
+<p>To enable coercion, the following things need to be done:</p>
+<ul>
+<li>Define a <code>reitit.coercion/Coercion</code> for the routes</li>
+<li>Define types for the parameters and/or responses</li>
+<li>Mount Coercion Middleware to apply to coercion</li>
+<li>Use the coerced parameters in a handler/middleware</li>
+</ul>
+<h2 id="define-coercion">Define coercion</h2>
+<p><code>reitit.coercion/Coercion</code> is a protocol defining how types are defined, coerced and inventoried.</p>
 <p>Reitit ships with the following coercion modules:</p>
 <ul>
-<li><code>reitit.coercion.schema/coercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a>.</li>
-<li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a>.</li>
+<li><code>reitit.coercion.schema/coercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a></li>
+<li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a></li>
 </ul>
-<h3 id="ring-request-and-response-coercion">Ring request and response coercion</h3>
-<p>To use <code>Coercion</code> with Ring, one needs to do the following:</p>
-<ol>
-<li>Define parameters and responses as data into route data, in format adopted from <a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a>:<ul>
-<li><code>:parameters</code> map, with submaps for different parameters: <code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>. Parameters are defined in the format understood by the <code>Coercion</code>.</li>
-<li><code>:responses</code> map, with response status codes as keys (or <code>:default</code> for &quot;everything else&quot;) with maps with <code>:schema</code> and optionally <code>:description</code> as values.</li>
-</ul>
-</li>
-<li>Set a <code>Coercion</code> implementation to route data under <code>:coercion</code></li>
-<li>Mount request &amp; response coercion middleware to the routes (can be done for all routes as the middleware are only mounted to routes which have the parameters &amp;/ responses defined):<ul>
-<li><code>reitit.ring.coercion-middleware/coerce-request-middleware</code></li>
-<li><code>reitit.ring.coercion-middleware/coerce-response-middleware</code></li>
-</ul>
-</li>
-</ol>
-<p>If the request coercion succeeds, the coerced parameters are injected into request under <code>:parameters</code>.</p>
-<p>If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the <code>reitit.ring.coercion-middleware/coerce-exceptions-middleware</code> middleware</p>
-<h3 id="example-with-schema">Example with Schema</h3>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion-middleware <span class="hljs-symbol">:as</span> coercion-middleware])
-(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema <span class="hljs-symbol">:as</span> schema])
+<p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementations within a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
+<h1 id="defining-parameters-and-responses">Defining parameters and responses</h1>
+<p>Below is a ring route data defining <a href="https://github.com/plumatic/schema" target="_blank">Plumatic Schema</a> coercion. It defines schemas for <code>:query</code>, <code>:body</code> and  <code>:path</code> parameters and for a successful response <code>:body</code>.</p>
+<p>The coerced parameters can be read under <code>:parameters</code> key in the request.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">ring/ring-handler</span>
-    (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span>
-       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> s/Int, <span class="hljs-symbol">:y</span> s/Int}}
-                        <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name">s/constrained</span> s/Int pos?)}}}
-                        <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
-                                   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                                    <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              <span class="hljs-symbol">:coercion</span> schema/coercion}})))
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> plus-endpoint
+  {<span class="hljs-symbol">:coercion</span> reitit.coercion.schema/coercion
+   <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> s/Int}
+                <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:y</span> s/Int}
+                <span class="hljs-symbol">:path</span> {<span class="hljs-symbol">:z</span> s/Int}}
+   <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> PositiveInt}}}
+   <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [parameters]}]
+              (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [total (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:query</span> <span class="hljs-symbol">:x</span>)
+                             (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:body</span> <span class="hljs-symbol">:y</span>)
+                             (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:path</span> <span class="hljs-symbol">:z</span>))]
+                {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                 <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> total}}))})
 </code></pre>
-<p>Valid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
-<span class="hljs-comment">; {:status 200</span>
-<span class="hljs-comment">;  :body {:total 3}}</span>
-</code></pre>
-<p>Invalid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
-<span class="hljs-comment">; {:status 400,</span>
-<span class="hljs-comment">;  :body {:type :reitit.coercion/request-coercion</span>
-<span class="hljs-comment">;         :coercion :schema</span>
-<span class="hljs-comment">;         :in [:request :body-params]</span>
-<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
-<span class="hljs-comment">;         :schema {:x &quot;Int&quot;, :y &quot;Int&quot;}</span>
-<span class="hljs-comment">;         :errors {:y &quot;(not (integer? \&quot;2\&quot;))&quot;}}}</span>
-</code></pre>
-<h3 id="example-with-data-specs">Example with data-specs</h3>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion-middleware <span class="hljs-symbol">:as</span> coercion-middleware])
-(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> spec])
+<h2 id="coercion-middleware">Coercion Middleware</h2>
+<p>Defining a coercion for a route data doesn&apos;t do anything, as it&apos;s just data. We have to attach some code to apply the actual coercion. We can use the middleware from <code>reitit.ring.coercion-middleware</code>:</p>
+<ul>
+<li><code>coerce-request-middleware</code> for the parameter coercion</li>
+<li><code>coerce-response-middleware</code> for the response coercion</li>
+<li><code>coerce-exceptions-middleware</code> to turn coercion exceptions into pretty responses</li>
+</ul>
+<h3 id="example-with-schema">Example with Schema</h3>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion-middleware <span class="hljs-symbol">:as</span> mw])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
       [<span class="hljs-string">&quot;/api&quot;</span>
-       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
-                        <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> pos-int?}}}
-                        <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
-                                   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                                    <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>
+                 <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_]
+                        {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                         <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})}]
+       [<span class="hljs-string">&quot;/plus/:z&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::plus</span>
+                    <span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:coercion</span> reitit.coercion.schema/coercion
+                           <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> s/Int}
+                                        <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:y</span> s/Int}
+                                        <span class="hljs-symbol">:path</span> {<span class="hljs-symbol">:z</span> s/Int}}
+                           <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> {<span class="hljs-symbol">:total</span> PositiveInt}}}
+                           <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [parameters]}]
+                                      (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [total (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:query</span> <span class="hljs-symbol">:x</span>)
+                                                     (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:body</span> <span class="hljs-symbol">:y</span>)
+                                                     (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:path</span> <span class="hljs-symbol">:z</span>))]
+                                        {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                                         <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> total}}))}}]]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [mw/coerce-exceptions-middleware
+                           mw/coerce-request-middleware
+                           mw/coerce-response-middleware]}})))
 </code></pre>
 <p>Valid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
-<span class="hljs-comment">; {:status 200</span>
-<span class="hljs-comment">;  :body {:total 3}}</span>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
+      <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/plus/3&quot;</span>
+      <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>}
+      <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
+<span class="hljs-comment">; {:status 200, :body {:total 6}}</span>
 </code></pre>
 <p>Invalid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
+      <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/plus/3&quot;</span>
+      <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;abba&quot;</span>}
+      <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
 <span class="hljs-comment">; {:status 400,</span>
-<span class="hljs-comment">;  :body {:type ::coercion/request-coercion</span>
-<span class="hljs-comment">;         :coercion :spec</span>
-<span class="hljs-comment">;         :in [:request :body-params]</span>
-<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
-<span class="hljs-comment">;         :spec &quot;(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec37747/x :$spec37747/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})&quot;</span>
-<span class="hljs-comment">;         :problems [{:path [:y]</span>
-<span class="hljs-comment">;                     :pred &quot;clojure.core/int?&quot;</span>
-<span class="hljs-comment">;                     :val &quot;2&quot;</span>
-<span class="hljs-comment">;                     :via [:$spec37747/y]</span>
-<span class="hljs-comment">;                     :in [:y]}]}}</span>
+<span class="hljs-comment">;  :body {:schema {:x &quot;Int&quot;, &quot;Any&quot; &quot;Any&quot;},</span>
+<span class="hljs-comment">;         :errors {:x &quot;(not (integer? \&quot;abba\&quot;))&quot;},</span>
+<span class="hljs-comment">;         :type :reitit.coercion/request-coercion,</span>
+<span class="hljs-comment">;         :coercion :schema,</span>
+<span class="hljs-comment">;         :value {:x &quot;abba&quot;},</span>
+<span class="hljs-comment">;         :in [:request :query-params]}}</span>
 </code></pre>
-<h3 id="example-with-clojurespec">Example with clojure.spec</h3>
-<p>Currently, <code>clojure.spec</code> <a href="https://dev.clojure.org/jira/browse/CLJ-2116" target="_blank">doesn&apos;t support runtime transformations via conforming</a>, so one needs to wrap all specs with <code>spec-tools.core/spec</code>.</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion-middleware <span class="hljs-symbol">:as</span> coercion-middleware])
-(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> spec])
-(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
-(<span class="hljs-name">require</span> &apos;[spec-tools.core <span class="hljs-symbol">:as</span> st])
+<p>Invalid response:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
+      <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/plus/3&quot;</span>
+      <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>}
+      <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:y</span> <span class="hljs-number">-10</span>}})
+<span class="hljs-comment">; {:status 500,</span>
+<span class="hljs-comment">;  :body {:schema {:total &quot;(constrained Int PositiveInt)&quot;},</span>
+<span class="hljs-comment">;         :errors {:total &quot;(not (PositiveInt -6))&quot;},</span>
+<span class="hljs-comment">;         :type :reitit.coercion/response-coercion,</span>
+<span class="hljs-comment">;         :coercion :schema,</span>
+<span class="hljs-comment">;         :value {:total -6},</span>
+<span class="hljs-comment">;         :in [:response :body]}}</span>
+</code></pre>
+<h3 id="optimizations">Optimizations</h3>
+<p>The coercion middleware are <a href="compiling_middleware,md">compiled againts a route</a>. This enables them to compile and cache the actual coercers for the defined models ahead of time. They also unmount if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
+<p>We can query the compiled middleware chain for the routes:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
-(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::x</span> (<span class="hljs-name">st/spec</span> int?))
-(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::y</span> (<span class="hljs-name">st/spec</span> int?))
-(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::total</span> int?)
-(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::request</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::x</span> <span class="hljs-symbol">::y</span>]))
-(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::response</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::total</span>]))
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">ring/ring-handler</span>
-    (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span>
-       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> <span class="hljs-symbol">::request</span>}
-                        <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:schema</span> <span class="hljs-symbol">::response</span>}}
-                        <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
-                                   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                                    <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
+(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> (<span class="hljs-name">ring/get-router</span> app)
+    (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::plus</span>)
+    <span class="hljs-symbol">:result</span> <span class="hljs-symbol">:post</span> <span class="hljs-symbol">:middleware</span>
+    (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;&gt;</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">mapv</span></span> <span class="hljs-symbol">:name</span>)))
+<span class="hljs-comment">; [::mw/coerce-exceptions</span>
+<span class="hljs-comment">;  ::mw/coerce-parameters</span>
+<span class="hljs-comment">;  ::mw/coerce-response]</span>
 </code></pre>
-<p>Valid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-number">2</span>}})
-<span class="hljs-comment">; {:status 200</span>
-<span class="hljs-comment">;  :body {:total 3}}</span>
+<p>Route without coercion defined:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;pong&quot;}</span>
 </code></pre>
-<p>Invalid request:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span>
-  {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>
-   <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>
-   <span class="hljs-symbol">:body-params</span> {<span class="hljs-symbol">:x</span> <span class="hljs-number">1</span>, <span class="hljs-symbol">:y</span> <span class="hljs-string">&quot;2&quot;</span>}})
-<span class="hljs-comment">; {:status 400,</span>
-<span class="hljs-comment">;  :body {:type ::coercion/request-coercion</span>
-<span class="hljs-comment">;         :coercion :spec</span>
-<span class="hljs-comment">;         :in [:request :body-params]</span>
-<span class="hljs-comment">;         :value {:x 1, :y &quot;2&quot;}</span>
-<span class="hljs-comment">;         :spec &quot;(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:reitit.coercion-test/x :reitit.coercion-test/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})&quot;</span>
-<span class="hljs-comment">;         :problems [{:path [:y]</span>
-<span class="hljs-comment">;                     :pred &quot;clojure.core/int?&quot;</span>
-<span class="hljs-comment">;                     :val &quot;2&quot;</span>
-<span class="hljs-comment">;                     :via [::request ::y]</span>
-<span class="hljs-comment">;                     :in [:y]}]}}</span>
+<p>Has no mounted middleware:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> (<span class="hljs-name">ring/get-router</span> app)
+    (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::ping</span>)
+    <span class="hljs-symbol">:result</span> <span class="hljs-symbol">:get</span> <span class="hljs-symbol">:middleware</span>
+    (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;&gt;</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">mapv</span></span> <span class="hljs-symbol">:name</span>)))
+<span class="hljs-comment">; []</span>
 </code></pre>
-<h3 id="custom-coercion">Custom coercion</h3>
-<p>Both Schema and Spec Coercion can be configured via options, see the source code for details.</p>
-<p>To plug in new validation engine, see the
-<code>reitit.coercion/Coercion</code> protocol.</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defprotocol</span></span> Coercion
-  <span class="hljs-string">&quot;Pluggable coercion protocol&quot;</span>
-  (<span class="hljs-name">-get-name</span> [this] <span class="hljs-string">&quot;Keyword name for the coercion&quot;</span>)
-  (<span class="hljs-name">-get-apidocs</span> [this model data] <span class="hljs-string">&quot;???&quot;</span>)
-  (<span class="hljs-name">-compile-model</span> [this model name] <span class="hljs-string">&quot;Compiles a coercion model&quot;</span>)
-  (<span class="hljs-name">-open-model</span> [this model] <span class="hljs-string">&quot;Returns a new map model which doesn&apos;t fail on extra keys&quot;</span>)
-  (<span class="hljs-name">-encode-error</span> [this error] <span class="hljs-string">&quot;Converts error in to a serializable format&quot;</span>)
-  (<span class="hljs-name">-request-coercer</span> [this type model] <span class="hljs-string">&quot;Returns a `value format =&gt; value` request coercion function&quot;</span>)
-  (<span class="hljs-name">-response-coercer</span> [this model] <span class="hljs-string">&quot;Returns a `value format =&gt; value` response coercion function&quot;</span>))
-</code></pre>
+<h2 id="thanks-to">Thanks to</h2>
+<p>Most of the thing are just polished version of the original implementations. Thanks to:</p>
+<ul>
+<li><a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a> for the initial <code>Coercion</code> protocol</li>
+<li><a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a> for the <code>:parameters</code> and <code>:responses</code> syntax.</li>
+<li><a href="https://github.com/plumatic/schema" target="_blank">schema</a> and <a href="https://github.com/metosin/schema-tools" target="_blank">schema-tools</a> for Schema Coercion</li>
+<li><a href="https://github.com/metosin/spec-tools" target="_blank">spec-tools</a> for Spec Coercion</li>
+</ul>
 
                                 
                                 </section>
@@ -728,7 +687,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"next":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2017-12-14T09:45:59.633Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-14T09:46:41.599Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring Coercion","level":"1.5.4","depth":2,"next":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

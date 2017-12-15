@@ -399,7 +399,7 @@
                 <a href="../ring/coercion.html">
             
                     
-                    Pluggable Coercion
+                    Ring Coercion
             
                 </a>
             
@@ -518,7 +518,7 @@
   (<span class="hljs-name">r/router</span>
     [<span class="hljs-string">&quot;/:company/users/:user-id&quot;</span> <span class="hljs-symbol">::user-view</span>]))
 </code></pre>
-<p>Match with the String <code>:params</code>:</p>
+<p>Match with the parsed <code>:params</code> as Strings:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> r <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view},</span>
@@ -537,8 +537,8 @@
 <p><code>reitit.coercion/Coercion</code> is a protocol defining how types are defined, coerced and inventoried.</p>
 <p>Reitit ships with the following coercion modules:</p>
 <ul>
-<li><code>reitit.coercion.schema/coercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a>.</li>
-<li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a>.</li>
+<li><code>reitit.coercion.schema/coercion</code> for <a href="https://github.com/plumatic/schema" target="_blank">plumatic schema</a></li>
+<li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a></li>
 </ul>
 <p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementations within a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
 <h2 id="defining-parameters">Defining parameters</h2>
@@ -645,10 +645,12 @@
 <h2 id="ring-coercion">Ring Coercion</h2>
 <p>For a full-blown http-coercion, see the <a href="../ring/coercion.html">ring coercion</a>.</p>
 <h2 id="thanks-to">Thanks to</h2>
-<p>Most of the thing are just polished version of the original implementations. Big thanks to:</p>
+<p>Most of the thing are just polished version of the original implementations. Thanks to:</p>
 <ul>
 <li><a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a> for the initial <code>Coercion</code> protocol</li>
-<li><a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a> for the syntax of the <code>:paramters</code> (and <code>:responses</code>).</li>
+<li><a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a> for the <code>:parameters</code> and <code>:responses</code> syntax.</li>
+<li><a href="https://github.com/plumatic/schema" target="_blank">schema</a> and <a href="https://github.com/metosin/schema-tools" target="_blank">schema-tools</a> for Schema Coercion</li>
+<li><a href="https://github.com/metosin/spec-tools" target="_blank">spec-tools</a> for Spec Coercion</li>
 </ul>
 
                                 
@@ -693,7 +695,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2017-12-14T09:45:59.633Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-14T09:46:41.599Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

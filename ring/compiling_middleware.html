@@ -399,7 +399,7 @@
                 <a href="coercion.html">
             
                     
-                    Pluggable Coercion
+                    Ring Coercion
             
                 </a>
             
@@ -519,8 +519,8 @@
 <li>Reads the compiled route information on every request.</li>
 </ul>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-coerce-response
-  <span class="hljs-string">&quot;Pluggable response coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  <span class="hljs-string">&quot;Middleware for pluggable response coercion.
+  Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise will do nothing.&quot;</span>
   [handler]
   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
@@ -556,19 +556,18 @@
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> coerce-response-middleware
   <span class="hljs-string">&quot;Middleware for pluggable response coercion.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise does not mount.&quot;</span>
-  (<span class="hljs-name">middleware/create</span>
-    {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::coerce-response</span>
-     <span class="hljs-symbol">:compile</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [coercion responses opts]} _]
-                (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
-                  (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
-                    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
-                      (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
-                        ([request]
-                         (<span class="hljs-name">coerce-response</span> coercers request (<span class="hljs-name">handler</span> request)))
-                        ([request respond raise]
-                         (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %)) raise)))))))}))
+  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::coerce-response</span>
+   <span class="hljs-symbol">:compile</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [coercion responses]} opts]
+              (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
+                (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">coercion/response-coercers</span> coercion responses opts)]
+                  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
+                    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
+                      ([request]
+                       (<span class="hljs-name">coercion/coerce-response</span> coercers request (<span class="hljs-name">handler</span> request)))
+                      ([request respond raise]
+                       (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coercion/coerce-response</span> coercers request %)) raise)))))))})
 </code></pre>
 <p>The latter has 50% less code, is easier to reason about and is much faster.</p>
 
@@ -598,7 +597,7 @@
 
             
                 
-                <a href="coercion.html" class="navigation navigation-prev " aria-label="Previous page: Pluggable Coercion">
+                <a href="coercion.html" class="navigation navigation-prev " aria-label="Previous page: Ring Coercion">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
@@ -614,7 +613,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"next":{"title":"Performance","level":"1.6","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-12-14T09:45:59.633Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-14T09:46:41.599Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"next":{"title":"Performance","level":"1.6","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Ring Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
