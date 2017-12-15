@@ -70,10 +70,10 @@
     nil routes))
 
 #_(def reitit-tree
-  (reduce
-    (fn [acc [p d]]
-      (trie/insert acc p d))
-    nil routes))
+    (reduce
+      (fn [acc [p d]]
+        (trie/insert acc p d))
+      nil routes))
 
 (def reitit-segment
   (segment/create routes))
@@ -101,8 +101,8 @@
   ;; 0.8ms (return route-data)
   ;; 0.8ms (fix payloads)
   #_(cc/quick-bench
-    (dotimes [_ 1000]
-      (trie/lookup reitit-tree "/v1/orgs/1/topics" {})))
+      (dotimes [_ 1000]
+        (trie/lookup reitit-tree "/v1/orgs/1/topics" {})))
 
   ;;  0.9ms (initial)
   ;;  0.5ms (protocols)

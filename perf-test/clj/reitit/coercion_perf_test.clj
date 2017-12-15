@@ -4,7 +4,6 @@
             [reitit.perf-utils :refer :all]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
-            [spec-tools.data-spec :as ds]
             [muuntaja.middleware :as mm]
             [muuntaja.core :as m]
             [muuntaja.format.jsonista :as jsonista-format]
@@ -13,9 +12,7 @@
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
             [reitit.coercion :as coercion]
-            [reitit.ring :as ring]
-            [reitit.core :as r])
-  (:import (java.io ByteArrayInputStream)))
+            [reitit.ring :as ring]))
 
 ;;
 ;; start repl with `lein perf repl`

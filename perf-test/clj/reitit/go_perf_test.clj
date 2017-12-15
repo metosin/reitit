@@ -20,7 +20,7 @@
 ;;
 
 (defn h [path]
-  (fn [req]
+  (fn [_]
     {:status 200, :body path}))
 
 (defn add [handler routes route]
