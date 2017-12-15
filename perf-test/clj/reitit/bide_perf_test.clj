@@ -10,8 +10,7 @@
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
-            [io.pedestal.http.route :as route]
-            [reitit.core :as r]))
+            [io.pedestal.http.route :as route]))
 
 ;;
 ;; start repl with `lein perf repl`

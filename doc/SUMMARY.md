@@ -22,7 +22,7 @@
     * [Ring-router](ring/ring.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
     * [Data-driven Middleware](ring/data_driven_middleware.md)
-    * [Pluggable Coercion](ring/coercion.md)
+    * [Ring Coercion](ring/coercion.md)
     * [Compiling Middleware](ring/compiling_middleware.md)
 * [Performance](performance.md)
 * [FAQ](faq.md)

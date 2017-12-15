@@ -1,209 +1,168 @@
-# Pluggable Coercion
+# Ring Coercion
 
-Reitit provides pluggable parameter coercion via `reitit.coercion/Coercion` protocol, originally introduced in [compojure-api](https://clojars.org/metosin/compojure-api).
+Coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). Both request parameters (`:query`, `:body`, `:form`, `:header` and `:path`) and response `:body` can be coerced.
+
+To enable coercion, the following things need to be done:
+
+* Define a `reitit.coercion/Coercion` for the routes
+* Define types for the parameters and/or responses
+* Mount Coercion Middleware to apply to coercion
+* Use the coerced parameters in a handler/middleware
+
+## Define coercion
+
+`reitit.coercion/Coercion` is a protocol defining how types are defined, coerced and inventoried.
 
 Reitit ships with the following coercion modules:
 
-* `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema).
-* `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs).
+* `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema)
+* `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs)
 
-### Ring request and response coercion
+Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
 
-To use `Coercion` with Ring, one needs to do the following:
+# Defining parameters and responses
 
-1. Define parameters and responses as data into route data, in format adopted from [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example):
-  * `:parameters` map, with submaps for different parameters: `:query`, `:body`, `:form`, `:header` and `:path`. Parameters are defined in the format understood by the `Coercion`.
-  * `:responses` map, with response status codes as keys (or `:default` for "everything else") with maps with `:schema` and optionally `:description` as values.
-2. Set a `Coercion` implementation to route data under `:coercion`
-3. Mount request & response coercion middleware to the routes (can be done for all routes as the middleware are only mounted to routes which have the parameters &/ responses defined):
-  * `reitit.ring.coercion-middleware/coerce-request-middleware`
-  * `reitit.ring.coercion-middleware/coerce-response-middleware`
+Below is a ring route data defining [Plumatic Schema](https://github.com/plumatic/schema) coercion. It defines schemas for `:query`, `:body` and  `:path` parameters and for a successful response `:body`.
 
-If the request coercion succeeds, the coerced parameters are injected into request under `:parameters`.
+The coerced parameters can be read under `:parameters` key in the request.
 
-If either request or response coercion fails, an descriptive error is thrown. To turn the exceptions into http responses, one can also mount the `reitit.ring.coercion-middleware/coerce-exceptions-middleware` middleware
+```clj
+(require '[reitit.coercion.schema])
+(require '[schema.core :as s])
+
+(def plus-endpoint
+  {:coercion reitit.coercion.schema/coercion
+   :parameters {:query {:x s/Int}
+                :body {:y s/Int}
+                :path {:z s/Int}}
+   :responses {200 {:schema {:total PositiveInt}}}
+   :handler (fn [{:keys [parameters]}]
+              (let [total (+ (-> parameters :query :x)
+                             (-> parameters :body :y)
+                             (-> parameters :path :z))]
+                {:status 200
+                 :body {:total total}}))})
+```
+
+## Coercion Middleware
+
+Defining a coercion for a route data doesn't do anything, as it's just data. We have to attach some code to apply the actual coercion. We can use the middleware from `reitit.ring.coercion-middleware`:
+
+* `coerce-request-middleware` for the parameter coercion
+* `coerce-response-middleware` for the response coercion
+* `coerce-exceptions-middleware` to turn coercion exceptions into pretty responses
 
 ### Example with Schema
 
 ```clj
-(require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion-middleware :as coercion-middleware])
-(require '[reitit.coercion.schema :as schema])
-(require '[schema.core :as s])
+(require '[reitit.ring.coercion-middleware :as mw])
 
 (def app
   (ring/ring-handler
     (ring/router
       ["/api"
-       ["/ping" {:post {:parameters {:body {:x s/Int, :y s/Int}}
-                        :responses {200 {:schema {:total (s/constrained s/Int pos?)}}}
-                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                   {:status 200
-                                    :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              :coercion schema/coercion}})))
+       ["/ping" {:name ::ping
+                 :get (fn [_]
+                        {:status 200
+                         :body "pong"})}]
+       ["/plus/:z" {:name ::plus
+                    :post {:coercion reitit.coercion.schema/coercion
+                           :parameters {:query {:x s/Int}
+                                        :body {:y s/Int}
+                                        :path {:z s/Int}}
+                           :responses {200 {:schema {:total PositiveInt}}}
+                           :handler (fn [{:keys [parameters]}]
+                                      (let [total (+ (-> parameters :query :x)
+                                                     (-> parameters :body :y)
+                                                     (-> parameters :path :z))]
+                                        {:status 200
+                                         :body {:total total}}))}}]]
+      {:data {:middleware [mw/coerce-exceptions-middleware
+                           mw/coerce-request-middleware
+                           mw/coerce-response-middleware]}})))
 ```
 
 Valid request:
 
 ```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y 2}})
-; {:status 200
-;  :body {:total 3}}
+(app {:request-method :post
+      :uri "/api/plus/3"
+      :query-params {"x" "1"}
+      :body-params {:y 2}})
+; {:status 200, :body {:total 6}}
 ```
 
 Invalid request:
 
 ```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y "2"}})
+(app {:request-method :post
+      :uri "/api/plus/3"
+      :query-params {"x" "abba"}
+      :body-params {:y 2}})
 ; {:status 400,
-;  :body {:type :reitit.coercion/request-coercion
-;         :coercion :schema
-;         :in [:request :body-params]
-;         :value {:x 1, :y "2"}
-;         :schema {:x "Int", :y "Int"}
-;         :errors {:y "(not (integer? \"2\"))"}}}
+;  :body {:schema {:x "Int", "Any" "Any"},
+;         :errors {:x "(not (integer? \"abba\"))"},
+;         :type :reitit.coercion/request-coercion,
+;         :coercion :schema,
+;         :value {:x "abba"},
+;         :in [:request :query-params]}}
 ```
 
-### Example with data-specs
+Invalid response:
 
 ```clj
-(require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion-middleware :as coercion-middleware])
-(require '[reitit.coercion.spec :as spec])
-
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/api"
-       ["/ping" {:post {:parameters {:body {:x int?, :y int?}}
-                        :responses {200 {:schema {:total pos-int?}}}
-                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                   {:status 200
-                                    :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              :coercion spec/coercion}})))
+(app {:request-method :post
+      :uri "/api/plus/3"
+      :query-params {"x" "1"}
+      :body-params {:y -10}})
+; {:status 500,
+;  :body {:schema {:total "(constrained Int PositiveInt)"},
+;         :errors {:total "(not (PositiveInt -6))"},
+;         :type :reitit.coercion/response-coercion,
+;         :coercion :schema,
+;         :value {:total -6},
+;         :in [:response :body]}}
 ```
 
-Valid request:
+### Optimizations
+
+The coercion middleware are [compiled againts a route](compiling_middleware,md). This enables them to compile and cache the actual coercers for the defined models ahead of time. They also unmount if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+
+We can query the compiled middleware chain for the routes:
 
 ```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y 2}})
-; {:status 200
-;  :body {:total 3}}
+(require '[reitit.core :as r])
+
+(-> (ring/get-router app)
+    (r/match-by-name ::plus)
+    :result :post :middleware
+    (->> (mapv :name)))
+; [::mw/coerce-exceptions
+;  ::mw/coerce-parameters
+;  ::mw/coerce-response]
 ```
 
-Invalid request:
+Route without coercion defined:
 
 ```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y "2"}})
-; {:status 400,
-;  :body {:type ::coercion/request-coercion
-;         :coercion :spec
-;         :in [:request :body-params]
-;         :value {:x 1, :y "2"}
-;         :spec "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec37747/x :$spec37747/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})"
-;         :problems [{:path [:y]
-;                     :pred "clojure.core/int?"
-;                     :val "2"
-;                     :via [:$spec37747/y]
-;                     :in [:y]}]}}
+(app {:request-method :get, :uri "/api/ping"})
+; {:status 200, :body "pong"}
 ```
 
-### Example with clojure.spec
-
-Currently, `clojure.spec` [doesn't support runtime transformations via conforming](https://dev.clojure.org/jira/browse/CLJ-2116), so one needs to wrap all specs with `spec-tools.core/spec`.
+Has no mounted middleware:
 
 ```clj
-(require '[reitit.ring :as ring])
-(require '[reitit.ring.coercion-middleware :as coercion-middleware])
-(require '[reitit.coercion.spec :as spec])
-(require '[clojure.spec.alpha :as s])
-(require '[spec-tools.core :as st])
-
-(s/def ::x (st/spec int?))
-(s/def ::y (st/spec int?))
-(s/def ::total int?)
-(s/def ::request (s/keys :req-un [::x ::y]))
-(s/def ::response (s/keys :req-un [::total]))
-
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/api"
-       ["/ping" {:post {:parameters {:body ::request}
-                        :responses {200 {:schema ::response}}
-                        :handler (fn [{{{:keys [x y]} :body} :parameters}]
-                                   {:status 200
-                                    :body {:total (+ x y)}})}}]]
-      {:data {:middleware [coercion-middleware/coerce-exceptions-middleware
-                           coercion-middleware/coerce-request-middleware
-                           coercion-middleware/coerce-response-middleware]
-              :coercion spec/coercion}})))
+(-> (ring/get-router app)
+    (r/match-by-name ::ping)
+    :result :get :middleware
+    (->> (mapv :name)))
+; []
 ```
+## Thanks to
 
-Valid request:
+Most of the thing are just polished version of the original implementations. Thanks to:
 
-```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y 2}})
-; {:status 200
-;  :body {:total 3}}
-```
-
-Invalid request:
-
-```clj
-(app
-  {:request-method :post
-   :uri "/api/ping"
-   :body-params {:x 1, :y "2"}})
-; {:status 400,
-;  :body {:type ::coercion/request-coercion
-;         :coercion :spec
-;         :in [:request :body-params]
-;         :value {:x 1, :y "2"}
-;         :spec "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:reitit.coercion-test/x :reitit.coercion-test/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})"
-;         :problems [{:path [:y]
-;                     :pred "clojure.core/int?"
-;                     :val "2"
-;                     :via [::request ::y]
-;                     :in [:y]}]}}
-```
-
-### Custom coercion
-
-Both Schema and Spec Coercion can be configured via options, see the source code for details.
-
-To plug in new validation engine, see the
-`reitit.coercion/Coercion` protocol.
-
-```clj
-(defprotocol Coercion
-  "Pluggable coercion protocol"
-  (-get-name [this] "Keyword name for the coercion")
-  (-get-apidocs [this model data] "???")
-  (-compile-model [this model name] "Compiles a coercion model")
-  (-open-model [this model] "Returns a new map model which doesn't fail on extra keys")
-  (-encode-error [this error] "Converts error in to a serializable format")
-  (-request-coercer [this type model] "Returns a `value format => value` request coercion function")
-  (-response-coercer [this model] "Returns a `value format => value` response coercion function"))
-```
+* [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
+* [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the `:parameters` and `:responses` syntax.
+* [schema](https://github.com/plumatic/schema) and [schema-tools](https://github.com/metosin/schema-tools) for Schema Coercion
+* [spec-tools](https://github.com/metosin/spec-tools) for Spec Coercion

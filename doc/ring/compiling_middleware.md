@@ -14,8 +14,8 @@ To demonstrate the two approaches, below are response coercion middleware writte
 
 ```clj
 (defn wrap-coerce-response
-  "Pluggable response coercion middleware.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  "Middleware for pluggable response coercion.
+  Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise will do nothing."
   [handler]
   (fn
@@ -53,19 +53,18 @@ To demonstrate the two approaches, below are response coercion middleware writte
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
-  Expects a :coercion of type `reitit.coercion.protocol/Coercion`
+  Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise does not mount."
-  (middleware/create
-    {:name ::coerce-response
-     :compile (fn [{:keys [coercion responses opts]} _]
-                (if (and coercion responses)
-                  (let [coercers (response-coercers coercion responses opts)]
-                    (fn [handler]
-                      (fn
-                        ([request]
-                         (coerce-response coercers request (handler request)))
-                        ([request respond raise]
-                         (handler request #(respond (coerce-response coercers request %)) raise)))))))}))
+  {:name ::coerce-response
+   :compile (fn [{:keys [coercion responses]} opts]
+              (if (and coercion responses)
+                (let [coercers (coercion/response-coercers coercion responses opts)]
+                  (fn [handler]
+                    (fn
+                      ([request]
+                       (coercion/coerce-response coercers request (handler request)))
+                      ([request respond raise]
+                       (handler request #(respond (coercion/coerce-response coercers request %)) raise)))))))})
 ```
 
 The latter has 50% less code, is easier to reason about and is much faster.

@@ -12,7 +12,7 @@ By default, all wildcard and catch-all parameters are parsed as Strings:
     ["/:company/users/:user-id" ::user-view]))
 ```
 
-Match with the String `:params`:
+Match with the parsed `:params` as Strings:
 
 ```clj
 (r/match-by-path r "/metosin/users/123")
@@ -36,8 +36,8 @@ To enable parameter coercion, the following things need to be done:
 
 Reitit ships with the following coercion modules:
 
-* `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema).
-* `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs).
+* `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema)
+* `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs)
 
 Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
 
@@ -179,7 +179,9 @@ For a full-blown http-coercion, see the [ring coercion](../ring/coercion.md).
 
 ## Thanks to
 
-Most of the thing are just polished version of the original implementations. Big thanks to:
+Most of the thing are just polished version of the original implementations. Thanks to:
 
 * [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
-* [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the syntax of the `:paramters` (and `:responses`).
+* [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the `:parameters` and `:responses` syntax.
+* [schema](https://github.com/plumatic/schema) and [schema-tools](https://github.com/metosin/schema-tools) for Schema Coercion
+* [spec-tools](https://github.com/metosin/spec-tools) for Spec Coercion
