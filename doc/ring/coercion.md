@@ -145,7 +145,7 @@ We can query the compiled middleware chain for the routes:
     :result :post :middleware
     (->> (mapv :name)))
 ; [::mw/coerce-exceptions
-;  ::mw/coerce-parameters
+;  ::mw/coerce-request
 ;  ::mw/coerce-response]
 ```
 

@@ -8,7 +8,7 @@
             [muuntaja.core :as m]
             [muuntaja.format.jsonista :as jsonista-format]
             [jsonista.core :as j]
-            [reitit.coercion-middleware :as coercion-middleware]
+            [reitit.ring.coercion-middleware :as coercion-middleware]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
             [reitit.coercion :as coercion]
@@ -43,7 +43,7 @@
       ;; 4600ns
       (bench!
         "coerce-parameters"
-        (#'coercion-middleware/coerce-parameters coercers request))
+        (#'coercion-middleware/coerce-request-middleware coercers request))
 
       ;; 2700ns
       (bench!
@@ -87,7 +87,7 @@
   (-open-model [_ spec] spec)
   (-encode-error [_ error] error)
   (-request-coercer [_ type spec] (fn [value format] value))
-  (-response-coercer [this spec] (protocol/request-coercer this :response spec)))
+  (-response-coercer [this spec] (coercion/request-coercer this :response spec {})))
 
 (comment
   (doseq [coercion [nil (->NoOpCoercion) spec/coercion]]
@@ -172,11 +172,15 @@
       (cc/quick-bench (app req)))))
 
 (defn json-perf-test []
+  (title "json")
   (let [m (m/create (jsonista-format/with-json-format m/default-options))
         app (ring/ring-handler
               (ring/router
-                ["/plus" {:post {:handler (fn [{{:keys [x y]} :body-params}]
-                                            {:status 200, :body {:result (+ x y)}})}}]
+                ["/plus" {:post {:handler (fn [request]
+                                            (let [body (:body-params request)
+                                                  x (:x body)
+                                                  y (:y body)]
+                                              {:status 200, :body {:result (+ x y)}}))}}]
                 {:data {:middleware [[mm/wrap-format m]]}}))
         request {:request-method :post
                  :uri "/plus"
@@ -191,6 +195,7 @@
       (-> request app :body slurp))))
 
 (defn schema-json-perf-test []
+  (title "schema-json")
   (let [m (m/create (jsonista-format/with-json-format m/default-options))
         app (ring/ring-handler
               (ring/router
@@ -216,6 +221,7 @@
       (-> request app :body slurp))))
 
 (defn schema-perf-test []
+  (title "schema")
   (let [app (ring/ring-handler
               (ring/router
                 ["/plus" {:post {:responses {200 {:schema {:result Long}}}
@@ -239,6 +245,7 @@
       (call))))
 
 (defn data-spec-perf-test []
+  (title "data-spec")
   (let [app (ring/ring-handler
               (ring/router
                 ["/plus" {:post {:responses {200 {:schema {:result int?}}}
@@ -267,6 +274,7 @@
 (s/def ::response (s/keys :req-un [::result]))
 
 (defn spec-perf-test []
+  (title "spec")
   (let [app (ring/ring-handler
               (ring/router
                 ["/plus" {:post {:responses {200 {:schema ::response}}

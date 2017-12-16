@@ -21,7 +21,7 @@
   "Middleware for pluggable request coercion.
   Expects a :coercion of type `reitit.coercion/Coercion`
   and :parameters from route data, otherwise does not mount."
-  {:name ::coerce-parameters
+  {:name ::coerce-request
    :compile (fn [{:keys [coercion parameters]} opts]
               (if (and coercion parameters)
                 (let [coercers (coercion/request-coercers coercion parameters opts)]
