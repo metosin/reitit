@@ -34,6 +34,14 @@
         :routes (s/coll-of ::route :into [])))
 
 ;;
+;; Default data
+;;
+
+(s/def ::name keyword?)
+(s/def ::handler fn?)
+(s/def ::default-data (s/keys :opt-un [::name ::handler]))
+
+;;
 ;; router
 ;;
 
@@ -62,3 +70,37 @@
         :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
                     :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
         :ret ::router)
+
+;;
+;; Route data validator
+;;
+
+
+(defrecord Problem [path scope data spec problems])
+
+(defn problems-str [problems explain]
+  (apply str "Invalid route data:\n\n"
+         (mapv
+           (fn [{:keys [path scope data spec]}]
+             (str "-- On route --------------------\n\n"
+                  (pr-str path) (if scope (str " " (pr-str scope))) "\n\n" (explain spec data) "\n"))
+           problems)))
+
+(defn throw-on-problems! [problems explain]
+  (throw
+    (ex-info
+      (problems-str problems explain)
+      {:problems problems})))
+
+(defn validate-route-data [routes spec]
+  (->> (for [[p d _] routes]
+         (when-let [problems (and spec (s/explain-data spec d))]
+           (->Problem p nil d spec problems)))
+       (keep identity) (seq)))
+
+(defn validate-spec!
+  [routes {:keys [spec ::explain]
+           :or {explain s/explain-str
+                spec ::default-data}}]
+  (when-let [problems (validate-route-data routes spec)]
+    (throw-on-problems! problems explain)))

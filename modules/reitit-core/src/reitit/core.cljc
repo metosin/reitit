@@ -336,9 +336,11 @@
   | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:data`      | Initial route data (default `{}`)
+  | `:spec`      | clojure.spec definition for a route data, see `reitit.spec` on how to use this
   | `:expand`    | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => result` to compile a route handler
+  | `:validate`  | Function of `routes opts => side-effect` to validate route (data)
   | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
   | `:router`    | Function of `routes opts => router` to override the actual router implementation"
   ([raw-routes]
@@ -357,6 +359,9 @@
                   (not wilds?) lookup-router
                   all-wilds? segment-router
                   :else mixed-router)]
+
+     (when-let [validate (:validate opts)]
+       (validate routes opts))
 
      (when-let [conflicts (:conflicts opts)]
        (when conflicting (conflicts conflicting)))
