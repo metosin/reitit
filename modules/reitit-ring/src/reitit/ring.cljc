@@ -6,6 +6,7 @@
 
 (def http-methods #{:get :head :patch :delete :options :post :put})
 (defrecord Methods [get head post put delete trace options connect patch any])
+(defrecord Endpoint [data handler path method middleware])
 
 (defn- group-keys [data]
   (reduce-kv
@@ -58,14 +59,19 @@
               acc)) data http-methods)])
 
 (defn compile-result [[path data] opts]
-  (let [[top childs] (group-keys data)]
+  (let [[top childs] (group-keys data)
+        ->endpoint (fn [p d m s]
+                     (-> (middleware/compile-result [p d] opts s)
+                         (map->Endpoint)
+                         (assoc :path p)
+                         (assoc :method m)))]
     (if-not (seq childs)
-      (map->Methods {:any (middleware/compile-result [path top] opts)})
+      (map->Methods {:any (->endpoint path top :any nil)})
       (reduce-kv
         (fn [acc method data]
           (let [data (meta-merge top data)]
-            (assoc acc method (middleware/compile-result [path data] opts method))))
-        (map->Methods {:any (if (:handler top) (middleware/compile-result [path data] opts))})
+            (assoc acc method (->endpoint path data method method))))
+        (map->Methods {:any (if (:handler top) (->endpoint path data :any nil))})
         childs))))
 
 (defn router
