@@ -42,7 +42,7 @@
                                   [metosin/reitit]
                                   [metosin/schema-tools "0.10.0-SNAPSHOT"]
 
-                                  [expound "0.3.4"]
+                                  [expound "0.4.0"]
                                   [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
