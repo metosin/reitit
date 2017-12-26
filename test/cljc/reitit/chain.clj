@@ -10,6 +10,7 @@
 ;
 ; You must not remove this notice, or any other, from this software.
 
+(comment
 (ns reitit.chain
   "Interceptor pattern. Executes a chain of Interceptor functions on a
   common \"context\" map, maintaining a virtual \"stack\", with error
@@ -378,3 +379,4 @@
        context)))
   ([context interceptors]
    (execute (enqueue context interceptors))))
+)
