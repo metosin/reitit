@@ -8,8 +8,7 @@
 ;; routes
 ;;
 
-(s/def ::path (s/with-gen (s/and string? #(or (str/blank? %) (str/starts-with? % "/")))
-                          #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
+(s/def ::path (s/with-gen string? #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
 (s/def ::arg (s/and any? (complement vector?)))
 (s/def ::data (s/map-of keyword? any?))
@@ -82,7 +81,7 @@
   (apply str "Invalid route data:\n\n"
          (mapv
            (fn [{:keys [path scope data spec]}]
-             (str "-- On route --------------------\n\n"
+             (str "-- On route -----------------------\n\n"
                   (pr-str path) (if scope (str " " (pr-str scope))) "\n\n" (explain spec data) "\n"))
            problems)))
 
