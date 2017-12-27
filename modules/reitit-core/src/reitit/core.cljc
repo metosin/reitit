@@ -340,8 +340,8 @@
   | `:expand`    | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => result` to compile a route handler
-  | `:validate`  | Function of `routes opts => side-effect` to validate route (data)
-  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
+  | `:validate`  | Function of `routes opts => ()` to validate route (data) via side-effects
+  | `:conflicts` | Function of `{route #{route}} => ()` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
   | `:router`    | Function of `routes opts => router` to override the actual router implementation"
   ([raw-routes]
    (router raw-routes {}))
