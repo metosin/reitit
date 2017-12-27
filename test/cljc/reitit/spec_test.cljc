@@ -20,6 +20,8 @@
 
         ["/api" {}]
 
+        ["api" {}]
+
         [["/api" {}]]
 
         ["/api"
@@ -34,9 +36,6 @@
                 #"Call to #'reitit.core/router did not conform to spec"
                 (r/router
                   data)))
-
-          ;; missing slash
-          ["invalid" {}]
 
           ;; path
           [:invalid {}]
@@ -68,7 +67,7 @@
               (r/router
                 ["/api"] opts)))
 
-        {:path "api"}
+        {:path :api}
         {:path nil}
         {:data nil}
         {:expand nil}
