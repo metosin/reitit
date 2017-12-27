@@ -1,8 +1,8 @@
 # Route Conflicts
 
-Many routing libraries allow multiple matches for a single path lookup. Usually, the first match is used and the rest are effecively unreachanle. This is not good, especially if route tree is merged from multiple sources.
+Most routing libraries allow conflicting paths within a router. On lookup, the first match is used making rest of the matching routes effecively unreachable. This is not good, especially if route tree is merged from multiple sources.
 
-Reitit resolves this by running explicit conflicit resolution when a `router` is called. Conflicting routes are passed into a `:conflicts` callback. Default implementation throws `ex-info` with a descriptive message.
+Reitit resolves this by running explicit conflicit resolution when a Router is created. Conflicting routes are passed into a `:conflicts` callback. Default implementation throws `ex-info` with a descriptive message.
 
 Examples router with conflicting routes:
 
