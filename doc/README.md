@@ -6,11 +6,12 @@
 * [Route conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
-* [Ring-router](./ring/ring.html) with [data-driven middleware](./ring/data_driven_middleware.html)
-* [Pluggable coercion](./coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Extendable
 * Modular
 * [Fast](performance.md)
+
+There are also [Ring-router](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md) as a separate module.
 
 To use Reitit, add the following dependecy to your project:
 
@@ -23,7 +24,7 @@ Optionally, the parts can be required separately:
 ```clj
 [metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
 [metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
-[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec-coercion
+[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec coercion
 [metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion
 ```
 
