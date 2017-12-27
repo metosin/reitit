@@ -1,4 +1,5 @@
 (ns reitit.segment
+  (:refer-clojure :exclude [-lookup])
   (:require [reitit.impl :as impl]
             [clojure.string :as str]))
 

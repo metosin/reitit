@@ -1,5 +1,4 @@
 (ns reitit.core
-  (:refer-clojure :exclude [-lookup])
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
             [reitit.segment :as segment]
