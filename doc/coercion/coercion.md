@@ -138,7 +138,7 @@ We get the coerced paremeters back. If a coercion fails, a typed (`:reitit.coerc
 
 ## Full example
 
-Here's an full example for doing both routing and coercion with Reitit:
+Here's an full example for doing routing and coercion with Reitit and Schema:
 
 ```clj
 (require '[reitit.coercion.schema])
@@ -179,9 +179,6 @@ For a full-blown http-coercion, see the [ring coercion](../ring/coercion.md).
 
 ## Thanks to
 
-Most of the thing are just polished version of the original implementations. Thanks to:
-
 * [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
-* [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the `:parameters` and `:responses` syntax.
 * [schema](https://github.com/plumatic/schema) and [schema-tools](https://github.com/metosin/schema-tools) for Schema Coercion
 * [spec-tools](https://github.com/metosin/spec-tools) for Spec Coercion

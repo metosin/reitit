@@ -7,10 +7,11 @@ A friendly data-driven router for Clojure(Script).
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
+
+There are also [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html) as a separate module.
 
 See the [full documentation](https://metosin.github.io/reitit/) for details.
 
@@ -54,6 +55,74 @@ Optionally, the parts can be required separately:
 ;        :result nil,
 ;        :params {:id 2},
 ;        :path "/api/orders/2"}
+```
+
+## Ring example
+
+A Ring routing app with input & output coercion using [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs).
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.coercion.spec])
+(require '[reitit.ring.coercion-middleware :as mw])
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api"
+       ["/math" {:name ::math
+                 :get {:coercion reitit.coercion.spec/coercion
+                       :parameters {:query {:x int?, :y int?}}
+                       :responses {200 {:schema {:total pos-int?}}}
+                       :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                                  {:status 200
+                                   :body {:total (+ x y)}})}}]]
+      {:data {:middleware [mw/coerce-exceptions-middleware
+                           mw/coerce-request-middleware
+                           mw/coerce-response-middleware]}})))
+```
+
+Valid request:
+
+```clj
+(app {:request-method :get
+      :uri "/api/math"
+      :query-params {:x "1", :y "2"}})
+; {:status 200
+;  :body {:total 3}}
+```
+
+Invalid request:
+
+```clj
+(app {:request-method :get
+      :uri "/api/math"
+      :query-params {:x "1", :y "a"}})
+;{:status 400,
+; :body {:type :reitit.coercion/request-coercion,
+;        :coercion :spec,
+;        :spec "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec20745/x :$spec20745/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})",
+;        :problems [{:path [:y], 
+;                    :pred "clojure.core/int?", 
+;                    :val "a", 
+;                    :via [:$spec20745/y], 
+;                    :in [:y]}],
+;        :value {:x "1", :y "a"},
+;        :in [:request :query-params]}}
+
+
+```
+
+Reverse routing:
+
+```clj
+(require '[reitit.core :as r])
+
+(-> app 
+    (ring/get-router) 
+    (r/match-by-name ::math) 
+    :path)
+;; "/api/math"
 ```
 
 ## More info

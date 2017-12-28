@@ -3,7 +3,8 @@
             [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
             [clojure.spec.alpha :as s]
             [reitit.core :as r]
-            [reitit.spec :as spec])
+            [reitit.spec :as rs]
+            [expound.alpha :as e])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -18,6 +19,8 @@
         (is (= true (r/router? (r/router data))))
 
         ["/api" {}]
+
+        ["api" {}]
 
         [["/api" {}]]
 
@@ -34,9 +37,6 @@
                 (r/router
                   data)))
 
-          ;; missing slash
-          ["invalid" {}]
-
           ;; path
           [:invalid {}]
 
@@ -45,7 +45,7 @@
            ["/ipa"]])))
 
     (testing "routes conform to spec (can't spec protocol functions)"
-      (is (= true (s/valid? ::spec/routes (r/routes (r/router ["/ping"]))))))
+      (is (= true (s/valid? ::rs/routes (r/routes (r/router ["/ping"]))))))
 
     (testing "options"
 
@@ -67,7 +67,7 @@
               (r/router
                 ["/api"] opts)))
 
-        {:path "api"}
+        {:path :api}
         {:path nil}
         {:data nil}
         {:expand nil}
@@ -75,3 +75,28 @@
         {:compile nil}
         {:conflicts nil}
         {:router nil}))))
+
+(deftest route-data-validation-test
+  (testing "validation is turned off by default"
+    (is (true? (r/router? (r/router
+                            ["/api" {:handler "identity"}])))))
+
+  (testing "with default spec validates :name and :handler"
+    (is (thrown-with-msg?
+          ExceptionInfo
+          #"Invalid route data"
+          (r/router
+            ["/api" {:handler "identity"}]
+            {:validate rs/validate-spec!})))
+    (is (thrown-with-msg?
+          ExceptionInfo
+          #"Invalid route data"
+          (r/router
+            ["/api" {:name "kikka"}]
+            {:validate rs/validate-spec!}))))
+
+  (testing "spec can be overridden"
+    (is (true? (r/router? (r/router
+                            ["/api" {:handler "identity"}]
+                            {:spec any?
+                             :validate rs/validate-spec!}))))))

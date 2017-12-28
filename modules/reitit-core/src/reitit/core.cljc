@@ -142,8 +142,7 @@
   ([routes]
    (linear-router routes {}))
   ([routes opts]
-   (let [compiled (compile-routes routes opts)
-         names (find-names routes opts)
+   (let [names (find-names routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [params] :as route} (impl/create [p data result])
@@ -152,7 +151,7 @@
                                 (->PartialMatch p data result % params))]
                        [(conj pl route)
                         (if name (assoc nl name f) nl)]))
-                   [[] {}] compiled)
+                   [[] {}] routes)
          lookup (impl/fast-map nl)]
      ^{:type ::router}
      (reify
@@ -160,7 +159,7 @@
        (router-name [_]
          :linear-router)
        (routes [_]
-         compiled)
+         routes)
        (options [_]
          opts)
        (route-names [_]
@@ -190,14 +189,13 @@
          (str "can't create :lookup-router with wildcard routes: " wilds)
          {:wilds wilds
           :routes routes})))
-   (let [compiled (compile-routes routes opts)
-         names (find-names routes opts)
+   (let [names (find-names routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      [(assoc pl p (->Match p data result {} p))
                       (if name
                         (assoc nl name #(->Match p data result % p))
-                        nl)]) [{} {}] compiled)
+                        nl)]) [{} {}] routes)
          data (impl/fast-map pl)
          lookup (impl/fast-map nl)]
      ^{:type ::router}
@@ -205,7 +203,7 @@
        (router-name [_]
          :lookup-router)
        (routes [_]
-         compiled)
+         routes)
        (options [_]
          opts)
        (route-names [_]
@@ -225,8 +223,7 @@
   ([routes]
    (segment-router routes {}))
   ([routes opts]
-   (let [compiled (compile-routes routes opts)
-         names (find-names routes opts)
+   (let [names (find-names routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [params] :as route} (impl/create [p data result])
@@ -235,7 +232,7 @@
                                 (->PartialMatch p data result % params))]
                        [(segment/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
-                   [nil {}] compiled)
+                   [nil {}] routes)
          lookup (impl/fast-map nl)]
      ^{:type ::router}
      (reify
@@ -243,7 +240,7 @@
        (router-name [_]
          :segment-router)
        (routes [_]
-         compiled)
+         routes)
        (options [_]
          opts)
        (route-names [_]
@@ -272,7 +269,7 @@
          (str ":single-static-path-router requires exactly 1 static route: " routes)
          {:routes routes})))
    (let [[n :as names] (find-names routes opts)
-         [[p data result] :as compiled] (compile-routes routes opts)
+         [[p data result] :as compiled] routes
          p #?(:clj (.intern ^String p) :cljs p)
          match (->Match p data result {} p)]
      ^{:type ::router}
@@ -280,7 +277,7 @@
        (router-name [_]
          :single-static-path-router)
        (routes [_]
-         compiled)
+         routes)
        (options [_]
          opts)
        (route-names [_]
@@ -304,7 +301,6 @@
    (mixed-router routes {}))
   ([routes opts]
    (let [{wild true, lookup false} (group-by impl/wild-route? routes)
-         compiled (compile-routes routes opts)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (segment-router wild opts)
          static-router (->static-router lookup opts)
@@ -314,7 +310,7 @@
        (router-name [_]
          :mixed-router)
        (routes [_]
-         compiled)
+         routes)
        (options [_]
          opts)
        (route-names [_]
@@ -339,10 +335,12 @@
   | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:data`      | Initial route data (default `{}`)
+  | `:spec`      | clojure.spec definition for a route data, see `reitit.spec` on how to use this
   | `:expand`    | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => result` to compile a route handler
-  | `:conflicts` | Function of `{route #{route}} => side-effect` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
+  | `:validate`  | Function of `routes opts => ()` to validate route (data) via side-effects
+  | `:conflicts` | Function of `{route #{route}} => ()` to handle conflicting routes (default `reitit.core/throw-on-conflicts!`)
   | `:router`    | Function of `routes opts => router` to override the actual router implementation"
   ([raw-routes]
    (router raw-routes {}))
@@ -350,6 +348,7 @@
    (let [{:keys [router] :as opts} (meta-merge default-router-options opts)
          routes (resolve-routes raw-routes opts)
          conflicting (conflicting-routes routes)
+         routes (compile-routes routes opts)
          wilds? (boolean (some impl/wild-route? routes))
          all-wilds? (every? impl/wild-route? routes)
          router (cond
@@ -359,6 +358,9 @@
                   (not wilds?) lookup-router
                   all-wilds? segment-router
                   :else mixed-router)]
+
+     (when-let [validate (:validate opts)]
+       (validate routes opts))
 
      (when-let [conflicts (:conflicts opts)]
        (when conflicting (conflicts conflicting)))

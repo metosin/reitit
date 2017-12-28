@@ -30,11 +30,7 @@
 
 (defn bench-routes [routes req f]
   (let [router (reitit/router routes)
-        urls (valid-urls router)
-        random-url #(rand-nth urls)
-        log-time #(let [now (System/nanoTime)] (%) (- (System/nanoTime) now))
-        total 10000
-        dropped (int (* total 0.45))]
+        urls (valid-urls router)]
     (mapv
       (fn [path]
         (let [request (map->Request (req path))

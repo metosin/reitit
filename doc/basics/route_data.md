@@ -1,6 +1,6 @@
 # Route Data
 
-Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. This enables  co-existence of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. Together with `clojure.spec` -validation this enables co-existence of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
 
 Routes can have a non-sequential route argument that is expanded into route data map when a router is created.
 
@@ -75,8 +75,6 @@ Resolved route tree:
 By default, `reitit/Expand` protocol is used to expand the route arguments. It expands keywords into `:name` and functions into `:handler` key in the route data map. It's easy to add custom expanders and one can chenge the whole expand implementation via [router options](../advanced/configuring_routers.md).
 
 ```clj
-(require '[reitit.core :as r])
-
 (def router
   (r/router
     [["/ping" ::ping]

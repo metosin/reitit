@@ -7,7 +7,7 @@ install:
   - npm install
 script:
   - ./scripts/test.sh $TEST
-  - ./scripts/submit-to-coveralls.sh $TEST
+#  - ./scripts/submit-to-coveralls.sh $TEST
 env:
   matrix:
   - TEST=clj

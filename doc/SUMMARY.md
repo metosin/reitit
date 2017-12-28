@@ -7,6 +7,7 @@
     * [Path-based Routing](basics/path_based_routing.md)
     * [Name-based Routing](basics/name_based_routing.md)
     * [Route Data](basics/route_data.md)
+    * [Route Data Validation](basics/route_data_validation.md)
     * [Route Conflicts](basics/route_conflicts.md)
 * [Coercion](coercion/README.md)
     * [Coercion Explained](coercion/coercion.md)

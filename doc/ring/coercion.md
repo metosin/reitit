@@ -52,10 +52,17 @@ Defining a coercion for a route data doesn't do anything, as it's just data. We 
 * `coerce-response-middleware` for the response coercion
 * `coerce-exceptions-middleware` to turn coercion exceptions into pretty responses
 
-### Example with Schema
+### Full example
+
+Here's an full example for applying coercion with Reitit, Ring and Schema:
 
 ```clj
 (require '[reitit.ring.coercion-middleware :as mw])
+(require '[reitit.coercion.schema])
+(require '[reitit.ring :as ring])
+(require '[schema.core :as s])
+
+(def PositiveInt (s/constrained s/Int pos? 'PositiveInt))
 
 (def app
   (ring/ring-handler
@@ -126,7 +133,7 @@ Invalid response:
 
 ### Optimizations
 
-The coercion middleware are [compiled againts a route](compiling_middleware,md). This enables them to compile and cache the actual coercers for the defined models ahead of time. They also unmount if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+The coercion middleware are [compiled againts a route](compiling_middleware,md). In the compile step the actual coercer implementations are compiled for the defined models. Also, the mw doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
 
 We can query the compiled middleware chain for the routes:
 
@@ -138,7 +145,7 @@ We can query the compiled middleware chain for the routes:
     :result :post :middleware
     (->> (mapv :name)))
 ; [::mw/coerce-exceptions
-;  ::mw/coerce-parameters
+;  ::mw/coerce-request
 ;  ::mw/coerce-response]
 ```
 
@@ -159,8 +166,6 @@ Has no mounted middleware:
 ; []
 ```
 ## Thanks to
-
-Most of the thing are just polished version of the original implementations. Thanks to:
 
 * [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
 * [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the `:parameters` and `:responses` syntax.

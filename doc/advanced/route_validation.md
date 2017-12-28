@@ -2,8 +2,6 @@
 
 Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) definitions for raw-routes, routes, router and router options.
 
-**NOTE:** Use of specs requires to use Clojure 1.9.0 or higher.
-
 ## Example
 
 ```clj
@@ -26,12 +24,12 @@ Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) 
 
 ## At development time
 
-`reitit.core/router` can be instrumented and use something like [expound](https://github.com/bhb/expound) to pretty-print the spec problems.
+`reitit.core/router` can be instrumented and use a tool like [expound](https://github.com/bhb/expound) to pretty-print the spec problems.
 
 First add a `:dev` dependency to:
 
 ```clj
-[expound "0.3.0"] ; or higher
+[expound "0.4.0"] ; or higher
 ```
 
 Some bootstrapping:
@@ -162,7 +160,3 @@ And we are ready to go:
 ; -------------------------
 ; Detected 2 errors
 ```
-
-# Validating route data
-
-*TODO*

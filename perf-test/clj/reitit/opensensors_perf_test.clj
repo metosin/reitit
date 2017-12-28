@@ -1,22 +1,17 @@
 (ns reitit.opensensors-perf-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+  (:require [reitit.perf-utils :refer :all]
             [cheshire.core :as json]
             [clojure.string :as str]
             [reitit.core :as reitit]
             [reitit.ring :as ring]
 
             [bidi.bidi :as bidi]
-
             [ataraxy.core :as ataraxy]
-
             [compojure.core :refer [routes context ANY]]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
-            [io.pedestal.http.route.router :as pedestal]
-            [io.pedestal.http.route :as route]))
+            [io.pedestal.http.route.router :as pedestal]))
 
 ;;
 ;; start repl with `lein perf repl`
