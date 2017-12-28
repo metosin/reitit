@@ -181,7 +181,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_data_validation.html">
+            
+                <a href="../basics/route_data_validation.html">
+            
+                    
+                    Route Data Validation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.7" data-path="../basics/route_conflicts.html">
             
                 <a href="../basics/route_conflicts.html">
             
@@ -552,8 +565,14 @@
 <li><code>coerce-response-middleware</code> for the response coercion</li>
 <li><code>coerce-exceptions-middleware</code> to turn coercion exceptions into pretty responses</li>
 </ul>
-<h3 id="example-with-schema">Example with Schema</h3>
+<h3 id="full-example">Full example</h3>
+<p>Here&apos;s an full example for applying coercion with Reitit, Ring and Schema:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion-middleware <span class="hljs-symbol">:as</span> mw])
+(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
+(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> PositiveInt (<span class="hljs-name">s/constrained</span> s/Int pos? &apos;PositiveInt))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
@@ -613,7 +632,7 @@
 <span class="hljs-comment">;         :in [:response :body]}}</span>
 </code></pre>
 <h3 id="optimizations">Optimizations</h3>
-<p>The coercion middleware are <a href="compiling_middleware,md">compiled againts a route</a>. This enables them to compile and cache the actual coercers for the defined models ahead of time. They also unmount if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
+<p>The coercion middleware are <a href="compiling_middleware,md">compiled againts a route</a>. In the compile step the actual coercer implementations are compiled for the defined models. Also, the mw doesn&apos;t mount itself if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
 <p>We can query the compiled middleware chain for the routes:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
@@ -622,7 +641,7 @@
     <span class="hljs-symbol">:result</span> <span class="hljs-symbol">:post</span> <span class="hljs-symbol">:middleware</span>
     (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;&gt;</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">mapv</span></span> <span class="hljs-symbol">:name</span>)))
 <span class="hljs-comment">; [::mw/coerce-exceptions</span>
-<span class="hljs-comment">;  ::mw/coerce-parameters</span>
+<span class="hljs-comment">;  ::mw/coerce-request</span>
 <span class="hljs-comment">;  ::mw/coerce-response]</span>
 </code></pre>
 <p>Route without coercion defined:</p>
@@ -637,7 +656,6 @@
 <span class="hljs-comment">; []</span>
 </code></pre>
 <h2 id="thanks-to">Thanks to</h2>
-<p>Most of the thing are just polished version of the original implementations. Thanks to:</p>
 <ul>
 <li><a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a> for the initial <code>Coercion</code> protocol</li>
 <li><a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a> for the <code>:parameters</code> and <code>:responses</code> syntax.</li>
@@ -687,7 +705,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Ring Coercion","level":"1.5.4","depth":2,"next":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring Coercion","level":"1.5.4","depth":2,"next":{"title":"Compiling Middleware","level":"1.5.5","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2017-12-28T08:59:21.907Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-28T08:59:59.416Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

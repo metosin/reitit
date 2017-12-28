@@ -181,7 +181,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_data_validation.html">
+            
+                <a href="../basics/route_data_validation.html">
+            
+                    
+                    Route Data Validation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.7" data-path="../basics/route_conflicts.html">
             
                 <a href="../basics/route_conflicts.html">
             
@@ -511,7 +524,6 @@
                                 
                                 <h1 id="route-validation">Route validation</h1>
 <p>Namespace <code>reitit.spec</code> contains <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> definitions for raw-routes, routes, router and router options.</p>
-<p><strong>NOTE:</strong> Use of specs requires to use Clojure 1.9.0 or higher.</p>
 <h2 id="example">Example</h2>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
 (<span class="hljs-name">require</span> &apos;[reitit.spec <span class="hljs-symbol">:as</span> spec])
@@ -530,9 +542,9 @@
 <span class="hljs-comment">; :clojure.spec.alpha/value  [&quot;tenant1&quot; :user/tenant1]</span>
 </code></pre>
 <h2 id="at-development-time">At development time</h2>
-<p><code>reitit.core/router</code> can be instrumented and use something like <a href="https://github.com/bhb/expound" target="_blank">expound</a> to pretty-print the spec problems.</p>
+<p><code>reitit.core/router</code> can be instrumented and use a tool like <a href="https://github.com/bhb/expound" target="_blank">expound</a> to pretty-print the spec problems.</p>
 <p>First add a <code>:dev</code> dependency to:</p>
-<pre><code class="lang-clj">[expound <span class="hljs-string">&quot;0.3.0&quot;</span>] <span class="hljs-comment">; or higher</span>
+<pre><code class="lang-clj">[expound <span class="hljs-string">&quot;0.4.0&quot;</span>] <span class="hljs-comment">; or higher</span>
 </code></pre>
 <p>Some bootstrapping:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.test.alpha <span class="hljs-symbol">:as</span> stest])
@@ -657,8 +669,6 @@
 <span class="hljs-comment">; -------------------------</span>
 <span class="hljs-comment">; Detected 2 errors</span>
 </code></pre>
-<h1 id="validating-route-data">Validating route data</h1>
-<p><em>TODO</em></p>
 
                                 
                                 </section>
@@ -702,7 +712,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Validation","level":"1.4.3","depth":2,"next":{"title":"Interceptors","level":"1.4.4","depth":2,"path":"advanced/interceptors.md","ref":"advanced/interceptors.md","articles":[]},"previous":{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/route_validation.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Validation","level":"1.4.3","depth":2,"next":{"title":"Interceptors","level":"1.4.4","depth":2,"path":"advanced/interceptors.md","ref":"advanced/interceptors.md","articles":[]},"previous":{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/route_validation.md","mtime":"2017-12-28T08:59:21.907Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-28T08:59:59.416Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

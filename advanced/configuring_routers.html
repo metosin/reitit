@@ -181,7 +181,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="../basics/route_conflicts.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_data_validation.html">
+            
+                <a href="../basics/route_data_validation.html">
+            
+                    
+                    Route Data Validation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2.7" data-path="../basics/route_conflicts.html">
             
                 <a href="../basics/route_conflicts.html">
             
@@ -510,7 +523,7 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="configuring-routers">Configuring Routers</h1>
-<p>Routers can be configured via options. Options allow things like <a href="https://clojure.org/about/spec" target="_blank"><code>clojure.spec</code></a> validation for route data and fast, compiled handlers. The following options are available for the <code>reitit.core/router</code>:</p>
+<p>Routers can be configured via options. The following options are available for the <code>reitit.core/router</code>:</p>
 <table>
 <thead>
 <tr>
@@ -532,6 +545,10 @@
 <td>Initial route data (default <code>{}</code>)</td>
 </tr>
 <tr>
+<td><code>:spec</code></td>
+<td>clojure.spec definition for a route data, see <code>reitit.spec</code> on how to use this</td>
+</tr>
+<tr>
 <td><code>:expand</code></td>
 <td>Function of <code>arg opts =&gt; data</code> to expand route arg to route data (default <code>reitit.core/expand</code>)</td>
 </tr>
@@ -544,8 +561,12 @@
 <td>Function of <code>route opts =&gt; result</code> to compile a route handler</td>
 </tr>
 <tr>
+<td><code>:validate</code></td>
+<td>Function of <code>routes opts =&gt; ()</code> to validate route (data) via side-effects</td>
+</tr>
+<tr>
 <td><code>:conflicts</code></td>
-<td>Function of <code>{route #{route}} =&gt; side-effect</code> to handle conflicting routes (default <code>reitit.core/throw-on-conflicts!</code>)</td>
+<td>Function of <code>{route #{route}} =&gt; ()</code> to handle conflicting routes (default <code>reitit.core/throw-on-conflicts!</code>)</td>
 </tr>
 <tr>
 <td><code>:router</code></td>
@@ -596,7 +617,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Configuring Routers","level":"1.4.1","depth":2,"next":{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Advanced","level":"1.4","depth":1,"path":"advanced/README.md","ref":"advanced/README.md","articles":[{"title":"Configuring Routers","level":"1.4.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},{"title":"Route Validation","level":"1.4.3","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},{"title":"Interceptors","level":"1.4.4","depth":2,"path":"advanced/interceptors.md","ref":"advanced/interceptors.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/configuring_routers.md","mtime":"2017-12-15T06:21:24.497Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-15T06:22:19.661Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Configuring Routers","level":"1.4.1","depth":2,"next":{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Advanced","level":"1.4","depth":1,"path":"advanced/README.md","ref":"advanced/README.md","articles":[{"title":"Configuring Routers","level":"1.4.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},{"title":"Different Routers","level":"1.4.2","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},{"title":"Route Validation","level":"1.4.3","depth":2,"path":"advanced/route_validation.md","ref":"advanced/route_validation.md","articles":[]},{"title":"Interceptors","level":"1.4.4","depth":2,"path":"advanced/interceptors.md","ref":"advanced/interceptors.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/configuring_routers.md","mtime":"2017-12-28T08:59:21.907Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-12-28T08:59:59.416Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
