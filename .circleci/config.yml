@@ -18,9 +18,9 @@ jobs:
           command: ./scripts/test.sh clj
       - store_test_results:
          path: ~/test/target/junit.xml
-      - run:
-          name: Run coverage
-          command: ./scripts/submit-to-coveralls.sh clj
+#      - run:
+#          name: Run coverage
+#          command: ./scripts/submit-to-coveralls.sh clj
       - save_cache:
           key: 'v1-test-{{ checksum "project.clj" }}'
           paths:
