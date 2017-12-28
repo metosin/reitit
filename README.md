@@ -70,8 +70,7 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
   (ring/ring-handler
     (ring/router
       ["/api"
-       ["/math" {:name ::math
-                 :get {:coercion reitit.coercion.spec/coercion
+       ["/math" {:get {:coercion reitit.coercion.spec/coercion
                        :parameters {:query {:x int?, :y int?}}
                        :responses {200 {:schema {:total pos-int?}}}
                        :handler (fn [{{{:keys [x y]} :query} :parameters}]
@@ -111,18 +110,6 @@ Invalid request:
 ;        :in [:request :query-params]}}
 
 
-```
-
-Reverse routing:
-
-```clj
-(require '[reitit.core :as r])
-
-(-> app 
-    (ring/get-router) 
-    (r/match-by-name ::math) 
-    :path)
-;; "/api/math"
 ```
 
 ## More info
