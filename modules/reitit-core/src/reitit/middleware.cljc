@@ -6,7 +6,7 @@
 (defprotocol IntoMiddleware
   (into-middleware [this data opts]))
 
-(defrecord Middleware [name wrap])
+(defrecord Middleware [name wrap spec])
 (defrecord Endpoint [data handler middleware])
 
 (def ^:dynamic *max-compile-depth* 10)
