@@ -1,4 +1,4 @@
-# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit) [![Clojars Project](https://img.shields.io/clojars/v/metosin/reitit.svg)](https://clojars.org/metosin/reitit)
+# reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit)
 
 A friendly data-driven router for Clojure(Script).
 
@@ -11,7 +11,7 @@ A friendly data-driven router for Clojure(Script).
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-There are also [Ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html) as a separate module.
+There are also a separate [Ring-router](https://metosin.github.io/reitit/ring/ring.html) module with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html).
 
 See the [full documentation](https://metosin.github.io/reitit/) for details.
 
@@ -101,10 +101,10 @@ Invalid request:
 ; :body {:type :reitit.coercion/request-coercion,
 ;        :coercion :spec,
 ;        :spec "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec20745/x :$spec20745/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})",
-;        :problems [{:path [:y], 
-;                    :pred "clojure.core/int?", 
-;                    :val "a", 
-;                    :via [:$spec20745/y], 
+;        :problems [{:path [:y],
+;                    :pred "clojure.core/int?",
+;                    :val "a",
+;                    :via [:$spec20745/y],
 ;                    :in [:y]}],
 ;        :value {:x "1", :y "a"},
 ;        :in [:request :query-params]}}
@@ -116,19 +116,17 @@ Invalid request:
 
 [Check out the full documentation!](https://metosin.github.io/reitit/)
 
-Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
+Join [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
 
-There is also a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
+Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## Special thanks
 
-To all Clojure(Script) routing libs out there, expecially to
+* Existing Clojure(Script) routing libs, expecially to
 [Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [Compojure](https://github.com/weavejester/compojure) and
 [Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
-
-Also to [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
-
-And, of course, to: [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec).
+* [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
+* [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the formal validation.
 
 ## Development instructions
 

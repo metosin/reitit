@@ -11,7 +11,7 @@
 * Modular
 * [Fast](performance.md)
 
-There are also [Ring-router](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md) as a separate module.
+There are also a separate [Ring-router](https://metosin.github.io/reitit/ring/ring.html) module with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html).
 
 To use Reitit, add the following dependecy to your project:
 
