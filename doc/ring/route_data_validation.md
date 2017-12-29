@@ -280,7 +280,7 @@ The common Middleware can also be pushed to the router, here cleanly separing be
                                      ::roles #{:manager}}
                                :delete {:handler handler
                                         ::roles #{:admin}}}]]
-      {:middleware [zone-middleware wrap-enforce-roles]
+      {:data {:middleware [zone-middleware wrap-enforce-roles]}
        :validate rrs/validate-spec!
        ::rs/explain e/expound-str})))
 ```
