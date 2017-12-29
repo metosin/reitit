@@ -3,8 +3,7 @@
             [reitit.ring :as ring]
             [reitit.ring.spec :as rrs]
             [clojure.spec.alpha :as s]
-            [reitit.core :as r]
-            [expound.alpha :as e])
+            [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 

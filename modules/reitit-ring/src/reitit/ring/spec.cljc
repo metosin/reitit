@@ -7,7 +7,7 @@
 ;; Specs
 ;;
 
-(s/def ::middleware (s/coll-of (partial satisfies? middleware/IntoMiddleware)))
+(s/def ::middleware (s/coll-of #(satisfies? middleware/IntoMiddleware %)))
 
 (s/def ::data
   (s/keys :req-un [::rs/handler]

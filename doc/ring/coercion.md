@@ -1,6 +1,6 @@
-# Ring Coercion
+# Pluggable Coercion
 
-Coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). Both request parameters (`:query`, `:body`, `:form`, `:header` and `:path`) and response `:body` can be coerced.
+Basic coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). With Ring, both request parameters (`:query`, `:body`, `:form`, `:header` and `:path`) and response `:body` can be coerced.
 
 To enable coercion, the following things need to be done:
 

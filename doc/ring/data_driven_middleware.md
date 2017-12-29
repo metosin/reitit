@@ -17,7 +17,8 @@ Records can have arbitrary keys, but the following keys have a special purpose:
 
 | key            | description |
 | ---------------|-------------|
-| `:name`        | Name of the middleware as a qualified keyword (optional)
+| `:name`        | Name of the middleware as a qualified keyword
+| `:spec`        | `clojure.spec` definition for the route data, see [route data validation](route_data_validation.md) (optional)
 | `:wrap`        | The actual middleware function of `handler & args => request => response`
 | `:compile`     | Middleware compilation function, see [compiling middleware](compiling_middleware.md).
 
@@ -135,11 +136,5 @@ Some things bubblin' under:
 * Support Middleware dependency resolution with new keys `:requires` and `:provides`. Values are set of top-level keys of the request. e.g.
    * `InjectUserIntoRequestMiddleware` requires `#{:session}` and provides `#{:user}`
    * `AuthorizationMiddleware` requires `#{:user}`
-* Support partial `s/keys` route data specs with Middleware (and Router). Merged together to define sound spec for the route data and/or route data for a given route.
-   * e.g. `AuthrorizationMiddleware` has a spec defining `:roles` key (a set of keywords)
-   * Documentation for the route data
-   * Route data is validated against the spec:
-      * Complain of keywords that are not handled by anything
-      * Propose fixes for typos (Figwheel-style)
 
 Ideas welcome & see [issues](https://github.com/metosin/reitit/issues) for details.
