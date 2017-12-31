@@ -12,9 +12,9 @@
 
 (deftest route-data-validation-test
   (testing "validation is turned off by default"
-    (is (true? (r/router?
-                 (r/router
-                   ["/api" {:handler "identity"}])))))
+    (is (r/router?
+          (r/router
+            ["/api" {:handler "identity"}]))))
 
   (testing "with default spec validates :name, :handler and :middleware"
     (is (thrown-with-msg?
@@ -40,11 +40,11 @@
             {:validate rrs/validate-spec!}))))
 
   (testing "spec can be overridden"
-    (is (true? (r/router?
-                 (ring/router
-                   ["/api" {:handler "identity"}]
-                   {:spec (s/spec any?)
-                    :validate rrs/validate-spec!}))))
+    (is (r/router?
+          (ring/router
+            ["/api" {:handler "identity"}]
+            {:spec (s/spec any?)
+             :validate rrs/validate-spec!})))
 
     (testing "predicates are not allowed"
       (is (thrown-with-msg?
@@ -56,15 +56,15 @@
                :validate rrs/validate-spec!})))))
 
   (testing "middleware can contribute to specs"
-    (is (true? (r/router?
-                 (ring/router
-                   ["/api" {:get {:handler identity
-                                  :roles #{:admin}}}]
-                   {:validate rrs/validate-spec!
-                    :data {:middleware [{:spec (s/keys :opt-un [::roles])
-                                         :wrap (fn [handler]
-                                                 (fn [request]
-                                                   (handler request)))}]}}))))
+    (is (r/router?
+          (ring/router
+            ["/api" {:get {:handler identity
+                           :roles #{:admin}}}]
+            {:validate rrs/validate-spec!
+             :data {:middleware [{:spec (s/keys :opt-un [::roles])
+                                  :wrap (fn [handler]
+                                          (fn [request]
+                                            (handler request)))}]}})))
     (is (thrown-with-msg?
           ExceptionInfo
           #"Invalid route data"

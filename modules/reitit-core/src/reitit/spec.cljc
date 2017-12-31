@@ -1,7 +1,6 @@
 (ns reitit.spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as str]
             [reitit.core :as reitit]))
 
 ;;

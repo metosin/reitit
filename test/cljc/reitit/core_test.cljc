@@ -16,7 +16,7 @@
             (is (= name (r/router-name router)))
             (is (= [["/api/ipa/:size" {:name ::beer} nil]]
                    (r/routes router)))
-            (is (= true (map? (r/options router))))
+            (is (map? (r/options router)))
             (is (= (r/map->Match
                      {:template "/api/ipa/:size"
                       :data {:name ::beer}
@@ -39,7 +39,7 @@
                         :required #{:size}
                         :params nil})
                      (r/match-by-name router ::beer)))
-              (is (= true (r/partial-match? (r/match-by-name router ::beer))))
+              (is (r/partial-match? (r/match-by-name router ::beer)))
               (is (thrown-with-msg?
                     ExceptionInfo
                     #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
@@ -72,7 +72,7 @@
         (is (= name (r/router-name router)))
         (is (= [["/api/ipa/large" {:name ::beer} nil]]
                (r/routes router)))
-        (is (= true (map? (r/options router))))
+        (is (map? (r/options router)))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
                   :data {:name ::beer}

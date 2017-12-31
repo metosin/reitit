@@ -48,4 +48,3 @@
           (is (= nil (coercion/coerce! m))))
         (let [m (r/match-by-path r "/none/kikka/abba")]
           (is (= nil (coercion/coerce! m))))))))
-
