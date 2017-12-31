@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest testing is]]
             [schema.core :as s]
             [reitit.ring :as ring]
-            [reitit.ring.coercion-middleware :as coercion-middleware]
+            [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema])
   #?(:clj
@@ -53,8 +53,8 @@
                              :coercion spec/coercion}})))]
 
     (testing "withut exception handling"
-      (let [app (create [coercion-middleware/coerce-request-middleware
-                         coercion-middleware/coerce-response-middleware])]
+      (let [app (create [rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -74,9 +74,9 @@
                 (app invalid-request2))))))
 
     (testing "with exception handling"
-      (let [app (create [coercion-middleware/coerce-exceptions-middleware
-                         coercion-middleware/coerce-request-middleware
-                         coercion-middleware/coerce-response-middleware])]
+      (let [app (create [rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -108,8 +108,8 @@
                              :coercion schema/coercion}})))]
 
     (testing "withut exception handling"
-      (let [app (create [coercion-middleware/coerce-request-middleware
-                         coercion-middleware/coerce-response-middleware])]
+      (let [app (create [rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
@@ -129,9 +129,9 @@
                 (app invalid-request2))))
 
         (testing "with exception handling"
-          (let [app (create [coercion-middleware/coerce-exceptions-middleware
-                             coercion-middleware/coerce-request-middleware
-                             coercion-middleware/coerce-response-middleware])]
+          (let [app (create [rrc/coerce-exceptions-middleware
+                             rrc/coerce-request-middleware
+                             rrc/coerce-response-middleware])]
 
             (testing "all good"
               (is (= {:status 200

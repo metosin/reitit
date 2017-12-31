@@ -47,15 +47,17 @@ To demonstrate the two approaches, below are response coercion middleware writte
 * Route information is provided via a closure
 * Pre-compiled coercers
 * Mounts only if `:coercion` and `:responses` are defined for the route
+* Also defines spec for the route data `:responses` for the [route data validation](route_data_validation.md).
 
 ```clj
-(require '[reitit.middleware :as middleware])
+(require '[reitit.spec :as rs])
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise does not mount."
   {:name ::coerce-response
+   :spec ::rs/responses
    :compile (fn [{:keys [coercion responses]} opts]
               (if (and coercion responses)
                 (let [coercers (coercion/response-coercers coercion responses opts)]

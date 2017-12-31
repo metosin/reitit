@@ -1,7 +1,6 @@
 (ns reitit.spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [clojure.string :as str]
             [reitit.core :as reitit]))
 
 ;;
@@ -71,9 +70,42 @@
         :ret ::router)
 
 ;;
-;; Route data validator
+;; coercion
 ;;
 
+(s/def :reitit.core.coercion/kw-map (s/map-of keyword? any?))
+
+(s/def :reitit.core.coercion/query :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/body :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/form :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/header :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/path :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/parameters
+  (s/keys :opt-un [:reitit.core.coercion/query
+                   :reitit.core.coercion/body
+                   :reitit.core.coercion/form
+                   :reitit.core.coercion/header
+                   :reitit.core.coercion/path]))
+
+(s/def ::parameters
+  (s/keys :opt-un [:reitit.core.coercion/parameters]))
+
+(s/def :reitit.core.coercion/status
+  (s/or :number number? :default #{:default}))
+(s/def :reitit.core.coercion/schema any?)
+(s/def :reitit.core.coercion/description string?)
+(s/def :reitit.core.coercion/response
+  (s/keys :opt-un [:reitit.core.coercion/schema
+                   :reitit.core.coercion/description]))
+(s/def :reitit.core.coercion/responses
+  (s/map-of :reitit.core.coercion/status :reitit.core.coercion/response))
+
+(s/def ::responses
+  (s/keys :opt-un [:reitit.core.coercion/responses]))
+
+;;
+;; Route data validator
+;;
 
 (defrecord Problem [path scope data spec problems])
 

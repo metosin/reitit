@@ -16,7 +16,7 @@
 
     (testing "route-data"
       (are [data]
-        (is (= true (r/router? (r/router data))))
+        (is (r/router? (r/router data)))
 
         ["/api" {}]
 
@@ -45,12 +45,12 @@
            ["/ipa"]])))
 
     (testing "routes conform to spec (can't spec protocol functions)"
-      (is (= true (s/valid? ::rs/routes (r/routes (r/router ["/ping"]))))))
+      (is (s/valid? ::rs/routes (r/routes (r/router ["/ping"])))))
 
     (testing "options"
 
       (are [opts]
-        (is (= true (r/router? (r/router ["/api"] opts))))
+        (is (r/router? (r/router ["/api"] opts)))
 
         {:path "/"}
         {:data {}}
@@ -78,8 +78,8 @@
 
 (deftest route-data-validation-test
   (testing "validation is turned off by default"
-    (is (true? (r/router? (r/router
-                            ["/api" {:handler "identity"}])))))
+    (is (r/router? (r/router
+                     ["/api" {:handler "identity"}]))))
 
   (testing "with default spec validates :name and :handler"
     (is (thrown-with-msg?
@@ -96,7 +96,35 @@
             {:validate rs/validate-spec!}))))
 
   (testing "spec can be overridden"
-    (is (true? (r/router? (r/router
-                            ["/api" {:handler "identity"}]
-                            {:spec any?
-                             :validate rs/validate-spec!}))))))
+    (is (r/router? (r/router
+                     ["/api" {:handler "identity"}]
+                     {:spec any?
+                      :validate rs/validate-spec!})))))
+
+(deftest parameters-test
+  (is (s/valid?
+        ::rs/parameters
+        {:parameters {:query {:a string?}
+                      :body {:b string?}
+                      :form {:c string?}
+                      :header {:d string?}
+                      :path {:e string?}}}))
+
+  (is (not (s/valid?
+             ::rs/parameters
+             {:parameters {:header {"d" string?}}})))
+
+  (is (s/valid?
+        ::rs/responses
+        {:responses {200 {:description "ok", :schema string?}
+                     400 {:description "fail"}
+                     500 {:schema string?}
+                     :default {}}}))
+
+  (is (not (s/valid?
+             ::rs/responses
+             {:responses {"200" {:description "ok", :schema string?}}})))
+
+  (is (not (s/valid?
+             ::rs/responses
+             {:responses {200 {:description :ok, :schema string?}}}))))
