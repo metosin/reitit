@@ -100,3 +100,31 @@
                      ["/api" {:handler "identity"}]
                      {:spec any?
                       :validate rs/validate-spec!})))))
+
+(deftest parameters-test
+  (is (s/valid?
+        ::rs/parameters
+        {:parameters {:query {:a string?}
+                      :body {:b string?}
+                      :form {:c string?}
+                      :header {:d string?}
+                      :path {:e string?}}}))
+
+  (is (not (s/valid?
+             ::rs/parameters
+             {:parameters {:header {"d" string?}}})))
+
+  (is (s/valid?
+        ::rs/responses
+        {:responses {200 {:description "ok", :schema string?}
+                     400 {:description "fail"}
+                     500 {:schema string?}
+                     :default {}}}))
+
+  (is (not (s/valid?
+             ::rs/responses
+             {:responses {"200" {:description "ok", :schema string?}}})))
+
+  (is (not (s/valid?
+             ::rs/responses
+             {:responses {200 {:description :ok, :schema string?}}}))))

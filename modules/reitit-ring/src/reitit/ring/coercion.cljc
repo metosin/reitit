@@ -1,5 +1,6 @@
 (ns reitit.ring.coercion
   (:require [reitit.coercion :as coercion]
+            [reitit.spec :as rs]
             [reitit.impl :as impl]))
 
 (defn handle-coercion-exception [e respond raise]
@@ -22,6 +23,7 @@
   Expects a :coercion of type `reitit.coercion/Coercion`
   and :parameters from route data, otherwise does not mount."
   {:name ::coerce-request
+   :spec ::rs/parameters
    :compile (fn [{:keys [coercion parameters]} opts]
               (if (and coercion parameters)
                 (let [coercers (coercion/request-coercers coercion parameters opts)]
@@ -39,6 +41,7 @@
   Expects a :coercion of type `reitit.coercion/Coercion`
   and :responses from route data, otherwise does not mount."
   {:name ::coerce-response
+   :spec ::rs/responses
    :compile (fn [{:keys [coercion responses]} opts]
               (if (and coercion responses)
                 (let [coercers (coercion/response-coercers coercion responses opts)]
