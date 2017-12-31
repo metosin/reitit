@@ -8,7 +8,7 @@
             [muuntaja.core :as m]
             [muuntaja.format.jsonista :as jsonista-format]
             [jsonista.core :as j]
-            [reitit.ring.coercion-middleware :as coercion-middleware]
+            [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
             [reitit.coercion :as coercion]
@@ -36,14 +36,14 @@
     (s/def ::k (s/keys :req-un [::x ::y]))
 
     (let [spec (spec/into-spec {:x int?, :y int?} ::jeah)
-          coercers (#'coercion-middleware/request-coercers spec/coercion {:body spec})
+          coercers (#'rrc/request-coercers spec/coercion {:body spec})
           params {:x "1", :y "2"}
           request {:body-params {:x "1", :y "2"}}]
 
       ;; 4600ns
       (bench!
         "coerce-parameters"
-        (#'coercion-middleware/coerce-request-middleware coercers request))
+        (#'rrc/coerce-request-middleware coercers request))
 
       ;; 2700ns
       (bench!
@@ -102,24 +102,24 @@
           app (ring/ring-handler
                 (ring/router
                   routes
-                  {:data {:middleware [coercion-middleware/coerce-request-middleware]
+                  {:data {:middleware [rrc/coerce-request-middleware]
                           :coercion coercion}}))
           app2 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion-middleware/coerce-request-middleware]
+                   {:data {:middleware [rrc/coerce-request-middleware]
                            :coercion coercion}}))
           app3 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion-middleware/coerce-request-middleware
-                                        coercion-middleware/wrap-coerce-response]
+                   {:data {:middleware [rrc/coerce-request-middleware
+                                        rrc/wrap-coerce-response]
                            :coercion coercion}}))
           app4 (ring/ring-handler
                  (ring/router
                    routes
-                   {:data {:middleware [coercion-middleware/coerce-request-middleware
-                                        coercion-middleware/coerce-response-middleware]
+                   {:data {:middleware [rrc/coerce-request-middleware
+                                        rrc/coerce-response-middleware]
                            :coercion coercion}}))
           req {:request-method :get
                :uri "/api/ping"
@@ -156,8 +156,8 @@
                      :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                       {:status 200
                                        :body {:total (+ x y)}})}}]]
-          {:data {:middleware [coercion-middleware/coerce-request-middleware
-                               coercion-middleware/coerce-response-middleware]
+          {:data {:middleware [rrc/coerce-request-middleware
+                               rrc/coerce-response-middleware]
                   :coercion spec/coercion}})))
 
     (app
@@ -205,8 +205,8 @@
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
                 {:data {:middleware [[mm/wrap-format m]
-                                     coercion-middleware/coerce-request-middleware
-                                     coercion-middleware/coerce-response-middleware]
+                                     rrc/coerce-request-middleware
+                                     rrc/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -229,8 +229,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion-middleware/coerce-request-middleware
-                                     coercion-middleware/coerce-response-middleware]
+                {:data {:middleware [rrc/coerce-request-middleware
+                                     rrc/coerce-response-middleware]
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -253,8 +253,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion-middleware/coerce-request-middleware
-                                     coercion-middleware/coerce-response-middleware]
+                {:data {:middleware [rrc/coerce-request-middleware
+                                     rrc/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"
@@ -282,8 +282,8 @@
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [coercion-middleware/coerce-request-middleware
-                                     coercion-middleware/coerce-response-middleware]
+                {:data {:middleware [rrc/coerce-request-middleware
+                                     rrc/coerce-response-middleware]
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"

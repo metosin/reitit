@@ -1,4 +1,4 @@
-(ns reitit.ring.coercion-middleware
+(ns reitit.ring.coercion
   (:require [reitit.coercion :as coercion]
             [reitit.impl :as impl]))
 

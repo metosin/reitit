@@ -1,7 +1,7 @@
 (ns example.server
   (:require [ring.adapter.jetty :as jetty]
             [reitit.middleware :as middleware]
-            [reitit.ring.coercion-middleware :as coercion-middleware]))
+            [reitit.ring.coercion :as rrc]))
 
 (defonce ^:private server (atom nil))
 
@@ -10,9 +10,9 @@
 ;; to be set with :extract-request-format and extract-response-format
 (defn wrap-coercion [handler resource]
   (middleware/chain
-    [coercion-middleware/coerce-request-middleware
-     coercion-middleware/coerce-response-middleware
-     coercion-middleware/coerce-exceptions-middleware]
+    [rrc/coerce-request-middleware
+     rrc/coerce-response-middleware
+     rrc/coerce-exceptions-middleware]
     handler
     resource))
 

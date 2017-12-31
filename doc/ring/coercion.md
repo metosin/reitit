@@ -46,7 +46,7 @@ The coerced parameters can be read under `:parameters` key in the request.
 
 ## Coercion Middleware
 
-Defining a coercion for a route data doesn't do anything, as it's just data. We have to attach some code to apply the actual coercion. We can use the middleware from `reitit.ring.coercion-middleware`:
+Defining a coercion for a route data doesn't do anything, as it's just data. We have to attach some code to apply the actual coercion. We can use the middleware from `reitit.ring.coercion`:
 
 * `coerce-request-middleware` for the parameter coercion
 * `coerce-response-middleware` for the response coercion
@@ -57,7 +57,7 @@ Defining a coercion for a route data doesn't do anything, as it's just data. We 
 Here's an full example for applying coercion with Reitit, Ring and Schema:
 
 ```clj
-(require '[reitit.ring.coercion-middleware :as mw])
+(require '[reitit.ring.coercion :as rrc])
 (require '[reitit.coercion.schema])
 (require '[reitit.ring :as ring])
 (require '[schema.core :as s])
@@ -84,9 +84,9 @@ Here's an full example for applying coercion with Reitit, Ring and Schema:
                                                      (-> parameters :path :z))]
                                         {:status 200
                                          :body {:total total}}))}}]]
-      {:data {:middleware [mw/coerce-exceptions-middleware
-                           mw/coerce-request-middleware
-                           mw/coerce-response-middleware]}})))
+      {:data {:middleware [rrc/coerce-exceptions-middleware
+                           rrc/coerce-request-middleware
+                           rrc/coerce-response-middleware]}})))
 ```
 
 Valid request:
