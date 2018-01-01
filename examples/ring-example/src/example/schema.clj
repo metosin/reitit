@@ -5,7 +5,7 @@
 (def routes
   ["/schema" {:coercion reitit.coercion.schema/coercion}
    ["/plus" {:name ::plus
-             :responses {200 {:schema {:total s/Int}}}
+             :responses {200 {:body {:total s/Int}}}
              :get {:summary "plus with query-params"
                    :parameters {:query {:x s/Int, :y s/Int}}
                    :handler (fn [{{{:keys [x y]} :query} :parameters}]

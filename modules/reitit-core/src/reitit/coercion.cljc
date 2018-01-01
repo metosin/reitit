@@ -89,10 +89,10 @@
             (request-coercion-failed! result coercion value in request)
             result))))))
 
-(defn response-coercer [coercion model {:keys [extract-response-format]
-                                        :or {extract-response-format (constantly nil)}}]
+(defn response-coercer [coercion body {:keys [extract-response-format]
+                                       :or {extract-response-format (constantly nil)}}]
   (if coercion
-    (let [coercer (-response-coercer coercion model)]
+    (let [coercer (-response-coercer coercion body)]
       (fn [request response]
         (let [format (extract-response-format request response)
               value (:body response)
@@ -126,8 +126,8 @@
        (into {})))
 
 (defn response-coercers [coercion responses opts]
-  (->> (for [[status {:keys [schema]}] responses :when schema]
-         [status (response-coercer coercion schema opts)])
+  (->> (for [[status {:keys [body]}] responses :when body]
+         [status (response-coercer coercion body opts)])
        (into {})))
 
 (defn- coercers-not-compiled! [match]

@@ -92,10 +92,10 @@
 
 (s/def :reitit.core.coercion/status
   (s/or :number number? :default #{:default}))
-(s/def :reitit.core.coercion/schema any?)
+(s/def :reitit.core.coercion/body any?)
 (s/def :reitit.core.coercion/description string?)
 (s/def :reitit.core.coercion/response
-  (s/keys :opt-un [:reitit.core.coercion/schema
+  (s/keys :opt-un [:reitit.core.coercion/body
                    :reitit.core.coercion/description]))
 (s/def :reitit.core.coercion/responses
   (s/map-of :reitit.core.coercion/status :reitit.core.coercion/response))

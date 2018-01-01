@@ -94,7 +94,7 @@
     (suite (str (if coercion (protocol/get-name coercion))))
     (let [routes ["/api"
                   ["/ping" {:parameters {:body {:x int?, :y int?}}
-                            :responses {200 {:schema {:total pos-int?}}}
+                            :responses {200 {:body {:total pos-int?}}}
                             :get {:handler (fn [request]
                                              (let [{:keys [x y]} (-> request :parameters :body)]
                                                {:status 200
@@ -152,7 +152,7 @@
         (ring/router
           ["/api"
            ["/ping" {:parameters {:body {:x int?, :y int?}}
-                     :responses {200 {:schema {:total pos-int?}}}
+                     :responses {200 {:body {:total pos-int?}}}
                      :get {:handler (fn [{{{:keys [x y]} :body} :parameters}]
                                       {:status 200
                                        :body {:total (+ x y)}})}}]]
@@ -199,7 +199,7 @@
   (let [m (m/create (jsonista-format/with-json-format m/default-options))
         app (ring/ring-handler
               (ring/router
-                ["/plus" {:post {:responses {200 {:schema {:result Long}}}
+                ["/plus" {:post {:responses {200 {:body {:result Long}}}
                                  :parameters {:body {:x Long, :y Long}}
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
@@ -224,7 +224,7 @@
   (title "schema")
   (let [app (ring/ring-handler
               (ring/router
-                ["/plus" {:post {:responses {200 {:schema {:result Long}}}
+                ["/plus" {:post {:responses {200 {:body {:result Long}}}
                                  :parameters {:body {:x Long, :y Long}}
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
@@ -248,7 +248,7 @@
   (title "data-spec")
   (let [app (ring/ring-handler
               (ring/router
-                ["/plus" {:post {:responses {200 {:schema {:result int?}}}
+                ["/plus" {:post {:responses {200 {:body {:result int?}}}
                                  :parameters {:body {:x int?, :y int?}}
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
@@ -277,7 +277,7 @@
   (title "spec")
   (let [app (ring/ring-handler
               (ring/router
-                ["/plus" {:post {:responses {200 {:schema ::response}}
+                ["/plus" {:post {:responses {200 {:body ::response}}
                                  :parameters {:body ::request}
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
