@@ -1,7 +1,7 @@
 (ns example.spec
   (:require [clojure.spec.alpha :as s]
             [spec-tools.spec :as spec]
-            [reitit.coercion.spec :as spec-coercion]))
+            [reitit.coercion.spec]))
 
 ;; wrap into Spec Records to enable runtime conforming
 (s/def ::x spec/int?)
@@ -9,7 +9,7 @@
 (s/def ::total spec/int?)
 
 (def routes
-  ["/spec" {:coercion spec-coercion/coercion}
+  ["/spec" {:coercion reitit.coercion.spec/coercion}
    ["/plus" {:name ::plus
              :responses {200 {:schema (s/keys :req-un [::total])}}
              :get {:summary "plus with query-params"
