@@ -18,8 +18,9 @@
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.
   Supports both 1 (sync) and 3 (async) arities."
-  [router]
-  (let [default-handler (constantly nil)]
+  ([router]
+    (ring-handler router (constantly nil)))
+  ([router default-handler]
     (with-meta
       (fn
         ([request]
