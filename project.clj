@@ -16,6 +16,7 @@
                          [metosin/reitit-schema "0.1.3"]
                          [metosin/reitit-swagger "0.1.3"]
                          [metosin/reitit-swagger-ui "0.1.3"]
+                         [metosin/reitit-frontend "0.1.3"]
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
@@ -40,7 +41,8 @@
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
                                   "modules/reitit-swagger/src"
-                                  "modules/reitit-swagger-ui/src"]
+                                  "modules/reitit-swagger-ui/src"
+                                  "modules/reitit-frontend/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.10.238"]
