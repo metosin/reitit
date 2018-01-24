@@ -618,18 +618,72 @@
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:delete</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/db&quot;</span>})
 <span class="hljs-comment">; {:status 200, :body [:api :admin :db :delete :handler]}</span>
 </code></pre>
-<h1 id="not-found">Not found</h1>
-<p>If no routes match, <code>nil</code> is returned, which is not understood by Ring.</p>
-<p>Enabling custom error messages:</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">some-fn</span>
-    (<span class="hljs-name">ring/ring-handler</span>
-      (<span class="hljs-name">ring/router</span>
-        [<span class="hljs-string">&quot;/ping&quot;</span> handler]))
-    (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">404</span>})))
+<h1 id="default-handler">Default handler</h1>
+<p>By default, if no routes match, <code>nil</code> is returned, which is not valid response in Ring:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [_]
+  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;&quot;</span>})
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/ping&quot;</span> handler])))
 
 (<span class="hljs-name">app</span> {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/invalid&quot;</span>})
-<span class="hljs-comment">; {:status 404}</span>
+<span class="hljs-comment">; nil</span>
+</code></pre>
+<p>Setting the default-handler as a second argument to <code>ring-handler</code>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/ping&quot;</span> handler])
+    (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">404</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;&quot;</span>})))
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/invalid&quot;</span>})
+<span class="hljs-comment">; {:status 404, :body &quot;&quot;}</span>
+</code></pre>
+<p>To get more correct http error responses, <code>ring/create-default-handler</code> can be used. It differentiates <code>:not-found</code> (no route matched), <code>:method-not-accepted</code> (no method matched) and <code>:not-acceptable</code> (handler returned <code>nil</code>).</p>
+<p>With defaults:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [[<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> handler}]
+       [<span class="hljs-string">&quot;/pong&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> <span class="hljs-literal">nil</span>)]])
+    (<span class="hljs-name">ring/create-default-handler</span>)))
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/&quot;</span>})
+<span class="hljs-comment">; {:status 404, :body &quot;&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+<span class="hljs-comment">; {:status 405, :body &quot;&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/pong&quot;</span>})
+<span class="hljs-comment">; {:status 406, :body &quot;&quot;}</span>
+</code></pre>
+<p>With custom responses:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [[<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> handler}]
+       [<span class="hljs-string">&quot;/pong&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> <span class="hljs-literal">nil</span>)]])
+    (<span class="hljs-name">ring/create-default-handler</span>
+      {<span class="hljs-symbol">:not-found</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">404</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;kosh&quot;</span>})
+       <span class="hljs-symbol">:method-not-allowed</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">405</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;kosh&quot;</span>})
+       <span class="hljs-symbol">:not-acceptable</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">406</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;kosh&quot;</span>})})))
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/&quot;</span>})
+<span class="hljs-comment">; {:status 404, :body &quot;kosh&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+<span class="hljs-comment">; {:status 405, :body &quot;kosh&quot;}</span>
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/pong&quot;</span>})
+<span class="hljs-comment">; {:status 406, :body &quot;kosh&quot;}</span>
 </code></pre>
 <h1 id="async-ring">Async Ring</h1>
 <p>All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure &amp; ClojureScript, so they work with <a href="https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html" target="_blank">Async Ring</a> and <a href="https://nodejs.org" target="_blank">Node.js</a> too.</p>
@@ -676,7 +730,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Ring-router","level":"1.5.1","depth":2,"next":{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"previous":{"title":"Ring","level":"1.5","depth":1,"path":"ring/README.md","ref":"ring/README.md","articles":[{"title":"Ring-router","level":"1.5.1","depth":2,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},{"title":"Route Data Validation","level":"1.5.5","depth":2,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},{"title":"Compiling Middleware","level":"1.5.6","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/ring.md","mtime":"2018-01-22T05:40:37.015Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-22T05:41:24.849Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring-router","level":"1.5.1","depth":2,"next":{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"previous":{"title":"Ring","level":"1.5","depth":1,"path":"ring/README.md","ref":"ring/README.md","articles":[{"title":"Ring-router","level":"1.5.1","depth":2,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},{"title":"Route Data Validation","level":"1.5.5","depth":2,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},{"title":"Compiling Middleware","level":"1.5.6","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/ring.md","mtime":"2018-01-24T07:15:53.092Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-01-24T07:16:40.156Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
