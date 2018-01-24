@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 language: clojure
 lein: 2.7.1
 install:
@@ -20,3 +20,5 @@ cache:
   directories:
   - "$HOME/.m2"
   - "node_modules"
+addons:
+  chrome: stable
