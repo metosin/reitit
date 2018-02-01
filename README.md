@@ -11,7 +11,10 @@ A friendly data-driven router for Clojure(Script).
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-There are also a separate [Ring-router](https://metosin.github.io/reitit/ring/ring.html) module with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html).
+The following higher-level routers are also available as separate modules:
+* [ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* http-router with Pedestal-style Interceptors (WIP)
+* cljs-router with Keechma-style Controllers (WIP)
 
 See the [full documentation](https://metosin.github.io/reitit/) for details.
 
