@@ -100,7 +100,7 @@
   (into [] (keep #(compile-route % opts) routes)))
 
 (defn route-info [route]
-  (select-keys (impl/create route) [:path :parts :path-params :result :data]))
+  (select-keys (impl/create route) [:path :path-parts :path-params :result :data]))
 
 (defprotocol Router
   (router-name [this])

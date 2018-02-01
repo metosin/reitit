@@ -96,7 +96,7 @@
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher parts path-params data result])
+(defrecord Route [path matcher path-parts path-params data result])
 
 (defn create [[path data result]]
   (let [path #?(:clj (.intern ^String path) :cljs path)]
@@ -110,7 +110,6 @@
                     :data data})
           (dissoc $ :path-re :path-constraints)
           (update $ :path-params set)
-          (set/rename-keys $ {:path-parts :parts})
           (map->Route $))))
 
 (defn wild-route? [[path]]
@@ -130,7 +129,7 @@
 (defn path-for [^Route route path-params]
   (if-let [required (:path-params route)]
     (if (every? #(contains? path-params %) required)
-      (str "/" (str/join \/ (map #(get (or path-params {}) % %) (:parts route)))))
+      (str "/" (str/join \/ (map #(get (or path-params {}) % %) (:path-parts route)))))
     (:path route)))
 
 (defn throw-on-missing-path-params [template required path-params]
