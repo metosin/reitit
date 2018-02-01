@@ -53,14 +53,14 @@ Routing:
 ; #Match{:template "/api/ping"
 ;        :data {:name ::ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 
 (r/match-by-path router "/api/orders/1")
 ; #Match{:template "/api/orders/:id"
 ;        :data {:name ::order-by-id}
 ;        :result nil
-;        :params {:id "1"}
+;        :path-params {:id "1"}
 ;        :path "/api/orders/1"}
 ```
 
@@ -74,14 +74,14 @@ Reverse-routing:
 ; #Match{:template "/api/ping"
 ;        :data {:name ::ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 
 (r/match-by-name router ::order-by-id)
 ; #PartialMatch{:template "/api/orders/:id"
 ;               :data {:name :user/order-by-id}
 ;               :result nil
-;               :params nil
+;               :path-params nil
 ;               :required #{:id}}
 
 (r/partial-match? (r/match-by-name router ::order-by-id))
@@ -91,7 +91,7 @@ Reverse-routing:
 ; #Match{:template "/api/orders/:id",
 ;        :data {:name ::order-by-id},
 ;        :result nil,
-;        :params {:id 2},
+;        :path-params {:id 2},
 ;        :path "/api/orders/2"}
 ```
 
@@ -141,6 +141,6 @@ Reverse-routing:
 ;               :get {:handler #object[user$handler]}
 ;        :name ::ping}
 ;        :result #Methods{...}
-;        :params nil
+;        :path-params nil
 ;        :path "/api/ping"}
 ```

@@ -35,7 +35,7 @@ Matching a route:
 ; #Match{:template "/api/ping"
 ;        :data {:name :user/ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 ```
 
@@ -46,7 +46,7 @@ If not all path-parameters are set, a `PartialMatch` is returned:
 ; #PartialMatch{:template "/api/user/:id",
 ;               :data {:name :user/user},
 ;               :result nil,
-;               :params nil,
+;               :path-params nil,
 ;               :required #{:id}}
 
 (r/partial-match? (r/match-by-name router ::user))
@@ -61,7 +61,7 @@ With provided path-parameters:
 ;        :data {:name :user/user}
 ;        :path "/api/user/1"
 ;        :result nil
-;        :params {:id "1"}}
+;        :path-params {:id "1"}}
 ```
 
 There is also a exception throwing version:

@@ -62,12 +62,12 @@
          ([request]
           (if-let [match (r/match-by-path router (:uri request))]
             (let [method (:request-method request :any)
-                  params (:params match)
+                  path-params (:path-params match)
                   result (:result match)
                   handler (or (-> result method :handler)
                               (-> result :any (:handler default-handler)))
                   request (cond-> (impl/fast-assoc request ::match match)
-                                  (seq params) (impl/fast-assoc :path-params params))
+                                  (seq path-params) (impl/fast-assoc :path-params path-params))
                   response (handler request)]
               (if (nil? response)
                 (default-handler request)
@@ -76,12 +76,12 @@
          ([request respond raise]
           (if-let [match (r/match-by-path router (:uri request))]
             (let [method (:request-method request :any)
-                  params (:params match)
+                  path-params (:path-params match)
                   result (:result match)
                   handler (or (-> result method :handler)
                               (-> result :any (:handler default-handler)))
                   request (cond-> (impl/fast-assoc request ::match match)
-                                  (seq params) (impl/fast-assoc :path-params params))]
+                                  (seq path-params) (impl/fast-assoc :path-params path-params))]
               (handler request respond raise))
             (default-handler request respond raise))))
        {::router router}))))

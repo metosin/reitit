@@ -37,7 +37,7 @@ Successful coercion:
 ;               :coercion <<:spec>>
 ;               :parameters {:path ::path-params}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :params {:company "metosin", :user-id "123"},
+;        :path-params {:company "metosin", :user-id "123"},
 ;        :parameters {:path {:company "metosin", :user-id 123}}
 ;        :path "/metosin/users/123"}
 ```

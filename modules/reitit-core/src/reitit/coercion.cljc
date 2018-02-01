@@ -157,4 +157,4 @@
   If coercion or parameters are not defined, return `nil`"
   [match]
   (if-let [result (:result match)]
-    (coerce-request result {:path-params (:params match)})))
+    (coerce-request result {:path-params (:path-params match)})))

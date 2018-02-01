@@ -46,14 +46,14 @@ Optionally, the parts can be required separately:
 ; #Match{:template "/api/ping"
 ;        :data {:name ::ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 
 (r/match-by-name router ::order {:id 2})
 ; #Match{:template "/api/orders/:id",
 ;        :data {:name ::order},
 ;        :result nil,
-;        :params {:id 2},
+;        :path-params {:id 2},
 ;        :path "/api/orders/2"}
 ```
 

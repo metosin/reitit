@@ -19,7 +19,7 @@ Match with the parsed `:params` as Strings:
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view},
 ;        :result nil,
-;        :params {:company "metosin", :user-id "123"},
+;        :path-params {:company "metosin", :user-id "123"},
 ;        :path "/metosin/users/123"}
 ```
 
@@ -69,7 +69,7 @@ A Match:
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result nil,
-;        :params {:company "metosin", :user-id "123"},
+;        :path-params {:company "metosin", :user-id "123"},
 ;        :path "/metosin/users/123"}
 ```
 
@@ -109,7 +109,7 @@ Routing again:
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :params {:company "metosin", :user-id "123"},
+;        :path-params {:company "metosin", :user-id "123"},
 ;        :path "/metosin/users/123"}
 ```
 
@@ -165,7 +165,7 @@ Here's an full example for doing routing and coercion with Reitit and Schema:
 ;               :parameters {:path {:company java.lang.String,
 ;                                   :user-id Int}}},
 ;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :params {:company "metosin", :user-id "123"},
+;        :path-params {:company "metosin", :user-id "123"},
 ;        :parameters {:path {:company "metosin", :user-id 123}}
 ;        :path "/metosin/users/123"}
 

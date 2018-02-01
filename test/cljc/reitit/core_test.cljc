@@ -21,13 +21,13 @@
                      {:template "/api/ipa/:size"
                       :data {:name ::beer}
                       :path "/api/ipa/large"
-                      :params {:size "large"}})
+                      :path-params {:size "large"}})
                    (r/match-by-path router "/api/ipa/large")))
             (is (= (r/map->Match
                      {:template "/api/ipa/:size"
                       :data {:name ::beer}
                       :path "/api/ipa/large"
-                      :params {:size "large"}})
+                      :path-params {:size "large"}})
                    (r/match-by-name router ::beer {:size "large"})))
             (is (= nil (r/match-by-name router "ILLEGAL")))
             (is (= [::beer] (r/route-names router)))
@@ -37,7 +37,7 @@
                        {:template "/api/ipa/:size"
                         :data {:name ::beer}
                         :required #{:size}
-                        :params nil})
+                        :path-params nil})
                      (r/match-by-name router ::beer)))
               (is (r/partial-match? (r/match-by-name router ::beer)))
               (is (thrown-with-msg?
@@ -77,13 +77,13 @@
                  {:template "/api/ipa/large"
                   :data {:name ::beer}
                   :path "/api/ipa/large"
-                  :params {}})
+                  :path-params {}})
                (r/match-by-path router "/api/ipa/large")))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
                   :data {:name ::beer}
                   :path "/api/ipa/large"
-                  :params {:size "large"}})
+                  :path-params {:size "large"}})
                (r/match-by-name router ::beer {:size "large"})))
         (is (= nil (r/match-by-name router "ILLEGAL")))
         (is (= [::beer] (r/route-names router)))
@@ -181,7 +181,7 @@
                {:template "/api/user/:id/:sub-id"
                 :data {:mw [:api], :parameters {:id "String", :sub-id "String"}}
                 :path "/api/user/1/2"
-                :params {:id "1", :sub-id "2"}})
+                :path-params {:id "1", :sub-id "2"}})
              (r/match-by-path router "/api/user/1/2"))))))
 
 (deftest conflicting-routes-test

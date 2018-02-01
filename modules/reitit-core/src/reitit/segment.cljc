@@ -3,23 +3,23 @@
   (:require [reitit.impl :as impl]
             [clojure.string :as str]))
 
-(defrecord Match [data params])
+(defrecord Match [data path-params])
 
 (defprotocol Segment
   (-insert [this ps data])
-  (-lookup [this ps params]))
+  (-lookup [this ps path-params]))
 
 (extend-protocol Segment
   nil
   (-insert [_ _ _])
   (-lookup [_ _ _]))
 
-(defn- -catch-all [children catch-all params p ps]
+(defn- -catch-all [children catch-all path-params p ps]
   (if catch-all
     (-lookup
       (impl/fast-get children catch-all)
       nil
-      (assoc params catch-all (str/join "/" (cons p ps))))))
+      (assoc path-params catch-all (str/join "/" (cons p ps))))))
 
 (defn- segment
   ([] (segment {} #{} nil nil))
@@ -36,12 +36,12 @@
                  catch-all (or c catch-all)
                  children (update children (or w c p) #(-insert (or % (segment)) ps d))]
              (segment children wilds catch-all match))))
-       (-lookup [_ [p & ps] params]
+       (-lookup [_ [p & ps] path-params]
          (if (nil? p)
-           (if match (assoc match :params params))
-           (or (-lookup (impl/fast-get children' p) ps params)
-               (some #(-lookup (impl/fast-get children' %) ps (assoc params % p)) wilds)
-               (-catch-all children' catch-all params p ps))))))))
+           (if match (assoc match :path-params path-params))
+           (or (-lookup (impl/fast-get children' p) ps path-params)
+               (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds)
+               (-catch-all children' catch-all path-params p ps))))))))
 
 (defn insert [root path data]
   (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))

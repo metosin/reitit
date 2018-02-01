@@ -100,7 +100,7 @@
   (into [] (keep #(compile-route % opts) routes)))
 
 (defn route-info [route]
-  (select-keys (impl/create route) [:path :parts :params :result :data]))
+  (select-keys (impl/create route) [:path :parts :path-params :result :data]))
 
 (defprotocol Router
   (router-name [this])
@@ -108,13 +108,13 @@
   (options [this])
   (route-names [this])
   (match-by-path [this path])
-  (match-by-name [this name] [this name params]))
+  (match-by-name [this name] [this name path-params]))
 
 (defn router? [x]
   (satisfies? Router x))
 
-(defrecord Match [template data result params path])
-(defrecord PartialMatch [template data result params required])
+(defrecord Match [template data result path-params path])
+(defrecord PartialMatch [template data result path-params required])
 
 (defn partial-match? [x]
   (instance? PartialMatch x))
@@ -122,12 +122,12 @@
 (defn match-by-name!
   ([this name]
    (match-by-name! this name nil))
-  ([this name params]
-   (if-let [match (match-by-name this name params)]
+  ([this name path-params]
+   (if-let [match (match-by-name this name path-params)]
      (if-not (partial-match? match)
        match
        (impl/throw-on-missing-path-params
-         (:template match) (:required match) params)))))
+         (:template match) (:required match) path-params)))))
 
 (def default-router-options
   {:lookup name-lookup
@@ -145,10 +145,10 @@
    (let [names (find-names routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [params] :as route} (impl/create [p data result])
+                     (let [{:keys [path-params] :as route} (impl/create [p data result])
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result % path)
-                                (->PartialMatch p data result % params))]
+                                (->PartialMatch p data result % path-params))]
                        [(conj pl route)
                         (if name (assoc nl name f) nl)]))
                    [[] {}] routes)
@@ -166,16 +166,16 @@
          names)
        (match-by-path [_ path]
          (reduce
-           (fn [acc ^Route route]
-             (if-let [params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) params path))))
+           (fn [_ ^Route route]
+             (if-let [path-params ((:matcher route) path)]
+               (reduced (->Match (:path route) (:data route) (:result route) path-params path))))
            nil pl))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name params]
+       (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match params)))))))
+           (match path-params)))))))
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
@@ -213,9 +213,9 @@
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name params]
+       (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match params)))))))
+           (match path-params)))))))
 
 (defn segment-router
   "Creates a special prefix-tree style segment router from resolved routes and optional
@@ -226,10 +226,10 @@
    (let [names (find-names routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [params] :as route} (impl/create [p data result])
+                     (let [{:keys [path-params] :as route} (impl/create [p data result])
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result % path)
-                                (->PartialMatch p data result % params))]
+                                (->PartialMatch p data result % path-params))]
                        [(segment/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
                    [nil {}] routes)
@@ -248,14 +248,14 @@
        (match-by-path [_ path]
          (if-let [match (segment/lookup pl path)]
            (-> (:data match)
-               (assoc :params (:params match))
+               (assoc :path-params (:path-params match))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name params]
+       (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match params)))))))
+           (match path-params)))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
@@ -288,9 +288,9 @@
        (match-by-name [_ name]
          (if (= n name)
            match))
-       (match-by-name [_ name params]
+       (match-by-name [_ name path-params]
          (if (= n name)
-           (impl/fast-assoc match :params params)))))))
+           (impl/fast-assoc match :path-params path-params)))))))
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
@@ -321,9 +321,9 @@
        (match-by-name [_ name]
          (or (match-by-name static-router name)
              (match-by-name wildcard-router name)))
-       (match-by-name [_ name params]
-         (or (match-by-name static-router name params)
-             (match-by-name wildcard-router name params)))))))
+       (match-by-name [_ name path-params]
+         (or (match-by-name static-router name path-params)
+             (match-by-name wildcard-router name path-params)))))))
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
