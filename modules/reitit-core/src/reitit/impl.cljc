@@ -96,7 +96,7 @@
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher parts params data result])
+(defrecord Route [path matcher path-parts path-params data result])
 
 (defn create [[path data result]]
   (let [path #?(:clj (.intern ^String path) :cljs path)]
@@ -110,8 +110,6 @@
                     :data data})
           (dissoc $ :path-re :path-constraints)
           (update $ :path-params set)
-          (set/rename-keys $ {:path-parts :parts
-                              :path-params :params})
           (map->Route $))))
 
 (defn wild-route? [[path]]
@@ -128,20 +126,20 @@
       (not= s1 s2) false
       :else (recur ss1 ss2))))
 
-(defn path-for [^Route route params]
-  (if-let [required (:params route)]
-    (if (every? #(contains? params %) required)
-      (str "/" (str/join \/ (map #(get (or params {}) % %) (:parts route)))))
+(defn path-for [^Route route path-params]
+  (if-let [required (:path-params route)]
+    (if (every? #(contains? path-params %) required)
+      (str "/" (str/join \/ (map #(get (or path-params {}) % %) (:path-parts route)))))
     (:path route)))
 
-(defn throw-on-missing-path-params [template required params]
-  (when-not (every? #(contains? params %) required)
-    (let [defined (-> params keys set)
+(defn throw-on-missing-path-params [template required path-params]
+  (when-not (every? #(contains? path-params %) required)
+    (let [defined (-> path-params keys set)
           missing (clojure.set/difference required defined)]
       (throw
         (ex-info
           (str "missing path-params for route " template " -> " missing)
-          {:params params, :required required})))))
+          {:path-params path-params, :required required})))))
 
 (defn fast-assoc
   #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]

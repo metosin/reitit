@@ -33,5 +33,5 @@ Match provides the route information:
 ;        :data {:name :user/user}
 ;        :path "/api/user/1"
 ;        :result nil
-;        :params {:id "1"}}
+;        :path-params {:id "1"}}
 ```

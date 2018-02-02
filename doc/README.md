@@ -11,7 +11,10 @@
 * Modular
 * [Fast](performance.md)
 
-There are also a separate [Ring-router](https://metosin.github.io/reitit/ring/ring.html) module with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html).
+The following higher-level routers are also available as separate modules:
+* [ring-router](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md)
+* http-router with Pedestal-style Interceptors (WIP)
+* cljs-router with Keechma-style Controllers (WIP)
 
 To use Reitit, add the following dependecy to your project:
 
@@ -53,14 +56,14 @@ Routing:
 ; #Match{:template "/api/ping"
 ;        :data {:name ::ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 
 (r/match-by-path router "/api/orders/1")
 ; #Match{:template "/api/orders/:id"
 ;        :data {:name ::order-by-id}
 ;        :result nil
-;        :params {:id "1"}
+;        :path-params {:id "1"}
 ;        :path "/api/orders/1"}
 ```
 
@@ -74,14 +77,14 @@ Reverse-routing:
 ; #Match{:template "/api/ping"
 ;        :data {:name ::ping}
 ;        :result nil
-;        :params {}
+;        :path-params {}
 ;        :path "/api/ping"}
 
 (r/match-by-name router ::order-by-id)
 ; #PartialMatch{:template "/api/orders/:id"
 ;               :data {:name :user/order-by-id}
 ;               :result nil
-;               :params nil
+;               :path-params nil
 ;               :required #{:id}}
 
 (r/partial-match? (r/match-by-name router ::order-by-id))
@@ -91,7 +94,7 @@ Reverse-routing:
 ; #Match{:template "/api/orders/:id",
 ;        :data {:name ::order-by-id},
 ;        :result nil,
-;        :params {:id 2},
+;        :path-params {:id 2},
 ;        :path "/api/orders/2"}
 ```
 
@@ -141,6 +144,6 @@ Reverse-routing:
 ;               :get {:handler #object[user$handler]}
 ;        :name ::ping}
 ;        :result #Methods{...}
-;        :params nil
+;        :path-params nil
 ;        :path "/api/ping"}
 ```
