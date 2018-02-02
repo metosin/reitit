@@ -18,7 +18,6 @@
     * [Configuring Routers](advanced/configuring_routers.md)
     * [Different Routers](advanced/different_routers.md)
     * [Route Validation](advanced/route_validation.md)
-    * [Interceptors](advanced/interceptors.md)
 * [Ring](ring/README.md)
     * [Ring-router](ring/ring.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
@@ -26,6 +25,7 @@
     * [Pluggable Coercion](ring/coercion.md)
     * [Route Data Validation](ring/route_data_validation.md)
     * [Compiling Middleware](ring/compiling_middleware.md)
+* [Interceptors](interceptors.md)
+* [Swagger & Openapi](openapi.md)
 * [Performance](performance.md)
 * [FAQ](faq.md)
-* TODO: Swagger & OpenAPI
