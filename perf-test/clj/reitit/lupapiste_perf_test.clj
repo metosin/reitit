@@ -323,8 +323,6 @@
 (def cqrs-routes
   (mapv (fn [command] [(str "/command/" (name command)) {:post handler :name command}]) commands))
 
-cqrs-routes
-
 (def cqrs-routes-pedestal
   (map-tree/router
     (table/table-routes
