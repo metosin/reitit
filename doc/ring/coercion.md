@@ -39,7 +39,7 @@ Handler can access the coerced parameters can be read under `:parameters` key in
    :parameters {:query {:x s/Int}
                 :body {:y s/Int}
                 :path {:z s/Int}}
-   :responses {200 {:schema {:total PositiveInt}}}
+   :responses {200 {:body {:total PositiveInt}}}
    :handler (fn [{:keys [parameters]}]
               (let [total (+ (-> parameters :query :x)
                              (-> parameters :body :y)
@@ -81,7 +81,7 @@ Here's an full example for applying coercion with Reitit, Ring and Schema:
                            :parameters {:query {:x s/Int}
                                         :body {:y s/Int}
                                         :path {:z s/Int}}
-                           :responses {200 {:schema {:total PositiveInt}}}
+                           :responses {200 {:body {:total PositiveInt}}}
                            :handler (fn [{:keys [parameters]}]
                                       (let [total (+ (-> parameters :query :x)
                                                      (-> parameters :body :y)

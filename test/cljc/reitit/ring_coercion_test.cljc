@@ -47,7 +47,7 @@
                                            :form {:c int?}
                                            :header {:d int?}
                                            :path {:e int?}}
-                              :responses {200 {:schema {:total pos-int?}}}
+                              :responses {200 {:body {:total pos-int?}}}
                               :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion spec/coercion}})))]
@@ -102,7 +102,7 @@
                                            :form {:c s/Int}
                                            :header {:d s/Int}
                                            :path {:e s/Int}}
-                              :responses {200 {:schema {:total (s/constrained s/Int pos? 'positive)}}}
+                              :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}}
                               :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion schema/coercion}})))]
@@ -139,9 +139,9 @@
                      (app valid-request))))
 
             (testing "invalid request"
-              (let [{:keys [status body]} (app invalid-request)]
+              (let [{:keys [status]} (app invalid-request)]
                 (is (= 400 status))))
 
             (testing "invalid response"
-              (let [{:keys [status body]} (app invalid-request2)]
+              (let [{:keys [status]} (app invalid-request2)]
                 (is (= 500 status))))))))))

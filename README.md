@@ -74,7 +74,7 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
     (ring/router
       ["/api"
        ["/math" {:get {:parameters {:query {:x int?, :y int?}}
-                       :responses {200 {:schema {:total pos-int?}}}
+                       :responses {200 {:body {:total pos-int?}}}
                        :handler (fn [{{{:keys [x y]} :query} :parameters}]
                                   {:status 200
                                    :body {:total (+ x y)}})}}]]

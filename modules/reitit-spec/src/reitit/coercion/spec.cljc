@@ -77,7 +77,7 @@
                           (into
                             (empty responses)
                             (for [[k response] responses]
-                              [k (update response :schema #(coercion/-compile-model this % nil))])))))
+                              [k (update response :body #(coercion/-compile-model this % nil))])))))
     (-compile-model [_ model name]
       (into-spec model (or name (gensym "spec"))))
     (-open-model [_ spec] spec)

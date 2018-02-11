@@ -1,5 +1,7 @@
 (ns example.server
   (:require [ring.adapter.jetty :as jetty]
+            [muuntaja.middleware]
+            [ring.middleware.params]
             [reitit.middleware :as middleware]
             [reitit.ring.coercion :as rrc]))
 
@@ -10,9 +12,9 @@
 ;; to be set with :extract-request-format and extract-response-format
 (defn wrap-coercion [handler resource]
   (middleware/chain
-    [rrc/coerce-request-middleware
-     rrc/coerce-response-middleware
-     rrc/coerce-exceptions-middleware]
+    [rrc/coerce-exceptions-middleware
+     rrc/coerce-request-middleware
+     rrc/coerce-response-middleware]
     handler
     resource))
 
