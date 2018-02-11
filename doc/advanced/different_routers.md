@@ -4,11 +4,11 @@ Reitit ships with several different implementations for the `Router` protocol, o
 
 | router                        | description |
 | ------------------------------|-------------|
-| `:linear-router`              | Matches the routes one-by-one starting from the top until a match is found. Works with any kind of routes. Slow, but works with all route trees.
-| `:lookup-router`              | Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters and there are no [Route conflicts](../basics/route_conflicts.md).
-| `:mixed-router`               | Creates internally a `:segment-router` for wildcard routes and a `:lookup-router` or `:single-static-path-router` for static routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
-| `:single-static-path-router`  | Super fast router: sting-matches the route. Valid only if there is one static route.
+| `:linear-router`              | Matches the routes one-by-one starting from the top until a match is found. Slow, but works with all route trees.
 | `:segment-router`             | Router that creates a optimized [search trie](https://en.wikipedia.org/wiki/Trie) out of an route table. Much faster than `:linear-router` for wildcard routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
+| `:lookup-router`              | Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters and there are no [Route conflicts](../basics/route_conflicts.md).
+| `:single-static-path-router`  | Super fast router: string-matches a route. Valid only if there is one static route.
+| `:mixed-router`               | Contains two routers: `:segment-router` for wildcard routes and a `:lookup-router` or `:single-static-path-router` for static routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
 
 The router name can be asked from the router:
 
@@ -22,4 +22,19 @@ The router name can be asked from the router:
 
 (r/router-name router)
 ; :mixed-router
+```
+
+Overriding the router implementation:
+
+```clj
+(require '[reitit.core :as r])
+
+(def router
+  (r/router
+    [["/ping" ::ping]
+     ["/api/:users" ::users]]
+    {:router r/linear-router}))
+
+(r/router-name router)
+; :linear-router
 ```

@@ -1,6 +1,6 @@
 # Router
 
-Routes are just data and for routing, we need a router instance satisfying the `reitit.core/Router` protocol. Routers are created with `reitit.core/router` function, taking the raw routes and optionally an options map.
+Routes are just data and to do routing, we need a router instance satisfying the `reitit.core/Router` protocol. Routers are created with `reitit.core/router` function, taking the raw routes and optionally an options map.
 
 The `Router` protocol:
 
@@ -21,9 +21,9 @@ Creating a router:
 
 (def router
   (r/router
-    [["/api"
-      ["/ping" ::ping]
-      ["/user/:id" ::user]]]))
+    ["/api"
+     ["/ping" ::ping]
+     ["/user/:id" ::user]]))
 ```
 
 Name of the created router:
@@ -46,5 +46,5 @@ When router is created, the following steps are done:
 * route tree is flattened
 * route arguments are expanded (via `reitit.core/Expand` protocol) and optionally coerced
 * [route conflicts](advanced/route_conflicts.md) are resolved
+* route tree is compiled
 * actual [router implementation](../advanced/different_routers.md) is selected and created
-* optionally route data gets compiled

@@ -5,6 +5,7 @@
 Example middleware to guard routes based on user roles:
 
 ```clj
+(require '[reitit.ring :as ring])
 (require '[clojure.set :as set])
 
 (defn wrap-enforce-roles [handler]
@@ -50,3 +51,5 @@ Authorized access to guarded route:
 (app {:request-method :get, :uri "/api/admin/ping", ::roles #{:admin}})
 ; {:status 200, :body "ok"}
 ```
+
+Dynamic extensions are nice, but we can do much better. See [data-driven middleware](data_driven_middleware.md) and [compiling routes](compiling_middleware.md).

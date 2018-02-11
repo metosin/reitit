@@ -1,6 +1,6 @@
 # Introduction
 
-[Reitit](https://github.com/metosin/reitit) is a small Clojure(Script) library for data-driven routing.
+[Reitit](https://github.com/metosin/reitit) is a fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](./basics/route_syntax.md)
 * [Route conflict resolution](./basics/route_conflicts.md)
@@ -12,9 +12,9 @@
 * [Fast](performance.md)
 
 The following higher-level routers are also available as separate modules:
-* [ring-router](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md)
-* http-router with Pedestal-style Interceptors (WIP)
-* cljs-router with Keechma-style Controllers (WIP)
+* [`ring-router`](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md)
+* `http-router` with enchanced Pedestal-style Interceptors (WIP)
+* `frontend-router` with Keechma-style Controllers (WIP)
 
 To use Reitit, add the following dependecy to your project:
 
@@ -25,7 +25,7 @@ To use Reitit, add the following dependecy to your project:
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
+[metosin/reitit-core "0.1.0-SNAPSHOT"] ; routing core
 [metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
 [metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec coercion
 [metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion

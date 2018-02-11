@@ -4,7 +4,7 @@ Path-based routing is done using the `reitit.core/match-by-path` function. It ta
 
 * `nil`, no match
 * `PartialMatch`, path matched, missing path-parameters (only in reverse-routing)
-* `Match`, exact match
+* `Match`, an exact match
 
 Given a router:
 
@@ -13,9 +13,9 @@ Given a router:
 
 (def router
   (r/router
-    [["/api"
-      ["/ping" ::ping]
-      ["/user/:id" ::user]]]))
+    ["/api"
+     ["/ping" ::ping]
+     ["/user/:id" ::user]]))
 ```
 
 No match returns `nil`:

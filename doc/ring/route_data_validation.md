@@ -7,8 +7,6 @@ Ring route validation works [just like with core router](../basics/route_data_va
 
 ## Example
 
-Let's build a ring app with with both explicit (via middleware) and implicit (fully-qualified keys) spec validation.
-
 A simple app with spec-validation turned on:
 
 ```clj
@@ -222,7 +220,7 @@ But fails if they are present and invalid:
 
 ### Pushing the data to the endpoints
 
-Ability to define (and reuse) route-data in sub-paths is a powerful feature, but having data scattered all around might be harder to reason about. There is always an option to push all data to the endpoints.
+Ability to define (and reuse) route-data in mid-paths is a powerful feature, but having data defined all around might be harder to reason about. There is always an option to define all data at the endpoints.
 
 ```clj
 (def app

@@ -5,13 +5,13 @@ Ring [defines middleware](https://github.com/ring-clojure/ring/wiki/Concepts#mid
 Reitit defines middleware as data:
 
 1. Middleware can be defined as first-class data entries
-2. Middleware can be defined as a [duct-style](https://github.com/duct-framework/duct/wiki/Configuration) vector (of middleware)
+2. Middleware can be mounted as a [duct-style](https://github.com/duct-framework/duct/wiki/Configuration) vector (of middleware)
 4. Middleware can be optimized & [compiled](compiling_middleware.md) againt an endpoint
 3. Middleware chain can be transformed by the router
 
 ## Middleware as data
 
-All values in the `:middleware` vector in the route data are coerced into `reitit.middleware/Middleware` Records with using the `reitit.middleware/IntoMiddleware` Protocol. By default, functions, maps and `Middleware` records are allowed.
+All values in the `:middleware` vector in the route data are expanded into `reitit.middleware/Middleware` Records with using the `reitit.middleware/IntoMiddleware` Protocol. By default, functions, maps and `Middleware` records are allowed.
 
 Records can have arbitrary keys, but the following keys have a special purpose:
 
@@ -38,6 +38,15 @@ The following produce identical middleware runtime function.
     (handler (update request ::acc (fnil conj []) id))))
 ```
 
+### Map
+
+```clj
+(def wrap3
+  {:name ::wrap3
+   :description "Middleware that does things."
+   :wrap wrap})
+```
+
 ### Record
 
 ```clj
@@ -48,15 +57,6 @@ The following produce identical middleware runtime function.
     {:name ::wrap2
      :description "Middleware that does things."
      :wrap wrap}))
-```
-
-### Map
-
-```clj
-(def wrap3
-  {:name ::wrap3
-   :description "Middleware that does things."
-   :wrap wrap})
 ```
 
 ## Using Middleware
@@ -104,7 +104,7 @@ There is an extra option in ring-router (actually, in the undelaying middleware-
       {::middleware/transform #(interleave % (repeat [wrap :debug]))})))
 ```
 
-```
+```clj
 (app {:request-method :get, :uri "/api/ping"})
 ; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
 ```
@@ -121,17 +121,15 @@ There is an extra option in ring-router (actually, in the undelaying middleware-
       {::middleware/transform reverse)})))
 ```
 
-```
+```clj
 (app {:request-method :get, :uri "/api/ping"})
 ; {:status 200, :body [3 2 1 :handler]}
 ```
 
-## Roadmap for middleware
-
-Some things bubblin' under:
+## Ideas for the future
 
 * Re-package all useful middleware into (optimized) data-driven Middleware
-   * just package or a new community-repo with rehosting stuffm?
+   * just package or a new community-repo with rehosting stuff?
 * Support `Keyword` expansion into Middleware, enabling external Middleware Registries (duct/integrant/macchiato -style)
 * Support Middleware dependency resolution with new keys `:requires` and `:provides`. Values are set of top-level keys of the request. e.g.
    * `InjectUserIntoRequestMiddleware` requires `#{:session}` and provides `#{:user}`

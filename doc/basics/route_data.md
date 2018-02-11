@@ -1,8 +1,8 @@
 # Route Data
 
-Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. Together with `clojure.spec` -validation this enables co-existence of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+Route data is the core feature of reitit. Routes can have any map-like data attachted to them. This data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. Route data format can be defined and validated with `clojure.spec` enabling a architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
 
-Routes can have a non-sequential route argument that is expanded into route data map when a router is created.
+Raw routes can have a non-sequential route argument that is expanded (via router `:expand` hook) into route data at router creation time. By default, Keywords are expanded into `:name` and functions into `:handler` keys.
 
 ```clj
 (require '[reitit.core :as r])
@@ -23,14 +23,18 @@ The expanded route data can be retrieved from a router with `routes` and is retu
 ;  ["/pong" {:handler identity]}
 ;  ["/users" {:get {:roles #{:admin}
 ;                   :handler identity}}]]
+```
 
+```clj
 (r/match-by-path router "/ping")
 ; #Match{:template "/ping"
 ;        :data {:name :user/ping}
 ;        :result nil
 ;        :path-params {}
 ;        :path "/ping"}
+```
 
+```clj
 (r/match-by-name router ::ping)
 ; #Match{:template "/ping"
 ;        :data {:name :user/ping}
@@ -72,26 +76,20 @@ Resolved route tree:
 
 ## Expansion
 
-By default, `reitit/Expand` protocol is used to expand the route arguments. It expands keywords into `:name` and functions into `:handler` key in the route data map. It's easy to add custom expanders and one can chenge the whole expand implementation via [router options](../advanced/configuring_routers.md).
+By default, router `:expand` hook maps to `reitit.core/expand` function, backed by a `reitit.core/Expand` protocol. One can provide either a totally different function or add new implementations to that protocol. Expand implementations can be recursive.
+
+Naive example to add direct support for `java.io.File` route argument:
 
 ```clj
-(def router
-  (r/router
-    [["/ping" ::ping]
-     ["/pong" identity]
-     ["/users" {:get {:roles #{:admin}
-                      :handler identity}}]]))
+(extend-type java.io.File
+  r/Expand
+  (expand [file options]
+    (r/expand
+      #(slurp file)
+      options)))
 
-(r/routes router)
-; [["/ping" {:name :user/ping}]
-;  ["/pong" {:handler identity]}
-;  ["/users" {:get {:roles #{:admin}
-;                   :handler identity}}]]
-
-(r/match-by-path router "/ping")
-; #Match{:template "/ping"
-;        :data {:name :user/ping}
-;        :result nil
-;        :path-params {}
-;        :path "/ping"}
+(r/router
+  ["/" (java.io.File. "index.html")])
 ```
+
+See [router options](../advanced/configuring_routers.md) for all available options.

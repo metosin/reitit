@@ -1,10 +1,10 @@
 # Route Data Validation
 
-Route data can be anything, so it's easy to do mistakes. Accidentally using a `:role` key instead of `:roles` might render the whole routing app without any authorization in place.
+Route data can be anything, so it's easy to do go wrong. Accidentally adding a `:role` key instead of `:roles` might hinder the whole routing app without any authorization in place.
 
 To fail fast, we could use the custom `:coerce` and `:compile` hooks to apply data validation and throw exceptions on first sighted problem.
 
-But there is a better way. Router also has a `:validation` hook to validate the whole route tree after it's successfuly compiled. It expects a 2-arity function `routes opts => ()` that can side-effect in case of validation errors.
+But there is a better way. Router has a `:validation` hook to validate the whole route tree after it's successfuly compiled. It expects a 2-arity function `routes opts => ()` that can side-effect in case of validation errors.
 
 ## clojure.spec
 
@@ -104,26 +104,26 @@ Explicitly requiring a `::roles` key in a route data:
    ::rs/explain e/expound-str
    :validate rs/validate-spec!})
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
-; 
+;
 ; -- On route -----------------------
-; 
+;
 ; "/api"
-; 
+;
 ; -- Spec failed --------------------
-; 
+;
 ; {:handler
 ;  #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}
-; 
+;
 ; should contain key: `:user/roles`
-; 
+;
 ; |         key |                                   spec |
 ; |-------------+----------------------------------------|
 ; | :user/roles | (coll-of #{:admin :manager} :into #{}) |
-; 
-; 
-; 
+;
+;
+;
 ; -------------------------
 ; Detected 1 error
-; 
-; {:problems (#reitit.spec.Problem{:path "/api", :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :problems #:clojure.spec.alpha{:problems ({:path [], :pred (clojure.core/fn [%] (clojure.core/contains? % :user/roles)), :val {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :via [], :in []}), :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :value {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}}})}, compiling:(/Users/tommi/projects/metosin/reitit/test/cljc/reitit/spec_test.cljc:151:1) 
+;
+; {:problems (#reitit.spec.Problem{:path "/api", :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :problems #:clojure.spec.alpha{:problems ({:path [], :pred (clojure.core/fn [%] (clojure.core/contains? % :user/roles)), :val {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :via [], :in []}), :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :value {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}}})}, compiling:(/Users/tommi/projects/metosin/reitit/test/cljc/reitit/spec_test.cljc:151:1)
 ```
