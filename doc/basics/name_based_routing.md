@@ -9,9 +9,9 @@ Given a router:
 
 (def router
   (r/router
-    [["/api"
-      ["/ping" ::ping]
-      ["/user/:id" ::user]]]))
+    ["/api"
+     ["/ping" ::ping]
+     ["/user/:id" ::user]]))
 ```
 
 Listing all route names:

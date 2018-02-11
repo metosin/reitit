@@ -60,29 +60,27 @@ Same routes flattened:
 ```
 
 ### Generating routes
-As routes are just data, it's easy to create them programmatically:
+
+Routes are just data, so it's easy to create them programmatically:
 
 ```clj
-(defn cqrs-routes [actions dev-mode?]
+(defn cqrs-routes [actions]
   ["/api" {:interceptors [::api ::db]}
    (for [[type interceptor] actions
          :let [path (str "/" (name interceptor))
                method (condp = type
                         :query :get
                         :command :post)]]
-     [path {method {:interceptors [interceptor]}}])
-   (if dev-mode? ["/dev-tools" ::dev-tools])])
+     [path {method {:interceptors [interceptor]}}])])
 ```
 
 ```clj
 (cqrs-routes
   [[:query   'get-user]
    [:command 'add-user]
-   [:command 'add-order]]
-  false)
+   [:command 'add-order]])
 ; ["/api" {:interceptors [::api ::db]}
 ;  (["/get-user" {:get {:interceptors [get-user]}}]
 ;   ["/add-user" {:post {:interceptors [add-user]}}]
-;   ["/add-order" {:post {:interceptors [add-order]}}])
-;  nil]
+;   ["/add-order" {:post {:interceptors [add-order]}}])]
 ```

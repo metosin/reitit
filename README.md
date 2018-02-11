@@ -1,6 +1,6 @@
 # reitit [![Build Status](https://travis-ci.org/metosin/reitit.svg?branch=master)](https://travis-ci.org/metosin/reitit)
 
-A friendly data-driven router for Clojure(Script).
+A fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
 * Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
@@ -12,9 +12,9 @@ A friendly data-driven router for Clojure(Script).
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
 The following higher-level routers are also available as separate modules:
-* [ring-router](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
-* http-router with Pedestal-style Interceptors (WIP)
-* cljs-router with Keechma-style Controllers (WIP)
+* [`ring-router`](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* `http-router` with enchanced Pedestal-style Interceptors (WIP)
+* `frontend-router` with Keechma-style Controllers (WIP)
 
 See the [full documentation](https://metosin.github.io/reitit/) for details.
 
@@ -29,7 +29,7 @@ All bundled:
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.0-SNAPSHOT"] ; just the router
+[metosin/reitit-core "0.1.0-SNAPSHOT"] ; routing core
 [metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
 [metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec coercion
 [metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion
@@ -130,7 +130,7 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 [Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [Compojure](https://github.com/weavejester/compojure) and
 [Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
 * [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
-* [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the formal validation.
+* [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the validation part.
 
 ## Development instructions
 

@@ -2,7 +2,7 @@
 
 Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into two separate steps.
 
-By default, all wildcard and catch-all parameters are parsed as Strings:
+By default, all wildcard and catch-all parameters are parsed into strings:
 
 ```clj
 (require '[reitit.core :as r])
@@ -12,7 +12,7 @@ By default, all wildcard and catch-all parameters are parsed as Strings:
     ["/:company/users/:user-id" ::user-view]))
 ```
 
-Match with the parsed `:params` as Strings:
+Match with the parsed `:path-params` as strings:
 
 ```clj
 (r/match-by-path r "/metosin/users/123")
@@ -73,13 +73,13 @@ A Match:
 ;        :path "/metosin/users/123"}
 ```
 
-Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we haven't applied the coercion yet. We need to apply it ourselves after the successfull routing.
+Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we have done just the routing part. We need to apply coercion after the successful routing.
 
 But now we should have enough data on the match to apply the coercion.
 
 ## Compiling coercers
 
-Before the actual coercion, we need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.
+Before the actual coercion, we ~~should~~ need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.
 
 Compiling can be done via a Middleware, Interceptor or a Router. We apply it now at router-level, effecting all routes (with `:parameters` and `:coercion` defined).
 
@@ -176,9 +176,3 @@ Here's an full example for doing routing and coercion with Reitit and Schema:
 ## Ring Coercion
 
 For a full-blown http-coercion, see the [ring coercion](../ring/coercion.md).
-
-## Thanks to
-
-* [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
-* [schema](https://github.com/plumatic/schema) and [schema-tools](https://github.com/metosin/schema-tools) for Schema Coercion
-* [spec-tools](https://github.com/metosin/spec-tools) for Spec Coercion

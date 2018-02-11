@@ -1,12 +1,16 @@
-# Interceptors
+# Interceptors (WIP)
 
-Reitit also supports [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) via `reitit.interceptor` package.
+Reitit has also support for [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) via `reitit.interceptor` package. Currently, there is no interceptor interpreter shipped, just a way to compose and manage the interceptor chains.
 
-Full support is WIP at the moment:
+Plan is to have a full-featured `reitit-http` module with same features as the `reitit-ring` - enchanced interceptor maps & interceptor compilations. Stay tuned.
 
-* separate module (or library?) for interceptor interpreters
-* figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.
-* finalize `reitit-http` module as an alternative to `reitit-ring`
+### TODO
+
+* Figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.
+* Separate modules for interceptor interpreters (including cljs)
+* Finalize `reitit-http` module as an alternative to `reitit-ring`
+
+### Example
 
 Current `reitit-http` draft (with data-specs):
 

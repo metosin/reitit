@@ -2,15 +2,15 @@
 
 The [dynamic extensions](dynamic_extensions.md) is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.
 
-But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware/interceptor at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass it into the actual request-handler via a closure - yielding much faster runtime processing. It can also decide not to mount itself by returning `nil`. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
+But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass the optimized data into the actual request-handler via a closure - yielding much faster runtime processing. Middleware can also decide not to mount itself by returning `nil`. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
 
-To enable this we use [middleware records](data_driven_middleware.md) `:compile` key instead of the normal `:wrap`. `:compile` expects a function of `route-data router-opts => ?wrap`.
+To enable this we use [middleware records](data_driven_middleware.md) `:compile` key instead of the normal `:wrap`. `:compile` expects a function of `route-data router-opts => ?IntoMiddleware`.
 
 To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:compile`.
 
 ## Normal Middleware
 
-* Reads the compiled route information on every request.
+* Reads the compiled route information on every request. Everything is done at request-time.
 
 ```clj
 (defn wrap-coerce-response
@@ -44,9 +44,9 @@ To demonstrate the two approaches, below are response coercion middleware writte
 
 ## Compiled Middleware
 
-* Route information is provided via a closure
-* Pre-compiled coercers
-* Mounts only if `:coercion` and `:responses` are defined for the route
+* Route information is provided at creation-time
+* Coercers are compiled at creation-time
+* Middleware mounts only if `:coercion` and `:responses` are defined for the route
 * Also defines spec for the route data `:responses` for the [route data validation](route_data_validation.md).
 
 ```clj
@@ -69,4 +69,4 @@ To demonstrate the two approaches, below are response coercion middleware writte
                        (handler request #(respond (coercion/coerce-response coercers request %)) raise)))))))})
 ```
 
-The latter has 50% less code, is easier to reason about and is much faster.
+It has 50% less code, it's much easier to reason about and is much faster.

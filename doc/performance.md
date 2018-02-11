@@ -1,16 +1,16 @@
 # Performance
 
-There are many great routing libraries for Clojure(Script), but not many are optimized for perf. Reitit tries to be both great in features and be really fast. Originally the routing was adopted from [Pedestal](http://pedestal.io/) (which is known to be fast), but has been partially rewritten performance in mind. Hopefully some optimizations can be back-ported to Pedestal.
+Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from [Pedestal](http://pedestal.io/), but has been mostly rewritten to get even better performance.
 
 ### Rationale
 
-* Multiple routing algorithms, choose based on the route tree
+* Multiple routing algorithms, chosen based on the route tree
 * Route flattening and re-ordering
-* Managed mutability over Immutability
-* Precompute/compile as much as possible (matches, middleware, routes)
+* Managed mutability over immutability
+* Precompute/compile as much as possible (matches, middleware, interceptors, routes)
 * Use abstractions that enable JVM optimizations
 * Use small functions to enable JVM Inlining
-* Protocols over Multimethods (or Maps)
+* Protocols over Multimethods
 * Records over Maps
 * Always be measuring
 * Don't trust the (micro-)benchmarks
@@ -77,27 +77,27 @@ So, we need to test something more realistic.
 
 To get better view on the real life routing performance, there is [test](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj) of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the [OpenSensors](https://opensensors.io/) swagger definitions.
 
-Thanks to the snappy [segment-tree](https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc) algorithm, `reitit-ring` is fastest here. Pedestal is also fast with it's [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) implementation.
+Thanks to the snappy new [segment-tree](https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc) algorithm, `reitit-ring` is fastest here. Pedestal is also fast with it's [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) implementation.
 
 ![Opensensors perf test](images/opensensors.png)
 
 ### CQRS apis
 
-Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj) is a [CQRS](https://martinfowler.com/bliki/CQRS.html)-style route tree, where all the paths are static, e.g. `/api/command/add-order`. The route definitions are pulled out from [Lupapiste](https://github.com/lupapiste/lupapiste). The test consists of ~300 static routes (just the commands here, there would be ~200 queries too).
+Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj) is a [CQRS](https://martinfowler.com/bliki/CQRS.html)-style route tree, where all the paths are static, e.g. `/api/command/add-order`. The 300 route definitions are pulled out from [Lupapiste](https://github.com/lupapiste/lupapiste).
 
-Again, both `reitit-ring` and Pedestal shine here, thanks to the fast lookup-routers. On average, they are **two** and on best case, **three orders of magnitude faster** than the other tested libs. Ataraxy failed this test on `Method code too large!` error.
+Both `reitit-ring` and Pedestal shine in this test, thanks to the fast lookup-routers. On average, they are **two** and on best case, **three orders of magnitude faster** than the other tested libs. Ataraxy failed this test on `Method code too large!` error.
 
 ![Opensensors perf test](images/lupapiste.png)
 
-**NOTE**: If there would be even one wildcard route in the route-tree, Pedestal would fallback from lookup-router to the prefix-tree router, yielding nearly constant, but an order of magnitude slower perf. Reitit instead fallbacks to `:mixed-router`, serving all the static routes with `:lookup-router`, just the wildcard route(s) with `:segment-tree`. So, the performance would not notably degrade.
+**NOTE**: in real life, there are usually always also wild-card routes present. In this case, Pedestal would fallback from lookup-router to the prefix-tree router, which is order of magnitude slower (30x in this test). Reitit would handle this nicely thanks to it's `:mixed-router`: all static routes would still be served with `:lookup-router`, just the wildcard routes with `:segment-tree`. The performance would not notably degrade.
 
 ### Why measure?
 
-The routing perf needs to be measured to get an internal baseline to optimize against. We also want to ensure that new features don't regress the performance. Perf tests should be run in a stable CI environment. Help welcome.
+The reitit routing perf is measured to get an internal baseline to optimize against. We also want to ensure that new features don't regress the performance. Perf tests should be run in a stable CI environment. Help welcome!
 
 ### Looking out of the box
 
-It might be interesting to compare reitit with the routers in other languages, like the [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark).
+A quick poke to [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that the reitit is only few times slower than the fastest routers in Go. Which is really awesome (if true).
 
 ### Performance tips
 

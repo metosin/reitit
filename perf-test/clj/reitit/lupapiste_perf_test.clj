@@ -323,6 +323,8 @@
 (def cqrs-routes
   (mapv (fn [command] [(str "/command/" (name command)) {:post handler :name command}]) commands))
 
+cqrs-routes
+
 (def cqrs-routes-pedestal
   (map-tree/router
     (table/table-routes
@@ -332,7 +334,9 @@
   ["/command/" (into {} (mapv (fn [command] [(name command) command]) commands))])
 
 (def cqrs-routes-compojure
-  (apply routes (map (fn [command] (compojure/ANY (str "/command/" (name command)) [] handler)) commands)))
+  (apply
+    compojure/routes
+    (map (fn [command] (compojure/ANY (str "/command/" (name command)) [] handler)) commands)))
 
 ;; Method code too large!
 #_(def cqrs-routes-ataraxy

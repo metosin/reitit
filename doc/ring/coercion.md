@@ -20,15 +20,19 @@ Reitit ships with the following coercion modules:
 
 Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
 
-# Defining parameters and responses
+## Defining parameters and responses
 
-Below is a ring route data defining [Plumatic Schema](https://github.com/plumatic/schema) coercion. It defines schemas for `:query`, `:body` and  `:path` parameters and for a successful response `:body`.
+Parameters are defined in `:parameters` key and responses in `:responses`.
 
-The coerced parameters can be read under `:parameters` key in the request.
+Below is an example with [Plumatic Schema](https://github.com/plumatic/schema). It defines input schemas for `:query`, `:body` and `:path` parameters and a schema for a successful response `:body`.
+
+Handler can access the coerced parameters can be read under `:parameters` key in the request.
 
 ```clj
 (require '[reitit.coercion.schema])
 (require '[schema.core :as s])
+
+(def PositiveInt (s/constrained s/Int pos? 'PositiveInt))
 
 (def plus-endpoint
   {:coercion reitit.coercion.schema/coercion
@@ -48,9 +52,9 @@ The coerced parameters can be read under `:parameters` key in the request.
 
 Defining a coercion for a route data doesn't do anything, as it's just data. We have to attach some code to apply the actual coercion. We can use the middleware from `reitit.ring.coercion`:
 
-* `coerce-request-middleware` for the parameter coercion
-* `coerce-response-middleware` for the response coercion
-* `coerce-exceptions-middleware` to turn coercion exceptions into pretty responses
+* `coerce-request-middleware` to apply the parameter coercion
+* `coerce-response-middleware` to apply the response coercion
+* `coerce-exceptions-middleware` to transform coercion exceptions into pretty responses
 
 ### Full example
 
@@ -133,7 +137,7 @@ Invalid response:
 
 ### Optimizations
 
-The coercion middleware are [compiled againts a route](compiling_middleware,md). In the compile step the actual coercer implementations are compiled for the defined models. Also, the mw doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+The coercion middleware are [compiled againts a route](compiling_middleware,md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
 
 We can query the compiled middleware chain for the routes:
 
@@ -165,9 +169,3 @@ Has no mounted middleware:
     (->> (mapv :name)))
 ; []
 ```
-## Thanks to
-
-* [compojure-api](https://clojars.org/metosin/compojure-api) for the initial `Coercion` protocol
-* [ring-swagger](https://github.com/metosin/ring-swagger#more-complete-example) for the `:parameters` and `:responses` syntax.
-* [schema](https://github.com/plumatic/schema) and [schema-tools](https://github.com/metosin/schema-tools) for Schema Coercion
-* [spec-tools](https://github.com/metosin/spec-tools) for Spec Coercion
