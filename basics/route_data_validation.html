@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../interceptors.html">
-            
-                <a href="../interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="../openapi.html">
-            
-                <a href="../openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="../performance.html">
+        <li class="chapter " data-level="1.6" data-path="../performance.html">
             
                 <a href="../performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../interceptors.html">
+            
+                <a href="../interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../openapi.html">
+            
+                <a href="../openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -536,9 +536,9 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="route-data-validation">Route Data Validation</h1>
-<p>Route data can be anything, so it&apos;s easy to do mistakes. Accidentally using a <code>:role</code> key instead of <code>:roles</code> might render the whole routing app without any authorization in place.</p>
+<p>Route data can be anything, so it&apos;s easy to do go wrong. Accidentally adding a <code>:role</code> key instead of <code>:roles</code> might hinder the whole routing app without any authorization in place.</p>
 <p>To fail fast, we could use the custom <code>:coerce</code> and <code>:compile</code> hooks to apply data validation and throw exceptions on first sighted problem.</p>
-<p>But there is a better way. Router also has a <code>:validation</code> hook to validate the whole route tree after it&apos;s successfuly compiled. It expects a 2-arity function <code>routes opts =&gt; ()</code> that can side-effect in case of validation errors.</p>
+<p>But there is a better way. Router has a <code>:validation</code> hook to validate the whole route tree after it&apos;s successfuly compiled. It expects a 2-arity function <code>routes opts =&gt; ()</code> that can side-effect in case of validation errors.</p>
 <h2 id="clojurespec">clojure.spec</h2>
 <p>Namespace <code>reitit.spec</code> contains specs for main parts of <code>reitit.core</code> and a helper function <code>validate-spec!</code> that runs spec validation for all route data and throws an exception if any errors are found.</p>
 <p>A Router with invalid route data:</p>
@@ -633,27 +633,27 @@
    <span class="hljs-symbol">::rs/explain</span> e/expound-str
    <span class="hljs-symbol">:validate</span> rs/validate-spec!})
 <span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Invalid route data:</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; -- On route -----------------------</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; &quot;/api&quot;</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; -- Spec failed --------------------</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; {:handler</span>
 <span class="hljs-comment">;  #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; should contain key: `:user/roles`</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; |         key |                                   spec |</span>
 <span class="hljs-comment">; |-------------+----------------------------------------|</span>
 <span class="hljs-comment">; | :user/roles | (coll-of #{:admin :manager} :into #{}) |</span>
-<span class="hljs-comment">; </span>
-<span class="hljs-comment">; </span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; -------------------------</span>
 <span class="hljs-comment">; Detected 1 error</span>
-<span class="hljs-comment">; </span>
+<span class="hljs-comment">;</span>
 <span class="hljs-comment">; {:problems (#reitit.spec.Problem{:path &quot;/api&quot;, :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}, :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b &quot;clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b&quot;], :problems #:clojure.spec.alpha{:problems ({:path [], :pred (clojure.core/fn [%] (clojure.core/contains? % :user/roles)), :val {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}, :via [], :in []}), :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b &quot;clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b&quot;], :value {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}}})}, compiling:(/Users/tommi/projects/metosin/reitit/test/cljc/reitit/spec_test.cljc:151:1)</span>
 </code></pre>
 
@@ -699,7 +699,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"1.2.6","depth":2,"next":{"title":"Route Conflicts","level":"1.2.7","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2018-02-02T12:48:38.750Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"1.2.6","depth":2,"next":{"title":"Route Conflicts","level":"1.2.7","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2018-02-11T19:35:28.394Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

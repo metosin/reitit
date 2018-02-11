@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../interceptors.html">
-            
-                <a href="../interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="../openapi.html">
-            
-                <a href="../openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="../performance.html">
+        <li class="chapter " data-level="1.6" data-path="../performance.html">
             
                 <a href="../performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../interceptors.html">
+            
+                <a href="../interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../openapi.html">
+            
+                <a href="../openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -552,11 +552,14 @@
 <li><code>reitit.coercion.spec/coercion</code> for both <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> and <a href="https://github.com/metosin/spec-tools#data-specs" target="_blank">data-specs</a></li>
 </ul>
 <p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementations within a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
-<h1 id="defining-parameters-and-responses">Defining parameters and responses</h1>
-<p>Below is a ring route data defining <a href="https://github.com/plumatic/schema" target="_blank">Plumatic Schema</a> coercion. It defines schemas for <code>:query</code>, <code>:body</code> and  <code>:path</code> parameters and for a successful response <code>:body</code>.</p>
-<p>The coerced parameters can be read under <code>:parameters</code> key in the request.</p>
+<h2 id="defining-parameters-and-responses">Defining parameters and responses</h2>
+<p>Parameters are defined in <code>:parameters</code> key and responses in <code>:responses</code>.</p>
+<p>Below is an example with <a href="https://github.com/plumatic/schema" target="_blank">Plumatic Schema</a>. It defines input schemas for <code>:query</code>, <code>:body</code> and <code>:path</code> parameters and a schema for a successful response <code>:body</code>.</p>
+<p>Handler can access the coerced parameters can be read under <code>:parameters</code> key in the request.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> PositiveInt (<span class="hljs-name">s/constrained</span> s/Int pos? &apos;PositiveInt))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> plus-endpoint
   {<span class="hljs-symbol">:coercion</span> reitit.coercion.schema/coercion
@@ -574,9 +577,9 @@
 <h2 id="coercion-middleware">Coercion Middleware</h2>
 <p>Defining a coercion for a route data doesn&apos;t do anything, as it&apos;s just data. We have to attach some code to apply the actual coercion. We can use the middleware from <code>reitit.ring.coercion</code>:</p>
 <ul>
-<li><code>coerce-request-middleware</code> for the parameter coercion</li>
-<li><code>coerce-response-middleware</code> for the response coercion</li>
-<li><code>coerce-exceptions-middleware</code> to turn coercion exceptions into pretty responses</li>
+<li><code>coerce-request-middleware</code> to apply the parameter coercion</li>
+<li><code>coerce-response-middleware</code> to apply the response coercion</li>
+<li><code>coerce-exceptions-middleware</code> to transform coercion exceptions into pretty responses</li>
 </ul>
 <h3 id="full-example">Full example</h3>
 <p>Here&apos;s an full example for applying coercion with Reitit, Ring and Schema:</p>
@@ -645,7 +648,7 @@
 <span class="hljs-comment">;         :in [:response :body]}}</span>
 </code></pre>
 <h3 id="optimizations">Optimizations</h3>
-<p>The coercion middleware are <a href="compiling_middleware,md">compiled againts a route</a>. In the compile step the actual coercer implementations are compiled for the defined models. Also, the mw doesn&apos;t mount itself if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
+<p>The coercion middleware are <a href="compiling_middleware,md">compiled againts a route</a>. In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn&apos;t mount itself if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
 <p>We can query the compiled middleware chain for the routes:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
@@ -668,13 +671,6 @@
     (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;&gt;</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">mapv</span></span> <span class="hljs-symbol">:name</span>)))
 <span class="hljs-comment">; []</span>
 </code></pre>
-<h2 id="thanks-to">Thanks to</h2>
-<ul>
-<li><a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a> for the initial <code>Coercion</code> protocol</li>
-<li><a href="https://github.com/metosin/ring-swagger#more-complete-example" target="_blank">ring-swagger</a> for the <code>:parameters</code> and <code>:responses</code> syntax.</li>
-<li><a href="https://github.com/plumatic/schema" target="_blank">schema</a> and <a href="https://github.com/metosin/schema-tools" target="_blank">schema-tools</a> for Schema Coercion</li>
-<li><a href="https://github.com/metosin/spec-tools" target="_blank">spec-tools</a> for Spec Coercion</li>
-</ul>
 
                                 
                                 </section>
@@ -718,7 +714,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"next":{"title":"Route Data Validation","level":"1.5.5","depth":2,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"next":{"title":"Route Data Validation","level":"1.5.5","depth":2,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

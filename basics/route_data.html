@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../interceptors.html">
-            
-                <a href="../interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="../openapi.html">
-            
-                <a href="../openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="../performance.html">
+        <li class="chapter " data-level="1.6" data-path="../performance.html">
             
                 <a href="../performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../interceptors.html">
+            
+                <a href="../interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../openapi.html">
+            
+                <a href="../openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -536,8 +536,8 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="route-data">Route Data</h1>
-<p>Route data is the heart of this library. Routes can have any data attachted to them. Data is interpeted either by the client application or the <code>Router</code> via it&apos;s <code>:coerce</code> and <code>:compile</code> hooks. Together with <code>clojure.spec</code> -validation this enables co-existence of both <a href="https://youtu.be/x9pxbnFC4aQ?t=1907" target="_blank">adaptive and principled</a> components.</p>
-<p>Routes can have a non-sequential route argument that is expanded into route data map when a router is created.</p>
+<p>Route data is the core feature of reitit. Routes can have any map-like data attachted to them. This data is interpeted either by the client application or the <code>Router</code> via it&apos;s <code>:coerce</code> and <code>:compile</code> hooks. Route data format can be defined and validated with <code>clojure.spec</code> enabling a architecture of both <a href="https://youtu.be/x9pxbnFC4aQ?t=1907" target="_blank">adaptive and principled</a> components.</p>
+<p>Raw routes can have a non-sequential route argument that is expanded (via router <code>:expand</code> hook) into route data at router creation time. By default, Keywords are expanded into <code>:name</code> and functions into <code>:handler</code> keys.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
@@ -553,15 +553,15 @@
 <span class="hljs-comment">;  [&quot;/pong&quot; {:handler identity]}</span>
 <span class="hljs-comment">;  [&quot;/users&quot; {:get {:roles #{:admin}</span>
 <span class="hljs-comment">;                   :handler identity}}]]</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/ping&quot;</span>)
+</code></pre>
+<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/ping&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/ping&quot;</span>
 <span class="hljs-comment">;        :data {:name :user/ping}</span>
 <span class="hljs-comment">;        :result nil</span>
 <span class="hljs-comment">;        :path-params {}</span>
 <span class="hljs-comment">;        :path &quot;/ping&quot;}</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
+</code></pre>
+<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
 <span class="hljs-comment">; #Match{:template &quot;/ping&quot;</span>
 <span class="hljs-comment">;        :data {:name :user/ping}</span>
 <span class="hljs-comment">;        :result nil</span>
@@ -591,27 +591,19 @@
 <span class="hljs-comment">;                    :roles #{:db-admin}}]]</span>
 </code></pre>
 <h2 id="expansion">Expansion</h2>
-<p>By default, <code>reitit/Expand</code> protocol is used to expand the route arguments. It expands keywords into <code>:name</code> and functions into <code>:handler</code> key in the route data map. It&apos;s easy to add custom expanders and one can chenge the whole expand implementation via <a href="../advanced/configuring_routers.html">router options</a>.</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
-  (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-     [<span class="hljs-string">&quot;/pong&quot;</span> identity]
-     [<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:roles</span> #{<span class="hljs-symbol">:admin</span>}
-                      <span class="hljs-symbol">:handler</span> identity}}]]))
+<p>By default, router <code>:expand</code> hook maps to <code>reitit.core/expand</code> function, backed by a <code>reitit.core/Expand</code> protocol. One can provide either a totally different function or add new implementations to that protocol. Expand implementations can be recursive.</p>
+<p>Naive example to add direct support for <code>java.io.File</code> route argument:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">extend-type</span></span> java.io.File
+  r/Expand
+  (<span class="hljs-name">expand</span> [file options]
+    (<span class="hljs-name">r/expand</span>
+      #(<span class="hljs-name"><span class="hljs-builtin-name">slurp</span></span> file)
+      options)))
 
-(<span class="hljs-name">r/routes</span> router)
-<span class="hljs-comment">; [[&quot;/ping&quot; {:name :user/ping}]</span>
-<span class="hljs-comment">;  [&quot;/pong&quot; {:handler identity]}</span>
-<span class="hljs-comment">;  [&quot;/users&quot; {:get {:roles #{:admin}</span>
-<span class="hljs-comment">;                   :handler identity}}]]</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/ping&quot;</span>)
-<span class="hljs-comment">; #Match{:template &quot;/ping&quot;</span>
-<span class="hljs-comment">;        :data {:name :user/ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :path-params {}</span>
-<span class="hljs-comment">;        :path &quot;/ping&quot;}</span>
+(<span class="hljs-name">r/router</span>
+  [<span class="hljs-string">&quot;/&quot;</span> (<span class="hljs-name">java.io.File.</span> <span class="hljs-string">&quot;index.html&quot;</span>)])
 </code></pre>
+<p>See <a href="../advanced/configuring_routers.html">router options</a> for all available options.</p>
 
                                 
                                 </section>
@@ -655,7 +647,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Data","level":"1.2.5","depth":2,"next":{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"previous":{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data.md","mtime":"2018-02-02T12:48:38.750Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Data","level":"1.2.5","depth":2,"next":{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"previous":{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data.md","mtime":"2018-02-11T19:35:28.394Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

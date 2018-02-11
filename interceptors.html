@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Interceptors · GitBook</title>
+        <title>Interceptors (WIP) · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -60,7 +60,7 @@
     <link rel="next" href="openapi.html" />
     
     
-    <link rel="prev" href="ring/compiling_middleware.html" />
+    <link rel="prev" href="performance.html" />
     
 
     </head>
@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.6" data-path="interceptors.html">
-            
-                <a href="interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="openapi.html">
-            
-                <a href="openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="performance.html">
+        <li class="chapter " data-level="1.6" data-path="performance.html">
             
                 <a href="performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.7" data-path="interceptors.html">
+            
+                <a href="interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="openapi.html">
+            
+                <a href="openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -520,7 +520,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Interceptors</a>
+        <a href="." >Interceptors (WIP)</a>
     </h1>
 </div>
 
@@ -535,14 +535,16 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="interceptors">Interceptors</h1>
-<p>Reitit also supports <a href="pedestal.io">Pedestal</a>-style <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> via <code>reitit.interceptor</code> package.</p>
-<p>Full support is WIP at the moment:</p>
+                                <h1 id="interceptors-wip">Interceptors (WIP)</h1>
+<p>Reitit has also support for <a href="pedestal.io">Pedestal</a>-style <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> via <code>reitit.interceptor</code> package. Currently, there is no interceptor interpreter shipped, just a way to compose and manage the interceptor chains.</p>
+<p>Plan is to have a full-featured <code>reitit-http</code> module with same features as the <code>reitit-ring</code> - enchanced interceptor maps &amp; interceptor compilations. Stay tuned.</p>
+<h3 id="todo">TODO</h3>
 <ul>
-<li>separate module (or library?) for interceptor interpreters</li>
-<li>figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.</li>
-<li>finalize <code>reitit-http</code> module as an alternative to <code>reitit-ring</code></li>
+<li>Figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.</li>
+<li>Separate modules for interceptor interpreters (including cljs)</li>
+<li>Finalize <code>reitit-http</code> module as an alternative to <code>reitit-ring</code></li>
 </ul>
+<h3 id="example">Example</h3>
 <p>Current <code>reitit-http</code> draft (with data-specs):</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.http.coercion <span class="hljs-symbol">:as</span> rhc])
 (<span class="hljs-name">require</span> &apos;[reitit.http <span class="hljs-symbol">:as</span> http])
@@ -616,12 +618,12 @@
 
             
                 
-                <a href="ring/compiling_middleware.html" class="navigation navigation-prev " aria-label="Previous page: Compiling Middleware">
+                <a href="performance.html" class="navigation navigation-prev " aria-label="Previous page: Performance">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="openapi.html" class="navigation navigation-next " aria-label="Next page: Swagger & Openapi">
+                <a href="openapi.html" class="navigation navigation-next " aria-label="Next page: Swagger & Openapi (WIP)">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -632,7 +634,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Interceptors","level":"1.6","depth":1,"next":{"title":"Swagger & Openapi","level":"1.7","depth":1,"path":"openapi.md","ref":"openapi.md","articles":[]},"previous":{"title":"Compiling Middleware","level":"1.5.6","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"interceptors.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Interceptors (WIP)","level":"1.7","depth":1,"next":{"title":"Swagger & Openapi (WIP)","level":"1.8","depth":1,"path":"openapi.md","ref":"openapi.md","articles":[]},"previous":{"title":"Performance","level":"1.6","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"interceptors.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../interceptors.html">
-            
-                <a href="../interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="../openapi.html">
-            
-                <a href="../openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="../performance.html">
+        <li class="chapter " data-level="1.6" data-path="../performance.html">
             
                 <a href="../performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../interceptors.html">
+            
+                <a href="../interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../openapi.html">
+            
+                <a href="../openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -537,14 +537,14 @@
                                 
                                 <h1 id="coercion-explained">Coercion Explained</h1>
 <p>Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into two separate steps.</p>
-<p>By default, all wildcard and catch-all parameters are parsed as Strings:</p>
+<p>By default, all wildcard and catch-all parameters are parsed into strings:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">r/router</span>
     [<span class="hljs-string">&quot;/:company/users/:user-id&quot;</span> <span class="hljs-symbol">::user-view</span>]))
 </code></pre>
-<p>Match with the parsed <code>:params</code> as Strings:</p>
+<p>Match with the parsed <code>:path-params</code> as strings:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> r <span class="hljs-string">&quot;/metosin/users/123&quot;</span>)
 <span class="hljs-comment">; #Match{:template &quot;/:company/users/:user-id&quot;,</span>
 <span class="hljs-comment">;        :data {:name :user/user-view},</span>
@@ -591,10 +591,10 @@
 <span class="hljs-comment">;        :path-params {:company &quot;metosin&quot;, :user-id &quot;123&quot;},</span>
 <span class="hljs-comment">;        :path &quot;/metosin/users/123&quot;}</span>
 </code></pre>
-<p>Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we haven&apos;t applied the coercion yet. We need to apply it ourselves after the successfull routing.</p>
+<p>Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we have done just the routing part. We need to apply coercion after the successful routing.</p>
 <p>But now we should have enough data on the match to apply the coercion.</p>
 <h2 id="compiling-coercers">Compiling coercers</h2>
-<p>Before the actual coercion, we need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.</p>
+<p>Before the actual coercion, we <del>should</del> need to compile the coercers against the route data. Compiled coercers yield much better performance and the manual step of adding a coercion compiler makes things explicit and non-magical.</p>
 <p>Compiling can be done via a Middleware, Interceptor or a Router. We apply it now at router-level, effecting all routes (with <code>:parameters</code> and <code>:coercion</code> defined).</p>
 <p>There is a helper function <code>reitit.coercion/compile-request-coercers</code> just for this:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion <span class="hljs-symbol">:as</span> coercion])
@@ -670,12 +670,6 @@
 </code></pre>
 <h2 id="ring-coercion">Ring Coercion</h2>
 <p>For a full-blown http-coercion, see the <a href="../ring/coercion.html">ring coercion</a>.</p>
-<h2 id="thanks-to">Thanks to</h2>
-<ul>
-<li><a href="https://clojars.org/metosin/compojure-api" target="_blank">compojure-api</a> for the initial <code>Coercion</code> protocol</li>
-<li><a href="https://github.com/plumatic/schema" target="_blank">schema</a> and <a href="https://github.com/metosin/schema-tools" target="_blank">schema-tools</a> for Schema Coercion</li>
-<li><a href="https://github.com/metosin/spec-tools" target="_blank">spec-tools</a> for Spec Coercion</li>
-</ul>
 
                                 
                                 </section>
@@ -719,7 +713,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2018-02-02T12:48:38.750Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Coercion Explained","level":"1.3.1","depth":2,"next":{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"previous":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/coercion.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

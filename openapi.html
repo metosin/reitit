@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Swagger & Openapi · GitBook</title>
+        <title>Swagger & Openapi (WIP) · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,7 +57,7 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="performance.html" />
+    <link rel="next" href="faq.html" />
     
     
     <link rel="prev" href="interceptors.html" />
@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="interceptors.html">
-            
-                <a href="interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter active" data-level="1.7" data-path="openapi.html">
-            
-                <a href="openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="performance.html">
+        <li class="chapter " data-level="1.6" data-path="performance.html">
             
                 <a href="performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="interceptors.html">
+            
+                <a href="interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.8" data-path="openapi.html">
+            
+                <a href="openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -520,7 +520,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Swagger & Openapi</a>
+        <a href="." >Swagger & Openapi (WIP)</a>
     </h1>
 </div>
 
@@ -535,15 +535,58 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="swagger--openapi">Swagger &amp; OpenAPI</h1>
-<p>Goal is to support both <a href="https://swagger.io/" target="_blank">Swagger</a> &amp; <a href="https://www.openapis.org/" target="_blank">OpenAPI</a> specifications for route documentation.</p>
-<p>Swagge-support draft works, but only for Clojure.</p>
-<p>TODO:</p>
+                                <h1 id="swagger--openapi-wip">Swagger &amp; OpenAPI (WIP)</h1>
+<p>Goal is to support both <a href="https://swagger.io/" target="_blank">Swagger</a> &amp; <a href="https://www.openapis.org/" target="_blank">OpenAPI</a> for route documentation. Documentation is extracted from existing coercion definitions <code>:parameters</code>, <code>:responses</code> and from a set of new doumentation keys.</p>
+<p>Swagger-support draft works, but only for Clojure.</p>
+<h3 id="todo">TODO</h3>
 <ul>
 <li><a href="https://github.com/metosin/schema-tools/issues/38" target="_blank">metosin/schema-tools#38</a>: extract Schema-swagger from <a href="https://github.com/metosin/ring-swagger" target="_blank">ring-swagger</a> into <a href="https://github.com/metosin/schema-tools" target="_blank">schema-tools</a> to support both Clojure &amp; ClojureScript</li>
 <li>separate modules for the swagger2 &amp; openapi</li>
-<li><a href="https://github.com/metosin/spec-tools/issues/105" target="_blank">metosin/spec-tools#105</a>: support OpenApi</li>
+<li><a href="https://github.com/metosin/spec-tools/issues/105" target="_blank">metosin/spec-tools#105</a>: support Openapi</li>
 </ul>
+<h3 id="example">Example</h3>
+<p>Current <code>reitit-swagger</code> draft (with <code>reitit-ring</code> &amp; data-specs):</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.swagger <span class="hljs-symbol">:as</span> swagger])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> rrc])
+(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> spec])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span>
+       <span class="hljs-comment">;; identify a swagger api</span>
+       <span class="hljs-comment">;; there can be several in a routing tree</span>
+       {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:id</span> <span class="hljs-symbol">:math</span>}}
+
+       <span class="hljs-comment">;; the (undocumented) swagger spec endpoint</span>
+       [<span class="hljs-string">&quot;/swagger.json&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
+               <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:info</span> {<span class="hljs-symbol">:title</span> <span class="hljs-string">&quot;my-api&quot;</span>}}
+               <span class="hljs-symbol">:handler</span> swagger/swagger-spec-handler}}]
+
+       [<span class="hljs-string">&quot;/minus&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;minus&quot;</span>
+               <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+               <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                          {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">-</span></span> x y)}})}}]
+
+       [<span class="hljs-string">&quot;/plus&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus&quot;</span>
+               <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+               <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                          {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-comment">;; does not particiate in request processing</span>
+                           <span class="hljs-comment">;; just defines specs for the extra keys</span>
+                           swagger/swagger-middleware
+                           rrc/coerce-exceptions-middleware
+                           rrc/coerce-request-middleware
+                           rrc/coerce-response-middleware]
+              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
+</code></pre>
 
                                 
                                 </section>
@@ -571,12 +614,12 @@
 
             
                 
-                <a href="interceptors.html" class="navigation navigation-prev " aria-label="Previous page: Interceptors">
+                <a href="interceptors.html" class="navigation navigation-prev " aria-label="Previous page: Interceptors (WIP)">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="performance.html" class="navigation navigation-next " aria-label="Next page: Performance">
+                <a href="faq.html" class="navigation navigation-next " aria-label="Next page: FAQ">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -587,7 +630,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Swagger & Openapi","level":"1.7","depth":1,"next":{"title":"Performance","level":"1.8","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"previous":{"title":"Interceptors","level":"1.6","depth":1,"path":"interceptors.md","ref":"interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"openapi.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Swagger & Openapi (WIP)","level":"1.8","depth":1,"next":{"title":"FAQ","level":"1.9","depth":1,"path":"faq.md","ref":"faq.md","articles":[]},"previous":{"title":"Interceptors (WIP)","level":"1.7","depth":1,"path":"interceptors.md","ref":"interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"openapi.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

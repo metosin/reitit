@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="faq.html" />
+    <link rel="next" href="interceptors.html" />
     
     
-    <link rel="prev" href="openapi.html" />
+    <link rel="prev" href="ring/compiling_middleware.html" />
     
 
     </head>
@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="interceptors.html">
-            
-                <a href="interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="openapi.html">
-            
-                <a href="openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter active" data-level="1.8" data-path="performance.html">
+        <li class="chapter active" data-level="1.6" data-path="performance.html">
             
                 <a href="performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="interceptors.html">
+            
+                <a href="interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="openapi.html">
+            
+                <a href="openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -536,16 +536,16 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="performance">Performance</h1>
-<p>There are many great routing libraries for Clojure(Script), but not many are optimized for perf. Reitit tries to be both great in features and be really fast. Originally the routing was adopted from <a href="http://pedestal.io/" target="_blank">Pedestal</a> (which is known to be fast), but has been partially rewritten performance in mind. Hopefully some optimizations can be back-ported to Pedestal.</p>
+<p>Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from <a href="http://pedestal.io/" target="_blank">Pedestal</a>, but has been mostly rewritten to get even better performance.</p>
 <h3 id="rationale">Rationale</h3>
 <ul>
-<li>Multiple routing algorithms, choose based on the route tree</li>
+<li>Multiple routing algorithms, chosen based on the route tree</li>
 <li>Route flattening and re-ordering</li>
-<li>Managed mutability over Immutability</li>
-<li>Precompute/compile as much as possible (matches, middleware, routes)</li>
+<li>Managed mutability over immutability</li>
+<li>Precompute/compile as much as possible (matches, middleware, interceptors, routes)</li>
 <li>Use abstractions that enable JVM optimizations</li>
 <li>Use small functions to enable JVM Inlining</li>
-<li>Protocols over Multimethods (or Maps)</li>
+<li>Protocols over Multimethods</li>
 <li>Records over Maps</li>
 <li>Always be measuring</li>
 <li>Don&apos;t trust the (micro-)benchmarks</li>
@@ -595,17 +595,17 @@
 <p>So, we need to test something more realistic.</p>
 <h3 id="restful-apis">RESTful apis</h3>
 <p>To get better view on the real life routing performance, there is <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj" target="_blank">test</a> of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the <a href="https://opensensors.io/" target="_blank">OpenSensors</a> swagger definitions.</p>
-<p>Thanks to the snappy <a href="https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc" target="_blank">segment-tree</a> algorithm, <code>reitit-ring</code> is fastest here. Pedestal is also fast with it&apos;s <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">prefix-tree</a> implementation.</p>
+<p>Thanks to the snappy new <a href="https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc" target="_blank">segment-tree</a> algorithm, <code>reitit-ring</code> is fastest here. Pedestal is also fast with it&apos;s <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">prefix-tree</a> implementation.</p>
 <p><img src="images/opensensors.png" alt="Opensensors perf test"></p>
 <h3 id="cqrs-apis">CQRS apis</h3>
-<p>Another real-life <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj" target="_blank">test scenario</a> is a <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank">CQRS</a>-style route tree, where all the paths are static, e.g. <code>/api/command/add-order</code>. The route definitions are pulled out from <a href="https://github.com/lupapiste/lupapiste" target="_blank">Lupapiste</a>. The test consists of ~300 static routes (just the commands here, there would be ~200 queries too).</p>
-<p>Again, both <code>reitit-ring</code> and Pedestal shine here, thanks to the fast lookup-routers. On average, they are <strong>two</strong> and on best case, <strong>three orders of magnitude faster</strong> than the other tested libs. Ataraxy failed this test on <code>Method code too large!</code> error.</p>
+<p>Another real-life <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj" target="_blank">test scenario</a> is a <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank">CQRS</a>-style route tree, where all the paths are static, e.g. <code>/api/command/add-order</code>. The 300 route definitions are pulled out from <a href="https://github.com/lupapiste/lupapiste" target="_blank">Lupapiste</a>.</p>
+<p>Both <code>reitit-ring</code> and Pedestal shine in this test, thanks to the fast lookup-routers. On average, they are <strong>two</strong> and on best case, <strong>three orders of magnitude faster</strong> than the other tested libs. Ataraxy failed this test on <code>Method code too large!</code> error.</p>
 <p><img src="images/lupapiste.png" alt="Opensensors perf test"></p>
-<p><strong>NOTE</strong>: If there would be even one wildcard route in the route-tree, Pedestal would fallback from lookup-router to the prefix-tree router, yielding nearly constant, but an order of magnitude slower perf. Reitit instead fallbacks to <code>:mixed-router</code>, serving all the static routes with <code>:lookup-router</code>, just the wildcard route(s) with <code>:segment-tree</code>. So, the performance would not notably degrade.</p>
+<p><strong>NOTE</strong>: in real life, there are usually always also wild-card routes present. In this case, Pedestal would fallback from lookup-router to the prefix-tree router, which is order of magnitude slower (30x in this test). Reitit would handle this nicely thanks to it&apos;s <code>:mixed-router</code>: all static routes would still be served with <code>:lookup-router</code>, just the wildcard routes with <code>:segment-tree</code>. The performance would not notably degrade.</p>
 <h3 id="why-measure">Why measure?</h3>
-<p>The routing perf needs to be measured to get an internal baseline to optimize against. We also want to ensure that new features don&apos;t regress the performance. Perf tests should be run in a stable CI environment. Help welcome.</p>
+<p>The reitit routing perf is measured to get an internal baseline to optimize against. We also want to ensure that new features don&apos;t regress the performance. Perf tests should be run in a stable CI environment. Help welcome!</p>
 <h3 id="looking-out-of-the-box">Looking out of the box</h3>
-<p>It might be interesting to compare reitit with the routers in other languages, like the <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a>.</p>
+<p>A quick poke to <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a> indicates that the reitit is only few times slower than the fastest routers in Go. Which is really awesome (if true).</p>
 <h3 id="performance-tips">Performance tips</h3>
 <p>Few things that have an effect on performance:</p>
 <ul>
@@ -643,12 +643,12 @@
 
             
                 
-                <a href="openapi.html" class="navigation navigation-prev " aria-label="Previous page: Swagger & Openapi">
+                <a href="ring/compiling_middleware.html" class="navigation navigation-prev " aria-label="Previous page: Compiling Middleware">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="faq.html" class="navigation navigation-next " aria-label="Next page: FAQ">
+                <a href="interceptors.html" class="navigation navigation-next " aria-label="Next page: Interceptors (WIP)">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -659,7 +659,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.8","depth":1,"next":{"title":"FAQ","level":"1.9","depth":1,"path":"faq.md","ref":"faq.md","articles":[]},"previous":{"title":"Swagger & Openapi","level":"1.7","depth":1,"path":"openapi.md","ref":"openapi.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"1.6","depth":1,"next":{"title":"Interceptors (WIP)","level":"1.7","depth":1,"path":"interceptors.md","ref":"interceptors.md","articles":[]},"previous":{"title":"Compiling Middleware","level":"1.5.6","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

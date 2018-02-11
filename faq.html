@@ -58,7 +58,7 @@
 
     
     
-    <link rel="prev" href="performance.html" />
+    <link rel="prev" href="openapi.html" />
     
 
     </head>
@@ -436,38 +436,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="interceptors.html">
-            
-                <a href="interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="openapi.html">
-            
-                <a href="openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="performance.html">
+        <li class="chapter " data-level="1.6" data-path="performance.html">
             
                 <a href="performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="interceptors.html">
+            
+                <a href="interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="openapi.html">
+            
+                <a href="openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -534,9 +534,114 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+<ul>
+<li><a href="#why-yet-another-routing-library">Why yet another routing library?</a></li>
+<li><a href="#how-can-i-contribute">How can I contribute?</a></li>
+<li><a href="#how-does-reitit-differ-from-bidi">How does Reitit differ from Bidi?</a></li>
+<li><a href="#how-does-reitit-differ-from-pedestal">How does Reitit differ from Pedestal?</a></li>
+<li><a href="#how-does-reitit-differ-from-compojure">How does Reitit differ from Compojure?</a></li>
+</ul>
 <h3 id="why-yet-another-routing-library">Why yet another routing library?</h3>
-<p>There are many great routing libs for Clojure, but we felt that none was perfect. We picked
-best parts of existing libs, added things that were missing (like first-class route data, spec-coercion and full route conflict resolution) trying to make a library it both both fun to use and really, really fast.</p>
+<p>Routing and dispatching is in the core of most business apps, so we should have a great library to for it. There are already many good routing libs for Clojure, but we felt none was perfect. So, we took best parts of existing libs and added features that were missing: first-class composable route data, full route conflict resolution and pluggable coercion. Goal was to make a data-driven library that works, is fun to use and is really, really fast.</p>
+<h3 id="how-can-i-contribute">How can I contribute?</h3>
+<p>You can join <a href="https://clojurians.slack.com/messages/reitit/" target="_blank">#reitit</a> channel in <a href="http://clojurians.net/" target="_blank">Clojurians slack</a> to discuss things. Known roadmap is mostly written in <a href="https://github.com/metosin/reitit/issues" target="_blank">issues</a>, and many issues are marked already with &quot;Help wanted&quot;.</p>
+<h3 id="how-does-reitit-differ-from-bidi">How does Reitit differ from Bidi?</h3>
+<p><a href="https://github.com/juxt/bidi" target="_blank">Bidi</a> is an great and proven library for ClojureScript and we have been using it in many of our frontend projects. Both Reitit and Bidi are data-driven, bi-directional and work with both Clojure &amp; ClojureScript. Here are the main differences:</p>
+<h4 id="route-syntax">Route syntax</h4>
+<ul>
+<li>Bidi supports multiple representations for route syntax, Reitit supports just one (simple) syntax.</li>
+<li>Bidi uses special (Clojure) syntax for route patterns while Reitit separates (human-readable) paths strings from route data - still exposing the machine-readable syntax for extensions.</li>
+</ul>
+<p>Bidi:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [<span class="hljs-string">&quot;/&quot;</span> [[<span class="hljs-string">&quot;auth/login&quot;</span> <span class="hljs-symbol">:auth/login</span>]
+        [[<span class="hljs-string">&quot;auth/recovery/token/&quot;</span> <span class="hljs-symbol">:token</span>] <span class="hljs-symbol">:auth/recovery</span>]
+        [<span class="hljs-string">&quot;workspace/&quot;</span> [[[<span class="hljs-symbol">:project-uuid</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-symbol">:page-uuid</span>] <span class="hljs-symbol">:workspace/page</span>]]]]])
+</code></pre>
+<p>Reitit:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [[<span class="hljs-string">&quot;/auth/login&quot;</span> <span class="hljs-symbol">:auth/login</span>]
+   [<span class="hljs-string">&quot;/auth/recovery/token/:token&quot;</span> <span class="hljs-symbol">:auth/recovery</span>]
+   [<span class="hljs-string">&quot;/workspace/:project-uuid/:page-uuid&quot;</span> <span class="hljs-symbol">:workspace/page</span>]])
+</code></pre>
+<h4 id="features">Features</h4>
+<ul>
+<li>Bidi has extra features like route guards</li>
+<li>Reitit ships with composable route data, specs, full route conflict resolution and pluggable coercion.</li>
+</ul>
+<h4 id="performance">Performance</h4>
+<ul>
+<li>Bidi is not optimized for speed and thus, Reitit is <a href="performance.html">orders of magnitude faster</a> than Bidi. From Bidi source:</li>
+</ul>
+<pre><code class="lang-clj"><span class="hljs-comment">;; Route compilation was only marginally effective and hard to</span>
+<span class="hljs-comment">;; debug. When bidi matching takes in the order of 30 micro-seconds,</span>
+<span class="hljs-comment">;; this is good enough in relation to the time taken to process the</span>
+<span class="hljs-comment">;; overall request.</span>
+</code></pre>
+<h3 id="how-does-reitit-differ-from-pedestal">How does Reitit differ from Pedestal?</h3>
+<p><a href="http://pedestal.io/" target="_blank">Pedestal</a> is an great and proven library and has had great influence in Reitit. Both Reitit and Pedestal are data-driven and provide bi-directional routing and fast. Here are the main differences:</p>
+<h4 id="clojurescript">ClojureScript</h4>
+<ul>
+<li>Pedestal targets only Clojure, while Reitit works also with ClojureScript.</li>
+</ul>
+<h4 id="route-syntax">Route syntax</h4>
+<ul>
+<li>Pedestal supports multiple representations for route syntax: terse, table and verbose. Reitit provides only one representation.</li>
+<li>Pedestal supports both maps or keyword-arguments in route data, in Reitit, it&apos;s all maps.</li>
+</ul>
+<p>Pedestal:</p>
+<pre><code class="lang-clj">[<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">:get</span> identity <span class="hljs-symbol">:route-name</span> <span class="hljs-symbol">::ping</span>]
+</code></pre>
+<p>Reitit:</p>
+<pre><code class="lang-clj">[<span class="hljs-string">&quot;/api/ping&quot;</span> {<span class="hljs-symbol">:get</span> identity, <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]
+</code></pre>
+<h4 id="features">Features</h4>
+<ul>
+<li>Pedestal supports route guards</li>
+<li>Pedestal supports interceptors (<code>reitit-http</code> module will support them too).</li>
+<li>Reitit ships with composable route data, specs, full route conflict resolution and pluggable coercion.</li>
+<li>In Pedestal, different routers <a href="https://github.com/pedestal/pedestal/issues/532" target="_blank">behave differently</a>, in Reitit, all work the same.</li>
+</ul>
+<h4 id="performance">Performance</h4>
+<p>Reitit routing was originally based on Pedestal Routing an thus they same similar performance. For routing trees with both static and wildcard routes, Reitit is much faster thanks to it&apos;s <code>mixed-router</code> algorithm.</p>
+<h3 id="how-does-reitit-differ-from-compojure">How does Reitit differ from Compojure?</h3>
+<p><a href="https://github.com/weavejester/compojure" target="_blank">Compojure</a> is the most used routing library in Clojure. It&apos;s proven and awesome.</p>
+<h4 id="clojurescript">ClojureScript</h4>
+<ul>
+<li>Compojure targets only Clojure, while Reitit works also with ClojureScript.</li>
+</ul>
+<h4 id="route-syntax">Route syntax</h4>
+<ul>
+<li>Compojure uses routing functions and macros while reitit is all data</li>
+<li>Compojure allows easy destructuring of route params on mid-path</li>
+<li>Applying middleware for sub-paths is hacky on Compojure, <code>reitit-ring</code> resolves this with data-driven middleware</li>
+</ul>
+<p>Compojure:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">defroutes</span> routes
+  (<span class="hljs-name">wrap-routes</span>
+    (<span class="hljs-name">context</span> <span class="hljs-string">&quot;/api&quot;</span> []
+      (<span class="hljs-name">GET</span> <span class="hljs-string">&quot;/users/:id&quot;</span> [id <span class="hljs-symbol">:&lt;&lt;</span> as-int]
+        (<span class="hljs-name">ok</span> (<span class="hljs-name">get-user</span> id)))
+      (<span class="hljs-name">POST</span> <span class="hljs-string">&quot;/pizza&quot;</span> []
+        (<span class="hljs-name">wrap-log</span> post-pizza-handler)))
+    wrap-api <span class="hljs-symbol">:secure</span>))
+</code></pre>
+<p><code>reitit-ring</code> with <code>reitit-spec</code> module:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap-api <span class="hljs-symbol">:secure</span>]]}
+   [<span class="hljs-string">&quot;/users/:id&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:path</span> {<span class="hljs-symbol">:id</span> int?}}}
+                  <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [parameters]}]
+                             (<span class="hljs-name">ok</span> (<span class="hljs-name">get-user</span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> parameters <span class="hljs-symbol">:body</span> <span class="hljs-symbol">:id</span>))))}
+    [<span class="hljs-string">&quot;/pizza&quot;</span> {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:middleware</span> [wrap-log]
+                      <span class="hljs-symbol">:handler</span> post-pizza-handler}]]])
+</code></pre>
+<h4 id="features">Features</h4>
+<ul>
+<li>Dynamic routing is trivial in Compojure, with reitit, some trickery is needed</li>
+<li>Reitit ships with composable route data, specs, full route conflict resolution and pluggable coercion.</li>
+</ul>
+<h4 id="performance">Performance</h4>
+<p>Reitit is <a href="performance.html">orders of magnitude faster</a> than Compojure.</p>
 
                                 
                                 </section>
@@ -564,7 +669,7 @@ best parts of existing libs, added things that were missing (like first-class ro
 
             
                 
-                <a href="performance.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Performance">
+                <a href="openapi.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page: Swagger & Openapi (WIP)">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
@@ -576,7 +681,7 @@ best parts of existing libs, added things that were missing (like first-class ro
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"FAQ","level":"1.9","depth":1,"previous":{"title":"Performance","level":"1.8","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"faq.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"FAQ","level":"1.9","depth":1,"previous":{"title":"Swagger & Openapi (WIP)","level":"1.8","depth":1,"path":"openapi.md","ref":"openapi.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"faq.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

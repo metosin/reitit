@@ -438,38 +438,38 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../interceptors.html">
-            
-                <a href="../interceptors.html">
-            
-                    
-                    Interceptors
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.7" data-path="../openapi.html">
-            
-                <a href="../openapi.html">
-            
-                    
-                    Swagger & Openapi
-            
-                </a>
-            
-
-            
-        </li>
-    
-        <li class="chapter " data-level="1.8" data-path="../performance.html">
+        <li class="chapter " data-level="1.6" data-path="../performance.html">
             
                 <a href="../performance.html">
             
                     
                     Performance
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="../interceptors.html">
+            
+                <a href="../interceptors.html">
+            
+                    
+                    Interceptors (WIP)
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="../openapi.html">
+            
+                <a href="../openapi.html">
+            
+                    
+                    Swagger & Openapi (WIP)
             
                 </a>
             
@@ -540,12 +540,12 @@
 <p>Reitit defines middleware as data:</p>
 <ol>
 <li>Middleware can be defined as first-class data entries</li>
-<li>Middleware can be defined as a <a href="https://github.com/duct-framework/duct/wiki/Configuration" target="_blank">duct-style</a> vector (of middleware)</li>
+<li>Middleware can be mounted as a <a href="https://github.com/duct-framework/duct/wiki/Configuration" target="_blank">duct-style</a> vector (of middleware)</li>
 <li>Middleware can be optimized &amp; <a href="compiling_middleware.html">compiled</a> againt an endpoint</li>
 <li>Middleware chain can be transformed by the router</li>
 </ol>
 <h2 id="middleware-as-data">Middleware as data</h2>
-<p>All values in the <code>:middleware</code> vector in the route data are coerced into <code>reitit.middleware/Middleware</code> Records with using the <code>reitit.middleware/IntoMiddleware</code> Protocol. By default, functions, maps and <code>Middleware</code> records are allowed.</p>
+<p>All values in the <code>:middleware</code> vector in the route data are expanded into <code>reitit.middleware/Middleware</code> Records with using the <code>reitit.middleware/IntoMiddleware</code> Protocol. By default, functions, maps and <code>Middleware</code> records are allowed.</p>
 <p>Records can have arbitrary keys, but the following keys have a special purpose:</p>
 <table>
 <thead>
@@ -582,6 +582,12 @@
   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
     (<span class="hljs-name">handler</span> (<span class="hljs-name">update</span> request <span class="hljs-symbol">::acc</span> (<span class="hljs-name">fnil</span> conj []) id))))
 </code></pre>
+<h3 id="map">Map</h3>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap3
+  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap3</span>
+   <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;Middleware that does things.&quot;</span>
+   <span class="hljs-symbol">:wrap</span> wrap})
+</code></pre>
 <h3 id="record">Record</h3>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.middleware <span class="hljs-symbol">:as</span> middleware])
 
@@ -590,12 +596,6 @@
     {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap2</span>
      <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;Middleware that does things.&quot;</span>
      <span class="hljs-symbol">:wrap</span> wrap}))
-</code></pre>
-<h3 id="map">Map</h3>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap3
-  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap3</span>
-   <span class="hljs-symbol">:description</span> <span class="hljs-string">&quot;Middleware that does things.&quot;</span>
-   <span class="hljs-symbol">:wrap</span> wrap})
 </code></pre>
 <h2 id="using-middleware">Using Middleware</h2>
 <p><code>:middleware</code> is merged to endpoints by the <code>router</code>.</p>
@@ -628,9 +628,10 @@
                        <span class="hljs-symbol">:handler</span> handler}}]]
       {<span class="hljs-symbol">::middleware/transform</span> #(<span class="hljs-name">interleave</span> % (<span class="hljs-name"><span class="hljs-builtin-name">repeat</span></span> [wrap <span class="hljs-symbol">:debug</span>]))})))
 </code></pre>
-<pre><code>(app {:request-method :get, :uri &quot;/api/ping&quot;})
-; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
-</code></pre><h4 id="reversing-the-middleware-chain">Reversing the middleware chain</h4>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}</span>
+</code></pre>
+<h4 id="reversing-the-middleware-chain">Reversing the middleware chain</h4>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
@@ -639,13 +640,13 @@
                        <span class="hljs-symbol">:handler</span> handler}}]]
       {<span class="hljs-symbol">::middleware/transform</span> reverse)})))
 </code></pre>
-<pre><code>(app {:request-method :get, :uri &quot;/api/ping&quot;})
-; {:status 200, :body [3 2 1 :handler]}
-</code></pre><h2 id="roadmap-for-middleware">Roadmap for middleware</h2>
-<p>Some things bubblin&apos; under:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body [3 2 1 :handler]}</span>
+</code></pre>
+<h2 id="ideas-for-the-future">Ideas for the future</h2>
 <ul>
 <li>Re-package all useful middleware into (optimized) data-driven Middleware<ul>
-<li>just package or a new community-repo with rehosting stuffm?</li>
+<li>just package or a new community-repo with rehosting stuff?</li>
 </ul>
 </li>
 <li>Support <code>Keyword</code> expansion into Middleware, enabling external Middleware Registries (duct/integrant/macchiato -style)</li>
@@ -699,7 +700,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"next":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2018-02-02T12:48:38.754Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-02T12:49:15.950Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Data-driven Middleware","level":"1.5.3","depth":2,"next":{"title":"Pluggable Coercion","level":"1.5.4","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Dynamic Extensions","level":"1.5.2","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/data_driven_middleware.md","mtime":"2018-02-11T19:35:28.398Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-02-11T19:36:06.764Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
