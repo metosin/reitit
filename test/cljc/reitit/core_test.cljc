@@ -234,15 +234,3 @@
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
       (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
-
-(require '[reitit.core :as r])
-
-(extend-type java.io.File
-  r/Expand
-  (expand [file options]
-    (r/expand
-      (fn [_] file)
-      options)))
-
-(r/router
-  ["/file" (java.io.File. "index.html")])
