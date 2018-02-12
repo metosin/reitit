@@ -29,6 +29,7 @@ Optionally, the parts can be required separately:
 [metosin/reitit-ring "0.1.0"] ; ring-router
 [metosin/reitit-spec "0.1.0"] ; spec coercion
 [metosin/reitit-schema "0.1.0"] ; schema coercion
+[metosin/reitit-swagger "0.1.0"] ; swagger docs
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
