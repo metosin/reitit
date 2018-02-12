@@ -32,7 +32,7 @@
   ([{:keys [not-found method-not-allowed not-acceptable]}]
    (fn
      ([request]
-      (if-let [match (::match request)]
+      (if-let [match (::r/match request)]
         (let [method (:request-method request :any)
               result (:result match)
               handler? (or (-> result method :handler) (-> result :any :handler))
@@ -40,7 +40,7 @@
           (error-handler request))
         (not-found request)))
      ([request respond _]
-      (if-let [match (::match request)]
+      (if-let [match (::r/match request)]
         (let [method (:request-method request :any)
               result (:result match)
               handler? (or (-> result method :handler) (-> result :any :handler))
@@ -66,8 +66,10 @@
                   result (:result match)
                   handler (or (-> result method :handler)
                               (-> result :any (:handler default-handler)))
-                  request (cond-> (impl/fast-assoc request ::match match)
-                                  (seq path-params) (impl/fast-assoc :path-params path-params))
+                  request (-> request
+                              (impl/fast-assoc ::r/match match)
+                              (impl/fast-assoc ::r/router router)
+                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))
                   response (handler request)]
               (if (nil? response)
                 (default-handler request)
@@ -80,17 +82,19 @@
                   result (:result match)
                   handler (or (-> result method :handler)
                               (-> result :any (:handler default-handler)))
-                  request (cond-> (impl/fast-assoc request ::match match)
-                                  (seq path-params) (impl/fast-assoc :path-params path-params))]
+                  request (-> request
+                              (impl/fast-assoc ::r/match match)
+                              (impl/fast-assoc ::r/router router)
+                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))]
               (handler request respond raise))
             (default-handler request respond raise))))
-       {::router router}))))
+       {::r/router router}))))
 
 (defn get-router [handler]
-  (some-> handler meta ::router))
+  (-> handler meta ::r/router))
 
 (defn get-match [request]
-  (::match request))
+  (::r/match request))
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
