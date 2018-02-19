@@ -158,6 +158,6 @@ lein test
 
 ## License
 
-Copyright © 2017 [Metosin Oy](http://www.metosin.fi)
+Copyright © 2017-2018 [Metosin Oy](http://www.metosin.fi)
 
 Distributed under the Eclipse Public License, the same as Clojure.
