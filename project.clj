@@ -16,7 +16,7 @@
                          [metosin/reitit-schema "0.1.0-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
-                         [metosin/spec-tools "0.5.1"]
+                         [metosin/spec-tools "0.6.1"]
                          [metosin/schema-tools "0.10.0-SNAPSHOT"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
@@ -42,12 +42,12 @@
                                   [metosin/reitit]
                                   [metosin/schema-tools "0.10.0-SNAPSHOT"]
 
-                                  [expound "0.4.0"]
+                                  [expound "0.5.0"]
                                   [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
-                                  [metosin/muuntaja "0.4.1"]
-                                  [metosin/jsonista "0.1.0"]
+                                  [metosin/muuntaja "0.5.0"]
+                                  [metosin/jsonista "0.1.1"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
@@ -58,11 +58,11 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.6.0"]
-                                   [org.immutant/immutant "2.1.9"]
+                                   [org.immutant/immutant "2.1.10"]
                                    [io.pedestal/pedestal.route "0.5.3"]
-                                   [org.clojure/core.async "0.3.465"]
+                                   [org.clojure/core.async "0.4.474"]
                                    [ataraxy "0.4.0"]
-                                   [bidi "2.1.2"]]}
+                                   [bidi "2.1.3"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"

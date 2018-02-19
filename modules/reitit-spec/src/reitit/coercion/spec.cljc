@@ -26,17 +26,20 @@
 (defprotocol IntoSpec
   (into-spec [this name]))
 
+(defn- ensure-name [?name]
+  (or ?name (keyword "" (name (gensym "spec")))))
+
 (extend-protocol IntoSpec
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
   (into-spec [this name]
-    (ds/spec name this))
+    (ds/spec (ensure-name name) this))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
   (into-spec [this name]
-    (ds/spec name this))
+    (ds/spec (ensure-name name) this))
 
   Spec
   (into-spec [this _] this)
@@ -79,7 +82,7 @@
                             (for [[k response] responses]
                               [k (update response :body #(coercion/-compile-model this % nil))])))))
     (-compile-model [_ model name]
-      (into-spec model (or name (gensym "spec"))))
+      (into-spec model name))
     (-open-model [_ spec] spec)
     (-encode-error [_ error]
       (-> error
