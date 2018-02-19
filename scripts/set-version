@@ -4,5 +4,6 @@ ext="sedbak$$"
 
 find . -name project.clj -exec sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" '{}' \;
 find . -name project.clj -exec sed -i.$ext "s/defproject metosin\/reitit\(.*\) \".*\"/defproject metosin\/reitit\1 \"$1\"/g" '{}' \;
-find . -name *.md -exec sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" '{}' \;
+sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" doc/*.md
+sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" *.md
 find . -name "*.$ext" -exec rm '{}' \;

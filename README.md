@@ -23,16 +23,16 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.0-SNAPSHOT"]
+[metosin/reitit "0.1.0"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.0-SNAPSHOT"] ; routing core
-[metosin/reitit-ring "0.1.0-SNAPSHOT"] ; ring-router
-[metosin/reitit-spec "0.1.0-SNAPSHOT"] ; spec coercion
-[metosin/reitit-schema "0.1.0-SNAPSHOT"] ; schema coercion
+[metosin/reitit-core "0.1.0"] ; routing core
+[metosin/reitit-ring "0.1.0"] ; ring-router
+[metosin/reitit-spec "0.1.0"] ; spec coercion
+[metosin/reitit-schema "0.1.0"] ; schema coercion
 ```
 
 ## Quick start
