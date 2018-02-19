@@ -12,7 +12,7 @@ Routing and dispatching is in the core of most business apps, so we should have 
 
 ### How can I contribute?
 
-You can join [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/) to discuss things. Known roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues), and many issues are marked already with "Help wanted".
+You can join [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/) to discuss things. Known roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ### How does Reitit differ from Bidi?
 
@@ -48,7 +48,7 @@ Reitit:
 
 #### Performance
 
-* Bidi is not optimized for speed and thus, Reitit is [orders of magnitude faster](performance.md) than Bidi. From Bidi source:
+* Bidi is not optimized for speed and thus, Reitit is [much faster](performance.md) than Bidi. From Bidi source:
 
 ```clj
 ;; Route compilation was only marginally effective and hard to
@@ -139,4 +139,4 @@ Compojure:
 
 #### Performance
 
-Reitit is [orders of magnitude faster](performance.md) than Compojure.
+Reitit is [much faster](performance.md) than Compojure.
