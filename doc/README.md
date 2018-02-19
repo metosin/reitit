@@ -12,9 +12,9 @@
 * [Fast](performance.md)
 
 The following higher-level routers are also available as separate modules:
-* [`ring-router`](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md)
-* `http-router` with enchanced Pedestal-style Interceptors (WIP)
-* `frontend-router` with Keechma-style Controllers (WIP)
+* [`reitit-ring`](./ring/ring.md) with [data-driven middleware](./ring/data_driven_middleware.md)
+* `reitit-http` with enchanced Pedestal-style Interceptors (WIP)
+* `reitit-frontend` with Keechma-style Controllers (WIP)
 
 To use Reitit, add the following dependecy to your project:
 
