@@ -1,3 +1,3 @@
-## UNRELEASED
+## 0.1.0 (2018-2-19)
 
-* Initial release.
+* First release
