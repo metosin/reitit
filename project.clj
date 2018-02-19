@@ -17,7 +17,7 @@
 
                          [meta-merge "1.0.0"]
                          [metosin/spec-tools "0.6.1"]
-                         [metosin/schema-tools "0.10.0-SNAPSHOT"]]
+                         [metosin/schema-tools "0.10.0"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.8"]
@@ -40,7 +40,7 @@
 
                                   ;; modules dependencies
                                   [metosin/reitit]
-                                  [metosin/schema-tools "0.10.0-SNAPSHOT"]
+                                  [metosin/schema-tools "0.10.0"]
 
                                   [expound "0.5.0"]
                                   [orchestra "2017.11.12-1"]
