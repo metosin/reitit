@@ -18,6 +18,7 @@
     * [Configuring Routers](advanced/configuring_routers.md)
     * [Different Routers](advanced/different_routers.md)
     * [Route Validation](advanced/route_validation.md)
+    * [Dev Workflow](advanced/dev_workflow.md)
 * [Ring](ring/README.md)
     * [Ring-router](ring/ring.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
