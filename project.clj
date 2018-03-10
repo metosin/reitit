@@ -24,7 +24,7 @@
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.10"]
             [lein-codox "0.10.3"]
-            [metosin/boot-alt-test "0.4.0-20171019.180106-3"]]
+            [metosin/bat-test "0.4.0"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
 
@@ -70,12 +70,12 @@
                                             "-XX:+PrintInlining"]}}
   :aliases {"all" ["with-profile" "dev"]
             "perf" ["with-profile" "default,dev,perf"]
-            "test-clj" ["all" "do" ["alt-test"] ["check"]]
+            "test-clj" ["all" "do" ["bat-test"] ["check"]]
             "test-browser" ["doo" "chrome-headless" "test"]
             "test-advanced" ["doo" "chrome-headless" "advanced-test"]
             "test-node" ["doo" "node" "node-test"]}
 
-  :alt-test {:report [:pretty
+  :bat-test {:report [:pretty
                       {:type :junit
                        :output-to "target/junit.xml"}]}
 
