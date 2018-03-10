@@ -77,7 +77,7 @@
 
   :bat-test {:report [:pretty
                       {:type :junit
-                       :output-to "target/junit.xml"}]}
+                       :output-to "target/results/reitit/junit.xml"}]}
 
   :cljsbuild {:builds [{:id "test"
                         :source-paths ["src" "test/cljc" "test/cljs"]
