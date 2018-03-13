@@ -20,7 +20,7 @@
                          [metosin/schema-tools "0.10.0"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
-            [lein-doo "0.1.8"]
+            [lein-doo "0.1.9"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.10"]
             [lein-codox "0.10.3"]
