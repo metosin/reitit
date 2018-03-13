@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  test-clj:
     working_directory: ~/test
     docker:
       - image: clojure:lein-2.7.1
@@ -8,7 +8,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - 'v1-test-{{ checksum "project.clj" }}'
+            - 'v1-clj-{{ checksum "project.clj" }}'
+            - 'v1-clj-'
             - 'v1-test-'
       - run:
           name: Install modules
@@ -24,9 +25,36 @@ jobs:
 #          name: Run coverage
 #          command: ./scripts/submit-to-coveralls.sh clj
       - save_cache:
-          key: 'v1-test-{{ checksum "project.clj" }}'
+          key: 'v1-clj-{{ checksum "project.clj" }}'
           paths:
             - ~/.m2
+
+  test-cljs:
+    working_directory: ~/test
+    docker:
+      - image: circleci/clojure:lein-2.8.1-node-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-cljs-{{ checksum "project.clj" }}-{{ checksum "package.json" }}'
+            - 'v1-cljs-'
+      - run:
+          name: Install npm dependencies
+          command: npm install
+      - run:
+          name: Install modules
+          command: ./scripts/lein-modules install
+      - run:
+          name: Run tests
+          command: ./scripts/test.sh cljs
+      - store_test_results:
+          path: ~/test/target/results
+      - save_cache:
+          key: 'v1-cljs-{{ checksum "project.clj" }}-{{ checksum "package.json" }}'
+          paths:
+            - ~/.m2
+            - ~/test/node_modules
 
   build-docs:
     working_directory: ~/build
@@ -71,7 +99,8 @@ workflows:
   version: 2
   test-and-build-docs:
     jobs:
-      - test
+      - test-clj
+      - test-cljs
       - build-docs:
           filters:
             branches:
