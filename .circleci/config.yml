@@ -17,7 +17,9 @@ jobs:
           name: Run tests
           command: ./scripts/test.sh clj
       - store_test_results:
-         path: ~/test/target/junit.xml
+          # path must be a directory under which there a subdirectories that
+          # contain the JUnit XML files.
+          path: ~/test/target/results
 #      - run:
 #          name: Run coverage
 #          command: ./scripts/submit-to-coveralls.sh clj
