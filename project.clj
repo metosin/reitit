@@ -79,6 +79,11 @@
                       {:type :junit
                        :output-to "target/results/reitit/junit.xml"}]}
 
+  :doo {:paths {:karma "./node_modules/.bin/karma"}
+        :karma {:config {"plugins" ["karma-junit-reporter"]
+                         "reporters" ["progress", "junit"]
+                         "junitReporter" {"outputDir" "target/results/cljs"}}}}
+
   :cljsbuild {:builds [{:id "test"
                         :source-paths ["src" "test/cljc" "test/cljs"]
                         :compiler {:output-to "target/out/test.js"
