@@ -16,6 +16,10 @@ The following higher-level routers are also available as separate modules:
 * `reitit-http` with enchanced Pedestal-style Interceptors (WIP)
 * `reitit-frontend` with Keechma-style Controllers (WIP)
 
+Posts:
+* [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
+* [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
+
 See the [full documentation](https://metosin.github.io/reitit/) for details.
 
 ## Latest version
