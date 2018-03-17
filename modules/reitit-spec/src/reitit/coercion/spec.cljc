@@ -67,20 +67,25 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this _ {:keys [parameters responses] :as info}]
-      (cond-> (dissoc info :parameters :responses)
-              parameters (assoc
-                           ::swagger/parameters
-                           (into
-                             (empty parameters)
-                             (for [[k v] parameters]
-                               [k (coercion/-compile-model this v nil)])))
-              responses (assoc
-                          ::swagger/responses
-                          (into
-                            (empty responses)
-                            (for [[k response] responses]
-                              [k (update response :body #(coercion/-compile-model this % nil))])))))
+    (-get-apidocs [this type {:keys [parameters responses]}]
+      (condp = type
+        :swagger (merge
+                   (if parameters
+                     {::swagger/parameters
+                      (into
+                        (empty parameters)
+                        (for [[k v] parameters]
+                          [k (coercion/-compile-model this v nil)]))})
+                   (if responses
+                     {::swagger/responses
+                      (into
+                        (empty responses)
+                        (for [[k response] responses]
+                          [k (update response :body #(coercion/-compile-model this % nil))]))}))
+        (throw
+          (ex-info
+            (str "Can't produce Spec apidocs for " type)
+            {:type type, :coercion :spec}))))
     (-compile-model [_ model name]
       (into-spec model name))
     (-open-model [_ spec] spec)

@@ -2,7 +2,8 @@
   (:require [reitit.core :as r]
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [reitit.coercion :as coercion]))
 
 (s/def ::id keyword?)
 (s/def ::no-doc boolean?)
@@ -26,7 +27,7 @@
   | --------------|-------------|
   | :swagger      | map of any swagger-data. Must have `:id` to identify the api
 
-  The following common route keys also contribute to swagger spec:
+  The following common keys also contribute to swagger spec:
 
   | key           | description |
   | --------------|-------------|
@@ -34,6 +35,9 @@
   | :tags         | optional set of strings of keywords tags for an endpoint api docs
   | :summary      | optional short string summary of an endpoint
   | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
+
+  Also the coercion keys contribute to swagger spec:
+
   | :parameters   | optional input parameters for a route, in a format defined by the coercion
   | :responses    | optional descriptions of responess, in a format defined by coercion
 
@@ -74,10 +78,13 @@
                               [p (some->> c
                                           (keep
                                             (fn [[m e]]
-                                              (if (and e (-> e :data :no-doc not))
-                                                [m (meta-merge
-                                                     (-> e :data (select-keys [:tags :summary :description :parameters :responses]))
-                                                     (-> e :data :swagger))])))
+                                              (let [coercion (-> e :data :coercion)]
+                                                (if (and e (-> e :data :no-doc not))
+                                                  [m (meta-merge
+                                                       (if coercion
+                                                         (coercion/-get-apidocs coercion :swagger (-> e :data)))
+                                                       (-> e :data (select-keys [:tags :summary :description]))
+                                                       (-> e :data :swagger))]))))
                                           (seq)
                                           (into {}))]))
                        (filter second)
