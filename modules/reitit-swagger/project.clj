@@ -1,4 +1,4 @@
-(defproject metosin/reitit-swagger "0.1.0-SNAPSHOT"
+(defproject metosin/reitit-swagger "0.1.1-SNAPSHOT"
   :description "Reitit: Swagger-support"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

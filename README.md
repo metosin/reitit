@@ -27,17 +27,17 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.0"]
+[metosin/reitit "0.1.1-SNAPSHOT"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.0"] ; routing core
-[metosin/reitit-ring "0.1.0"] ; ring-router
-[metosin/reitit-spec "0.1.0"] ; spec coercion
-[metosin/reitit-schema "0.1.0"] ; schema coercion
-[metosin/reitit-swagger "0.1.0"] ; swagger docs
+[metosin/reitit-core "0.1.1-SNAPSHOT"] ; routing core
+[metosin/reitit-ring "0.1.1-SNAPSHOT"] ; ring-router
+[metosin/reitit-spec "0.1.1-SNAPSHOT"] ; spec coercion
+[metosin/reitit-schema "0.1.1-SNAPSHOT"] ; schema coercion
+[metosin/reitit-swagger "0.1.1-SNAPSHOT"] ; swagger docs
 ```
 
 ## Quick start
