@@ -84,7 +84,7 @@
                                                        (if coercion
                                                          (coercion/-get-apidocs coercion :swagger (-> e :data)))
                                                        (-> e :data (select-keys [:tags :summary :description]))
-                                                       (-> e :data :swagger))]))))
+                                                       (-> e :data :swagger (dissoc :id)))]))))
                                           (seq)
                                           (into {}))]))
                        (filter second)
@@ -94,79 +94,3 @@
          :body (meta-merge
                  swagger
                  {:paths paths})}))))
-
-;;
-;; spike
-;;
-
-(ns reitit.swagger.spike)
-(require '[reitit.ring :as ring])
-(require '[reitit.swagger :as swagger])
-(require '[reitit.ring.coercion :as rrc])
-(require '[reitit.coercion.spec :as spec])
-(require '[reitit.coercion.schema :as schema])
-
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/api"
-       {:swagger {:id ::math}}
-
-       ["/swagger.json"
-        {:get {:no-doc true
-               :swagger {:info {:title "my-api"}}
-               :handler swagger/swagger-spec-handler}}]
-
-       ["/spec" {:coercion spec/coercion}
-
-        ["/minus"
-         {:get {:summary "minus"
-                :parameters {:query {:x int?, :y int?}}
-                :responses {200 {:body {:total int?}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200, :body {:total (- x y)}})}}]
-
-        ["/plus"
-         {:get {:summary "plus"
-                :parameters {:query {:x int?, :y int?}}
-                :responses {200 {:body {:total int?}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200, :body {:total (+ x y)}})}}]]
-
-       ["/schema" {:coercion schema/coercion}
-
-        ["/minus"
-         {:get {:summary "minus"
-                :parameters {:query {:x Long, :y Long}}
-                :responses {200 {:body {:total Long}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200, :body {:total (- x y)}})}}]
-
-        ["/plus"
-         {:get {:summary "plus"
-                :parameters {:query {:x Long, :y Long}}
-                :responses {200 {:body {:total Long}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200, :body {:total (+ x y)}})}}]]]
-
-      {:data {:middleware [swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
-
-(app
-  {:request-method :get
-   :uri "/api/spec/plus"
-   :query-params {:x "1", :y "2"}})
-; {:body {:total 3}, :status 200}
-
-(app
-  {:request-method :get
-   :uri "/api/schema/plus"
-   :query-params {:x "1", :y "2"}})
-; {:body {:total 3}, :status 200}
-
-(app
-  {:request-method :get
-   :uri "/api/swagger.json"})
-; ... swagger-spec for "/api/minus" & "/api/plus"

@@ -6,7 +6,8 @@
             [schema.utils :as su]
             [schema-tools.coerce :as stc]
             [schema-tools.swagger.core :as swagger]
-            [reitit.coercion :as coercion]))
+            [reitit.coercion :as coercion]
+            [clojure.set :as set]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)
@@ -47,19 +48,21 @@
     (-get-options [_] opts)
     (-get-apidocs [this type {:keys [parameters responses]}]
       (condp = type
-        :swagger (merge
-                   (if parameters
-                     {::swagger/parameters
-                      (into
-                        (empty parameters)
-                        (for [[k v] parameters]
-                          [k (coercion/-compile-model this v nil)]))})
-                   (if responses
-                     {::swagger/responses
-                      (into
-                        (empty responses)
-                        (for [[k response] responses]
-                          [k (update response :body #(coercion/-compile-model this % nil))]))}))
+        :swagger (swagger/swagger-spec
+                   (merge
+                     (if parameters
+                       {::swagger/parameters
+                        (into
+                          (empty parameters)
+                          (for [[k v] parameters]
+                            [k (coercion/-compile-model this v nil)]))})
+                     (if responses
+                       {::swagger/responses
+                        (into
+                          (empty responses)
+                          (for [[k response] responses
+                                :let [response (set/rename-keys response {:body :schema})]]
+                            [k (update response :schema #(coercion/-compile-model this % nil))]))})))
         (throw
           (ex-info
             (str "Can't produce Schem apidocs for " type)
