@@ -5,6 +5,7 @@
             [schema.coerce :as sc]
             [schema.utils :as su]
             [schema-tools.coerce :as stc]
+            [schema-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]))
 
 (def string-coercion-matcher
@@ -44,10 +45,25 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
-    (-get-apidocs [_ _ {:keys [parameters responses] :as info}]
-      (cond-> (dissoc info :parameters :responses)
-              parameters (assoc ::parameters parameters)
-              responses (assoc ::responses responses)))
+    (-get-apidocs [this type {:keys [parameters responses]}]
+      (condp = type
+        :swagger (merge
+                   (if parameters
+                     {::swagger/parameters
+                      (into
+                        (empty parameters)
+                        (for [[k v] parameters]
+                          [k (coercion/-compile-model this v nil)]))})
+                   (if responses
+                     {::swagger/responses
+                      (into
+                        (empty responses)
+                        (for [[k response] responses]
+                          [k (update response :body #(coercion/-compile-model this % nil))]))}))
+        (throw
+          (ex-info
+            (str "Can't produce Schem apidocs for " type)
+            {:type type, :coercion :schema}))))
     (-compile-model [_ model _] model)
     (-open-model [_ schema] (st/open-schema schema))
     (-encode-error [_ error]
