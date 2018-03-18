@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.1.0"
+(defproject metosin/reitit-parent "0.1.1-SNAPSHOT"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,15 +9,16 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :managed-dependencies [[metosin/reitit "0.1.0"]
-                         [metosin/reitit-core "0.1.0"]
-                         [metosin/reitit-ring "0.1.0"]
-                         [metosin/reitit-spec "0.1.0"]
-                         [metosin/reitit-schema "0.1.0"]
+  :managed-dependencies [[metosin/reitit "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-core "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-ring "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-spec "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-schema "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-swagger "0.1.1-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
                          [metosin/spec-tools "0.6.1"]
-                         [metosin/schema-tools "0.10.0"]]
+                         [metosin/schema-tools "0.10.1-SNAPSHOT"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.9"]
@@ -33,14 +34,15 @@
                                   "modules/reitit-core/src"
                                   "modules/reitit-ring/src"
                                   "modules/reitit-spec/src"
-                                  "modules/reitit-schema/src"]
+                                  "modules/reitit-schema/src"
+                                  "modules/reitit-swagger/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.9.946"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
-                                  [metosin/schema-tools "0.10.0"]
+                                  [metosin/schema-tools]
 
                                   [expound "0.5.0"]
                                   [orchestra "2017.11.12-1"]

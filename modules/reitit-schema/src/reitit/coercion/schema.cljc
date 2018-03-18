@@ -5,7 +5,9 @@
             [schema.coerce :as sc]
             [schema.utils :as su]
             [schema-tools.coerce :as stc]
-            [reitit.coercion :as coercion]))
+            [schema-tools.swagger.core :as swagger]
+            [reitit.coercion :as coercion]
+            [clojure.set :as set]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)
@@ -44,10 +46,28 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
-    (-get-apidocs [_ _ {:keys [parameters responses] :as info}]
-      (cond-> (dissoc info :parameters :responses)
-              parameters (assoc ::parameters parameters)
-              responses (assoc ::responses responses)))
+    (-get-apidocs [this spesification {:keys [parameters responses]}]
+      ;; TODO: this looks identical to spec, refactor when schema is done.
+      (condp = spesification
+        :swagger (swagger/swagger-spec
+                   (merge
+                     (if parameters
+                       {::swagger/parameters
+                        (into
+                          (empty parameters)
+                          (for [[k v] parameters]
+                            [k (coercion/-compile-model this v nil)]))})
+                     (if responses
+                       {::swagger/responses
+                        (into
+                          (empty responses)
+                          (for [[k response] responses
+                                :let [response (set/rename-keys response {:body :schema})]]
+                            [k (update response :schema #(coercion/-compile-model this % nil))]))})))
+        (throw
+          (ex-info
+            (str "Can't produce Schema apidocs for " spesification)
+            {:type spesification, :coercion :schema}))))
     (-compile-model [_ model _] model)
     (-open-model [_ schema] (st/open-schema schema))
     (-encode-error [_ error]

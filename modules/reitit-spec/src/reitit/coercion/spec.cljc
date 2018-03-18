@@ -4,7 +4,8 @@
             [spec-tools.data-spec :as ds]
             [spec-tools.conform :as conform]
             [spec-tools.swagger.core :as swagger]
-            [reitit.coercion :as coercion])
+            [reitit.coercion :as coercion]
+            [clojure.set :as set])
   #?(:clj
      (:import (spec_tools.core Spec))))
 
@@ -67,20 +68,27 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this _ {:keys [parameters responses] :as info}]
-      (cond-> (dissoc info :parameters :responses)
-              parameters (assoc
-                           ::swagger/parameters
-                           (into
-                             (empty parameters)
-                             (for [[k v] parameters]
-                               [k (coercion/-compile-model this v nil)])))
-              responses (assoc
-                          ::swagger/responses
-                          (into
-                            (empty responses)
-                            (for [[k response] responses]
-                              [k (update response :body #(coercion/-compile-model this % nil))])))))
+    (-get-apidocs [this spesification {:keys [parameters responses]}]
+      (condp = spesification
+        :swagger (swagger/swagger-spec
+                   (merge
+                     (if parameters
+                       {::swagger/parameters
+                        (into
+                          (empty parameters)
+                          (for [[k v] parameters]
+                            [k (coercion/-compile-model this v nil)]))})
+                     (if responses
+                       {::swagger/responses
+                        (into
+                          (empty responses)
+                          (for [[k response] responses
+                                :let [response (set/rename-keys response {:body :schema})]]
+                            [k (update response :schema #(coercion/-compile-model this % nil))]))})))
+        (throw
+          (ex-info
+            (str "Can't produce Spec apidocs for " spesification)
+            {:type spesification, :coercion :spec}))))
     (-compile-model [_ model name]
       (into-spec model name))
     (-open-model [_ spec] spec)
