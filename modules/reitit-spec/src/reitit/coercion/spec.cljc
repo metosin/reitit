@@ -68,8 +68,8 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this type {:keys [parameters responses]}]
-      (condp = type
+    (-get-apidocs [this spesification {:keys [parameters responses]}]
+      (condp = spesification
         :swagger (swagger/swagger-spec
                    (merge
                      (if parameters
@@ -87,8 +87,8 @@
                             [k (update response :schema #(coercion/-compile-model this % nil))]))})))
         (throw
           (ex-info
-            (str "Can't produce Spec apidocs for " type)
-            {:type type, :coercion :spec}))))
+            (str "Can't produce Spec apidocs for " spesification)
+            {:type spesification, :coercion :spec}))))
     (-compile-model [_ model name]
       (into-spec model name))
     (-open-model [_ spec] spec)

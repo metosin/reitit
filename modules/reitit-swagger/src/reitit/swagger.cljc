@@ -17,11 +17,11 @@
 (def swagger-feature
   "Feature for handling swagger-documentation for routes.
   Works both with Middleware & Interceptors. Does not participate
-  in actual request processing, just provides specs for the extra
-  valid keys for the route data. Should be accompanied by a
+  in actual request processing, just provides specs for the new
+  documentation keys for the route data. Should be accompanied by a
   [[swagger-spec-handler]] to expose the swagger spec.
 
-  Swagger-spesific keys:
+  Swagger-specific keys:
 
   | key           | description |
   | --------------|-------------|
@@ -69,28 +69,20 @@
   "Ring handler to emit swagger spec."
   [{:keys [::r/router ::r/match :request-method]}]
   (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
-        swagger (set/rename-keys swagger {:id :x-id})]
+        swagger (set/rename-keys swagger {:id :x-id})
+        this-swagger? #(-> % second :swagger :id (= id))
+        transform-endpoint (fn [[method endpoint]]
+                             (let [coercion (-> endpoint :data :coercion)]
+                               (if (and endpoint (-> endpoint :data :no-doc not))
+                                 [method (meta-merge
+                                           (if coercion
+                                             (coercion/-get-apidocs coercion :swagger (-> endpoint :data)))
+                                           (-> endpoint :data (select-keys [:tags :summary :description]))
+                                           (-> endpoint :data :swagger (dissoc :id)))])))
+        transform-path (fn [[p _ c]]
+                         (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
+                           [p endpoint]))]
     (if id
-      (let [paths (->> router
-                       (r/routes)
-                       (filter #(-> % second :swagger :id (= id)))
-                       (map (fn [[p _ c]]
-                              [p (some->> c
-                                          (keep
-                                            (fn [[m e]]
-                                              (let [coercion (-> e :data :coercion)]
-                                                (if (and e (-> e :data :no-doc not))
-                                                  [m (meta-merge
-                                                       (if coercion
-                                                         (coercion/-get-apidocs coercion :swagger (-> e :data)))
-                                                       (-> e :data (select-keys [:tags :summary :description]))
-                                                       (-> e :data :swagger (dissoc :id)))]))))
-                                          (seq)
-                                          (into {}))]))
-                       (filter second)
-                       (into {}))]
-        ;; TODO: create the swagger spec
+      (let [paths (->> router (r/routes) (filter this-swagger?) (map transform-path) (into {}))]
         {:status 200
-         :body (meta-merge
-                 swagger
-                 {:paths paths})}))))
+         :body (meta-merge swagger {:paths paths})}))))

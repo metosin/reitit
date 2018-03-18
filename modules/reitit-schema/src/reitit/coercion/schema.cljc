@@ -46,8 +46,9 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
-    (-get-apidocs [this type {:keys [parameters responses]}]
-      (condp = type
+    (-get-apidocs [this spesification {:keys [parameters responses]}]
+      ;; TODO: this looks identical to spec, refactor when schema is done.
+      (condp = spesification
         :swagger (swagger/swagger-spec
                    (merge
                      (if parameters
@@ -65,8 +66,8 @@
                             [k (update response :schema #(coercion/-compile-model this % nil))]))})))
         (throw
           (ex-info
-            (str "Can't produce Schem apidocs for " type)
-            {:type type, :coercion :schema}))))
+            (str "Can't produce Schema apidocs for " spesification)
+            {:type spesification, :coercion :schema}))))
     (-compile-model [_ model _] model)
     (-open-model [_ schema] (st/open-schema schema))
     (-encode-error [_ error]

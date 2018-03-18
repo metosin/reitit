@@ -12,7 +12,7 @@
   "Pluggable coercion protocol"
   (-get-name [this] "Keyword name for the coercion")
   (-get-options [this] "Coercion options")
-  (-get-apidocs [this type data] "???")
+  (-get-apidocs [this spesification data] "Returns api documentation")
   (-compile-model [this model name] "Compiles a model")
   (-open-model [this model] "Returns a new model which allows extra keys in maps")
   (-encode-error [this error] "Converts error in to a serializable format")
