@@ -29,6 +29,12 @@
                       :path "/api/ipa/large"
                       :path-params {:size "large"}})
                    (r/match-by-name router ::beer {:size "large"})))
+            (is (= (r/map->Match
+                     {:template "/api/ipa/:size"
+                      :data {:name ::beer}
+                      :path "/api/ipa/large"
+                      :path-params {:size "large"}})
+                   (r/match-by-name router ::beer {:size :large})))
             (is (= nil (r/match-by-name router "ILLEGAL")))
             (is (= [::beer] (r/route-names router)))
 

@@ -175,7 +175,7 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match path-params)))))))
+           (match (impl/path-params path-params))))))))
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
@@ -215,7 +215,7 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match path-params)))))))
+           (match (impl/path-params path-params))))))))
 
 (defn segment-router
   "Creates a special prefix-tree style segment router from resolved routes and optional
@@ -255,7 +255,7 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match path-params)))))))
+           (match (impl/path-params path-params))))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
@@ -290,7 +290,7 @@
            match))
        (match-by-name [_ name path-params]
          (if (= n name)
-           (impl/fast-assoc match :path-params path-params)))))))
+           (impl/fast-assoc match :path-params (impl/path-params path-params))))))))
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
