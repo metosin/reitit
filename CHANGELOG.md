@@ -2,7 +2,7 @@
 
 ### `reitit-core`
 
-* `match-by-path` encodes parameters into strings using (internal) `reitit.impl/IntoString` protocol. Handles all of: numbers, keywords, booleans, uuids. Fixes [#75](https://github.com/metosin/reitit/issues/75).
+* `match-by-path` encodes parameters into strings using (internal) `reitit.impl/IntoString` protocol. Handles all of: strings, numbers, keywords, booleans, objects. Fixes [#75](https://github.com/metosin/reitit/issues/75).
 
 ```clj
 (require '[reitit.core :as r])
@@ -16,7 +16,7 @@
 ;       :data {:name :user/coffee},
 ;       :result nil,
 ;       :path-params {:type "luwak"},
-;       :path "/coffee/luwa"}
+;       :path "/coffee/luwak"}
 ```
 
 ### `reitit-swagger`
