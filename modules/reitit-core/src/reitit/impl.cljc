@@ -187,6 +187,10 @@
          (when (namespace this) "/")
          (name this)))
 
+  #?(:clj  Boolean
+     :cljs boolean)
+  (into-string [this] (str this))
+
   #?(:clj  Number
      :cljs number)
   (into-string [this] (str this))
