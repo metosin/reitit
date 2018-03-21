@@ -64,7 +64,7 @@ With provided path-parameters:
 ;        :path-params {:id "1"}}
 ```
 
-Path-parameters are automatically coerced into strings, with the help of (currently internal) Protocol `reitit.impl/IntoString`. It supports numbers, booleans, keywords and objects:
+Path-parameters are automatically coerced into strings, with the help of (currently internal) Protocol `reitit.impl/IntoString`. It supports strings, numbers, booleans, keywords and objects:
 
 ```clj
 (r/match-by-name router ::user {:id 1})

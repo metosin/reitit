@@ -169,8 +169,8 @@
           (.replace "+" "%20")))
 
 (defn url-decode [s]
-  #?(:clj  (some-> s (URLDecoder/decode "UTF-8"))
-     :cljs (some-> s (js/decodeURIComponent))))
+  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
+               :cljs (js/decodeURIComponent))))
 
 (defprotocol IntoString
   (into-string [_]))
@@ -183,9 +183,8 @@
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
   (into-string [this]
-    (str (namespace this)
-         (when (namespace this) "/")
-         (name this)))
+    (let [ns (namespace this)]
+      (str ns (if ns "/") (name this))))
 
   #?(:clj  Boolean
      :cljs boolean)
