@@ -13,8 +13,10 @@
 (ns ^:no-doc reitit.impl
   (:require [clojure.string :as str]
             [clojure.set :as set])
-  #?(:clj (:import (java.util.regex Pattern)
-                   (java.util HashMap Map))))
+  #?(:clj
+     (:import (java.util.regex Pattern)
+              (java.util HashMap Map)
+              (java.net URLEncoder URLDecoder))))
 
 (defn wild? [s]
   (contains? #{\: \*} (first (str s))))
@@ -135,7 +137,7 @@
 (defn throw-on-missing-path-params [template required path-params]
   (when-not (every? #(contains? path-params %) required)
     (let [defined (-> path-params keys set)
-          missing (clojure.set/difference required defined)]
+          missing (set/difference required defined)]
       (throw
         (ex-info
           (str "missing path-params for route " template " -> " missing)
@@ -155,3 +157,52 @@
 
 (defn strip-nils [m]
   (->> m (remove (comp nil? second)) (into {})))
+
+;;
+;; Path-parameters, see https://github.com/metosin/reitit/issues/75
+;;
+
+(defn url-encode [s]
+  (some-> s
+          #?(:clj  (URLEncoder/encode "UTF-8")
+             :cljs (js/encodeURIComponent))
+          #?(:clj (.replace "+" "%20"))))
+
+(defn url-decode [s]
+  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
+               :cljs (js/decodeURIComponent))))
+
+(defprotocol IntoString
+  (into-string [_]))
+
+(extend-protocol IntoString
+  #?(:clj  String
+     :cljs string)
+  (into-string [this] this)
+
+  #?(:clj  clojure.lang.Keyword
+     :cljs cljs.core.Keyword)
+  (into-string [this]
+    (let [ns (namespace this)]
+      (str ns (if ns "/") (name this))))
+
+  #?(:clj  Boolean
+     :cljs boolean)
+  (into-string [this] (str this))
+
+  #?(:clj  Number
+     :cljs number)
+  (into-string [this] (str this))
+
+  #?(:clj  Object
+     :cljs object)
+  (into-string [this] (str this)))
+
+(defn path-params
+  "shallow transform of the path-param values into strings"
+  [params]
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (url-encode (into-string v))))
+    {}
+    params))
