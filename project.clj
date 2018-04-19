@@ -17,8 +17,8 @@
                          [metosin/reitit-swagger "0.1.1-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
-                         [metosin/spec-tools "0.6.1"]
-                         [metosin/schema-tools "0.10.1-SNAPSHOT"]]
+                         [metosin/spec-tools "0.6.2-SNAPSHOT"]
+                         [metosin/schema-tools "0.10.2-SNAPSHOT"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.10"]
@@ -59,7 +59,7 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[compojure "1.6.0"]
+                    :dependencies [[compojure "1.6.1"]
                                    [org.immutant/immutant "2.1.10"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.4.474"]
