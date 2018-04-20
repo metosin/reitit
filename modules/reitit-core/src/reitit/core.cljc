@@ -164,12 +164,17 @@
          opts)
        (route-names [_]
          names)
-       (match-by-path [_ path]
-         (reduce
-           (fn [_ ^Route route]
-             (if-let [path-params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) path-params path))))
-           nil pl))
+       (match-by-path [_ raw-path]
+         (let [{:keys [path query-string fragment-string] :as path-data}
+               (impl/pre-process-path raw-path)]
+           (when-some [match (reduce
+                              (fn [_ ^Route route]
+                                (if-let [path-params ((:matcher route) path)]
+                                  (reduced (->Match (:path route) (:data route) (:result route) path-params path))))
+                              nil pl)]
+             (merge match
+                    path-data
+                    {:path raw-path}))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -208,8 +213,13 @@
          opts)
        (route-names [_]
          names)
-       (match-by-path [_ path]
-         (impl/fast-get data path))
+       (match-by-path [_ raw-path]
+         (let [{:keys [path query-string fragment-string] :as path-data}
+               (impl/pre-process-path raw-path)]
+           (when-some [match (impl/fast-get data path)]
+             (merge match
+                    path-data
+                    {:path raw-path}))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -245,11 +255,14 @@
          opts)
        (route-names [_]
          names)
-       (match-by-path [_ path]
-         (if-let [match (segment/lookup pl path)]
-           (-> (:data match)
-               (assoc :path-params (:path-params match))
-               (assoc :path path))))
+       (match-by-path [_ raw-path]
+         (let [{:keys [path query-string fragment-string] :as path-data}
+               (impl/pre-process-path raw-path)]
+           (when-some [match (segment/lookup pl path)]
+             (-> (:data match)
+                 (merge path-data)
+                 (assoc :path-params (:path-params match)
+                        :path raw-path)))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -282,9 +295,14 @@
          opts)
        (route-names [_]
          names)
-       (match-by-path [_ path]
-         (if (#?(:clj .equals :cljs =) p path)
-           match))
+       (match-by-path [_ raw-path]
+         (let [{:keys [path query-string fragment-string] :as path-data}
+               (impl/pre-process-path raw-path)]
+           (when-some [match (if (#?(:clj .equals :cljs =) p path)
+                               match)]
+             (merge match
+                    path-data
+                    {:path raw-path}))))
        (match-by-name [_ name]
          (if (= n name)
            match))

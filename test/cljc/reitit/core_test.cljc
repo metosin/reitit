@@ -66,6 +66,7 @@
             (is (= ::jabba2 (matches "/abba/2")))
             (is (= ::doo (matches "/abba/1/doo")))
             (is (= ::boo (matches "/abba/1/boo")))
+            (is (= ::boo (matches "/abba/1/boo?foo=doo#zoo")))
             (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa"))))))
 
       r/linear-router :linear-router
@@ -85,6 +86,14 @@
                   :path "/api/ipa/large"
                   :path-params {}})
                (r/match-by-path router "/api/ipa/large")))
+        (is (= (r/map->Match
+                {:template "/api/ipa/large"
+                 :data {:name ::beer}
+                 :path "/api/ipa/large?glass=pint#cold"
+                 :path-params {}
+                 :query-string "glass=pint"
+                 :fragment-string "cold"})
+               (r/match-by-path router "/api/ipa/large?glass=pint#cold")))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
                   :data {:name ::beer}
