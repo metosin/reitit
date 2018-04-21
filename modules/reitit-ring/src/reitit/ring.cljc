@@ -4,8 +4,8 @@
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
-(def http-methods #{:get :head :patch :delete :options :post :put})
-(defrecord Methods [get head post put delete trace options connect patch any])
+(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
+(defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
 
 (defn- group-keys [data]
@@ -64,28 +64,23 @@
             (let [method (:request-method request :any)
                   path-params (:path-params match)
                   result (:result match)
-                  handler (or (-> result method :handler)
-                              (-> result :any (:handler default-handler)))
+                  handler (-> result method :handler (or default-handler))
                   request (-> request
+                              (impl/fast-assoc :path-params path-params)
                               (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router)
-                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))
-                  response (handler request)]
-              (if (nil? response)
-                (default-handler request)
-                response))
+                              (impl/fast-assoc ::r/router router))]
+              (or (handler request) (default-handler request)))
             (default-handler request)))
          ([request respond raise]
           (if-let [match (r/match-by-path router (:uri request))]
             (let [method (:request-method request :any)
                   path-params (:path-params match)
                   result (:result match)
-                  handler (or (-> result method :handler)
-                              (-> result :any (:handler default-handler)))
+                  handler (-> result method :handler (or default-handler))
                   request (-> request
+                              (impl/fast-assoc :path-params path-params)
                               (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router)
-                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))]
+                              (impl/fast-assoc ::r/router router))]
               (handler request respond raise))
             (default-handler request respond raise))))
        {::r/router router}))))
@@ -109,14 +104,21 @@
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
                          (assoc :path p)
-                         (assoc :method m)))]
+                         (assoc :method m)))
+        ->methods (fn [any? data]
+                    (reduce
+                      (fn [acc method]
+                        (cond-> acc
+                                any? (assoc method (->endpoint path data method nil))))
+                      (map->Methods {})
+                      http-methods))]
     (if-not (seq childs)
-      (map->Methods {:any (->endpoint path top :any nil)})
+      (->methods true top)
       (reduce-kv
         (fn [acc method data]
           (let [data (meta-merge top data)]
             (assoc acc method (->endpoint path data method method))))
-        (map->Methods {:any (if (:handler top) (->endpoint path data :any nil))})
+        (->methods (:handler top) data)
         childs))))
 
 (defn router
