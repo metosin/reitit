@@ -264,3 +264,41 @@
       (let [app (create {::middleware/transform #(interleave % (repeat (middleware "debug")))})]
         (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]}
                (app request)))))))
+
+#?(:clj
+   (deftest resource-handler-test
+     (doseq [[test app] [["inside a router"
+                          (ring/ring-handler
+                            (ring/router
+                              [["/ping" (constantly {:status 200, :body "pong"})]
+                               ["/files/*" (ring/create-resource-handler)]])
+                            (ring/create-default-handler))]
+
+                         ["outside of a router"
+                          (ring/ring-handler
+                            (ring/router
+                              ["/ping" (constantly {:status 200, :body "pong"})])
+                            (ring/routes
+                              (ring/create-resource-handler {:path "/files"})
+                              (ring/create-default-handler)))]]]
+
+       (testing test
+         (testing "different file-types"
+           (let [response (app {:uri "/files/hello.json", :request-method :get})]
+             (is (= "application/json" (get-in response [:headers "Content-Type"])))
+             (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
+           (let [response (app {:uri "/files/hello.xml", :request-method :get})]
+             (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+             (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+
+         (testing "not found"
+           (let [response (app {:uri "/files/not-found", :request-method :get})]
+             (is (= 404 (:status response)))))
+
+         (testing "3-arity"
+           (let [result (atom nil)
+                 respond (partial reset! result)
+                 raise ::not-called]
+             (app {:uri "/files/hello.xml", :request-method :get} respond raise)
+             (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+             (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))

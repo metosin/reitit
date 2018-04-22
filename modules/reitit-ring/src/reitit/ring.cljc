@@ -1,8 +1,11 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.middleware :as middleware]
+            [reitit.ring.mime :as mime]
             [reitit.core :as r]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+    #?(:clj
+            [clojure.java.io :as io])))
 
 (def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
 (defrecord Methods [get head post put delete connect options trace patch])
@@ -63,6 +66,48 @@
               error-handler (if handler? not-acceptable method-not-allowed)]
           (respond (error-handler request)))
         (respond (not-found request)))))))
+
+#?(:clj
+   (defn create-resource-handler
+     "A ring handler for handling classpath resources,
+      configured via options:
+
+      | key          | description |
+      | -------------|-------------|
+      | :parameter   | optional name of the wildcard parameter, defaults to `:`
+      | :root        | optional resource root, defaults to `public`
+      | :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
+      | :path        | optional path to mount the handler to. Works only outside of a router
+      "
+     ([]
+      (create-resource-handler nil))
+     ([{:keys [parameter root mime-types path]
+        :or {parameter (keyword "")
+             root "public"
+             mime-types mime/default-mime-types}}]
+      (let [response (fn [file]
+                       {:status 200
+                        :body file
+                        :headers {"Content-Type" (mime/ext-mime-type (.getName file) mime-types)}})]
+        (if path
+          (let [path-size (count path)]
+            (fn
+              ([req]
+               (let [uri (:uri req)]
+                 (if (and (>= (count uri) path-size))
+                   (some->> (str root (subs uri path-size)) io/resource io/file response))))
+              ([req respond _]
+               (let [uri (:uri req)]
+                 (if (and (>= (count uri) path-size))
+                   (some->> (str root (subs uri path-size)) io/resource io/file response respond))))))
+          (fn
+            ([req]
+             (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
+                 {:status 404}))
+            ([req respond _]
+             (respond
+               (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
+                   {:status 404})))))))))
 
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.
