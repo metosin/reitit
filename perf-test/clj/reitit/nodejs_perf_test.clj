@@ -69,7 +69,7 @@
   ;; 25310 / 25126
   "regex"
 
-  ;; 84149 / 84867
+  ;; 88060 / 90778
   (title "reitit")
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/product/foo
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/twenty/bar
@@ -77,5 +77,5 @@
   (assert (= {:status 200, :body "Got twenty id bar"} (app {:request-method :get, :uri "/twenty/bar"}))))
 
 (comment
-  (web/run app {:port 2048})
+  (web/run app {:port 2048, :dispatch? false, :server {:always-set-keep-alive false}})
   (routing-test))

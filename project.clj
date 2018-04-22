@@ -60,7 +60,7 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.6.1"]
-                                   [org.immutant/immutant "2.1.10"]
+                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.4.474"]
                                    [ataraxy "0.4.0"]
