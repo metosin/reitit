@@ -40,7 +40,7 @@
      ["/swagger.json"
       {:get {:no-doc true
              :swagger {:info {:title "my-api"}}
-             :handler swagger/swagger-spec-handler}}]
+             :handler (swagger/create-swagger-handler)}}]
 
      ["/spec" {:coercion spec/coercion}
       ["/plus"
