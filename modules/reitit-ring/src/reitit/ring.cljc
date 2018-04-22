@@ -15,6 +15,22 @@
         [top (assoc childs k v)]
         [(assoc top k v) childs])) [{} {}] data))
 
+(defn routes
+  "Create a ring handler by combining several handlers into one."
+  [& handlers]
+  (let [single-arity (apply some-fn handlers)]
+    (fn
+      ([request]
+       (single-arity request))
+      ([request respond raise]
+       (letfn [(f [handlers]
+                 (if (seq handlers)
+                   (let [handler (first handlers)
+                         respond' #(if % (respond %) (f (rest handlers)))]
+                     (handler request respond' raise))
+                   (respond nil)))]
+         (f handlers))))))
+
 (defn create-default-handler
   "A default ring handler that can handle the following cases,
   configured via options:
@@ -81,7 +97,7 @@
                               (impl/fast-assoc :path-params path-params)
                               (impl/fast-assoc ::r/match match)
                               (impl/fast-assoc ::r/router router))]
-              (handler request respond raise))
+              ((routes handler default-handler) request respond raise))
             (default-handler request respond raise))))
        {::r/router router}))))
 

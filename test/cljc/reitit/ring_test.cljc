@@ -17,7 +17,7 @@
 (defn handler
   ([{:keys [::mw]}]
    {:status 200 :body (conj mw :ok)})
-  ([request respond raise]
+  ([request respond _]
    (respond (handler request))))
 
 (deftest ring-router-test
@@ -227,11 +227,11 @@
               (app {:request-method :post, :uri "/ping"} respond raise)
               (is (= 405 (:status (respond))))
               (is (= ::nil (raise)))))
-          (testing "if handler rejects, nil in still returned."
+          (testing "if handler rejects"
             (let [respond (promise)
                   raise (promise)]
               (app {:request-method :get, :uri "/pong"} respond raise)
-              (is (= nil (respond)))
+              (is (= 406 (:status (respond))))
               (is (= ::nil (raise))))))))))
 
 (deftest middleware-transform-test
