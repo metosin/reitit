@@ -19,9 +19,15 @@
 ;       :path "/coffee/luwak"}
 ```
 
+### `reitit-ring`
+
+* `reitit.ring/default-handler` now works correctly with async ring
+* new helper `reitit.ring/router` to compose routes outside of a router.
+* `reitit.ring/create-resource-handler` function to serve static routes.
+
 ### `reitit-swagger`
 
-* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors.
+* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors and Schema & Spec.
 
 ```clj
 (require '[reitit.ring :as ring])

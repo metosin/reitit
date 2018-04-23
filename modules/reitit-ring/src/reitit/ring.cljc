@@ -69,16 +69,14 @@
 
 #?(:clj
    (defn create-resource-handler
-     "A ring handler for handling classpath resources,
-      configured via options:
+     "A ring handler for serving classpath resources, configured via options:
 
-      | key          | description |
-      | -------------|-------------|
-      | :parameter   | optional name of the wildcard parameter, defaults to `:`
-      | :root        | optional resource root, defaults to `public`
-      | :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
-      | :path        | optional path to mount the handler to. Works only outside of a router
-      "
+     | key          | description |
+     | -------------|-------------|
+     | :parameter   | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root        | optional resource root, defaults to `\"public\"`
+     | :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
+     | :path        | optional path to mount the handler to. Works only if mounted outside of a router."
      ([]
       (create-resource-handler nil))
      ([{:keys [parameter root mime-types path]
