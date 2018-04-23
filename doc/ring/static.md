@@ -6,7 +6,7 @@ There are two options to serve the files.
 
 ## Internal routes
 
-This is good option if static files can be from non-conflicting paths, e.g. `/assets/*`.
+This is good option if static files can be from non-conflicting paths, e.g. `"/assets/*"`.
 
 
 ```clj
@@ -19,9 +19,22 @@ This is good option if static files can be from non-conflicting paths, e.g. `/as
   (ring/create-default-handler))
 ```
 
+To serve static files with conflicting routes, e.g. `"/*#`, one needs to disable the confligt resolution:
+
+```clj
+(require '[reitit.ring :as ring])
+
+(ring/ring-handler
+  (ring/router
+    [["/ping" (constantly {:status 200, :body "pong"})]
+     ["/*" (ring/create-resource-handler)]]
+    {:conflicts (constantly nil)})
+  (ring/create-default-handler))
+```
+
 ## External routes
 
-To serve files from conflicting paths, e.g. `/*`, one option is to mount them to default-handler branch of `ring-handler`. This way, they are only served if none of the actual routes have matched.
+To serve files from conflicting paths, e.g. `"/*"`, one option is to mount them to default-handler branch of `ring-handler`. This way, they are only served if none of the actual routes have matched.
 
 
 ```clj
