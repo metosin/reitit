@@ -23,11 +23,11 @@
 
 * `reitit.ring/default-handler` now works correctly with async ring
 * new helper `reitit.ring/router` to compose routes outside of a router.
-* `reitit.ring/create-resource-handler` function to serve static routes. See [https://metosin.github.io/reitit/ring/static.html](docs).
+* `reitit.ring/create-resource-handler` function to serve static routes. See (docs)[https://metosin.github.io/reitit/ring/static.html].
 
 ### `reitit-swagger`
 
-* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors and Schema & Spec. See [https://metosin.github.io/reitit/swagger.html](docs).
+* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors and Schema & Spec. See [docs](https://metosin.github.io/reitit/swagger.html).
 
 ```clj
 (require '[reitit.ring :as ring])

@@ -88,24 +88,23 @@
                         :body file
                         :headers {"Content-Type" (mime/ext-mime-type (.getName file) mime-types)}})]
         (if path
-          (let [path-size (count path)]
+          (let [path-size (count path)
+                serve (fn [req]
+                        (let [uri (:uri req)]
+                          (if (and (>= (count uri) path-size))
+                            (some->> (str root (subs uri path-size)) io/resource io/file response))))]
             (fn
               ([req]
-               (let [uri (:uri req)]
-                 (if (and (>= (count uri) path-size))
-                   (some->> (str root (subs uri path-size)) io/resource io/file response))))
+               (serve req))
               ([req respond _]
-               (let [uri (:uri req)]
-                 (if (and (>= (count uri) path-size))
-                   (some->> (str root (subs uri path-size)) io/resource io/file response respond))))))
-          (fn
-            ([req]
-             (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
-                 {:status 404}))
-            ([req respond _]
-             (respond
-               (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
-                   {:status 404})))))))))
+               (respond (serve req)))))
+          (let [serve (fn [req]
+                        (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
+                            {:status 404}))]
+            (fn ([req]
+                 (serve req))
+              ([req respond _]
+               (respond (serve req))))))))))
 
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.

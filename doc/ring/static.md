@@ -19,7 +19,7 @@ This is good option if static files can be from non-conflicting paths, e.g. `"/a
   (ring/create-default-handler))
 ```
 
-To serve static files with conflicting routes, e.g. `"/*#`, one needs to disable the confligt resolution:
+To serve static files with conflicting routes, e.g. `"/*#`, one needs to disable the conflict resolution:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -59,31 +59,4 @@ To serve files from conflicting paths, e.g. `"/*"`, one option is to mount them 
 
 ### TODO
 
-* support for things like `:cache`, `:last-modified?` and `:index-files`
-
-## Performance
-
-Thanks to NIO-support, serving files is quite fast. With late2015 Macbook PRO and `[ikitommi/immutant "3.0.0-alpha1"]` here are some numbers:
-
-##### Small file (17 bytes)
-
-```
-wrk -t2 -c100 -d2s http://localhost:3000/files/hello.json
-34055 requests/sec
-4.64MB / sec
-```
-
-##### large file (406kB)
-
-```
-wrk -t2 -c10 -d10s http://localhost:3000/files/image.jpg
-2798 request/sec
-1.08GB / sec
-```
-
-##### single huge file (775Mb)
-
-```
-wget http://localhost:3000/files/LilaBali2.pptx
-315 MB/s
-```
+* support for things like `:cache`, `:last-modified?`, `:index-files` and `:gzip`
