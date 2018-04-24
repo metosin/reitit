@@ -72,14 +72,16 @@
      "A ring handler for serving classpath resources, configured via options:
 
      | key          | description |
-     | -------------|-------------|
+     | -----------------|-------------|
      | :parameter   | optional name of the wildcard parameter, defaults to unnamed keyword `:`
      | :root        | optional resource root, defaults to `\"public\"`
      | :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
-     | :path        | optional path to mount the handler to. Works only if mounted outside of a router."
+     | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :loader          | optional class loader to resolve the resources
+     | :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root mime-types path]
+     ([{:keys [parameter root mime-types path loader allow-symlinks?]
         :or {parameter (keyword "")
              root "public"
              mime-types mime/default-mime-types}}]
