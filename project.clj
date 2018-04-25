@@ -17,6 +17,7 @@
                          [metosin/reitit-swagger "0.1.1-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
+                         [ring/ring-core "1.6.3"]
                          [metosin/spec-tools "0.6.2-SNAPSHOT"]
                          [metosin/schema-tools "0.10.2-SNAPSHOT"]]
 
@@ -60,7 +61,8 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.6.1"]
-                                   [org.immutant/immutant "2.1.10"]
+                                   [ring/ring-defaults "0.3.1"]
+                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.4.474"]
                                    [ataraxy "0.4.0"]
@@ -70,7 +72,7 @@
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
                                             "-XX:+PrintInlining"]}}
-  :aliases {"all" ["with-profile" "dev"]
+  :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
             "test-browser" ["doo" "chrome-headless" "test"]

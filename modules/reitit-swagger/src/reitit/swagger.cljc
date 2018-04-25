@@ -65,24 +65,24 @@
   {:name ::swagger
    :spec ::spec})
 
-(defn swagger-spec-handler
-  "Ring handler to emit swagger spec."
-  [{:keys [::r/router ::r/match :request-method]}]
-  (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
-        swagger (set/rename-keys swagger {:id :x-id})
-        accept-route #(-> % second :swagger :id (= id))
-        transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
-                             (if (and data (not no-doc))
-                               [method
-                                (meta-merge
-                                  (if coercion
-                                    (coercion/-get-apidocs coercion :swagger data))
-                                  (select-keys data [:tags :summary :description])
-                                  (dissoc swagger :id))]))
-        transform-path (fn [[p _ c]]
-                         (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                           [p endpoint]))]
-    (if id
-      (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
-        {:status 200
-         :body (meta-merge swagger {:paths paths})}))))
+(defn create-swagger-handler []
+  "Create a ring handler to emit swagger spec."
+  (fn [{:keys [::r/router ::r/match :request-method]}]
+    (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
+          swagger (set/rename-keys swagger {:id :x-id})
+          accept-route #(-> % second :swagger :id (= id))
+          transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
+                               (if (and data (not no-doc))
+                                 [method
+                                  (meta-merge
+                                    (if coercion
+                                      (coercion/-get-apidocs coercion :swagger data))
+                                    (select-keys data [:tags :summary :description])
+                                    (dissoc swagger :id))]))
+          transform-path (fn [[p _ c]]
+                           (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
+                             [p endpoint]))]
+      (if id
+        (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
+          {:status 200
+           :body (meta-merge swagger {:paths paths})})))))

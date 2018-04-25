@@ -16,7 +16,7 @@
        ["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
-               :handler swagger/swagger-spec-handler}}]
+               :handler (swagger/create-swagger-handler)}}]
 
        ["/spec" {:coercion spec/coercion}
         ["/plus"
@@ -59,7 +59,25 @@
                          :uri "/api/swagger.json"}))]
       (is (= {:x-id ::math
               :info {:title "my-api"}
-              :paths {"/api/schema/plus" {:get {:summary "plus"}} ;; TODO: implement!
+              :paths {"/api/schema/plus" {:get {:parameters [{:description ""
+                                                              :format "int32"
+                                                              :in "query"
+                                                              :name "x"
+                                                              :required true
+                                                              :type "integer"}
+                                                             {:description ""
+                                                              :format "int32"
+                                                              :in "query"
+                                                              :name "y"
+                                                              :required true
+                                                              :type "integer"}]
+                                                :responses {200 {:description ""
+                                                                 :schema {:additionalProperties false
+                                                                          :properties {"total" {:format "int32"
+                                                                                                :type "integer"}}
+                                                                          :required ["total"]
+                                                                          :type "object"}}}
+                                                :summary "plus"}}
                       "/api/spec/plus" {:get {:parameters [{:description ""
                                                             :format "int64"
                                                             :in "query"

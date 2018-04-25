@@ -2,10 +2,13 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.middleware :as middleware]
             [reitit.core :as r]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+    #?@(:clj [
+            [ring.util.mime-type :as mime-type]
+            [ring.util.response :as response]])))
 
-(def http-methods #{:get :head :patch :delete :options :post :put})
-(defrecord Methods [get head post put delete trace options connect patch any])
+(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
+(defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
 
 (defn- group-keys [data]
@@ -14,6 +17,22 @@
       (if (http-methods k)
         [top (assoc childs k v)]
         [(assoc top k v) childs])) [{} {}] data))
+
+(defn routes
+  "Create a ring handler by combining several handlers into one."
+  [& handlers]
+  (let [single-arity (apply some-fn handlers)]
+    (fn
+      ([request]
+       (single-arity request))
+      ([request respond raise]
+       (letfn [(f [handlers]
+                 (if (seq handlers)
+                   (let [handler (first handlers)
+                         respond' #(if % (respond %) (f (rest handlers)))]
+                     (handler request respond' raise))
+                   (respond nil)))]
+         (f handlers))))))
 
 (defn create-default-handler
   "A default ring handler that can handle the following cases,
@@ -48,6 +67,41 @@
           (respond (error-handler request)))
         (respond (not-found request)))))))
 
+#?(:clj
+   (defn create-resource-handler
+     "A ring handler for serving classpath resources, configured via options:
+
+     | key              | description |
+     | -----------------|-------------|
+     | :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root            | optional resource root, defaults to `\"public\"`
+     | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :loader          | optional class loader to resolve the resources
+     | :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`"
+     ([]
+      (create-resource-handler nil))
+     ([{:keys [parameter root path loader allow-symlinks?]
+        :or {parameter (keyword "")
+             root "public"}}]
+      (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
+            path-size (count path)
+            create (fn [handler]
+                     (fn
+                       ([request] (handler request))
+                       ([request respond _] (respond (handler request)))))
+            response (fn [path]
+                       (if-let [response (response/resource-response path options)]
+                         (response/content-type response (mime-type/ext-mime-type path))))
+            handler (if path
+                      (fn [request]
+                        (let [uri (:uri request)]
+                          (if (>= (count uri) path-size)
+                            (response (subs uri path-size)))))
+                      (fn [request]
+                        (let [path (-> request :path-params parameter)]
+                          (or (response path) {:status 404}))))]
+        (create handler)))))
+
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.
   Supports both 1 (sync) and 3 (async) arities.
@@ -64,29 +118,24 @@
             (let [method (:request-method request :any)
                   path-params (:path-params match)
                   result (:result match)
-                  handler (or (-> result method :handler)
-                              (-> result :any (:handler default-handler)))
+                  handler (-> result method :handler (or default-handler))
                   request (-> request
+                              (impl/fast-assoc :path-params path-params)
                               (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router)
-                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))
-                  response (handler request)]
-              (if (nil? response)
-                (default-handler request)
-                response))
+                              (impl/fast-assoc ::r/router router))]
+              (or (handler request) (default-handler request)))
             (default-handler request)))
          ([request respond raise]
           (if-let [match (r/match-by-path router (:uri request))]
             (let [method (:request-method request :any)
                   path-params (:path-params match)
                   result (:result match)
-                  handler (or (-> result method :handler)
-                              (-> result :any (:handler default-handler)))
+                  handler (-> result method :handler (or default-handler))
                   request (-> request
+                              (impl/fast-assoc :path-params path-params)
                               (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router)
-                              (cond-> (seq path-params) (impl/fast-assoc :path-params path-params)))]
-              (handler request respond raise))
+                              (impl/fast-assoc ::r/router router))]
+              ((routes handler default-handler) request respond raise))
             (default-handler request respond raise))))
        {::r/router router}))))
 
@@ -109,14 +158,21 @@
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
                          (assoc :path p)
-                         (assoc :method m)))]
+                         (assoc :method m)))
+        ->methods (fn [any? data]
+                    (reduce
+                      (fn [acc method]
+                        (cond-> acc
+                                any? (assoc method (->endpoint path data method nil))))
+                      (map->Methods {})
+                      http-methods))]
     (if-not (seq childs)
-      (map->Methods {:any (->endpoint path top :any nil)})
+      (->methods true top)
       (reduce-kv
         (fn [acc method data]
           (let [data (meta-merge top data)]
             (assoc acc method (->endpoint path data method method))))
-        (map->Methods {:any (if (:handler top) (->endpoint path data :any nil))})
+        (->methods (:handler top) data)
         childs))))
 
 (defn router

@@ -1,14 +1,6 @@
-# Swagger & OpenAPI (WIP)
+# Swagger
 
-Goal is to support both [Swagger](https://swagger.io/) & [OpenAPI](https://www.openapis.org/) for route documentation. Documentation is extracted from existing coercion definitions `:parameters`, `:responses` and from a set of new doumentation keys.
-
-Swagger-support draft works, but only for Clojure.
-
-### TODO
-
-* [metosin/schema-tools#38](https://github.com/metosin/schema-tools/issues/38): extract Schema-swagger from [ring-swagger](https://github.com/metosin/ring-swagger) into [schema-tools](https://github.com/metosin/schema-tools) to support both Clojure & ClojureScript
-* separate modules for the swagger2 & openapi
-* [metosin/spec-tools#105](https://github.com/metosin/spec-tools/issues/105): support Openapi
+Reitit supports [Swagger](https://swagger.io/) to generate route documentation. Documentation is extracted from existing coercion definitions `:parameters`, `:responses` and from a set of new doumentation keys.
 
 ### Example
 
@@ -25,6 +17,7 @@ Current `reitit-swagger` draft (with `reitit-ring` & data-specs):
   (ring/ring-handler
     (ring/router
       ["/api"
+
        ;; identify a swagger api
        ;; there can be several in a routing tree
        {:swagger {:id :math}}
@@ -33,7 +26,14 @@ Current `reitit-swagger` draft (with `reitit-ring` & data-specs):
        ["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
-               :handler swagger/swagger-spec-handler}}]
+               :handler (swagger/create-swagger-handler)}}]
+
+       ;; the (undocumented) swagger-ui
+       ;; [org.webjars/swagger-ui "3.13.4"]
+       ["/docs/*"
+        {:get {:no-doc true
+               :handler (ring/create-resource-handler
+                          {:root "META-INF/resources/webjars/swagger-ui"})}}]
 
        ["/minus"
         {:get {:summary "minus"

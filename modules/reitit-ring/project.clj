@@ -6,4 +6,5 @@
   :plugins [[lein-parent "0.3.2"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
-  :dependencies [[metosin/reitit-core]])
+  :dependencies [[metosin/reitit-core]
+                 [ring/ring-core]])
