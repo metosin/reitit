@@ -286,9 +286,11 @@
          (testing "different file-types"
            (let [response (app {:uri "/files/hello.json", :request-method :get})]
              (is (= "application/json" (get-in response [:headers "Content-Type"])))
+             (is (get-in response [:headers "Last-Modified"]))
              (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
            (let [response (app {:uri "/files/hello.xml", :request-method :get})]
              (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+             (is (get-in response [:headers "Last-Modified"]))
              (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
          (testing "not found"
@@ -301,4 +303,5 @@
                  raise ::not-called]
              (app {:uri "/files/hello.xml", :request-method :get} respond raise)
              (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+             (is (get-in @result [:headers "Last-Modified"]))
              (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))
