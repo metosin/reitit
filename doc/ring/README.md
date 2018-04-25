@@ -1,6 +1,7 @@
 # Ring
 
 * [Ring-router](ring.md)
+* [Default handler](default_handler.md)
 * [Static Resources](static.md)
 * [Dynamic Extensions](dynamic_extensions.md)
 * [Data-driven Middleware](data_driven_middleware.md)

@@ -21,6 +21,7 @@
     * [Dev Workflow](advanced/dev_workflow.md)
 * [Ring](ring/README.md)
     * [Ring-router](ring/ring.md)
+    * [Default handler](ring/default_handler.md)
     * [Static Resources](ring/static.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
     * [Data-driven Middleware](ring/data_driven_middleware.md)

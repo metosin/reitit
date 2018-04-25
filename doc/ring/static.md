@@ -1,6 +1,6 @@
 # Static Resources (Clojure Only)
 
-Static resources can be served with a help of `reitit.ring/create-resource-handler`. It takes optionally an options map and returns a ring handler to serve files from Classpath. It returns `java.io.File` instances, so ring adapters can use NIO to effective Stream the files.
+Static resources can be served with a help of `reitit.ring/create-resource-handler`. It takes optionally an options map and returns a ring handler to serve files from Classpath.
 
 There are two options to serve the files.
 
@@ -59,6 +59,6 @@ To serve files from conflicting paths, e.g. `"/*"`, one option is to mount them 
 
 ### TODO
 
-* support for things like `:cache`, `:last-modified?`, `:index-files` and `:gzip`
+* support for things like `:cache`, `:etag`, `:last-modified?`, `:index-files` and `:gzip`
 * support for ClojureScript
 * serve from file-system
