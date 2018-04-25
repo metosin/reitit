@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Dynamic Extensions · GitBook</title>
+        <title>Static Resources · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="data_driven_middleware.html" />
+    <link rel="next" href="dynamic_extensions.html" />
     
     
-    <link rel="prev" href="static.html" />
+    <link rel="prev" href="ring.html" />
     
 
     </head>
@@ -381,7 +381,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.2" data-path="static.html">
+        <li class="chapter active" data-level="1.5.2" data-path="static.html">
             
                 <a href="static.html">
             
@@ -394,7 +394,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.5.3" data-path="dynamic_extensions.html">
+        <li class="chapter " data-level="1.5.3" data-path="dynamic_extensions.html">
             
                 <a href="dynamic_extensions.html">
             
@@ -546,7 +546,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Dynamic Extensions</a>
+        <a href=".." >Static Resources</a>
     </h1>
 </div>
 
@@ -561,44 +561,76 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="dynamic-extensions">Dynamic Extensions</h1>
-<p><code>ring-handler</code> injects the <code>Match</code> into a request and it can be extracted at runtime with <code>reitit.ring/get-match</code>. This can be used to build ad-hoc extensions to the system.</p>
-<p>Example middleware to guard routes based on user roles:</p>
+                                <h1 id="static-resources-clojure-only">Static Resources (Clojure Only)</h1>
+<p>Static resources can be served with a help of <code>reitit.ring/create-resource-handler</code>. It takes optionally an options map and returns a ring handler to serve files from Classpath. It returns <code>java.io.File</code> instances, so ring adapters can use NIO to effective Stream the files.</p>
+<p>There are two options to serve the files.</p>
+<h2 id="internal-routes">Internal routes</h2>
+<p>This is good option if static files can be from non-conflicting paths, e.g. <code>&quot;/assets/*&quot;</code>.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-(<span class="hljs-name">require</span> &apos;[clojure.set <span class="hljs-symbol">:as</span> set])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-enforce-roles [handler]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::roles</span>] <span class="hljs-symbol">:as</span> request}]
-    (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [required (<span class="hljs-name">some-&gt;</span> request (<span class="hljs-name">ring/get-match</span>) <span class="hljs-symbol">:data</span> <span class="hljs-symbol">::roles</span>)]
-      (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">seq</span></span> required) (<span class="hljs-name"><span class="hljs-builtin-name">not</span></span> (<span class="hljs-name">set/subset?</span> required roles)))
-        {<span class="hljs-symbol">:status</span> <span class="hljs-number">403</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;forbidden&quot;</span>}
-        (<span class="hljs-name">handler</span> request)))))
+(<span class="hljs-name">ring/ring-handler</span>
+  (<span class="hljs-name">ring/router</span>
+    [[<span class="hljs-string">&quot;/ping&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})]
+     [<span class="hljs-string">&quot;/assets/*&quot;</span> (<span class="hljs-name">ring/create-resource-handler</span>)]])
+  (<span class="hljs-name">ring/create-default-handler</span>))
 </code></pre>
-<p>Mounted to an app via router data (effecting all routes):</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> handler (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>}))
+<p>To serve static files with conflicting routes, e.g. <code>&quot;/*#</code>, one needs to disable the conflict resolution:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">ring/ring-handler</span>
-    (<span class="hljs-name">ring/router</span>
-      [[<span class="hljs-string">&quot;/api&quot;</span>
-        [<span class="hljs-string">&quot;/ping&quot;</span> handler]
-        [<span class="hljs-string">&quot;/admin&quot;</span> {<span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}}
-         [<span class="hljs-string">&quot;/ping&quot;</span> handler]]]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [wrap-enforce-roles]}})))
+(<span class="hljs-name">ring/ring-handler</span>
+  (<span class="hljs-name">ring/router</span>
+    [[<span class="hljs-string">&quot;/ping&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})]
+     [<span class="hljs-string">&quot;/*&quot;</span> (<span class="hljs-name">ring/create-resource-handler</span>)]]
+    {<span class="hljs-symbol">:conflicts</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> <span class="hljs-literal">nil</span>)})
+  (<span class="hljs-name">ring/create-default-handler</span>))
 </code></pre>
-<p>Anonymous access to public route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
+<h2 id="external-routes">External routes</h2>
+<p>To serve files from conflicting paths, e.g. <code>&quot;/*&quot;</code>, one option is to mount them to default-handler branch of <code>ring-handler</code>. This way, they are only served if none of the actual routes have matched.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">ring/ring-handler</span>
+  (<span class="hljs-name">ring/router</span>
+    [<span class="hljs-string">&quot;/ping&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})])
+  (<span class="hljs-name">ring/routes</span>
+    (<span class="hljs-name">ring/create-resource-handler</span> {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/&quot;</span>})
+    (<span class="hljs-name">ring/create-default-handler</span>)))
 </code></pre>
-<p>Anonymous access to guarded route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>})
-<span class="hljs-comment">; {:status 403, :body &quot;forbidden&quot;}</span>
-</code></pre>
-<p>Authorized access to guarded route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>, <span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
-</code></pre>
-<p>Dynamic extensions are nice, but we can do much better. See <a href="data_driven_middleware.html">data-driven middleware</a> and <a href="compiling_middleware.html">compiling routes</a>.</p>
+<h2 id="configuration">Configuration</h2>
+<p><code>reitit.ring/create-resource-handler</code> takes optionally an options map to configure how the files are being served.</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:parameter</td>
+<td>optional name of the wildcard parameter, defaults to unnamed keyword <code>:</code></td>
+</tr>
+<tr>
+<td>:root</td>
+<td>optional resource root, defaults to <code>&quot;public&quot;</code></td>
+</tr>
+<tr>
+<td>:path</td>
+<td>optional path to mount the handler to. Works only if mounted outside of a router.</td>
+</tr>
+<tr>
+<td>:loader</td>
+<td>optional class loader to resolve the resources</td>
+</tr>
+<tr>
+<td>:allow-symlinks?</td>
+<td>allow symlinks that lead to paths outside the root classpath directories, defaults to <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="todo">TODO</h3>
+<ul>
+<li>support for things like <code>:cache</code>, <code>:last-modified?</code>, <code>:index-files</code> and <code>:gzip</code></li>
+<li>support for ClojureScript</li>
+<li>serve from file-system</li>
+</ul>
 
                                 
                                 </section>
@@ -626,12 +658,12 @@
 
             
                 
-                <a href="static.html" class="navigation navigation-prev " aria-label="Previous page: Static Resources">
+                <a href="ring.html" class="navigation navigation-prev " aria-label="Previous page: Ring-router">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="data_driven_middleware.html" class="navigation navigation-next " aria-label="Next page: Data-driven Middleware">
+                <a href="dynamic_extensions.html" class="navigation navigation-next " aria-label="Next page: Dynamic Extensions">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -642,7 +674,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Dynamic Extensions","level":"1.5.3","depth":2,"next":{"title":"Data-driven Middleware","level":"1.5.4","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"previous":{"title":"Static Resources","level":"1.5.2","depth":2,"path":"ring/static.md","ref":"ring/static.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/dynamic_extensions.md","mtime":"2018-04-25T09:49:54.424Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-04-25T09:50:35.395Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Static Resources","level":"1.5.2","depth":2,"next":{"title":"Dynamic Extensions","level":"1.5.3","depth":2,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"previous":{"title":"Ring-router","level":"1.5.1","depth":2,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/static.md","mtime":"2018-04-25T09:49:54.424Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-04-25T09:50:35.395Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

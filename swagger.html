@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Introduction · GitBook</title>
+        <title>Swagger-support · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,8 +57,10 @@
     <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="basics/" />
+    <link rel="next" href="faq.html" />
     
+    
+    <link rel="prev" href="interceptors.html" />
     
 
     </head>
@@ -87,7 +89,7 @@
         
         
     
-        <li class="chapter active" data-level="1.1" data-path="./">
+        <li class="chapter " data-level="1.1" data-path="./">
             
                 <a href="./">
             
@@ -488,7 +490,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.8" data-path="swagger.html">
+        <li class="chapter active" data-level="1.8" data-path="swagger.html">
             
                 <a href="swagger.html">
             
@@ -544,7 +546,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Introduction</a>
+        <a href="." >Swagger-support</a>
     </h1>
 </div>
 
@@ -559,129 +561,58 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="introduction">Introduction</h1>
-<p><a href="https://github.com/metosin/reitit" target="_blank">Reitit</a> is a fast data-driven router for Clojure(Script).</p>
-<ul>
-<li>Simple data-driven <a href="basics/route_syntax.html">route syntax</a></li>
-<li><a href="basics/route_conflicts.html">Route conflict resolution</a></li>
-<li>First-class <a href="basics/route_data.html">route data</a></li>
-<li>Bi-directional routing</li>
-<li><a href="coercion/coercion.html">Pluggable coercion</a> (<a href="https://github.com/plumatic/schema" target="_blank">schema</a> &amp; <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a>)</li>
-<li>Extendable</li>
-<li>Modular</li>
-<li><a href="performance.html">Fast</a></li>
-</ul>
-<p>The following higher-level routers are also available as separate modules:</p>
-<ul>
-<li><a href="ring/ring.html"><code>reitit-ring</code></a> with <a href="ring/data_driven_middleware.html">data-driven middleware</a></li>
-<li><code>reitit-http</code> with enchanced Pedestal-style Interceptors (WIP)</li>
-<li><code>reitit-frontend</code> with Keechma-style Controllers (WIP)</li>
-</ul>
-<p>To use Reitit, add the following dependecy to your project:</p>
-<pre><code class="lang-clj">[metosin/reitit <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
-</code></pre>
-<p>Optionally, the parts can be required separately:</p>
-<pre><code class="lang-clj">[metosin/reitit-core <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; routing core</span>
-[metosin/reitit-ring <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; ring-router</span>
-[metosin/reitit-spec <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; spec coercion</span>
-[metosin/reitit-schema <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; schema coercion</span>
-[metosin/reitit-swagger <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; swagger docs</span>
-</code></pre>
-<p>For discussions, there is a <a href="https://clojurians.slack.com/messages/reitit/" target="_blank">#reitit</a> channel in <a href="http://clojurians.net/" target="_blank">Clojurians slack</a>.</p>
-<h1 id="examples">Examples</h1>
-<h2 id="simple-router">Simple router</h2>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
-  (<span class="hljs-name">r/router</span>
-    [[<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
-     [<span class="hljs-string">&quot;/api/orders/:id&quot;</span> <span class="hljs-symbol">::order-by-id</span>]]))
-</code></pre>
-<p>Routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/ipa&quot;</span>)
-<span class="hljs-comment">; nil</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/ping&quot;</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :data {:name ::ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :path-params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-
-(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/api/orders/1&quot;</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;        :data {:name ::order-by-id}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :path-params {:id &quot;1&quot;}</span>
-<span class="hljs-comment">;        :path &quot;/api/orders/1&quot;}</span>
-</code></pre>
-<p>Reverse-routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ipa</span>)
-<span class="hljs-comment">; nil</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::ping</span>)
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :data {:name ::ping}</span>
-<span class="hljs-comment">;        :result nil</span>
-<span class="hljs-comment">;        :path-params {}</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span>)
-<span class="hljs-comment">; #PartialMatch{:template &quot;/api/orders/:id&quot;</span>
-<span class="hljs-comment">;               :data {:name :user/order-by-id}</span>
-<span class="hljs-comment">;               :result nil</span>
-<span class="hljs-comment">;               :path-params nil</span>
-<span class="hljs-comment">;               :required #{:id}}</span>
-
-(<span class="hljs-name">r/partial-match?</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span>))
-<span class="hljs-comment">; true</span>
-
-(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::order-by-id</span> {<span class="hljs-symbol">:id</span> <span class="hljs-number">2</span>})
-<span class="hljs-comment">; #Match{:template &quot;/api/orders/:id&quot;,</span>
-<span class="hljs-comment">;        :data {:name ::order-by-id},</span>
-<span class="hljs-comment">;        :result nil,</span>
-<span class="hljs-comment">;        :path-params {:id 2},</span>
-<span class="hljs-comment">;        :path &quot;/api/orders/2&quot;}</span>
-</code></pre>
-<h2 id="ring-router">Ring-router</h2>
-<p>Ring-router adds support for <code>:handler</code> functions, <code>:middleware</code> and routing based on <code>:request-method</code>. It also supports pluggable parameter coercion (<code>clojure.spec</code>), data-driven middleware, route and middleware compilation, dynamic extensions and more.</p>
+                                <h1 id="swagger">Swagger</h1>
+<p>Reitit supports <a href="https://swagger.io/" target="_blank">Swagger</a> to generate route documentation. Documentation is extracted from existing coercion definitions <code>:parameters</code>, <code>:responses</code> and from a set of new doumentation keys.</p>
+<h3 id="example">Example</h3>
+<p>Current <code>reitit-swagger</code> draft (with <code>reitit-ring</code> &amp; data-specs):</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> handler [_]
-  {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>})
-
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap [handler id]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
-    (<span class="hljs-name">update</span> (<span class="hljs-name">handler</span> request) <span class="hljs-symbol">:wrap</span> (<span class="hljs-name">fnil</span> conj &apos;()) id)))
+(<span class="hljs-name">require</span> &apos;[reitit.ring.swagger <span class="hljs-symbol">:as</span> swagger])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> rrc])
+(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> spec])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-symbol">:api</span>]]}
-       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> handler
-                 <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]
-       [<span class="hljs-string">&quot;/admin&quot;</span> {<span class="hljs-symbol">:middleware</span> [[wrap <span class="hljs-symbol">:admin</span>]]}
-        [<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> handler
-                   <span class="hljs-symbol">:post</span> handler}]]])))
-</code></pre>
-<p>Routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/users&quot;</span>})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;, :wrap (:api :admin}</span>
+      [<span class="hljs-string">&quot;/api&quot;</span>
 
-(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:put</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/users&quot;</span>})
-<span class="hljs-comment">; nil</span>
-</code></pre>
-<p>Reverse-routing:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+       <span class="hljs-comment">;; identify a swagger api</span>
+       <span class="hljs-comment">;; there can be several in a routing tree</span>
+       {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:id</span> <span class="hljs-symbol">:math</span>}}
 
-(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app (<span class="hljs-name">ring/get-router</span>) (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::ping</span>))
-<span class="hljs-comment">; #Match{:template &quot;/api/ping&quot;</span>
-<span class="hljs-comment">;        :data {:middleware [[#object[user$wrap] :api]]</span>
-<span class="hljs-comment">;               :get {:handler #object[user$handler]}</span>
-<span class="hljs-comment">;        :name ::ping}</span>
-<span class="hljs-comment">;        :result #Methods{...}</span>
-<span class="hljs-comment">;        :path-params nil</span>
-<span class="hljs-comment">;        :path &quot;/api/ping&quot;}</span>
+       <span class="hljs-comment">;; the (undocumented) swagger spec endpoint</span>
+       [<span class="hljs-string">&quot;/swagger.json&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
+               <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:info</span> {<span class="hljs-symbol">:title</span> <span class="hljs-string">&quot;my-api&quot;</span>}}
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]
+
+       <span class="hljs-comment">;; the (undocumented) swagger-ui</span>
+       <span class="hljs-comment">;; [org.webjars/swagger-ui &quot;3.13.4&quot;]</span>
+       [<span class="hljs-string">&quot;/docs/*&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">ring/create-resource-handler</span>
+                          {<span class="hljs-symbol">:root</span> <span class="hljs-string">&quot;META-INF/resources/webjars/swagger-ui&quot;</span>})}}]
+
+       [<span class="hljs-string">&quot;/minus&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;minus&quot;</span>
+               <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+               <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                          {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">-</span></span> x y)}})}}]
+
+       [<span class="hljs-string">&quot;/plus&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus&quot;</span>
+               <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+               <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                          {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-comment">;; does not particiate in request processing</span>
+                           <span class="hljs-comment">;; just defines specs for the extra keys</span>
+                           swagger/swagger-middleware
+                           rrc/coerce-exceptions-middleware
+                           rrc/coerce-request-middleware
+                           rrc/coerce-response-middleware]
+              <span class="hljs-symbol">:coercion</span> spec/coercion}})))
 </code></pre>
 
                                 
@@ -710,8 +641,12 @@
 
             
                 
+                <a href="interceptors.html" class="navigation navigation-prev " aria-label="Previous page: Interceptors (WIP)">
+                    <i class="fa fa-angle-left"></i>
+                </a>
                 
-                <a href="basics/" class="navigation navigation-next navigation-unique" aria-label="Next page: Basics">
+                
+                <a href="faq.html" class="navigation navigation-next " aria-label="Next page: FAQ">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -722,7 +657,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route Syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},{"title":"Route Conflicts","level":"1.2.7","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-04-25T09:49:54.420Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-04-25T09:50:35.395Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Swagger-support","level":"1.8","depth":1,"next":{"title":"FAQ","level":"1.9","depth":1,"path":"faq.md","ref":"faq.md","articles":[]},"previous":{"title":"Interceptors (WIP)","level":"1.7","depth":1,"path":"interceptors.md","ref":"interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"swagger.md","mtime":"2018-04-25T09:49:54.424Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-04-25T09:50:35.395Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
