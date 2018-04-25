@@ -49,11 +49,10 @@ Current `reitit-swagger` draft (with `reitit-ring` & data-specs):
                :handler (fn [{{{:keys [x y]} :query} :parameters}]
                           {:status 200, :body {:total (+ x y)}})}}]]
 
-      {:data {:middleware [;; does not particiate in request processing
-                           ;; just defines specs for the extra keys
-                           swagger/swagger-middleware
-                           rrc/coerce-exceptions-middleware
+      {:data {:middleware [rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]
+                           rrc/coerce-response-middleware
+                           ;; provides just route data specs
+                           swagger/swagger-feature]
               :coercion spec/coercion}})))
 ```
