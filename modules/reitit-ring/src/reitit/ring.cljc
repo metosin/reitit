@@ -1,11 +1,11 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.middleware :as middleware]
-            [reitit.ring.mime :as mime]
             [reitit.core :as r]
             [reitit.impl :as impl]
-    #?(:clj
-            [clojure.java.io :as io])))
+    #?@(:clj [
+            [ring.util.mime-type :as mime-type]
+            [ring.util.response :as response]])))
 
 (def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
 (defrecord Methods [get head post put delete connect options trace patch])
@@ -71,42 +71,36 @@
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
-     | key          | description |
+     | key              | description |
      | -----------------|-------------|
-     | :parameter   | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root        | optional resource root, defaults to `\"public\"`
-     | :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
+     | :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root            | optional resource root, defaults to `\"public\"`
      | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
      | :loader          | optional class loader to resolve the resources
      | :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root mime-types path loader allow-symlinks?]
+     ([{:keys [parameter root path loader allow-symlinks?]
         :or {parameter (keyword "")
-             root "public"
-             mime-types mime/default-mime-types}}]
-      (let [response (fn [file]
-                       {:status 200
-                        :body file
-                        :headers {"Content-Type" (mime/ext-mime-type (.getName file) mime-types)}})]
-        (if path
-          (let [path-size (count path)
-                serve (fn [req]
-                        (let [uri (:uri req)]
-                          (if (and (>= (count uri) path-size))
-                            (some->> (str root (subs uri path-size)) io/resource io/file response))))]
-            (fn
-              ([req]
-               (serve req))
-              ([req respond _]
-               (respond (serve req)))))
-          (let [serve (fn [req]
-                        (or (some->> req :path-params parameter (str root "/") io/resource io/file response)
-                            {:status 404}))]
-            (fn ([req]
-                 (serve req))
-              ([req respond _]
-               (respond (serve req))))))))))
+             root "public"}}]
+      (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
+            path-size (count path)
+            create (fn [handler]
+                     (fn
+                       ([request] (handler request))
+                       ([request respond _] (respond (handler request)))))
+            response (fn [path]
+                       (if-let [response (response/resource-response path options)]
+                         (response/content-type response (mime-type/ext-mime-type path))))
+            handler (if path
+                      (fn [request]
+                        (let [uri (:uri request)]
+                          (if (>= (count uri) path-size)
+                            (response (subs uri path-size)))))
+                      (fn [request]
+                        (let [path (-> request :path-params parameter)]
+                          (or (response path) {:status 404}))))]
+        (create handler)))))
 
 (defn ring-handler
   "Creates a ring-handler out of a ring-router.

@@ -4,7 +4,10 @@
             [reitit.ring :as ring]
             [clojure.java.io :as io]
             [criterium.core :as cc]
-            [ring.util.mime-type :as mime]))
+            [ring.util.response]
+            [ring.middleware.defaults]
+            [ring.middleware.resource]
+            [ring.util.mime-type]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -21,14 +24,14 @@
 ;; Memory:                16 GB
 ;;
 
-(def app
+(def app1
   (ring/ring-handler
     (ring/router
       [["/ping" (constantly {:status 200, :body "pong"})]
        ["/files/*" (ring/create-resource-handler)]])
     (ring/create-default-handler)))
 
-(def app
+(def app2
   (ring/ring-handler
     (ring/router
       ["/ping" (constantly {:status 200, :body "pong"})])
@@ -36,19 +39,69 @@
       (ring/create-resource-handler {:path "/files"})
       (ring/create-default-handler))))
 
+(def wrap-resource
+  (-> (constantly {:status 200, :body "pong"})
+      (ring.middleware.resource/wrap-resource "public")))
+
+(def wrap-defaults
+  (-> (constantly {:status 200, :body "pong"})
+      (ring.middleware.defaults/wrap-defaults ring.middleware.defaults/site-defaults)))
+
 (comment
   (def server (web/run #'app {:port 3000, :dispatch? false, :server {:always-set-keep-alive false}}))
   (routing-test))
 
+(defn bench-resources []
+
+  ;; 134µs
+  (cc/quick-bench
+    (ring.util.response/resource-response "hello.json" {:root "public"}))
+
+  ;; 144µs
+  (cc/quick-bench
+    (app1 {:request-method :get, :uri "/files/hello.json"}))
+
+  ;; 144µs
+  (cc/quick-bench
+    (app2 {:request-method :get, :uri "/files/hello.json"}))
+
+  ;; 143µs
+  (cc/quick-bench
+    (wrap-resource {:request-method :get, :uri "/hello.json"}))
+
+  ;; 163µs
+  (cc/quick-bench
+    (wrap-defaults {:request-method :get, :uri "/hello.json"})))
+
+(defn bench-handler []
+
+  ;; 140ns
+  (cc/quick-bench
+    (app1 {:request-method :get, :uri "/ping"}))
+
+  ;; 134ns
+  (cc/quick-bench
+    (app2 {:request-method :get, :uri "/ping"}))
+
+  ;; 108µs
+  (cc/quick-bench
+    (wrap-resource {:request-method :get, :uri "/ping"}))
+
+  ;; 146µs
+  (cc/quick-bench
+    (wrap-defaults {:request-method :get, :uri "/ping"})))
+
 (comment
+  (bench-resources)
+  (bench-handler)
+
   (let [file (-> "logback.xml" io/resource io/file)
         name (.getName file)]
 
     ;; 639ns
     (cc/quick-bench
-      (mime/ext-mime-type name))
-
+      (ring.util.mime-type/ext-mime-type name))
 
     ;; 106ns
     (cc/quick-bench
-      (ext-mime-type name))))
+      (reitit.ring.mime/ext-mime-type name reitit.ring.mime/default-mime-types))))

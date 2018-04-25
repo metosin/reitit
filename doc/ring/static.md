@@ -8,7 +8,6 @@ There are two options to serve the files.
 
 This is good option if static files can be from non-conflicting paths, e.g. `"/assets/*"`.
 
-
 ```clj
 (require '[reitit.ring :as ring])
 
@@ -50,13 +49,16 @@ To serve files from conflicting paths, e.g. `"/*"`, one option is to mount them 
 
 `reitit.ring/create-resource-handler` takes optionally an options map to configure how the files are being served.
 
-| key          | description |
-| -------------|-------------|
-| :parameter   | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-| :root        | optional resource root, defaults to `"public"`
-| :mime-types  | optional extension->mime-type mapping, defaults to `reitit.ring.mime/default-types`
-| :path        | optional path to mount the handler to. Works only if mounted outside of a router.
+| key              | description |
+| -----------------|-------------|
+| :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+| :root            | optional resource root, defaults to `"public"`
+| :path            | optional path to mount the handler to. Works only if mounted outside of a router.
+| :loader          | optional class loader to resolve the resources
+| :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`
 
 ### TODO
 
 * support for things like `:cache`, `:last-modified?`, `:index-files` and `:gzip`
+* support for ClojureScript
+* serve from file-system
