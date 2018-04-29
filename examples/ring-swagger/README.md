@@ -19,6 +19,8 @@ http GET :3000/api/swagger.json
 * swagger.json: http://localhost:3000/api/swagger.json
 * swagger-ui: http://localhost:3000/api-docs/index.html
 
+<img src="https://raw.githubusercontent.com/metosin/reitit/master/examples/ring-swagger/swagger-ui.png" />
+
 ## License
 
 Copyright © 2017 Metosin Oy
