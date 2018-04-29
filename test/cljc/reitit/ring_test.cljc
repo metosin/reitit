@@ -293,6 +293,12 @@
              (is (get-in response [:headers "Last-Modified"]))
              (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
+         (testing "index-files"
+           (let [response (app {:uri "/files/docs", :request-method :get})]
+             (is (= "text/html" (get-in response [:headers "Content-Type"])))
+             (is (get-in response [:headers "Last-Modified"]))
+             (is (= "<h1>hello</h1>\n" (slurp (:body response))))))
+
          (testing "not found"
            (let [response (app {:uri "/files/not-found", :request-method :get})]
              (is (= 404 (:status response)))))

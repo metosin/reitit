@@ -68,6 +68,7 @@
         (respond (not-found request)))))))
 
 #?(:clj
+   ;; TODO: optimize for perf
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
@@ -77,29 +78,39 @@
      | :root            | optional resource root, defaults to `\"public\"`
      | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
      | :loader          | optional class loader to resolve the resources
+     | :index-files     | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
      | :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root path loader allow-symlinks?]
+     ([{:keys [parameter root path loader allow-symlinks? index-files]
         :or {parameter (keyword "")
-             root "public"}}]
+             root "public"
+             index-files ["index.html"]}}]
       (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
             path-size (count path)
             create (fn [handler]
                      (fn
                        ([request] (handler request))
                        ([request respond _] (respond (handler request)))))
-            response (fn [path]
-                       (if-let [response (response/resource-response path options)]
-                         (response/content-type response (mime-type/ext-mime-type path))))
+            resource-response (fn [path accept]
+                                (if-let [path (accept path)]
+                                  (if-let [response (response/resource-response path options)]
+                                    (response/content-type response (mime-type/ext-mime-type path)))))
+            path-or-index-response (fn [path accept]
+                                     (or (resource-response path accept)
+                                         (loop [[file & files] index-files]
+                                           (if file
+                                             (or (resource-response (str path "/" file) accept)
+                                                 (recur files))))))
             handler (if path
                       (fn [request]
                         (let [uri (:uri request)]
-                          (if (>= (count uri) path-size)
-                            (response (subs uri path-size)))))
+                          (path-or-index-response uri (fn [path]
+                                                        (if (>= (count path) path-size)
+                                                          (subs path path-size))))))
                       (fn [request]
                         (let [path (-> request :path-params parameter)]
-                          (or (response path) {:status 404}))))]
+                          (or (path-or-index-response path identity) {:status 404}))))]
         (create handler)))))
 
 (defn ring-handler
