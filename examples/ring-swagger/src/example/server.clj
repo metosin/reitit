@@ -19,7 +19,7 @@
         ["/swagger.json"
          {:get {:no-doc true
                 :swagger {:info {:title "my-api"}}
-                :handler swagger/swagger-spec-handler}}]
+                :handler (swagger/create-swagger-handler)}}]
 
         ["/spec" {:coercion spec/coercion}
          ["/plus"
@@ -37,9 +37,10 @@
                  :handler (fn [{{{:keys [x y]} :query} :parameters}]
                             {:status 200, :body {:total (+ x y)}})}}]]]
 
-       ;; serve api-docs here
        ["/api-docs/*"
-        (constantly {:status 200, :body "api-docs"})]]
+         {:no-doc true
+          :handler (ring/create-resource-handler
+                     {:root "META-INF/resources/webjars/swagger-ui/3.13.6"})}]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
@@ -47,7 +48,9 @@
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})
-    (ring/create-default-handler)))
+    (ring/routes
+      (ring/create-resource-handler {:path "/"})
+      (ring/create-default-handler))))
 
 (defn start []
   (jetty/run-jetty #'app {:port 3000, :join? false})

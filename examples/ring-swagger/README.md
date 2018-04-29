@@ -1,17 +1,10 @@
 # WIP: Ring + Swagger example
 
-TODO:
-
-* Serve Swagger-ui.
-
 ## Usage
 
 ```clj
 > lein repl
-
-(require '[example.server :as server])
-
-(server/start)
+(start)
 ```
 
 To test the endpoints using [httpie](https://httpie.org/):
@@ -22,6 +15,9 @@ http GET :3000/api/spec/plus x==1 y==20
 
 http GET :3000/api/swagger.json
 ```
+
+* swagger.json: http://localhost:3000/api/swagger.json
+* swagger-ui: http://localhost:3000/api-docs/index.html
 
 ## License
 
