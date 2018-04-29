@@ -1,6 +1,6 @@
 # Static Resources (Clojure Only)
 
-Static resources can be served with a help of `reitit.ring/create-resource-handler`. It takes optionally an options map and returns a ring handler to serve files from Classpath.
+Static resources can be served using `reitit.ring/create-resource-handler`. It takes optionally an options map and returns a ring handler to serve files from Classpath.
 
 There are two options to serve the files.
 
@@ -18,7 +18,7 @@ This is good option if static files can be from non-conflicting paths, e.g. `"/a
   (ring/create-default-handler))
 ```
 
-To serve static files with conflicting routes, e.g. `"/*#`, one needs to disable the conflict resolution:
+To serve static files with conflicting routes, e.g. `"/*"`, one needs to disable the conflict resolution:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -33,8 +33,7 @@ To serve static files with conflicting routes, e.g. `"/*#`, one needs to disable
 
 ## External routes
 
-To serve files from conflicting paths, e.g. `"/*"`, one option is to mount them to default-handler branch of `ring-handler`. This way, they are only served if none of the actual routes have matched.
-
+A better way to serve files from conflicting paths, e.g. `"/*"`, is to serve them from the default-handler. One can compose multipl default locations using `ring-handler`. This way, they are only served if none of the actual routes have matched.
 
 ```clj
 (ring/ring-handler
