@@ -1,4 +1,4 @@
-# WIP: Ring + Swagger example
+# Ring with Swagger example
 
 ## Usage
 
