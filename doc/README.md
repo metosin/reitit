@@ -106,7 +106,7 @@ Ring-router adds support for `:handler` functions, `:middleware` and routing bas
 ```clj
 (require '[reitit.ring :as ring])
 
-(def handler [_]
+(defn handler [_]
   {:status 200, :body "ok"})
 
 (defn wrap [handler id]
