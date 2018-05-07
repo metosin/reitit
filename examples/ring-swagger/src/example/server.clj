@@ -13,37 +13,37 @@
 (def app
   (ring/ring-handler
     (ring/router
-      [["/api"
-        {:swagger {:id ::math}}
+      ["/api"
+       {:swagger {:id ::math}}
 
-        ["/swagger.json"
-         {:get {:no-doc true
-                :swagger {:info {:title "my-api"}}
-                :handler (swagger/create-swagger-handler)}}]
+       ["/swagger.json"
+        {:get {:no-doc true
+               :swagger {:info {:title "my-api"}}
+               :handler (swagger/create-swagger-handler)}}]
 
-        ["/spec"
-         {:coercion spec/coercion
-          :swagger {:tags ["spec"]}}
+       ["/spec"
+        {:coercion spec/coercion
+         :swagger {:tags ["spec"]}}
 
-         ["/plus"
-          {:get {:summary "plus with spec"
-                 :parameters {:query {:x int?, :y int?}}
-                 :responses {200 {:body {:total int?}}}
-                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200
-                             :body {:total (+ x y)}})}}]]
+        ["/plus"
+         {:get {:summary "plus with spec"
+                :parameters {:query {:x int?, :y int?}}
+                :responses {200 {:body {:total int?}}}
+                :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                           {:status 200
+                            :body {:total (+ x y)}})}}]]
 
-        ["/schema"
-         {:coercion schema/coercion
-          :swagger {:tags ["schema"]}}
+       ["/schema"
+        {:coercion schema/coercion
+         :swagger {:tags ["schema"]}}
 
-         ["/plus"
-          {:get {:summary "plus with schema"
-                 :parameters {:query {:x Int, :y Int}}
-                 :responses {200 {:body {:total Int}}}
-                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200
-                             :body {:total (+ x y)}})}}]]]]
+        ["/plus"
+         {:get {:summary "plus with schema"
+                :parameters {:query {:x Int, :y Int}}
+                :responses {200 {:body {:total Int}}}
+                :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                           {:status 200
+                            :body {:total (+ x y)}})}}]]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
