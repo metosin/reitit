@@ -3,7 +3,11 @@
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
-            [reitit.coercion :as coercion]))
+            [clojure.string :as str]
+            [reitit.ring :as ring]
+            [reitit.coercion :as coercion]
+    #?@(:clj [
+            [jsonista.core :as j]])))
 
 (s/def ::id keyword?)
 (s/def ::no-doc boolean?)
@@ -69,7 +73,8 @@
   "Create a ring handler to emit swagger spec."
   (fn [{:keys [::r/router ::r/match :request-method]}]
     (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
-          swagger (set/rename-keys swagger {:id :x-id})
+          swagger (->> (set/rename-keys swagger {:id :x-id})
+                       (merge {:swagger "2.0"}))
           accept-route #(-> % second :swagger :id (= id))
           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
                                (if (and data (not no-doc))
@@ -86,3 +91,36 @@
         (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
           {:status 200
            :body (meta-merge swagger {:paths paths})})))))
+
+#?(:clj
+   (defn create-swagger-ui-handler
+     "Creates a ring handler which can be used to serve swagger-ui.
+
+     | key              | description |
+     | -----------------|-------------|
+     | :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root            | optional resource root, defaults to `\"swagger-ui\"`
+     | :url             | path to swagger endpoint, defaults to `/swagger.json`
+     | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :config          | parameters passed to swaggger-ui, keys transformed into camelCase."
+     ([]
+      (create-swagger-ui-handler nil))
+     ([options]
+      (let [mixed-case (fn [k]
+                         (let [[f & rest] (str/split (name k) #"-")]
+                           (apply str (str/lower-case f) (map str/capitalize rest))))
+            mixed-case-key (fn [[k v]] [(mixed-case k) v])
+            config-json (fn [{:keys [url config]}] (j/write-value-as-string (merge config {:url url})))
+            conf-js (fn [opts] (str "window.API_CONF = " (config-json opts) ";"))
+            options (as-> options $
+                          (update $ :root (fnil identity "swagger-ui"))
+                          (update $ :url (fnil identity "/swagger.json"))
+                          (update $ :config #(->> % (map mixed-case-key) (into {})))
+                          (assoc $ :paths {"conf.js" {:headers {"Content-Type" "application/javascript"}
+                                                      :status 200
+                                                      :body (conf-js $)}
+                                           "config.json" {:headers {"Content-Type" "application/json"}
+                                                          :status 200
+                                                          :body (config-json $)}}))]
+        (ring/routes
+          (ring/create-resource-handler options))))))

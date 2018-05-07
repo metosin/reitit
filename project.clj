@@ -19,7 +19,9 @@
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
                          [metosin/spec-tools "0.6.2-SNAPSHOT"]
-                         [metosin/schema-tools "0.10.2-SNAPSHOT"]]
+                         [metosin/schema-tools "0.10.2-SNAPSHOT"]
+                         [metosin/ring-swagger-ui "2.2.10"]
+                         [metosin/jsonista "0.2.0"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.10"]
@@ -50,7 +52,8 @@
 
                                   [ring "1.6.3"]
                                   [metosin/muuntaja "0.5.0"]
-                                  [metosin/jsonista "0.1.1"]
+                                  [metosin/jsonista "0.2.0"]
+                                  [metosin/ring-swagger-ui "2.2.10"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]

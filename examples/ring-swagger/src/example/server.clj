@@ -21,26 +21,29 @@
                 :swagger {:info {:title "my-api"}}
                 :handler (swagger/create-swagger-handler)}}]
 
-        ["/spec" {:coercion spec/coercion}
+        ["/spec"
+         {:coercion spec/coercion
+          :swagger {:tags ["spec"]}}
+
          ["/plus"
-          {:get {:summary "plus"
+          {:get {:summary "plus with spec"
                  :parameters {:query {:x int?, :y int?}}
                  :responses {200 {:body {:total int?}}}
                  :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}})}}]]
+                            {:status 200
+                             :body {:total (+ x y)}})}}]]
 
-        ["/schema" {:coercion schema/coercion}
+        ["/schema"
+         {:coercion schema/coercion
+          :swagger {:tags ["schema"]}}
+
          ["/plus"
-          {:get {:summary "plus"
+          {:get {:summary "plus with schema"
                  :parameters {:query {:x Int, :y Int}}
                  :responses {200 {:body {:total Int}}}
                  :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}})}}]]]
-
-       ["/api-docs/*"
-         {:no-doc true
-          :handler (ring/create-resource-handler
-                     {:root "META-INF/resources/webjars/swagger-ui/3.13.6"})}]]
+                            {:status 200
+                             :body {:total (+ x y)}})}}]]]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
@@ -49,7 +52,8 @@
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})
     (ring/routes
-      (ring/create-resource-handler {:path "/"})
+      (swagger/create-swagger-ui-handler
+        {:path "", :url "/api/swagger.json"})
       (ring/create-default-handler))))
 
 (defn start []
