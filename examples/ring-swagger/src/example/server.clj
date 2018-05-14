@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
@@ -50,9 +51,15 @@
                            swagger/swagger-feature
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})
+                           rrc/coerce-response-middleware]
+              :swagger {:produces #{"application/json"
+                                    "application/edn"
+                                    "application/transit+json"}
+                        :consumes #{"application/json"
+                                    "application/edn"
+                                    "application/transit+json"}}}})
     (ring/routes
-      (swagger/create-swagger-ui-handler
+      (swagger-ui/create-swagger-ui-handler
         {:path "", :url "/api/swagger.json"})
       (ring/create-default-handler))))
 

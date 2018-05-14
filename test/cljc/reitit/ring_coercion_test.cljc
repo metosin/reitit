@@ -84,11 +84,11 @@
                  (app valid-request))))
 
         (testing "invalid request"
-          (let [{:keys [status body]} (app invalid-request)]
+          (let [{:keys [status]} (app invalid-request)]
             (is (= 400 status))))
 
         (testing "invalid response"
-          (let [{:keys [status body]} (app invalid-request2)]
+          (let [{:keys [status]} (app invalid-request2)]
             (is (= 500 status))))))))
 
 (deftest schema-coercion-test

@@ -10,4 +10,5 @@
                  [metosin/reitit-ring]
                  [metosin/reitit-spec]
                  [metosin/reitit-schema]
-                 [metosin/reitit-swagger]])
+                 [metosin/reitit-swagger]
+                 [metosin/reitit-swagger-ui]])
