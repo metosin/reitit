@@ -2,27 +2,33 @@
   (:require [clojure.spec.alpha :as s]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds]
-            [spec-tools.conform :as conform]
+            [spec-tools.transform :as stt]
             [spec-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]
             [clojure.set :as set])
   #?(:clj
      (:import (spec_tools.core Spec))))
 
-(def string-conforming
-  (st/type-conforming
-    (merge
-      conform/string-type-conforming
-      conform/strip-extra-keys-type-conforming)))
+(def string-transformer
+  (st/type-transformer
+    {:name :string
+     :decoders (merge
+                 stt/string-type-decoders
+                 stt/strip-extra-keys-type-decoders)
+     :encoders stt/string-type-encoders
+     :default-encoder stt/any->any}))
 
-(def json-conforming
-  (st/type-conforming
-    (merge
-      conform/json-type-conforming
-      conform/strip-extra-keys-type-conforming)))
+(def json-transformer
+  (st/type-transformer
+    {:name :json
+     :decoders (merge
+                 stt/json-type-decoders
+                 stt/strip-extra-keys-type-decoders)
+     :encoders stt/json-type-encoders
+     :default-encoder stt/any->any}))
 
-(def default-conforming
-  ::default)
+(def no-op-transformer
+  st/no-op-transformer)
 
 (defprotocol IntoSpec
   (into-spec [this name]))
@@ -58,12 +64,12 @@
 
 (def default-options
   {:coerce-response? coerce-response?
-   :conforming {:body {:default default-conforming
-                       :formats {"application/json" json-conforming}}
-                :string {:default string-conforming}
-                :response {:default default-conforming}}})
+   :transformers {:body {:default no-op-transformer
+                         :formats {"application/json" json-transformer}}
+                  :string {:default string-transformer}
+                  :response {:default no-op-transformer}}})
 
-(defn create [{:keys [conforming coerce-response?] :as opts}]
+(defn create [{:keys [transformers coerce-response?] :as opts}]
   ^{:type ::coercion/coercion}
   (reify coercion/Coercion
     (-get-name [_] :spec)
@@ -98,16 +104,16 @@
           (update :problems (partial mapv #(update % :pred stringify-pred)))))
     (-request-coercer [this type spec]
       (let [spec (coercion/-compile-model this spec nil)
-            {:keys [formats default]} (conforming type)]
+            {:keys [formats default]} (transformers type)]
         (fn [value format]
-          (if-let [conforming (or (get formats format) default)]
-            (let [conformed (st/conform spec value conforming)]
-              (if (s/invalid? conformed)
-                (let [problems (st/explain-data spec value conforming)]
+          (if-let [transformer (or (get formats format) default)]
+            (let [transformed (st/conform spec value transformer)]
+              (if (s/invalid? transformed)
+                (let [problems (st/explain-data spec value transformer)]
                   (coercion/map->CoercionError
                     {:spec spec
                      :problems (::s/problems problems)}))
-                (s/unform spec conformed)))
+                (s/unform spec transformed)))
             value))))
     (-response-coercer [this spec]
       (if (coerce-response? spec)

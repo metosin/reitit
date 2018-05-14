@@ -271,7 +271,9 @@
                           (ring/ring-handler
                             (ring/router
                               [["/ping" (constantly {:status 200, :body "pong"})]
-                               ["/files/*" (ring/create-resource-handler)]])
+                               ["/files/*" (ring/create-resource-handler)]
+                               ["/*" (ring/create-resource-handler)]]
+                              {:conflicts (constantly nil)})
                             (ring/create-default-handler))]
 
                          ["outside of a router"
@@ -280,34 +282,37 @@
                               ["/ping" (constantly {:status 200, :body "pong"})])
                             (ring/routes
                               (ring/create-resource-handler {:path "/files"})
-                              (ring/create-default-handler)))]]]
+                              (ring/create-resource-handler {:path "/"})
+                              (ring/create-default-handler)))]]
+             prefix ["/" "/files"]
+             :let [request (fn [uri] {:uri (str prefix uri), :request-method :get})]]
 
        (testing test
          (testing "different file-types"
-           (let [response (app {:uri "/files/hello.json", :request-method :get})]
+           (let [response (app (request "/hello.json"))]
              (is (= "application/json" (get-in response [:headers "Content-Type"])))
              (is (get-in response [:headers "Last-Modified"]))
              (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
-           (let [response (app {:uri "/files/hello.xml", :request-method :get})]
+           (let [response (app (request "/hello.xml"))]
              (is (= "text/xml" (get-in response [:headers "Content-Type"])))
              (is (get-in response [:headers "Last-Modified"]))
              (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
          (testing "index-files"
-           (let [response (app {:uri "/files/docs", :request-method :get})]
+           (let [response (app (request "/docs"))]
              (is (= "text/html" (get-in response [:headers "Content-Type"])))
              (is (get-in response [:headers "Last-Modified"]))
              (is (= "<h1>hello</h1>\n" (slurp (:body response))))))
 
          (testing "not found"
-           (let [response (app {:uri "/files/not-found", :request-method :get})]
+           (let [response (app (request "/not-found"))]
              (is (= 404 (:status response)))))
 
          (testing "3-arity"
            (let [result (atom nil)
                  respond (partial reset! result)
                  raise ::not-called]
-             (app {:uri "/files/hello.xml", :request-method :get} respond raise)
+             (app (request "/hello.xml") respond raise)
              (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
              (is (get-in @result [:headers "Last-Modified"]))
              (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))

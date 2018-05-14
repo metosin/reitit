@@ -57,7 +57,8 @@
     (let [spec (:body (app
                         {:request-method :get
                          :uri "/api/swagger.json"}))]
-      (is (= {:x-id ::math
+      (is (= {:x-id #{::math}
+              :swagger "2.0"
               :info {:title "my-api"}
               :paths {"/api/schema/plus" {:get {:parameters [{:description ""
                                                               :format "int32"
@@ -97,3 +98,33 @@
                                                                         :type "object"}}}
                                               :summary "plus"}}}}
              spec)))))
+
+(deftest multiple-swagger-apis-test
+  (let [ping-route ["/ping" {:get (constantly "ping")}]
+        spec-route ["/swagger.json"
+                    {:get {:no-doc true
+                           :handler (swagger/create-swagger-handler)}}]
+        app (ring/ring-handler
+              (ring/router
+                [["/common" {:swagger {:id #{::one ::two}}}
+                  ping-route]
+
+                 ["/one" {:swagger {:id ::one}}
+                  ping-route
+                  spec-route]
+
+                 ["/two" {:swagger {:id ::two}}
+                  ping-route
+                  spec-route
+                  ["/deep" {:swagger {:id ::one}}
+                   ping-route]]
+                 ["/one-two" {:swagger {:id #{::one ::two}}}
+                  spec-route]]))
+        spec-paths (fn [uri]
+                     (-> {:request-method :get, :uri uri} app :body :paths keys))]
+    (is (= ["/common/ping" "/one/ping" "/two/deep/ping"]
+           (spec-paths "/one/swagger.json")))
+    (is (= ["/common/ping" "/two/ping"]
+           (spec-paths "/two/swagger.json")))
+    (is (= ["/common/ping" "/one/ping" "/two/ping" "/two/deep/ping"]
+           (spec-paths "/one-two/swagger.json")))))

@@ -69,6 +69,8 @@
 
 #?(:clj
    ;; TODO: optimize for perf
+   ;; TODO: ring.middleware.not-modified/wrap-not-modified
+   ;; TODO: ring.middleware.head/wrap-head
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
@@ -82,19 +84,20 @@
      | :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root path loader allow-symlinks? index-files]
+     ([{:keys [parameter root path loader allow-symlinks? index-files paths]
         :or {parameter (keyword "")
              root "public"
-             index-files ["index.html"]}}]
+             index-files ["index.html"]
+             paths (constantly nil)}}]
       (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
-            path-size (count path)
+            path-size (inc (count path))
             create (fn [handler]
                      (fn
                        ([request] (handler request))
                        ([request respond _] (respond (handler request)))))
             resource-response (fn [path accept]
                                 (if-let [path (accept path)]
-                                  (if-let [response (response/resource-response path options)]
+                                  (if-let [response (or (paths path) (response/resource-response path options))]
                                     (response/content-type response (mime-type/ext-mime-type path)))))
             path-or-index-response (fn [path accept]
                                      (or (resource-response path accept)

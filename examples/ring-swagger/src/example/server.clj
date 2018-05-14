@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
@@ -13,43 +14,53 @@
 (def app
   (ring/ring-handler
     (ring/router
-      [["/api"
-        {:swagger {:id ::math}}
+      ["/api"
+       {:swagger {:id ::math}}
 
-        ["/swagger.json"
-         {:get {:no-doc true
-                :swagger {:info {:title "my-api"}}
-                :handler (swagger/create-swagger-handler)}}]
+       ["/swagger.json"
+        {:get {:no-doc true
+               :swagger {:info {:title "my-api"}}
+               :handler (swagger/create-swagger-handler)}}]
 
-        ["/spec" {:coercion spec/coercion}
-         ["/plus"
-          {:get {:summary "plus"
-                 :parameters {:query {:x int?, :y int?}}
-                 :responses {200 {:body {:total int?}}}
-                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}})}}]]
+       ["/spec"
+        {:coercion spec/coercion
+         :swagger {:tags ["spec"]}}
 
-        ["/schema" {:coercion schema/coercion}
-         ["/plus"
-          {:get {:summary "plus"
-                 :parameters {:query {:x Int, :y Int}}
-                 :responses {200 {:body {:total Int}}}
-                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}})}}]]]
+        ["/plus"
+         {:get {:summary "plus with spec"
+                :parameters {:query {:x int?, :y int?}}
+                :responses {200 {:body {:total int?}}}
+                :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                           {:status 200
+                            :body {:total (+ x y)}})}}]]
 
-       ["/api-docs/*"
-         {:no-doc true
-          :handler (ring/create-resource-handler
-                     {:root "META-INF/resources/webjars/swagger-ui/3.13.6"})}]]
+       ["/schema"
+        {:coercion schema/coercion
+         :swagger {:tags ["schema"]}}
+
+        ["/plus"
+         {:get {:summary "plus with schema"
+                :parameters {:query {:x Int, :y Int}}
+                :responses {200 {:body {:total Int}}}
+                :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                           {:status 200
+                            :body {:total (+ x y)}})}}]]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
                            swagger/swagger-feature
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})
+                           rrc/coerce-response-middleware]
+              :swagger {:produces #{"application/json"
+                                    "application/edn"
+                                    "application/transit+json"}
+                        :consumes #{"application/json"
+                                    "application/edn"
+                                    "application/transit+json"}}}})
     (ring/routes
-      (ring/create-resource-handler {:path "/"})
+      (swagger-ui/create-swagger-ui-handler
+        {:path "", :url "/api/swagger.json"})
       (ring/create-default-handler))))
 
 (defn start []

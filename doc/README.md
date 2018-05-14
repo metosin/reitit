@@ -29,7 +29,8 @@ Optionally, the parts can be required separately:
 [metosin/reitit-ring "0.1.1-SNAPSHOT"] ; ring-router
 [metosin/reitit-spec "0.1.1-SNAPSHOT"] ; spec coercion
 [metosin/reitit-schema "0.1.1-SNAPSHOT"] ; schema coercion
-[metosin/reitit-swagger "0.1.1-SNAPSHOT"] ; swagger docs
+[metosin/reitit-swagger "0.1.1-SNAPSHOT"] ; swagger
+[metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"] ; swagger-ui
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).

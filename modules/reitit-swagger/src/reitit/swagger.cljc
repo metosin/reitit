@@ -5,7 +5,7 @@
             [clojure.set :as set]
             [reitit.coercion :as coercion]))
 
-(s/def ::id keyword?)
+(s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
 (s/def ::summary string?)
@@ -21,16 +21,11 @@
   documentation keys for the route data. Should be accompanied by a
   [[swagger-spec-handler]] to expose the swagger spec.
 
-  Swagger-specific keys:
+  New route data keys contributing to swagger docs:
 
   | key           | description |
   | --------------|-------------|
-  | :swagger      | map of any swagger-data. Must have `:id` to identify the api
-
-  The following common keys also contribute to swagger spec:
-
-  | key           | description |
-  | --------------|-------------|
+  | :swagger      | map of any swagger-data. Must have `:id` (keyword or sequence of keywords) to identify the api
   | :no-doc       | optional boolean to exclude endpoint from api docs
   | :tags         | optional set of strings of keywords tags for an endpoint api docs
   | :summary      | optional short string summary of an endpoint
@@ -38,6 +33,8 @@
 
   Also the coercion keys contribute to swagger spec:
 
+  | key           | description |
+  | --------------|-------------|
   | :parameters   | optional input parameters for a route, in a format defined by the coercion
   | :responses    | optional descriptions of responess, in a format defined by coercion
 
@@ -66,11 +63,16 @@
    :spec ::spec})
 
 (defn create-swagger-handler []
-  "Create a ring handler to emit swagger spec."
+  "Create a ring handler to emit swagger spec. Collects all routes from router which have
+  an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
   (fn [{:keys [::r/router ::r/match :request-method]}]
     (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
-          swagger (set/rename-keys swagger {:id :x-id})
-          accept-route #(-> % second :swagger :id (= id))
+          ->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
+          ids (->set id)
+          swagger (->> (dissoc swagger :id)
+                       (merge {:swagger "2.0"
+                               :x-id ids}))
+          accept-route #(-> % second :swagger :id ->set (set/intersection ids) seq)
           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
                                (if (and data (not no-doc))
                                  [method

@@ -15,11 +15,14 @@
                          [metosin/reitit-spec "0.1.1-SNAPSHOT"]
                          [metosin/reitit-schema "0.1.1-SNAPSHOT"]
                          [metosin/reitit-swagger "0.1.1-SNAPSHOT"]
+                         [metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
-                         [metosin/spec-tools "0.6.2-SNAPSHOT"]
-                         [metosin/schema-tools "0.10.2-SNAPSHOT"]]
+                         [metosin/spec-tools "0.7.0"]
+                         [metosin/schema-tools "0.10.2"]
+                         [metosin/ring-swagger-ui "2.2.10"]
+                         [metosin/jsonista "0.2.0"]]
 
   :plugins [[jonase/eastwood "0.2.5"]
             [lein-doo "0.1.10"]
@@ -36,10 +39,11 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
-                                  "modules/reitit-swagger/src"]
+                                  "modules/reitit-swagger/src"
+                                  "modules/reitit-swagger-ui/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.9.946"]
+                                  [org.clojure/clojurescript "1.10.238"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
@@ -50,12 +54,13 @@
 
                                   [ring "1.6.3"]
                                   [metosin/muuntaja "0.5.0"]
-                                  [metosin/jsonista "0.1.1"]
+                                  [metosin/jsonista "0.2.0"]
+                                  [metosin/ring-swagger-ui "2.2.10"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
-                                  [com.gfredericks/test.chuck "0.2.8"]]}
+                                  [com.gfredericks/test.chuck "0.2.9"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
