@@ -8,3 +8,4 @@
 * [Pluggable Coercion](coercion.md)
 * [Route Data Validation](route_data_validation.md)
 * [Compiling Middleware](compiling_middleware.md)
+* [Swagger Support](swagger.md)

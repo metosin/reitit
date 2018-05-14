@@ -28,7 +28,7 @@
     * [Pluggable Coercion](ring/coercion.md)
     * [Route Data Validation](ring/route_data_validation.md)
     * [Compiling Middleware](ring/compiling_middleware.md)
+    * [Swagger Support](ring/swagger.md)
 * [Performance](performance.md)
 * [Interceptors (WIP)](interceptors.md)
-* [Swagger-support](swagger.md)
 * [FAQ](faq.md)
