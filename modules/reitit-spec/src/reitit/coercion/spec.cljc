@@ -27,8 +27,8 @@
      :encoders stt/json-type-encoders
      :default-encoder stt/any->any}))
 
-(def just-validate-transformer
-  (st/type-transformer {}))
+(def no-op-transformer
+  st/no-op-transformer)
 
 (defprotocol IntoSpec
   (into-spec [this name]))
@@ -64,10 +64,10 @@
 
 (def default-options
   {:coerce-response? coerce-response?
-   :transformers {:body {:default just-validate-transformer
+   :transformers {:body {:default no-op-transformer
                          :formats {"application/json" json-transformer}}
                   :string {:default string-transformer}
-                  :response {:default just-validate-transformer}}})
+                  :response {:default no-op-transformer}}})
 
 (defn create [{:keys [transformers coerce-response?] :as opts}]
   ^{:type ::coercion/coercion}
