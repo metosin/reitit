@@ -57,7 +57,8 @@
     (let [spec (:body (app
                         {:request-method :get
                          :uri "/api/swagger.json"}))]
-      (is (= {:x-id ::math
+      (is (= {:x-id #{::math}
+              :swagger "2.0"
               :info {:title "my-api"}
               :paths {"/api/schema/plus" {:get {:parameters [{:description ""
                                                               :format "int32"

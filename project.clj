@@ -18,8 +18,8 @@
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
-                         [metosin/spec-tools "0.6.2-SNAPSHOT"]
-                         [metosin/schema-tools "0.10.2-SNAPSHOT"]
+                         [metosin/spec-tools "0.7.0-SNAPSHOT"]
+                         [metosin/schema-tools "0.10.2"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/jsonista "0.2.0"]]
 
@@ -41,7 +41,7 @@
                                   "modules/reitit-swagger/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.9.946"]
+                                  [org.clojure/clojurescript "1.10.238"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
@@ -58,7 +58,7 @@
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
-                                  [com.gfredericks/test.chuck "0.2.8"]]}
+                                  [com.gfredericks/test.chuck "0.2.9"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
