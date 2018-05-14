@@ -24,7 +24,7 @@
 
 * `reitit.ring/default-handler` now works correctly with async ring
 * new helper `reitit.ring/router` to compose routes outside of a router.
-* `reitit.ring/create-resource-handler` function to serve static routes. See (docs)[https://metosin.github.io/reitit/ring/static.html].
+* `reitit.ring/create-resource-handler` function to serve static routes. See [docs](https://metosin.github.io/reitit/ring/static.html).
 
 * new dependencies:
 
@@ -47,9 +47,7 @@ New module to server pre-integrated [Swagger-ui](https://github.com/swagger-api/
 [metosin/ring-swagger-ui "2.2.10"]
 ```
 
-*** dependencies
-
-* updated:
+### dependencies
 
 ```clj
 [metosin/spec-tools "0.7.0-SNAPSHOT"] is available but we use "0.6.1"
