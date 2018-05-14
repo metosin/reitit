@@ -50,7 +50,7 @@ New module to server pre-integrated [Swagger-ui](https://github.com/swagger-api/
 ### dependencies
 
 ```clj
-[metosin/spec-tools "0.7.0-SNAPSHOT"] is available but we use "0.6.1"
+[metosin/spec-tools "0.7.0"] is available but we use "0.6.1"
 [metosin/schema-tools "0.10.2"] is available but we use "0.10.1"
 ```
 
