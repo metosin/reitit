@@ -2,6 +2,7 @@
 
 ### `reitit-core`
 
+* `linear-router` now works with unnamed catch-all parameters, e.g. `"/files/*"`
 * `match-by-path` encodes parameters into strings using (internal) `reitit.impl/IntoString` protocol. Handles all of: strings, numbers, keywords, booleans, objects. Fixes [#75](https://github.com/metosin/reitit/issues/75).
 
 ```clj
@@ -33,47 +34,26 @@
 
 ### `reitit-swagger`
 
-* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors and Schema & Spec. See [docs](https://metosin.github.io/reitit/swagger.html).
+* New module to produce swagger-docs from routing tree, including `Coercion` definitions. Works with both middleware & interceptors and Schema & Spec. See [docs](https://metosin.github.io/reitit/ring/swagger.html).
+
+### `reitit-swagger-ui`
+
+New module to server pre-integrated [Swagger-ui](https://github.com/swagger-api/swagger-ui). See [docs](https://metosin.github.io/reitit/ring/swagger.html#swagger-ui).
+
+* new dependencies:
 
 ```clj
-(require '[reitit.ring :as ring])
-(require '[reitit.swagger :as swagger])
-(require '[reitit.ring.coercion :as rrc])
-(require '[reitit.coercion.spec :as spec])
-(require '[reitit.coercion.schema :as schema])
+[metosin/jsonista "0.2.0"]
+[metosin/ring-swagger-ui "2.2.10"]
+```
 
-(require '[schema.core :refer [Int]])
+*** dependencies
 
-(ring/ring-handler
-  (ring/router
-    ["/api"
-     {:swagger {:id ::math}}
+* updated:
 
-     ["/swagger.json"
-      {:get {:no-doc true
-             :swagger {:info {:title "my-api"}}
-             :handler (swagger/create-swagger-handler)}}]
-
-     ["/spec" {:coercion spec/coercion}
-      ["/plus"
-       {:get {:summary "plus"
-              :parameters {:query {:x int?, :y int?}}
-              :responses {200 {:body {:total int?}}}
-              :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                         {:status 200, :body {:total (+ x y)}})}}]]
-
-     ["/schema" {:coercion schema/coercion}
-      ["/plus"
-       {:get {:summary "plus"
-              :parameters {:query {:x Int, :y Int}}
-              :responses {200 {:body {:total Int}}}
-              :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                         {:status 200, :body {:total (+ x y)}})}}]]]
-
-    {:data {:middleware [rrc/coerce-exceptions-middleware
-                         rrc/coerce-request-middleware
-                         rrc/coerce-response-middleware
-                         swagger/swagger-feature]}}))
+```clj
+[metosin/spec-tools "0.7.0-SNAPSHOT"] is available but we use "0.6.1"
+[metosin/schema-tools "0.10.2"] is available but we use "0.10.1"
 ```
 
 ## 0.1.0 (2018-2-19)
