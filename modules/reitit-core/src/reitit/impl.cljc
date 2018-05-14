@@ -56,7 +56,7 @@
                            (update-in [:path-parts] conj key)
                            (update-in [:path-params] conj key)
                            (assoc-in [:path-constraints key] "([^/]+)"))))
-    #"^\*(.+)$" :>> (fn [[_ token]]
+    #"^\*(.*)$" :>> (fn [[_ token]]
                       (let [key (keyword token)]
                         (-> out
                             (update-in [:path-parts] conj key)
