@@ -1,11 +1,11 @@
 {:cljdoc/include-namespaces-from-dependencies
- [[metosin/reitit]
-  [metosin/reitit-core]
-  [metosin/reitit-ring]
-  [metosin/reitit-spec]
-  [metosin/reitit-schema]
-  [metosin/reitit-swagger]
-  [metosin/reitit-swagger-ui]],
+ [metosin/reitit
+  metosin/reitit-core
+  metosin/reitit-ring
+  metosin/reitit-spec
+  metosin/reitit-schema
+  metosin/reitit-swagger
+  metosin/reitit-swagger-ui],
  :cljdoc.doc/tree
  [["Introduction" {:file "doc/README.md"}]
   ["Basics"
