@@ -11,8 +11,17 @@ A fast data-driven router for Clojure(Script).
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-The following higher-level routers are also available as separate modules:
+Modules:
+
+* `reitit-core` - the routing core
 * [`reitit-ring`](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
+* `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
+* `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
+* `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
+
+Bubblin' under:
+
 * `reitit-http` with enchanced Pedestal-style Interceptors (WIP)
 * `reitit-frontend` with Keechma-style Controllers (WIP)
 
@@ -33,12 +42,12 @@ All bundled:
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.1-SNAPSHOT"] ; routing core
-[metosin/reitit-ring "0.1.1-SNAPSHOT"] ; ring-router
-[metosin/reitit-spec "0.1.1-SNAPSHOT"] ; spec coercion
-[metosin/reitit-schema "0.1.1-SNAPSHOT"] ; schema coercion
-[metosin/reitit-swagger "0.1.1-SNAPSHOT"] ; swagger
-[metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"] ; swagger-ui
+[metosin/reitit-core "0.1.1-SNAPSHOT"]
+[metosin/reitit-ring "0.1.1-SNAPSHOT"]
+[metosin/reitit-spec "0.1.1-SNAPSHOT"]
+[metosin/reitit-schema "0.1.1-SNAPSHOT"]
+[metosin/reitit-swagger "0.1.1-SNAPSHOT"]
+[metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"]
 ```
 
 ## Quick start
