@@ -11,7 +11,13 @@ A fast data-driven router for Clojure(Script).
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-Modules:
+Posts:
+* [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
+* [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
+
+See the [full documentation](https://metosin.github.io/reitit/) for details.
+
+## Modules
 
 * `reitit-core` - the routing core
 * [`reitit-ring`](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
@@ -24,12 +30,6 @@ Bubblin' under:
 
 * `reitit-http` with enchanced Pedestal-style Interceptors (WIP)
 * `reitit-frontend` with Keechma-style Controllers (WIP)
-
-Posts:
-* [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
-* [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
-
-See the [full documentation](https://metosin.github.io/reitit/) for details.
 
 ## Latest version
 
