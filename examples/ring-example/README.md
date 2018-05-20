@@ -30,4 +30,4 @@ http POST :3000/spec/plus x:=1 y:=20
 
 ## License
 
-Copyright © 2017 Metosin Oy
+Copyright © 2017-2018 Metosin Oy

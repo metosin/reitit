@@ -36,18 +36,18 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.1-SNAPSHOT"]
+[metosin/reitit "0.1.1"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.1-SNAPSHOT"]
-[metosin/reitit-ring "0.1.1-SNAPSHOT"]
-[metosin/reitit-spec "0.1.1-SNAPSHOT"]
-[metosin/reitit-schema "0.1.1-SNAPSHOT"]
-[metosin/reitit-swagger "0.1.1-SNAPSHOT"]
-[metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"]
+[metosin/reitit-core "0.1.1"]
+[metosin/reitit-ring "0.1.1"]
+[metosin/reitit-spec "0.1.1"]
+[metosin/reitit-schema "0.1.1"]
+[metosin/reitit-swagger "0.1.1"]
+[metosin/reitit-swagger-ui "0.1.1"]
 ```
 
 ## Quick start
@@ -127,9 +127,13 @@ Invalid request:
 ;                    :in [:y]}],
 ;        :value {:x "1", :y "a"},
 ;        :in [:request :query-params]}}
-
-
 ```
+
+**NOTE**: Reitit is not a batteries included web-stack. You should also include at least:
+* content negotiation library like [Muuntaja](https://github.com/metosin/muuntaja)
+* some default Ring-middleware like `ring.middleware.params/wrap-params`
+
+See [Ring with Swagger Example](https://github.com/metosin/reitit/tree/master/examples/ring-swagger) for a runnable example. Plan is to have more batteries as separate modules, templates and example projects. Stay tuned.
 
 ## More info
 
