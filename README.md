@@ -133,7 +133,7 @@ Invalid request:
 * content negotiation library like [Muuntaja](https://github.com/metosin/muuntaja)
 * some default Ring-middleware like `ring.middleware.params/wrap-params`
 
-See [Ring with Swagger Example](/tree/master/examples/ring-swagger) for a runnable example. Plan is to have more batteries as separate modules, templates and example projects. Stay tuned.
+See [Ring with Swagger Example](https://github.com/metosin/reitit/tree/master/examples/ring-swagger) for a runnable example. Plan is to have more batteries as separate modules, templates and example projects. Stay tuned.
 
 ## More info
 
