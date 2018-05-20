@@ -24,7 +24,7 @@
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/jsonista "0.2.0"]]
 
-  :plugins [[jonase/eastwood "0.2.5"]
+  :plugins [[jonase/eastwood "0.2.6"]
             [lein-doo "0.1.10"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.10"]
@@ -49,7 +49,7 @@
                                   [metosin/reitit]
                                   [metosin/schema-tools]
 
-                                  [expound "0.5.0"]
+                                  [expound "0.6.0"]
                                   [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
