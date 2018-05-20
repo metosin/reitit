@@ -46,4 +46,5 @@
    ["Swagger Support" {:file "doc/ring/swagger.md"}]]
   ["Performance" {:file "doc/performance.md"}]
   ["Interceptors (WIP)" {:file "doc/interceptors.md"}]
+  ["Development Instructions" {:file "doc/development.md"}]
   ["FAQ" {:file "doc/faq.md"}]]}
