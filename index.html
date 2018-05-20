@@ -514,7 +514,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.8" data-path="faq.html">
+        <li class="chapter " data-level="1.8" data-path="development.html">
+            
+                <a href="development.html">
+            
+                    
+                    Development Instructions
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="faq.html">
             
                 <a href="faq.html">
             
@@ -584,22 +597,25 @@
 <li>Modular</li>
 <li><a href="performance.html">Fast</a></li>
 </ul>
-<p>The following higher-level routers are also available as separate modules:</p>
+<p>Modules:</p>
 <ul>
-<li><a href="ring/ring.html"><code>reitit-ring</code></a> with <a href="ring/data_driven_middleware.html">data-driven middleware</a></li>
-<li><code>reitit-http</code> with enchanced Pedestal-style Interceptors (WIP)</li>
-<li><code>reitit-frontend</code> with Keechma-style Controllers (WIP)</li>
+<li><code>reitit-core</code> - the routing core</li>
+<li><a href="ring/ring.html"><code>reitit-ring</code></a> with <a href="https://metosin.github.io/reitit/ring/data_driven_middleware.html" target="_blank">data-driven middleware</a></li>
+<li><code>reitit-spec</code> <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a> coercion</li>
+<li><code>reitit-schema</code> <a href="https://github.com/plumatic/schema" target="_blank">Schema</a> coercion</li>
+<li><code>reitit-swagger</code> <a href="https://swagger.io/" target="_blank">Swagger2</a> apidocs</li>
+<li><code>reitit-swagger-ui</code> Integrated <a href="https://github.com/swagger-api/swagger-ui" target="_blank">Swagger UI</a>.</li>
 </ul>
 <p>To use Reitit, add the following dependecy to your project:</p>
 <pre><code class="lang-clj">[metosin/reitit <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
 </code></pre>
 <p>Optionally, the parts can be required separately:</p>
-<pre><code class="lang-clj">[metosin/reitit-core <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; routing core</span>
-[metosin/reitit-ring <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; ring-router</span>
-[metosin/reitit-spec <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; spec coercion</span>
-[metosin/reitit-schema <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; schema coercion</span>
-[metosin/reitit-swagger <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; swagger</span>
-[metosin/reitit-swagger-ui <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>] <span class="hljs-comment">; swagger-ui</span>
+<pre><code class="lang-clj">[metosin/reitit-core <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
+[metosin/reitit-ring <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
+[metosin/reitit-spec <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
+[metosin/reitit-schema <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
+[metosin/reitit-swagger <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
+[metosin/reitit-swagger-ui <span class="hljs-string">&quot;0.1.1-SNAPSHOT&quot;</span>]
 </code></pre>
 <p>For discussions, there is a <a href="https://clojurians.slack.com/messages/reitit/" target="_blank">#reitit</a> channel in <a href="http://clojurians.net/" target="_blank">Clojurians slack</a>.</p>
 <h1 id="examples">Examples</h1>
@@ -736,7 +752,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route Syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},{"title":"Route Conflicts","level":"1.2.7","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-05-20T12:49:42.133Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-05-20T12:50:18.557Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Basics","level":"1.2","depth":1,"path":"basics/README.md","ref":"basics/README.md","articles":[{"title":"Route Syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},{"title":"Router","level":"1.2.2","depth":2,"path":"basics/router.md","ref":"basics/router.md","articles":[]},{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},{"title":"Name-based Routing","level":"1.2.4","depth":2,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},{"title":"Route Conflicts","level":"1.2.7","depth":2,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-05-20T16:51:46.421Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-05-20T16:52:23.707Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
