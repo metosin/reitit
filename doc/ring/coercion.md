@@ -18,7 +18,7 @@ Reitit ships with the following coercion modules:
 * `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema)
 * `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs)
 
-Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
+Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.md#nested-route-data) apply.
 
 ## Defining parameters and responses
 
@@ -137,7 +137,7 @@ Invalid response:
 
 ### Optimizations
 
-The coercion middleware are [compiled againts a route](compiling_middleware,md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+The coercion middleware are [compiled againts a route](compiling_middleware.md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
 
 We can query the compiled middleware chain for the routes:
 

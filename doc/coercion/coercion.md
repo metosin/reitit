@@ -39,7 +39,7 @@ Reitit ships with the following coercion modules:
 * `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema)
 * `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs)
 
-Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.html#nested-route-data) apply.
+Coercion can be attached to route data under `:coercion` key. There can be multiple `Coercion` implementations within a single router, normal [scoping rules](../basics/route_data.md#nested-route-data) apply.
 
 ## Defining parameters
 
