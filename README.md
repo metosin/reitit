@@ -36,18 +36,18 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.1-SNAPSHOT"]
+[metosin/reitit "0.1.1"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.1-SNAPSHOT"]
-[metosin/reitit-ring "0.1.1-SNAPSHOT"]
-[metosin/reitit-spec "0.1.1-SNAPSHOT"]
-[metosin/reitit-schema "0.1.1-SNAPSHOT"]
-[metosin/reitit-swagger "0.1.1-SNAPSHOT"]
-[metosin/reitit-swagger-ui "0.1.1-SNAPSHOT"]
+[metosin/reitit-core "0.1.1"]
+[metosin/reitit-ring "0.1.1"]
+[metosin/reitit-spec "0.1.1"]
+[metosin/reitit-schema "0.1.1"]
+[metosin/reitit-swagger "0.1.1"]
+[metosin/reitit-swagger-ui "0.1.1"]
 ```
 
 ## Quick start
