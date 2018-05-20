@@ -55,7 +55,6 @@ A better way to serve files from conflicting paths, e.g. `"/*"`, is to serve the
 | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
 | :loader          | optional class loader to resolve the resources
 | :index-files     | optional vector of index-files to look in a resource directory, defaults to `["index.html"]`
-| :allow-symlinks? | allow symlinks that lead to paths outside the root classpath directories, defaults to `false`
 
 ### TODO
 

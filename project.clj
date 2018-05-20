@@ -53,6 +53,7 @@
                                   [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
+                                  [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/muuntaja "0.5.0"]
                                   [metosin/jsonista "0.2.0"]
                                   [metosin/ring-swagger-ui "2.2.10"]
