@@ -31,7 +31,7 @@ Coercion keys also contribute to the docs:
 | :parameters   | optional input parameters for a route, in a format defined by the coercion
 | :responses    | optional descriptions of responess, in a format defined by coercion
 
-There is a `reitit.swagger.swagger-feature`, which acts as both a `Middleware` and an `Interceptor` that is not participating in any request processing - it just defines the route data specs for the routes it's mounted to. It is only needed if the [route data validation](route_data_validation.html) is turned on.
+There is a `reitit.swagger.swagger-feature`, which acts as both a `Middleware` and an `Interceptor` that is not participating in any request processing - it just defines the route data specs for the routes it's mounted to. It is only needed if the [route data validation](route_data_validation.md) is turned on.
 
 ## Swagger spec
 
@@ -197,7 +197,7 @@ http://localhost:3000 should render now the swagger-ui:
 
 ## Advanced
 
-Route data in path `[:swagger :id]` can be either a keyword or a sequence of keywords. This enables one route to be part of multiple swagger apis. Normal route data [scoping rules](../basics/route_data.html#nested-route-data) rules apply.
+Route data in path `[:swagger :id]` can be either a keyword or a sequence of keywords. This enables one route to be part of multiple swagger apis. Normal route data [scoping rules](../basics/route_data.md#nested-route-data) rules apply.
 
 Example with:
 
