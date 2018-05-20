@@ -137,7 +137,7 @@ Invalid response:
 
 ### Optimizations
 
-The coercion middleware are [compiled againts a route](compiling_middleware,md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+The coercion middleware are [compiled againts a route](compiling_middleware.md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
 
 We can query the compiled middleware chain for the routes:
 
