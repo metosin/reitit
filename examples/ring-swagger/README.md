@@ -23,4 +23,4 @@ http GET :3000/api/swagger.json
 
 ## License
 
-Copyright © 2017 Metosin Oy
+Copyright © 2017-2018 Metosin Oy

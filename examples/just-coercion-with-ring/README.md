@@ -36,4 +36,4 @@ http://localhost:3000/?x=1&y=20
 
 ## License
 
-Copyright © 2017 Metosin Oy
+Copyright © 2017-2018 Metosin Oy
