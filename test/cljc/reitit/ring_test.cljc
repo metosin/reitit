@@ -284,7 +284,7 @@
                               (ring/create-resource-handler {:path "/files"})
                               (ring/create-resource-handler {:path "/"})
                               (ring/create-default-handler)))]]
-             prefix ["/" "/files"]
+             prefix ["" "/" "/files" "/files/"]
              :let [request (fn [uri] {:uri (str prefix uri), :request-method :get})]]
 
        (testing test
@@ -300,6 +300,10 @@
 
          (testing "index-files"
            (let [response (app (request "/docs"))]
+             (is (= "text/html" (get-in response [:headers "Content-Type"])))
+             (is (get-in response [:headers "Last-Modified"]))
+             (is (= "<h1>hello</h1>\n" (slurp (:body response)))))
+           (let [response (app (request "/docs/"))]
              (is (= "text/html" (get-in response [:headers "Content-Type"])))
              (is (get-in response [:headers "Last-Modified"]))
              (is (= "<h1>hello</h1>\n" (slurp (:body response))))))
