@@ -31,4 +31,5 @@
     * [Swagger Support](ring/swagger.md)
 * [Performance](performance.md)
 * [Interceptors (WIP)](interceptors.md)
+* [Development Instructions](development.md)
 * [FAQ](faq.md)

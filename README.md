@@ -138,30 +138,6 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 * [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
 * [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the validation part.
 
-## Development instructions
-
-The documentation is built with [gitbook](https://toolchain.gitbook.com). To preview your changes locally:
-
-```bash
-npm install -g gitbook-cli
-gitbook install
-gitbook serve
-```
-
-To bump up version:
-
-```bash
-# new version
-./scripts/set-version "1.0.0"
-./scripts/lein-modules install
-
-# works
-lein test
-
-# deploy to clojars
-./scripts/lein-modules do clean, deploy clojars
-```
-
 ## License
 
 Copyright © 2017-2018 [Metosin Oy](http://www.metosin.fi)
