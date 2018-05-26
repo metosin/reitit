@@ -4,7 +4,7 @@
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
-            [clojure.string :as string]
+            [clojure.string :as str]
             [reitit.coercion :as coercion]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
@@ -68,7 +68,7 @@
   (->> (impl/segments path)
        (map #(if (impl/wild-or-catch-all-param? %)
                (str "{" (subs % 1) "}") %))
-       (string/join "/")))
+       (str/join "/")))
 
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have

@@ -1,3 +1,25 @@
+## 0.1.2-SNAPSHOT
+
+### `reitit-schema`
+
+* updated dependencies:
+
+```clj
+[metosin/schema-tools "0.10.3"] is available but we use "0.10.2"
+```
+
+### `reitit-swagger`
+
+* Fix Swagger-paths, by [Kirill Chernyshov](https://github.com/DeLaGuardo).
+
+### `reitit-swagger-ui`
+
+* updated dependencies:
+
+```clj
+[metosin/jsonista "0.2.1"] is available but we use "0.2.0"
+```
+
 ## 0.1.1 (2018-5-20)
 
 ### `reitit-core`
