@@ -29,7 +29,7 @@
                            {:status 200, :body {:total (+ x y z)}})}}]]
 
        ["/schema" {:coercion schema/coercion}
-        ["/plus/:z"
+        ["/plus/*z"
          {:get {:summary "plus"
                 :parameters {:query {:x Int, :y Int}
                              :path {:z Int}}
