@@ -3,6 +3,7 @@
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
+            [clojure.string :as string]
             [reitit.coercion :as coercion]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
@@ -62,6 +63,21 @@
   {:name ::swagger
    :spec ::spec})
 
+(defn- path->template [path endpoint]
+  (let [path-parameters (filter (fn [{:keys [in]}]
+                                  (= in "path"))
+                                (mapcat (fn [[_ {:keys [parameters]}]]
+                                          parameters)
+                                        endpoint))]
+    (loop [{:keys [name] :as path-parameter} (first path-parameters)
+           path-parameters (rest path-parameters)
+           path path]
+      (if path-parameter
+        (recur (first path-parameters)
+               (rest path-parameters)
+               (string/replace path (re-pattern (str ":" name)) (str "{" name "}")))
+        path))))
+
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
@@ -83,7 +99,7 @@
                                     (dissoc swagger :id))]))
           transform-path (fn [[p _ c]]
                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                             [p endpoint]))]
+                             [(path->template p endpoint) endpoint]))]
       (if id
         (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
           {:status 200
