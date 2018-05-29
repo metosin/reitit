@@ -3,7 +3,7 @@
 Routers can be configured via options. The following options are available for the `reitit.core/router`:
 
   | key          | description |
-  | -------------|-------------|
+  |--------------|-------------|
   | `:path`      | Base-path for routes |
   | `:routes`    | Initial resolved routes (default `[]`) |
   | `:data`      | Initial route data (default `{}`) |
