@@ -1,8 +1,10 @@
 (ns reitit.swagger
   (:require [reitit.core :as r]
+            [reitit.impl :as impl]
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
+            [clojure.string :as string]
             [reitit.coercion :as coercion]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
@@ -62,6 +64,12 @@
   {:name ::swagger
    :spec ::spec})
 
+(defn- path->template [path]
+  (->> (impl/segments path)
+       (map #(if (impl/wild-or-catch-all-param? %)
+               (str "{" (subs % 1) "}") %))
+       (string/join "/")))
+
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
@@ -83,7 +91,7 @@
                                     (dissoc swagger :id))]))
           transform-path (fn [[p _ c]]
                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                             [p endpoint]))]
+                             [(path->template p) endpoint]))]
       (if id
         (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
           {:status 200
