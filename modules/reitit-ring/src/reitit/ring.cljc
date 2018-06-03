@@ -129,7 +129,7 @@
        (fn
          ([request]
           (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request :any)
+            (let [method (:request-method request)
                   path-params (:path-params match)
                   result (:result match)
                   handler (-> result method :handler (or default-handler))
@@ -141,7 +141,7 @@
             (default-handler request)))
          ([request respond raise]
           (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request :any)
+            (let [method (:request-method request)
                   path-params (:path-params match)
                   result (:result match)
                   handler (-> result method :handler (or default-handler))
