@@ -108,6 +108,12 @@
       r/segment-router :segment-router
       r/mixed-router :mixed-router))
 
+  (testing "nil routes are allowed ans stripped"
+    (is (= [] (r/routes (r/router nil))))
+    (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
+    (is (= [["/ping" {} nil]] (r/routes (r/router [nil [nil] ["/ping"]]))))
+    (is (= [["/ping" {} nil]] (r/routes (r/router [[[nil [nil] ["/ping"]]]])))))
+
   (testing "route coercion & compilation"
 
     (testing "custom compile"

@@ -1,5 +1,17 @@
 ## 0.1.2-SNAPSHOT
 
+### `reitit-core`
+
+* Better handling of `nil` routes - they filtered away from route syntax before routes are expanded:
+
+```clj
+(testing "nil routes are allowed ans stripped"
+  (is (= [] (r/routes (r/router nil))))
+  (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
+  (is (= [["/ping" {} nil]] (r/routes (r/router [nil [nil] ["/ping"]]))))
+  (is (= [["/ping" {} nil]] (r/routes (r/router [[[nil [nil] ["/ping"]]]])))))
+```
+
 ### `reitit-schema`
 
 * updated dependencies:
