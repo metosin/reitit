@@ -26,7 +26,7 @@
 
         ;; with path and url set, swagger validator disabled
         (swagger-ui/create-swagger-ui-handler
-          {:path \"\"
+          {:path \"/\"
            :url \"/api/swagger.json\"
            :config {:validator-url nil})"
      ([]
