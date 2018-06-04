@@ -14,6 +14,9 @@
   (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
   (is (= [] (r/routes (r/router ["/ping" [nil "/pong"]])))))
 ```
+### `reitit-ring`
+
+* Use HTTP redirect (302) with index-files in `reitit.ring/create-resource-handler`.
 
 ### `reitit-schema`
 
@@ -28,6 +31,8 @@
 * Fix Swagger-paths, by [Kirill Chernyshov](https://github.com/DeLaGuardo).
 
 ### `reitit-swagger-ui`
+
+* Use HTTP redirect (302) with index-files in `reitit.swagger-ui/create-swagger-ui-handler`.
 
 * updated dependencies:
 
