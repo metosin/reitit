@@ -268,7 +268,7 @@
 
 #?(:clj
    (deftest resource-handler-test
-     (let [redirect (fn [uri] {:status 302 :headers {"Location" uri}})
+     (let [redirect (fn [uri] {:status 302, :body "", :headers {"Location" uri}})
            request (fn [uri] {:uri uri, :request-method :get})]
        (testing "inside a router"
 

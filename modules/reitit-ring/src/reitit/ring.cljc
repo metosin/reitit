@@ -107,7 +107,7 @@
                                          (loop [[file & files] index-files]
                                            (if file
                                              (if (resource-response (join-paths path file))
-                                               {:status 302 :headers {"Location" (join-paths uri file)}}
+                                               (response/redirect (join-paths uri file))
                                                (recur files))))))
             handler (if path
                       (fn [request]
