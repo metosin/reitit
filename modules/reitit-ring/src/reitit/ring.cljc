@@ -96,26 +96,30 @@
                      (fn
                        ([request] (handler request))
                        ([request respond _] (respond (handler request)))))
-            trim-path (fn [& paths] (str/replace (apply str paths) "//" "/"))
+            join-paths (fn [& paths]
+                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
             resource-response (fn [path]
-                                (if-let [response (or (paths (trim-path "/" path)) (response/resource-response path options))]
+                                (if-let [response (or (paths (join-paths "/" path))
+                                                      (response/resource-response path options))]
                                   (response/content-type response (mime-type/ext-mime-type path))))
             path-or-index-response (fn [path uri]
                                      (or (resource-response path)
                                          (loop [[file & files] index-files]
                                            (if file
-                                             (let [path (trim-path path file)]
-                                               (if (resource-response path)
-                                                 {:status 302 :headers {"Location" (trim-path uri "/" path)}}
-                                                 (recur files)))))))
+                                             (if (resource-response (join-paths path file))
+                                               {:status 302 :headers {"Location" (join-paths uri file)}}
+                                               (recur files))))))
             handler (if path
                       (fn [request]
                         (let [uri (:uri request)]
                           (if-let [path (if (>= (count uri) path-size) (subs uri path-size))]
                             (path-or-index-response path uri))))
                       (fn [request]
-                        (let [path (-> request :path-params parameter)]
-                          (or (path-or-index-response path path) {:status 404}))))]
+                        (let [uri (:uri request)
+                              path (-> request :path-params parameter)]
+                          (or (path-or-index-response path uri)
+                              ;; TODO: use generic not-found handler
+                              {:status 404}))))]
         (create handler)))))
 
 (defn ring-handler
