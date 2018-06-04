@@ -2,14 +2,17 @@
 
 ### `reitit-core`
 
-* Better handling of `nil` routes - they filtered away from route syntax before routes are expanded:
+* Better handling of `nil` in route syntax:
+  * explicit `nil` after path string is always handled as `nil` route
+  * `nil` as path string causes the whole route to be `nil`
+  * `nil` as child route is stripped away
 
 ```clj
-(testing "nil routes are allowed ans stripped"
+(testing "nil routes are stripped"
   (is (= [] (r/routes (r/router nil))))
+  (is (= [] (r/routes (r/router [nil ["/ping"]]))))
   (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
-  (is (= [["/ping" {} nil]] (r/routes (r/router [nil [nil] ["/ping"]]))))
-  (is (= [["/ping" {} nil]] (r/routes (r/router [[[nil [nil] ["/ping"]]]])))))
+  (is (= [] (r/routes (r/router ["/ping" [nil "/pong"]])))))
 ```
 
 ### `reitit-schema`

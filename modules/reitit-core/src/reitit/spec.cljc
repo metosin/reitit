@@ -9,18 +9,19 @@
 
 (s/def ::path (s/with-gen string? #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
-(s/def ::arg (s/and any? (complement vector?)))
+(s/def ::arg (s/and some? (complement vector?)))
 (s/def ::data (s/map-of keyword? any?))
 (s/def ::result any?)
 
 (s/def ::raw-route
-  (s/cat :path ::path
-         :arg (s/? ::arg)
-         :childs (s/* (s/and (s/nilable ::raw-route)))))
+  (s/nilable
+    (s/cat :path ::path
+           :arg (s/? ::arg)
+           :childs (s/* (s/and (s/nilable ::raw-routes))))))
 
 (s/def ::raw-routes
   (s/or :route ::raw-route
-        :routes (s/coll-of ::raw-route :into [])))
+        :routes (s/coll-of ::raw-routes :into [])))
 
 (s/def ::route
   (s/cat :path ::path

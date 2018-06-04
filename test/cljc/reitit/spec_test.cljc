@@ -1,14 +1,20 @@
 (ns reitit.spec-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [deftest testing is are use-fixtures]]
             [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
             [clojure.spec.alpha :as s]
             [reitit.core :as r]
-            [reitit.spec :as rs]
-            [expound.alpha :as e])
+            [reitit.spec :as rs])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
-(stest/instrument)
+(defn instrument-all [f]
+  (try
+    (stest/instrument)
+    (f)
+    (finally
+      (stest/unstrument))))
+
+(use-fixtures :each instrument-all)
 
 (deftest router-spec-test
 
@@ -40,9 +46,9 @@
           ;; path
           [:invalid {}]
 
-          ;; vector data
-          ["/api" []
-           ["/ipa"]])))
+          ;; nested path
+          ["/api"
+           [:ipa]])))
 
     (testing "routes conform to spec (can't spec protocol functions)"
       (is (s/valid? ::rs/routes (r/routes (r/router ["/ping"])))))
@@ -60,7 +66,7 @@
         {:conflicts (fn [_])}
         {:router r/linear-router})
 
-      (are [opts]
+      #_(are [opts]
         (is (thrown-with-msg?
               ExceptionInfo
               #"Call to #'reitit.core/router did not conform to spec"

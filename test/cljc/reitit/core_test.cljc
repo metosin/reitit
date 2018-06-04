@@ -108,11 +108,11 @@
       r/segment-router :segment-router
       r/mixed-router :mixed-router))
 
-  (testing "nil routes are allowed ans stripped"
+  (testing "nil routes are stripped"
     (is (= [] (r/routes (r/router nil))))
+    (is (= [] (r/routes (r/router [nil ["/ping"]]))))
     (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
-    (is (= [["/ping" {} nil]] (r/routes (r/router [nil [nil] ["/ping"]]))))
-    (is (= [["/ping" {} nil]] (r/routes (r/router [[[nil [nil] ["/ping"]]]])))))
+    (is (= [] (r/routes (r/router ["/ping" [nil "/pong"]])))))
 
   (testing "route coercion & compilation"
 
@@ -246,3 +246,9 @@
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
       (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
+
+(testing "nil routes are stripped"
+  (is (= [] (r/routes (r/router nil))))
+  (is (= [] (r/routes (r/router [nil ["/ping"]]))))
+  (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
+  (is (= [] (r/routes (r/router ["/ping" [nil "/pong"]])))))

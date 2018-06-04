@@ -37,17 +37,16 @@
     [(walk-many [p m r]
        (reduce #(into %1 (walk-one p m %2)) [] r))
      (walk-one [pacc macc routes]
-       (if-let [routes (seq (keep identity routes))]
-         (if (vector? (first routes))
-           (walk-many pacc macc routes)
+       (if (vector? (first routes))
+         (walk-many pacc macc routes)
+         (if (string? (first routes))
            (let [[path & [maybe-arg :as args]] routes
-                 [data childs] (if (vector? maybe-arg)
+                 [data childs] (if (or (vector? maybe-arg) (nil? maybe-arg))
                                  [{} args]
                                  [maybe-arg (rest args)])
-                 macc (into macc (expand data opts))]
-             (if (seq childs)
-               (walk-many (str pacc path) macc childs)
-               [[(str pacc path) macc]])))))]
+                 macc (into macc (expand data opts))
+                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
+             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
