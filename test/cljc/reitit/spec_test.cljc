@@ -66,7 +66,7 @@
         {:conflicts (fn [_])}
         {:router r/linear-router})
 
-      #_(are [opts]
+      (are [opts]
         (is (thrown-with-msg?
               ExceptionInfo
               #"Call to #'reitit.core/router did not conform to spec"

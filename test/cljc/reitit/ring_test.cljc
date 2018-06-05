@@ -3,8 +3,7 @@
             [clojure.set :as set]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.core :as r]
-            [clojure.string :as str])
+            [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
