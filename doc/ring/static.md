@@ -33,7 +33,7 @@ To serve static files with conflicting routes, e.g. `"/*"`, one needs to disable
 
 ## External routes
 
-A better way to serve files from conflicting paths, e.g. `"/*"`, is to serve them from the default-handler. One can compose multipl default locations using `ring-handler`. This way, they are only served if none of the actual routes have matched.
+A better way to serve files from conflicting paths, e.g. `"/*"`, is to serve them from the default-handler. One can compose multiple default locations using `ring-handler`. This way, they are only served if none of the actual routes have matched.
 
 ```clj
 (ring/ring-handler
