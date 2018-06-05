@@ -17,6 +17,9 @@
 ### `reitit-ring`
 
 * Use HTTP redirect (302) with index-files in `reitit.ring/create-resource-handler`.
+* `reitit.ring/create-default-handler` now conforms to [RING Spec](https://github.com/ring-clojure/ring/blob/master/SPEC), Fixes [#83](https://github.com/metosin/reitit/issues/83)
+
+https://github.com/metosin/reitit/issues/83
 
 ### `reitit-schema`
 

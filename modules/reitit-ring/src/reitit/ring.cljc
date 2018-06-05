@@ -46,9 +46,9 @@
   | `:not-acceptable`      | 406, handler returned `nil`"
   ([]
    (create-default-handler
-     {:not-found (constantly {:status 404, :body ""})
-      :method-not-allowed (constantly {:status 405, :body ""})
-      :not-acceptable (constantly {:status 406, :body ""})}))
+     {:not-found (constantly {:status 404, :body "", :headers {}})
+      :method-not-allowed (constantly {:status 405, :body "", :headers {}})
+      :not-acceptable (constantly {:status 406, :body "", :headers {}})}))
   ([{:keys [not-found method-not-allowed not-acceptable]}]
    (fn
      ([request]
