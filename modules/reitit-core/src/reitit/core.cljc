@@ -39,7 +39,7 @@
      (walk-one [pacc macc routes]
        (if (vector? (first routes))
          (walk-many pacc macc routes)
-         (if (string? (first routes))
+         (when (string? (first routes))
            (let [[path & [maybe-arg :as args]] routes
                  [data childs] (if (or (vector? maybe-arg) (nil? maybe-arg))
                                  [{} args]
