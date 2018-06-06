@@ -10,7 +10,8 @@
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
-            [io.pedestal.http.route :as route]))
+            [io.pedestal.http.route :as route]
+            [reitit.ring :as ring]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -61,6 +62,26 @@
     [["/auth/login" :auth/login]
      ["/auth/recovery/token/:token" :auth/recovery]
      ["/workspace/:project/:page" :workspace/page]]))
+
+(def ring-app
+  (ring/ring-handler
+    (ring/router
+      [["/auth/login" {:get identity}]
+       ["/auth/recovery/token/:token" {:get identity}]
+       ["/workspace/:project/:page" {:get identity}]])))
+
+(comment
+
+  (ring-app {:request-method :get, :uri "/auth/login"})
+
+  ;; 213ns
+  ;; 204ns (remove if)
+  ;; 163ns (inline fast-assoc)
+  ;; 156ns (don't inline fast-assoc)
+  ;; 128ns (single method dispatch)
+  ;;  80ns --> (don't inject router & match)
+  (cc/quick-bench
+    (ring-app {:request-method :post, :uri "/auth/login"})))
 
 (defn routing-test1 []
 

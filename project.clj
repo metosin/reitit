@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.1.1"
+(defproject metosin/reitit-parent "0.1.2-SNAPSHOT"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,13 +9,13 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :managed-dependencies [[metosin/reitit "0.1.1"]
-                         [metosin/reitit-core "0.1.1"]
-                         [metosin/reitit-ring "0.1.1"]
-                         [metosin/reitit-spec "0.1.1"]
-                         [metosin/reitit-schema "0.1.1"]
-                         [metosin/reitit-swagger "0.1.1"]
-                         [metosin/reitit-swagger-ui "0.1.1"]
+  :managed-dependencies [[metosin/reitit "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-core "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-ring "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-spec "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-schema "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-swagger "0.1.2-SNAPSHOT"]
+                         [metosin/reitit-swagger-ui "0.1.2-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
@@ -53,7 +53,7 @@
 
                                   [ring "1.6.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.5.0"]
+                                  [metosin/muuntaja "0.6.0-SNAPSHOT"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/jsonista "0.2.1"]
 
@@ -70,6 +70,8 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.route "0.5.3"]
                                    [org.clojure/core.async "0.4.474"]
+                                   [yada "1.2.13"]
+                                   [ring/ring-defaults "0.3.1"]
                                    [ataraxy "0.4.0"]
                                    [bidi "2.1.3"]]}
              :analyze {:jvm-opts ^:replace ["-server"

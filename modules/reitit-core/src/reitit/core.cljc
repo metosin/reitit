@@ -39,14 +39,14 @@
      (walk-one [pacc macc routes]
        (if (vector? (first routes))
          (walk-many pacc macc routes)
-         (let [[path & [maybe-arg :as args]] routes
-               [data childs] (if (vector? maybe-arg)
-                               [{} args]
-                               [maybe-arg (rest args)])
-               macc (into macc (expand data opts))]
-           (if (seq childs)
-             (walk-many (str pacc path) macc childs)
-             [[(str pacc path) macc]]))))]
+         (when (string? (first routes))
+           (let [[path & [maybe-arg :as args]] routes
+                 [data childs] (if (or (vector? maybe-arg) (nil? maybe-arg))
+                                 [{} args]
+                                 [maybe-arg (rest args)])
+                 macc (into macc (expand data opts))
+                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
+             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
@@ -87,10 +87,10 @@
       (conflicts-str conflicts)
       {:conflicts conflicts})))
 
-(defn name-lookup [[_ {:keys [name]}] opts]
+(defn name-lookup [[_ {:keys [name]}] _]
   (if name #{name}))
 
-(defn find-names [routes opts]
+(defn find-names [routes _]
   (into [] (keep #(-> % second :name)) routes))
 
 (defn- compile-route [[p m :as route] {:keys [compile] :as opts}]

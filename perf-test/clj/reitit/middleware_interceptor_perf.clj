@@ -31,7 +31,7 @@
 
 (defrecord RequestOrContext [values queue stack])
 
-(def +items+ 100)
+(def +items+ 10)
 
 (defn expected! [x]
   (assert (= (range +items+) (:values x))))
@@ -47,18 +47,19 @@
         map-request {}
         record-request (map->RequestOrContext map-request)]
 
-    ;; 10.8 µs
+    ;; 1000ns
     (title "middleware - map")
     (expected! (app map-request))
     (cc/quick-bench
       (app map-request))
 
-    ;; 4.7 µs
+    ;;  365ns
     (title "middleware - record")
     (expected! (app record-request))
     (cc/quick-bench
       (app record-request))
 
+    ;; 6900ns
     (title "middleware - dynamic")
     (expected! ((middleware/chain mw identity) record-request))
     (cc/quick-bench
@@ -110,21 +111,21 @@
                        {:enter (interceptor value)}) (range +items+)))
         ctx (io.pedestal.interceptor.chain/enqueue nil is)]
 
-    ;; 78 µs
+    ;; 8400ns
     (title "pedestal")
     (cc/quick-bench
       (io.pedestal.interceptor.chain/execute ctx))))
 
-(defn pedestal-tuned-chain-text []
-  (let [is (map io.pedestal.interceptor/interceptor
-                (map (fn [value]
-                       {:enter (interceptor value)}) (range +items+)))
-        ctx (reitit.chain/map->Context (reitit.chain/enqueue nil is))]
+#_(defn pedestal-tuned-chain-text []
+    (let [is (map io.pedestal.interceptor/interceptor
+                  (map (fn [value]
+                         {:enter (interceptor value)}) (range +items+)))
+          ctx (reitit.chain/map->Context (reitit.chain/enqueue nil is))]
 
-    ;; 67 µs
-    (title "pedestal - tuned")
-    (cc/quick-bench
-      (reitit.chain/execute ctx))))
+      ;; 67 µs
+      (title "pedestal - tuned")
+      (cc/quick-bench
+        (reitit.chain/execute ctx))))
 
 ;;
 ;; Naive chain
@@ -140,17 +141,17 @@
 
 (defn interceptor-test []
   (let [interceptors (map (fn [value] [interceptor value]) (range +items+))
-        app (executor-reduce (interceptor/chain interceptors identity))
+        app (executor-reduce (interceptor/chain interceptors identity {}))
         map-request {}
         record-request (map->RequestOrContext map-request)]
 
-    ;; 13.5 µs (Map)
+    ;; 1900ns
     (title "interceptors - map")
     (expected! (app map-request))
     (cc/quick-bench
       (app map-request))
 
-    ;;  7.2 µs (Record)
+    ;; 1300ns
     (title "interceptors - record")
     (expected! (app record-request))
     (cc/quick-bench
@@ -212,24 +213,24 @@
 
 (defn interceptor-chain-test []
   (let [interceptors (map (fn [value] [interceptor value]) (range +items+))
-        app-reduce (executor-reduce (interceptor/chain interceptors identity))
-        app-queue (executor-queue (interceptor/chain interceptors identity))
-        app-ctx-queue (executor-ctx-queue (interceptor/chain interceptors identity))
+        app-reduce (executor-reduce (interceptor/chain interceptors identity {}))
+        app-queue (executor-queue (interceptor/chain interceptors identity {}))
+        app-ctx-queue (executor-ctx-queue (interceptor/chain interceptors identity {}))
         request {}]
 
-    ;;  14.2 µs
+    ;; 2000ns
     (title "interceptors - reduce")
     (expected! (app-reduce request))
     (cc/quick-bench
       (app-reduce request))
 
-    ;;  19.4 µs
+    ;; 2500ns
     (title "interceptors - queue")
     (expected! (app-queue request))
     (cc/quick-bench
       (app-queue request))
 
-    ;;  30.9 µs
+    ;; 3200ns
     (title "interceptors - ctx-queue")
     (expected! (app-ctx-queue request))
     (cc/quick-bench

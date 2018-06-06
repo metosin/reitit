@@ -46,9 +46,9 @@
   | `:not-acceptable`      | 406, handler returned `nil`"
   ([]
    (create-default-handler
-     {:not-found (constantly {:status 404, :body ""})
-      :method-not-allowed (constantly {:status 405, :body ""})
-      :not-acceptable (constantly {:status 406, :body ""})}))
+     {:not-found (constantly {:status 404, :body "", :headers {}})
+      :method-not-allowed (constantly {:status 405, :body "", :headers {}})
+      :not-acceptable (constantly {:status 406, :body "", :headers {}})}))
   ([{:keys [not-found method-not-allowed not-acceptable]}]
    (fn
      ([request]
@@ -96,24 +96,30 @@
                      (fn
                        ([request] (handler request))
                        ([request respond _] (respond (handler request)))))
+            join-paths (fn [& paths]
+                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
             resource-response (fn [path]
-                                (if-let [response (or (paths path) (response/resource-response path options))]
+                                (if-let [response (or (paths (join-paths "/" path))
+                                                      (response/resource-response path options))]
                                   (response/content-type response (mime-type/ext-mime-type path))))
-            path-or-index-response (fn [path]
+            path-or-index-response (fn [path uri]
                                      (or (resource-response path)
-                                         (let [separator (if-not (str/ends-with? path "/") "/")]
-                                           (loop [[file & files] index-files]
-                                             (if file
-                                               (or (resource-response (str path separator file))
-                                                   (recur files)))))))
+                                         (loop [[file & files] index-files]
+                                           (if file
+                                             (if (resource-response (join-paths path file))
+                                               (response/redirect (join-paths uri file))
+                                               (recur files))))))
             handler (if path
                       (fn [request]
                         (let [uri (:uri request)]
                           (if-let [path (if (>= (count uri) path-size) (subs uri path-size))]
-                            (path-or-index-response path))))
+                            (path-or-index-response path uri))))
                       (fn [request]
-                        (let [path (-> request :path-params parameter)]
-                          (or (path-or-index-response path) {:status 404}))))]
+                        (let [uri (:uri request)
+                              path (-> request :path-params parameter)]
+                          (or (path-or-index-response path uri)
+                              ;; TODO: use generic not-found handler
+                              {:status 404}))))]
         (create handler)))))
 
 (defn ring-handler
@@ -129,7 +135,7 @@
        (fn
          ([request]
           (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request :any)
+            (let [method (:request-method request)
                   path-params (:path-params match)
                   result (:result match)
                   handler (-> result method :handler (or default-handler))
@@ -141,7 +147,7 @@
             (default-handler request)))
          ([request respond raise]
           (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request :any)
+            (let [method (:request-method request)
                   path-params (:path-params match)
                   result (:result match)
                   handler (-> result method :handler (or default-handler))

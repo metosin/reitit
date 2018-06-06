@@ -1,5 +1,26 @@
 ## 0.1.2-SNAPSHOT
 
+### `reitit-core`
+
+* Better handling of `nil` in route syntax:
+  * explicit `nil` after path string is always handled as `nil` route
+  * `nil` as path string causes the whole route to be `nil`
+  * `nil` as child route is stripped away
+
+```clj
+(testing "nil routes are stripped"
+  (is (= [] (r/routes (r/router nil))))
+  (is (= [] (r/routes (r/router [nil ["/ping"]]))))
+  (is (= [] (r/routes (r/router [nil [nil] [[nil nil nil]]]))))
+  (is (= [] (r/routes (r/router ["/ping" [nil "/pong"]])))))
+```
+### `reitit-ring`
+
+* Use HTTP redirect (302) with index-files in `reitit.ring/create-resource-handler`.
+* `reitit.ring/create-default-handler` now conforms to [RING Spec](https://github.com/ring-clojure/ring/blob/master/SPEC), Fixes [#83](https://github.com/metosin/reitit/issues/83)
+
+https://github.com/metosin/reitit/issues/83
+
 ### `reitit-schema`
 
 * updated dependencies:
@@ -13,6 +34,8 @@
 * Fix Swagger-paths, by [Kirill Chernyshov](https://github.com/DeLaGuardo).
 
 ### `reitit-swagger-ui`
+
+* Use HTTP redirect (302) with index-files in `reitit.swagger-ui/create-swagger-ui-handler`.
 
 * updated dependencies:
 

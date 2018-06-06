@@ -183,7 +183,7 @@ Whole example project is in [`/examples/ring-swagger`](https://github.com/metosi
                                     "application/transit+json"}}}})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
-        {:path "", :url "/api/swagger.json"})
+        {:path "/", :url "/api/swagger.json"})
       (ring/create-default-handler))))
 
 (defn start []

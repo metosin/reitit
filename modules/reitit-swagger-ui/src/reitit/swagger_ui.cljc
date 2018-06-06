@@ -26,7 +26,7 @@
 
         ;; with path and url set, swagger validator disabled
         (swagger-ui/create-swagger-ui-handler
-          {:path \"\"
+          {:path \"/\"
            :url \"/api/swagger.json\"
            :config {:validator-url nil})"
      ([]
@@ -42,11 +42,11 @@
                           (update $ :root (fnil identity "swagger-ui"))
                           (update $ :url (fnil identity "/swagger.json"))
                           (update $ :config #(->> % (map mixed-case-key) (into {})))
-                          (assoc $ :paths {"conf.js" {:headers {"Content-Type" "application/javascript"}
-                                                      :status 200
-                                                      :body (conf-js $)}
-                                           "config.json" {:headers {"Content-Type" "application/json"}
-                                                          :status 200
-                                                          :body (config-json $)}}))]
+                          (assoc $ :paths {"/conf.js" {:headers {"Content-Type" "application/javascript"}
+                                                       :status 200
+                                                       :body (conf-js $)}
+                                           "/config.json" {:headers {"Content-Type" "application/json"}
+                                                           :status 200
+                                                           :body (config-json $)}}))]
         (ring/routes
           (ring/create-resource-handler options))))))
