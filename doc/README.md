@@ -23,18 +23,18 @@ Modules:
 To use Reitit, add the following dependecy to your project:
 
 ```clj
-[metosin/reitit "0.1.1"]
+[metosin/reitit "0.1.2"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.1"]
-[metosin/reitit-ring "0.1.1"]
-[metosin/reitit-spec "0.1.1"]
-[metosin/reitit-schema "0.1.1"]
-[metosin/reitit-swagger "0.1.1"]
-[metosin/reitit-swagger-ui "0.1.1"]
+[metosin/reitit-core "0.1.2"]
+[metosin/reitit-ring "0.1.2"]
+[metosin/reitit-spec "0.1.2"]
+[metosin/reitit-schema "0.1.2"]
+[metosin/reitit-swagger "0.1.2"]
+[metosin/reitit-swagger-ui "0.1.2"]
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
