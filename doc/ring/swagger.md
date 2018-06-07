@@ -35,13 +35,13 @@ There is a `reitit.swagger.swagger-feature`, which acts as both a `Middleware` a
 
 ## Swagger spec
 
-To serve the actual [Swagger Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md), there is `reitit.swagger/create-swagger-handler`. It takes no arguments and returns a ring-handler which collects at request-time data from all routes for the same swagger api and returns a formatted Swagger spesification as Clojure data, to be encoded by a response formatter.
+To serve the actual [Swagger Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md), there is `reitit.swagger/create-swagger-handler`. It takes no arguments and returns a ring-handler which collects at request-time data from all routes for the same swagger api and returns a formatted Swagger specification as Clojure data, to be encoded by a response formatter.
 
 If you need to post-process the generated spec, just wrap the handler with a custom `Middleware` or an `Interceptor`.
 
 ## Swagger-ui
 
-[Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger spesification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
+[Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger specification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
 
 ```
 [metosin/reitit-swagger-ui "0.1.2"]
