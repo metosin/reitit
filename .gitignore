@@ -11,3 +11,4 @@ pom.xml.asc
 /gh-pages
 /node_modules
 /_book
+figwheel_server.log

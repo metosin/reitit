@@ -62,7 +62,10 @@
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
-                                  [com.gfredericks/test.chuck "0.2.9"]]}
+                                  [com.gfredericks/test.chuck "0.2.9"]
+
+                                  ;; https://github.com/bensu/doo/issues/180
+                                  [fipp "0.6.12"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
