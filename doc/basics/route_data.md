@@ -1,6 +1,6 @@
 # Route Data
 
-Route data is the core feature of reitit. Routes can have any map-like data attachted to them. This data is interpeted either by the client application or the `Router` via it's `:coerce` and `:compile` hooks. Route data format can be defined and validated with `clojure.spec` enabling a architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+Route data is the core feature of reitit. Routes can have any map-like data attached to them. This data is interpreted either by the client application or the `Router` via its `:coerce` and `:compile` hooks. Route data format can be defined and validated with `clojure.spec` enabling a architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
 
 Raw routes can have a non-sequential route argument that is expanded (via router `:expand` hook) into route data at router creation time. By default, Keywords are expanded into `:name` and functions into `:handler` keys.
 
