@@ -27,24 +27,36 @@
          :swagger {:tags ["spec"]}}
 
         ["/plus"
-         {:get {:summary "plus with spec"
+         {:get {:summary "plus with spec query parameters"
                 :parameters {:query {:x int?, :y int?}}
                 :responses {200 {:body {:total int?}}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
-                            :body {:total (+ x y)}})}}]]
+                            :body {:total (+ x y)}})}
+          :post {:summary "plus with spec body parameters"
+                 :parameters {:body {:x int?, :y int?}}
+                 :responses {200 {:body {:total int?}}}
+                 :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                            {:status 200
+                             :body {:total (+ x y)}})}}]]
 
        ["/schema"
         {:coercion schema/coercion
          :swagger {:tags ["schema"]}}
 
         ["/plus"
-         {:get {:summary "plus with schema"
+         {:get {:summary "plus with schema query parameters"
                 :parameters {:query {:x Int, :y Int}}
                 :responses {200 {:body {:total Int}}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
-                            :body {:total (+ x y)}})}}]]]
+                            :body {:total (+ x y)}})}
+          :post {:summary "plus with schema body parameters"
+                 :parameters {:body {:x Int, :y Int}}
+                 :responses {200 {:body {:total Int}}}
+                 :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                            {:status 200
+                             :body {:total (+ x y)}})}}]]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
                            muuntaja.middleware/wrap-format
@@ -57,7 +69,10 @@
                                     "application/transit+json"}
                         :consumes #{"application/json"
                                     "application/edn"
-                                    "application/transit+json"}}}})
+                                    "application/transit+json"}}}
+       ;; TODO: these should work by default!
+       :extract-request-format (comp :format :muuntaja/request)
+       :extract-response-format (comp :format :muuntaja/response)})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/", :url "/api/swagger.json"})
