@@ -1,7 +1,6 @@
 (ns example.naive
   (:require [clojure.spec.alpha :as s]
-            [clojure.walk :as walk]
-            [example.server :as server]))
+            [clojure.walk :as walk]))
 
 (s/def ::x int?)
 (s/def ::y int?)

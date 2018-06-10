@@ -1,6 +1,6 @@
 (ns example.schema
   (:require [reitit.coercion.schema :as schema-coercion]
-            [example.server :as server]))
+            [example.middleware :as middleware]))
 
 (defn handler [{{{:keys [x y]} :query} :parameters}]
   {:status 200
@@ -9,6 +9,6 @@
 
 (def app
   (-> #'handler
-      (server/wrap-coercion
+      (middleware/wrap-coercion
         {:parameters {:query {:x Long, :y Long}}
          :coercion schema-coercion/coercion})))

@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [spec-tools.spec :as spec]
             [reitit.coercion.spec :as spec-coercion]
-            [example.server :as server]))
+            [example.middleware :as middleware]))
 
 ;; wrap into Spec Records to enable runtime conforming
 (s/def ::x spec/int?)
@@ -17,6 +17,6 @@
 
 (def app
   (-> #'handler
-      (server/wrap-coercion
+      (middleware/wrap-coercion
         {:parameters {:query ::request}
          :coercion spec-coercion/coercion})))
