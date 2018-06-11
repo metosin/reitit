@@ -66,9 +66,12 @@
          :request request
          :response response}))))
 
+(defn extract-request-format-default [request]
+  (-> request :muuntaja/request :format))
+
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
 (defn request-coercer [coercion type model {:keys [extract-request-format]
-                                            :or {extract-request-format (constantly nil)}}]
+                                            :or {extract-request-format extract-request-format-default}}]
   (if coercion
     (let [{:keys [keywordize? open? in style]} (ring-parameter-coercion type)
           transform (comp (if keywordize? walk/keywordize-keys identity) in)
@@ -82,8 +85,11 @@
             (request-coercion-failed! result coercion value in request)
             result))))))
 
+(defn extract-response-format-default [request response]
+  (-> request :muuntaja/response :format))
+
 (defn response-coercer [coercion body {:keys [extract-response-format]
-                                       :or {extract-response-format (constantly nil)}}]
+                                       :or {extract-response-format extract-response-format-default}}]
   (if coercion
     (let [coercer (-response-coercer coercion body)]
       (fn [request response]

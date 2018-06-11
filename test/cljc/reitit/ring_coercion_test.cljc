@@ -4,9 +4,13 @@
             [reitit.ring :as ring]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
-            [reitit.coercion.schema :as schema])
+            [reitit.coercion.schema :as schema]
+    #?(:clj
+            [muuntaja.middleware])
+            [jsonista.core :as j])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo)
+              (java.io ByteArrayInputStream))))
 
 (defn handler [{{{:keys [a]} :query
                  {:keys [b]} :body
@@ -145,3 +149,38 @@
             (testing "invalid response"
               (let [{:keys [status]} (app invalid-request2)]
                 (is (= 500 status))))))))))
+
+#?(:clj
+   (deftest muuntaja-test
+     (let [app (ring/ring-handler
+                 (ring/router
+                   ["/api"
+                    ["/plus"
+                     {:post {:parameters {:body {:int int?, :keyword keyword?}}
+                             :responses {200 {:body {:int int?, :keyword keyword?}}}
+                             :handler (fn [{{:keys [body]} :parameters}]
+                                        {:status 200
+                                         :body body})}}]]
+                   {:data {:middleware [muuntaja.middleware/wrap-format
+                                        rrc/coerce-request-middleware
+                                        rrc/coerce-response-middleware]
+                           :coercion spec/coercion}}))
+           request (fn [content-type body]
+                     (-> {:request-method :post
+                          :headers {"content-type" content-type, "accept" content-type}
+                          :uri "/api/plus"
+                          :body body}))
+           data-edn {:int 1 :keyword :kikka}
+           data-json {:int 1 :keyword "kikka"}]
+
+       (testing "json coercion"
+         (let [e2e #(-> (request "application/json" (ByteArrayInputStream. (j/write-value-as-bytes %)))
+                        (app) :body (slurp) (j/read-value (j/object-mapper {:decode-key-fn true})))]
+           (is (= data-json (e2e data-edn)))
+           (is (= data-json (e2e data-json)))))
+
+       (testing "edn coercion"
+         (let [e2e #(-> (request "application/edn" (pr-str %))
+                        (app) :body slurp (read-string))]
+           (is (= data-edn (e2e data-edn)))
+           (is (thrown? ExceptionInfo (e2e data-json))))))))
