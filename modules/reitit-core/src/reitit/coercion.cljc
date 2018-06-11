@@ -29,13 +29,6 @@
   (instance? CoercionError x))
 
 ;;
-;; api-docs
-;;
-
-#_(defn get-apidocs [coercion spec info]
-    (protocol/get-apidocs coercion spec info))
-
-;;
 ;; coercer
 ;;
 
