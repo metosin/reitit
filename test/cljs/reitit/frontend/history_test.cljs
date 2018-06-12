@@ -19,7 +19,9 @@
       (is (= "#/bar/5"
              (rfh/href history ::bar {:id 5})))
       (is (= "#/bar/5?q=x"
-             (rfh/href history ::bar {:id 5} {:q "x"}))))))
+             (rfh/href history ::bar {:id 5} {:q "x"})))
+      (is (= nil
+             (rfh/href history ::asd))))))
 
 (deftest html5-history-test
   (let [router (r/router ["/"
@@ -37,4 +39,6 @@
       (is (= "/bar/5"
              (rfh/href history ::bar {:id 5})))
       (is (= "/bar/5?q=x"
-             (rfh/href history ::bar {:id 5} {:q "x"}))))))
+             (rfh/href history ::bar {:id 5} {:q "x"})))
+      (is (= nil
+             (rfh/href history ::asd))))))

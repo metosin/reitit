@@ -22,10 +22,11 @@
                (count (.getPathPrefix history)))))
 
 (defn- token->href [history token]
-  (str (if (.-useFragment_ history)
-         (str "#"))
-       (.getPathPrefix history)
-       token))
+  (if token
+    (str (if (.-useFragment_ history)
+           (str "#"))
+         (.getPathPrefix history)
+         token)))
 
 (def ^:private current-domain (.getDomain (.parse Uri js/location)))
 
@@ -110,7 +111,10 @@
          token (match->token history match k params query)]
      (token->href history token))))
 
-(defn replace-token [{:keys [router history]} k params]
-  (let [match (rf/match-by-name router k params)
-        token (match->token history match k params query)]
-    (.replaceToken history token)))
+(defn replace-token
+  ([state k params]
+   (replace-token state k params nil))
+  ([{:keys [router history]} k params query]
+   (let [match (rf/match-by-name router k params)
+         token (match->token history match k params query)]
+     (.replaceToken history token))))

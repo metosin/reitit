@@ -12,5 +12,4 @@
                  [metosin/reitit-schema]
                  [metosin/reitit-swagger]
                  [metosin/reitit-swagger-ui]
-                 [metosin/reitit-frontend]
-                 [metosin/reitit-re-frame]])
+                 [metosin/reitit-frontend]])
