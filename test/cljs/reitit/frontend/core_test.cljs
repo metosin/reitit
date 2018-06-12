@@ -4,7 +4,7 @@
             [reitit.frontend :as rf]
             [reitit.coercion :as coercion]
             [schema.core :as s]
-            [reitit.coercion.schema :as schema]))
+            [reitit.coercion.schema :as schema-coercion]))
 
 (deftest match-by-path-test
   (testing "simple"
@@ -12,30 +12,42 @@
                             ["" ::frontpage]
                             ["foo" ::foo]
                             ["bar" ::bar]])]
-      (is (= {:template "/"
-              :data {:name ::frontpage}
-              :path "/"}
+      (is (= (r/map->Match
+               {:template "/"
+                :data {:name ::frontpage}
+                :path-params {}
+                :path "/"
+                :parameters {:query {}
+                             :path {}}})
              (rf/match-by-path router "/")))
-      (is (= {:template "/foo"
-              :data {:name ::foo}
-              :path "/foo"}
+      (is (= (r/map->Match
+               {:template "/foo"
+                :data {:name ::foo}
+                :path-params {}
+                :path "/foo"
+                :parameters {:query {}
+                             :path {}}})
              (rf/match-by-path router "/foo")))))
 
   (testing "schema coercion"
     (let [router (r/router ["/"
-                            [":id"
-                             {:name ::foo
-                              :parameters {:path {:id s/Int}
-                                           :query {(s/optional-key :mode) s/Keyword}}}]])]
-      #_#_
-      (is (= {:template "/5"
-              :data {:name ::foo}
-              :path "/5"
-              :parameters {:path {:id 5}}}
-             (rf/match-by-path router "/5")))
-      (is (= {:template "/5?mode=foo"
-              :data {:name ::foo}
-              :path "/5?mode=foo"
-              :parameters {:path {:id 5}
-                           :query {:mode :foo}}}
-             (rf/match-by-path router "/5?mode=foo"))))))
+                            [":id" {:name ::foo
+                                    :parameters {:path {:id s/Int}
+                                                 :query {(s/optional-key :mode) s/Keyword}}}]]
+                           {:compile coercion/compile-request-coercers
+                            :data {:coercion schema-coercion/coercion}})]
+      (is (= (r/map->Match
+               {:template "/:id"
+                :path-params {:id "5"}
+                :path "/5"
+                :parameters {:query {}
+                             :path {:id 5}}})
+             (assoc (rf/match-by-path router "/5") :data nil :result nil)))
+      (is (= (r/map->Match
+               {:template "/:id"
+                :path-params {:id "5"}
+                ;; Note: query not included in path
+                :path "/5"
+                :parameters {:path {:id 5}
+                             :query {:mode :foo}}})
+             (assoc (rf/match-by-path router "/5?mode=foo") :data nil :result nil))))))

@@ -6,7 +6,8 @@
             reitit.middleware-test
             reitit.ring-test
             #_reitit.spec-test
-            reitit.frontend.core-test))
+            reitit.frontend.core-test
+            reitit.frontend.controllers-test))
 
 (enable-console-print!)
 
@@ -16,4 +17,5 @@
            'reitit.middleware-test
            'reitit.ring-test
            #_'reitit.spec-test
-           'reitit.frontend.core-test)
+           'reitit.frontend.core-test
+           'reitit.frontend.controllers-test)

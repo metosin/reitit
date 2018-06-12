@@ -43,7 +43,7 @@
                          (coercion/coerce-request (:result match) {:query-params q
                                                                    :path-params (:path-params match)})
                          {:query q
-                          :path (:param match)})]
+                          :path (:path-params match)})]
         (assoc match :parameters parameters)))))
 
 (defn match-by-name
