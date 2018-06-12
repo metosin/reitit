@@ -13,7 +13,11 @@
 
 (defn- token->path [history token]
   (if (.-useFragment_ history)
-    token
+    ;; If no fragment at all, default to "/"
+    ;; If fragment is present, the token already is prefixed with "/"
+    (if (= "" token)
+      (.getPathPrefix history)
+      token)
     (str (.getPathPrefix history) token)))
 
 (defn- path->token [history path]

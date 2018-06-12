@@ -28,17 +28,13 @@
 
 (def routes
   (rc/router
-    [""
+    ["/"
      [""
-      {:name ::frontpage-root
+      {:name ::frontpage
        :view home-page}]
-     ["/"
-      [""
-       {:name ::frontpage
-        :view home-page}]
-      ["about"
-       {:name ::about
-        :view about-page}]]]))
+     ["about"
+      {:name ::about
+       :view about-page}]]))
 
 (defn init! []
   (reset! router (rfh/start! routes
