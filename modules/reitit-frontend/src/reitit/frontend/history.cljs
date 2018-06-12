@@ -93,10 +93,12 @@
   (if close-fn
     (close-fn)))
 
-(defn- match->token [history match k params]
+(defn- match->token [history match k params query]
   ;; FIXME: query string
   (if-let [path (:path match)]
-    (path->token history path)))
+    (str (path->token history path)
+         (if query
+           (str "?" (rf/query-string query))))))
 
 (defn href
   ([state k]
@@ -105,10 +107,10 @@
    (href state k params nil))
   ([{:keys [router history]} k params query]
    (let [match (rf/match-by-name router k params)
-         token (match->token history match k params)]
+         token (match->token history match k params query)]
      (token->href history token))))
 
 (defn replace-token [{:keys [router history]} k params]
   (let [match (rf/match-by-name router k params)
-        token (match->token history match k params)]
+        token (match->token history match k params query)]
     (.replaceToken history token)))

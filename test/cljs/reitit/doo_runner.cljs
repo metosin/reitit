@@ -7,6 +7,7 @@
             reitit.ring-test
             #_reitit.spec-test
             reitit.frontend.core-test
+            reitit.frontend.history-test
             reitit.frontend.controllers-test))
 
 (enable-console-print!)
@@ -18,4 +19,5 @@
            'reitit.ring-test
            #_'reitit.spec-test
            'reitit.frontend.core-test
+           'reitit.frontend.history-test
            'reitit.frontend.controllers-test)
