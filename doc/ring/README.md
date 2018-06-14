@@ -1,6 +1,7 @@
 # Ring
 
 * [Ring-router](ring.md)
+* [Reverse-routing](reverse_routing.md)
 * [Default handler](default_handler.md)
 * [Static Resources](static.md)
 * [Dynamic Extensions](dynamic_extensions.md)
