@@ -33,7 +33,8 @@
           :s "kikka"
           :u "c2541900-17a7-4353-9024-db8ac258ba4e"
           :k "kikka"
-          :qk "reitit.impl-test%2Fkikka"}
+          :qk "reitit.impl-test%2Fkikka"
+          :nil nil}
          (impl/path-params {:n 1
                             :n1 -1
                             :n2 (long 1)
@@ -45,4 +46,5 @@
                             :s "kikka"
                             :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
                             :k :kikka
-                            :qk ::kikka}))))
+                            :qk ::kikka
+                            :nil nil}))))
