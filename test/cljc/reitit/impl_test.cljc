@@ -48,3 +48,19 @@
                             :k :kikka
                             :qk ::kikka
                             :nil nil}))))
+
+(deftest query-params-test
+  (are [x y]
+    (= (impl/query-string x) y)
+    {:a "b"} "a=b"
+    {"a" "b"} "a=b"
+    {:a 1} "a=1"
+    {:a nil} "a="
+    {:a :b :c "d"} "a=b&c=d"
+    {:a "b c"} "a=b%20c"))
+
+; TODO: support seq values?
+;{:a ["b" "c"]} "a=b&a=c"
+;{:a ["c" "b"]} "a=c&a=b"
+;{:a (seq [1 2])} "a=1&a=2"
+;{:a #{"c" "b"}} "a=b&a=c"

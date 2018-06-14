@@ -129,6 +129,12 @@
        (impl/throw-on-missing-path-params
          (:template match) (:required match) path-params)))))
 
+(defn match->path
+  ([match]
+   (match->path match nil))
+  ([match query-params]
+   (some-> match :path (cond-> query-params (str "?" (impl/query-string query-params))))))
+
 (def default-router-options
   {:lookup name-lookup
    :expand expand

@@ -21,6 +21,22 @@
 ;  :query {:int 10}}
 ```
 
+* `reitit.core/match->path` to create full paths from match, including the query parameters:
+
+```clj
+(require '[reitit.core :as r])
+
+(-> (r/router ["/:a/:b" ::route])
+    (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+    (r/match->path))
+; "/olipa/kerran"
+
+(-> (r/router ["/:a/:b" ::route])
+    (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+    (r/match->path {:iso "pöriläinen"}))
+; "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
+```
+
 ## 0.1.2 (2018-6-6)
 
 ### `reitit-core`
