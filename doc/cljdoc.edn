@@ -34,6 +34,7 @@
   ["Ring"
    {:file "doc/ring/README.md"}
    ["Ring-router" {:file "doc/ring/ring.md"}]
+   ["Reverse-routing" {:file "doc/ring/reverse_routing.md"}]
    ["Default handler" {:file "doc/ring/default_handler.md"}]
    ["Static Resources" {:file "doc/ring/static.md"}]
    ["Dynamic Extensions" {:file "doc/ring/dynamic_extensions.md"}]
