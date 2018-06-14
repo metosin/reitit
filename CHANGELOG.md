@@ -1,3 +1,9 @@
+## UNRELEASED
+
+## `reitit-core`
+
+* `spec-tools.data-spec/maybe` can be used in spec-coercion.
+
 ## 0.1.2 (2018-6-6)
 
 ### `reitit-core`
