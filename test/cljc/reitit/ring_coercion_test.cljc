@@ -5,9 +5,9 @@
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
-    #?(:clj
-            [muuntaja.middleware])
-            [jsonista.core :as j])
+    #?@(:clj [
+            [muuntaja.middleware]
+            [jsonista.core :as j]]))
   #?(:clj
      (:import (clojure.lang ExceptionInfo)
               (java.io ByteArrayInputStream))))
