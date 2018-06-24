@@ -19,7 +19,7 @@
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
-                         [metosin/spec-tools "0.7.1"]
+                         [metosin/spec-tools "0.7.1-SNAPSHOT"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/jsonista "0.2.1"]]
