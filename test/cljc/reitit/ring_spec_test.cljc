@@ -89,7 +89,9 @@
                                 :form {:c string?}
                                 :header {:d string?}
                                 :path {:e string?}}
-                   :responses {200 {:body {:total pos-int?}}}
+                   :responses {200 {:body {:total pos-int?}}
+                               400 {:description "fail"}
+                               500 {}}
                    :handler identity}}]]
           {:data {:middleware [rrc/coerce-exceptions-middleware
                                rrc/coerce-request-middleware
