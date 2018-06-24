@@ -23,7 +23,8 @@
          {:get {:summary "plus"
                 :parameters {:query {:x int?, :y int?}
                              :path {:z int?}}
-                :responses {200 {:body {:total int?}}}
+                :responses {200 {:body {:total int?}}
+                            500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
                                {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}}]]
@@ -33,7 +34,8 @@
          {:get {:summary "plus"
                 :parameters {:query {:x Int, :y Int}
                              :path {:z Int}}
-                :responses {200 {:body {:total Int}}}
+                :responses {200 {:body {:total Int}}
+                            500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
                                {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}}]]]
@@ -87,7 +89,8 @@
                                                                               :properties {"total" {:format "int32"
                                                                                                     :type "integer"}}
                                                                               :required ["total"]
-                                                                              :type "object"}}}
+                                                                              :type "object"}}
+                                                                500 {:description "fail"}}
                                                     :summary "plus"}}
                       "/api/spec/plus/{z}" {:get {:parameters [{:description ""
                                                                 :format "int64"
@@ -111,7 +114,8 @@
                                                                    :schema {:properties {"total" {:format "int64"
                                                                                                   :type "integer"}}
                                                                             :required ["total"]
-                                                                            :type "object"}}}
+                                                                            :type "object"}}
+                                                              500 {:description "fail"}}
                                                   :summary "plus"}}}}
              spec)))))
 
