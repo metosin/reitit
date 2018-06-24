@@ -34,7 +34,7 @@
 
 (defrecord ParameterCoercion [in style keywordize? open?])
 
-(def ^:no-doc ring-parameter-coercion
+(def ^:no-doc defaut-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
@@ -73,7 +73,7 @@
 (defn request-coercer [coercion type model {:keys [extract-request-format]
                                             :or {extract-request-format extract-request-format-default}}]
   (if coercion
-    (let [{:keys [keywordize? open? in style]} (ring-parameter-coercion type)
+    (let [{:keys [keywordize? open? in style]} (defaut-parameter-coercion type)
           transform (comp (if keywordize? walk/keywordize-keys identity) in)
           model (if open? (-open-model coercion model) model)
           coercer (-request-coercer coercion style model)]
@@ -155,5 +155,5 @@
   coercers under `:result` (provided by [[compile-request-coercers]].
   If coercion or parameters are not defined, return `nil`"
   [match]
-  (if-let [result (:result match)]
-    (coerce-request result {:path-params (:path-params match)})))
+  (if-let [coercers (:result match)]
+    (coerce-request coercers match)))

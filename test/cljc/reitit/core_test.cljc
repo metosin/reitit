@@ -246,3 +246,14 @@
               [["/a"] ["/a"]]))))
     (testing "can be configured to ignore"
       (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
+
+(deftest match->path-test
+  (let [router (r/router ["/:a/:b" ::route])]
+    (is (= "/olipa/kerran"
+           (-> router
+               (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+               (r/match->path))))
+    (is (= "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
+           (-> router
+               (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+               (r/match->path {:iso "pöriläinen"}))))))

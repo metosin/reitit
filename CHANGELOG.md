@@ -1,3 +1,42 @@
+## UNRELEASED
+
+## `reitit-core`
+
+* `reitit.coercion/coerce!` coerced all parameters found in match, e.g. injecting in `:query-parameters` into `Match` with coerce those too if `:query` coercion is defined.
+* `spec-tools.data-spec/maybe` can be used in spec-coercion.
+
+```clj
+(def router
+  (reitit.core/router
+    ["/spec" {:coercion reitit.coercion.spec/coercion}
+     ["/:number/:keyword" {:parameters {:path {:number int?
+                                               :keyword keyword?}
+                                        :query (ds/maybe {:int int?})}}]]
+    {:compile reitit.coercion/compile-request-coercers}))
+
+(-> (reitit.core/match-by-path router "/spec/10/kikka")
+    (assoc :query-params {:int "10"})
+    (reitit.coercion/coerce!))
+; {:path {:number 10, :keyword :kikka}
+;  :query {:int 10}}
+```
+
+* `reitit.core/match->path` to create full paths from match, including the query parameters:
+
+```clj
+(require '[reitit.core :as r])
+
+(-> (r/router ["/:a/:b" ::route])
+    (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+    (r/match->path))
+; "/olipa/kerran"
+
+(-> (r/router ["/:a/:b" ::route])
+    (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+    (r/match->path {:iso "pöriläinen"}))
+; "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
+```
+
 ## 0.1.2 (2018-6-6)
 
 ### `reitit-core`

@@ -33,7 +33,8 @@
           :s "kikka"
           :u "c2541900-17a7-4353-9024-db8ac258ba4e"
           :k "kikka"
-          :qk "reitit.impl-test%2Fkikka"}
+          :qk "reitit.impl-test%2Fkikka"
+          :nil nil}
          (impl/path-params {:n 1
                             :n1 -1
                             :n2 (long 1)
@@ -45,4 +46,21 @@
                             :s "kikka"
                             :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
                             :k :kikka
-                            :qk ::kikka}))))
+                            :qk ::kikka
+                            :nil nil}))))
+
+(deftest query-params-test
+  (are [x y]
+    (= (impl/query-string x) y)
+    {:a "b"} "a=b"
+    {"a" "b"} "a=b"
+    {:a 1} "a=1"
+    {:a nil} "a="
+    {:a :b :c "d"} "a=b&c=d"
+    {:a "b c"} "a=b%20c"))
+
+; TODO: support seq values?
+;{:a ["b" "c"]} "a=b&a=c"
+;{:a ["c" "b"]} "a=c&a=b"
+;{:a (seq [1 2])} "a=1&a=2"
+;{:a #{"c" "b"}} "a=b&a=c"

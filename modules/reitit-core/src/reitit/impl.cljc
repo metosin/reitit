@@ -196,13 +196,23 @@
 
   #?(:clj  Object
      :cljs object)
-  (into-string [this] (str this)))
+  (into-string [this] (str this))
+
+  nil
+  (into-string [this]))
 
 (defn path-params
-  "shallow transform of the path-param values into strings"
+  "shallow transform of the path parameters values into strings"
   [params]
   (reduce-kv
     (fn [m k v]
       (assoc m k (url-encode (into-string v))))
     {}
     params))
+
+(defn query-string
+  "shallow transform of query parameters into query string"
+  [params]
+  (->> params
+       (map (fn [[k v]] (str (url-encode (into-string k)) "=" (url-encode (into-string v)))))
+       (str/join "&")))
