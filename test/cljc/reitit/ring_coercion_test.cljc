@@ -5,9 +5,8 @@
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
-    #?@(:clj [
-            [muuntaja.middleware]
-            [jsonista.core :as j]]))
+            #?@(:clj [[muuntaja.middleware]
+                      [jsonista.core :as j]]))
   #?(:clj
      (:import (clojure.lang ExceptionInfo)
               (java.io ByteArrayInputStream))))
@@ -17,8 +16,11 @@
                  {:keys [c]} :form
                  {:keys [d]} :header
                  {:keys [e]} :path} :parameters}]
-  {:status 200
-   :body {:total (+ a b c d e)}})
+  (if (= 666 a)
+    {:status 500
+     :body {:evil true}}
+    {:status 200
+     :body {:total (+ a b c d e)}}))
 
 (def valid-request
   {:uri "/api/plus/5"
@@ -51,19 +53,23 @@
                                            :form {:c int?}
                                            :header {:d int?}
                                            :path {:e int?}}
-                              :responses {200 {:body {:total pos-int?}}}
+                              :responses {200 {:body {:total pos-int?}}
+                                          500 {:description "fail"}}
                               :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion spec/coercion}})))]
 
-    (testing "withut exception handling"
+    (testing "without exception handling"
       (let [app (create [rrc/coerce-request-middleware
                          rrc/coerce-response-middleware])]
 
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request))))
+                 (app valid-request)))
+          (is (= {:status 500
+                  :body {:evil true}}
+                 (app (assoc-in valid-request [:query-params "a"] "666")))))
 
         (testing "invalid request"
           (is (thrown-with-msg?
@@ -106,7 +112,8 @@
                                            :form {:c s/Int}
                                            :header {:d s/Int}
                                            :path {:e s/Int}}
-                              :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}}
+                              :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}
+                                          500 {:description "fail"}}
                               :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion schema/coercion}})))]
@@ -118,7 +125,10 @@
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request))))
+                 (app valid-request)))
+          (is (= {:status 500
+                  :body {:evil true}}
+                 (app (assoc-in valid-request [:query-params "a"] "666")))))
 
         (testing "invalid request"
           (is (thrown-with-msg?

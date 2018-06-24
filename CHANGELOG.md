@@ -3,6 +3,7 @@
 ## `reitit-core`
 
 * `reitit.coercion/coerce!` coerced all parameters found in match, e.g. injecting in `:query-parameters` into `Match` with coerce those too if `:query` coercion is defined.
+* if response coercion is not defined for a response status, response is still returned
 * `spec-tools.data-spec/maybe` can be used in spec-coercion.
 
 ```clj

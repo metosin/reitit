@@ -116,7 +116,8 @@
 (defn coerce-response [coercers request response]
   (if response
     (if-let [coercer (or (coercers (:status response)) (coercers :default))]
-      (impl/fast-assoc response :body (coercer request response)))))
+      (impl/fast-assoc response :body (coercer request response))
+      response)))
 
 (defn request-coercers [coercion parameters opts]
   (->> (for [[k v] parameters
