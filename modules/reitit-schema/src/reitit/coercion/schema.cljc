@@ -61,9 +61,12 @@
                        {::swagger/responses
                         (into
                           (empty responses)
-                          (for [[k response] responses
-                                :let [response (set/rename-keys response {:body :schema})]]
-                            [k (update response :schema #(coercion/-compile-model this % nil))]))})))
+                          (for [[k response] responses]
+                            [k (as-> response $
+                                     (set/rename-keys $ {:body :schema})
+                                     (if (:schema $)
+                                       (update $ :schema #(coercion/-compile-model this % nil))
+                                       $))]))})))
         (throw
           (ex-info
             (str "Can't produce Schema apidocs for " spesification)

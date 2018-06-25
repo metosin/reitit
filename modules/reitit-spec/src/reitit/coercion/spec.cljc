@@ -29,7 +29,11 @@
      :default-encoder stt/any->any}))
 
 (def no-op-transformer
-  st/no-op-transformer)
+  (reify
+    st/Transformer
+    (-name [_] ::no-op)
+    (-encoder [_ _ _])
+    (-decoder [_ _ _])))
 
 (defprotocol IntoSpec
   (into-spec [this name]))
@@ -59,7 +63,10 @@
   #?(:clj  Object
      :cljs default)
   (into-spec [this _]
-    (st/create-spec {:spec this})))
+    (st/create-spec {:spec this}))
+
+  nil
+  (into-spec [this _]))
 
 (defn stringify-pred [pred]
   (str (if (seq? pred) (seq pred) pred)))
@@ -93,9 +100,12 @@
                        {::swagger/responses
                         (into
                           (empty responses)
-                          (for [[k response] responses
-                                :let [response (set/rename-keys response {:body :schema})]]
-                            [k (update response :schema #(coercion/-compile-model this % nil))]))})))
+                          (for [[k response] responses]
+                            [k (as-> response $
+                                     (set/rename-keys $ {:body :schema})
+                                     (if (:schema $)
+                                       (update $ :schema #(coercion/-compile-model this % nil))
+                                       $))]))})))
         (throw
           (ex-info
             (str "Can't produce Spec apidocs for " spesification)

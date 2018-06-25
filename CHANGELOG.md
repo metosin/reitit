@@ -1,8 +1,9 @@
-## UNRELEASED
+## 0.1.3-SNAPSHOT
 
 ## `reitit-core`
 
 * `reitit.coercion/coerce!` coerced all parameters found in match, e.g. injecting in `:query-parameters` into `Match` with coerce those too if `:query` coercion is defined.
+* if response coercion is not defined for a response status, response is still returned
 * `spec-tools.data-spec/maybe` can be used in spec-coercion.
 
 ```clj
@@ -36,6 +37,20 @@
     (r/match->path {:iso "pöriläinen"}))
 ; "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
 ```
+
+### `reitit-spec`
+
+* `[metosin/spec-tools "0.7.1"]` with swagger generation enhancements, see the [CHANGELOG](https://github.com/metosin/spec-tools/blob/master/CHANGELOG.md)
+* if response coercion is not defined for a response status, no `:schema` is not emitted.
+* updated dependencies:
+
+```clj
+[metosin/spec-tools "0.7.1"] is available but we use "0.7.0"
+```
+
+### `reitit-schema`
+
+* if response coercion is not defined for a response status, no `:schema` is not emitted.
 
 ## 0.1.2 (2018-6-6)
 
