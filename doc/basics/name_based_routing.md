@@ -81,3 +81,21 @@ There is also a exception throwing version:
 (r/match-by-name! router ::user)
 ; ExceptionInfo missing path-params for route /api/user/:id: #{:id}
 ```
+
+To turn a Match into a path, there is `reitit.core/match->path`:
+
+```clj
+(-> router
+    (r/match-by-name ::user {:id 1})
+    (r/match->path))
+; "/api/user/1"
+```
+
+It can take an optional map of query-parameters too:
+
+```clj
+(-> router
+    (r/match-by-name ::user {:id 1})
+    (r/match->path {:iso "möly"}))
+; "/api/user/1?iso=m%C3%B6ly"    
+```
