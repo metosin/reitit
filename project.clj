@@ -19,7 +19,7 @@
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
-                         [metosin/spec-tools "0.7.1-SNAPSHOT"]
+                         [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/jsonista "0.2.1"]]
@@ -48,7 +48,7 @@
                                   ;; modules dependencies
                                   [metosin/reitit]
 
-                                  [expound "0.6.0"]
+                                  [expound "0.7.1"]
                                   [orchestra "2017.11.12-1"]
 
                                   [ring "1.6.3"]
@@ -66,9 +66,9 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.6.1"]
-                                   [ring/ring-defaults "0.3.1"]
+                                   [ring/ring-defaults "0.3.2"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.route "0.5.3"]
+                                   [io.pedestal/pedestal.route "0.5.4"]
                                    [org.clojure/core.async "0.4.474"]
                                    [yada "1.2.13"]
                                    [ring/ring-defaults "0.3.1"]
