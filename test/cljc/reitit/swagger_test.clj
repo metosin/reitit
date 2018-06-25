@@ -23,10 +23,12 @@
          {:get {:summary "plus"
                 :parameters {:query {:x int?, :y int?}
                              :path {:z int?}}
+                :swagger {:responses {400 {:schema {:type "string"}
+                                           :description "kosh"}}}
                 :responses {200 {:body {:total int?}}
                             500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
-                               {:keys [z]} :path} :parameters}]
+                                {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}}]]
 
        ["/schema" {:coercion schema/coercion}
@@ -34,10 +36,12 @@
          {:get {:summary "plus"
                 :parameters {:query {:x Int, :y Int}
                              :path {:z Int}}
+                :swagger {:responses {400 {:schema {:type "string"}
+                                           :description "kosh"}}}
                 :responses {200 {:body {:total Int}}
                             500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
-                               {:keys [z]} :path} :parameters}]
+                                {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}}]]]
 
       {:data {:middleware [swagger/swagger-feature
@@ -90,6 +94,8 @@
                                                                                                     :type "integer"}}
                                                                               :required ["total"]
                                                                               :type "object"}}
+                                                                400 {:schema {:type "string"}
+                                                                     :description "kosh"}
                                                                 500 {:description "fail"}}
                                                     :summary "plus"}}
                       "/api/spec/plus/{z}" {:get {:parameters [{:description ""
@@ -115,6 +121,8 @@
                                                                                                   :type "integer"}}
                                                                             :required ["total"]
                                                                             :type "object"}}
+                                                              400 {:schema {:type "string"}
+                                                                   :description "kosh"}
                                                               500 {:description "fail"}}
                                                   :summary "plus"}}}}
              spec)))))
