@@ -601,33 +601,38 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="reverse-routing-with-ring">Reverse routing with Ring</h1>
-<p>Both the <code>router</code> and the <code>match</code> are injected into Ring Request (as <code>::r/router</code> and <code>::r/match</code>) by the <code>reitit.ring/ring-handler</code> and with that, available to middleware and endpoints.</p>
-<p>Below is an example how to use the <code>router</code> to do reverse routing from a ring handler:</p>
+<p>Both the <code>router</code> and the <code>match</code> are injected into Ring Request (as <code>::r/router</code> and <code>::r/match</code>) by the <code>reitit.ring/ring-handler</code> and with that, available to middleware and endpoints. To convert a <code>Match</code> into a path, one can use <code>r/match-&gt;path</code>, which optionally takes a map of query-parameters too.</p>
+<p>Below is an example how to do reverse routing from a ring handler:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 (<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [[<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::r/router</span>]}]
-                         {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                          <span class="hljs-symbol">:body</span> (<span class="hljs-name"><span class="hljs-builtin-name">for</span></span> [i (<span class="hljs-name"><span class="hljs-builtin-name">range</span></span> <span class="hljs-number">10</span>)]
-                                  {<span class="hljs-symbol">:uri</span> (<span class="hljs-symbol">:path</span> (<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> i}))})})}]
-       [<span class="hljs-string">&quot;/users/:id&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::user</span>
-                      <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;user...&quot;</span>})}]])))
+      [[<span class="hljs-string">&quot;/users&quot;</span>
+        {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::r/router</span>]}]
+                {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                 <span class="hljs-symbol">:body</span> (<span class="hljs-name"><span class="hljs-builtin-name">for</span></span> [i (<span class="hljs-name"><span class="hljs-builtin-name">range</span></span> <span class="hljs-number">10</span>)]
+                         {<span class="hljs-symbol">:uri</span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> router
+                                   (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> i})
+                                   <span class="hljs-comment">;; with extra query-params</span>
+                                   (<span class="hljs-name">r/match-&gt;path</span> {<span class="hljs-symbol">:iso</span> <span class="hljs-string">&quot;m&#xF6;ly&quot;</span>}))})})}]
+       [<span class="hljs-string">&quot;/users/:id&quot;</span>
+        {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::user</span>
+         <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;user...&quot;</span>})}]])))
 
 (<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/users&quot;</span>})
-<span class="hljs-comment">;{:status 200,</span>
-<span class="hljs-comment">; :body [{:uri &quot;/users/0&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/1&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/2&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/3&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/4&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/5&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/6&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/7&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/8&quot;}</span>
-<span class="hljs-comment">;        {:uri &quot;/users/9&quot;}]}</span>
+<span class="hljs-comment">; {:status 200,</span>
+<span class="hljs-comment">;  :body ({:uri &quot;/users/0?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/1?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/2?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/3?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/4?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/5?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/6?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/7?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/8?iso=m%C3%B6ly&quot;}</span>
+<span class="hljs-comment">;         {:uri &quot;/users/9?iso=m%C3%B6ly&quot;})}</span>
 </code></pre>
 
                                 
@@ -672,7 +677,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Reverse-routing","level":"1.5.2","depth":2,"next":{"title":"Default handler","level":"1.5.3","depth":2,"path":"ring/default_handler.md","ref":"ring/default_handler.md","articles":[]},"previous":{"title":"Ring-router","level":"1.5.1","depth":2,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/reverse_routing.md","mtime":"2018-06-24T08:37:52.051Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-24T08:38:29.769Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Reverse-routing","level":"1.5.2","depth":2,"next":{"title":"Default handler","level":"1.5.3","depth":2,"path":"ring/default_handler.md","ref":"ring/default_handler.md","articles":[]},"previous":{"title":"Ring-router","level":"1.5.1","depth":2,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/reverse_routing.md","mtime":"2018-06-25T07:35:11.421Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-25T07:35:47.587Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

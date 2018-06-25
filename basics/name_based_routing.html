@@ -658,6 +658,18 @@
 <pre><code class="lang-clj">(<span class="hljs-name">r/match-by-name!</span> router <span class="hljs-symbol">::user</span>)
 <span class="hljs-comment">; ExceptionInfo missing path-params for route /api/user/:id: #{:id}</span>
 </code></pre>
+<p>To turn a Match into a path, there is <code>reitit.core/match-&gt;path</code>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> router
+    (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-number">1</span>})
+    (<span class="hljs-name">r/match-&gt;path</span>))
+<span class="hljs-comment">; &quot;/api/user/1&quot;</span>
+</code></pre>
+<p>It can take an optional map of query-parameters too:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> router
+    (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> <span class="hljs-number">1</span>})
+    (<span class="hljs-name">r/match-&gt;path</span> {<span class="hljs-symbol">:iso</span> <span class="hljs-string">&quot;m&#xF6;ly&quot;</span>}))
+<span class="hljs-comment">; &quot;/api/user/1?iso=m%C3%B6ly&quot;</span>
+</code></pre>
 
                                 
                                 </section>
@@ -701,7 +713,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Name-based Routing","level":"1.2.4","depth":2,"next":{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"previous":{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/name_based_routing.md","mtime":"2018-06-24T08:37:52.047Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-24T08:38:29.769Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Name-based Routing","level":"1.2.4","depth":2,"next":{"title":"Route Data","level":"1.2.5","depth":2,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"previous":{"title":"Path-based Routing","level":"1.2.3","depth":2,"path":"basics/path_based_routing.md","ref":"basics/path_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/name_based_routing.md","mtime":"2018-06-25T07:35:11.417Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-25T07:35:47.587Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
