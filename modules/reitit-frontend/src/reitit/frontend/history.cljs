@@ -32,7 +32,8 @@
          (.getPathPrefix history)
          token)))
 
-(def ^:private current-domain (.getDomain (.parse Uri js/location)))
+(def ^:private current-domain (if (exists? js/location)
+                                (.getDomain (.parse Uri js/location))))
 
 (defn ignore-anchor-click
   "Ignore click events from a elements, if the href points to URL that is part
