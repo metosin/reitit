@@ -57,7 +57,11 @@
           (.replaceToken history (path->token history (.getPath uri)))))))
 
 (defn start!
-  "Parameters:
+  "This registers event listeners on either haschange or HTML5 history.
+  When using with development workflow like Figwheel, rememeber to
+  remove listeners using stop! call before calling start! again.
+
+  Parameters:
   - router         The reitit routing tree.
   - on-navigate    Function to be called when route changes.
 
@@ -94,7 +98,7 @@
      :close-fn (fn []
                  (e/unlistenByKey event-key)
                  (e/unlistenByKey click-listen-key)
-                 (.setEnabled history false))}))
+                 (.dispose history))}))
 
 (defn stop! [{:keys [close-fn]}]
   (if close-fn

@@ -8,7 +8,7 @@
               [schema.core :as s]
               [fipp.edn :as fedn]))
 
-(def router (atom nil))
+(defonce history (atom nil))
 
 (defn home-page []
   [:div
@@ -19,8 +19,8 @@
    [:h2 "About frontend"]
    [:ul
     [:li [:a {:href "http://google.com"} "external link"]]
-    [:li [:a {:href (rfh/href @router ::foobar)} "Missing route"]]
-    [:li [:a {:href (rfh/href @router ::item)} "Missing route params"]]]])
+    [:li [:a {:href (rfh/href @history ::foobar)} "Missing route"]]
+    [:li [:a {:href (rfh/href @history ::item)} "Missing route params"]]]])
 
 (defn item-page [match]
   (let [{:keys [path query]} (:parameters match)
@@ -35,10 +35,10 @@
 (defn current-page []
   [:div
    [:ul
-    [:li [:a {:href (rfh/href @router ::frontpage)} "Frontpage"]]
-    [:li [:a {:href (rfh/href @router ::about)} "About"]]
-    [:li [:a {:href (rfh/href @router ::item {:id 1})} "Item 1"]]
-    [:li [:a {:href (rfh/href @router ::item {:id 2} {:foo "bar"})} "Item 2"]]]
+    [:li [:a {:href (rfh/href @history ::frontpage)} "Frontpage"]]
+    [:li [:a {:href (rfh/href @history ::about)} "About"]]
+    [:li [:a {:href (rfh/href @history ::item {:id 1})} "Item 1"]]
+    [:li [:a {:href (rfh/href @history ::item {:id 2} {:foo "bar"})} "Item 2"]]]
    (if @match
      (let [view (:view (:data @match))]
        [view @match]))
@@ -62,10 +62,12 @@
      :data {:coercion rsc/coercion}}))
 
 (defn init! []
-  (reset! router (rfh/start! routes
-                             (fn [m] (reset! match m))
-                             {:use-fragment true
-                              :path-prefix "/"}))
+  (swap! history (fn [old-history]
+                   (rfh/stop! old-history)
+                   (rfh/start! routes
+                               (fn [m] (reset! match m))
+                               {:use-fragment true
+                                :path-prefix "/"})))
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)

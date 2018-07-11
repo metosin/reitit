@@ -22,9 +22,9 @@
   those previously enabled. Resets controllers whose
   parameters have changed."
   [old-controllers new-match]
-  (let [new-controllers (map (fn [controller]
-                               (assoc controller ::params (get-params controller new-match)))
-                             (:controllers (:data new-match)))
+  (let [new-controllers (mapv (fn [controller]
+                                (assoc controller ::params (get-params controller new-match)))
+                              (:controllers (:data new-match)))
         changed-controllers (->> (map (fn [old new]
                                         ;; different controllers, or params changed
                                         (if (not= old new)
