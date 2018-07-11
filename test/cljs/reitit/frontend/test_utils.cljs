@@ -2,18 +2,14 @@
 
 (defn capture-console [f]
   (let [messages (atom [])
-        original-console js/console
+        original-console-warn js/console.warn
         log (fn [t & message]
               (swap! messages conj {:type t
                                     :message message}))
         value (try
-                (set! js/console #js {:log (partial log :log)
-                                      :warn (partial log :warn)
-                                      :info (partial log :info)
-                                      :error (partial log :error)
-                                      :debug (partial log :debug)})
+                (set! js/console.warn (partial log :warn))
                 (f)
                 (finally
-                  (set! js/console original-console)))]
+                  (set! js/console.warn original-console-warn)))]
     {:value value
      :messages @messages}))
