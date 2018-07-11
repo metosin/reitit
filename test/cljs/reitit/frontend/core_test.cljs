@@ -2,9 +2,9 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.core :as r]
             [reitit.frontend :as rf]
-            [reitit.coercion :as coercion]
+            [reitit.coercion :as rc]
             [schema.core :as s]
-            [reitit.coercion.schema :as schema-coercion]))
+            [reitit.coercion.schema :as rsc]))
 
 (defn m [x]
   (assoc x :data nil :result nil))
@@ -45,8 +45,8 @@
                             [":id" {:name ::foo
                                     :parameters {:path {:id s/Int}
                                                  :query {(s/optional-key :mode) s/Keyword}}}]]
-                           {:compile coercion/compile-request-coercers
-                            :data {:coercion schema-coercion/coercion}})]
+                           {:compile rc/compile-request-coercers
+                            :data {:coercion rsc/coercion}})]
       (is (= (r/map->Match
                {:template "/:id"
                 :path-params {:id "5"}

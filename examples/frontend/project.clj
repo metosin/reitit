@@ -13,7 +13,9 @@
                  [org.clojure/clojurescript "1.10.339" :scope "provided"]
                  [metosin/reitit "0.1.4-SNAPSHOT"]
                  [metosin/reitit-schema "0.1.4-SNAPSHOT"]
-                 [metosin/reitit-frontend "0.1.4-SNAPSHOT"]]
+                 [metosin/reitit-frontend "0.1.4-SNAPSHOT"]
+                 ;; Just for pretty printting the match
+                 [fipp "0.6.12"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]]
 
