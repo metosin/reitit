@@ -3,42 +3,46 @@
             [reitit.core :as r]
             [reitit.frontend.history :as rfh]))
 
+(def browser (exists? js/window))
+
 (deftest fragment-history-test
-  (let [router (r/router ["/"
+  (when browser
+    (let [router (r/router ["/"
                             ["" ::frontpage]
                             ["foo" ::foo]
                             ["bar/:id" ::bar]])
-        history (rfh/start! router
-                            (fn [_])
-                            {:use-fragment true
-                             :path-prefix "/"})]
+          history (rfh/start! router
+                              (fn [_])
+                              {:use-fragment true
+                               :path-prefix "/"})]
 
-    (testing "creating urls"
-      (is (= "#/foo"
-             (rfh/href history ::foo)))
-      (is (= "#/bar/5"
-             (rfh/href history ::bar {:id 5})))
-      (is (= "#/bar/5?q=x"
-             (rfh/href history ::bar {:id 5} {:q "x"})))
-      (is (= nil
-             (rfh/href history ::asd))))))
+      (testing "creating urls"
+        (is (= "#/foo"
+               (rfh/href history ::foo)))
+        (is (= "#/bar/5"
+               (rfh/href history ::bar {:id 5})))
+        (is (= "#/bar/5?q=x"
+               (rfh/href history ::bar {:id 5} {:q "x"})))
+        (is (= nil
+               (rfh/href history ::asd)))))))
 
 (deftest html5-history-test
-  (let [router (r/router ["/"
+  (when browser
+    (let [router (r/router ["/"
                             ["" ::frontpage]
                             ["foo" ::foo]
                             ["bar/:id" ::bar]])
-        history (rfh/start! router
-                            (fn [_])
-                            {:use-fragment false
-                             :path-prefix "/"})]
+          history (rfh/start! router
+                              (fn [_])
+                              {:use-fragment false
+                               :path-prefix "/"})]
 
-    (testing "creating urls"
-      (is (= "/foo"
-             (rfh/href history ::foo)))
-      (is (= "/bar/5"
-             (rfh/href history ::bar {:id 5})))
-      (is (= "/bar/5?q=x"
-             (rfh/href history ::bar {:id 5} {:q "x"})))
-      (is (= nil
-             (rfh/href history ::asd))))))
+      (testing "creating urls"
+        (is (= "/foo"
+               (rfh/href history ::foo)))
+        (is (= "/bar/5"
+               (rfh/href history ::bar {:id 5})))
+        (is (= "/bar/5?q=x"
+               (rfh/href history ::bar {:id 5} {:q "x"})))
+        (is (= nil
+               (rfh/href history ::asd)))))))
