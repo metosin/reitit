@@ -4,6 +4,7 @@
             [clojure.string :as string]
             [goog.events :as e]
             [goog.dom :as dom]
+            [reitit.core :as r]
             [reitit.frontend :as rf])
   (:import goog.history.Html5History
            goog.Uri))
@@ -100,11 +101,8 @@
     (close-fn)))
 
 (defn- match->token [history match k params query]
-  ;; FIXME: query string
-  (if-let [path (:path match)]
-    (str (path->token history path)
-         (if query
-           (str "?" (rf/query-string query))))))
+  (some->> (r/match->path match query)
+           (path->token history)))
 
 (defn href
   ([state k]

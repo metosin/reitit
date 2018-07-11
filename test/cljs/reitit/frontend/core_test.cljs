@@ -6,6 +6,9 @@
             [schema.core :as s]
             [reitit.coercion.schema :as schema-coercion]))
 
+(defn m [x]
+  (assoc x :data nil :result nil))
+
 (deftest match-by-path-test
   (testing "simple"
     (let [router (r/router ["/"
@@ -20,6 +23,10 @@
                 :parameters {:query {}
                              :path {}}})
              (rf/match-by-path router "/")))
+
+      (is (= "/"
+             (r/match->path (rf/match-by-name router ::frontpage))))
+
       (is (= (r/map->Match
                {:template "/foo"
                 :data {:name ::foo}
@@ -27,7 +34,11 @@
                 :path "/foo"
                 :parameters {:query {}
                              :path {}}})
-             (rf/match-by-path router "/foo")))))
+             (rf/match-by-path router "/foo")))
+
+
+      (is (= "/foo"
+             (r/match->path (rf/match-by-name router ::foo))))))
 
   (testing "schema coercion"
     (let [router (r/router ["/"
@@ -42,7 +53,11 @@
                 :path "/5"
                 :parameters {:query {}
                              :path {:id 5}}})
-             (assoc (rf/match-by-path router "/5") :data nil :result nil)))
+             (m (rf/match-by-path router "/5"))))
+
+      (is (= "/5"
+             (r/match->path (rf/match-by-name router ::foo {:id 5}))))
+
       (is (= (r/map->Match
                {:template "/:id"
                 :path-params {:id "5"}
@@ -50,4 +65,7 @@
                 :path "/5"
                 :parameters {:path {:id 5}
                              :query {:mode :foo}}})
-             (assoc (rf/match-by-path router "/5?mode=foo") :data nil :result nil))))))
+             (m (rf/match-by-path router "/5?mode=foo"))))
+
+      (is (= "/5?mode=foo"
+             (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo}))))))

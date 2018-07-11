@@ -16,19 +16,6 @@
          (map (juxt keyword #(.get q %)))
          (into {}))))
 
-(defn query-string
-  "Given map, creates "
-  [m]
-  (str/join "&" (map (fn [[k v]]
-                       (str (js/encodeURIComponent (name k))
-                            "="
-                            ;; FIXME: create protocol to handle how types are converted to string
-                            ;; FIXME: array to multiple params
-                            (if (coll? v)
-                              (str/join "," (map #(js/encodeURIComponent %) v))
-                              (js/encodeURIComponent v))))
-                     m)))
-
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
   coerced parameters. Return nil if no match found."
@@ -47,12 +34,7 @@
         (assoc match :parameters parameters)))))
 
 (defn match-by-name
-  [router name params]
-  ;; FIXME: move router not initialized to re-frame integration?
-  (if router
-    (or (reitit/match-by-name router name params)
-        ;; FIXME: return nil?
-        (do
-          (js/console.error "Can't create URL for route " (pr-str name) (pr-str params))
-          nil))
-    ::not-initialized))
+  ([router name]
+   (match-by-name router name {}))
+  ([router name path-params]
+   (reitit/match-by-name router name path-params)))
