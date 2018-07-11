@@ -10,7 +10,7 @@
                  [ring "1.6.3"]
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
-                 [org.clojure/clojurescript "1.10.238" :scope "provided"]
+                 [org.clojure/clojurescript "1.10.339" :scope "provided"]
                  [metosin/reitit "0.1.4-SNAPSHOT"]
                  [metosin/reitit-schema "0.1.4-SNAPSHOT"]
                  [metosin/reitit-frontend "0.1.4-SNAPSHOT"]]

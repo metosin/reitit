@@ -45,7 +45,7 @@
                                   "modules/reitit-frontend/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.10.238"]
+                                  [org.clojure/clojurescript "1.10.339"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
