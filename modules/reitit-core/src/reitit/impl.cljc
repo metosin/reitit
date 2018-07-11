@@ -131,7 +131,10 @@
 (defn path-for [^Route route path-params]
   (if-let [required (:path-params route)]
     (if (every? #(contains? path-params %) required)
-      (str "/" (str/join \/ (map #(get (or path-params {}) % %) (:path-parts route)))))
+      (->> (:path-parts route)
+           (map #(get (or path-params {}) % %))
+           (str/join \/)
+           (str "/")))
     (:path route)))
 
 (defn throw-on-missing-path-params [template required path-params]
@@ -214,5 +217,8 @@
   "shallow transform of query parameters into query string"
   [params]
   (->> params
-       (map (fn [[k v]] (str (url-encode (into-string k)) "=" (url-encode (into-string v)))))
+       (map (fn [[k v]]
+              (str (url-encode (into-string k))
+                   "="
+                   (url-encode (into-string v)))))
        (str/join "&")))
