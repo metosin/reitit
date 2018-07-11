@@ -10,17 +10,20 @@
                  [ring "1.6.3"]
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
-                 [org.clojure/clojurescript "1.10.339" :scope "provided"]
+                 [org.clojure/clojurescript "1.10.339"]
                  [metosin/reitit "0.1.4-SNAPSHOT"]
                  [metosin/reitit-schema "0.1.4-SNAPSHOT"]
                  [metosin/reitit-frontend "0.1.4-SNAPSHOT"]
                  ;; Just for pretty printting the match
                  [fipp "0.6.12"]]
 
-  :plugins [[lein-cljsbuild "1.1.7"]]
+  :plugins [[lein-cljsbuild "1.1.7"]
+            [lein-figwheel "0.5.16"]]
 
   :source-paths []
   :resource-paths ["resources" "target/cljsbuild"]
+
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]]}}
 
   :cljsbuild
   {:builds
@@ -44,10 +47,6 @@
                 :optimizations :advanced
                 :pretty-print false}}]}
 
-  :figwheel
-  {:http-server-root "public"
-   :server-port 3449
-   :nrepl-port 7002}
-
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]]
-                   :plugins [[lein-figwheel "0.5.16"]]}})
+  :figwheel {:http-server-root "public"
+             :server-port 3449
+             :nrepl-port 7002})
