@@ -4,7 +4,8 @@
             [reitit.frontend :as rf]
             [reitit.coercion :as rc]
             [schema.core :as s]
-            [reitit.coercion.schema :as rsc]))
+            [reitit.coercion.schema :as rsc]
+            [reitit.frontend.test-utils :refer [capture-console]]))
 
 (defn m [x]
   (assoc x :data nil :result nil))
@@ -36,9 +37,15 @@
                              :path {}}})
              (rf/match-by-path router "/foo")))
 
-
       (is (= "/foo"
-             (r/match->path (rf/match-by-name router ::foo))))))
+             (r/match->path (rf/match-by-name router ::foo))))
+
+      (is (= [{:type :warn
+               :message ["missing route" ::asd]}]
+             (:messages
+               (capture-console
+                 (fn []
+                   (rf/match-by-name! router ::asd))))))))
 
   (testing "schema coercion"
     (let [router (r/router ["/"
@@ -68,4 +75,15 @@
              (m (rf/match-by-path router "/5?mode=foo"))))
 
       (is (= "/5?mode=foo"
-             (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo}))))))
+             (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo})))
+
+      (is (= [{:type :warn
+               :message ["missing path-params for route" ::foo
+                         {:template "/:id"
+                          :missing #{:id}
+                          :required #{:id}
+                          :path-params {}}]}]
+             (:messages
+               (capture-console
+                 (fn []
+                   (rf/match-by-name! router ::foo {})))))))))

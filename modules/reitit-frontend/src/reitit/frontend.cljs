@@ -45,7 +45,7 @@
   ([router name]
    (match-by-name! router name {}))
   ([router name path-params]
-   (if-let [match (reitit/match-by-name router name path-params)]
+   (if-let [match (match-by-name router name path-params)]
      (if (reitit/partial-match? match)
        (if (every? #(contains? path-params %) (:required match))
          match

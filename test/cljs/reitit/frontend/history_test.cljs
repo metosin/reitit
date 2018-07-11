@@ -1,7 +1,8 @@
 (ns reitit.frontend.history-test
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.core :as r]
-            [reitit.frontend.history :as rfh]))
+            [reitit.frontend.history :as rfh]
+            [reitit.frontend.test-utils :refer [capture-console]]))
 
 (def browser (exists? js/window))
 
@@ -23,8 +24,13 @@
                (rfh/href history ::bar {:id 5})))
         (is (= "#/bar/5?q=x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
-        (is (= nil
-               (rfh/href history ::asd)))))))
+        (let [{:keys [value messages]} (capture-console
+                                         (fn []
+                                           (rfh/href history ::asd)))]
+          (is (= nil value))
+          (is (= [{:type :warn
+                   :message ["missing route" ::asd]}]
+                 messages)))))))
 
 (deftest html5-history-test
   (when browser
@@ -44,5 +50,10 @@
                (rfh/href history ::bar {:id 5})))
         (is (= "/bar/5?q=x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
-        (is (= nil
-               (rfh/href history ::asd)))))))
+        (let [{:keys [value messages]} (capture-console
+                                         (fn []
+                                           (rfh/href history ::asd)))]
+          (is (= nil value))
+          (is (= [{:type :warn
+                   :message ["missing route" ::asd]}]
+                 messages)))))))
