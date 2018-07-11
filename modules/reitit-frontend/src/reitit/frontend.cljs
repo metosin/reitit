@@ -2,6 +2,7 @@
   ""
   (:require [reitit.core :as reitit]
             [clojure.string :as str]
+            [clojure.set :as set]
             [reitit.coercion :as coercion]
             [goog.events :as e]
             [goog.dom :as dom])
@@ -38,3 +39,25 @@
    (match-by-name router name {}))
   ([router name path-params]
    (reitit/match-by-name router name path-params)))
+
+(defn match-by-name!
+  "Logs problems using console.warn"
+  ([router name]
+   (match-by-name! router name {}))
+  ([router name path-params]
+   (if-let [match (reitit/match-by-name router name path-params)]
+     (if (reitit/partial-match? match)
+       (if (every? #(contains? path-params %) (:required match))
+         match
+         (let [defined (-> path-params keys set)
+               missing (set/difference (:required match) defined)]
+           (js/console.warn
+             "missing path-params for route" name
+             {:template (:template match)
+              :missing missing
+              :path-params path-params
+              :required (:required match)})
+           nil))
+       match)
+     (do (js/console.warn "missing route" name)
+         nil))))

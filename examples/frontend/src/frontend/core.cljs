@@ -17,7 +17,10 @@
 (defn about-page []
   [:div
    [:h2 "About frontend"]
-   [:a {:href "http://google.com"} "external link"]])
+   [:ul
+    [:li [:a {:href "http://google.com"} "external link"]]
+    [:li [:a {:href (rfh/href @router ::foobar)} "Missing route"]]
+    [:li [:a {:href (rfh/href @router ::item)} "Missing route params"]]]])
 
 (defn item-page [match]
   (let [{:keys [path query]} (:parameters match)

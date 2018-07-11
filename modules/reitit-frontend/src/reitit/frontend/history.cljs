@@ -110,7 +110,7 @@
   ([state k params]
    (href state k params nil))
   ([{:keys [router history]} k params query]
-   (let [match (rf/match-by-name router k params)
+   (let [match (rf/match-by-name! router k params)
          token (match->token history match k params query)]
      (token->href history token))))
 
@@ -118,6 +118,6 @@
   ([state k params]
    (replace-token state k params nil))
   ([{:keys [router history]} k params query]
-   (let [match (rf/match-by-name router k params)
+   (let [match (rf/match-by-name! router k params)
          token (match->token history match k params query)]
      (.replaceToken history token))))
