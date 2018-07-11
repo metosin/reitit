@@ -45,6 +45,11 @@
     {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
    ["Swagger Support" {:file "doc/ring/swagger.md"}]]
+  ["Frontend"
+   {:file "doc/frontend/README.md"}
+   ["Basics" {:file "doc/frontend/basics.md"}]
+   ["Browser integration" {:file "doc/frontend/browser.md"}]
+   ["Controllers" {:file "doc/frontend/controllers/.md"}]]
   ["Performance" {:file "doc/performance.md"}]
   ["Interceptors (WIP)" {:file "doc/interceptors.md"}]
   ["Development Instructions" {:file "doc/development.md"}]

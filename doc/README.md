@@ -10,6 +10,7 @@
 * Extendable
 * Modular
 * [Fast](performance.md)
+* [Frontend routing](./frontend/README.md)
 
 Modules:
 
@@ -19,8 +20,9 @@ Modules:
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
+* `reitit-frontend` Tools for frontend routing.
 
-To use Reitit, add the following dependecy to your project:
+To use Reitit, add the following dependency to your project:
 
 ```clj
 [metosin/reitit "0.1.4-SNAPSHOT"]
@@ -35,6 +37,7 @@ Optionally, the parts can be required separately:
 [metosin/reitit-schema "0.1.4-SNAPSHOT"]
 [metosin/reitit-swagger "0.1.4-SNAPSHOT"]
 [metosin/reitit-swagger-ui "0.1.4-SNAPSHOT"]
+[metosin/frontend "0.1.4-SNAPSHOT"]
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
