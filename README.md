@@ -36,18 +36,18 @@ Bubblin' under:
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.3"]
+[metosin/reitit "0.1.4-SNAPSHOT"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.3"]
-[metosin/reitit-ring "0.1.3"]
-[metosin/reitit-spec "0.1.3"]
-[metosin/reitit-schema "0.1.3"]
-[metosin/reitit-swagger "0.1.3"]
-[metosin/reitit-swagger-ui "0.1.3"]
+[metosin/reitit-core "0.1.4-SNAPSHOT"]
+[metosin/reitit-ring "0.1.4-SNAPSHOT"]
+[metosin/reitit-spec "0.1.4-SNAPSHOT"]
+[metosin/reitit-schema "0.1.4-SNAPSHOT"]
+[metosin/reitit-swagger "0.1.4-SNAPSHOT"]
+[metosin/reitit-swagger-ui "0.1.4-SNAPSHOT"]
 ```
 
 ## Quick start

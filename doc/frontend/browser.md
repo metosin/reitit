@@ -1,0 +1,3 @@
+# Frontend browser integration
+
+TODO

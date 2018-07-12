@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.1.3"
+(defproject metosin/reitit-parent "0.1.4-SNAPSHOT"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,13 +9,14 @@
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
 
-  :managed-dependencies [[metosin/reitit "0.1.3"]
-                         [metosin/reitit-core "0.1.3"]
-                         [metosin/reitit-ring "0.1.3"]
-                         [metosin/reitit-spec "0.1.3"]
-                         [metosin/reitit-schema "0.1.3"]
-                         [metosin/reitit-swagger "0.1.3"]
-                         [metosin/reitit-swagger-ui "0.1.3"]
+  :managed-dependencies [[metosin/reitit "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-core "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-ring "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-spec "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-schema "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-swagger "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-swagger-ui "0.1.4-SNAPSHOT"]
+                         [metosin/reitit-frontend "0.1.4-SNAPSHOT"]
 
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
@@ -40,10 +41,11 @@
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
                                   "modules/reitit-swagger/src"
-                                  "modules/reitit-swagger-ui/src"]
+                                  "modules/reitit-swagger-ui/src"
+                                  "modules/reitit-frontend/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.10.238"]
+                                  [org.clojure/clojurescript "1.10.339"]
 
                                   ;; modules dependencies
                                   [metosin/reitit]
@@ -60,7 +62,10 @@
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
-                                  [com.gfredericks/test.chuck "0.2.9"]]}
+                                  [com.gfredericks/test.chuck "0.2.9"]
+
+                                  ;; https://github.com/bensu/doo/issues/180
+                                  [fipp "0.6.12"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
