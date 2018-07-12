@@ -55,9 +55,9 @@
                  (= 0 (.-button e))
                  (reitit/match-by-path router (.getPath uri)))
           (.preventDefault e)
-          (.replaceToken history (path->token history (str (.getPath uri)
-                                                           (if (seq (.getQuery uri))
-                                                             (str "?" (.getQuery uri))))))))))
+          (.setToken history (path->token history (str (.getPath uri)
+                                                       (if (seq (.getQuery uri))
+                                                         (str "?" (.getQuery uri))))))))))
 
 (impl/goog-extend
   ^{:jsdoc ["@constructor"
@@ -136,7 +136,17 @@
          token (match->token history match k params query)]
      (token->href history token))))
 
+(defn set-token
+  "Sets the new route, leaving previous route in history."
+  ([state k params]
+   (set-token state k params nil))
+  ([{:keys [router history]} k params query]
+   (let [match (rf/match-by-name! router k params)
+         token (match->token history match k params query)]
+     (.setToken history token))))
+
 (defn replace-token
+  "Replaces current route. I.e. current route is not left on history."
   ([state k params]
    (replace-token state k params nil))
   ([{:keys [router history]} k params query]
