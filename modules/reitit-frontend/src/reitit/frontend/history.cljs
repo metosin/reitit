@@ -5,7 +5,8 @@
             [goog.events :as e]
             [goog.dom :as dom]
             [reitit.core :as r]
-            [reitit.frontend :as rf])
+            [reitit.frontend :as rf]
+            [reitit.impl :as impl])
   (:import goog.history.Html5History
            goog.Uri))
 
@@ -54,7 +55,24 @@
                  (= 0 (.-button e))
                  (reitit/match-by-path router (.getPath uri)))
           (.preventDefault e)
-          (.replaceToken history (path->token history (.getPath uri)))))))
+          (.replaceToken history (path->token history (str (.getPath uri)
+                                                           (if (seq (.getQuery uri))
+                                                             (str "?" (.getQuery uri))))))))))
+
+(impl/goog-extend
+  ^{:jsdoc ["@constructor"
+            "@extends {Html5History.TokenTransformer}"]}
+  TokenTransformer
+  Html5History.TokenTransformer
+  ([]
+   (this-as this
+     (.call Html5History.TokenTransformer this)))
+  (retrieveToken [path-prefix location]
+    (subs (.-pathname location) (count path-prefix)))
+  (createUrl [token path-prefix location]
+    ;; Code in Closure also adds current query params
+    ;; from location.
+    (str path-prefix token)))
 
 (defn start!
   "This registers event listeners on either haschange or HTML5 history.
@@ -75,7 +93,7 @@
     :or {path-prefix "/"
          use-fragment true}}]
   (let [history
-        (doto (Html5History.)
+        (doto (Html5History. nil (TokenTransformer.))
           (.setEnabled true)
           (.setPathPrefix path-prefix)
           (.setUseFragment use-fragment))

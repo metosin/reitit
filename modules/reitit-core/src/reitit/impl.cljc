@@ -11,6 +11,7 @@
 ; You must not remove this notice, or any other, from this software.
 
 (ns ^:no-doc reitit.impl
+  #?(:cljs (:require-macros [reitit.impl]))
   (:require [clojure.string :as str]
             [clojure.set :as set])
   #?(:clj
@@ -222,3 +223,15 @@
                    "="
                    (url-encode (into-string v)))))
        (str/join "&")))
+
+(defmacro goog-extend [type base-type ctor & methods]
+  `(do
+     (def ~type (fn ~@ctor))
+
+     (goog/inherits ~type ~base-type)
+
+     ~@(map
+        (fn [method]
+          `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
+                 (fn ~@(rest method))))
+        methods)))
