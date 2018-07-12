@@ -38,14 +38,16 @@
                 :source-map true
                 :optimizations :none
                 :pretty-print true
-                :preloads [devtools.preload]}}
+                :preloads [devtools.preload]
+                :aot-cache true}}
     {:id "min"
      :source-paths ["src"]
      :compiler {:output-to "target/cljsbuild/public/js/app.js"
                 :output-dir "target/cljsbuild/public/js"
                 :source-map "target/cljsbuild/public/js/app.js.map"
                 :optimizations :advanced
-                :pretty-print false}}]}
+                :pretty-print false
+                :aot-cache true}}]}
 
   :figwheel {:http-server-root "public"
              :server-port 3449

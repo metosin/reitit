@@ -28,6 +28,7 @@ jobs:
           key: 'v1-clj-{{ checksum "project.clj" }}'
           paths:
             - ~/.m2
+            - ~/.cljs/.aot_cache
 
   test-cljs:
     working_directory: ~/test
