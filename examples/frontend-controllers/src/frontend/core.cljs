@@ -2,14 +2,12 @@
     (:require [reagent.core :as r]
               [reitit.core :as re]
               [reitit.frontend :as rf]
-              [reitit.frontend.history :as rfh]
+              [reitit.frontend.easy :as rfe]
               [reitit.frontend.controllers :as rfc]
               [reitit.coercion :as rc]
               [reitit.coercion.schema :as rsc]
               [schema.core :as s]
               [fipp.edn :as fedn]))
-
-(defonce history (atom nil))
 
 (defn home-page []
   [:div
@@ -21,8 +19,8 @@
         {:keys [id]} path]
     [:div
      [:ul
-      [:li [:a {:href (rfh/href @history ::item {:id 1})} "Item 1"]]
-      [:li [:a {:href (rfh/href @history ::item {:id 2} {:foo "bar"})} "Item 2"]]]
+      [:li [:a {:href (rfe/href ::item {:id 1})} "Item 1"]]
+      [:li [:a {:href (rfe/href ::item {:id 2} {:foo "bar"})} "Item 2"]]]
      (if id
        [:h2 "Selected item " id])
      (if (:foo query)
@@ -33,9 +31,9 @@
 (defn current-page []
   [:div
    [:ul
-    [:li [:a {:href (rfh/href @history ::frontpage)} "Frontpage"]]
+    [:li [:a {:href (rfe/href ::frontpage)} "Frontpage"]]
     [:li
-     [:a {:href (rfh/href @history ::item-list)} "Item list"]
+     [:a {:href (rfe/href ::item-list)} "Item list"]
      ]]
    (if @match
      (let [view (:view (:data @match))]
@@ -80,16 +78,14 @@
             :coercion rsc/coercion}}))
 
 (defn init! []
-  (swap! history (fn [old-history]
-                   (rfh/stop! old-history)
-                   (rfh/start!
-                     routes
-                     (fn [new-match]
-                       (swap! match (fn [old-match]
-                                      (if new-match
-                                        (assoc new-match :controllers (rfc/apply-controllers (:controllers old-match) new-match))))))
-                     {:use-fragment true
-                      :path-prefix "/"})))
+  (rfe/start!
+    routes
+    (fn [new-match]
+      (swap! match (fn [old-match]
+                     (if new-match
+                       (assoc new-match :controllers (rfc/apply-controllers (:controllers old-match) new-match))))))
+    {:use-fragment true
+     :path-prefix "/"})
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)
