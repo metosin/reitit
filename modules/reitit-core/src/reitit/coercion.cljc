@@ -34,7 +34,7 @@
 
 (defrecord ParameterCoercion [in style keywordize? open?])
 
-(def ^:no-doc defaut-parameter-coercion
+(def ^:no-doc default-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
@@ -70,10 +70,11 @@
   (-> request :muuntaja/request :format))
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-(defn request-coercer [coercion type model {:keys [extract-request-format]
-                                            :or {extract-request-format extract-request-format-default}}]
+(defn request-coercer [coercion type model {:keys [::extract-request-format ::parameter-coercion]
+                                            :or {extract-request-format extract-request-format-default
+                                                 parameter-coercion default-parameter-coercion}}]
   (if coercion
-    (let [{:keys [keywordize? open? in style]} (defaut-parameter-coercion type)
+    (let [{:keys [keywordize? open? in style]} (parameter-coercion type)
           transform (comp (if keywordize? walk/keywordize-keys identity) in)
           model (if open? (-open-model coercion model) model)
           coercer (-request-coercer coercion style model)]

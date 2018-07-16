@@ -1,5 +1,10 @@
 ## UNRELEASED
 
+## `reitit-core`
+
+* **BREAKING**: the router option key to extract body format has been renamed: `:extract-request-format` => `:reitit.coercion/extract-request-format`
+  * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
+
 ## `reitit-swagger-ui`
 
 * **BREAKING**: pass swagger-ui `:config` as-is (instead of mixed-casing keys) to swagger-ui, fixes [#109](https://github.com/metosin/reitit/issues/109):
