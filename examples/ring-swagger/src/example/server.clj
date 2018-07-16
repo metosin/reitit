@@ -69,10 +69,7 @@
                                     "application/transit+json"}
                         :consumes #{"application/json"
                                     "application/edn"
-                                    "application/transit+json"}}}
-       ;; TODO: these should work by default!
-       :extract-request-format (comp :format :muuntaja/request)
-       :extract-response-format (comp :format :muuntaja/response)})
+                                    "application/transit+json"}}}})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/", :url "/api/swagger.json"})
