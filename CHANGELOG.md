@@ -1,3 +1,18 @@
+## UNRELEASED
+
+## `reitit-swagger-ui`
+
+* **BREAKING**: pass swagger-ui `:config` as-is (instead of mixed-casing keys) to swagger-ui, fixes [#109](https://github.com/metosin/reitit/issues/109):
+  * see [docs](https://github.com/swagger-api/swagger-ui/tree/2.x#parameters) for available parameters.
+
+```clj
+(swagger-ui/create-swagger-ui-handler
+  {:path "/"
+   :url "/api/swagger.json"
+   :config {:jsonEditor true
+            :validatorUrl nil}})
+```
+
 ## 0.1.3 (2018-6-25)
 
 ## `reitit-core`

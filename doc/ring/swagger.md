@@ -55,7 +55,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 | :root            | optional resource root, defaults to `"swagger-ui"`
 | :url             | path to swagger endpoint, defaults to `/swagger.json`
 | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
-| :config          | parameters passed to swaggger-ui, keys transformed into camelCase. See [the docs](https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md)
+| :config          | parameters passed to swaggger-ui as-is. See [the docs](https://github.com/swagger-api/swagger-ui/tree/2.x#parameters)
 
 We use swagger-ui from [ring-swagger-ui](https://github.com/metosin/ring-swagger-ui), which can be easily configured from routing application. It stores files `swagger-ui` in the resource classpath.
 

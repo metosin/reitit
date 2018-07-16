@@ -2,10 +2,12 @@
   (:require [clojure.test :refer :all]
             [reitit.ring :as ring]
             [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
-            [schema.core :refer [Int]]))
+            [schema.core :refer [Int]]
+            [muuntaja.core :as m]))
 
 (def app
   (ring/ring-handler
@@ -156,3 +158,13 @@
            (spec-paths "/two/swagger.json")))
     (is (= ["/common/ping" "/one/ping" "/two/ping" "/two/deep/ping"]
            (spec-paths "/one-two/swagger.json")))))
+
+(deftest swagger-ui-congif-test
+  (let [app (swagger-ui/create-swagger-ui-handler
+              {:path "/"
+               :config {:jsonEditor true}})]
+    (is (= 302 (:status (app {:request-method :get, :uri "/"}))))
+    (is (= 200 (:status (app {:request-method :get, :uri "/index.html"}))))
+    (is (= {:jsonEditor true, :url "/swagger.json"}
+           (->> {:request-method :get, :uri "/config.json"}
+                (app) :body (m/decode m/instance "application/json"))))))

@@ -14,9 +14,9 @@
      | :root            | optional resource root, defaults to `\"swagger-ui\"`
      | :url             | path to swagger endpoint, defaults to `/swagger.json`
      | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
-     | :config          | parameters passed to swaggger-ui, keys transformed into camelCase.
+     | :config          | parameters passed to swaggger-ui as-is.
 
-     See https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
+     See https://github.com/swagger-api/swagger-ui/tree/2.x#parameters
      for all available :config options
 
      Examples:
@@ -24,24 +24,20 @@
         ;; with defaults
         (create-swagger-ui-handler)
 
-        ;; with path and url set, swagger validator disabled
+        ;; with path and url set, swagger validator disabled, jsonEditor enabled
         (swagger-ui/create-swagger-ui-handler
           {:path \"/\"
            :url \"/api/swagger.json\"
-           :config {:validator-url nil})"
+           :config {:validatorUrl nil
+                    :jsonEditor true})"
      ([]
       (create-swagger-ui-handler nil))
      ([options]
-      (let [mixed-case (fn [k]
-                         (let [[f & rest] (str/split (name k) #"-")]
-                           (apply str (str/lower-case f) (map str/capitalize rest))))
-            mixed-case-key (fn [[k v]] [(mixed-case k) v])
-            config-json (fn [{:keys [url config]}] (j/write-value-as-string (merge config {:url url})))
+      (let [config-json (fn [{:keys [url config]}] (j/write-value-as-string (merge config {:url url})))
             conf-js (fn [opts] (str "window.API_CONF = " (config-json opts) ";"))
             options (as-> options $
                           (update $ :root (fnil identity "swagger-ui"))
                           (update $ :url (fnil identity "/swagger.json"))
-                          (update $ :config #(->> % (map mixed-case-key) (into {})))
                           (assoc $ :paths {"/conf.js" {:headers {"Content-Type" "application/javascript"}
                                                        :status 200
                                                        :body (conf-js $)}
