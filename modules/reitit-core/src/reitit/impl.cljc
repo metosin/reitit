@@ -38,6 +38,13 @@
 (defn wild-or-catch-all-param? [x]
   (boolean (or (wild-param x) (catch-all-param x))))
 
+(defn pre-process-path [path]
+  (let [[path fragment] (str/split path #"#" 2)
+        [path query] (str/split path #"\?" 2)]
+    (cond-> {:path path}
+      fragment (assoc :fragment-string fragment)
+      query (assoc :query-string query))))
+
 (defn segments [path]
   #?(:clj  (.split ^String path "/" 666)
      :cljs (.split path #"/" 666)))
