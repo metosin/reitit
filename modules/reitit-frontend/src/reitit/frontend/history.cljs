@@ -138,6 +138,8 @@
 
 (defn set-token
   "Sets the new route, leaving previous route in history."
+  ([state k]
+   (set-token state k nil))
   ([state k params]
    (set-token state k params nil))
   ([{:keys [router history]} k params query]
@@ -147,6 +149,8 @@
 
 (defn replace-token
   "Replaces current route. I.e. current route is not left on history."
+  ([state k]
+   (replace-token state k nil))
   ([state k params]
    (replace-token state k params nil))
   ([{:keys [router history]} k params query]
