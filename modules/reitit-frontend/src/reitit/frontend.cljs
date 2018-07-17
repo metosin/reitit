@@ -1,11 +1,8 @@
 (ns reitit.frontend
   ""
   (:require [reitit.core :as reitit]
-            [clojure.string :as str]
             [clojure.set :as set]
-            [reitit.coercion :as coercion]
-            [goog.events :as e]
-            [goog.dom :as dom])
+            [reitit.coercion :as coercion])
   (:import goog.Uri))
 
 (defn query-params
@@ -26,12 +23,9 @@
       (let [q (query-params uri)
             ;; Return uncoerced values if coercion is not enabled - so
             ;; that tha parameters are always accessible from same property.
-            ;; FIXME: coerce! can't be used as it doesn't take query-params
-            parameters (if (:result match)
-                         (coercion/coerce-request (:result match) {:query-params q
-                                                                   :path-params (:path-params match)})
-                         {:query q
-                          :path (:path-params match)})]
+            parameters (or (coercion/coerce! (assoc match :query-params q))
+                           {:path (:path-params match)
+                            :query q})]
         (assoc match :parameters parameters)))))
 
 (defn match-by-name
