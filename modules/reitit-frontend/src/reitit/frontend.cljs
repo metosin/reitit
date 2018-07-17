@@ -1,11 +1,8 @@
 (ns reitit.frontend
   ""
   (:require [reitit.core :as reitit]
-            [clojure.string :as str]
             [clojure.set :as set]
-            [reitit.coercion :as coercion]
-            [goog.events :as e]
-            [goog.dom :as dom])
+            [reitit.coercion :as coercion])
   (:import goog.Uri))
 
 (defn query-params

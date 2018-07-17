@@ -1,9 +1,7 @@
 (ns reitit.frontend.history
   ""
   (:require [reitit.core :as reitit]
-            [clojure.string :as string]
             [goog.events :as e]
-            [goog.dom :as dom]
             [reitit.core :as r]
             [reitit.frontend :as rf]
             [reitit.impl :as impl])
