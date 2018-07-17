@@ -5,11 +5,12 @@
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
+            [reitit.ring.middleware.alpha.muuntaja :as muuntaja]
+
             [schema.core :refer [Int]]
 
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params]
-            [muuntaja.middleware]))
+            [ring.middleware.params]))
 
 (def app
   (ring/ring-handler
@@ -58,17 +59,11 @@
                              :body {:total (+ x y)}})}}]]]
 
       {:data {:middleware [ring.middleware.params/wrap-params
-                           muuntaja.middleware/wrap-format
+                           (muuntaja/create-format-middleware)
                            swagger/swagger-feature
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]
-              :swagger {:produces #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}
-                        :consumes #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}}}})
+                           rrc/coerce-response-middleware]}})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/", :url "/api/swagger.json"})

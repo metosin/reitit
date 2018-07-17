@@ -8,6 +8,7 @@
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-core]
                  [metosin/reitit-ring]
+                 [metosin/reitit-middleware]
                  [metosin/reitit-spec]
                  [metosin/reitit-schema]
                  [metosin/reitit-swagger]
