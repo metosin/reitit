@@ -49,7 +49,7 @@
    {:file "doc/frontend/README.md"}
    ["Basics" {:file "doc/frontend/basics.md"}]
    ["Browser integration" {:file "doc/frontend/browser.md"}]
-   ["Controllers" {:file "doc/frontend/controllers/.md"}]]
+   ["Controllers" {:file "doc/frontend/controllers.md"}]]
   ["Performance" {:file "doc/performance.md"}]
   ["Interceptors (WIP)" {:file "doc/interceptors.md"}]
   ["Development Instructions" {:file "doc/development.md"}]

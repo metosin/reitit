@@ -99,12 +99,16 @@
 (defn- compile-routes [routes opts]
   (into [] (keep #(compile-route % opts) routes)))
 
+(defn- uncompile-routes [routes]
+  (mapv (comp vec (partial take 2)) routes))
+
 (defn route-info [route]
   (select-keys (impl/create route) [:path :path-parts :path-params :result :data]))
 
 (defprotocol Router
   (router-name [this])
   (routes [this])
+  (compiled-routes [this])
   (options [this])
   (route-names [this])
   (match-by-path [this path])
@@ -145,10 +149,10 @@
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
   expanded options. See [[router]] for available options"
-  ([routes]
-   (linear-router routes {}))
-  ([routes opts]
-   (let [names (find-names routes opts)
+  ([compiled-routes]
+   (linear-router compiled-routes {}))
+  ([compiled-routes opts]
+   (let [names (find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/create [p data result])
@@ -157,8 +161,9 @@
                                 (->PartialMatch p data result % path-params))]
                        [(conj pl route)
                         (if name (assoc nl name f) nl)]))
-                   [[] {}] routes)
-         lookup (impl/fast-map nl)]
+                   [[] {}] compiled-routes)
+         lookup (impl/fast-map nl)
+         routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
        Router
@@ -166,6 +171,8 @@
          :linear-router)
        (routes [_]
          routes)
+       (compiled-routes [_]
+         compiled-routes)
        (options [_]
          opts)
        (route-names [_]
@@ -186,30 +193,33 @@
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
   expanded options. See [[router]] for available options"
-  ([routes]
-   (lookup-router routes {}))
-  ([routes opts]
-   (when-let [wilds (seq (filter impl/wild-route? routes))]
+  ([compiled-routes]
+   (lookup-router compiled-routes {}))
+  ([compiled-routes opts]
+   (when-let [wilds (seq (filter impl/wild-route? compiled-routes))]
      (throw
        (ex-info
          (str "can't create :lookup-router with wildcard routes: " wilds)
          {:wilds wilds
-          :routes routes})))
-   (let [names (find-names routes opts)
+          :routes compiled-routes})))
+   (let [names (find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      [(assoc pl p (->Match p data result {} p))
                       (if name
                         (assoc nl name #(->Match p data result % p))
-                        nl)]) [{} {}] routes)
+                        nl)]) [{} {}] compiled-routes)
          data (impl/fast-map pl)
-         lookup (impl/fast-map nl)]
+         lookup (impl/fast-map nl)
+         routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
          :lookup-router)
        (routes [_]
          routes)
+       (compiled-routes [_]
+         compiled-routes)
        (options [_]
          opts)
        (route-names [_]
@@ -226,10 +236,10 @@
 (defn segment-router
   "Creates a special prefix-tree style segment router from resolved routes and optional
   expanded options. See [[router]] for available options"
-  ([routes]
-   (segment-router routes {}))
-  ([routes opts]
-   (let [names (find-names routes opts)
+  ([compiled-routes]
+   (segment-router compiled-routes {}))
+  ([compiled-routes opts]
+   (let [names (find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/create [p data result])
@@ -238,8 +248,9 @@
                                 (->PartialMatch p data result % path-params))]
                        [(segment/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
-                   [nil {}] routes)
-         lookup (impl/fast-map nl)]
+                   [nil {}] compiled-routes)
+         lookup (impl/fast-map nl)
+         routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
        Router
@@ -247,6 +258,8 @@
          :segment-router)
        (routes [_]
          routes)
+       (compiled-routes [_]
+         compiled-routes)
        (options [_]
          opts)
        (route-names [_]
@@ -266,24 +279,27 @@
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
   expanded options. See [[router]] for available options"
-  ([routes]
-   (single-static-path-router routes {}))
-  ([routes opts]
-   (when (or (not= (count routes) 1) (some impl/wild-route? routes))
+  ([compiled-routes]
+   (single-static-path-router compiled-routes {}))
+  ([compiled-routes opts]
+   (when (or (not= (count compiled-routes) 1) (some impl/wild-route? compiled-routes))
      (throw
        (ex-info
-         (str ":single-static-path-router requires exactly 1 static route: " routes)
-         {:routes routes})))
-   (let [[n :as names] (find-names routes opts)
-         [[p data result] :as compiled] routes
+         (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
+         {:routes compiled-routes})))
+   (let [[n :as names] (find-names compiled-routes opts)
+         [[p data result] :as compiled] compiled-routes
          p #?(:clj (.intern ^String p) :cljs p)
-         match (->Match p data result {} p)]
+         match (->Match p data result {} p)
+         routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
          :single-static-path-router)
        (routes [_]
          routes)
+       (compiled-routes [_]
+         compiled-routes)
        (options [_]
          opts)
        (route-names [_]
@@ -303,20 +319,23 @@
   static routes and [[segment-router]] for wildcard routes. All
   routes should be non-conflicting. Takes resolved routes and optional
   expanded options. See [[router]] for options."
-  ([routes]
-   (mixed-router routes {}))
-  ([routes opts]
-   (let [{wild true, lookup false} (group-by impl/wild-route? routes)
+  ([compiled-routes]
+   (mixed-router compiled-routes {}))
+  ([compiled-routes opts]
+   (let [{wild true, lookup false} (group-by impl/wild-route? compiled-routes)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (segment-router wild opts)
          static-router (->static-router lookup opts)
-         names (find-names routes opts)]
+         names (find-names compiled-routes opts)
+         routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
          :mixed-router)
        (routes [_]
          routes)
+       (compiled-routes [_]
+         compiled-routes)
        (options [_]
          opts)
        (route-names [_]
@@ -354,21 +373,21 @@
    (let [{:keys [router] :as opts} (meta-merge default-router-options opts)
          routes (resolve-routes raw-routes opts)
          conflicting (conflicting-routes routes)
-         routes (compile-routes routes opts)
-         wilds? (boolean (some impl/wild-route? routes))
-         all-wilds? (every? impl/wild-route? routes)
+         compiled-routes (compile-routes routes opts)
+         wilds? (boolean (some impl/wild-route? compiled-routes))
+         all-wilds? (every? impl/wild-route? compiled-routes)
          router (cond
                   router router
-                  (and (= 1 (count routes)) (not wilds?)) single-static-path-router
+                  (and (= 1 (count compiled-routes)) (not wilds?)) single-static-path-router
                   conflicting linear-router
                   (not wilds?) lookup-router
                   all-wilds? segment-router
                   :else mixed-router)]
 
      (when-let [validate (:validate opts)]
-       (validate routes opts))
+       (validate compiled-routes opts))
 
      (when-let [conflicts (:conflicts opts)]
        (when conflicting (conflicts conflicting)))
 
-     (router routes opts))))
+     (router compiled-routes opts))))

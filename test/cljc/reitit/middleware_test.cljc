@@ -178,7 +178,7 @@
           (is (= [::mw1 ::mw3 :ok ::mw3 ::mw1] (app "/api")))
 
           (testing "routes contain list of actually applied mw"
-            (is (= [::mw1 ::mw3] (->> (r/routes router)
+            (is (= [::mw1 ::mw3] (->> (r/compiled-routes router)
                                       first
                                       last
                                       :middleware

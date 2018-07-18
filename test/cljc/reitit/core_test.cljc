@@ -14,7 +14,7 @@
         (testing "simple"
           (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
             (is (= name (r/router-name router)))
-            (is (= [["/api/ipa/:size" {:name ::beer} nil]]
+            (is (= [["/api/ipa/:size" {:name ::beer}]]
                    (r/routes router)))
             (is (map? (r/options router)))
             (is (= (r/map->Match
@@ -76,7 +76,7 @@
     (are [r name]
       (let [router (r/router ["/api" ["/ipa" ["/large" ::beer]]] {:router r})]
         (is (= name (r/router-name router)))
-        (is (= [["/api/ipa/large" {:name ::beer} nil]]
+        (is (= [["/api/ipa/large" {:name ::beer}]]
                (r/routes router)))
         (is (map? (r/options router)))
         (is (= (r/map->Match
@@ -141,7 +141,7 @@
                   ["/api/pong" {:name ::pong
                                 :path "/api/pong",
                                 :roles #{:admin}}]]
-                 (map butlast (r/routes router)))))
+                 (r/routes router))))
 
         (testing "route match contains compiled handler"
           (is (= 2 @compile-times))
