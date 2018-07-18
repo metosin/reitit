@@ -166,7 +166,7 @@
           (is (= [::i1 ::i3 :ok ::i3 ::i1] (app "/api")))
 
           (testing "routes contain list of actually applied interceptors"
-            (is (= [::i1 ::i3 ::api] (->> (r/routes router)
+            (is (= [::i1 ::i3 ::api] (->> (r/compiled-routes router)
                                           first
                                           last
                                           :interceptors

@@ -93,6 +93,6 @@
                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                              [(path->template p) endpoint]))]
       (if id
-        (let [paths (->> router (r/routes) (filter accept-route) (map transform-path) (into {}))]
+        (let [paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) (into {}))]
           {:status 200
            :body (meta-merge swagger {:paths paths})})))))
