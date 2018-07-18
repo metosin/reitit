@@ -38,7 +38,7 @@ Now, we can add routers to the router:
 ; ["/foo/bar/:id/:subid" {:handler #object[clojure.core$identity]}]]
 ```
 
-Router is recreated, so all the rules are fires:
+Router is recreated, so all the rules are fired:
 
 ```clj
 (swap! router add-route ["/foo/:fail" identity])
