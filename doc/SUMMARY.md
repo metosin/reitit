@@ -16,6 +16,7 @@
     * [Data-specs](coercion/data_spec_coercion.md)
 * [Advanced](advanced/README.md)
     * [Configuring Routers](advanced/configuring_routers.md)
+    * [Composing Routers](advanced/composing_routers.md)
     * [Different Routers](advanced/different_routers.md)
     * [Route Validation](advanced/route_validation.md)
     * [Dev Workflow](advanced/dev_workflow.md)
