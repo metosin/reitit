@@ -74,13 +74,13 @@
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
   (fn [{:keys [::r/router ::r/match :request-method]}]
-    (let [{:keys [id] :as swagger} (-> match :result request-method :data :swagger)
+    (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
           ->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
           ids (->set id)
           swagger (->> (dissoc swagger :id)
                        (merge {:swagger "2.0"
                                :x-id ids}))
-          accept-route #(-> % second :swagger :id ->set (set/intersection ids) seq)
+          accept-route #(-> % second :swagger :id (or ::default) ->set (set/intersection ids) seq)
           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
                                (if (and data (not no-doc))
                                  [method
@@ -92,7 +92,6 @@
           transform-path (fn [[p _ c]]
                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                              [(path->template p) endpoint]))]
-      (if id
-        (let [paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) (into {}))]
-          {:status 200
-           :body (meta-merge swagger {:paths paths})})))))
+      (let [paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) (into {}))]
+        {:status 200
+         :body (meta-merge swagger {:paths paths})}))))

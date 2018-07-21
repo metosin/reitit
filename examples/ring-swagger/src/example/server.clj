@@ -15,7 +15,6 @@
   (ring/ring-handler
     (ring/router
       ["/api"
-       {:swagger {:id ::math}}
 
        ["/swagger.json"
         {:get {:no-doc true

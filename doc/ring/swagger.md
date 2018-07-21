@@ -18,7 +18,7 @@ The following route data keys contribute to the generated swagger specification:
 
 | key           | description |
 | --------------|-------------|
-| :swagger      | map of any swagger-data. Must have `:id` (keyword or sequence of keywords) to identify the api
+| :swagger      | map of any swagger-data. Can have `:id` (keyword or sequence of keywords) to identify the api
 | :no-doc       | optional boolean to exclude endpoint from api docs
 | :tags         | optional set of strings of keywords tags for an endpoint api docs
 | :summary      | optional short string summary of an endpoint
@@ -67,7 +67,7 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
 
 ### Simple example
 
-* two routes in a single swagger-api `::api`
+* two routes
 * swagger-spec served from  `"/swagger.json"`
 * swagger-ui mounted to `"/"`
 
@@ -84,8 +84,7 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
         ["/pong" {:post (constantly "pong")}]]
        ["/swagger.json"
         {:get {:no-doc true
-               :handler (swagger/create-swagger-handler)}}]]
-      {:data {:swagger {:id ::api}}}) ;; for all routes
+               :handler (swagger/create-swagger-handler)}}]]) 
     (swagger-ui/create-swagger-ui-handler {:path "/"})))
 ```
 
@@ -95,7 +94,7 @@ The generated swagger spec:
 (app {:request-method :get :uri "/swagger.json"})
 ;{:status 200
 ; :body {:swagger "2.0"
-;        :x-id #{:user/api}
+;        :x-id #{:reitit.swagger/default}
 ;        :paths {"/api/ping" {:get {}}
 ;                "/api/pong" {:post {}}}}}
 ```
@@ -138,8 +137,7 @@ Whole example project is in [`/examples/ring-swagger`](https://github.com/metosi
   (ring/ring-handler
     (ring/router
       ["/api"
-       {:swagger {:id ::math}}
-
+      
        ["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
@@ -195,9 +193,9 @@ http://localhost:3000 should render now the swagger-ui:
 
 ![Swagger-ui](../images/swagger.png)
 
-## Advanced
+## Multiple swagger apis
 
-Route data in path `[:swagger :id]` can be either a keyword or a sequence of keywords. This enables one route to be part of multiple swagger apis. Normal route data [scoping rules](../basics/route_data.md#nested-route-data) rules apply.
+There can be multiple swagger apis within a router. Each route can be part of 0..n swagger apis. Swagger apis are identified by value in route data under key path `[:swagger :id]`. It can be either a keyword or a sequence of keywords. Normal route data [scoping rules](../basics/route_data.md#nested-route-data) rules apply.
 
 Example with:
 
