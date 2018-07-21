@@ -5,6 +5,7 @@
 * **BREAKING**: the router option key to extract body format has been renamed: `:extract-request-format` => `:reitit.coercion/extract-request-format`
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
 * the `r/routes` returns just the path + data tuples as documented, not the compiled route results. To get the compiled results, use `r/compiled-routes` instead.
+* welcome route name conflict resolution! If router has routes with same names, router can't be created. fix 'em.
 
 ## `reitit-swagger`
 

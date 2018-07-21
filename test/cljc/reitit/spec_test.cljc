@@ -79,7 +79,7 @@
         {:expand nil}
         {:coerce nil}
         {:compile nil}
-        {:conflicts nil}
+        {:conflicts "invalid"}
         {:router nil}))))
 
 (deftest route-data-validation-test
