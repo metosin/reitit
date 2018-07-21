@@ -6,6 +6,25 @@
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
 * the `r/routes` returns just the path + data tuples as documented, not the compiled route results. To get the compiled results, use `r/compiled-routes` instead.
 
+## `reitit-swagger`
+
+* In case of just one swagger api per router, the swagger api doesn't have to identified, so this works now:
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.swagger :as swagger])
+(require '[reitit.swagger-ui :as swagger-ui])
+
+(ring/ring-handler
+  (ring/router
+    [["/ping"
+      {:get (fn [_] {:status 200, :body "pong"})}]
+     ["/swagger.json"
+      {:get {:no-doc true
+             :handler (swagger/create-swagger-handler)}}]])
+  (swagger-ui/create-swagger-ui-handler {:path "/"}))
+```
+
 ## `reitit-swagger-ui`
 
 * **BREAKING**: pass swagger-ui `:config` as-is (instead of mixed-casing keys) to swagger-ui, fixes [#109](https://github.com/metosin/reitit/issues/109):
