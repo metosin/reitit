@@ -180,5 +180,5 @@
                          :handler (swagger/create-swagger-handler)}}]]))]
     (is (= ["/ping"] (spec-paths app "/swagger.json")))
     (is (= #{::swagger/default}
-          (-> {:request-method :get :uri "/swagger.json"}
-              (app) :body :x-id)))))
+           (-> {:request-method :get :uri "/swagger.json"}
+               (app) :body :x-id)))))

@@ -12,6 +12,6 @@
                  (if options
                    (let [m (m/create options)]
                      {:data {:swagger {:produces (m/encodes m)
-                                       :consumes (m/encodes m)}}
+                                       :consumes (m/decodes m)}}
                       :wrap (fn [handler]
                               (muuntaja.middleware/wrap-format handler m))}))))}))

@@ -81,10 +81,11 @@
                        (merge {:swagger "2.0"
                                :x-id ids}))
           accept-route #(-> % second :swagger :id (or ::default) ->set (set/intersection ids) seq)
-          transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data}]]
+          transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data middleware :middleware}]]
                                (if (and data (not no-doc))
                                  [method
                                   (meta-merge
+                                    (apply meta-merge (keep (comp :swagger :data) middleware))
                                     (if coercion
                                       (coercion/-get-apidocs coercion :swagger data))
                                     (select-keys data [:tags :summary :description])
