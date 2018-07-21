@@ -63,7 +63,7 @@
            coerce (into [] (keep #(coerce % opts)))))
 
 ;; This whole function might be more efficient and easier to understand with transducers.
-(defn conflicting-routes [routes]
+(defn path-conflicting-routes [routes]
   (some->>
     (loop [[r & rest] routes, acc {}]
       (if (seq rest)
@@ -74,17 +74,33 @@
     (seq)
     (into {})))
 
-(defn conflicts-str [conflicts]
-  (apply str "Router contains conflicting routes:\n\n"
+(defn path-conflicts-str [conflicts]
+  (apply str "Router contains conflicting route paths:\n\n"
          (mapv
            (fn [[[path] vals]]
              (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
            conflicts)))
 
-(defn throw-on-conflicts! [conflicts]
+(defn name-conflicting-routes [routes]
+  (some->> routes
+           (group-by (comp :name second))
+           (remove (comp nil? first))
+           (filter (comp pos? count butlast second))
+           (seq)
+           (map (fn [[k v]] [k (set v)]))
+           (into {})))
+
+(defn name-conflicts-str [conflicts]
+  (apply str "Router contains conflicting route names:\n\n"
+         (mapv
+           (fn [[name vals]]
+             (str name "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
+           conflicts)))
+
+(defn throw-on-conflicts! [f conflicts]
   (throw
     (ex-info
-      (conflicts-str conflicts)
+      (f conflicts)
       {:conflicts conflicts})))
 
 (defn name-lookup [[_ {:keys [name]}] _]
@@ -144,7 +160,7 @@
    :expand expand
    :coerce (fn [route _] route)
    :compile (fn [[_ {:keys [handler]}] _] handler)
-   :conflicts throw-on-conflicts!})
+   :conflicts (partial throw-on-conflicts! path-conflicts-str)})
 
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
@@ -370,16 +386,17 @@
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
-   (let [{:keys [router] :as opts} (meta-merge default-router-options opts)
+   (let [{:keys [router] :as opts} (merge default-router-options opts)
          routes (resolve-routes raw-routes opts)
-         conflicting (conflicting-routes routes)
+         path-conflicting (path-conflicting-routes routes)
+         name-conflicting (name-conflicting-routes routes)
          compiled-routes (compile-routes routes opts)
          wilds? (boolean (some impl/wild-route? compiled-routes))
          all-wilds? (every? impl/wild-route? compiled-routes)
          router (cond
                   router router
                   (and (= 1 (count compiled-routes)) (not wilds?)) single-static-path-router
-                  conflicting linear-router
+                  path-conflicting linear-router
                   (not wilds?) lookup-router
                   all-wilds? segment-router
                   :else mixed-router)]
@@ -388,6 +405,9 @@
        (validate compiled-routes opts))
 
      (when-let [conflicts (:conflicts opts)]
-       (when conflicting (conflicts conflicting)))
+       (when path-conflicting (conflicts path-conflicting)))
+
+     (when name-conflicting
+       (throw-on-conflicts! name-conflicts-str name-conflicting))
 
      (router compiled-routes opts))))

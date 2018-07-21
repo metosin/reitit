@@ -1,10 +1,12 @@
 # Route Conflicts
 
-Most routing libraries allow conflicting paths within a router. On lookup, the first match is used making rest of the matching routes effecively unreachable. This is not good, especially if route tree is merged from multiple sources.
+We should fast if a router contains conflicting paths or route names. 
 
-Reitit resolves this by running explicit conflicit resolution when a Router is created. Conflicting routes are passed into a `:conflicts` callback. Default implementation throws `ex-info` with a descriptive message.
+When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. Is some (legacy api) cases, path conflicts are should be allowed and one can override the path conflict resolution via `:conflicts` router option.
 
-Examples router with conflicting routes:
+## Path Conflicts
+
+Routes with path conflicts:
 
 ```clj
 (require '[reitit.core :as r])
@@ -17,11 +19,11 @@ Examples router with conflicting routes:
    ["/:version/status"]])
 ```
 
-By default, `ExceptionInfo` is thrown:
+Creating router with defaults:
 
 ```clj
 (r/router routes)
-; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting routes:
+; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
 ;
 ;    /:user-id/orders
 ; -> /public/*path
@@ -35,22 +37,58 @@ By default, `ExceptionInfo` is thrown:
 ;
 ```
 
-Just logging the conflicts:
+To ignore the conflicts:
 
 ```clj
 (r/router
   routes
-  {:conflicts (comp println reitit/conflicts-str)})
-; Router contains conflicting routes:
+  {:conflicts nil})
+; => #object[reitit.core$linear_router$reify]
+```
+
+To just log the conflicts:
+
+```clj
+(r/router
+  routes
+  {:conflicts (fn [conflicts]
+                (println (r/path-conflicts-str conflicts)))})
+; Router contains conflicting route paths:
 ;
 ;    /:user-id/orders
 ; -> /public/*path
 ; -> /bulk/:bulk-id
 ;
-;    /bulk/:bulk-id
+; /bulk/:bulk-id
 ; -> /:version/status
 ;
-;    /public/*path
+; /public/*path
 ; -> /:version/status
+;
+; => #object[reitit.core$linear_router$reify]
+```
+
+## Name conflicts
+
+Routes with name conflicts:
+
+```clj
+(def routes
+  [["/ping" ::ping]
+   ["/admin" ::admin]
+   ["/admin/ping" ::ping]])
+```
+
+Creating router with defaults:
+
+```clj
+(r/router routes)
+;CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route names:
+;
+;:reitit.core/ping
+;-> /ping
+;-> /admin/ping
 ;
 ```
+
+There is no way to disable the name conflict resolution.

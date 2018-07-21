@@ -12,18 +12,15 @@
 (deftest coercion-test
   (let [r (r/router
             [["/schema" {:coercion reitit.coercion.schema/coercion}
-              ["/:number/:keyword" {:name ::user
-                                    :parameters {:path {:number s/Int
+              ["/:number/:keyword" {:parameters {:path {:number s/Int
                                                         :keyword s/Keyword}
                                                  :query (s/maybe {:int s/Int})}}]]
              ["/spec" {:coercion reitit.coercion.spec/coercion}
-              ["/:number/:keyword" {:name ::user
-                                    :parameters {:path {:number int?
+              ["/:number/:keyword" {:parameters {:path {:number int?
                                                         :keyword keyword?}
                                                  :query (ds/maybe {:int int?})}}]]
              ["/none"
-              ["/:number/:keyword" {:name ::user
-                                    :parameters {:path {:number int?
+              ["/:number/:keyword" {:parameters {:path {:number int?
                                                         :keyword keyword?}}}]]]
             {:compile coercion/compile-request-coercers})]
 

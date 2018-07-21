@@ -197,55 +197,66 @@
              (r/match-by-path router "/api/user/1/2"))))))
 
 (deftest conflicting-routes-test
-  (are [conflicting? data]
-    (let [routes (r/resolve-routes data {})
-          conflicts (-> routes (r/resolve-routes {}) (r/conflicting-routes))]
-      (if conflicting? (seq conflicts) (nil? conflicts)))
+  (testing "path conflicts"
+    (are [conflicting? data]
+      (let [routes (r/resolve-routes data {})
+            conflicts (-> routes
+                          (r/resolve-routes {})
+                          (r/path-conflicting-routes))]
+        (if conflicting? (seq conflicts) (nil? conflicts)))
 
-    true [["/a"]
-          ["/a"]]
+      true [["/a"]
+            ["/a"]]
 
-    true [["/a"]
-          ["/:b"]]
+      true [["/a"]
+            ["/:b"]]
 
-    true [["/a"]
-          ["/*b"]]
+      true [["/a"]
+            ["/*b"]]
 
-    true [["/a/1/2"]
-          ["/*b"]]
+      true [["/a/1/2"]
+            ["/*b"]]
 
-    false [["/a"]
-           ["/a/"]]
+      false [["/a"]
+             ["/a/"]]
 
-    false [["/a"]
-           ["/a/1"]]
+      false [["/a"]
+             ["/a/1"]]
 
-    false [["/a"]
-           ["/a/:b"]]
+      false [["/a"]
+             ["/a/:b"]]
 
-    false [["/a"]
-           ["/a/*b"]]
+      false [["/a"]
+             ["/a/*b"]]
 
-    true [["/v2/public/messages/dataset/bulk"]
-          ["/v2/public/messages/dataset/:dataset-id"]])
+      true [["/v2/public/messages/dataset/bulk"]
+            ["/v2/public/messages/dataset/:dataset-id"]])
 
-  (testing "all conflicts are returned"
-    (is (= {["/a" {}] #{["/*d" {}] ["/:b" {}]},
-            ["/:b" {}] #{["/c" {}] ["/*d" {}]},
-            ["/c" {}] #{["/*d" {}]}}
-           (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
-               (r/resolve-routes {})
-               (r/conflicting-routes)))))
+    (testing "all conflicts are returned"
+      (is (= {["/a" {}] #{["/*d" {}] ["/:b" {}]},
+              ["/:b" {}] #{["/c" {}] ["/*d" {}]},
+              ["/c" {}] #{["/*d" {}]}}
+             (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
+                 (r/resolve-routes {})
+                 (r/path-conflicting-routes)))))
 
-  (testing "router with conflicting routes"
-    (testing "throws by default"
+    (testing "router with conflicting routes"
+      (testing "throws by default"
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"Router contains conflicting route paths"
+              (r/router
+                [["/a"] ["/a"]]))))
+      (testing "can be configured to ignore"
+        (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts nil})))))))
+
+  (testing "name conflicts"
+    (testing "router with conflicting routes always throws"
       (is (thrown-with-msg?
             ExceptionInfo
-            #"Router contains conflicting routes"
+            #"Router contains conflicting route names"
             (r/router
-              [["/a"] ["/a"]]))))
-    (testing "can be configured to ignore"
-      (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts (constantly nil)})))))))
+              [["/1" ::1] ["/2" ::1]]))))))
 
 (deftest match->path-test
   (let [router (r/router ["/:a/:b" ::route])]

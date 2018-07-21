@@ -51,7 +51,7 @@
 (s/def :reitit.router/expand fn?)
 (s/def :reitit.router/coerce fn?)
 (s/def :reitit.router/compile fn?)
-(s/def :reitit.router/conflicts fn?)
+(s/def :reitit.router/conflicts (s/nilable fn?))
 (s/def :reitit.router/router fn?)
 
 (s/def ::opts
