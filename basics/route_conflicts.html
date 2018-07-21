@@ -672,9 +672,10 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="route-conflicts">Route Conflicts</h1>
-<p>Most routing libraries allow conflicting paths within a router. On lookup, the first match is used making rest of the matching routes effecively unreachable. This is not good, especially if route tree is merged from multiple sources.</p>
-<p>Reitit resolves this by running explicit conflicit resolution when a Router is created. Conflicting routes are passed into a <code>:conflicts</code> callback. Default implementation throws <code>ex-info</code> with a descriptive message.</p>
-<p>Examples router with conflicting routes:</p>
+<p>We should fast if a router contains conflicting paths or route names. </p>
+<p>When a <code>Router</code> is created via <code>reitit.core/router</code>, both path and route name conflicts are checked automatically. By default, in case of conflict, an <code>ex-info</code> is thrown with a descriptive message. Is some (legacy api) cases, path conflicts are should be allowed and one can override the path conflict resolution via <code>:conflicts</code> router option.</p>
+<h2 id="path-conflicts">Path Conflicts</h2>
+<p>Routes with path conflicts:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
@@ -684,9 +685,9 @@
    [<span class="hljs-string">&quot;/public/*path&quot;</span>]
    [<span class="hljs-string">&quot;/:version/status&quot;</span>]])
 </code></pre>
-<p>By default, <code>ExceptionInfo</code> is thrown:</p>
+<p>Creating router with defaults:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span> routes)
-<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting routes:</span>
+<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:</span>
 <span class="hljs-comment">;</span>
 <span class="hljs-comment">;    /:user-id/orders</span>
 <span class="hljs-comment">; -&gt; /public/*path</span>
@@ -699,23 +700,48 @@
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
 </code></pre>
-<p>Just logging the conflicts:</p>
+<p>To ignore the conflicts:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
   routes
-  {<span class="hljs-symbol">:conflicts</span> (<span class="hljs-name"><span class="hljs-builtin-name">comp</span></span> println reitit/conflicts-str)})
-<span class="hljs-comment">; Router contains conflicting routes:</span>
+  {<span class="hljs-symbol">:conflicts</span> <span class="hljs-literal">nil</span>})
+<span class="hljs-comment">; =&gt; #object[reitit.core$linear_router$reify]</span>
+</code></pre>
+<p>To just log the conflicts:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
+  routes
+  {<span class="hljs-symbol">:conflicts</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [conflicts]
+                (<span class="hljs-name">println</span> (<span class="hljs-name">r/path-conflicts-str</span> conflicts)))})
+<span class="hljs-comment">; Router contains conflicting route paths:</span>
 <span class="hljs-comment">;</span>
 <span class="hljs-comment">;    /:user-id/orders</span>
 <span class="hljs-comment">; -&gt; /public/*path</span>
 <span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /bulk/:bulk-id</span>
+<span class="hljs-comment">; /bulk/:bulk-id</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /public/*path</span>
+<span class="hljs-comment">; /public/*path</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; =&gt; #object[reitit.core$linear_router$reify]</span>
+</code></pre>
+<h2 id="name-conflicts">Name conflicts</h2>
+<p>Routes with name conflicts:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [[<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+   [<span class="hljs-string">&quot;/admin&quot;</span> <span class="hljs-symbol">::admin</span>]
+   [<span class="hljs-string">&quot;/admin/ping&quot;</span> <span class="hljs-symbol">::ping</span>]])
+</code></pre>
+<p>Creating router with defaults:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">r/router</span> routes)
+<span class="hljs-comment">;CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route names:</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;:reitit.core/ping</span>
+<span class="hljs-comment">;-&gt; /ping</span>
+<span class="hljs-comment">;-&gt; /admin/ping</span>
 <span class="hljs-comment">;</span>
 </code></pre>
+<p>There is no way to disable the name conflict resolution.</p>
 
                                 
                                 </section>
@@ -759,7 +785,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Conflicts","level":"1.2.7","depth":2,"next":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"previous":{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_conflicts.md","mtime":"2018-07-21T06:47:22.343Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-21T06:48:00.548Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Conflicts","level":"1.2.7","depth":2,"next":{"title":"Coercion","level":"1.3","depth":1,"path":"coercion/README.md","ref":"coercion/README.md","articles":[{"title":"Coercion Explained","level":"1.3.1","depth":2,"path":"coercion/coercion.md","ref":"coercion/coercion.md","articles":[]},{"title":"Plumatic Schema","level":"1.3.2","depth":2,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},{"title":"Clojure.spec","level":"1.3.3","depth":2,"path":"coercion/clojure_spec_coercion.md","ref":"coercion/clojure_spec_coercion.md","articles":[]},{"title":"Data-specs","level":"1.3.4","depth":2,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]}]},"previous":{"title":"Route Data Validation","level":"1.2.6","depth":2,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_conflicts.md","mtime":"2018-07-21T06:49:02.476Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-21T06:49:40.113Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
