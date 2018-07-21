@@ -129,6 +129,9 @@
                                                   :summary "plus"}}}}
              spec)))))
 
+(defn spec-paths [app uri]
+  (-> {:request-method :get, :uri uri} app :body :paths keys))
+
 (deftest multiple-swagger-apis-test
   (let [ping-route ["/ping" {:get (constantly "ping")}]
         spec-route ["/swagger.json"
@@ -149,15 +152,13 @@
                   ["/deep" {:swagger {:id ::one}}
                    ping-route]]
                  ["/one-two" {:swagger {:id #{::one ::two}}}
-                  spec-route]]))
-        spec-paths (fn [uri]
-                     (-> {:request-method :get, :uri uri} app :body :paths keys))]
+                  spec-route]]))]
     (is (= ["/common/ping" "/one/ping" "/two/deep/ping"]
-           (spec-paths "/one/swagger.json")))
+           (spec-paths app "/one/swagger.json")))
     (is (= ["/common/ping" "/two/ping"]
-           (spec-paths "/two/swagger.json")))
+           (spec-paths app "/two/swagger.json")))
     (is (= ["/common/ping" "/one/ping" "/two/ping" "/two/deep/ping"]
-           (spec-paths "/one-two/swagger.json")))))
+           (spec-paths app "/one-two/swagger.json")))))
 
 (deftest swagger-ui-congif-test
   (let [app (swagger-ui/create-swagger-ui-handler
@@ -168,3 +169,16 @@
     (is (= {:jsonEditor true, :url "/swagger.json"}
            (->> {:request-method :get, :uri "/config.json"}
                 (app) :body (m/decode m/instance "application/json"))))))
+
+(deftest without-swagger-id-test
+  (let [app (ring/ring-handler
+              (ring/router
+                [["/ping"
+                  {:get (constantly "ping")}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))]
+    (is (= ["/ping"] (spec-paths app "/swagger.json")))
+    (is (= #{::swagger/default}
+          (-> {:request-method :get :uri "/swagger.json"}
+              (app) :body :x-id)))))
