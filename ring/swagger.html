@@ -692,7 +692,7 @@
 <tbody>
 <tr>
 <td>:swagger</td>
-<td>map of any swagger-data. Must have <code>:id</code> (keyword or sequence of keywords) to identify the api</td>
+<td>map of any swagger-data. Can have <code>:id</code> (keyword or sequence of keywords) to identify the api</td>
 </tr>
 <tr>
 <td>:no-doc</td>
@@ -775,7 +775,7 @@
 <h2 id="examples">Examples</h2>
 <h3 id="simple-example">Simple example</h3>
 <ul>
-<li>two routes in a single swagger-api <code>::api</code></li>
+<li>two routes</li>
 <li>swagger-spec served from  <code>&quot;/swagger.json&quot;</code></li>
 <li>swagger-ui mounted to <code>&quot;/&quot;</code></li>
 </ul>
@@ -791,15 +791,14 @@
         [<span class="hljs-string">&quot;/pong&quot;</span> {<span class="hljs-symbol">:post</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> <span class="hljs-string">&quot;pong&quot;</span>)}]]
        [<span class="hljs-string">&quot;/swagger.json&quot;</span>
         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
-               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:id</span> <span class="hljs-symbol">::api</span>}}}) <span class="hljs-comment">;; for all routes</span>
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]]) 
     (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span> {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/&quot;</span>})))
 </code></pre>
 <p>The generated swagger spec:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span> <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/swagger.json&quot;</span>})
 <span class="hljs-comment">;{:status 200</span>
 <span class="hljs-comment">; :body {:swagger &quot;2.0&quot;</span>
-<span class="hljs-comment">;        :x-id #{:user/api}</span>
+<span class="hljs-comment">;        :x-id #{:reitit.swagger/default}</span>
 <span class="hljs-comment">;        :paths {&quot;/api/ping&quot; {:get {}}</span>
 <span class="hljs-comment">;                &quot;/api/pong&quot; {:post {}}}}}</span>
 </code></pre>
@@ -836,7 +835,6 @@
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
       [<span class="hljs-string">&quot;/api&quot;</span>
-       {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:id</span> <span class="hljs-symbol">::math</span>}}
 
        [<span class="hljs-string">&quot;/swagger.json&quot;</span>
         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
@@ -890,8 +888,8 @@
 </code></pre>
 <p><a href="http://localhost:3000" target="_blank">http://localhost:3000</a> should render now the swagger-ui:</p>
 <p><img src="../images/swagger.png" alt="Swagger-ui"></p>
-<h2 id="advanced">Advanced</h2>
-<p>Route data in path <code>[:swagger :id]</code> can be either a keyword or a sequence of keywords. This enables one route to be part of multiple swagger apis. Normal route data <a href="../basics/route_data.html#nested-route-data">scoping rules</a> rules apply.</p>
+<h2 id="multiple-swagger-apis">Multiple swagger apis</h2>
+<p>There can be multiple swagger apis within a router. Each route can be part of 0..n swagger apis. Swagger apis are identified by value in route data under key path <code>[:swagger :id]</code>. It can be either a keyword or a sequence of keywords. Normal route data <a href="../basics/route_data.html#nested-route-data">scoping rules</a> rules apply.</p>
 <p>Example with:</p>
 <ul>
 <li>4 routes</li>
@@ -980,7 +978,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"1.5.10","depth":2,"next":{"title":"Frontend","level":"1.6","depth":1,"path":"frontend/README.md","ref":"frontend/README.md","articles":[{"title":"Basics","level":"1.6.1","depth":2,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},{"title":"Browser integration","level":"1.6.2","depth":2,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},{"title":"Controllers","level":"1.6.3","depth":2,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]}]},"previous":{"title":"Compiling Middleware","level":"1.5.9","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-07-18T10:22:50.984Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-18T10:23:27.219Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"1.5.10","depth":2,"next":{"title":"Frontend","level":"1.6","depth":1,"path":"frontend/README.md","ref":"frontend/README.md","articles":[{"title":"Basics","level":"1.6.1","depth":2,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},{"title":"Browser integration","level":"1.6.2","depth":2,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},{"title":"Controllers","level":"1.6.3","depth":2,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]}]},"previous":{"title":"Compiling Middleware","level":"1.5.9","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-07-21T06:47:22.347Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-21T06:48:00.548Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
