@@ -80,8 +80,8 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
   (ring/ring-handler
     (ring/router
       [["/api"
-        ["/ping" {:get (constantly "ping")}]
-        ["/pong" {:post (constantly "pong")}]]
+        ["/ping" {:get (constantly {:status 200, :body "ping"})}]
+        ["/pong" {:post (constantly {:status 200, :body "pong"})}]]
        ["/swagger.json"
         {:get {:no-doc true
                :handler (swagger/create-swagger-handler)}}]]) 
@@ -208,7 +208,7 @@ Example with:
 (require '[reitit.swagger :as swagger])
 
 (def ping-route
-  ["/ping" {:get (constantly "ping")}])
+  ["/ping" {:get (constantly {:status 200, :body "ping"})}])
 
 (def spec-route
   ["/swagger.json"
