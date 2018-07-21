@@ -5,7 +5,7 @@
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
-            [reitit.ring.middleware.alpha.muuntaja :as muuntaja]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
 
             [schema.core :refer [Int]]
 

@@ -1,4 +1,4 @@
-(ns reitit.ring.middleware.alpha.multipart
+(ns reitit.ring.middleware.multipart
   (:require [reitit.coercion :as coercion]
             [ring.middleware.multipart-params :as multipart-params]))
 

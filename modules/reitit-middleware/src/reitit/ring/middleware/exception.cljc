@@ -1,4 +1,4 @@
-(ns reitit.ring.middleware.alpha.exception
+(ns reitit.ring.middleware.exception
   (:require [reitit.coercion :as coercion]
             [reitit.ring :as ring]))
 

@@ -1,4 +1,4 @@
-(ns reitit.ring.middleware.alpha.muuntaja
+(ns reitit.ring.middleware.muuntaja
   (:require [muuntaja.core :as m]
             [muuntaja.middleware]
             [clojure.spec.alpha :as s]))
