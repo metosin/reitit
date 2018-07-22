@@ -8,7 +8,6 @@
             [reitit.ring.middleware.exception :as exception]
             [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params]
             [muuntaja.core :as m]))
 
 (def app
