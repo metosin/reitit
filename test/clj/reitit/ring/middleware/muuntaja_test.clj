@@ -83,3 +83,61 @@
         (is (= #{"application/edn"}
                (produces path)
                (consumes path)))))))
+
+(deftest muuntaja-swagger-parts-test
+  (let [app (ring/ring-handler
+              (ring/router
+                [["/request"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-request-middleware]
+                   :get identity}]
+                 ["/response"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-response-middleware]
+                   :get identity}]
+                 ["/both"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-response-middleware
+                                muuntaja/format-request-middleware]
+                   :get identity}]
+
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]
+                {:data {:muuntaja m/instance}}))
+        spec (fn [path]
+               (-> {:request-method :get :uri "/swagger.json"}
+                   (app) :body :paths (get path) :get))
+        produces (comp :produces spec)
+        consumes (comp :consumes spec)]
+
+    (testing "just request formatting"
+      (let [path "/request"]
+        (is (nil? (produces path)))
+        (is (= #{"application/json"
+                 "application/transit+msgpack"
+                 "application/transit+json"
+                 "application/edn"}
+               (consumes path)))))
+
+    (testing "just response formatting"
+      (let [path "/response"]
+        (is (= #{"application/json"
+                 "application/transit+msgpack"
+                 "application/transit+json"
+                 "application/edn"}
+               (produces path)))
+        (is (nil? (consumes path)))))
+
+    (testing "just response formatting"
+      (let [path "/both"]
+        (is (= #{"application/json"
+                 "application/transit+msgpack"
+                 "application/transit+json"
+                 "application/edn"}
+               (produces path)))
+        (is (= #{"application/json"
+                 "application/transit+msgpack"
+                 "application/transit+json"
+                 "application/edn"}
+               (consumes path)))))))
