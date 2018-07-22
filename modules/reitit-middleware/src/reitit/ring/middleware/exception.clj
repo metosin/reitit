@@ -15,6 +15,9 @@
                           (get handlers ex-class)
                           (some
                             (partial get handlers)
+                            (descendants type))
+                          (some
+                            (partial get handlers)
                             (super-classes ex-class))
                           default-handler)]
     (error-handler error data request)))
@@ -37,13 +40,13 @@
 (defn request-parsing-handler [_ {:keys [format]} _]
   {:status 400
    :headers {"Content-Type" "text/plain"}
-   :body (str "Malformed " format " request.")})
+   :body (str "Malformed " (pr-str format) " request.")})
 
 ;;
 ;; public api
 ;;
 
-(def default-handlers
+(def default-options
   {::default default-handler
    ::ring/response http-response-handler
    :muuntaja/decode request-parsing-handler
@@ -54,25 +57,28 @@
   "Catches all exceptions and looks up a exception handler:
   1) `:type` of ex-data
   2) Class of Exception
-  3) Super Classes of Exception
-  4) The ::default handler"
+  3) descadents `:type` of ex-data
+  4) Super Classes of Exception
+  5) The ::default handler"
   ([]
-    (create-exceptions-middleware default-handlers))
-  ([{:keys [handlers] :or {handlers default-handlers}}]
-   (let [default-handler (get handlers ::default default-handler)
+   (create-exceptions-middleware default-options))
+  ([options]
+   (let [default-handler (get options ::default default-handler)
          on-exception (fn [e request respond raise]
                         (try
-                          (respond (call-error-handler default-handler handlers e request))
+                          (respond (call-error-handler default-handler options e request))
                           (catch Exception e
                             (raise e))))]
-     (fn
-       ([request]
-        (try
-          (handler request)
-          (catch Throwable e
-            (on-exception e request identity #(throw %)))))
-       ([request respond raise]
-        (try
-          (handler request respond (fn [e] (on-exception e request respond raise)))
-          (catch Throwable e
-            (on-exception e request respond raise))))))))
+     {:name ::exception
+      :wrap (fn [handler]
+              (fn
+                ([request]
+                 (try
+                   (handler request)
+                   (catch Throwable e
+                     (on-exception e request identity #(throw %)))))
+                ([request respond raise]
+                 (try
+                   (handler request respond (fn [e] (on-exception e request respond raise)))
+                   (catch Throwable e
+                     (on-exception e request respond raise))))))})))

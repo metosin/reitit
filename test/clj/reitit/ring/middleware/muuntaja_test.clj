@@ -2,9 +2,8 @@
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.ring :as ring]
             [reitit.ring.middleware.muuntaja :as muuntaja]
-            [muuntaja.core :as m]
             [reitit.swagger :as swagger]
-            [reitit.core :as r]))
+            [muuntaja.core :as m]))
 
 (deftest muuntaja-test
   (let [data {:kikka "kukka"}
