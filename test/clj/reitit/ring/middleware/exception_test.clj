@@ -22,7 +22,7 @@
                    :parameters {:query {:x int?, :y int?}}
                    :responses {200 {:body {:total pos-int?}}}
                    :handler f}]]
-                {:data {:middleware [(exception/create-exceptions-middleware
+                {:data {:middleware [(exception/create-exception-middleware
                                        (merge
                                          exception/default-options
                                          {::kikka (constantly {:status 200, :body "kikka"})
