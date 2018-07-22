@@ -42,7 +42,7 @@
                           (get handlers ::default default-handler))]
     (error-handler error data request)))
 
-(defn- on-exception [e handlers request respond raise]
+(defn- on-exception [handlers e request respond raise]
   (try
     (respond (call-error-handler handlers e request))
     (catch Exception e
