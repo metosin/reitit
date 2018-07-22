@@ -7,7 +7,7 @@
 (s/def ::spec (s/keys :opt-un [::muuntaja]))
 
 (def format-middleware
-  {:name ::formats
+  {:name ::format
    :spec ::spec
    :compile (fn [{:keys [muuntaja]} _]
               (if muuntaja
@@ -16,14 +16,14 @@
                  :wrap #(muuntaja.middleware/wrap-format % muuntaja)}))})
 
 (def format-negotiate-middleware
-  {:name ::formats
+  {:name ::format-negotiate
    :spec ::spec
    :compile (fn [{:keys [muuntaja]} _]
               (if muuntaja
                 {:wrap #(muuntaja.middleware/wrap-format-negotiate % muuntaja)}))})
 
 (def format-request-middleware
-  {:name ::formats
+  {:name ::format-request
    :spec ::spec
    :compile (fn [{:keys [muuntaja]} _]
               (if muuntaja
@@ -31,7 +31,7 @@
                  :wrap #(muuntaja.middleware/wrap-format-request % muuntaja)}))})
 
 (def format-response-middleware
-  {:name ::formats
+  {:name ::format-response
    :spec ::spec
    :compile (fn [{:keys [muuntaja]} _]
               (if muuntaja
