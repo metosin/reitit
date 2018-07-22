@@ -10,7 +10,8 @@
             [schema.core :refer [Int]]
 
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params]))
+            [ring.middleware.params]
+            [muuntaja.core :as m]))
 
 (def app
   (ring/ring-handler
@@ -58,8 +59,9 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:data {:middleware [ring.middleware.params/wrap-params
-                           (muuntaja/create-format-middleware)
+      {:data {:muuntaja m/instance
+              :middleware [ring.middleware.params/wrap-params
+                           muuntaja/format-middleware
                            swagger/swagger-feature
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware

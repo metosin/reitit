@@ -10,7 +10,8 @@
         app (ring/ring-handler
               (ring/router
                 ["/ping" {:get (constantly {:status 200, :body data})}]
-                {:data {:middleware [(muuntaja/create-format-middleware)]}}))]
+                {:data {:muuntaja m/instance
+                        :middleware [muuntaja/format-middleware]}}))]
     (is (= data (->> {:request-method :get, :uri "/ping"}
                      (app)
                      :body
@@ -36,7 +37,8 @@
                  ["/swagger.json"
                   {:get {:no-doc true
                          :handler (swagger/create-swagger-handler)}}]]
-                {:data {:middleware [(muuntaja/create-format-middleware)]}}))
+                {:data {:muuntaja m/instance
+                        :middleware [muuntaja/format-middleware]}}))
         spec (fn [path]
                (let [path (keyword path)]
                  (-> {:request-method :get :uri "/swagger.json"}
