@@ -45,6 +45,17 @@
 (defn contains-wilds? [path]
   (boolean (some wild-or-catch-all-param? (segments path))))
 
+(defn url-encode [s]
+  (some-> s
+          #?(:clj  (URLEncoder/encode "UTF-8")
+             :cljs (js/encodeURIComponent))
+          #?(:clj (.replace "+" "%20"))))
+
+(defn url-decode [s]
+  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
+               :cljs (js/decodeURIComponent))))
+
+
 ;;
 ;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/path.clj
 ;;
@@ -93,7 +104,7 @@
   (let [{:keys [path-re path-params]} route]
     (fn [path]
       (when-let [m (re-matches path-re path)]
-        (zipmap path-params (rest m))))))
+        (zipmap path-params (map url-decode (rest m)))))))
 
 ;;
 ;; Routing (c) Metosin
@@ -108,7 +119,7 @@
           (merge $ {:path path
                     :matcher (if (contains-wilds? path)
                                (path-matcher $)
-                               #(if (#?(:clj .equals, :cljs =) path %) {}))
+                               #(if (#?(:clj .equals, :cljs =) path (url-decode %)) {}))
                     :result result
                     :data data})
           (dissoc $ :path-re :path-constraints)
@@ -165,16 +176,6 @@
 ;;
 ;; Path-parameters, see https://github.com/metosin/reitit/issues/75
 ;;
-
-(defn url-encode [s]
-  (some-> s
-          #?(:clj  (URLEncoder/encode "UTF-8")
-             :cljs (js/encodeURIComponent))
-          #?(:clj (.replace "+" "%20"))))
-
-(defn url-decode [s]
-  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
-               :cljs (js/decodeURIComponent))))
 
 (defprotocol IntoString
   (into-string [_]))

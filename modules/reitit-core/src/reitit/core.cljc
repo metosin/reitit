@@ -241,7 +241,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (impl/fast-get data path))
+         (impl/fast-get data (impl/url-decode path)))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -321,7 +321,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if (#?(:clj .equals :cljs =) p path)
+         (if (#?(:clj .equals :cljs =) p (impl/url-decode path))
            match))
        (match-by-name [_ name]
          (if (= n name)

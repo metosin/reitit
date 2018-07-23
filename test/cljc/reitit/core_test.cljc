@@ -51,6 +51,22 @@
                     #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
                     (r/match-by-name! router ::beer))))))
 
+        (testing "URL-encoded"
+          (let [router (r/router [["/one-param-path/:param"]
+                                  ["/two-param-path/:param1/:param2"]
+                                  ["/catchall/*remaining-path"]
+                                  ["/space in path"]] {:router r})
+                decoded-params #(-> router (r/match-by-path %) :path-params)
+                decoded-param #(-> (decoded-params %) :param)
+                decoded-catchall #(-> (decoded-params %) :remaining-path)]
+            (println "Testing" (r/router-name router))
+            (is (= "foo bar" (decoded-param "/one-param-path/foo%20bar")))
+            (is (= {:param1 "foo bar" :param2 "baz qux"} (decoded-params "/two-param-path/foo%20bar/baz%20qux")))
+            (is (= "foo bar" (decoded-catchall "/catchall/foo%20bar")))
+            (is (= "foo bar" (decoded-catchall "/catchall/foo%20bar")))
+            (is (= "!#$&'()*+,/:;=?@[]" (decoded-param "/one-param-path/%21%23%24%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D")))
+            (is (= "/space in path" (-> router (r/match-by-path "/space%20in%20path") :template)))))
+
         (testing "complex"
           (let [router (r/router
                          [["/:abba" ::abba]
@@ -100,7 +116,18 @@
                 #"can't create :lookup-router with wildcard routes"
                 (r/lookup-router
                   (r/resolve-routes
-                    ["/api/:version/ping"] {}))))))
+                    ["/api/:version/ping"] {})))))
+
+        (testing "URL-decoding"
+          (let [router (r/router [["/space in path"]] {:router r})
+                matched-template #(-> router (r/match-by-path %) :template)]
+            (is (= "/space in path" (matched-template "/space%20in%20path"))))
+
+          (testing "should only apply to real URLs, not configured routes"
+            (let [router (r/router [["/percent%20in%20path"]] {:router r})
+                  matched-template #(-> router (r/match-by-path %) :template)]
+              (is (= "/percent%20in%20path" (matched-template "/percent%2520in%2520path")))
+              (is (not= "/percent%20in%20path" (matched-template "/percent%20in%20path")))))))
 
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
