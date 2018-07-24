@@ -6,7 +6,20 @@
 
 (defonce history (atom nil))
 
+;; Doc-strings from reitit.frontend.history
+;; remember to update both!
+
 (defn start!
+  "This registers event listeners on HTML5 history and hashchange events.
+  When using with development workflow like Figwheel, rememeber to
+  remove listeners using stop! call before calling start! again.
+
+  Parameters:
+  - router         The Reitit routing tree.
+  - on-navigate    Function to be called when route changes. Takes two parameters, ´token´ and ´history´ object.
+
+  Options:
+  - :use-fragment  (default true) If true, onhashchange and location hash are used to store the token."
   [routes on-navigate opts]
   (swap! history (fn [old-history]
                    (rfh/stop! old-history)
@@ -14,26 +27,26 @@
 
 (defn href
   ([k]
-   (rfh/href @history k))
+   (rfh/href @history k nil nil))
   ([k params]
-   (rfh/href @history k params))
+   (rfh/href @history k params nil))
   ([k params query]
    (rfh/href @history k params query)))
 
-(defn set-token
+(defn push-state
   "Sets the new route, leaving previous route in history."
   ([k]
-   (rfh/set-token @history k))
+   (rfh/push-state @history k nil nil))
   ([k params]
-   (rfh/set-token @history k params))
+   (rfh/push-state @history k params nil))
   ([k params query]
-   (rfh/set-token @history k params query)))
+   (rfh/push-state @history k params query)))
 
-(defn replace-token
+(defn replace-state
   "Replaces current route. I.e. current route is not left on history."
   ([k]
-   (rfh/replace-token @history k))
+   (rfh/replace-state @history k nil nil))
   ([k params]
-   (rfh/replace-token @history k params))
+   (rfh/replace-state @history k params nil))
   ([k params query]
-   (rfh/replace-token @history k params query)))
+   (rfh/replace-state @history k params query)))
