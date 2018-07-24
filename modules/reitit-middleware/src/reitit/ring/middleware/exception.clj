@@ -2,26 +2,6 @@
   (:require [reitit.coercion :as coercion]
             [reitit.ring :as ring]))
 
-(defn default-handler [^Exception e _ _]
-  {:status 500
-   :body {:type "exception"
-          :class (.getName (.getClass e))}})
-
-(defn coercion-handler [status]
-  (fn [_ data _]
-    {:status status
-     :body (coercion/encode-error data)}))
-
-(defn http-response-handler
-  "reads response from ex-data :response"
-  [_ {:keys [response]} _]
-  response)
-
-(defn request-parsing-handler [_ {:keys [format]} _]
-  {:status 400
-   :headers {"Content-Type" "text/plain"}
-   :body (str "Malformed " (pr-str format) " request.")})
-
 (defn- super-classes [^Class k]
   (loop [sk (.getSuperclass k), ks []]
     (if-not (= sk Object)
@@ -29,7 +9,7 @@
       ks)))
 
 (defn- call-error-handler [handlers error request]
-  (let [{:keys [type] :as data} (ex-data error)
+  (let [type (:type (ex-data error))
         ex-class (class error)
         error-handler (or (get handlers type)
                           (get handlers ex-class)
@@ -39,8 +19,8 @@
                           (some
                             (partial get handlers)
                             (super-classes ex-class))
-                          (get handlers ::default default-handler))]
-    (error-handler error data request)))
+                          (get handlers ::default))]
+    (error-handler error request)))
 
 (defn- on-exception [handlers e request respond raise]
   (try
@@ -48,44 +28,83 @@
     (catch Exception e
       (raise e))))
 
-(defn- wrap [options]
+;;
+;; handlers
+;;
+
+(defn default-handler
+  "Default safe handler for any exception."
+  [^Exception e _]
+  {:status 500
+   :body {:type "exception"
+          :class (.getName (.getClass e))}})
+
+(defn create-coercion-handler
+  "Creates a coercion exception handler."
+  [status]
+  (fn [e _]
+    {:status status
+     :body (coercion/encode-error (ex-data e))}))
+
+(defn http-response-handler
+  "Reads response from Exception ex-data :response"
+  [e _]
+  (-> e ex-data :response))
+
+(defn request-parsing-handler [e _]
+  {:status 400
+   :headers {"Content-Type" "text/plain"}
+   :body (str "Malformed " (-> e ex-data :format pr-str) " request.")})
+
+;;
+;; public api
+;;
+
+(def default-handlers
+  {::default default-handler
+   ::ring/response http-response-handler
+   :muuntaja/decode request-parsing-handler
+   ::coercion/request-coercion (create-coercion-handler 400)
+   ::coercion/response-coercion (create-coercion-handler 500)})
+
+(defn wrap-exception [handlers]
   (fn [handler]
     (fn
       ([request]
        (try
          (handler request)
          (catch Throwable e
-           (on-exception options e request identity #(throw %)))))
+           (on-exception handlers e request identity #(throw %)))))
       ([request respond raise]
        (try
-         (handler request respond (fn [e] (on-exception options e request respond raise)))
+         (handler request respond (fn [e] (on-exception handlers e request respond raise)))
          (catch Throwable e
-           (on-exception options e request respond raise)))))))
-
-;;
-;; public api
-;;
-
-(def default-options
-  {::default default-handler
-   ::ring/response http-response-handler
-   :muuntaja/decode request-parsing-handler
-   ::coercion/request-coercion (coercion-handler 400)
-   ::coercion/response-coercion (coercion-handler 500)})
+           (on-exception handlers e request respond raise)))))))
 
 (def exception-middleware
-  "Catches all exceptions and looks up a exception handler:
+  "Middleware that catches all exceptions and looks up a exception handler
+  from a [[default-handlers]] map in the lookup order:
+
   1) `:type` of ex-data
   2) Class of Exception
   3) descadents `:type` of ex-data
   4) Super Classes of Exception
   5) The ::default handler"
   {:name ::exception
-   :wrap (wrap default-options)})
+   :wrap (wrap-exception default-handlers)})
 
 (defn create-exception-middleware
+  "Creates a middleware that catches all exceptions and looks up a exception handler
+  from a given map of `handlers` with keyword or Exception class as keys and a 2-arity
+  Exception handler function as values.
+
+  1) `:type` of ex-data
+  2) Class of Exception
+  3) descadents `:type` of ex-data
+  4) Super Classes of Exception
+  5) The ::default handler"
   ([]
-   (create-exception-middleware default-options))
-  ([options]
+   (create-exception-middleware default-handlers))
+  ([handlers]
    {:name ::exception
-    :wrap (wrap options)}))
+    :wrap (wrap-exception handlers)}))

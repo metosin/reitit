@@ -24,7 +24,7 @@
                    :handler f}]]
                 {:data {:middleware [(exception/create-exception-middleware
                                        (merge
-                                         exception/default-options
+                                         exception/default-handlers
                                          {::kikka (constantly {:status 200, :body "kikka"})
                                           SQLException (constantly {:status 200, :body "sql"})}))]}})))]
 
