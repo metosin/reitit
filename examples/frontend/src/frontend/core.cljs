@@ -10,7 +10,11 @@
 
 (defn home-page []
   [:div
-   [:h2 "Welcome to frontend"]])
+   [:h2 "Welcome to frontend"]
+   [:button
+    {:type "button"
+     :on-click #(rfe/set-token ::item {:id 3})}
+    "Item 3"]])
 
 (defn about-page []
   [:div
