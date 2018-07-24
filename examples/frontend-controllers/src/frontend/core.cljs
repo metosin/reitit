@@ -84,8 +84,7 @@
       (swap! match (fn [old-match]
                      (if new-match
                        (assoc new-match :controllers (rfc/apply-controllers (:controllers old-match) new-match))))))
-    {:use-fragment true
-     :path-prefix "/"})
+    {:use-fragment true})
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)

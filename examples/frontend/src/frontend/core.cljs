@@ -62,8 +62,7 @@
 (defn init! []
   (rfe/start! routes
               (fn [m] (reset! match m))
-              {:use-fragment true
-               :path-prefix "/"})
+              {:use-fragment true})
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)
