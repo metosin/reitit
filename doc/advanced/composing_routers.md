@@ -293,7 +293,7 @@ Here's a quick benchmark on the recursive matches.
 | `/gin/napue`     | 40ns    | static
 | `/ciders/weston` | 440ns   | catch-all
 | `/beers/saison`  | 600ns   | catch-all + static
-| `/other/drink`   | 12000ns | catch-all + dynamic
+| `/dynamic/duo`   | 12000ns | catch-all + dynamic
 
 In this example, we could have wrapped the top-level router in an `atom` and add the beer-routes directly to it, making them order of magnitude faster.
 
