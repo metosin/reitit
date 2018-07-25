@@ -48,7 +48,7 @@ New router with an extra route:
     [["/baz/:id/:subid" ::baz]]))
 
 (r/routes router2)
-;[["/foo" {:name :user/bar}]
+;[["/foo" {:name :user/foo}]
 ; ["/bar/:id" {:name :user/bar}]
 ; ["/baz/:id/:subid" {:name :user/baz}]]
 ```
