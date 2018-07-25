@@ -20,7 +20,7 @@ It's resolved routes and options:
 ```clj
 (r/routes router)
 ;[["/foo" {:name :user/foo}]
-; ["/bar/:idr" {:name :user/bar}]]
+; ["/bar/:id" {:name :user/bar}]]
 
 (r/options router)
 ;{:lookup #object[...]
@@ -133,9 +133,10 @@ As the `Match` contains the route data, we can create a new matching function th
 (defn recursive-match-by-path [router path]
   (if-let [match (r/match-by-path router path)]
     (if-let [subrouter (-> match :data :router)]
-      (if-let [submatch (recursive-match-by-path subrouter (subs path (str/last-index-of (:template match) "/")))]
-        (into [match] submatch))
-      [match])))
+      (let [subpath (subs path (str/last-index-of (:template match) "/"))]
+        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+          (cons match submatch)))
+      (list match))))
 ```
 
 With invalid nested path we get now `nil` as expected:
@@ -186,15 +187,15 @@ In all the examples above, the routers were created ahead of time, making the wh
 First, we need to modify our matching function to support router references:
 
 ```clj
-(defn- << [x]
-  (if (instance? clojure.lang.IDeref x) (deref x) x))
+(defn- << [x] (if (instance? clojure.lang.IDeref x) (deref x) x))
 
 (defn recursive-match-by-path [router path]
   (if-let [match (r/match-by-path (<< router) path)]
     (if-let [subrouter (-> match :data :router <<)]
-      (if-let [submatch (recursive-match-by-path subrouter (subs path (str/last-index-of (:template match) "/")))]
-        (into [match] submatch))
-      [match])))
+      (let [subpath (subs path (str/last-index-of (:template match) "/"))]
+        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+          (cons match submatch)))
+      (list match))))
 ```
 
 A router that can be updated on demand, for example based on a domain event when a new entry in inserted into a database. We'll wrap the router into a `atom` to achieve this.
@@ -213,7 +214,7 @@ Another router, which is re-created on each routing request.
   (reify clojure.lang.IDeref
     (deref [_]
       (r/router
-        ["/duo" (keyword (gensym ""))]))))
+        ["/duo" (keyword (gensym "duo"))]))))
 ```
 
 Now we can compose the routers into a system-level static root router.
@@ -276,10 +277,10 @@ The dynamic routes are re-created on every request:
 
 ```clj
 (name-path "/dynamic/duo")
-; [:other :2390883]
+; [:other :duo2390883]
 
 (name-path "/dynamic/duo")
-; [:other :2390893]
+; [:other :duo2390893]
 ```
 
 ### Performance
