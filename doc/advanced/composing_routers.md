@@ -1,6 +1,10 @@
 # Composing Routers
 
-Once a router is created, the routing tree is immutable and cannot be changed. To modify the routes, we have to make a new copy of the router, with modified routes and/or options. For this, the `Router` exposes the resolved routes via `r/routes` and options via `r/options`.
+Data-driven approach in `reitit` allows us to compose routes, route data, route specs, middleware and interceptors chains. We can compose routers too. This is needed to achieve dynamic routing like in [Compojure](https://github.com/weavejester/compojure).
+
+## Immutatability
+
+Once a router is created, the routing tree is immutable and cannot be changed. To change the routing, we need to create a new router with changed routes and/or options. For this, the `Router` protocol exposes it's resolved routes via `r/routes` and options via `r/options`.
 
 ## Adding routes
 
@@ -15,7 +19,7 @@ Let's create a router:
      ["/bar/:id" ::bar]]))
 ```
 
-It's resolved routes and options:
+We can query it's resolved routes and options:
 
 ```clj
 (r/routes router)
@@ -30,7 +34,7 @@ It's resolved routes and options:
 ; :conflicts #object[...]}
 ```
 
-A helper to create a new router with extra routes:
+Let's add a helper function to create a new router with extra routes:
 
 ```clj
 (defn add-routes [router routes]
@@ -39,7 +43,7 @@ A helper to create a new router with extra routes:
     (r/options router)))
 ```
 
-New router with an extra route:
+We can now create a new router with an extra routes:
 
 ```clj
 (def router2
@@ -53,7 +57,15 @@ New router with an extra route:
 ; ["/baz/:id/:subid" {:name :user/baz}]]
 ```
 
-All rules are applied, including the conflict resolution:
+The original router was not changed:
+
+```clj
+(r/routes router)
+;[["/foo" {:name :user/foo}]
+; ["/bar/:id" {:name :user/bar}]]
+```
+
+When a new router is created, all rules are applied, including the conflict resolution:
 
 ```clj
 (add-routes
@@ -67,7 +79,7 @@ All rules are applied, including the conflict resolution:
 
 ## Merging routers
 
-A helper to merge routers:
+Let's create a helper function to merge routers:
 
 ```clj
 (defn merge-routers [& routers]
@@ -76,7 +88,7 @@ A helper to merge routers:
     (apply merge (map r/options routers))))
 ```
 
-Merging three routers into one:
+We can now merge multiple routers into one:
 
 ```clj
 (def router
@@ -93,9 +105,9 @@ Merging three routers into one:
 
 ## Nesting routers
 
-Routers can be nested too, using the catch-all parameter.
+Routers can be nested using the catch-all parameter.
 
-A router with nested routers using a custom `:router` key:
+Here's a router with deeply nested routers under a `:router` key in the route data:
 
 ```clj
 (def router
@@ -123,9 +135,9 @@ Matching by path:
 ;       :path "/olipa/iso/kala"}
 ```
 
-That not right, it should not have matched. The core routing doesn't understand anything about nesting, so it only matched against the top-level router, which gave a match for the catch-all path. 
+That didn't work as we wanted, as the nested routers don't have such a route. Thing is that the core routing doesn't understand anything about our new `:router` key, so it only matched against the top-level router, which gave a match for the catch-all path.
 
-As the `Match` contains the route data, we can create a new matching function that understands our custom `:router` syntax. Here is a function that does recursive matching using the subrouters. It returns either `nil` or a vector of mathces.
+As the `Match` contains all the route data, we can create a new matching function that understands the `:router` key. Below is a function that does recursive matching using the subrouters. It returns either `nil` or a vector of mathces.
 
 ```clj
 (require '[clojure.string :as str])
@@ -169,7 +181,7 @@ With valid path we get all the nested matches:
 ;                    :path "/avaruus"}]
 ```
 
-Helper to get only the route names for matches:
+Let's create a helper to get only the route names for matches:
 
 ```clj
 (defn name-path [router path]
@@ -180,14 +192,18 @@ Helper to get only the route names for matches:
 ; [:olipa :kerran :avaruus]
 ```
 
+So, we can nest routers, but why would we do that?
+
 ## Dynamic routing
 
-In all the examples above, the routers were created ahead of time, making the whole route tree effective static. To do dynamic routing, we should use router references so that we can update the routes either on background or per request basis. Let's walk through both cases.
+In all the examples above, the routers were created ahead of time, making the whole route tree effective static.  To have more dynamic routing, we can use router references allowing the router to be swapped over time. We can also create fully dynamic routers where the router is re-created for each request. Let's walk through both cases.
 
 First, we need to modify our matching function to support router references:
 
 ```clj
-(defn- << [x] (if (instance? clojure.lang.IDeref x) (deref x) x))
+(defn- << [x] 
+  (if (instance? clojure.lang.IDeref x) 
+    (deref x) x))
 
 (defn recursive-match-by-path [router path]
   (if-let [match (r/match-by-path (<< router) path)]
@@ -198,7 +214,9 @@ First, we need to modify our matching function to support router references:
       (list match))))
 ```
 
-A router that can be updated on demand, for example based on a domain event when a new entry in inserted into a database. We'll wrap the router into a `atom` to achieve this.
+Then, we need some router (references).
+
+First, a reference to a router that can be updated on demand on background, for example when a new entry in inserted into a database. We'll wrap the router into a `atom`:
 
 ```clj
 (def beer-router
@@ -207,17 +225,17 @@ A router that can be updated on demand, for example based on a domain event when
       [["/lager" :lager]])))
 ```
 
-Another router, which is re-created on each routing request.
+Second, a reference to router, which is re-created on each routing request:
 
 ```clj
 (def dynamic-router
   (reify clojure.lang.IDeref
     (deref [_]
       (r/router
-        ["/duo" (keyword (gensym "duo"))]))))
+        ["/duo" (keyword (str "duo" (rand-int 100)))]))))
 ```
 
-Now we can compose the routers into a system-level static root router.
+We can compose the routers into a system-level static root router:
 
 ```clj
 (def router
@@ -226,7 +244,7 @@ Now we can compose the routers into a system-level static root router.
      ["/ciders/*" :ciders]
      ["/beers/*" {:name :beers
                   :router beer-router}]
-     ["/dynamic/*" {:name :other
+     ["/dynamic/*" {:name :dynamic
                     :router dynamic-router}]]))
 ```
 
@@ -263,7 +281,7 @@ There we have it:
 ; [:beers :saison]
 ```
 
-We can't add a conflicting routes:
+We can't add conflicting routes:
 
 ```clj
 (swap! beer-router add-routes [["/saison" :saison]])
@@ -277,17 +295,17 @@ The dynamic routes are re-created on every request:
 
 ```clj
 (name-path "/dynamic/duo")
-; [:other :duo2390883]
+; [:dynamic :duo71]
 
 (name-path "/dynamic/duo")
-; [:other :duo2390893]
+; [:dynamic :duo55]
 ```
 
 ### Performance
 
 With nested routers, instead of having to do just one route match, matching is recursive, which adds a small cost. All nested routers need to be of type catch-all at top-level, which is order of magnitude slower than fully static routes. Dynamic routes are the slowest ones, at least an order of magnitude slower, as the router needs to be recreated for each request.
 
-Here's a quick benchmark on the recursive matches.
+A quick benchmark on the recursive lookups:
 
 | path             | time    | type
 |------------------|---------|-----------------------
@@ -296,11 +314,103 @@ Here's a quick benchmark on the recursive matches.
 | `/beers/saison`  | 600ns   | catch-all + static
 | `/dynamic/duo`   | 12000ns | catch-all + dynamic
 
-In this example, we could have wrapped the top-level router in an `atom` and add the beer-routes directly to it, making them order of magnitude faster.
+The non-recursive lookup for `/gin/napue` is around 23ns.
+
+Comparing the dynamic routing performance with Compojure:
+
+```clj
+(require '[compojure.core :refer [context])
+
+(def app
+  (context "/dynamic" [] (constantly :duo)))
+
+(app {:uri "/dynamic/duo" :request-method :get})
+; :duo
+```
+
+| path             | time    | type
+|------------------|---------|-----------------------
+| `/dynamic/duo`   | 20000ns | compojure
+
+We could use the Router `:compile` hook to compile the nested routers for better performance. Also, the dynamic routing could be made faster, by allowing router creation time features like conflict resolution to be disabled.
+
+### When to use nested routers?
+
+Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it's the only choise. For other cases, nested routes are most likely a better option. 
+
+Let's re-create the previous example with normal route composition.
+
+A helper to create beer-routes and the root router.
+
+```clj
+(defn beer-routes [beers]
+  (for [beer beers]
+    [(str "/" beer) (keyword "beer" beer)]))
+
+(defn create-router [beer-routes]
+  (r/router
+    [["/gin/napue" :napue]
+     ["/ciders/*" :ciders]
+     ["/beers" beer-routes]
+     ["/dynamic/*" {:name :dynamic
+                    :router dynamic-router}]]))
+```
+
+New new root router *reference* and a helper to reset it:
+
+```clj
+(def router
+  (atom (create-router nil)))
+
+(defn reset-router! [beers]
+  (reset! router (-> beers beer-routes create-router)))
+```
+
+The routing tree:
+
+```clj
+(r/routes @router)
+;[["/gin/napue" {:name :napue}]
+; ["/ciders/*" {:name :ciders}]
+; ["/dynamic/*" {:name :dynamic,
+;                :router #object[user$reify__24359]}]]
+```
+
+Let's reset the router with some beers:
+
+```clj
+(reset-router! ["lager" "sahti" "bock"])
+```
+
+We can see that the beer routes are now embedded into the core router:
+
+```clj
+(r/routes @router)
+;[["/gin/napue" {:name :napue}]
+; ["/ciders/*" {:name :ciders}]
+; ["/beers/lager" {:name :beer/lager}]
+; ["/beers/sahti" {:name :beer/sahti}]
+; ["/beers/bock" {:name :beer/bock}]
+; ["/dynamic/*" {:name :dynamic,
+;                :router #object[user$reify__24359]}]]
+```
+
+And the routing works:
+
+```clj
+(name-path @router "/beers/sahti")
+;[:beer/sahti]
+```
+
+The beer-routes all now match in constant time.
+
+| path            | time    | type
+|-----------------|---------|-----------------------
+| `/beers/sahti`  | 40ns    | static
 
 ## TODO
 
-* example how to do dynamic routing with `reitit-ring`
-* create a `recursive-router` into a separate ns with all `r/routes` implemented correctly?
-* `reitit.core/merge-routes` to effectively merge routes with route data
+* add an example how to do dynamic routing with `reitit-ring`
+* maybe create a `recursive-router` into a separate ns with all `Router` functions implemented correctly? maybe not...
+* add `reitit.core/merge-routes` to effectively merge routes with route data
 
