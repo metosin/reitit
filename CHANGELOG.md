@@ -6,6 +6,19 @@
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
 * the `r/routes` returns just the path + data tuples as documented, not the compiled route results. To get the compiled results, use `r/compiled-routes` instead.
 * welcome route name conflict resolution! If router has routes with same names, router can't be created. fix 'em.
+* sequential child routes are allowed, enabling this:
+
+```clj
+(-> ["/api"
+     (for [i (range 4)]
+       [(str "/" i)])]
+    (r/router)
+    (r/routes))
+;[["/api/0" {}]
+; ["/api/1" {}]
+; ["/api/2" {}]
+; ["/api/3" {}]]
+```
 
 ## `reitit-swagger`
 

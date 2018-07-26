@@ -268,3 +268,19 @@
            (-> router
                (r/match-by-name! ::route {:a "olipa", :b "kerran"})
                (r/match->path {:iso "pöriläinen"}))))))
+
+(deftest sequential-routes
+  (testing "sequential child routes work"
+    (is (= [["/api/0" {}]
+            ["/api/1" {}]]
+           (-> ["/api"
+                (for [i (range 2)]
+                  [(str "/" i)])]
+               (r/router)
+               (r/routes)))))
+  (testing "sequential route definition fails"
+    (is (thrown?
+          #?(:clj Exception, :cljs js/Error)
+          (-> ["/api"
+               (list "/ipa")]
+              (r/router))))))

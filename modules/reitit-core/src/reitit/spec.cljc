@@ -9,7 +9,7 @@
 
 (s/def ::path (s/with-gen string? #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
-(s/def ::arg (s/and some? (complement vector?)))
+(s/def ::arg (s/and some? (complement sequential?)))
 (s/def ::data (s/map-of keyword? any?))
 (s/def ::result any?)
 
