@@ -672,7 +672,9 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="composing-routers">Composing Routers</h1>
-<p>Once a router is created, the routing tree is immutable and cannot be changed. To modify the routes, we have to make a new copy of the router, with modified routes and/or options. For this, the <code>Router</code> exposes the resolved routes via <code>r/routes</code> and options via <code>r/options</code>.</p>
+<p>Data-driven approach in <code>reitit</code> allows us to compose routes, route data, middleware and interceptors chains. We can compose routers too. This is needed to achieve dynamic routing in <a href="https://github.com/weavejester/compojure" target="_blank">Compojure</a>.</p>
+<h2 id="immutatability">Immutatability</h2>
+<p>Once a router is created, the routing tree is immutable and cannot be changed. To change the routing, we need to create a new router with changed routes and/or options. For this, the <code>Router</code> protocol exposes it&apos;s resolved routes via <code>r/routes</code> and options via <code>r/options</code>.</p>
 <h2 id="adding-routes">Adding routes</h2>
 <p>Let&apos;s create a router:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
@@ -682,7 +684,7 @@
     [[<span class="hljs-string">&quot;/foo&quot;</span> <span class="hljs-symbol">::foo</span>]
      [<span class="hljs-string">&quot;/bar/:id&quot;</span> <span class="hljs-symbol">::bar</span>]]))
 </code></pre>
-<p>It&apos;s resolved routes and options:</p>
+<p>We can query it&apos;s resolved routes and options:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/routes</span> router)
 <span class="hljs-comment">;[[&quot;/foo&quot; {:name :user/foo}]</span>
 <span class="hljs-comment">; [&quot;/bar/:id&quot; {:name :user/bar}]]</span>
@@ -694,13 +696,13 @@
 <span class="hljs-comment">; :compile #object[...]</span>
 <span class="hljs-comment">; :conflicts #object[...]}</span>
 </code></pre>
-<p>A helper to create a new router with extra routes:</p>
+<p>Let&apos;s add a helper function to create a new router with extra routes:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> add-routes [router routes]
   (<span class="hljs-name">r/router</span>
     (<span class="hljs-name"><span class="hljs-builtin-name">into</span></span> (<span class="hljs-name">r/routes</span> router) routes)
     (<span class="hljs-name">r/options</span> router)))
 </code></pre>
-<p>New router with an extra route:</p>
+<p>We can now create a new router with an extra routes:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router2
   (<span class="hljs-name">add-routes</span>
     router
@@ -711,7 +713,12 @@
 <span class="hljs-comment">; [&quot;/bar/:id&quot; {:name :user/bar}]</span>
 <span class="hljs-comment">; [&quot;/baz/:id/:subid&quot; {:name :user/baz}]]</span>
 </code></pre>
-<p>All rules are applied, including the conflict resolution:</p>
+<p>The original router was now changed:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">r/routes</span> router)
+<span class="hljs-comment">;[[&quot;/foo&quot; {:name :user/foo}]</span>
+<span class="hljs-comment">; [&quot;/bar/:id&quot; {:name :user/bar}]]</span>
+</code></pre>
+<p>When a new router is created, all rules are applied, including the conflict resolution:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">add-routes</span>
   router2
   [[<span class="hljs-string">&quot;/:this/should/:fail&quot;</span> <span class="hljs-symbol">::fail</span>]])
@@ -721,13 +728,13 @@
 <span class="hljs-comment">;-&gt; /:this/should/:fail</span>
 </code></pre>
 <h2 id="merging-routers">Merging routers</h2>
-<p>A helper to merge routers:</p>
+<p>Let&apos;s create a helper function to merge routers:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> merge-routers [&amp; routers]
   (<span class="hljs-name">r/router</span>
     (<span class="hljs-name"><span class="hljs-builtin-name">apply</span></span> merge (<span class="hljs-name"><span class="hljs-builtin-name">map</span></span> r/routes routers))
     (<span class="hljs-name"><span class="hljs-builtin-name">apply</span></span> merge (<span class="hljs-name"><span class="hljs-builtin-name">map</span></span> r/options routers))))
 </code></pre>
-<p>Merging three routers into one:</p>
+<p>We can now merge multiple routers into one:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">merge-routers</span>
     (<span class="hljs-name">r/router</span> [<span class="hljs-string">&quot;/route1&quot;</span> <span class="hljs-symbol">::route1</span>])
@@ -740,8 +747,8 @@
 <span class="hljs-comment">; [&quot;/route3&quot; {:name :user/route3}]]</span>
 </code></pre>
 <h2 id="nesting-routers">Nesting routers</h2>
-<p>Routers can be nested too, using the catch-all parameter.</p>
-<p>A router with nested routers using a custom <code>:router</code> key:</p>
+<p>Routers can be nested using the catch-all parameter.</p>
+<p>Here&apos;s a router with nested routers under a custom <code>:router</code> key in the route data:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">r/router</span>
     [[<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">:ping</span>]
@@ -763,8 +770,8 @@
 <span class="hljs-comment">;       :path-params {: &quot;kerran/iso/kala&quot;}</span>
 <span class="hljs-comment">;       :path &quot;/olipa/iso/kala&quot;}</span>
 </code></pre>
-<p>That not right, it should not have matched. The core routing doesn&apos;t understand anything about nesting, so it only matched against the top-level router, which gave a match for the catch-all path. </p>
-<p>As the <code>Match</code> contains the route data, we can create a new matching function that understands our custom <code>:router</code> syntax. Here is a function that does recursive matching using the subrouters. It returns either <code>nil</code> or a vector of mathces.</p>
+<p>That didn&apos;t work as we wanted, as there is no nested route that matches. Thing is that the core routing doesn&apos;t understand anything about our ad-hoc invented <code>:router</code> key, so it only matched against the top-level router, which gave a match for the catch-all path.</p>
+<p>As the <code>Match</code> contains all the route data, we can create a new matching function that understands the new <code>:router</code> syntax. Below is a function that does recursive matching using the subrouters. It returns either <code>nil</code> or a vector of mathces.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.string <span class="hljs-symbol">:as</span> str])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> recursive-match-by-path [router path]
@@ -799,7 +806,7 @@
 <span class="hljs-comment">;                    :path-params {} </span>
 <span class="hljs-comment">;                    :path &quot;/avaruus&quot;}]</span>
 </code></pre>
-<p>Helper to get only the route names for matches:</p>
+<p>Let&apos;s create a helper to get only the route names for matches:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> name-path [router path]
   (<span class="hljs-name">some-&gt;&gt;</span> (<span class="hljs-name">recursive-match-by-path</span> router path)
            (<span class="hljs-name"><span class="hljs-builtin-name">mapv</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">comp</span></span> <span class="hljs-symbol">:name</span> <span class="hljs-symbol">:data</span>))))
@@ -807,10 +814,13 @@
 (<span class="hljs-name">name-path</span> router <span class="hljs-string">&quot;/olipa/kerran/avaruus&quot;</span>)
 <span class="hljs-comment">; [:olipa :kerran :avaruus]</span>
 </code></pre>
+<p>So, we can nest routers, but why would we do that?</p>
 <h2 id="dynamic-routing">Dynamic routing</h2>
-<p>In all the examples above, the routers were created ahead of time, making the whole route tree effective static. To do dynamic routing, we should use router references so that we can update the routes either on background or per request basis. Let&apos;s walk through both cases.</p>
+<p>In all the examples above, the routers were created ahead of time, making the whole route tree effective static.  To have more dynamic routing, we can use router references allowing the immutable routes to be changed over time. We can also create fully dynamic nested routers that allow routes to be generated on request basis. Let&apos;s walk through both cases.</p>
 <p>First, we need to modify our matching function to support router references:</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn-</span></span> &lt;&lt; [x] (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">instance?</span></span> clojure.lang.IDeref x) (<span class="hljs-name"><span class="hljs-builtin-name">deref</span></span> x) x))
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn-</span></span> &lt;&lt; [x] 
+  (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">instance?</span></span> clojure.lang.IDeref x) 
+    (<span class="hljs-name"><span class="hljs-builtin-name">deref</span></span> x) x))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> recursive-match-by-path [router path]
   (<span class="hljs-name"><span class="hljs-builtin-name">if-let</span></span> [match (<span class="hljs-name">r/match-by-path</span> (<span class="hljs-name">&lt;&lt;</span> router) path)]
@@ -820,27 +830,28 @@
           (<span class="hljs-name"><span class="hljs-builtin-name">cons</span></span> match submatch)))
       (<span class="hljs-name"><span class="hljs-builtin-name">list</span></span> match))))
 </code></pre>
-<p>A router that can be updated on demand, for example based on a domain event when a new entry in inserted into a database. We&apos;ll wrap the router into a <code>atom</code> to achieve this.</p>
+<p>Then, we need some routers.</p>
+<p>First, a router that can be updated on demand on background, for example based on a domain event when a new entry in inserted into a database. We&apos;ll wrap the router into a <code>atom</code> to achieve this.</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> beer-router
   (<span class="hljs-name"><span class="hljs-builtin-name">atom</span></span>
     (<span class="hljs-name">r/router</span> 
       [[<span class="hljs-string">&quot;/lager&quot;</span> <span class="hljs-symbol">:lager</span>]])))
 </code></pre>
-<p>Another router, which is re-created on each routing request.</p>
+<p>Another, fully dynamic router, which is re-created on each routing request.</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> dynamic-router
   (<span class="hljs-name"><span class="hljs-builtin-name">reify</span></span> clojure.lang.IDeref
     (<span class="hljs-name"><span class="hljs-builtin-name">deref</span></span> [_]
       (<span class="hljs-name">r/router</span>
-        [<span class="hljs-string">&quot;/duo&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">keyword</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">gensym</span></span> <span class="hljs-string">&quot;duo&quot;</span>))]))))
+        [<span class="hljs-string">&quot;/duo&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">keyword</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">str</span></span> <span class="hljs-string">&quot;duo&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">rand-int</span></span> <span class="hljs-number">100</span>)))]))))
 </code></pre>
-<p>Now we can compose the routers into a system-level static root router.</p>
+<p>We can compose the routers into a system-level static root router.</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
   (<span class="hljs-name">r/router</span>
     [[<span class="hljs-string">&quot;/gin/napue&quot;</span> <span class="hljs-symbol">:napue</span>]
      [<span class="hljs-string">&quot;/ciders/*&quot;</span> <span class="hljs-symbol">:ciders</span>]
      [<span class="hljs-string">&quot;/beers/*&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">:beers</span>
                   <span class="hljs-symbol">:router</span> beer-router}]
-     [<span class="hljs-string">&quot;/dynamic/*&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">:other</span>
+     [<span class="hljs-string">&quot;/dynamic/*&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">:dynamic</span>
                     <span class="hljs-symbol">:router</span> dynamic-router}]]))
 </code></pre>
 <p>Matching root routes:</p>
@@ -873,10 +884,10 @@
 </code></pre>
 <p>The dynamic routes are re-created on every request:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">name-path</span> <span class="hljs-string">&quot;/dynamic/duo&quot;</span>)
-<span class="hljs-comment">; [:other :duo2390883]</span>
+<span class="hljs-comment">; [:dynamic :duo71]</span>
 
 (<span class="hljs-name">name-path</span> <span class="hljs-string">&quot;/dynamic/duo&quot;</span>)
-<span class="hljs-comment">; [:other :duo2390893]</span>
+<span class="hljs-comment">; [:dynamic :duo55]</span>
 </code></pre>
 <h3 id="performance">Performance</h3>
 <p>With nested routers, instead of having to do just one route match, matching is recursive, which adds a small cost. All nested routers need to be of type catch-all at top-level, which is order of magnitude slower than fully static routes. Dynamic routes are the slowest ones, at least an order of magnitude slower, as the router needs to be recreated for each request.</p>
@@ -912,12 +923,50 @@
 </tr>
 </tbody>
 </table>
-<p>In this example, we could have wrapped the top-level router in an <code>atom</code> and add the beer-routes directly to it, making them order of magnitude faster.</p>
+<h3 id="when-to-use-nested-routers">When to use nested routers?</h3>
+<p>Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it&apos;s the only choise. For other cases, nested routes are most likely a better option. Let&apos;s re-create the previous example with normal route composition.</p>
+<p>A helper to create beer-routes and the root router. We will generate fully qualified beer names so that the route names won&apos;t clash so easily.</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> beer-routes [beers]
+  (<span class="hljs-name"><span class="hljs-builtin-name">for</span></span> [beer beers]
+    [(<span class="hljs-name"><span class="hljs-builtin-name">str</span></span> <span class="hljs-string">&quot;/&quot;</span> beer) (<span class="hljs-name"><span class="hljs-builtin-name">keyword</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">str</span></span> *ns*) beer)]))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> create-router [beer-routes]
+  (<span class="hljs-name">r/router</span>
+    [[<span class="hljs-string">&quot;/gin/napue&quot;</span> <span class="hljs-symbol">:napue</span>]
+     [<span class="hljs-string">&quot;/ciders/*&quot;</span> <span class="hljs-symbol">:ciders</span>]
+     [<span class="hljs-string">&quot;/beers&quot;</span> beer-routes]
+     [<span class="hljs-string">&quot;/dynamic/*&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">:dynamic</span>
+                    <span class="hljs-symbol">:router</span> dynamic-router}]]))
+</code></pre>
+<p>New new root router <em>reference</em> and a helper to reset it</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name"><span class="hljs-builtin-name">atom</span></span> (<span class="hljs-name">create-router</span> <span class="hljs-literal">nil</span>)))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> reset-router! [beers]
+  (<span class="hljs-name"><span class="hljs-builtin-name">reset!</span></span> router (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> beers beer-routes create-router)))
+</code></pre>
+<p>Let&apos;s reset the router with some beers:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">reset-router!</span> [<span class="hljs-string">&quot;lager&quot;</span> <span class="hljs-string">&quot;sahti&quot;</span> <span class="hljs-string">&quot;bock&quot;</span>])
+</code></pre>
+<p>We can see that the beer routes are now embedded into the core router:</p>
+<pre><code>(r/routes @router)
+;[[&quot;/gin/napue&quot; {:name :napue}]
+; [&quot;/ciders/*&quot; {:name :ciders}]
+; [&quot;/beers/lager&quot; {:name :user/lager}]
+; [&quot;/beers/sahti&quot; {:name :user/sahti}]
+; [&quot;/beers/bock&quot; {:name :user/bock}]
+; [&quot;/dynamic/*&quot; {:name :dynamic,
+;                :router #object[user$reify__24359]}]]
+</code></pre><p>And the routing works:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">name-path</span> @router <span class="hljs-string">&quot;/beers/sahti&quot;</span>)
+<span class="hljs-comment">;[:user/sahti]</span>
+</code></pre>
+<p>The beer-routes now route in constant time of ~40ns, compared to ~600ns in the previous example.</p>
 <h2 id="todo">TODO</h2>
 <ul>
-<li>example how to do dynamic routing with <code>reitit-ring</code></li>
-<li>create a <code>recursive-router</code> into a separate ns with all <code>r/routes</code> implemented correctly?</li>
-<li><code>reitit.core/merge-routes</code> to effectively merge routes with route data</li>
+<li>add an example how to do dynamic routing with <code>reitit-ring</code></li>
+<li>maybe create a <code>recursive-router</code> into a separate ns with all <code>Router</code> functions implemented correctly? maybe not...</li>
+<li>add <code>reitit.core/merge-routes</code> to effectively merge routes with route data</li>
 </ul>
 
                                 
@@ -962,7 +1011,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Composing Routers","level":"1.4.2","depth":2,"next":{"title":"Different Routers","level":"1.4.3","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Configuring Routers","level":"1.4.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/composing_routers.md","mtime":"2018-07-25T08:17:19.331Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-25T08:17:55.471Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Composing Routers","level":"1.4.2","depth":2,"next":{"title":"Different Routers","level":"1.4.3","depth":2,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Configuring Routers","level":"1.4.1","depth":2,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/composing_routers.md","mtime":"2018-07-26T07:40:18.058Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-26T07:40:53.641Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
