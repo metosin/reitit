@@ -20,6 +20,32 @@
 ; ["/api/3" {}]]
 ```
 
+* Welcome Middleware and Intercetor Registries!
+  * when Keywords are used in place of middleware / interceptor, a lookup is done into Router option `::middleware/registry` (or `::interceptor/registrty`) with the key. Fails fast with missing registry entries.
+  * fixes [#32](https://github.com/metosin/reitit/issues/32)
+  
+ ```clj
+ (require '[reitit.ring :as ring])
+ (require '[reitit.middleware :as middleware])
+ 
+ (defn wrap-xyz [handler value]
+   (fn [request]
+     (handler (update request :xyz (fnil + 0) value))))
+ 
+ (def app
+   (ring/ring-handler
+     (ring/router
+       ["/api" {:middleware [[:xyz 20]]}
+        ["/ping" {:middleware [:xyz10]
+                  :get identity}]]
+       {::middleware/registry {:xyz wrap-xyz
+                               :xyz10 [:xyz 10]}})))
+ 
+ (-> {:request-method :get, :uri "/api/ping"} (app) :xyz)
+ ; 30
+ ```
+
+
 ## `reitit-swagger`
 
 * In case of just one swagger api per router, the swagger api doesn't have to identified, so this works now:
