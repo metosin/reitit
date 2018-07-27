@@ -24,11 +24,14 @@
 (defn handler [ctx]
   (conj ctx :ok))
 
-(defn create [interceptors]
-  (let [chain (interceptor/chain
-                interceptors
-                handler :data nil)]
-    (partial execute chain)))
+(defn create
+  ([interceptors]
+    (create interceptors nil))
+  ([interceptors opts]
+   (let [chain (interceptor/chain
+                 interceptors
+                 handler :data opts)]
+     (partial execute chain))))
 
 (deftest expand-interceptor-test
 

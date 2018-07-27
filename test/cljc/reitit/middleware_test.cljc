@@ -10,12 +10,15 @@
 (defn handler [request]
   (conj request :ok))
 
-(defn create [middleware]
-  (middleware/chain
-    middleware
-    handler
-    :data
-    nil))
+(defn create
+  ([middleware]
+    (create middleware nil))
+  ([middleware opts]
+   (middleware/chain
+     middleware
+     handler
+     :data
+     opts)))
 
 (deftest expand-middleware-test
 
