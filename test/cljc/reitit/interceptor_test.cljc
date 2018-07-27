@@ -58,6 +58,19 @@
               (is (= [:value :ok] (app ctx)))
               (is (= 1 @calls)))))
 
+        (testing "as keyword"
+          (reset! calls 0)
+          (let [app (create [:enter] {::interceptor/registry {:enter (enter :value)}})]
+            (dotimes [_ 10]
+              (is (= [:value :ok] (app ctx)))
+              (is (= 1 @calls)))))
+
+        (testing "missing keyword"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Interceptor :enter not found in registry"
+                (create [:enter]))))
+
         (testing "as map"
           (reset! calls 0)
           (let [app (create [{:enter (enter :value)}])]

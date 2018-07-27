@@ -13,6 +13,17 @@
 
 (extend-protocol IntoInterceptor
 
+  #?(:clj  clojure.lang.Keyword
+     :cljs cljs.core.Keyword)
+  (into-interceptor [this data {:keys [::registry] :as opts}]
+    (or (if-let [interceptor (if registry (registry this))]
+          (into-interceptor interceptor data opts))
+        (throw
+          (ex-info
+            (str "Interceptor " (pr-str this) " not found in registry.")
+            {:keyword this
+             :registry registry}))))
+
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
   (into-interceptor [[f & args :as form] data opts]
