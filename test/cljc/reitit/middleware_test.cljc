@@ -45,6 +45,26 @@
               (is (= [:value :ok] (app request)))
               (is (= 1 @calls)))))
 
+        (testing "as keyword"
+          (reset! calls 0)
+          (let [app (create [:wrap] {::middleware/registry {:wrap #(wrap % :value)}})]
+            (dotimes [_ 10]
+              (is (= [:value :ok] (app request)))
+              (is (= 1 @calls)))))
+
+        (testing "as keyword vector"
+          (reset! calls 0)
+          (let [app (create [[:wrap :value]] {::middleware/registry {:wrap wrap}})]
+            (dotimes [_ 10]
+              (is (= [:value :ok] (app request)))
+              (is (= 1 @calls)))))
+
+        (testing "missing keyword"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Middleware :wrap not found in registry"
+                (create [:wrap]))))
+
         (testing "as function vector with value(s)"
           (reset! calls 0)
           (let [app (create [[wrap :value]])]

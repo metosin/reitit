@@ -13,6 +13,17 @@
 
 (extend-protocol IntoMiddleware
 
+  #?(:clj  clojure.lang.Keyword
+     :cljs cljs.core.Keyword)
+  (into-middleware [this data {:keys [::registry] :as opts}]
+    (or (if-let [middleware (if registry (registry this))]
+          (into-middleware middleware data opts))
+        (throw
+          (ex-info
+            (str "Middleware " (pr-str this) " not found in registry.")
+            {:keyword this
+             :registry registry}))))
+
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
   (into-middleware [[f & args] data opts]
