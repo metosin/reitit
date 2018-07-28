@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Dynamic Extensions · GitBook</title>
+        <title>Middleware Registry · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="data_driven_middleware.html" />
+    <link rel="next" href="coercion.html" />
     
     
-    <link rel="prev" href="static.html" />
+    <link rel="prev" href="data_driven_middleware.html" />
     
 
     </head>
@@ -433,7 +433,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.5.5" data-path="dynamic_extensions.html">
+        <li class="chapter " data-level="1.5.5" data-path="dynamic_extensions.html">
             
                 <a href="dynamic_extensions.html">
             
@@ -459,7 +459,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.7" data-path="middleware_registry.html">
+        <li class="chapter active" data-level="1.5.7" data-path="middleware_registry.html">
             
                 <a href="middleware_registry.html">
             
@@ -669,7 +669,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Dynamic Extensions</a>
+        <a href=".." >Middleware Registry</a>
     </h1>
 </div>
 
@@ -684,44 +684,55 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="dynamic-extensions">Dynamic Extensions</h1>
-<p><code>ring-handler</code> injects the <code>Match</code> into a request and it can be extracted at runtime with <code>reitit.ring/get-match</code>. This can be used to build ad-hoc extensions to the system.</p>
-<p>Example middleware to guard routes based on user roles:</p>
+                                <h1 id="middleware-registry">Middleware Registry</h1>
+<p>The <code>:middleware</code> syntax in <code>reitit-ring</code> supports also Keywords. Keywords are looked from Middleware Registry, which is a map of <code>keyword =&gt; IntoMiddleware</code>. Middleware registry should be stored under key <code>:reitit.middleware/registry</code> in the router options. If a middleware keyword isn&apos;t found in the registry, router creation fails fast with descriptive error message.</p>
+<h2 id="examples">Examples</h2>
+<p>Application using middleware defined in the Middleware Registry:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
-(<span class="hljs-name">require</span> &apos;[clojure.set <span class="hljs-symbol">:as</span> set])
+(<span class="hljs-name">require</span> &apos;[reitit.middleware <span class="hljs-symbol">:as</span> middleware])
 
-(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-enforce-roles [handler]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [<span class="hljs-symbol">::roles</span>] <span class="hljs-symbol">:as</span> request}]
-    (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [required (<span class="hljs-name">some-&gt;</span> request (<span class="hljs-name">ring/get-match</span>) <span class="hljs-symbol">:data</span> <span class="hljs-symbol">::roles</span>)]
-      (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">seq</span></span> required) (<span class="hljs-name"><span class="hljs-builtin-name">not</span></span> (<span class="hljs-name">set/subset?</span> required roles)))
-        {<span class="hljs-symbol">:status</span> <span class="hljs-number">403</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;forbidden&quot;</span>}
-        (<span class="hljs-name">handler</span> request)))))
-</code></pre>
-<p>Mounted to an app via router data (effecting all routes):</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> handler (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>}))
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-bonus [handler value]
+  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
+    (<span class="hljs-name">handler</span> (<span class="hljs-name">update</span> request <span class="hljs-symbol">:bonus</span> (<span class="hljs-name">fnil</span> + <span class="hljs-number">0</span>) value))))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [[<span class="hljs-string">&quot;/api&quot;</span>
-        [<span class="hljs-string">&quot;/ping&quot;</span> handler]
-        [<span class="hljs-string">&quot;/admin&quot;</span> {<span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}}
-         [<span class="hljs-string">&quot;/ping&quot;</span> handler]]]]
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [wrap-enforce-roles]}})))
+      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[<span class="hljs-symbol">:bonus</span> <span class="hljs-number">20</span>]]}
+       [<span class="hljs-string">&quot;/bonus&quot;</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">:bonus10</span>]
+                 <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [bonus]}]
+                        {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:bonus</span> bonus}})}]]
+      {<span class="hljs-symbol">::middleware/registry</span> {<span class="hljs-symbol">:bonus</span> wrap-bonus
+                              <span class="hljs-symbol">:bonus10</span> [<span class="hljs-symbol">:bonus</span> <span class="hljs-number">10</span>]}})))
 </code></pre>
-<p>Anonymous access to public route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/ping&quot;</span>})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
+<p>Works as expected:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/bonus&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body {:bonus 30}}</span>
 </code></pre>
-<p>Anonymous access to guarded route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>})
-<span class="hljs-comment">; {:status 403, :body &quot;forbidden&quot;}</span>
+<p>Router creation fails fast if registry doesn&apos;t contain the Middleware:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:middleware</span> [[<span class="hljs-symbol">:bonus</span> <span class="hljs-number">20</span>]]}
+       [<span class="hljs-string">&quot;/bonus&quot;</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">:bonus10</span>]
+                  <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [bonus]}]
+                         {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:bonus</span> bonus}})}]]
+      {<span class="hljs-symbol">::middleware/registry</span> {<span class="hljs-symbol">:bonus</span> wrap-bonus}})))
+<span class="hljs-comment">;CompilerException clojure.lang.ExceptionInfo: Middleware :bonus10 not found in registry.</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;Available middleware in registry:</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;|    :id |                         :description |</span>
+<span class="hljs-comment">;|--------+--------------------------------------|</span>
+<span class="hljs-comment">;| :bonus | reitit.ring_test$wrap_bonus@59fddabb |</span>
 </code></pre>
-<p>Authorized access to guarded route:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/admin/ping&quot;</span>, <span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:admin</span>}})
-<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
-</code></pre>
-<p>Dynamic extensions are nice, but we can do much better. See <a href="data_driven_middleware.html">data-driven middleware</a> and <a href="compiling_middleware.html">compiling routes</a>.</p>
+<h2 id="when-to-use-the-registry">When to use the registry?</h2>
+<p>Middleware as Keywords helps to keep the routes (all but handlers) as literal data (e.g. data that evaluates to itself) enabling the routes to be persisted in external formats like EDN-files and databases. Duct is a good example where the <a href="https://github.com/duct-framework/duct/wiki/Configuration" target="_blank">middleware can be referenced from EDN-files</a>. It should be easy to make Duct configuration a Middleware Registry in <code>reitit-ring</code>.</p>
+<p>The bad thing it&apos;s an extra indirection, making things more complex and removed the default IDE-support of &quot;goto definition&quot; or &quot;look source&quot;.</p>
+<h2 id="todo">TODO</h2>
+<ul>
+<li>a prefilled registry of common middleware in the <code>reitit-middleware</code></li>
+</ul>
 
                                 
                                 </section>
@@ -749,12 +760,12 @@
 
             
                 
-                <a href="static.html" class="navigation navigation-prev " aria-label="Previous page: Static Resources">
+                <a href="data_driven_middleware.html" class="navigation navigation-prev " aria-label="Previous page: Data-driven Middleware">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="data_driven_middleware.html" class="navigation navigation-next " aria-label="Next page: Data-driven Middleware">
+                <a href="coercion.html" class="navigation navigation-next " aria-label="Next page: Pluggable Coercion">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -765,7 +776,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Dynamic Extensions","level":"1.5.5","depth":2,"next":{"title":"Data-driven Middleware","level":"1.5.6","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"previous":{"title":"Static Resources","level":"1.5.4","depth":2,"path":"ring/static.md","ref":"ring/static.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/dynamic_extensions.md","mtime":"2018-07-28T09:07:37.866Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-28T09:08:12.280Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Middleware Registry","level":"1.5.7","depth":2,"next":{"title":"Pluggable Coercion","level":"1.5.8","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Data-driven Middleware","level":"1.5.6","depth":2,"path":"ring/data_driven_middleware.md","ref":"ring/data_driven_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/middleware_registry.md","mtime":"2018-07-28T09:07:37.866Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-07-28T09:08:12.280Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
