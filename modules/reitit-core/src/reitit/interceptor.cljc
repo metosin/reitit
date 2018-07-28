@@ -1,5 +1,6 @@
 (ns reitit.interceptor
   (:require [meta-merge.core :refer [meta-merge]]
+            [clojure.pprint :as pprint]
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
@@ -20,8 +21,15 @@
           (into-interceptor interceptor data opts))
         (throw
           (ex-info
-            (str "Interceptor " this " not found in registry.")
-            {:keyword this
+            (str
+              "Interceptor " this " not found in registry.\n\n"
+              (if (seq registry)
+                (str
+                  "Available interceptors in registry:\n"
+                  (with-out-str
+                    (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+                "see [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
+            {:id this
              :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector

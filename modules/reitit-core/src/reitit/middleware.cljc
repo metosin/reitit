@@ -29,7 +29,7 @@
                   (with-out-str
                     (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
                 "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
-            {:keyword this
+            {:id this
              :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
