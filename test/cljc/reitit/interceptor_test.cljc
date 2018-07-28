@@ -24,11 +24,14 @@
 (defn handler [ctx]
   (conj ctx :ok))
 
-(defn create [interceptors]
-  (let [chain (interceptor/chain
-                interceptors
-                handler :data nil)]
-    (partial execute chain)))
+(defn create
+  ([interceptors]
+    (create interceptors nil))
+  ([interceptors opts]
+   (let [chain (interceptor/chain
+                 interceptors
+                 handler :data opts)]
+     (partial execute chain))))
 
 (deftest expand-interceptor-test
 
@@ -54,6 +57,19 @@
             (dotimes [_ 10]
               (is (= [:value :ok] (app ctx)))
               (is (= 1 @calls)))))
+
+        (testing "as keyword"
+          (reset! calls 0)
+          (let [app (create [:enter] {::interceptor/registry {:enter (enter :value)}})]
+            (dotimes [_ 10]
+              (is (= [:value :ok] (app ctx)))
+              (is (= 1 @calls)))))
+
+        (testing "missing keyword"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Interceptor :enter not found in registry"
+                (create [:enter]))))
 
         (testing "as map"
           (reset! calls 0)

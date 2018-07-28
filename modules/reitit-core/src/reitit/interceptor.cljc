@@ -1,5 +1,6 @@
 (ns reitit.interceptor
   (:require [meta-merge.core :refer [meta-merge]]
+            [clojure.pprint :as pprint]
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
@@ -12,6 +13,24 @@
 (def ^:dynamic *max-compile-depth* 10)
 
 (extend-protocol IntoInterceptor
+
+  #?(:clj  clojure.lang.Keyword
+     :cljs cljs.core.Keyword)
+  (into-interceptor [this data {:keys [::registry] :as opts}]
+    (or (if-let [interceptor (if registry (registry this))]
+          (into-interceptor interceptor data opts))
+        (throw
+          (ex-info
+            (str
+              "Interceptor " this " not found in registry.\n\n"
+              (if (seq registry)
+                (str
+                  "Available interceptors in registry:\n"
+                  (with-out-str
+                    (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+                "see [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
+            {:id this
+             :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
@@ -115,6 +134,7 @@
   | key                             | description |
   | --------------------------------|-------------|
   | `:reitit.interceptor/transform` | Function of [Interceptor] => [Interceptor] to transform the expanded Interceptors (default: identity).
+  | `:reitit.interceptor/registry`  | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptor
 
   See router options from [[reitit.core/router]]."
   ([data]
