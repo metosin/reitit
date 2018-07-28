@@ -23,8 +23,8 @@
                    :responses {200 {:body {:total pos-int?}}}
                    :handler f}]]
                 {:data {:middleware [(exception/create-exception-middleware
-                                       (merge
-                                         exception/default-handlers
+                                       (update
+                                         exception/default-options :handlers merge
                                          {::kikka (constantly {:status 200, :body "kikka"})
                                           SQLException (constantly {:status 200, :body "sql"})}))]}})))]
 

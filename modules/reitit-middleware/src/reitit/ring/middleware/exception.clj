@@ -1,6 +1,14 @@
 (ns reitit.ring.middleware.exception
   (:require [reitit.coercion :as coercion]
-            [reitit.ring :as ring]))
+            [reitit.ring :as ring]
+            [clojure.spec.alpha :as s]))
+
+(s/def ::handlers (s/map-of any? fn?))
+(s/def ::spec (s/keys :opt-un [::handlers]))
+
+;;
+;; helpers
+;;
 
 (defn- super-classes [^Class k]
   (loop [sk (.getSuperclass k), ks []]
@@ -27,6 +35,20 @@
     (respond (call-error-handler handlers e request))
     (catch Exception e
       (raise e))))
+
+(defn- wrap [{:keys [handlers]}]
+  (fn [handler]
+    (fn
+      ([request]
+       (try
+         (handler request)
+         (catch Throwable e
+           (on-exception handlers e request identity #(throw %)))))
+      ([request respond raise]
+       (try
+         (handler request respond (fn [e] (on-exception handlers e request respond raise)))
+         (catch Throwable e
+           (on-exception handlers e request respond raise)))))))
 
 ;;
 ;; handlers
@@ -60,51 +82,80 @@
 ;; public api
 ;;
 
-(def default-handlers
-  {::default default-handler
-   ::ring/response http-response-handler
-   :muuntaja/decode request-parsing-handler
-   ::coercion/request-coercion (create-coercion-handler 400)
-   ::coercion/response-coercion (create-coercion-handler 500)})
+(def default-options
+  {:handlers {::default default-handler
+              ::ring/response http-response-handler
+              :muuntaja/decode request-parsing-handler
+              ::coercion/request-coercion (create-coercion-handler 400)
+              ::coercion/response-coercion (create-coercion-handler 500)}})
 
-(defn wrap-exception [handlers]
-  (fn [handler]
-    (fn
-      ([request]
-       (try
-         (handler request)
-         (catch Throwable e
-           (on-exception handlers e request identity #(throw %)))))
-      ([request respond raise]
-       (try
-         (handler request respond (fn [e] (on-exception handlers e request respond raise)))
-         (catch Throwable e
-           (on-exception handlers e request respond raise)))))))
+(defn wrap-exception
+  "Ring middleware that catches all exceptions and looks up a
+  exceptions handler of type `exception request => response` to
+  handle the exception.
+
+  The following options are supported:
+
+  | key          | description
+  |--------------|-------------
+  | `:handlers`  | A map of exception identifier => exception-handler
+
+  The handler is selected from the handlers by exception idenfiter
+  in the following lookup order:
+
+  1) `:type` of exception ex-data
+  2) Class of exception
+  3) descadents `:type` of exception ex-data
+  4) Super Classes of exception
+  5) The ::default handler"
+  [handler options]
+  (-> options wrap handler))
 
 (def exception-middleware
-  "Middleware that catches all exceptions and looks up a exception handler
-  from a [[default-handlers]] map in the lookup order:
+  "Reitit middleware that catches all exceptions and looks up a
+  exceptions handler of type `exception request => response` to
+  handle the exception.
 
-  1) `:type` of ex-data
-  2) Class of Exception
-  3) descadents `:type` of ex-data
-  4) Super Classes of Exception
+  The following options are supported:
+
+  | key          | description
+  |--------------|-------------
+  | `:handlers`  | A map of exception identifier => exception-handler
+
+  The handler is selected from the handlers by exception idenfiter
+  in the following lookup order:
+
+  1) `:type` of exception ex-data
+  2) Class of exception
+  3) descadents `:type` of exception ex-data
+  4) Super Classes of exception
   5) The ::default handler"
   {:name ::exception
-   :wrap (wrap-exception default-handlers)})
+   :spec ::spec
+   :wrap (wrap default-options)})
 
 (defn create-exception-middleware
-  "Creates a middleware that catches all exceptions and looks up a exception handler
-  from a given map of `handlers` with keyword or Exception class as keys and a 2-arity
-  Exception handler function as values.
+  "Creates a reitit middleware that catches all exceptions and looks up a
+  exceptions handler of type `exception request => response` to
+  handle the exception.
 
-  1) `:type` of ex-data
-  2) Class of Exception
-  3) descadents `:type` of ex-data
-  4) Super Classes of Exception
+  The following options are supported:
+
+  | key          | description
+  |--------------|-------------
+  | `:handlers`  | A map of exception identifier => exception-handler
+
+  The handler is selected from the handlers by exception idenfiter
+  in the following lookup order:
+
+  1) `:type` of exception ex-data
+  2) Class of exception
+  3) descadents `:type` of exception ex-data
+  4) Super Classes of exception
   5) The ::default handler"
   ([]
-   (create-exception-middleware default-handlers))
-  ([handlers]
+   (create-exception-middleware default-options))
+  ([options]
    {:name ::exception
-    :wrap (wrap-exception handlers)}))
+    :spec ::spec
+    :wrap (wrap options)}))
