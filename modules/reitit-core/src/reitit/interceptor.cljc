@@ -20,7 +20,7 @@
           (into-interceptor interceptor data opts))
         (throw
           (ex-info
-            (str "Interceptor " (pr-str this) " not found in registry.")
+            (str "Interceptor " this " not found in registry.")
             {:keyword this
              :registry registry}))))
 
@@ -126,6 +126,7 @@
   | key                             | description |
   | --------------------------------|-------------|
   | `:reitit.interceptor/transform` | Function of [Interceptor] => [Interceptor] to transform the expanded Interceptors (default: identity).
+  | `:reitit.interceptor/registry`  | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptor
 
   See router options from [[reitit.core/router]]."
   ([data]

@@ -19,7 +19,7 @@ Let's create a router:
      ["/bar/:id" ::bar]]))
 ```
 
-We can query it's resolved routes and options:
+We can query the resolved routes and options:
 
 ```clj
 (r/routes router)
@@ -135,7 +135,7 @@ Matching by path:
 ;       :path "/olipa/iso/kala"}
 ```
 
-That didn't work as we wanted, as the nested routers don't have such a route. Thing is that the core routing doesn't understand anything about our new `:router` key, so it only matched against the top-level router, which gave a match for the catch-all path.
+That didn't work as we wanted, as the nested routers don't have such a route. The core routing doesn't understand anything the `:router` key, so it only matched against the top-level router, which gave a match for the catch-all path.
 
 As the `Match` contains all the route data, we can create a new matching function that understands the `:router` key. Below is a function that does recursive matching using the subrouters. It returns either `nil` or a vector of mathces.
 
@@ -214,9 +214,9 @@ First, we need to modify our matching function to support router references:
       (list match))))
 ```
 
-Then, we need some router (references).
+Then, we need some routers.
 
-First, a reference to a router that can be updated on demand on background, for example when a new entry in inserted into a database. We'll wrap the router into a `atom`:
+First, a reference to a router that can be updated on background, for example when a new entry in inserted into a database. We'll wrap the router into a `atom`:
 
 ```clj
 (def beer-router
@@ -251,20 +251,20 @@ We can compose the routers into a system-level static root router:
 Matching root routes:
 
 ```clj
-(name-path "/vodka/russian")
+(name-path router "/vodka/russian")
 ; nil
 
-(name-path "/gin/napue")
+(name-path router "/gin/napue")
 ; [:napue]
 ```
 
 Matching (nested) beer routes:
 
 ```clj
-(name-path "/beers/lager")
+(name-path router "/beers/lager")
 ; [:beers :lager]
 
-(name-path "/beers/saison")
+(name-path router "/beers/saison")
 ; nil
 ```
 
@@ -277,7 +277,7 @@ No saison!? Let's add the route:
 There we have it:
 
 ```clj
-(name-path "/beers/saison")
+(name-path router "/beers/saison")
 ; [:beers :saison]
 ```
 
@@ -294,16 +294,16 @@ We can't add conflicting routes:
 The dynamic routes are re-created on every request:
 
 ```clj
-(name-path "/dynamic/duo")
+(name-path router "/dynamic/duo")
 ; [:dynamic :duo71]
 
-(name-path "/dynamic/duo")
+(name-path router "/dynamic/duo")
 ; [:dynamic :duo55]
 ```
 
 ### Performance
 
-With nested routers, instead of having to do just one route match, matching is recursive, which adds a small cost. All nested routers need to be of type catch-all at top-level, which is order of magnitude slower than fully static routes. Dynamic routes are the slowest ones, at least an order of magnitude slower, as the router needs to be recreated for each request.
+With nested routers, instead of having to do just one route match, matching is recursive, which adds a small cost. All nested routers need to be of type catch-all at top-level, which is order of magnitude slower than fully static routes. Dynamic routes are the slowest ones, at least two orders of magnitude slower, as the router needs to be recreated for each request.
 
 A quick benchmark on the recursive lookups:
 
@@ -332,26 +332,23 @@ Comparing the dynamic routing performance with Compojure:
 |------------------|---------|-----------------------
 | `/dynamic/duo`   | 20000ns | compojure
 
-We could use the Router `:compile` hook to compile the nested routers for better performance. Also, the dynamic routing could be made faster, by allowing router creation time features like conflict resolution to be disabled.
+Can we make the nester routing faster? Sure. We could use the Router `:compile` hook to compile the nested routers for better performance. We could also allow router creation rules to be disabled, to get the dynamic routing much faster.
 
 ### When to use nested routers?
 
-Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it's the only choise. For other cases, nested routes are most likely a better option. 
+Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it's the only choise. For other cases, nested routes are most likely a better option.
 
-Let's re-create the previous example with normal route composition.
+Let's re-create the previous example with normal route nesting/composition.
 
-A helper to create beer-routes and the root router.
+A helper to the root router:
 
 ```clj
-(defn beer-routes [beers]
-  (for [beer beers]
-    [(str "/" beer) (keyword "beer" beer)]))
-
-(defn create-router [beer-routes]
+(defn create-router [beers]
   (r/router
     [["/gin/napue" :napue]
      ["/ciders/*" :ciders]
-     ["/beers" beer-routes]
+     ["/beers" (for [beer beers]
+                 [(str "/" beer) (keyword "beer" beer)])]
      ["/dynamic/*" {:name :dynamic
                     :router dynamic-router}]]))
 ```
@@ -363,7 +360,7 @@ New new root router *reference* and a helper to reset it:
   (atom (create-router nil)))
 
 (defn reset-router! [beers]
-  (reset! router (-> beers beer-routes create-router)))
+  (reset! router (create-router beers)))
 ```
 
 The routing tree:
@@ -402,7 +399,7 @@ And the routing works:
 ;[:beer/sahti]
 ```
 
-The beer-routes all now match in constant time.
+All the beer-routes now match in constant time.
 
 | path            | time    | type
 |-----------------|---------|-----------------------

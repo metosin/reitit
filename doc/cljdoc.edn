@@ -28,6 +28,7 @@
    {:file "doc/advanced/README.md"}
    ["Configuring Routers"
     {:file "doc/advanced/configuring_routers.md"}]
+   ["Composing Routers" {:file "doc/advanced/composing_routers.md"}]
    ["Different Routers" {:file "doc/advanced/different_routers.md"}]
    ["Route Validation" {:file "doc/advanced/route_validation.md"}]
    ["Dev Workflow" {:file "doc/advanced/dev_workflow.md"}]]
@@ -40,6 +41,7 @@
    ["Dynamic Extensions" {:file "doc/ring/dynamic_extensions.md"}]
    ["Data-driven Middleware"
     {:file "doc/ring/data_driven_middleware.md"}]
+   ["Middleware Registry" {:file "doc/ring/middleware_registry.md"}]
    ["Pluggable Coercion" {:file "doc/ring/coercion.md"}]
    ["Route Data Validation"
     {:file "doc/ring/route_data_validation.md"}]

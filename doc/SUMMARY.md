@@ -27,6 +27,7 @@
     * [Static Resources](ring/static.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
     * [Data-driven Middleware](ring/data_driven_middleware.md)
+    * [Middleware Registry](ring/middleware_registry.md)
     * [Pluggable Coercion](ring/coercion.md)
     * [Route Data Validation](ring/route_data_validation.md)
     * [Compiling Middleware](ring/compiling_middleware.md)

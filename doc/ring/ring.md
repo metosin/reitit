@@ -80,10 +80,12 @@ Name-based reverse routing:
 
 # Middleware
 
-Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector value of the following:
+Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector of any the following:
 
 1. normal ring middleware function `handler -> request -> response`
-2. vector of middleware function `handler ?args -> request -> response` and optinally it's args.
+2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
+3. a [data-driven middleware](data_driven_middleware.md) record or a map
+4. a Keyword name, to lookup the middleware from a [Middleware Registry](middleware_registry.md)
 
 A middleware and a handler:
 
