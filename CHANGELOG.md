@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.2.0-SNAPSHOT
 
 ## `reitit-core`
 
