@@ -6,9 +6,11 @@
             [reitit.coercion.spec]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.exception :as exception]
+            [reitit.ring.middleware.multipart :as multipart]
             [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
-            [muuntaja.core :as m]))
+            [muuntaja.core :as m]
+            [clojure.java.io :as io]))
 
 (def app
   (ring/ring-handler
@@ -17,6 +19,25 @@
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
                :handler (swagger/create-swagger-handler)}}]
+
+       ["/files"
+        {:swagger {:tags ["files"]}}
+
+        ["/upload"
+         {:post {:summary "upload a file"
+                 :parameters {:multipart {:file multipart/temp-file-part}}
+                 :responses {200 {:body {:file multipart/temp-file-part}}}
+                 :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                            {:status 200
+                             :body {:file file}})}}]
+
+        ["/download"
+         {:get {:summary "downloads a file"
+                :swagger {:produces ["image/png"]}
+                :handler (fn [_]
+                           {:status 200
+                            :headers {"Content-Type" "image/png"}
+                            :body (io/input-stream (io/resource "reitit.png"))})}}]]
 
        ["/math"
         {:swagger {:tags ["math"]}}
@@ -50,7 +71,9 @@
                            ;; coercing response bodys
                            coercion/coerce-response-middleware
                            ;; coercing request parameters
-                           coercion/coerce-request-middleware]}})
+                           coercion/coerce-request-middleware
+                           ;; multipart
+                           multipart/multipart-middleware]}})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler {:path "/"})
       (ring/create-default-handler))))
