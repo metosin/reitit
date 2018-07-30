@@ -77,19 +77,22 @@
     (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
           ->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
           ids (->set id)
-          swagger (->> (dissoc swagger :id)
+          strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
+          strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
+          swagger (->> (strip-endpoint-keys swagger)
                        (merge {:swagger "2.0"
                                :x-id ids}))
-          accept-route #(-> % second :swagger :id (or ::default) ->set (set/intersection ids) seq)
+          accept-route (fn [route]
+                         (-> route second :swagger :id (or ::default) ->set (set/intersection ids) seq))
           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data middleware :middleware}]]
                                (if (and data (not no-doc))
                                  [method
                                   (meta-merge
                                     (apply meta-merge (keep (comp :swagger :data) middleware))
                                     (if coercion
-                                      (coercion/-get-apidocs coercion :swagger data))
+                                      (coercion/get-apidocs coercion :swagger data))
                                     (select-keys data [:tags :summary :description])
-                                    (dissoc swagger :id))]))
+                                    (strip-top-level-keys swagger))]))
           transform-path (fn [[p _ c]]
                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                              [(path->template p) endpoint]))]
