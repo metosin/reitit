@@ -166,15 +166,40 @@
 ;; Path-parameters, see https://github.com/metosin/reitit/issues/75
 ;;
 
+#?(:clj
+   (def hex-digit
+     {0 "0" 1 "1" 2 "2" 3 "3"
+      4 "4" 5 "5" 6 "6" 7 "7"
+      8 "8" 9 "9" 10 "A" 11 "B"
+      12 "C" 13 "D" 14 "E" 15 "F"}))
+
+#?(:clj
+   (defn byte->percent [byte]
+     (let [byte (bit-and 0xFF byte)
+           low-nibble (bit-and 0xF byte)
+           high-nibble (bit-shift-right byte 4)]
+       (str "%" (hex-digit high-nibble) (hex-digit low-nibble)))))
+
+#?(:clj
+   (defn percent-encode [^String unencoded]
+     (->> (.getBytes unencoded "UTF-8") (map byte->percent) (str/join))))
+
+;; + is safe, but removed so it would work the same as with js
 (defn url-encode [s]
-  (some-> s
-          #?(:clj  (URLEncoder/encode "UTF-8")
-             :cljs (js/encodeURIComponent))
-          #?(:clj (.replace "+" "%20"))))
+  (if s
+    #?(:clj  (str/replace s #"[^A-Za-z0-9\!'\(\)\*_~.-]+" percent-encode)
+       :cljs (js/encodeURIComponent s))))
 
 (defn url-decode [s]
-  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
-               :cljs (js/decodeURIComponent))))
+  (if s
+    #?(:clj  (if (.contains ^String s "%")
+               (URLDecoder/decode
+                 (if (.contains ^String s "+")
+                   (.replace ^String s "+" "%2B")
+                   s)
+                 "UTF-8")
+               s)
+       :cljs (js/decodeURIComponent s))))
 
 (defprotocol IntoString
   (into-string [_]))
@@ -203,7 +228,7 @@
   (into-string [this] (str this))
 
   nil
-  (into-string [this]))
+  (into-string [_]))
 
 (defn path-params
   "shallow transform of the path parameters values into strings"
