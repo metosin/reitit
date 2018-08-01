@@ -157,3 +157,15 @@
     "a//" "a//"
     "/path/%C2%ABk%C3%BC%C3%9F%C3%AE%C2%BB" "/path/«küßî»"
     "/path/%E2%80%9C%D0%8C%CF%8D%D0%91%D0%87%E2%80%9D" "/path/“ЌύБЇ”"))
+
+(deftest form-encode-test
+  (are [in out]
+    (= out (impl/form-encode in))
+
+    "+632 905 123 4567" "%2B632+905+123+4567"))
+
+(deftest form-decode-test
+  (are [in out]
+    (= out (impl/form-decode in))
+
+    "%2B632+905+123+4567" "+632 905 123 4567"))
