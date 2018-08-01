@@ -65,6 +65,8 @@
 ;{:a (seq [1 2])} "a=1&a=2"
 ;{:a #{"c" "b"}} "a=b&a=c"
 
+;; test from https://github.com/playframework/playframework -> UriEncodingSpec.scala
+
 (deftest url-encode-test
   (are [in out]
     (= out (impl/url-encode in))

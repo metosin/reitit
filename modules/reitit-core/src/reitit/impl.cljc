@@ -163,7 +163,7 @@
   (->> m (remove (comp nil? second)) (into {})))
 
 ;;
-;; Path-parameters, see https://github.com/metosin/reitit/issues/75
+;; Parts (c) https://github.com/lambdaisland/uri/tree/master/src/lambdaisland/uri
 ;;
 
 #?(:clj
@@ -183,6 +183,10 @@
 #?(:clj
    (defn percent-encode [^String unencoded]
      (->> (.getBytes unencoded "UTF-8") (map byte->percent) (str/join))))
+
+;;
+;; encoding & decoding
+;;
 
 ;; + is safe, but removed so it would work the same as with js
 (defn url-encode [s]
