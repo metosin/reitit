@@ -33,7 +33,7 @@
     (.replace ^String s "+" "%2B")
     "UTF-8"))
 
-(defn decode! []
+(defn url-decode! []
 
   ;; ring
 
@@ -77,7 +77,7 @@
           (.contains s "(") (.replace "%28" "(")
           (.contains s ")") (.replace "%29" ")")))
 
-(defn encode! []
+(defn url-encode! []
 
   ;; ring
 
@@ -111,6 +111,62 @@
                "1"]]
       (test! f s))))
 
+(defn form-decode! []
+
+  ;; ring
+
+  ;; 280ns
+  ;; 130ns
+  ;; 43ns
+  ;; 25ns
+
+  ;; reitit
+
+  ;; 270ns (-4%)
+  ;; 20ns (-84%)
+  ;; 47ns (+8%)
+  ;; 12ns (-52%)
+
+  (doseq [fs ['ring.util.codec/form-decode-str
+              'reitit.impl/form-decode]
+          :let [f (deref (resolve fs))]]
+    (suite (str fs))
+    (doseq [s ["%2Baja%20hiljaa+sillalla"
+               "aja_hiljaa_sillalla"
+               "1+1"
+               "1"]]
+      (test! f s))))
+
+(defn form-encode! []
+
+  ;; ring
+
+  ;; 240ns
+  ;; 120ns
+  ;; 130ns
+  ;; 31ns
+
+  ;; reitit
+
+  ;; 210ns
+  ;; 120ns
+  ;; 130ns
+  ;; 30ns
+
+  (doseq [fs ['ring.util.codec/form-encode
+              'reitit.impl/form-encode]
+          :let [f (deref (resolve fs))]]
+    (suite (str fs))
+    (doseq [s ["aja hiljaa+sillalla"
+               "aja_hiljaa_sillalla"
+               "1+1"
+               "1"]]
+      (test! f s))))
+
 (comment
-  (decode!)
-  (encode!))
+  (url-decode!)
+  (url-encode!)
+  (form-decode!)
+  (form-encode!))
+
+(ring.util.codec/form-decode-str "%2B632+905+123+4567")

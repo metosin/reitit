@@ -203,19 +203,14 @@
 
 (defn form-encode [s]
   (if s
-    #?(:clj  (-> s
-                 (str/replace #"[^A-Za-z0-9\!'\(\)\*_~.-\\\ ]+" percent-encode)
-                 (^String .replace " " "+"))
+    #?(:clj  (URLEncoder/encode ^String s "UTF-8")
        :cljs (str/replace (js/encodeURIComponent s) "%20" "+"))))
 
 (defn form-decode [s]
   (if s
-    #?(:clj  (let [s (if (.contains ^String s "+")
-                       (.replace ^String s "+" " ")
-                       s)]
-               (if (.contains ^String s "%")
-                 (URLDecoder/decode s "UTF-8")
-                 s))
+    #?(:clj  (if (or (.contains ^String s "%") (.contains ^String s "+"))
+               (URLDecoder/decode ^String s "UTF-8")
+               s)
        :cljs (js/decodeURIComponent (str/replace s "+" " ")))))
 
 (defprotocol IntoString
