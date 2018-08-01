@@ -57,7 +57,7 @@
     {:a 1} "a=1"
     {:a nil} "a="
     {:a :b :c "d"} "a=b&c=d"
-    {:a "b c"} "a=b%20c"))
+    {:a "b c"} "a=b+c"))
 
 ; TODO: support seq values?
 ;{:a ["b" "c"]} "a=b&a=c"

@@ -256,9 +256,9 @@
   [params]
   (->> params
        (map (fn [[k v]]
-              (str (url-encode (into-string k))
+              (str (form-encode (into-string k))
                    "="
-                   (url-encode (into-string v)))))
+                   (form-encode (into-string v)))))
        (str/join "&")))
 
 (defmacro goog-extend [type base-type ctor & methods]
