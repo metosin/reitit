@@ -256,7 +256,7 @@
      (goog/inherits ~type ~base-type)
 
      ~@(map
-        (fn [method]
-          `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
-                 (fn ~@(rest method))))
-        methods)))
+         (fn [method]
+           `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
+                  (fn ~@(rest method))))
+         methods)))
