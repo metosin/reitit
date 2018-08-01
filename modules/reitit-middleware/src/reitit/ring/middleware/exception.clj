@@ -1,7 +1,10 @@
 (ns reitit.ring.middleware.exception
   (:require [reitit.coercion :as coercion]
             [reitit.ring :as ring]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str])
+  (:import (java.time Instant)
+           (java.io PrintWriter)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))
@@ -28,7 +31,9 @@
                             (partial get handlers)
                             (super-classes ex-class))
                           (get handlers ::default))]
-    (error-handler error request)))
+    (if-let [wrap (get handlers ::wrap)]
+      (wrap error-handler error request)
+      (error-handler error request))))
 
 (defn- on-exception [handlers e request respond raise]
   (try
@@ -36,7 +41,7 @@
     (catch Exception e
       (raise e))))
 
-(defn- wrap [{:keys [handlers]}]
+(defn- wrap [handlers]
   (fn [handler]
     (fn
       ([request]
@@ -49,6 +54,9 @@
          (handler request respond (fn [e] (on-exception handlers e request respond raise)))
          (catch Throwable e
            (on-exception handlers e request respond raise)))))))
+
+(defn print! [^PrintWriter writer & more]
+  (.write writer (str (str/join " " more) "\n")))
 
 ;;
 ;; handlers
@@ -78,84 +86,92 @@
    :headers {"Content-Type" "text/plain"}
    :body (str "Malformed " (-> e ex-data :format pr-str) " request.")})
 
+(defn wrap-log-to-console [handler e {:keys [uri request-method] :as req}]
+  (print! *out* (Instant/now) request-method (pr-str uri) "=>" (.getMessage e))
+  (.printStackTrace e *out*)
+  (handler e req))
+
 ;;
 ;; public api
 ;;
 
-(def default-options
-  {:handlers {::default default-handler
-              ::ring/response http-response-handler
-              :muuntaja/decode request-parsing-handler
-              ::coercion/request-coercion (create-coercion-handler 400)
-              ::coercion/response-coercion (create-coercion-handler 500)}})
+(def default-handlers
+  {::default default-handler
+   ::ring/response http-response-handler
+   :muuntaja/decode request-parsing-handler
+   ::coercion/request-coercion (create-coercion-handler 400)
+   ::coercion/response-coercion (create-coercion-handler 500)})
 
 (defn wrap-exception
-  "Ring middleware that catches all exceptions and looks up a
-  exceptions handler of type `exception request => response` to
-  handle the exception.
-
-  The following options are supported:
-
-  | key          | description
-  |--------------|-------------
-  | `:handlers`  | A map of exception identifier => exception-handler
-
-  The handler is selected from the handlers by exception idenfiter
-  in the following lookup order:
-
-  1) `:type` of exception ex-data
-  2) Class of exception
-  3) descadents `:type` of exception ex-data
-  4) Super Classes of exception
-  5) The ::default handler"
-  [handler options]
-  (-> options wrap handler))
+  ([handler]
+   (handler default-handlers))
+  ([handler options]
+   (-> options wrap handler)))
 
 (def exception-middleware
-  "Reitit middleware that catches all exceptions and looks up a
-  exceptions handler of type `exception request => response` to
-  handle the exception.
-
-  The following options are supported:
-
-  | key          | description
-  |--------------|-------------
-  | `:handlers`  | A map of exception identifier => exception-handler
-
-  The handler is selected from the handlers by exception idenfiter
-  in the following lookup order:
-
-  1) `:type` of exception ex-data
-  2) Class of exception
-  3) descadents `:type` of exception ex-data
-  4) Super Classes of exception
-  5) The ::default handler"
   {:name ::exception
    :spec ::spec
-   :wrap (wrap default-options)})
+   :wrap (wrap default-handlers)})
 
 (defn create-exception-middleware
-  "Creates a reitit middleware that catches all exceptions and looks up a
-  exceptions handler of type `exception request => response` to
-  handle the exception.
+  "Creates a reitit middleware that catches all exceptions. Takes a map
+  of `identifier => exception request => response` that is used to select
+  the exception handler for the thown/raised exception identifier. Exception
+  idenfier is either a `Keyword` or a Exception Class.
 
-  The following options are supported:
+  The following handlers special handlers are available:
 
   | key          | description
   |--------------|-------------
-  | `:handlers`  | A map of exception identifier => exception-handler
+  | `::default`  | a default exception handler if nothing else mathced (default [[default-handler]]).
+  | `::wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response`
 
-  The handler is selected from the handlers by exception idenfiter
+  The handler is selected from the options map by exception idenfiter
   in the following lookup order:
 
   1) `:type` of exception ex-data
   2) Class of exception
-  3) descadents `:type` of exception ex-data
+  3) `:type` ancestors of exception ex-data
   4) Super Classes of exception
-  5) The ::default handler"
+  5) The ::default handler
+
+  Example:
+
+      (require '[reitit.ring.middleware.exception :as exception])
+
+      ;; type hierarchy
+      (derive ::error ::exception)
+      (derive ::failure ::exception)
+      (derive ::horror ::exception)
+
+      (defn handler [message exception request]
+        {:status 500
+         :body {:message message
+                :exception (str exception)
+                :uri (:uri request)}})
+
+      (exception/create-exception-middleware
+        (merge
+          exception/default-handlers
+          {;; ex-data with :type ::error
+           ::error (partial handler \"error\")
+
+           ;; ex-data with ::exception or ::failure
+           ::exception (partial handler \"exception\")
+
+           ;; SQLException and all it's child classes
+           java.sql.SQLException (partial handler \"sql-exception\")
+
+           ;; override the default handler
+           ::exception/default (partial handler \"default\")
+
+           ;; print stack-traces for all exceptions
+           ::exception/wrap (fn [handler e request]
+                              (.printStackTrace e)
+                              (handler e request))}))"
   ([]
-   (create-exception-middleware default-options))
-  ([options]
+   (create-exception-middleware default-handlers))
+  ([handlers]
    {:name ::exception
     :spec ::spec
-    :wrap (wrap options)}))
+    :wrap (wrap handlers)}))

@@ -10,23 +10,27 @@
 (derive ::kikka ::kukka)
 
 (deftest exception-test
-  (letfn [(create [f]
-            (ring/ring-handler
-              (ring/router
-                [["/defaults"
-                  {:handler f}]
-                 ["/coercion"
-                  {:middleware [reitit.ring.coercion/coerce-request-middleware
-                                reitit.ring.coercion/coerce-response-middleware]
-                   :coercion reitit.coercion.spec/coercion
-                   :parameters {:query {:x int?, :y int?}}
-                   :responses {200 {:body {:total pos-int?}}}
-                   :handler f}]]
-                {:data {:middleware [(exception/create-exception-middleware
-                                       (update
-                                         exception/default-options :handlers merge
-                                         {::kikka (constantly {:status 200, :body "kikka"})
-                                          SQLException (constantly {:status 200, :body "sql"})}))]}})))]
+  (letfn [(create
+            ([f]
+              (create f nil))
+            ([f wrap]
+             (ring/ring-handler
+               (ring/router
+                 [["/defaults"
+                   {:handler f}]
+                  ["/coercion"
+                   {:middleware [reitit.ring.coercion/coerce-request-middleware
+                                 reitit.ring.coercion/coerce-response-middleware]
+                    :coercion reitit.coercion.spec/coercion
+                    :parameters {:query {:x int?, :y int?}}
+                    :responses {200 {:body {:total pos-int?}}}
+                    :handler f}]]
+                 {:data {:middleware [(exception/create-exception-middleware
+                                        (merge
+                                          exception/default-handlers
+                                          {::kikka (constantly {:status 400, :body "kikka"})
+                                           SQLException (constantly {:status 400, :body "sql"})
+                                           ::exception/wrap wrap}))]}}))))]
 
     (testing "normal calls work ok"
       (let [response {:status 200, :body "ok"}
@@ -81,20 +85,32 @@
 
     (testing "exact :type"
       (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kikka}))))]
-        (is (= {:status 200, :body "kikka"}
+        (is (= {:status 400, :body "kikka"}
                (app {:request-method :get, :uri "/defaults"})))))
 
     (testing "parent :type"
       (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kukka}))))]
-        (is (= {:status 200, :body "kikka"}
+        (is (= {:status 400, :body "kikka"}
                (app {:request-method :get, :uri "/defaults"})))))
 
     (testing "exact Exception"
       (let [app (create (fn [_] (throw (SQLException.))))]
-        (is (= {:status 200, :body "sql"}
+        (is (= {:status 400, :body "sql"}
                (app {:request-method :get, :uri "/defaults"})))))
 
     (testing "Exception SuperClass"
       (let [app (create (fn [_] (throw (SQLWarning.))))]
-        (is (= {:status 200, :body "sql"}
+        (is (= {:status 400, :body "sql"}
+               (app {:request-method :get, :uri "/defaults"})))))
+
+    (testing "::exception/wrap"
+      (let [calls (atom 0)
+            app (create (fn [_] (throw (SQLWarning.)))
+                        (fn [handler exception request]
+                          (if (< (swap! calls inc) 2)
+                            (handler exception request)
+                            {:status 500, :body "too many tries"})))]
+        (is (= {:status 400, :body "sql"}
+               (app {:request-method :get, :uri "/defaults"})))
+        (is (= {:status 500, :body "too many tries"}
                (app {:request-method :get, :uri "/defaults"})))))))
