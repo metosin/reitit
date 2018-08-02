@@ -12,7 +12,7 @@
 (deftest exception-test
   (letfn [(create
             ([f]
-              (create f nil))
+             (create f nil))
             ([f wrap]
              (ring/ring-handler
                (ring/router
