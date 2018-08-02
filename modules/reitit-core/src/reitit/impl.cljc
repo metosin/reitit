@@ -162,19 +162,46 @@
 (defn strip-nils [m]
   (->> m (remove (comp nil? second)) (into {})))
 
+#?(:clj (def +percents+ (into [] (map #(format "%%%02X" %) (range 0 256)))))
+
+#?(:clj (defn byte->percent [byte]
+          (nth +percents+ (if (< byte 0) (+ 256 byte) byte))))
+
+#?(:clj (defn percent-encode [^String s]
+          (->> (.getBytes s "UTF-8") (map byte->percent) (str/join))))
+
 ;;
-;; Path-parameters, see https://github.com/metosin/reitit/issues/75
+;; encoding & decoding
 ;;
 
+;; + is safe, but removed so it would work the same as with js
 (defn url-encode [s]
-  (some-> s
-          #?(:clj  (URLEncoder/encode "UTF-8")
-             :cljs (js/encodeURIComponent))
-          #?(:clj (.replace "+" "%20"))))
+  (if s
+    #?(:clj  (str/replace s #"[^A-Za-z0-9\!'\(\)\*_~.-]+" percent-encode)
+       :cljs (js/encodeURIComponent s))))
 
 (defn url-decode [s]
-  (some-> s #?(:clj  (URLDecoder/decode "UTF-8")
-               :cljs (js/decodeURIComponent))))
+  (if s
+    #?(:clj  (if (.contains ^String s "%")
+               (URLDecoder/decode
+                 (if (.contains ^String s "+")
+                   (.replace ^String s "+" "%2B")
+                   s)
+                 "UTF-8")
+               s)
+       :cljs (js/decodeURIComponent s))))
+
+(defn form-encode [s]
+  (if s
+    #?(:clj  (URLEncoder/encode ^String s "UTF-8")
+       :cljs (str/replace (js/encodeURIComponent s) "%20" "+"))))
+
+(defn form-decode [s]
+  (if s
+    #?(:clj  (if (or (.contains ^String s "%") (.contains ^String s "+"))
+               (URLDecoder/decode ^String s "UTF-8")
+               s)
+       :cljs (js/decodeURIComponent (str/replace s "+" " ")))))
 
 (defprotocol IntoString
   (into-string [_]))
@@ -203,7 +230,7 @@
   (into-string [this] (str this))
 
   nil
-  (into-string [this]))
+  (into-string [_]))
 
 (defn path-params
   "shallow transform of the path parameters values into strings"
@@ -219,9 +246,9 @@
   [params]
   (->> params
        (map (fn [[k v]]
-              (str (url-encode (into-string k))
+              (str (form-encode (into-string k))
                    "="
-                   (url-encode (into-string v)))))
+                   (form-encode (into-string v)))))
        (str/join "&")))
 
 (defmacro goog-extend [type base-type ctor & methods]
@@ -231,7 +258,7 @@
      (goog/inherits ~type ~base-type)
 
      ~@(map
-        (fn [method]
-          `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
-                 (fn ~@(rest method))))
-        methods)))
+         (fn [method]
+           `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
+                  (fn ~@(rest method))))
+         methods)))
