@@ -162,27 +162,13 @@
 (defn strip-nils [m]
   (->> m (remove (comp nil? second)) (into {})))
 
-;;
-;; Parts (c) https://github.com/lambdaisland/uri/tree/master/src/lambdaisland/uri
-;;
+#?(:clj (def +percents+ (into [] (map #(format "%%%02X" %) (range 0 256)))))
 
-#?(:clj
-   (def hex-digit
-     {0 "0" 1 "1" 2 "2" 3 "3"
-      4 "4" 5 "5" 6 "6" 7 "7"
-      8 "8" 9 "9" 10 "A" 11 "B"
-      12 "C" 13 "D" 14 "E" 15 "F"}))
+#?(:clj (defn byte->percent [byte]
+          (nth +percents+ (if (< byte 0) (+ 256 byte) byte))))
 
-#?(:clj
-   (defn byte->percent [byte]
-     (let [byte (bit-and 0xFF byte)
-           low-nibble (bit-and 0xF byte)
-           high-nibble (bit-shift-right byte 4)]
-       (str "%" (hex-digit high-nibble) (hex-digit low-nibble)))))
-
-#?(:clj
-   (defn percent-encode [^String unencoded]
-     (->> (.getBytes unencoded "UTF-8") (map byte->percent) (str/join))))
+#?(:clj (defn percent-encode [^String s]
+          (->> (.getBytes s "UTF-8") (map byte->percent) (str/join))))
 
 ;;
 ;; encoding & decoding

@@ -168,5 +168,3 @@
   (url-encode!)
   (form-decode!)
   (form-encode!))
-
-(ring.util.codec/form-decode-str "%2B632+905+123+4567")
