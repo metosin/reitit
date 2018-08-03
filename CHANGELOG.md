@@ -69,6 +69,11 @@
   (swagger-ui/create-swagger-ui-handler {:path "/"}))
 ```
 
+## `reitit-middleware`
+
+* A new module with common data-driven middleware: exception handling, content negotiation & multipart requests. See [the docs](https://metosin.github.io/reitit/ring/default_middleware.html).
+
+
 ## `reitit-swagger-ui`
 
 * **BREAKING**: pass swagger-ui `:config` as-is (instead of mixed-casing keys) to swagger-ui, fixes [#109](https://github.com/metosin/reitit/issues/109):
