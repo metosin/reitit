@@ -87,7 +87,7 @@
     (-get-name [_] :spec)
     (-get-options [_] opts)
     (-get-apidocs [this spesification {:keys [parameters responses]}]
-      (condp = spesification
+      (case spesification
         :swagger (swagger/swagger-spec
                    (merge
                      (if parameters

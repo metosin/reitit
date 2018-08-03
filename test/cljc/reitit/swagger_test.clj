@@ -180,5 +180,23 @@
                          :handler (swagger/create-swagger-handler)}}]]))]
     (is (= ["/ping"] (spec-paths app "/swagger.json")))
     (is (= #{::swagger/default}
-          (-> {:request-method :get :uri "/swagger.json"}
-              (app) :body :x-id)))))
+           (-> {:request-method :get :uri "/swagger.json"}
+               (app) :body :x-id)))))
+
+(deftest all-parameter-types-test
+  (let [app (ring/ring-handler
+              (ring/router
+                [["/parameters"
+                  {:post {:coercion spec/coercion
+                          :parameters {:query {:q string?}
+                                       :body {:b string?}
+                                       :form {:f string?}
+                                       :header {:h string?}
+                                       :path {:p string?}}
+                          :handler identity}}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
+    (is (= ["query" "body" "formData" "header" "path"]
+           (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
