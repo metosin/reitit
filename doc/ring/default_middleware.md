@@ -48,10 +48,10 @@ Creates the exception-middleware with custom options. Takes a map of `identifier
 
 The following handlers special keys are available:
 
-| key          | description
-|--------------|-------------
-| `::default`  | a default exception handler if nothing else mathced (default `exception/default-handler`).
-| `::wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response` (no default).
+| key                    | description
+|------------------------|-------------
+| `::exception/default`  | a default exception handler if nothing else mathced (default `exception/default-handler`).
+| `::exception/wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response` (no default).
 
 The handler is selected from the options map by exception idenfitifier in the following lookup order:
 

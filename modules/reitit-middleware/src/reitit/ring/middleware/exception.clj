@@ -121,10 +121,10 @@
 
   The following handlers special handlers are available:
 
-  | key          | description
-  |--------------|-------------
-  | `::default`  | a default exception handler if nothing else mathced (default [[default-handler]]).
-  | `::wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response`
+  | key                    | description
+  |------------------------|-------------
+  | `::exception/default`  | a default exception handler if nothing else mathced (default [[default-handler]]).
+  | `::exception/wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response`
 
   The handler is selected from the options map by exception idenfiter
   in the following lookup order:
