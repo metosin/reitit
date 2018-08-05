@@ -38,11 +38,10 @@
              (segment children wilds catch-all match))))
        (-lookup [_ [p & ps] path-params]
          (if (nil? p)
-           (if match (assoc match :path-params path-params))
-           (let [p (impl/url-decode p)]
-             (or (-lookup (impl/fast-get children' p) ps path-params)
-                 (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds)
-                 (-catch-all children' catch-all path-params p ps)))))))))
+           (when match (assoc match :path-params path-params))
+           (or (-lookup (impl/fast-get children' p) ps path-params)
+               (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds)
+               (-catch-all children' catch-all path-params p ps))))))))
 
 (defn insert [root path data]
   (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))

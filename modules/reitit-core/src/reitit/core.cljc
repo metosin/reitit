@@ -209,7 +209,7 @@
          (reduce
            (fn [_ ^Route route]
              (if-let [path-params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) path-params path))))
+               (reduced (->Match (:path route) (:data route) (:result route) (impl/url-decode-coll path-params) path))))
            nil pl))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -263,7 +263,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (impl/fast-get data (impl/url-decode path)))
+         (impl/fast-get data path))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -314,7 +314,7 @@
        (match-by-path [_ path]
          (if-let [match (segment/lookup pl path)]
            (-> (:data match)
-               (assoc :path-params (:path-params match))
+               (assoc :path-params (impl/url-decode-coll (:path-params match)))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -352,7 +352,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if (#?(:clj .equals :cljs =) p (impl/url-decode path))
+         (if (#?(:clj .equals :cljs =) p path)
            match))
        (match-by-name [_ name]
          (if (= n name)

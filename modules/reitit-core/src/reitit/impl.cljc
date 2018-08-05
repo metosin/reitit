@@ -19,6 +19,17 @@
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
+(defn map-kv
+  "Applies a function to every value of a map.
+
+  Also works on vectors. Maintains key for maps, order for vectors."
+  [f coll]
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (f v)))
+    (empty coll)
+    coll))
+
 (defn wild? [s]
   (contains? #{\: \*} (first (str s))))
 
@@ -93,7 +104,7 @@
   (let [{:keys [path-re path-params]} route]
     (fn [path]
       (when-let [m (re-matches path-re path)]
-        (zipmap path-params (map url-decode (rest m)))))))
+        (zipmap path-params (rest m))))))
 
 ;;
 ;; Routing (c) Metosin
@@ -108,7 +119,7 @@
           (merge $ {:path path
                     :matcher (if (contains-wilds? path)
                                (path-matcher $)
-                               #(if (#?(:clj .equals, :cljs =) path (url-decode %)) {}))
+                               #(if (#?(:clj .equals, :cljs =) path %) {}))
                     :result result
                     :data data})
           (dissoc $ :path-re :path-constraints)
@@ -203,6 +214,11 @@
                s)
        :cljs (js/decodeURIComponent (str/replace s "+" " ")))))
 
+(defn url-decode-coll
+  "URL-decodes maps and vectors"
+  [coll]
+  (map-kv url-decode coll))
+
 (defprotocol IntoString
   (into-string [_]))
 
@@ -233,13 +249,9 @@
   (into-string [_]))
 
 (defn path-params
-  "shallow transform of the path parameters values into strings"
+  "Convert parameters' values into URL-encoded strings, suitable for URL paths"
   [params]
-  (reduce-kv
-    (fn [m k v]
-      (assoc m k (url-encode (into-string v))))
-    {}
-    params))
+  (map-kv #(url-encode (into-string %)) params))
 
 (defn query-string
   "shallow transform of query parameters into query string"
