@@ -74,7 +74,7 @@
 ;; coercion
 ;;
 
-(s/def :reitit.core.coercion/kw-map (s/map-of keyword? any?))
+(s/def :reitit.core.coercion/kw-map (s/or :map (s/map-of keyword? any?) :spec s/spec?))
 
 (s/def :reitit.core.coercion/query :reitit.core.coercion/kw-map)
 (s/def :reitit.core.coercion/body :reitit.core.coercion/kw-map)
