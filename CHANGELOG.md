@@ -1,11 +1,55 @@
-## UNRELEASED
+## 0.2.0-SNAPSHOT
 
 ## `reitit-core`
 
 * **BREAKING**: the router option key to extract body format has been renamed: `:extract-request-format` => `:reitit.coercion/extract-request-format`
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
 * the `r/routes` returns just the path + data tuples as documented, not the compiled route results. To get the compiled results, use `r/compiled-routes` instead.
+* new [faster](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/impl_perf_test.clj) and more correct encoders and decoders for query & path params.
+  * query-parameters are encoded with `reitit.impl/form-encode`, so spaces are `+` instead of `%20`.
+* correctly read `:header` params from request `:headers`, not `:header-params`
 * welcome route name conflict resolution! If router has routes with same names, router can't be created. fix 'em.
+* sequential child routes are allowed, enabling this:
+
+```clj
+(-> ["/api"
+     (for [i (range 4)]
+       [(str "/" i)])]
+    (r/router)
+    (r/routes))
+;[["/api/0" {}]
+; ["/api/1" {}]
+; ["/api/2" {}]
+; ["/api/3" {}]]
+```
+
+* A [Guide to compose routers](https://metosin.github.io/reitit/advanced/composing_routers.html)
+* Welcome Middleware and Intercetor Registries!
+  * when Keywords are used in place of middleware / interceptor, a lookup is done into Router option `::middleware/registry` (or `::interceptor/registry`) with the key. Fails fast with missing registry entries.
+  * fixes [#32](https://github.com/metosin/reitit/issues/32).
+  * full documentation [here](https://metosin.github.io/reitit/ring/middleware_registry.html).
+  
+ ```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.middleware :as middleware])
+
+(defn wrap-bonus [handler value]
+  (fn [request]
+    (handler (update request :bonus (fnil + 0) value))))
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[:bonus 20]]}
+       ["/bonus" {:middleware [:bonus10]
+                 :get (fn [{:keys [bonus]}]
+                        {:status 200, :body {:bonus bonus}})}]]
+      {::middleware/registry {:bonus wrap-bonus
+                              :bonus10 [:bonus 10]}})))
+
+(app {:request-method :get, :uri "/api/bonus"})
+; {:status 200, :body {:bonus 30}}
+ ```
 
 ## `reitit-swagger`
 
@@ -25,6 +69,11 @@
              :handler (swagger/create-swagger-handler)}}]])
   (swagger-ui/create-swagger-ui-handler {:path "/"}))
 ```
+
+## `reitit-middleware`
+
+* A new module with common data-driven middleware: exception handling, content negotiation & multipart requests. See [the docs](https://metosin.github.io/reitit/ring/default_middleware.html).
+
 
 ## `reitit-swagger-ui`
 

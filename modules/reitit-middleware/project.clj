@@ -1,5 +1,5 @@
-(defproject metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"
-  :description "Reitit: Swagger-ui support"
+(defproject metosin/reitit-middleware "0.2.0-SNAPSHOT"
+  :description "Reitit, common middleware bundled"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -7,5 +7,4 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-ring]
-                 [metosin/jsonista]
-                 [metosin/ring-swagger-ui]])
+                 [metosin/muuntaja]])

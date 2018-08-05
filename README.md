@@ -20,11 +20,12 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 ## Modules
 
 * `reitit-core` - the routing core
-* [`reitit-ring`](https://metosin.github.io/reitit/ring/ring.html) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
+* `reitit-middleware` - [common data-driven middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
-* `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
+* `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
 
 Bubblin' under:
 
@@ -36,18 +37,18 @@ Bubblin' under:
 All bundled:
 
 ```clj
-[metosin/reitit "0.1.4-SNAPSHOT"]
+[metosin/reitit "0.2.0-SNAPSHOT"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.1.4-SNAPSHOT"]
-[metosin/reitit-ring "0.1.4-SNAPSHOT"]
-[metosin/reitit-spec "0.1.4-SNAPSHOT"]
-[metosin/reitit-schema "0.1.4-SNAPSHOT"]
-[metosin/reitit-swagger "0.1.4-SNAPSHOT"]
-[metosin/reitit-swagger-ui "0.1.4-SNAPSHOT"]
+[metosin/reitit-core "0.2.0-SNAPSHOT"]
+[metosin/reitit-ring "0.2.0-SNAPSHOT"]
+[metosin/reitit-spec "0.2.0-SNAPSHOT"]
+[metosin/reitit-schema "0.2.0-SNAPSHOT"]
+[metosin/reitit-swagger "0.2.0-SNAPSHOT"]
+[metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"]
 ```
 
 ## Quick start

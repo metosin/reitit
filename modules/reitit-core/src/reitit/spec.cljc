@@ -9,7 +9,7 @@
 
 (s/def ::path (s/with-gen string? #(gen/fmap (fn [s] (str "/" s)) (s/gen string?))))
 
-(s/def ::arg (s/and some? (complement vector?)))
+(s/def ::arg (s/and some? (complement sequential?)))
 (s/def ::data (s/map-of keyword? any?))
 (s/def ::result any?)
 
@@ -74,7 +74,7 @@
 ;; coercion
 ;;
 
-(s/def :reitit.core.coercion/kw-map (s/map-of keyword? any?))
+(s/def :reitit.core.coercion/kw-map (s/or :map (s/map-of keyword? any?) :spec s/spec?))
 
 (s/def :reitit.core.coercion/query :reitit.core.coercion/kw-map)
 (s/def :reitit.core.coercion/body :reitit.core.coercion/kw-map)

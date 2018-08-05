@@ -2,28 +2,45 @@
   (:require [reitit.ring :as ring]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
-            [reitit.ring.coercion :as rrc]
-            [reitit.coercion.spec :as spec]
-            [reitit.coercion.schema :as schema]
-            [schema.core :refer [Int]]
-
+            [reitit.ring.coercion :as coercion]
+            [reitit.coercion.spec]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.exception :as exception]
+            [reitit.ring.middleware.multipart :as multipart]
+            [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params]
-            [muuntaja.middleware]))
+            [muuntaja.core :as m]
+            [clojure.java.io :as io]))
 
 (def app
   (ring/ring-handler
     (ring/router
-      ["/api"
-
-       ["/swagger.json"
+      [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
                :handler (swagger/create-swagger-handler)}}]
 
-       ["/spec"
-        {:coercion spec/coercion
-         :swagger {:tags ["spec"]}}
+       ["/files"
+        {:swagger {:tags ["files"]}}
+
+        ["/upload"
+         {:post {:summary "upload a file"
+                 :parameters {:multipart {:file multipart/temp-file-part}}
+                 :responses {200 {:body {:file multipart/temp-file-part}}}
+                 :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                            {:status 200
+                             :body {:file file}})}}]
+
+        ["/download"
+         {:get {:summary "downloads a file"
+                :swagger {:produces ["image/png"]}
+                :handler (fn [_]
+                           {:status 200
+                            :headers {"Content-Type" "image/png"}
+                            :body (io/input-stream (io/resource "reitit.png"))})}}]]
+
+       ["/math"
+        {:swagger {:tags ["math"]}}
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
@@ -37,41 +54,28 @@
                  :responses {200 {:body {:total int?}}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
-                             :body {:total (+ x y)}})}}]]
-
-       ["/schema"
-        {:coercion schema/coercion
-         :swagger {:tags ["schema"]}}
-
-        ["/plus"
-         {:get {:summary "plus with schema query parameters"
-                :parameters {:query {:x Int, :y Int}}
-                :responses {200 {:body {:total Int}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200
-                            :body {:total (+ x y)}})}
-          :post {:summary "plus with schema body parameters"
-                 :parameters {:body {:x Int, :y Int}}
-                 :responses {200 {:body {:total Int}}}
-                 :handler (fn [{{{:keys [x y]} :body} :parameters}]
-                            {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:data {:middleware [ring.middleware.params/wrap-params
-                           muuntaja.middleware/wrap-format
-                           swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]
-              :swagger {:produces #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}
-                        :consumes #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}}}})
+      {:data {:coercion reitit.coercion.spec/coercion
+              :muuntaja m/instance
+              :middleware [;; query-params & form-params
+                           params/wrap-params
+                           ;; content-negotiation
+                           muuntaja/format-negotiate-middleware
+                           ;; encoding response body
+                           muuntaja/format-response-middleware
+                           ;; exception handling
+                           exception/exception-middleware
+                           ;; decoding request body
+                           muuntaja/format-request-middleware
+                           ;; coercing response bodys
+                           coercion/coerce-response-middleware
+                           ;; coercing request parameters
+                           coercion/coerce-request-middleware
+                           ;; multipart
+                           multipart/multipart-middleware]}})
     (ring/routes
-      (swagger-ui/create-swagger-ui-handler
-        {:path "/", :url "/api/swagger.json"})
+      (swagger-ui/create-swagger-ui-handler {:path "/"})
       (ring/create-default-handler))))
 
 (defn start []

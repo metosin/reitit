@@ -1,5 +1,6 @@
 (ns reitit.middleware
   (:require [meta-merge.core :refer [meta-merge]]
+            [clojure.pprint :as pprint]
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
@@ -12,6 +13,24 @@
 (def ^:dynamic *max-compile-depth* 10)
 
 (extend-protocol IntoMiddleware
+
+  #?(:clj  clojure.lang.Keyword
+     :cljs cljs.core.Keyword)
+  (into-middleware [this data {:keys [::registry] :as opts}]
+    (or (if-let [middleware (if registry (registry this))]
+          (into-middleware middleware data opts))
+        (throw
+          (ex-info
+            (str
+              "Middleware " this " not found in registry.\n\n"
+              (if (seq registry)
+                (str
+                  "Available middleware in registry:\n"
+                  (with-out-str
+                    (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+                "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
+            {:id this
+             :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
@@ -116,6 +135,7 @@
   | key                            | description |
   | -------------------------------|-------------|
   | `:reitit.middleware/transform` | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
+  | `:reitit.middleware/registry`  | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
 
   See other router options from [[reitit.core/router]]."
   ([data]

@@ -48,7 +48,7 @@
     (-get-options [_] opts)
     (-get-apidocs [this spesification {:keys [parameters responses]}]
       ;; TODO: this looks identical to spec, refactor when schema is done.
-      (condp = spesification
+      (case spesification
         :swagger (swagger/swagger-spec
                    (merge
                      (if parameters

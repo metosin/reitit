@@ -3,7 +3,7 @@
 [Ring](https://github.com/ring-clojure/ring) is a Clojure web applications library inspired by Python's WSGI and Ruby's Rack. By abstracting the details of HTTP into a simple, unified API, Ring allows web applications to be constructed of modular components that can be shared among a variety of applications, web servers, and web frameworks.
 
 ```clj
-[metosin/reitit-ring "0.1.4-SNAPSHOT"]
+[metosin/reitit-ring "0.2.0-SNAPSHOT"]
 ```
 
 Ring-router adds support for [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`. Ring-router is created with `reitit.ring/router` function. It uses a custom route compiler, creating a optimized data structure for handling route matches, with compiled middleware chain & handlers for all request methods. It also ensures that all routes have a `:handler` defined. `reitit.ring/ring-handler` is used to create a Ring handler out of ring-router.
@@ -80,10 +80,12 @@ Name-based reverse routing:
 
 # Middleware
 
-Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector value of the following:
+Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector of any the following:
 
 1. normal ring middleware function `handler -> request -> response`
-2. vector of middleware function `handler ?args -> request -> response` and optinally it's args.
+2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
+3. a [data-driven middleware](data_driven_middleware.md) record or a map
+4. a Keyword name, to lookup the middleware from a [Middleware Registry](middleware_registry.md)
 
 A middleware and a handler:
 

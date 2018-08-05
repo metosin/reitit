@@ -10,7 +10,17 @@
 
 (defn home-page []
   [:div
-   [:h2 "Welcome to frontend"]])
+   [:h2 "Welcome to frontend"]
+
+   [:button
+    {:type "button"
+     :on-click #(rfe/push-state ::item {:id 3})}
+    "Item 3"]
+
+   [:button
+    {:type "button"
+     :on-click #(rfe/replace-state ::item {:id 4})}
+    "Replace State Item 4"] ])
 
 (defn about-page []
   [:div
@@ -62,8 +72,7 @@
 (defn init! []
   (rfe/start! routes
               (fn [m] (reset! match m))
-              {:use-fragment true
-               :path-prefix "/"})
+              {:use-fragment true})
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)
