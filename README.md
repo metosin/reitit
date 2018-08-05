@@ -44,11 +44,24 @@ Optionally, the parts can be required separately:
 
 ```clj
 [metosin/reitit-core "0.2.0-SNAPSHOT"]
-[metosin/reitit-ring "0.2.0-SNAPSHOT"]
+
+;; coercion
 [metosin/reitit-spec "0.2.0-SNAPSHOT"]
 [metosin/reitit-schema "0.2.0-SNAPSHOT"]
+
+;; ring helpers
+[metosin/reitit-ring "0.2.0-SNAPSHOT"]
+[metosin/reitit-middleware "0.2.0-SNAPSHOT"]
+
+;; swagger-support for ring & http
 [metosin/reitit-swagger "0.2.0-SNAPSHOT"]
 [metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"]
+
+;; frontend helpers (alpha)
+[metosin/reitit-frontend "0.2.0-SNAPSHOT"]
+
+;; http helpers (alpha)
+[metosin/reitit-http "0.2.0-SNAPSHOT"]
 ```
 
 ## Quick start

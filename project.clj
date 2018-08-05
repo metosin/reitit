@@ -11,10 +11,11 @@
 
   :managed-dependencies [[metosin/reitit "0.2.0-SNAPSHOT"]
                          [metosin/reitit-core "0.2.0-SNAPSHOT"]
-                         [metosin/reitit-ring "0.2.0-SNAPSHOT"]
-                         [metosin/reitit-middleware "0.2.0-SNAPSHOT"]
                          [metosin/reitit-spec "0.2.0-SNAPSHOT"]
                          [metosin/reitit-schema "0.2.0-SNAPSHOT"]
+                         [metosin/reitit-ring "0.2.0-SNAPSHOT"]
+                         [metosin/reitit-middleware "0.2.0-SNAPSHOT"]
+                         [metosin/reitit-http "0.2.0-SNAPSHOT"]
                          [metosin/reitit-swagger "0.2.0-SNAPSHOT"]
                          [metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"]
                          [metosin/reitit-frontend "0.2.0-SNAPSHOT"]
@@ -39,6 +40,7 @@
                    :source-paths ["modules/reitit/src"
                                   "modules/reitit-core/src"
                                   "modules/reitit-ring/src"
+                                  "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
