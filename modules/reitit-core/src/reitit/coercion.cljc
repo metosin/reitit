@@ -38,7 +38,7 @@
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
-   :header (->ParameterCoercion :header-params :string true true)
+   :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
 
 (defn ^:no-doc request-coercion-failed! [result coercion value in request]

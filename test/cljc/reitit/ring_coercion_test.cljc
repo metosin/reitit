@@ -28,7 +28,7 @@
    :query-params {"a" "1"}
    :body-params {:b 2}
    :form-params {:c 3}
-   :header-params {:d 4}})
+   :headers {"d" "4"}})
 
 (def invalid-request
   {:uri "/api/plus/5"
@@ -40,7 +40,7 @@
    :query-params {"a" "1"}
    :body-params {:b 2}
    :form-params {:c 3}
-   :header-params {:d -40}})
+   :headers {"d" "-40"}})
 
 (deftest spec-coercion-test
   (let [create (fn [middleware]
