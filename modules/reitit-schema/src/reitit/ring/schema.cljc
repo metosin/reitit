@@ -8,7 +8,7 @@
   (spec [_]
     (s/spec m))
   (explain [_]
-    (cons 'file m))
+    (list 'file m))
 
   swagger/SwaggerSchema
   (-transform [_ _]
