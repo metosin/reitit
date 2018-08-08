@@ -92,9 +92,9 @@
   ;; 200ns (4.8x)
   "httpRouter"
 
-  ;;  77ns
-  ;; 700ns
-  ;; 890ns
+  ;;  77ns -> 120ns (decode path-params)
+  ;; 700ns -> 795ns (decode path-params)
+  ;; 890ns -> 1000ns (decode path-params)
   (title "reitit-ring")
   (let [r1 (map->Request {:request-method :get, :uri "/1/users"})
         r2 (map->Request {:request-method :get, :uri "/1/classes/go"})

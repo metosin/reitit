@@ -438,6 +438,8 @@
     ;;  2316ns
     ;;   819ns (prefix-tree-router)
     ;;   723ns (segment-router)
+    ;;   702ns (before path-parameters)
+    ;;   806ns (decode path-parameters)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;  2821ns

@@ -6,6 +6,7 @@
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
 * the `r/routes` returns just the path + data tuples as documented, not the compiled route results. To get the compiled results, use `r/compiled-routes` instead.
 * new [faster](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/impl_perf_test.clj) and more correct encoders and decoders for query & path params.
+  * all path-parameters are now decoded correctly with `reitit.impl/url-decode`, thanks to [Matthew Davidson](https://github.com/KingMob)!
   * query-parameters are encoded with `reitit.impl/form-encode`, so spaces are `+` instead of `%20`.
 * correctly read `:header` params from request `:headers`, not `:header-params`
 * welcome route name conflict resolution! If router has routes with same names, router can't be created. fix 'em.
