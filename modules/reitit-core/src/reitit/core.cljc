@@ -165,6 +165,23 @@
    :compile (fn [[_ {:keys [handler]}] _] handler)
    :conflicts (partial throw-on-conflicts! path-conflicts-str)})
 
+(defn- linear-router-lookup-structs
+  "Returns a 2-item vec of lookup structures.
+
+  The first is a vec of Routes.
+  The second is a map of route names to lookup fns."
+  [compiled-routes]
+  (reduce
+    (fn [[pl nl] [p {:keys [name] :as data} result]]
+      (let [{:keys [path-params] :as route} (impl/create [p data result])
+            f #(if-let [path (impl/path-for route %)]
+                 (->Match p data result % path)
+                 (->PartialMatch p data result % path-params))]
+        [(conj pl route)
+         (if name (assoc nl name f) nl)]))
+    [[] {}]
+    compiled-routes))
+
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
   expanded options. See [[router]] for available options"
@@ -172,15 +189,7 @@
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
    (let [names (find-names compiled-routes opts)
-         [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/create [p data result])
-                           f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result % path)
-                                (->PartialMatch p data result % path-params))]
-                       [(conj pl route)
-                        (if name (assoc nl name f) nl)]))
-                   [[] {}] compiled-routes)
+         [pl nl] (linear-router-lookup-structs compiled-routes)
          lookup (impl/fast-map nl)
          routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
@@ -200,7 +209,7 @@
          (reduce
            (fn [_ ^Route route]
              (if-let [path-params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) path-params path))))
+               (reduced (->Match (:path route) (:data route) (:result route) (impl/url-decode-coll path-params) path))))
            nil pl))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -208,6 +217,21 @@
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params))))))))
+
+(defn- lookup-router-lookup-structs
+  "Returns a 2-item vec of lookup structures.
+
+  The first is a map of paths to Matches.
+  The second is a map of route names to Matches."
+  [compiled-routes]
+  (reduce
+    (fn [[pl nl] [p {:keys [name] :as data} result]]
+      [(assoc pl p (->Match p data result {} p))
+       (if name
+         (assoc nl name #(->Match p data result % p))
+         nl)])
+    [{} {}]
+    compiled-routes))
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
@@ -222,12 +246,7 @@
          {:wilds wilds
           :routes compiled-routes})))
    (let [names (find-names compiled-routes opts)
-         [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     [(assoc pl p (->Match p data result {} p))
-                      (if name
-                        (assoc nl name #(->Match p data result % p))
-                        nl)]) [{} {}] compiled-routes)
+         [pl nl] (lookup-router-lookup-structs compiled-routes)
          data (impl/fast-map pl)
          lookup (impl/fast-map nl)
          routes (uncompile-routes compiled-routes)]
@@ -252,6 +271,23 @@
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params))))))))
 
+(defn- segment-router-lookup-structs
+  "Returns a 2-item vec of lookup structures.
+
+  The first is a prefix-tree of segments and associated Matches.
+  The second is a map of route names to Matches or PartialMatches."
+  [compiled-routes]
+  (reduce
+    (fn [[pl nl] [p {:keys [name] :as data} result]]
+      (let [{:keys [path-params] :as route} (impl/create [p data result])
+            f #(if-let [path (impl/path-for route %)]
+                 (->Match p data result % path)
+                 (->PartialMatch p data result % path-params))]
+        [(segment/insert pl p (->Match p data result nil nil))
+         (if name (assoc nl name f) nl)]))
+    [nil {}]
+    compiled-routes))
+
 (defn segment-router
   "Creates a special prefix-tree style segment router from resolved routes and optional
   expanded options. See [[router]] for available options"
@@ -259,15 +295,7 @@
    (segment-router compiled-routes {}))
   ([compiled-routes opts]
    (let [names (find-names compiled-routes opts)
-         [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/create [p data result])
-                           f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result % path)
-                                (->PartialMatch p data result % path-params))]
-                       [(segment/insert pl p (->Match p data result nil nil))
-                        (if name (assoc nl name f) nl)]))
-                   [nil {}] compiled-routes)
+         [pl nl] (segment-router-lookup-structs compiled-routes)
          lookup (impl/fast-map nl)
          routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
@@ -286,7 +314,7 @@
        (match-by-path [_ path]
          (if-let [match (segment/lookup pl path)]
            (-> (:data match)
-               (assoc :path-params (:path-params match))
+               (assoc :path-params (impl/url-decode-coll (:path-params match)))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]

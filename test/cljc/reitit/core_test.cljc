@@ -51,6 +51,19 @@
                     #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
                     (r/match-by-name! router ::beer))))))
 
+        (testing "decode %-encoded path params"
+          (let [router (r/router [["/one-param-path/:param1"]
+                                  ["/two-param-path/:param1/:param2"]
+                                  ["/catchall/*remaining-path"]] {:router r})
+                decoded-params #(-> router (r/match-by-path %) :path-params)
+                decoded-param1 #(-> (decoded-params %) :param1)
+                decoded-remaining-path #(-> (decoded-params %) :remaining-path)]
+            (is (= "foo bar" (decoded-param1 "/one-param-path/foo%20bar")))
+            (is (= {:param1 "foo bar" :param2 "baz qux"} (decoded-params "/two-param-path/foo%20bar/baz%20qux")))
+            (is (= "foo bar" (decoded-remaining-path "/catchall/foo%20bar")))
+            (is (= "!#$&'()*+,/:;=?@[]"
+                   (decoded-param1 "/one-param-path/%21%23%24%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D")))))
+
         (testing "complex"
           (let [router (r/router
                          [["/:abba" ::abba]

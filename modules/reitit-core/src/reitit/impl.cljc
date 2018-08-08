@@ -19,6 +19,17 @@
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
+(defn map-kv
+  "Applies a function to every value of a map.
+
+  Also works on vectors. Maintains key for maps, order for vectors."
+  [f coll]
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (f v)))
+    (empty coll)
+    coll))
+
 (defn wild? [s]
   (contains? #{\: \*} (first (str s))))
 
@@ -203,6 +214,11 @@
                s)
        :cljs (js/decodeURIComponent (str/replace s "+" " ")))))
 
+(defn url-decode-coll
+  "URL-decodes maps and vectors"
+  [coll]
+  (map-kv url-decode coll))
+
 (defprotocol IntoString
   (into-string [_]))
 
@@ -233,13 +249,9 @@
   (into-string [_]))
 
 (defn path-params
-  "shallow transform of the path parameters values into strings"
+  "Convert parameters' values into URL-encoded strings, suitable for URL paths"
   [params]
-  (reduce-kv
-    (fn [m k v]
-      (assoc m k (url-encode (into-string v))))
-    {}
-    params))
+  (map-kv #(url-encode (into-string %)) params))
 
 (defn query-string
   "shallow transform of query parameters into query string"
@@ -258,7 +270,7 @@
      (goog/inherits ~type ~base-type)
 
      ~@(map
-         (fn [method]
-           `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
-                  (fn ~@(rest method))))
-         methods)))
+        (fn [method]
+          `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
+                 (fn ~@(rest method))))
+        methods)))
