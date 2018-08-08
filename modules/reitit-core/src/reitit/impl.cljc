@@ -219,6 +219,11 @@
   [coll]
   (map-kv url-decode coll))
 
+(defn url-encode-coll
+  "URL-encodes maps and vectors"
+  [coll]
+  (map-kv url-encode coll))
+
 (defprotocol IntoString
   (into-string [_]))
 
