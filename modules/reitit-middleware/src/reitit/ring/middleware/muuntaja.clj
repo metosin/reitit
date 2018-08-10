@@ -3,7 +3,7 @@
             [muuntaja.middleware]
             [clojure.spec.alpha :as s]))
 
-(s/def ::muuntaja (partial instance? m/Muuntaja))
+(s/def ::muuntaja m/muuntaja?)
 (s/def ::spec (s/keys :opt-un [::muuntaja]))
 
 (defn- displace [x] (with-meta x {:displace true}))
