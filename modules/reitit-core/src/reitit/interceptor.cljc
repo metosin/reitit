@@ -7,8 +7,12 @@
 (defprotocol IntoInterceptor
   (into-interceptor [this data opts]))
 
-(defrecord Interceptor [name enter leave error])
+(defrecord Interceptor [name handler? enter leave error])
 (defrecord Endpoint [data interceptors])
+(defrecord Context [request response exception])
+
+(defn context [request]
+  (map->Context {:request request}))
 
 (def ^:dynamic *max-compile-depth* 10)
 
@@ -44,9 +48,12 @@
 
   #?(:clj  clojure.lang.Fn
      :cljs function)
-  (into-interceptor [this _ _]
-    (map->Interceptor
-      {:enter this}))
+  (into-interceptor [this data opts]
+    (into-interceptor
+      {:handler? true
+       :enter (fn [ctx]
+                (assoc ctx :response (this (:request ctx))))}
+      data opts))
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
@@ -78,43 +85,30 @@
   nil
   (into-interceptor [_ _ _]))
 
-(defn- ensure-handler! [path data scope]
-  (when-not (:handler data)
-    (throw (ex-info
-             (str "path \"" path "\" doesn't have a :handler defined"
-                  (if scope (str " for " scope)))
-             (merge {:path path, :data data}
-                    (if scope {:scope scope}))))))
-
-(defn- expand-and-transform
-  [interceptors data {:keys [::transform] :or {transform identity} :as opts}]
-  (->> interceptors
-       (keep #(into-interceptor % data opts))
-       (transform)
-       (keep #(into-interceptor % data opts))
-       (into [])))
-
 ;;
 ;; public api
 ;;
 
 (defn chain
   "Creates a Interceptor chain out of sequence of IntoInterceptor
-  and optionally a handler. Optionally takes route data and (Router) opts."
-  ([interceptors handler data]
-   (chain interceptors handler data nil))
-  ([interceptors handler data opts]
-   (let [interceptor (some-> (into-interceptor handler data opts)
-                             (assoc :name (:name data)))]
-     (-> (expand-and-transform interceptors data opts)
-         (cond-> interceptor (conj interceptor))))))
+  Optionally takes route data and (Router) opts."
+  ([interceptors]
+   (chain interceptors nil nil))
+  ([interceptors data]
+   (chain interceptors data nil))
+  ([interceptors data {:keys [::transform] :or {transform identity} :as opts}]
+   (->> interceptors
+        (keep #(into-interceptor % data opts))
+        (transform)
+        (keep #(into-interceptor % data opts))
+        (into []))))
 
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
   ([[_ {:keys [interceptors handler] :as data}] opts _]
    (map->Endpoint
-     {:interceptors (chain interceptors handler data opts)
+     {:interceptors (chain (into (vec interceptors) [handler]) data opts)
       :data data})))
 
 (defn router
