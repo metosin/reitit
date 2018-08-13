@@ -12,7 +12,7 @@
 (defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
 
-(defn- group-keys [data]
+(defn ^:no-wiki group-keys [data]
   (reduce-kv
     (fn [[top childs] k v]
       (if (http-methods k)

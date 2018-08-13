@@ -112,8 +112,7 @@
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[path {:keys [interceptors handler] :as data}] opts scope]
-   (ensure-handler! path data scope)
+  ([[_ {:keys [interceptors handler] :as data}] opts _]
    (map->Endpoint
      {:interceptors (chain interceptors handler data opts)
       :data data})))
@@ -131,8 +130,8 @@
 
   Options:
 
-  | key                             | description |
-  | --------------------------------|-------------|
+  | key                             | description
+  | --------------------------------|-------------
   | `:reitit.interceptor/transform` | Function of [Interceptor] => [Interceptor] to transform the expanded Interceptors (default: identity).
   | `:reitit.interceptor/registry`  | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptor
 
