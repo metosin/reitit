@@ -7,7 +7,7 @@
 ;; Specs
 ;;
 
-(s/def ::middleware (s/coll-of #(satisfies? middleware/IntoMiddleware %)))
+(s/def ::middleware (s/coll-of (partial satisfies? middleware/IntoMiddleware)))
 
 (s/def ::data
   (s/keys :req-un [::rs/handler]
@@ -26,11 +26,12 @@
          :non-specs non-specs})))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
-(defn- validate-ring-route-data [routes spec]
+(defn- validate-route-data [routes key spec]
   (->> (for [[p _ c] routes
-             [method {:keys [data middleware] :as endpoint}] c
+             [method {:keys [data] :as endpoint}] c
              :when endpoint
-             :let [mw-specs (seq (keep :spec middleware))
+             :let [target (key endpoint)
+                   mw-specs (seq (keep :spec target))
                    specs (keep identity (into [spec] mw-specs))
                    spec (merge-specs specs)]]
          (when-let [problems (and spec (s/explain-data spec data))]
@@ -39,5 +40,5 @@
 
 (defn validate-spec!
   [routes {:keys [spec ::rs/explain] :or {explain s/explain-str, spec ::data}}]
-  (when-let [problems (validate-ring-route-data routes spec)]
+  (when-let [problems (validate-route-data routes :middleware spec)]
     (rs/throw-on-problems! problems explain)))

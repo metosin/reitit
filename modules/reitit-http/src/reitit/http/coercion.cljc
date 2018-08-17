@@ -1,0 +1,53 @@
+(ns reitit.http.coercion
+  (:require [reitit.coercion :as coercion]
+            [reitit.spec :as rs]
+            [reitit.impl :as impl]))
+
+(def coerce-request-interceptor
+  "Interceptor for pluggable request coercion.
+  Expects a :coercion of type `reitit.coercion/Coercion`
+  and :parameters from route data, otherwise does not mount."
+  {:name ::coerce-request
+   :spec ::rs/parameters
+   :compile (fn [{:keys [coercion parameters]} opts]
+              (if (and coercion parameters)
+                (let [coercers (coercion/request-coercers coercion parameters opts)]
+                  {:enter
+                   (fn [ctx]
+                     (let [request (:request ctx)
+                           coerced (coercion/coerce-request coercers request)
+                           request (impl/fast-assoc request :parameters coerced)]
+                       (assoc ctx :request request)))})))})
+
+(def coerce-response-interceptor
+  "Interceptor for pluggable response coercion.
+  Expects a :coercion of type `reitit.coercion/Coercion`
+  and :responses from route data, otherwise does not mount."
+  {:name ::coerce-response
+   :spec ::rs/responses
+   :compile (fn [{:keys [coercion responses]} opts]
+              (if (and coercion responses)
+                (let [coercers (coercion/response-coercers coercion responses opts)]
+                  {:leave
+                   (fn [ctx]
+                     (let [response (coercion/coerce-response coercers (:request ctx) (:response ctx))]
+                       (assoc ctx :response response)))})))})
+
+(def coerce-exceptions-interceptor
+  "Interceptor for handling coercion exceptions.
+  Expects a :coercion of type `reitit.coercion/Coercion`
+  and :parameters or :responses from route data, otherwise does not mount."
+  {:name ::coerce-exceptions
+   :compile (fn [{:keys [coercion parameters responses]} _]
+              (if (and coercion (or parameters responses))
+                {:error (fn [ctx]
+                          (let [data (ex-data (:error ctx))]
+                            (if-let [status (case (:type data)
+                                              ::coercion/request-coercion 400
+                                              ::coercion/response-coercion 500
+                                              nil)]
+                              (let [response {:status status, :body (coercion/encode-error data)}]
+                                (-> ctx
+                                    (assoc :response response)
+                                    (assoc :error nil)))
+                              ctx)))}))})
