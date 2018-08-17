@@ -26,7 +26,7 @@
          :non-specs non-specs})))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
-(defn- validate-route-data [routes key spec]
+(defn validate-route-data [routes key spec]
   (->> (for [[p _ c] routes
              [method {:keys [data] :as endpoint}] c
              :when endpoint
