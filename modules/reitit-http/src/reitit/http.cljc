@@ -5,37 +5,16 @@
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
-(defrecord Endpoint [data handler path method interceptors])
+(defrecord Endpoint [data handler path method interceptors queue])
 
-(defn http-handler
-  "Creates a ring-handler out of a http-router and
-  an interceptor runner.
-  Optionally takes a ring-handler which is called
-  in no route matches."
-  ([router runner]
-   (http-handler router runner nil))
-  ([router runner default-handler]
-   (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))]
-     (with-meta
-       (fn [request]
-         (if-let [match (r/match-by-path router (:uri request))]
-           (let [method (:request-method request)
-                 path-params (:path-params match)
-                 result (:result match)
-                 interceptors (-> result method :interceptors)
-                 request (-> request
-                             (impl/fast-assoc :path-params path-params)
-                             (impl/fast-assoc ::r/match match)
-                             (impl/fast-assoc ::r/router router))]
-             (:response (runner interceptors request)))
-           (default-handler request)))
-       {::r/router router}))))
-
-(defn get-router [handler]
-  (-> handler meta ::r/router))
-
-(defn get-match [request]
-  (::r/match request))
+(defprotocol Executor
+  (queue
+    [this interceptors]
+    "takes a sequence of interceptors and compiles them to queue for the executor")
+  (execute
+    [this request interceptors]
+    [this request interceptors respond raise]
+    "executes the interceptor chain"))
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
@@ -44,7 +23,7 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] opts]
+(defn compile-result [[path data] {:keys [::queue] :as opts}]
   (let [[top childs] (ring/group-keys data)
         ->handler (fn [handler]
                     (if handler
@@ -54,10 +33,13 @@
                   (let [data (update data :handler ->handler)]
                     (interceptor/compile-result [path data] opts scope)))
         ->endpoint (fn [p d m s]
-                     (-> (compile [p d] opts s)
-                         (map->Endpoint)
-                         (assoc :path p)
-                         (assoc :method m)))
+                     (let [compiled (compile [p d] opts s)
+                           interceptors (:interceptors compiled)]
+                       (-> compiled
+                           (map->Endpoint)
+                           (assoc :path p)
+                           (assoc :method m)
+                           (assoc :queue ((or queue identity) interceptors)))))
         ->methods (fn [any? data]
                     (reduce
                       (fn [acc method]
@@ -94,3 +76,53 @@
   ([data opts]
    (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
      (r/router data opts))))
+
+(defn ring-handler
+  "Creates a ring-handler out of a http-router,
+  a default ring-handler and options map, with the following keys:
+
+  | key             | description |
+  | ----------------|-------------|
+  | `:executor`     | [[Executor]] for the interceptor chain
+  | `:interceptors` | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler"
+  [router default-handler {:keys [executor interceptors]}]
+  (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
+        default-queue (queue executor (interceptor/into-interceptor (concat interceptors [default-handler]) nil (r/options router)))
+        router-opts (-> (r/options router)
+                        (assoc ::queue (partial queue executor))
+                        (update :interceptors (partial concat interceptors)))
+        router (router (r/routes router) router-opts)]
+    (with-meta
+      (fn
+        ([request]
+         (if-let [match (r/match-by-path router (:uri request))]
+           (let [method (:request-method request)
+                 path-params (:path-params match)
+                 result (:result match)
+                 interceptors (-> result method :interceptors)
+                 request (-> request
+                             (impl/fast-assoc :path-params path-params)
+                             (impl/fast-assoc ::r/match match)
+                             (impl/fast-assoc ::r/router router))]
+             (execute executor interceptors request))
+           (execute executor default-queue request)))
+        ([request respond raise]
+         (if-let [match (r/match-by-path router (:uri request))]
+           (let [method (:request-method request)
+                 path-params (:path-params match)
+                 result (:result match)
+                 interceptors (-> result method :interceptors)
+                 request (-> request
+                             (impl/fast-assoc :path-params path-params)
+                             (impl/fast-assoc ::r/match match)
+                             (impl/fast-assoc ::r/router router))]
+             (execute executor interceptors request respond raise))
+           (execute executor default-queue request respond raise))
+         nil))
+      {::r/router router})))
+
+(defn get-router [handler]
+  (-> handler meta ::r/router))
+
+(defn get-match [request]
+  (::r/match request))

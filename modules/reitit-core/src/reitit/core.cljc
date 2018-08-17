@@ -335,7 +335,7 @@
          (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
          {:routes compiled-routes})))
    (let [[n :as names] (find-names compiled-routes opts)
-         [[p data result] :as compiled] compiled-routes
+         [[p data result]] compiled-routes
          p #?(:clj (.intern ^String p) :cljs p)
          match (->Match p data result {} p)
          routes (uncompile-routes compiled-routes)]
