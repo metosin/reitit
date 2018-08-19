@@ -13,15 +13,24 @@
 
 Modules:
 
+* `reitit` - all bundled
 * `reitit-core` - the routing core
-* [`reitit-ring`](ring/ring.md) with [data-driven middleware](https://metosin.github.io/reitit/ring/data_driven_middleware.html)
+* `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
+* `reitit-middleware` - [common data-driven middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
 * [`reitit-frontend`](frontend/basics.md) Tools for frontend routing.
 
-To use Reitit, add the following dependency to your project:
+Bubblin' under:
+
+* `reitit-http` http-routing with Pedestal-style Interceptors (WIP)
+* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors (WIP)
+
+## Latest version
+
+All bundled:
 
 ```clj
 [metosin/reitit "0.2.0-SNAPSHOT"]
@@ -47,8 +56,9 @@ Optionally, the parts can be required separately:
 ;; frontend helpers (alpha)
 [metosin/reitit-frontend "0.2.0-SNAPSHOT"]
 
-;; http helpers (alpha)
+;; http with interceptors (alpha)
 [metosin/reitit-http "0.2.0-SNAPSHOT"]
+[metosin/reitit-sieppari "0.2.0-SNAPSHOT"]
 ```
 
 For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).

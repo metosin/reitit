@@ -14,4 +14,5 @@
                  [metosin/reitit-http]
                  [metosin/reitit-swagger]
                  [metosin/reitit-swagger-ui]
-                 [metosin/reitit-frontend]])
+                 [metosin/reitit-frontend]
+                 [metosin/reitit-sieppari]])

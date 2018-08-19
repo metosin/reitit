@@ -7,9 +7,18 @@
 (defprotocol IntoInterceptor
   (into-interceptor [this data opts]))
 
-(defrecord Interceptor [name handler? enter leave error])
-(defrecord Endpoint [data interceptors])
+(defrecord Interceptor [name enter leave error])
+(defrecord Endpoint [data interceptors queue])
 (defrecord Context [request response exception])
+
+(defprotocol Executor
+  (queue
+    [this interceptors]
+    "takes a sequence of interceptors and compiles them to queue for the executor")
+  (execute
+    [this interceptors request]
+    [this interceptors request respond raise]
+    "executes the interceptor chain"))
 
 (defn context [request]
   (map->Context {:request request}))
@@ -50,7 +59,7 @@
      :cljs function)
   (into-interceptor [this data opts]
     (into-interceptor
-      {:handler? true
+      {:name ::handler
        :enter (fn [ctx]
                 (assoc ctx :response (this (:request ctx))))}
       data opts))
@@ -106,10 +115,12 @@
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[_ {:keys [interceptors handler] :as data}] opts _]
-   (map->Endpoint
-     {:interceptors (chain (into (vec interceptors) [handler]) data opts)
-      :data data})))
+  ([[_ {:keys [interceptors handler] :as data}] {:keys [::queue] :as opts} _]
+   (let [chain (chain (into (vec interceptors) [handler]) data opts)]
+     (map->Endpoint
+       {:interceptors chain
+        :queue ((or queue identity) chain)
+        :data data}))))
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with

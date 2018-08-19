@@ -19,13 +19,15 @@
                          [metosin/reitit-swagger "0.2.0-SNAPSHOT"]
                          [metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"]
                          [metosin/reitit-frontend "0.2.0-SNAPSHOT"]
+                         [metosin/reitit-sieppari "0.2.0-SNAPSHOT"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/muuntaja "0.6.0-alpha1"]
-                         [metosin/jsonista "0.2.1"]]
+                         [metosin/jsonista "0.2.1"]
+                         [metosin/sieppari "0.0.0-alpha1"]]
 
   :plugins [[jonase/eastwood "0.2.6"]
             [lein-doo "0.1.10"]
@@ -46,7 +48,8 @@
                                   "modules/reitit-schema/src"
                                   "modules/reitit-swagger/src"
                                   "modules/reitit-swagger-ui/src"
-                                  "modules/reitit-frontend/src"]
+                                  "modules/reitit-frontend/src"
+                                  "modules/reitit-sieppari/src"]
 
                    :dependencies [[org.clojure/clojure "1.9.0"]
                                   [org.clojure/clojurescript "1.10.339"]
@@ -61,6 +64,7 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/muuntaja "0.6.0-alpha1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
+                                  [metosin/sieppari "0.0.0-alpha1"]
                                   [metosin/jsonista "0.2.1"]
 
                                   [criterium "0.4.4"]

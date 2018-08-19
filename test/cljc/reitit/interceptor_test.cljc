@@ -182,18 +182,20 @@
           (is (= [::enter_i1 ::enter_i3 :ok ::leave_i3 ::leave_i1] (app "/api")))
 
           (testing "routes contain list of actually applied interceptors"
-            (is (= [::i1 ::i3 nil] (->> (r/compiled-routes router)
-                                        first
-                                        last
-                                        :interceptors
-                                        (map :name)))))
+            (is (= [::i1 ::i3 ::interceptor/handler]
+                   (->> (r/compiled-routes router)
+                        first
+                        last
+                        :interceptors
+                        (map :name)))))
 
           (testing "match contains list of actually applied interceptors"
-            (is (= [::i1 ::i3 nil] (->> "/api"
-                                        (r/match-by-path router)
-                                        :result
-                                        :interceptors
-                                        (map :name))))))))))
+            (is (= [::i1 ::i3 ::interceptor/handler]
+                   (->> "/api"
+                        (r/match-by-path router)
+                        :result
+                        :interceptors
+                        (map :name))))))))))
 
 (deftest chain-test
   (testing "chain can produce interceptor chain of any IntoInterceptor"
@@ -227,7 +229,10 @@
         (is (= [::olipa ::kerran ::avaruus :ok] (app "/ping")))))
 
     (testing "interceptors can be re-ordered"
-      (let [app (create {::interceptor/transform (partial sort-by (juxt :handler? :name))})]
+      (let [app (create {::interceptor/transform (fn [interceptors]
+                                                   (concat
+                                                     (sort-by :name (butlast interceptors))
+                                                     [(last interceptors)]))})]
         (is (= [::avaruus ::kerran ::olipa :ok] (app "/ping")))))
 
     (testing "adding debug interceptor between interceptors"

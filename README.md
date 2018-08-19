@@ -19,6 +19,7 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 
 ## Modules
 
+* `reitit` - all bundled
 * `reitit-core` - the routing core
 * `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
 * `reitit-middleware` - [common data-driven middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
@@ -26,11 +27,12 @@ See the [full documentation](https://metosin.github.io/reitit/) for details.
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
+* [`reitit-frontend`](frontend/basics.md) Tools for frontend routing.
 
 Bubblin' under:
 
-* `reitit-http` with enchanced Pedestal-style Interceptors (WIP)
-* `reitit-frontend` with Keechma-style Controllers (WIP)
+* `reitit-http` http-routing with Pedestal-style Interceptors (WIP)
+* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors (WIP)
 
 ## Latest version
 
@@ -60,8 +62,9 @@ Optionally, the parts can be required separately:
 ;; frontend helpers (alpha)
 [metosin/reitit-frontend "0.2.0-SNAPSHOT"]
 
-;; http helpers (alpha)
+;; http with interceptors (alpha)
 [metosin/reitit-http "0.2.0-SNAPSHOT"]
+[metosin/reitit-sieppari "0.2.0-SNAPSHOT"]
 ```
 
 ## Quick start

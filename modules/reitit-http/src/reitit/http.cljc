@@ -5,16 +5,7 @@
             [reitit.core :as r]
             [reitit.impl :as impl]))
 
-(defrecord Endpoint [data handler path method interceptors queue])
-
-(defprotocol Executor
-  (queue
-    [this interceptors]
-    "takes a sequence of interceptors and compiles them to queue for the executor")
-  (execute
-    [this request interceptors]
-    [this request interceptors respond raise]
-    "executes the interceptor chain"))
+(defrecord Endpoint [data interceptors queue handler path method])
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
@@ -23,23 +14,16 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {:keys [::queue] :as opts}]
+(defn compile-result [[path data] opts]
   (let [[top childs] (ring/group-keys data)
-        ->handler (fn [handler]
-                    (if handler
-                      (fn [ctx]
-                        (->> ctx :request handler (assoc ctx :response)))))
         compile (fn [[path data] opts scope]
-                  (let [data (update data :handler ->handler)]
-                    (interceptor/compile-result [path data] opts scope)))
+                  (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
-                     (let [compiled (compile [p d] opts s)
-                           interceptors (:interceptors compiled)]
+                     (let [compiled (compile [p d] opts s)]
                        (-> compiled
                            (map->Endpoint)
                            (assoc :path p)
-                           (assoc :method m)
-                           (assoc :queue ((or queue identity) interceptors)))))
+                           (assoc :method m))))
         ->methods (fn [any? data]
                     (reduce
                       (fn [acc method]
@@ -83,41 +67,44 @@
 
   | key             | description |
   | ----------------|-------------|
-  | `:executor`     | [[Executor]] for the interceptor chain
+  | `:executor`     | `reitit.interceptor.Executor` for the interceptor chain
   | `:interceptors` | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler"
   [router default-handler {:keys [executor interceptors]}]
   (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
-        default-queue (queue executor (interceptor/into-interceptor (concat interceptors [default-handler]) nil (r/options router)))
+        default-queue (->> [default-handler]
+                           (concat interceptors)
+                           (map #(interceptor/into-interceptor % nil (r/options router)))
+                           (interceptor/queue executor))
         router-opts (-> (r/options router)
-                        (assoc ::queue (partial queue executor))
-                        (update :interceptors (partial concat interceptors)))
-        router (router (r/routes router) router-opts)]
+                        (assoc ::interceptor/queue (partial interceptor/queue executor))
+                        (update-in [:data :interceptors] (partial into (vec interceptors))))
+        router (reitit.http/router (r/routes router) router-opts)]
     (with-meta
       (fn
         ([request]
          (if-let [match (r/match-by-path router (:uri request))]
            (let [method (:request-method request)
                  path-params (:path-params match)
-                 result (:result match)
-                 interceptors (-> result method :interceptors)
+                 endpoint (-> match :result method)
+                 interceptors (or (:queue endpoint) (:interceptors endpoint))
                  request (-> request
                              (impl/fast-assoc :path-params path-params)
                              (impl/fast-assoc ::r/match match)
                              (impl/fast-assoc ::r/router router))]
-             (execute executor interceptors request))
-           (execute executor default-queue request)))
+             (interceptor/execute executor interceptors request))
+           (interceptor/execute executor default-queue request)))
         ([request respond raise]
          (if-let [match (r/match-by-path router (:uri request))]
            (let [method (:request-method request)
                  path-params (:path-params match)
-                 result (:result match)
-                 interceptors (-> result method :interceptors)
+                 endpoint (-> match :result method)
+                 interceptors (or (:queue endpoint) (:interceptors endpoint))
                  request (-> request
                              (impl/fast-assoc :path-params path-params)
                              (impl/fast-assoc ::r/match match)
                              (impl/fast-assoc ::r/router router))]
-             (execute executor interceptors request respond raise))
-           (execute executor default-queue request respond raise))
+             (interceptor/execute executor interceptors request respond raise))
+           (interceptor/execute executor default-queue request respond raise))
          nil))
       {::r/router router})))
 
