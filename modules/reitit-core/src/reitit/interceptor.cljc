@@ -60,6 +60,7 @@
   (into-interceptor [this data opts]
     (into-interceptor
       {:name ::handler
+       ::handler this
        :enter (fn [ctx]
                 (assoc ctx :response (this (:request ctx))))}
       data opts))

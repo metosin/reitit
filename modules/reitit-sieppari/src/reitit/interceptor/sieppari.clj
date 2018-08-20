@@ -7,7 +7,11 @@
   (reify
     interceptor/Executor
     (queue [_ interceptors]
-      (queue/into-queue interceptors))
+      (queue/into-queue
+        (map
+          (fn [{:keys [::interceptor/handler] :as interceptor}]
+            (or handler interceptor))
+          interceptors)))
     (execute [_ interceptors request]
       (sieppari/execute interceptors request))
     (execute [_ interceptors request respond raise]
