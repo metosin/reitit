@@ -41,11 +41,12 @@
     (let [values (or (:values request) [])]
       (handler (assoc request :values (conj values value))))))
 
+(def map-request {})
+(def record-request (map->RequestOrContext map-request))
+
 (defn middleware-test []
   (let [mw (map (fn [value] [middleware value]) (range +items+))
-        app (middleware/chain mw identity)
-        map-request {}
-        record-request (map->RequestOrContext map-request)]
+        app (middleware/chain mw identity)]
 
     ;; 1000ns
     (title "middleware - map")
@@ -64,6 +65,44 @@
     (expected! ((middleware/chain mw identity) record-request))
     (cc/quick-bench
       ((middleware/chain mw identity) record-request))))
+
+(defn sieppari-test []
+  (let [interceptors (conj
+                       (mapv
+                         (fn [value]
+                           {:enter (fn [ctx]
+                                     (let [request (:request ctx)
+                                           values (conj (or (:values request) []) value)]
+                                       (assoc ctx :request (assoc request :values values))))})
+                         (range +items+))
+                       identity)
+        queue (sieppari.queue/into-queue interceptors)
+        app (fn [req] (sieppari.core/execute interceptors req))
+        app2 (fn [req] (sieppari.core/execute queue req))]
+
+    ;; 5500ns
+    (title "sieppari - map")
+    (expected! (app map-request))
+    (cc/quick-bench
+      (app map-request))
+
+    ;; 4600ns
+    (title "sieppari - record")
+    (expected! (app record-request))
+    (cc/quick-bench
+      (app record-request))
+
+    ;; 2200ns
+    (title "sieppari - map (compiled queue)")
+    (expected! (app2 map-request))
+    (cc/quick-bench
+      (app2 map-request))
+
+    ;; 1600ns
+    (title "sieppari - record (compiled queue)")
+    (expected! (app2 record-request))
+    (cc/quick-bench
+      (app2 record-request))))
 
 ;;
 ;; Reduce
@@ -239,6 +278,7 @@
 (comment
   (interceptor-test)
   (middleware-test)
+  (sieppari-test)
   (pedestal-chain-text)
   (pedestal-tuned-chain-text)
   (interceptor-chain-test))
