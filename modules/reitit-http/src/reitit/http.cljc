@@ -77,7 +77,8 @@
                            (interceptor/queue executor))
         router-opts (-> (r/options router)
                         (assoc ::interceptor/queue (partial interceptor/queue executor))
-                        (update-in [:data :interceptors] (partial into (vec interceptors))))
+                        (cond-> (seq interceptors)
+                                (update-in [:data :interceptors] (partial into (vec interceptors)))))
         router (reitit.http/router (r/routes router) router-opts)]
     (with-meta
       (fn
@@ -91,7 +92,8 @@
                              (impl/fast-assoc :path-params path-params)
                              (impl/fast-assoc ::r/match match)
                              (impl/fast-assoc ::r/router router))]
-             (interceptor/execute executor interceptors request))
+             (or (interceptor/execute executor interceptors request)
+                 (interceptor/execute executor default-queue request)))
            (interceptor/execute executor default-queue request)))
         ([request respond raise]
          (if-let [match (r/match-by-path router (:uri request))]

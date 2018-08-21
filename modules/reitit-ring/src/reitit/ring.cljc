@@ -109,7 +109,7 @@
       (if-let [match (::r/match request)]
         (let [method (:request-method request :any)
               result (:result match)
-              handler? (or (-> result method :handler) (-> result :any :handler))
+              handler? (or (-> result method) (-> result :any))
               error-handler (if handler? not-acceptable method-not-allowed)]
           (error-handler request))
         (not-found request)))
