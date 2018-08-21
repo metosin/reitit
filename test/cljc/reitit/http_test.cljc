@@ -234,36 +234,37 @@
                 (is (= 406 (:status (respond))))
                 (is (= ::nil (raise))))))))))
 
-#_(deftest middleware-transform-test
-    (let [middleware (fn [name] {:name name
-                                 :wrap (fn [handler]
-                                         (fn [request]
-                                           (handler (update request ::mw (fnil conj []) name))))})
-          handler (fn [{:keys [::mw]}] {:status 200 :body (conj mw :ok)})
-          request {:uri "/api/avaruus" :request-method :get}
-          create (fn [options]
-                   (http/ring-handler
-                     (http/router
-                       ["/api" {:interceptors [(middleware :olipa)]}
-                        ["/avaruus" {:interceptors [(middleware :kerran)]
-                                     :get {:handler handler
-                                           :interceptors [(middleware :avaruus)]}}]]
-                       options)))]
+(deftest interceptor-transform-test
+  (let [interceptor (fn [name] {:name name
+                                :enter (fn [ctx]
+                                         (update-in ctx [:request ::i] (fnil conj []) name))})
+        handler (fn [{:keys [::i]}] {:status 200 :body (conj i :ok)})
+        request {:uri "/api/avaruus" :request-method :get}
+        create (fn [options]
+                 (http/ring-handler
+                   (http/router
+                     ["/api" {:interceptors [(interceptor :olipa)]}
+                      ["/avaruus" {:interceptors [(interceptor :kerran)]
+                                   :get {:handler handler
+                                         :interceptors [(interceptor :avaruus)]}}]]
+                     options)
+                   nil
+                   {:executor sieppari/executor}))]
 
-      (testing "by default, all middleware are applied in order"
-        (let [app (create nil)]
-          (is (= {:status 200, :body [:olipa :kerran :avaruus :ok]}
-                 (app request)))))
+    (testing "by default, all middleware are applied in order"
+      (let [app (create nil)]
+        (is (= {:status 200, :body [:olipa :kerran :avaruus :ok]}
+               (app request)))))
 
-      (testing "middleware can be re-ordered"
-        (let [app (create {::interceptor/transform (partial sort-by :name)})]
-          (is (= {:status 200, :body [:avaruus :kerran :olipa :ok]}
-                 (app request)))))
+    (testing "middleware can be re-ordered"
+      (let [app (create {::interceptor/transform (partial sort-by :name)})]
+        (is (= {:status 200, :body [:avaruus :kerran :olipa :ok]}
+               (app request)))))
 
-      (testing "adding debug middleware between middleware"
-        (let [app (create {::interceptor/transform #(interleave % (repeat (middleware "debug")))})]
-          (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]}
-                 (app request)))))))
+    (testing "adding debug middleware between middleware"
+      (let [app (create {::interceptor/transform #(interleave % (repeat (interceptor "debug")))})]
+        (is (= {:status 200, :body [:olipa "debug" :kerran "debug" :avaruus "debug" :ok]}
+               (app request)))))))
 
 #?(:clj
    (deftest resource-handler-test
