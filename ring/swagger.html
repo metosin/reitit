@@ -459,7 +459,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.7" data-path="middleware_registry.html">
+        <li class="chapter " data-level="1.5.7" data-path="transformating_middleware_chain.md">
+            
+                <span>
+            
+                    
+                    Transformations Middleware Chain
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5.8" data-path="middleware_registry.html">
             
                 <a href="middleware_registry.html">
             
@@ -472,7 +485,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.8" data-path="default_middleware.html">
+        <li class="chapter " data-level="1.5.9" data-path="default_middleware.html">
             
                 <a href="default_middleware.html">
             
@@ -485,7 +498,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.9" data-path="coercion.html">
+        <li class="chapter " data-level="1.5.10" data-path="coercion.html">
             
                 <a href="coercion.html">
             
@@ -498,7 +511,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.10" data-path="route_data_validation.html">
+        <li class="chapter " data-level="1.5.11" data-path="route_data_validation.html">
             
                 <a href="route_data_validation.html">
             
@@ -511,7 +524,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.5.11" data-path="compiling_middleware.html">
+        <li class="chapter " data-level="1.5.12" data-path="compiling_middleware.html">
             
                 <a href="compiling_middleware.html">
             
@@ -524,7 +537,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.5.12" data-path="swagger.html">
+        <li class="chapter active" data-level="1.5.13" data-path="swagger.html">
             
                 <a href="swagger.html">
             
@@ -834,78 +847,93 @@
 </code></pre>
 <h3 id="more-complete-example">More complete example</h3>
 <ul>
-<li><code>clojure.spec</code> and <code>Schema</code> coercion</li>
-<li>swagger data (<code>:tags</code>, <code>:produces</code>, <code>:consumes</code>)</li>
-<li>swagger-spec served from  <code>&quot;/api/swagger.json&quot;</code></li>
+<li><code>clojure.spec</code> coercion</li>
+<li>swagger data (<code>:tags</code>, <code>:produces</code>, <code>:summary</code>)</li>
+<li>swagger-spec served from  <code>&quot;/swagger.json&quot;</code></li>
 <li>swagger-ui mounted to <code>&quot;/&quot;</code></li>
-<li><a href="https://github.com/metosin/muuntaja" target="_blank">Muuntaja</a> for request &amp; response formatting</li>
-<li><code>wrap-params</code> to capture query &amp; path parameters</li>
+<li>set of middleware for content negotiation, exceptions, multipart etc.</li>
 <li>missed routes are handled by <code>create-default-handler</code></li>
 <li>served via <a href="https://github.com/ring-clojure/ring/tree/master/ring-jetty-adapter" target="_blank">ring-jetty</a></li>
 </ul>
 <p>Whole example project is in <a href="https://github.com/metosin/reitit/tree/master/examples/ring-swagger" target="_blank"><code>/examples/ring-swagger</code></a>.</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring]
-(<span class="hljs-name">require</span> &apos;[reitit.swagger <span class="hljs-symbol">:as</span> swagger]
-(<span class="hljs-name">require</span> &apos;[reitit.swagger-ui <span class="hljs-symbol">:as</span> swagger-ui]
-<span class="hljs-comment">;; coercion</span>
-(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> rrc]
-(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> spec]
-(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema <span class="hljs-symbol">:as</span> schema]
-(<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:refer</span> [Int]]
-<span class="hljs-comment">;; web server</span>
-(<span class="hljs-name">require</span> &apos;[ring.adapter.jetty <span class="hljs-symbol">:as</span> jetty]
-(<span class="hljs-name">require</span> &apos;[ring.middleware.params]
-(<span class="hljs-name">require</span> &apos;[muuntaja.middleware]))
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">ns</span></span> example.server
+  (<span class="hljs-symbol">:require</span> [reitit.ring <span class="hljs-symbol">:as</span> ring]
+            [reitit.swagger <span class="hljs-symbol">:as</span> swagger]
+            [reitit.swagger-ui <span class="hljs-symbol">:as</span> swagger-ui]
+            [reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion]
+            [reitit.coercion.spec]
+            [reitit.ring.middleware.muuntaja <span class="hljs-symbol">:as</span> muuntaja]
+            [reitit.ring.middleware.exception <span class="hljs-symbol">:as</span> exception]
+            [reitit.ring.middleware.multipart <span class="hljs-symbol">:as</span> multipart]
+            [ring.middleware.params <span class="hljs-symbol">:as</span> params]
+            [ring.adapter.jetty <span class="hljs-symbol">:as</span> jetty]
+            [muuntaja.core <span class="hljs-symbol">:as</span> m]
+            [clojure.java.io <span class="hljs-symbol">:as</span> io]))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span>
-
-       [<span class="hljs-string">&quot;/swagger.json&quot;</span>
+      [[<span class="hljs-string">&quot;/swagger.json&quot;</span>
         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
                <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:info</span> {<span class="hljs-symbol">:title</span> <span class="hljs-string">&quot;my-api&quot;</span>}}
                <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]
 
-       [<span class="hljs-string">&quot;/spec&quot;</span>
-        {<span class="hljs-symbol">:coercion</span> spec/coercion
-         <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:tags</span> [<span class="hljs-string">&quot;spec&quot;</span>]}}
+       [<span class="hljs-string">&quot;/files&quot;</span>
+        {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:tags</span> [<span class="hljs-string">&quot;files&quot;</span>]}}
+
+        [<span class="hljs-string">&quot;/upload&quot;</span>
+         {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;upload a file&quot;</span>
+                 <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:multipart</span> {<span class="hljs-symbol">:file</span> multipart/temp-file-part}}
+                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:file</span> multipart/temp-file-part}}}
+                 <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [file]} <span class="hljs-symbol">:multipart</span>} <span class="hljs-symbol">:parameters</span>}]
+                            {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                             <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:file</span> file}})}}]
+
+        [<span class="hljs-string">&quot;/download&quot;</span>
+         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;downloads a file&quot;</span>
+                <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:produces</span> [<span class="hljs-string">&quot;image/png&quot;</span>]}
+                <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_]
+                           {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                            <span class="hljs-symbol">:headers</span> {<span class="hljs-string">&quot;Content-Type&quot;</span> <span class="hljs-string">&quot;image/png&quot;</span>}
+                            <span class="hljs-symbol">:body</span> (<span class="hljs-name">io/input-stream</span> (<span class="hljs-name">io/resource</span> <span class="hljs-string">&quot;reitit.png&quot;</span>))})}}]]
+
+       [<span class="hljs-string">&quot;/math&quot;</span>
+        {<span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:tags</span> [<span class="hljs-string">&quot;math&quot;</span>]}}
 
         [<span class="hljs-string">&quot;/plus&quot;</span>
-         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus with spec&quot;</span>
+         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus with spec query parameters&quot;</span>
                 <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
                 <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
                            {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                            <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]
+                            <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}
+          <span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus with spec body parameters&quot;</span>
+                 <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+                 <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+                 <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
+                            {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                             <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]]
 
-       [<span class="hljs-string">&quot;/schema&quot;</span>
-        {<span class="hljs-symbol">:coercion</span> schema/coercion
-         <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:tags</span> [<span class="hljs-string">&quot;schema&quot;</span>]}}
-
-        [<span class="hljs-string">&quot;/plus&quot;</span>
-         {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;plus with schema&quot;</span>
-                <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> Int, <span class="hljs-symbol">:y</span> Int}}
-                <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> Int}}}
-                <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
-                           {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                            <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]]]
-
-      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [ring.middleware.params/wrap-params
-                           muuntaja.middleware/wrap-format
-                           swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]
-              <span class="hljs-symbol">:swagger</span> {<span class="hljs-symbol">:produces</span> #{<span class="hljs-string">&quot;application/json&quot;</span>
-                                    <span class="hljs-string">&quot;application/edn&quot;</span>
-                                    <span class="hljs-string">&quot;application/transit+json&quot;</span>}
-                        <span class="hljs-symbol">:consumes</span> #{<span class="hljs-string">&quot;application/json&quot;</span>
-                                    <span class="hljs-string">&quot;application/edn&quot;</span>
-                                    <span class="hljs-string">&quot;application/transit+json&quot;</span>}}}})
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:coercion</span> reitit.coercion.spec/coercion
+              <span class="hljs-symbol">:muuntaja</span> m/instance
+              <span class="hljs-symbol">:middleware</span> [<span class="hljs-comment">;; query-params &amp; form-params</span>
+                           params/wrap-params
+                           <span class="hljs-comment">;; content-negotiation</span>
+                           muuntaja/format-negotiate-middleware
+                           <span class="hljs-comment">;; encoding response body</span>
+                           muuntaja/format-response-middleware
+                           <span class="hljs-comment">;; exception handling</span>
+                           exception/exception-middleware
+                           <span class="hljs-comment">;; decoding request body</span>
+                           muuntaja/format-request-middleware
+                           <span class="hljs-comment">;; coercing response bodys</span>
+                           coercion/coerce-response-middleware
+                           <span class="hljs-comment">;; coercing request parameters</span>
+                           coercion/coerce-request-middleware
+                           <span class="hljs-comment">;; multipart</span>
+                           multipart/multipart-middleware]}})
     (<span class="hljs-name">ring/routes</span>
-      (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span>
-        {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-symbol">:url</span> <span class="hljs-string">&quot;/api/swagger.json&quot;</span>})
+      (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span> {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/&quot;</span>})
       (<span class="hljs-name">ring/create-default-handler</span>))))
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> start []
@@ -953,7 +981,6 @@
 </code></pre>
 <h3 id="todo">TODO</h3>
 <ul>
-<li>create a data-driven version of <a href="https://github.com/metosin/muuntaja" target="_blank">Muuntaja</a> that integrates into <code>:produces</code> and <code>:consumes</code></li>
 <li>ClojureScript<ul>
 <li>example for <a href="https://github.com/macchiato-framework" target="_blank">Macchiato</a></li>
 <li>body formatting</li>
@@ -1004,7 +1031,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"1.5.12","depth":2,"next":{"title":"Frontend","level":"1.6","depth":1,"path":"frontend/README.md","ref":"frontend/README.md","articles":[{"title":"Basics","level":"1.6.1","depth":2,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},{"title":"Browser integration","level":"1.6.2","depth":2,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},{"title":"Controllers","level":"1.6.3","depth":2,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]}]},"previous":{"title":"Compiling Middleware","level":"1.5.11","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-08-22T17:24:29.926Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T17:25:09.089Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"1.5.13","depth":2,"next":{"title":"Frontend","level":"1.6","depth":1,"path":"frontend/README.md","ref":"frontend/README.md","articles":[{"title":"Basics","level":"1.6.1","depth":2,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},{"title":"Browser integration","level":"1.6.2","depth":2,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},{"title":"Controllers","level":"1.6.3","depth":2,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]}]},"previous":{"title":"Compiling Middleware","level":"1.5.12","depth":2,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-08-22T18:51:30.952Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T18:52:11.735Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
