@@ -698,20 +698,27 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="interceptors-wip">Interceptors (WIP)</h1>
-<p>Reitit has also support for <a href="pedestal.io">Pedestal</a>-style <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> via <code>reitit.interceptor</code> package. Currently, there is no interceptor interpreter shipped, just a way to compose and manage the interceptor chains.</p>
-<p>Plan is to have a full-featured <code>reitit-http</code> module with same features as the <code>reitit-ring</code> - enchanced interceptor maps &amp; interceptor compilations. Stay tuned.</p>
-<h3 id="todo">TODO</h3>
+<p>Reitit also support for <a href="pedestal.io">Pedestal</a>-style <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> as an alternative to Middleware. Basic interceptor handling is implemented in <code>reitit.interceptor</code> package. </p>
+<p>There is no interceptor executor shipped, but you can use libraries like <a href="https://github.com/pedestal/pedestal/tree/master/interceptor" target="_blank">Pedestal Interceptor</a> or <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> to execute the chains.</p>
+<h2 id="reitit-http">Reitit-http</h2>
+<p>An alternative to <code>reitit-ring</code>, using interceptors instead of middleware. Currently not finalized, you can track progress in <a href="https://github.com/metosin/reitit/pull/124" target="_blank">here</a>.</p>
+<h2 id="examples">Examples</h2>
+<h3 id="pedestal">Pedestal</h3>
+<p><strong>TODO</strong></p>
+<h3 id="sieppari">Sieppari</h3>
 <ul>
-<li>Figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.</li>
-<li>Separate modules for interceptor interpreters (including cljs)</li>
-<li>Finalize <code>reitit-http</code> module as an alternative to <code>reitit-ring</code></li>
+<li><a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a></li>
+<li><a href="https://github.com/ztellman/manifold" target="_blank">Manifold</a></li>
+<li><a href="https://github.com/metosin/spec-tools/blob/master/README.md#data-specs" target="_blank">data-specs</a>:</li>
 </ul>
-<h3 id="example">Example</h3>
-<p>Current <code>reitit-http</code> draft (with data-specs):</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.http.coercion <span class="hljs-symbol">:as</span> rhc])
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.interceptor.sieppari <span class="hljs-symbol">:as</span> sieppari])
+(<span class="hljs-name">require</span> &apos;[reitit.http.coercion <span class="hljs-symbol">:as</span> coercion])
 (<span class="hljs-name">require</span> &apos;[reitit.http <span class="hljs-symbol">:as</span> http])
+(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 (<span class="hljs-name">require</span> &apos;[reitit.coercion.spec])
 (<span class="hljs-name">require</span> &apos;[clojure.set <span class="hljs-symbol">:as</span> set])
+(<span class="hljs-name">require</span> &apos;[manifold.deferred <span class="hljs-symbol">:as</span> d])
+(<span class="hljs-name">require</span> &apos;[ring.adapter.jetty <span class="hljs-symbol">:as</span> jetty])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> auth-interceptor
   <span class="hljs-string">&quot;Interceptor that mounts itself if route has `:roles` data. Expects `:roles`
@@ -726,12 +733,15 @@
                  <span class="hljs-symbol">:enter</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{user-roles <span class="hljs-symbol">:roles</span>} <span class="hljs-symbol">:user</span> <span class="hljs-symbol">:as</span> ctx}]
                           (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">not</span></span> (<span class="hljs-name">set/subset?</span> roles user-roles))
                             (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> ctx <span class="hljs-symbol">:response</span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">403</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;forbidden&quot;</span>})
-                            ctx))}))})(<span class="hljs-name">require</span> &apos;[clojure.set <span class="hljs-symbol">:as</span> set])
+                            ctx))}))})
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> async-interceptor
+  {<span class="hljs-symbol">:enter</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [ctx] (<span class="hljs-name">d/future</span> ctx))})
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">http/http-handler</span>
+  (<span class="hljs-name">http/ring-handler</span>
     (<span class="hljs-name">http/router</span>
-      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:interceptors</span> [auth-interceptor]}
+      [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:interceptors</span> [async-interceptor auth-interceptor]}
        [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>
                  <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span>
                         {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
@@ -749,9 +759,13 @@
                                         {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
                                          <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> total}}))}}]]
       {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:coercion</span> reitit.coercion.spec/coercion
-              <span class="hljs-symbol">:interceptors</span> [rhc/coerce-exceptions-interceptor
-                             rhc/coerce-request-interceptor
-                             rhc/coerce-response-interceptor]}})))
+              <span class="hljs-symbol">:interceptors</span> [coercion/coerce-exceptions-interceptor
+                             coercion/coerce-request-interceptor
+                             coercion/coerce-response-interceptor]}})
+    (<span class="hljs-name">ring/create-default-handler</span>)
+    {<span class="hljs-symbol">:executor</span> sieppari/executor}))
+
+(<span class="hljs-name">jetty/run-jetty</span> #&apos;app {<span class="hljs-symbol">:port</span> <span class="hljs-number">3000</span>, <span class="hljs-symbol">:join?</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:async?</span> <span class="hljs-literal">true</span>})
 </code></pre>
 
                                 
@@ -796,7 +810,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Interceptors (WIP)","level":"1.8","depth":1,"next":{"title":"Development Instructions","level":"1.9","depth":1,"path":"development.md","ref":"development.md","articles":[]},"previous":{"title":"Performance","level":"1.7","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"interceptors.md","mtime":"2018-08-22T17:07:10.781Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T17:08:01.923Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Interceptors (WIP)","level":"1.8","depth":1,"next":{"title":"Development Instructions","level":"1.9","depth":1,"path":"development.md","ref":"development.md","articles":[]},"previous":{"title":"Performance","level":"1.7","depth":1,"path":"performance.md","ref":"performance.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"interceptors.md","mtime":"2018-08-22T17:24:29.922Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T17:25:09.089Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
