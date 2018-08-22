@@ -6,7 +6,7 @@
 * [Static Resources](static.md)
 * [Dynamic Extensions](dynamic_extensions.md)
 * [Data-driven Middleware](data_driven_middleware.md)
-* [Transformations Middleware Chain](transformating_middleware_chain.md)
+* [Transforming Middleware Chain](transforming_middleware_chain.md)
 * [Middleware Registry](middleware_registry.md)
 * [Default Middleware](default_middleware.md)
 * [Pluggable Coercion](coercion.md)
