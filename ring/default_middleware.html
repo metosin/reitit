@@ -806,13 +806,109 @@
 <span class="hljs-comment">;            :uri &quot;/fail&quot;}}</span>
 </code></pre>
 <h2 id="content-negotiation">Content Negotiation</h2>
-<p>Wrapper for <a href="https://github.com/metosin/muuntaja" target="_blank">Muuntaja</a> middleware for content-negotiation, request decoding and response encoding. Reads configuration from route data and emit&apos;s <a href="swagger.html">swagger</a> <code>:produces</code> and <code>:consumes</code> definitions automatically.</p>
+<p>Wrapper for <a href="https://github.com/metosin/muuntaja" target="_blank">Muuntaja</a> middleware for content-negotiation, request decoding and response encoding. Takes explicit configuration via <code>:muuntaja</code> key in route data. Emit&apos;s <a href="swagger.html">swagger</a> <code>:produces</code> and <code>:consumes</code> definitions automatically based on the Muuntaja configuration.</p>
+<p>Negotiates a request body based on <code>Content-Type</code> header and response body based on <code>Accept</code>, <code>Accept-Charset</code> headers. Publishes the negotiation results as <code>:muuntaja/request</code> and <code>:muuntaja/response</code> keys into the request.</p>
+<p>Decodes the request body into <code>:body-params</code> using the <code>:muuntaja/request</code> key in request if the <code>:body-params</code> doesn&apos;t already exist.</p>
+<p>Encodes the response body using the <code>:muuntaja/response</code> key in request if the response doesn&apos;t have <code>Content-Type</code> header already set.</p>
+<p>Expected route data:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:muuntaja</code></td>
+<td><code>muuntaja.core/Muuntaja</code> instance, does not mount if not set.</td>
+</tr>
+</tbody>
+</table>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware.muuntaja <span class="hljs-symbol">:as</span> muuntaja])
 </code></pre>
+<ul>
+<li><code>muuntaja/format-middleware</code> - Negotiation, request decoding and response encoding in a single Middleware</li>
+<li><code>muuntaja/format-negotiate-middleware</code> - Negotiation</li>
+<li><code>muuntaja/format-request-middleware</code> - Request decoding</li>
+<li><code>muuntaja/format-response-middleware</code> - Response encoding</li>
+</ul>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> rrc])
+(<span class="hljs-name">require</span> &apos;[reitit.coercion.spec <span class="hljs-symbol">:as</span> rcs])
+(<span class="hljs-name">require</span> &apos;[ring.adapter.jetty <span class="hljs-symbol">:as</span> jetty])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [[<span class="hljs-string">&quot;/math&quot;</span>
+        {<span class="hljs-symbol">:post</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;negotiated request &amp; response (json, edn, transit)&quot;</span>
+                <span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+                <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> int?}}}
+                <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:body</span>} <span class="hljs-symbol">:parameters</span>}]
+                           {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                            <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]
+       [<span class="hljs-string">&quot;/xml&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;forced xml response&quot;</span>
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_]
+                          {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                           <span class="hljs-symbol">:headers</span> {<span class="hljs-string">&quot;Content-Type&quot;</span> <span class="hljs-string">&quot;text/xml&quot;</span>}
+                           <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;&lt;kikka&gt;kukka&lt;/kikka&gt;&quot;</span>})}}]]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:muuntaja</span> m/instance
+              <span class="hljs-symbol">:coercion</span> rcs/coercion
+              <span class="hljs-symbol">:middleware</span> [muuntaja/format-middleware
+                           rrc/coerce-exceptions-middleware
+                           rrc/coerce-request-middleware
+                           rrc/coerce-response-middleware]}})))
+
+(<span class="hljs-name">jetty/run-jetty</span> #&apos;app {<span class="hljs-symbol">:port</span> <span class="hljs-number">3000</span>, <span class="hljs-symbol">:join?</span> <span class="hljs-literal">false</span>})
+</code></pre>
+<p>Testing with <a href="https://httpie.org/" target="_blank">httpie</a>:</p>
+<pre><code class="lang-bash">&gt; http POST :3000/math x:=1 y:=2
+
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json; charset=utf-8
+Date: Wed, 22 Aug 2018 16:59:54 GMT
+Server: Jetty(9.2.21.v20170120)
+
+{
+ <span class="hljs-string">&quot;total&quot;</span>: 3
+}
+</code></pre>
+<pre><code class="lang-bash">&gt; http :3000/xml
+
+HTTP/1.1 200 OK
+Content-Length: 20
+Content-Type: text/xml
+Date: Wed, 22 Aug 2018 16:59:58 GMT
+Server: Jetty(9.2.21.v20170120)
+
+&lt;kikka&gt;kukka&lt;/kikka&gt;
+</code></pre>
 <h2 id="multipart-request-handling">Multipart request handling</h2>
-<p>Wrapper for <a href="https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/middleware/multipart_params.clj" target="_blank">Ring Multipart Middleware</a>. Conditionally mounts to an endpoint only if it has <code>:multipart</code> params defined. Emits swagger <code>:consumes</code> definitions automatically.</p>
+<p>Wrapper for <a href="https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/middleware/multipart_params.clj" target="_blank">Ring Multipart Middleware</a>. Emits swagger <code>:consumes</code> definitions automatically.</p>
+<p>Expected route data:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[:parameters :multipart]</code></td>
+<td>mounts only if defined for a route.</td>
+</tr>
+</tbody>
+</table>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware.multipart <span class="hljs-symbol">:as</span> multipart])
 </code></pre>
+<ul>
+<li><code>multipart/multipart-middleware</code> a preconfigured middleware for multipart handling</li>
+<li><code>multipart/create-multipart-middleware</code> to generate with custom configuration</li>
+</ul>
 <h2 id="example-app">Example app</h2>
 <p>See an example app with the default middleware in action: <a href="https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj" target="_blank">https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj</a>.</p>
 
@@ -858,7 +954,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Default Middleware","level":"1.5.8","depth":2,"next":{"title":"Pluggable Coercion","level":"1.5.9","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Middleware Registry","level":"1.5.7","depth":2,"path":"ring/middleware_registry.md","ref":"ring/middleware_registry.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/default_middleware.md","mtime":"2018-08-22T07:47:19.927Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T07:47:58.894Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Default Middleware","level":"1.5.8","depth":2,"next":{"title":"Pluggable Coercion","level":"1.5.9","depth":2,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Middleware Registry","level":"1.5.7","depth":2,"path":"ring/middleware_registry.md","ref":"ring/middleware_registry.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/default_middleware.md","mtime":"2018-08-22T17:07:10.781Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-22T17:08:01.923Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
