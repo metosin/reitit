@@ -109,12 +109,14 @@
    (-> options wrap handler)))
 
 (def exception-middleware
+  "A preconfigured exception handling Middleware. To configure the exceptions handlers, use
+  `create-exception-handler` instead."
   {:name ::exception
    :spec ::spec
    :wrap (wrap default-handlers)})
 
 (defn create-exception-middleware
-  "Creates a reitit middleware that catches all exceptions. Takes a map
+  "Creates a Middleware that catches all exceptions. Takes a map
   of `identifier => exception request => response` that is used to select
   the exception handler for the thown/raised exception identifier. Exception
   idenfier is either a `Keyword` or a Exception Class.
