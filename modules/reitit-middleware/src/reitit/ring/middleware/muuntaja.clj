@@ -63,7 +63,7 @@
               (if muuntaja
                 {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}
                  :wrap #(muuntaja.middleware/wrap-format-request % muuntaja)}))})
-©
+
 (def format-response-middleware
   "Middleware for response formatting.
 

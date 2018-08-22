@@ -108,80 +108,95 @@ Swagger-ui:
 
 ### More complete example
 
-* `clojure.spec` and `Schema` coercion
-* swagger data (`:tags`, `:produces`, `:consumes`)
-* swagger-spec served from  `"/api/swagger.json"`
+* `clojure.spec` coercion
+* swagger data (`:tags`, `:produces`, `:summary`)
+* swagger-spec served from  `"/swagger.json"`
 * swagger-ui mounted to `"/"`
-* [Muuntaja](https://github.com/metosin/muuntaja) for request & response formatting
-* `wrap-params` to capture query & path parameters
+* set of middleware for content negotiation, exceptions, multipart etc.
 * missed routes are handled by `create-default-handler`
 * served via [ring-jetty](https://github.com/ring-clojure/ring/tree/master/ring-jetty-adapter)
 
 Whole example project is in [`/examples/ring-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-swagger).
 
 ```clj
-(require '[reitit.ring :as ring]
-(require '[reitit.swagger :as swagger]
-(require '[reitit.swagger-ui :as swagger-ui]
-;; coercion
-(require '[reitit.ring.coercion :as rrc]
-(require '[reitit.coercion.spec :as spec]
-(require '[reitit.coercion.schema :as schema]
-(require '[schema.core :refer [Int]]
-;; web server
-(require '[ring.adapter.jetty :as jetty]
-(require '[ring.middleware.params]
-(require '[muuntaja.middleware]))
+(ns example.server
+  (:require [reitit.ring :as ring]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
+            [reitit.ring.coercion :as coercion]
+            [reitit.coercion.spec]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.exception :as exception]
+            [reitit.ring.middleware.multipart :as multipart]
+            [ring.middleware.params :as params]
+            [ring.adapter.jetty :as jetty]
+            [muuntaja.core :as m]
+            [clojure.java.io :as io]))
 
 (def app
   (ring/ring-handler
     (ring/router
-      ["/api"
-      
-       ["/swagger.json"
+      [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
                :handler (swagger/create-swagger-handler)}}]
 
-       ["/spec"
-        {:coercion spec/coercion
-         :swagger {:tags ["spec"]}}
+       ["/files"
+        {:swagger {:tags ["files"]}}
+
+        ["/upload"
+         {:post {:summary "upload a file"
+                 :parameters {:multipart {:file multipart/temp-file-part}}
+                 :responses {200 {:body {:file multipart/temp-file-part}}}
+                 :handler (fn [{{{:keys [file]} :multipart} :parameters}]
+                            {:status 200
+                             :body {:file file}})}}]
+
+        ["/download"
+         {:get {:summary "downloads a file"
+                :swagger {:produces ["image/png"]}
+                :handler (fn [_]
+                           {:status 200
+                            :headers {"Content-Type" "image/png"}
+                            :body (io/input-stream (io/resource "reitit.png"))})}}]]
+
+       ["/math"
+        {:swagger {:tags ["math"]}}
 
         ["/plus"
-         {:get {:summary "plus with spec"
+         {:get {:summary "plus with spec query parameters"
                 :parameters {:query {:x int?, :y int?}}
                 :responses {200 {:body {:total int?}}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
-                            :body {:total (+ x y)}})}}]]
+                            :body {:total (+ x y)}})}
+          :post {:summary "plus with spec body parameters"
+                 :parameters {:body {:x int?, :y int?}}
+                 :responses {200 {:body {:total int?}}}
+                 :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                            {:status 200
+                             :body {:total (+ x y)}})}}]]]
 
-       ["/schema"
-        {:coercion schema/coercion
-         :swagger {:tags ["schema"]}}
-
-        ["/plus"
-         {:get {:summary "plus with schema"
-                :parameters {:query {:x Int, :y Int}}
-                :responses {200 {:body {:total Int}}}
-                :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                           {:status 200
-                            :body {:total (+ x y)}})}}]]]
-
-      {:data {:middleware [ring.middleware.params/wrap-params
-                           muuntaja.middleware/wrap-format
-                           swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]
-              :swagger {:produces #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}
-                        :consumes #{"application/json"
-                                    "application/edn"
-                                    "application/transit+json"}}}})
+      {:data {:coercion reitit.coercion.spec/coercion
+              :muuntaja m/instance
+              :middleware [;; query-params & form-params
+                           params/wrap-params
+                           ;; content-negotiation
+                           muuntaja/format-negotiate-middleware
+                           ;; encoding response body
+                           muuntaja/format-response-middleware
+                           ;; exception handling
+                           exception/exception-middleware
+                           ;; decoding request body
+                           muuntaja/format-request-middleware
+                           ;; coercing response bodys
+                           coercion/coerce-response-middleware
+                           ;; coercing request parameters
+                           coercion/coerce-request-middleware
+                           ;; multipart
+                           multipart/multipart-middleware]}})
     (ring/routes
-      (swagger-ui/create-swagger-ui-handler
-        {:path "/", :url "/api/swagger.json"})
+      (swagger-ui/create-swagger-ui-handler {:path "/"})
       (ring/create-default-handler))))
 
 (defn start []
@@ -242,7 +257,6 @@ Example with:
 
 ### TODO
 
-* create a data-driven version of [Muuntaja](https://github.com/metosin/muuntaja) that integrates into `:produces` and `:consumes`
 * ClojureScript
   * example for [Macchiato](https://github.com/macchiato-framework)
   * body formatting

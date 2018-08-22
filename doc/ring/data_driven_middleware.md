@@ -88,49 +88,8 @@ All the middleware are applied correctly:
 
 Middleware can be optimized against an endpoint using [middleware compilation](compiling_middleware.md).
 
-## Transforming the middleware chain
-
-There is an extra option in ring-router (actually, in the undelaying middleware-router): `:reitit.middleware/transform` to transform the middleware chain per endpoint. It sees the vector of compiled middleware and should return a new vector of middleware.
-
-#### Adding debug middleware between all other middleware
-
-```clj
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/api" {:middleware [[wrap 1] [wrap2 2]]}
-       ["/ping" {:get {:middleware [[wrap3 3]]
-                       :handler handler}}]]
-      {::middleware/transform #(interleave % (repeat [wrap :debug]))})))
-```
-
-```clj
-(app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
-```
-
-#### Reversing the middleware chain
-
-```clj
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/api" {:middleware [[wrap 1] [wrap2 2]]}
-       ["/ping" {:get {:middleware [[wrap3 3]]
-                       :handler handler}}]]
-      {::middleware/transform reverse)})))
-```
-
-```clj
-(app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [3 2 1 :handler]}
-```
-
 ## Ideas for the future
 
-* Re-package all useful middleware into (optimized) data-driven Middleware
-   * just package or a new community-repo with rehosting stuff?
-* Support `Keyword` expansion into Middleware, enabling external Middleware Registries (duct/integrant/macchiato -style)
 * Support Middleware dependency resolution with new keys `:requires` and `:provides`. Values are set of top-level keys of the request. e.g.
    * `InjectUserIntoRequestMiddleware` requires `#{:session}` and provides `#{:user}`
    * `AuthorizationMiddleware` requires `#{:user}`
