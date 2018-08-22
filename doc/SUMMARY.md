@@ -27,7 +27,7 @@
     * [Static Resources](ring/static.md)
     * [Dynamic Extensions](ring/dynamic_extensions.md)
     * [Data-driven Middleware](ring/data_driven_middleware.md)
-    * [Transforming Middleware Chain](transforming_middleware_chain.md)
+    * [Transforming Middleware Chain](ring/transforming_middleware_chain.md)
     * [Middleware Registry](ring/middleware_registry.md)
     * [Default Middleware](ring/default_middleware.md)
     * [Pluggable Coercion](ring/coercion.md)

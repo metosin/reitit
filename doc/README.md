@@ -10,7 +10,6 @@
 * Extendable
 * Modular
 * [Fast](performance.md)
-* [Frontend routing](./frontend/README.md)
 
 Modules:
 
@@ -20,7 +19,7 @@ Modules:
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
-* `reitit-frontend` Tools for frontend routing.
+* [`reitit-frontend`](frontend/basics.md) Tools for frontend routing.
 
 To use Reitit, add the following dependency to your project:
 

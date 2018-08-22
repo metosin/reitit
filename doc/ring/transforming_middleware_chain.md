@@ -1,4 +1,4 @@
-# Transformation Middleware Chain
+# Transforming the Middleware Chain
 
 There is an extra option in ring-router (actually, in the underlying middleware-router): `:reitit.middleware/transform` to transform the middleware chain per endpoint. It gets the vector of compiled middleware and should return a new vector of middleware.
 
