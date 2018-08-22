@@ -20,6 +20,7 @@
                {:template "/"
                 :data {:name ::frontpage}
                 :path-params {}
+                :query-params {}
                 :path "/"
                 :parameters {:query {}
                              :path {}}})
@@ -32,6 +33,7 @@
                {:template "/foo"
                 :data {:name ::foo}
                 :path-params {}
+                :query-params {}
                 :path "/foo"
                 :parameters {:query {}
                              :path {}}})
@@ -59,6 +61,7 @@
       (is (= (r/map->Match
                {:template "/:id"
                 :path-params {:id "5"}
+                :query-params {}
                 :path "/5"
                 :parameters {:query {}
                              :path {:id 5}}})
@@ -71,7 +74,7 @@
         (is (= (r/map->Match
                  {:template "/:id"
                   :path-params {:id "5"}
-                  ;; Note: query not included in path
+                  :query-params {:mode "foo"}
                   :path "/5"
                   :parameters {:path {:id 5}
                                :query {:mode :foo}}})
@@ -84,6 +87,7 @@
         (is (= (r/map->Match
                  {:template "/:id"
                   :path-params {:id "5"}
+                  :query-params {:mode "foo"}
                   :path "/5"
                   :parameters {:path {:id 5}
                                :query {:mode :foo}}})

@@ -21,9 +21,10 @@
   (let [uri (.parse Uri path)]
     (if-let [match (reitit/match-by-path router (.getPath uri))]
       (let [q (query-params uri)
+            match (assoc match :query-params q)
             ;; Return uncoerced values if coercion is not enabled - so
             ;; that tha parameters are always accessible from same property.
-            parameters (or (coercion/coerce! (assoc match :query-params q))
+            parameters (or (coercion/coerce! match)
                            {:path (:path-params match)
                             :query q})]
         (assoc match :parameters parameters)))))
