@@ -1,8 +1,6 @@
 # Interceptors (WIP)
 
-Reitit also support for [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) as an alternative to Middleware. Basic interceptor handling is implemented in `reitit.interceptor` package. 
-
-There is no interceptor executor shipped, but you can use libraries like [Pedestal Interceptor](https://github.com/pedestal/pedestal/tree/master/interceptor) or [Sieppari](https://github.com/metosin/sieppari) to execute the chains.
+Reitit also support for [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) as an alternative to Middleware. Basic interceptor handling is implemented in `reitit.interceptor` package.  There is no interceptor executor shipped, but you can use libraries like [Pedestal Interceptor](https://github.com/pedestal/pedestal/tree/master/interceptor) or [Sieppari](https://github.com/metosin/sieppari) to execute the chains.
 
 ## Reitit-http
 
@@ -10,15 +8,11 @@ An alternative to `reitit-ring`, using interceptors instead of middleware. Curre
 
 ## Examples
 
-### Pedestal
+### Standalone
 
-**TODO**
-
-### Sieppari
-
-* [Sieppari](https://github.com/metosin/sieppari)
-* [Manifold](https://github.com/ztellman/manifold)
-* [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs):
+* [Sieppari](https://github.com/metosin/sieppari) for executing the chain
+* [Manifold](https://github.com/ztellman/manifold) for async
+* [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs) for coercion
 
 ```clj
 (require '[reitit.interceptor.sieppari :as sieppari])
@@ -77,3 +71,7 @@ An alternative to `reitit-ring`, using interceptors instead of middleware. Curre
 
 (jetty/run-jetty #'app {:port 3000, :join? false, :async? true})
 ```
+
+### Pedestal
+
+**TODO**

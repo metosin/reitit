@@ -1,6 +1,8 @@
 # Performance
 
-Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from [Pedestal](http://pedestal.io/), but has been mostly rewritten to get even better performance.
+Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from [Pedestal](http://pedestal.io/), but has been mostly rewritten.
+
+![Opensensors perf test](images/opensensors.png)
 
 ### Rationale
 
