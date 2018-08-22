@@ -40,12 +40,13 @@
       (is (= "/foo"
              (r/match->path (rf/match-by-name router ::foo))))
 
-      (is (= [{:type :warn
-               :message ["missing route" ::asd]}]
-             (:messages
-               (capture-console
-                 (fn []
-                   (rf/match-by-name! router ::asd))))))))
+      (testing "console warning about missing route"
+        (is (= [{:type :warn
+                 :message ["missing route" ::asd]}]
+               (:messages
+                 (capture-console
+                   (fn []
+                     (rf/match-by-name! router ::asd)))))))))
 
   (testing "schema coercion"
     (let [router (r/router ["/"
@@ -54,6 +55,7 @@
                                                  :query {(s/optional-key :mode) s/Keyword}}}]]
                            {:compile rc/compile-request-coercers
                             :data {:coercion rsc/coercion}})]
+
       (is (= (r/map->Match
                {:template "/:id"
                 :path-params {:id "5"}
@@ -65,25 +67,36 @@
       (is (= "/5"
              (r/match->path (rf/match-by-name router ::foo {:id 5}))))
 
-      (is (= (r/map->Match
-               {:template "/:id"
-                :path-params {:id "5"}
-                ;; Note: query not included in path
-                :path "/5"
-                :parameters {:path {:id 5}
-                             :query {:mode :foo}}})
-             (m (rf/match-by-path router "/5?mode=foo"))))
+      (testing "query param is read"
+        (is (= (r/map->Match
+                 {:template "/:id"
+                  :path-params {:id "5"}
+                  ;; Note: query not included in path
+                  :path "/5"
+                  :parameters {:path {:id 5}
+                               :query {:mode :foo}}})
+               (m (rf/match-by-path router "/5?mode=foo"))))
 
-      (is (= "/5?mode=foo"
-             (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo})))
+        (is (= "/5?mode=foo"
+               (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo}))))
 
-      (is (= [{:type :warn
-               :message ["missing path-params for route" ::foo
-                         {:template "/:id"
-                          :missing #{:id}
-                          :required #{:id}
-                          :path-params {}}]}]
-             (:messages
-               (capture-console
-                 (fn []
-                   (rf/match-by-name! router ::foo {})))))))))
+      (testing "fragment is ignored"
+        (is (= (r/map->Match
+                 {:template "/:id"
+                  :path-params {:id "5"}
+                  :path "/5"
+                  :parameters {:path {:id 5}
+                               :query {:mode :foo}}})
+               (m (rf/match-by-path router "/5?mode=foo#fragment")))))
+
+      (testing "console warning about missing params"
+        (is (= [{:type :warn
+                 :message ["missing path-params for route" ::foo
+                           {:template "/:id"
+                            :missing #{:id}
+                            :required #{:id}
+                            :path-params {}}]}]
+               (:messages
+                 (capture-console
+                   (fn []
+                     (rf/match-by-name! router ::foo {}))))))))))
