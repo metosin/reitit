@@ -1,6 +1,5 @@
 (ns frontend.core
     (:require [reagent.core :as r]
-              [reitit.core :as re]
               [reitit.frontend :as rf]
               [reitit.frontend.easy :as rfe]
               [reitit.frontend.controllers :as rfc]
@@ -45,7 +44,7 @@
     (apply js/console.log params)))
 
 (def routes
-  (re/router
+  (rf/router
     ["/"
      [""
       {:name ::frontpage
@@ -72,8 +71,7 @@
                                 (js/console.log "start" "item controller" (:id params)))
                        :stop (fn [params]
                                (js/console.log "stop" "item controller" (:id params)))}]}]]]
-    {:compile rc/compile-request-coercers
-     :data {:controllers [{:start (log-fn "start" "root-controller")
+    {:data {:controllers [{:start (log-fn "start" "root-controller")
                            :stop (log-fn "stop" "root controller")}]
             :coercion rsc/coercion}}))
 
