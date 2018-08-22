@@ -1,24 +1,34 @@
 # Interceptors (WIP)
 
-Reitit has also support for [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) via `reitit.interceptor` package. Currently, there is no interceptor interpreter shipped, just a way to compose and manage the interceptor chains.
+Reitit also support for [Pedestal](pedestal.io)-style [interceptors](http://pedestal.io/reference/interceptors) as an alternative to Middleware. Basic interceptor handling is implemented in `reitit.interceptor` package. 
 
-Plan is to have a full-featured `reitit-http` module with same features as the `reitit-ring` - enchanced interceptor maps & interceptor compilations. Stay tuned.
+There is no interceptor executor shipped, but you can use libraries like [Pedestal Interceptor](https://github.com/pedestal/pedestal/tree/master/interceptor) or [Sieppari](https://github.com/metosin/sieppari) to execute the chains.
 
-### TODO
+## Reitit-http
 
-* Figure out how to make a truly portable Interceptor definitions, e.g. Pedestal has namespaced keys for context errors, queues etc.
-* Separate modules for interceptor interpreters (including cljs)
-* Finalize `reitit-http` module as an alternative to `reitit-ring`
+An alternative to `reitit-ring`, using interceptors instead of middleware. Currently not finalized, you can track progress in [here](https://github.com/metosin/reitit/pull/124).
 
-### Example
+## Examples
 
-Current `reitit-http` draft (with data-specs):
+### Pedestal
+
+**TODO**
+
+### Sieppari
+
+* [Sieppari](https://github.com/metosin/sieppari)
+* [Manifold](https://github.com/ztellman/manifold)
+* [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs):
 
 ```clj
-(require '[reitit.http.coercion :as rhc])
+(require '[reitit.interceptor.sieppari :as sieppari])
+(require '[reitit.http.coercion :as coercion])
 (require '[reitit.http :as http])
+(require '[reitit.ring :as ring])
 (require '[reitit.coercion.spec])
 (require '[clojure.set :as set])
+(require '[manifold.deferred :as d])
+(require '[ring.adapter.jetty :as jetty])
 
 (def auth-interceptor
   "Interceptor that mounts itself if route has `:roles` data. Expects `:roles`
@@ -33,12 +43,15 @@ Current `reitit-http` draft (with data-specs):
                  :enter (fn [{{user-roles :roles} :user :as ctx}]
                           (if (not (set/subset? roles user-roles))
                             (assoc ctx :response {:status 403, :body "forbidden"})
-                            ctx))}))})(require '[clojure.set :as set])
+                            ctx))}))})
+
+(def async-interceptor
+  {:enter (fn [ctx] (d/future ctx))})
 
 (def app
-  (http/http-handler
+  (http/ring-handler
     (http/router
-      ["/api" {:interceptors [auth-interceptor]}
+      ["/api" {:interceptors [async-interceptor auth-interceptor]}
        ["/ping" {:name ::ping
                  :get (constantly
                         {:status 200
@@ -56,7 +69,11 @@ Current `reitit-http` draft (with data-specs):
                                         {:status 200
                                          :body {:total total}}))}}]]
       {:data {:coercion reitit.coercion.spec/coercion
-              :interceptors [rhc/coerce-exceptions-interceptor
-                             rhc/coerce-request-interceptor
-                             rhc/coerce-response-interceptor]}})))
+              :interceptors [coercion/coerce-exceptions-interceptor
+                             coercion/coerce-request-interceptor
+                             coercion/coerce-response-interceptor]}})
+    (ring/create-default-handler)
+    {:executor sieppari/executor}))
+
+(jetty/run-jetty #'app {:port 3000, :join? false, :async? true})
 ```
