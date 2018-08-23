@@ -1,6 +1,5 @@
 (ns frontend.core
     (:require [reagent.core :as r]
-              [reitit.core :as re]
               [reitit.frontend :as rf]
               [reitit.frontend.easy :as rfe]
               [reitit.coercion :as rc]
@@ -53,7 +52,7 @@
    [:pre (with-out-str (fedn/pprint @match))]])
 
 (def routes
-  (re/router
+  (rf/router
     ["/"
      [""
       {:name ::frontpage
@@ -66,8 +65,7 @@
        :view item-page
        :parameters {:path {:id s/Int}
                     :query {(s/optional-key :foo) s/Keyword}}}]]
-    {:compile rc/compile-request-coercers
-     :data {:coercion rsc/coercion}}))
+    {:data {:coercion rsc/coercion}}))
 
 (defn init! []
   (rfe/start! routes
