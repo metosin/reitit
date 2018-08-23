@@ -49,4 +49,6 @@
 
   :figwheel {:http-server-root "public"
              :server-port 3449
-             :nrepl-port 7002})
+             :nrepl-port 7002
+             ;; Server index.html for all routes for HTML5 routing
+             :ring-handler backend.server/handler})
