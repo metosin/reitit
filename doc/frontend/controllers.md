@@ -35,5 +35,5 @@ authentication is done.
 ## Alternatives
 
 Similar solution could be used to describe required resources as data (maybe
-even GraphQL query) per resource, and then have code automatically load
+even GraphQL query) per route, and then have code automatically load
 missing resources.
