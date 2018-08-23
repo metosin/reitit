@@ -1,7 +1,6 @@
 (ns reitit.frontend.history
   ""
   (:require [reitit.core :as reitit]
-            [goog.events :as e]
             [reitit.core :as r]
             [reitit.frontend :as rf]
             [reitit.impl :as impl]
@@ -89,7 +88,7 @@
       (-on-navigate this (-get-path this))
       (assoc this
              :listen-key (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
-             :click-listen-key (e/listen js/document e/EventType.CLICK ignore-anchor-click))))
+             :click-listen-key (gevents/listen js/document goog.events.EventType.CLICK ignore-anchor-click))))
   (-on-navigate [this path]
     (on-navigate (rf/match-by-path router path) this))
   (-stop [this]
