@@ -51,4 +51,5 @@
 
   :figwheel {:http-server-root "public"
              :server-port 3449
-             :nrepl-port 7002})
+             :nrepl-port 7002
+             :ring-handler backend.server/handler})

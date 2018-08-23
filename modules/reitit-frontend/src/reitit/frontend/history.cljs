@@ -96,7 +96,8 @@
     (gevents/unlistenByKey listen-key)
     (gevents/unlistenByKey click-listen-key))
   (-get-path [this]
-    (.. js/window -location -pathname))
+    (str (.. js/window -location -pathname)
+         (.. js/window -location -search)))
   (-href [this path]
     path))
 
