@@ -23,7 +23,9 @@
                                                             'metosin/reitit-spec
                                                             'metosin/reitit-schema
                                                             'metosin/reitit-swagger
-                                                            'metosin/reitit-swagger-ui]
+                                                            'metosin/reitit-swagger-ui
+                                                            'metosin/reitit-frontend
+                                                            'metosin/reitit-middleware]
               :cljdoc.doc/tree docs}]
     (spit "doc/cljdoc.edn" (with-out-str (clojure.pprint/pprint data)))))
 
