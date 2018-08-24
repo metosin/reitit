@@ -2,8 +2,6 @@
 
 * https://github.com/metosin/reitit/tree/master/examples/frontend
 
-**WIP**
-
 `reitit.frontend` provides few useful functions wrapping core functions:
 
 - `match-by-path` version which parses a URI using JavaScript, including

@@ -24,14 +24,6 @@
    ["Plumatic Schema" {:file "doc/coercion/schema_coercion.md"}]
    ["Clojure.spec" {:file "doc/coercion/clojure_spec_coercion.md"}]
    ["Data-specs" {:file "doc/coercion/data_spec_coercion.md"}]]
-  ["Advanced"
-   {:file "doc/advanced/README.md"}
-   ["Configuring Routers"
-    {:file "doc/advanced/configuring_routers.md"}]
-   ["Composing Routers" {:file "doc/advanced/composing_routers.md"}]
-   ["Different Routers" {:file "doc/advanced/different_routers.md"}]
-   ["Route Validation" {:file "doc/advanced/route_validation.md"}]
-   ["Dev Workflow" {:file "doc/advanced/dev_workflow.md"}]]
   ["Ring"
    {:file "doc/ring/README.md"}
    ["Ring-router" {:file "doc/ring/ring.md"}]
@@ -41,17 +33,31 @@
    ["Dynamic Extensions" {:file "doc/ring/dynamic_extensions.md"}]
    ["Data-driven Middleware"
     {:file "doc/ring/data_driven_middleware.md"}]
+   ["Transforming Middleware Chain"
+    {:file "doc/ring/transforming_middleware_chain.md"}]
    ["Middleware Registry" {:file "doc/ring/middleware_registry.md"}]
+   ["Default Middleware" {:file "doc/ring/default_middleware.md"}]
    ["Pluggable Coercion" {:file "doc/ring/coercion.md"}]
    ["Route Data Validation"
     {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
    ["Swagger Support" {:file "doc/ring/swagger.md"}]]
+  ["Advanced"
+   {:file "doc/advanced/README.md"}
+   ["Configuring Routers"
+    {:file "doc/advanced/configuring_routers.md"}]
+   ["Composing Routers" {:file "doc/advanced/composing_routers.md"}]
+   ["Different Routers" {:file "doc/advanced/different_routers.md"}]
+   ["Route Validation" {:file "doc/advanced/route_validation.md"}]
+   ["Dev Workflow" {:file "doc/advanced/dev_workflow.md"}]]
+  ["Patterns"
+   {:file "doc/patterns/README.md"}
+   ["Shared Routes" {:file "doc/patterns/shared_routes.md"}]]
   ["Frontend"
    {:file "doc/frontend/README.md"}
    ["Basics" {:file "doc/frontend/basics.md"}]
    ["Browser integration" {:file "doc/frontend/browser.md"}]
-   ["Controllers" {:file "doc/frontend/controllers.md"}]]
+   ["Controllers (WIP)" {:file "doc/frontend/controllers.md"}]]
   ["Performance" {:file "doc/performance.md"}]
   ["Interceptors (WIP)" {:file "doc/interceptors.md"}]
   ["Development Instructions" {:file "doc/development.md"}]

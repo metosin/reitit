@@ -75,7 +75,9 @@
                            ;; multipart
                            multipart/multipart-middleware]}})
     (ring/routes
-      (swagger-ui/create-swagger-ui-handler {:path "/"})
+      (swagger-ui/create-swagger-ui-handler
+        {:path "/"
+         :config {:validatorUrl nil})
       (ring/create-default-handler))))
 
 (defn start []

@@ -1,7 +1,5 @@
 # Frontend browser integration
 
-**WIP**
-
 Reitit includes two browser history integrations.
 
 Functions follow HTML5 History API: `push-state` to change route, `replace-state`
