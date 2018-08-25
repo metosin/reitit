@@ -5,6 +5,8 @@
             [reitit.interceptor :as interceptor]
 
             reitit.chain
+            sieppari.queue
+            sieppari.core
             io.pedestal.interceptor
             io.pedestal.interceptor.chain))
 
@@ -34,36 +36,79 @@
 (def +items+ 10)
 
 (defn expected! [x]
-  (assert (= (range +items+) (:values x))))
+  (println x)
+  #_(assert (= (range +items+) (:values x))))
 
 (defn middleware [handler value]
   (fn [request]
-    (let [values (or (:values request) [])]
-      (handler (assoc request :values (conj values value))))))
+    (handler request)))
+
+(def map-request {})
+(def record-request (map->RequestOrContext map-request))
 
 (defn middleware-test []
   (let [mw (map (fn [value] [middleware value]) (range +items+))
-        app (middleware/chain mw identity)
-        map-request {}
-        record-request (map->RequestOrContext map-request)]
+        app (middleware/chain mw identity)]
 
     ;; 1000ns
+    ;;   18ns (identity)
     (title "middleware - map")
     (expected! (app map-request))
     (cc/quick-bench
       (app map-request))
 
     ;;  365ns
+    ;;   21ns (identity)
     (title "middleware - record")
     (expected! (app record-request))
     (cc/quick-bench
       (app record-request))
 
-    ;; 6900ns
+    ;;  6900ns
+    ;; 10000ns (identity)
     (title "middleware - dynamic")
     (expected! ((middleware/chain mw identity) record-request))
     (cc/quick-bench
       ((middleware/chain mw identity) record-request))))
+
+(defn sieppari-test []
+  (let [interceptors (conj
+                       (mapv
+                         (fn [value]
+                           {:enter identity})
+                         (range +items+))
+                       identity)
+        queue (sieppari.queue/into-queue interceptors)
+        app (fn [req] (sieppari.core/execute interceptors req))
+        app2 (fn [req] (sieppari.core/execute queue req))]
+
+    ;; 5500ns
+    ;; 4000ns (identity)
+    (title "sieppari - map")
+    (expected! (app map-request))
+    (cc/quick-bench
+      (app map-request))
+
+    ;; 4600ns
+    ;; 3800ns (identity)
+    (title "sieppari - record")
+    (expected! (app record-request))
+    (cc/quick-bench
+      (app record-request))
+
+    ;; 2200ns
+    ;; 1300ns (identity)
+    (title "sieppari - map (compiled queue)")
+    (expected! (app2 map-request))
+    (cc/quick-bench
+      (app2 map-request))
+
+    ;; 1600ns
+    ;; 1300ns (identity)
+    (title "sieppari - record (compiled queue)")
+    (expected! (app2 record-request))
+    (cc/quick-bench
+      (app2 record-request))))
 
 ;;
 ;; Reduce
@@ -108,24 +153,14 @@
 (defn pedestal-chain-text []
   (let [is (map io.pedestal.interceptor/interceptor
                 (map (fn [value]
-                       {:enter (interceptor value)}) (range +items+)))
+                       {:enter identity}) (range +items+)))
         ctx (io.pedestal.interceptor.chain/enqueue nil is)]
 
     ;; 8400ns
+    ;; 7200ns (identity)
     (title "pedestal")
     (cc/quick-bench
       (io.pedestal.interceptor.chain/execute ctx))))
-
-#_(defn pedestal-tuned-chain-text []
-    (let [is (map io.pedestal.interceptor/interceptor
-                  (map (fn [value]
-                         {:enter (interceptor value)}) (range +items+)))
-          ctx (reitit.chain/map->Context (reitit.chain/enqueue nil is))]
-
-      ;; 67 µs
-      (title "pedestal - tuned")
-      (cc/quick-bench
-        (reitit.chain/execute ctx))))
 
 ;;
 ;; Naive chain
@@ -239,8 +274,8 @@
 (comment
   (interceptor-test)
   (middleware-test)
+  (sieppari-test)
   (pedestal-chain-text)
-  (pedestal-tuned-chain-text)
   (interceptor-chain-test))
 
 ; Middleware (static chain) => 5µs

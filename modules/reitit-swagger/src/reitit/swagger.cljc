@@ -13,7 +13,7 @@
 (s/def ::summary string?)
 (s/def ::description string?)
 
-(s/def ::swagger (s/keys :req-un [::id]))
+(s/def ::swagger (s/keys :opt-un [::id]))
 (s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description]))
 
 (def swagger-feature

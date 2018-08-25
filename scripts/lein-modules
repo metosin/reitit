@@ -3,6 +3,17 @@
 set -e
 
 # Modules
-for ext in reitit-core reitit-ring reitit-middleware reitit-spec reitit-schema reitit-swagger reitit-swagger-ui reitit-frontend reitit; do
+for ext in \
+  reitit-core \
+  reitit-spec \
+  reitit-schema \
+  reitit-ring \
+  reitit-middleware \
+  reitit-http \
+  reitit-swagger \
+  reitit-swagger-ui \
+  reitit-frontend \
+  reitit-sieppari \
+  reitit; do
   cd modules/$ext; lein "$@"; cd ../..;
 done

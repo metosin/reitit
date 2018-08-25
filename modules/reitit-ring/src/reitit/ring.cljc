@@ -3,21 +3,75 @@
             [reitit.middleware :as middleware]
             [reitit.core :as r]
             [reitit.impl :as impl]
-    #?@(:clj [
-            [ring.util.mime-type :as mime-type]
-            [ring.util.response :as response]])
+            #?@(:clj [[ring.util.mime-type :as mime-type]
+                      [ring.util.response :as response]])
             [clojure.string :as str]))
 
 (def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
 (defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
 
-(defn- group-keys [data]
+(defn ^:no-wiki group-keys [data]
   (reduce-kv
     (fn [[top childs] k v]
       (if (http-methods k)
         [top (assoc childs k v)]
         [(assoc top k v) childs])) [{} {}] data))
+
+(defn coerce-handler [[path data] {:keys [expand] :as opts}]
+  [path (reduce
+          (fn [acc method]
+            (if (contains? acc method)
+              (update acc method expand opts)
+              acc)) data http-methods)])
+
+(defn compile-result [[path data] opts]
+  (let [[top childs] (group-keys data)
+        ->endpoint (fn [p d m s]
+                     (-> (middleware/compile-result [p d] opts s)
+                         (map->Endpoint)
+                         (assoc :path p)
+                         (assoc :method m)))
+        ->methods (fn [any? data]
+                    (reduce
+                      (fn [acc method]
+                        (cond-> acc
+                                any? (assoc method (->endpoint path data method nil))))
+                      (map->Methods {})
+                      http-methods))]
+    (if-not (seq childs)
+      (->methods true top)
+      (reduce-kv
+        (fn [acc method data]
+          (let [data (meta-merge top data)]
+            (assoc acc method (->endpoint path data method method))))
+        (->methods (:handler top) data)
+        childs))))
+
+;;
+;; public api
+;;
+
+(defn router
+  "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
+  support for http-methods and Middleware. See [docs](https://metosin.github.io/reitit/)
+  for details.
+
+  Example:
+
+      (router
+        [\"/api\" {:middleware [wrap-format wrap-oauth2]}
+          [\"/users\" {:get get-user
+                       :post update-user
+                       :delete {:middleware [wrap-delete]
+                               :handler delete-user}}]])
+
+  See router options from [[reitit.core/router]] and [[reitit.middleware/router]]."
+  ([data]
+   (router data nil))
+  ([data opts]
+   (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
+     (r/router data opts))))
 
 (defn routes
   "Create a ring handler by combining several handlers into one."
@@ -55,7 +109,7 @@
       (if-let [match (::r/match request)]
         (let [method (:request-method request :any)
               result (:result match)
-              handler? (or (-> result method :handler) (-> result :any :handler))
+              handler? (or (-> result method) (-> result :any))
               error-handler (if handler? not-acceptable method-not-allowed)]
           (error-handler request))
         (not-found request)))
@@ -156,7 +210,8 @@
                               (impl/fast-assoc ::r/match match)
                               (impl/fast-assoc ::r/router router))]
               ((routes handler default-handler) request respond raise))
-            (default-handler request respond raise))))
+            (default-handler request respond raise))
+          nil))
        {::r/router router}))))
 
 (defn get-router [handler]
@@ -164,54 +219,3 @@
 
 (defn get-match [request]
   (::r/match request))
-
-(defn coerce-handler [[path data] {:keys [expand] :as opts}]
-  [path (reduce
-          (fn [acc method]
-            (if (contains? acc method)
-              (update acc method expand opts)
-              acc)) data http-methods)])
-
-(defn compile-result [[path data] opts]
-  (let [[top childs] (group-keys data)
-        ->endpoint (fn [p d m s]
-                     (-> (middleware/compile-result [p d] opts s)
-                         (map->Endpoint)
-                         (assoc :path p)
-                         (assoc :method m)))
-        ->methods (fn [any? data]
-                    (reduce
-                      (fn [acc method]
-                        (cond-> acc
-                                any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods {})
-                      http-methods))]
-    (if-not (seq childs)
-      (->methods true top)
-      (reduce-kv
-        (fn [acc method data]
-          (let [data (meta-merge top data)]
-            (assoc acc method (->endpoint path data method method))))
-        (->methods (:handler top) data)
-        childs))))
-
-(defn router
-  "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
-  support for http-methods and Middleware. See [docs](https://metosin.github.io/reitit/)
-  for details.
-
-  Example:
-
-      (router
-        [\"/api\" {:middleware [wrap-format wrap-oauth2]}
-          [\"/users\" {:get get-user
-                       :post update-user
-                       :delete {:middleware [wrap-delete]
-                               :handler delete-user}}]])
-
-  See router options from [[reitit.core/router]] and [[reitit.middleware/router]]."
-  ([data]
-   (router data nil))
-  ([data opts]
-   (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
-     (r/router data opts))))

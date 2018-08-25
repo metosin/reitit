@@ -5,7 +5,7 @@
 
 (defn handle-coercion-exception [e respond raise]
   (let [data (ex-data e)]
-    (if-let [status (condp = (:type data)
+    (if-let [status (case (:type data)
                       ::coercion/request-coercion 400
                       ::coercion/response-coercion 500
                       nil)]

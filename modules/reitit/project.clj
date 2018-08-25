@@ -7,10 +7,12 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-core]
-                 [metosin/reitit-ring]
-                 [metosin/reitit-middleware]
                  [metosin/reitit-spec]
                  [metosin/reitit-schema]
+                 [metosin/reitit-ring]
+                 [metosin/reitit-middleware]
+                 [metosin/reitit-http]
                  [metosin/reitit-swagger]
                  [metosin/reitit-swagger-ui]
-                 [metosin/reitit-frontend]])
+                 [metosin/reitit-frontend]
+                 [metosin/reitit-sieppari]])
