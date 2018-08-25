@@ -1,4 +1,4 @@
-# Http with Swagger example
+# reitit-http example
 
 ## Usage
 

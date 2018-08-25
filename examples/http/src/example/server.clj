@@ -32,14 +32,15 @@
          :get {:interceptors [(interceptor :hello)]
                :handler handler}}]
 
+       ["/future"
+        {:interceptors [(future-interceptor :future)]
+         :get {:interceptors [(future-interceptor :hello)]
+               :handler future-handler}}]
+
        ["/async"
         {:interceptors [(async-interceptor :async)]
          :get {:interceptors [(async-interceptor :async-hello)]
-               :handler async-handler}}]
-       ["/future"
-        {:interceptors [(future-interceptor :sync)]
-         :get {:interceptors [(future-interceptor :hello)]
-               :handler future-handler}}]])
+               :handler async-handler}}]])
     (ring/create-default-handler)
     {:executor reitit.interceptor.sieppari/executor}))
 
