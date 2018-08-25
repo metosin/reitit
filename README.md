@@ -7,6 +7,7 @@ A fast data-driven router for Clojure(Script).
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html) & [the browser](https://metosin.github.io/reitit/frontend/basics.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
@@ -15,14 +16,16 @@ Posts:
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 
-See the [full documentation](https://metosin.github.io/reitit/) for details.
+See the [full documentation](https://metosin.github.io/reitit/) for details. 
+
+There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
 
 ## Modules
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
 * `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
-* `reitit-middleware` - [common data-driven middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
+* `reitit-middleware` - [common middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs

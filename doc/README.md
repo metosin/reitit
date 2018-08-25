@@ -7,6 +7,7 @@
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
 * [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* Helpers for [ring](./ring/ring.html) & [the browser](./frontend/basics.html)
 * Extendable
 * Modular
 * [Fast](performance.md)
@@ -15,8 +16,8 @@ Modules:
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
-* `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
-* `reitit-middleware` - [common data-driven middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
+* `reitit-ring` - a [ring router](./ring/ring.md)
+* `reitit-middleware` - [common middleware](./ring/default_middleware.md) for `reitit-ring`
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
@@ -61,7 +62,7 @@ Optionally, the parts can be required separately:
 [metosin/reitit-sieppari "0.2.0-SNAPSHOT"]
 ```
 
-For discussions, there is a [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
+There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
 
 # Examples
 
