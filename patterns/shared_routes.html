@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Basics · GitBook</title>
+        <title>Shared Routes · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -57,10 +57,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="route_syntax.html" />
+    <link rel="next" href="../frontend/" />
     
     
-    <link rel="prev" href="../" />
+    <link rel="prev" href="./" />
     
 
     </head>
@@ -102,9 +102,9 @@
             
         </li>
     
-        <li class="chapter active" data-level="1.2" data-path="./">
+        <li class="chapter " data-level="1.2" data-path="../basics/">
             
-                <a href="./">
+                <a href="../basics/">
             
                     
                     Basics
@@ -116,9 +116,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.2.1" data-path="route_syntax.html">
+        <li class="chapter " data-level="1.2.1" data-path="../basics/route_syntax.html">
             
-                <a href="route_syntax.html">
+                <a href="../basics/route_syntax.html">
             
                     
                     Route Syntax
@@ -129,9 +129,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.2" data-path="router.html">
+        <li class="chapter " data-level="1.2.2" data-path="../basics/router.html">
             
-                <a href="router.html">
+                <a href="../basics/router.html">
             
                     
                     Router
@@ -142,9 +142,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.3" data-path="path_based_routing.html">
+        <li class="chapter " data-level="1.2.3" data-path="../basics/path_based_routing.html">
             
-                <a href="path_based_routing.html">
+                <a href="../basics/path_based_routing.html">
             
                     
                     Path-based Routing
@@ -155,9 +155,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.4" data-path="name_based_routing.html">
+        <li class="chapter " data-level="1.2.4" data-path="../basics/name_based_routing.html">
             
-                <a href="name_based_routing.html">
+                <a href="../basics/name_based_routing.html">
             
                     
                     Name-based Routing
@@ -168,9 +168,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.5" data-path="route_data.html">
+        <li class="chapter " data-level="1.2.5" data-path="../basics/route_data.html">
             
-                <a href="route_data.html">
+                <a href="../basics/route_data.html">
             
                     
                     Route Data
@@ -181,9 +181,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.6" data-path="route_data_validation.html">
+        <li class="chapter " data-level="1.2.6" data-path="../basics/route_data_validation.html">
             
-                <a href="route_data_validation.html">
+                <a href="../basics/route_data_validation.html">
             
                     
                     Route Data Validation
@@ -194,9 +194,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.2.7" data-path="route_conflicts.html">
+        <li class="chapter " data-level="1.2.7" data-path="../basics/route_conflicts.html">
             
-                <a href="route_conflicts.html">
+                <a href="../basics/route_conflicts.html">
             
                     
                     Route Conflicts
@@ -555,9 +555,9 @@
             
         </li>
     
-        <li class="chapter " data-level="1.6" data-path="../patterns/">
+        <li class="chapter " data-level="1.6" data-path="./">
             
-                <a href="../patterns/">
+                <a href="./">
             
                     
                     Patterns
@@ -569,9 +569,9 @@
             <ul class="articles">
                 
     
-        <li class="chapter " data-level="1.6.1" data-path="../patterns/shared_routes.html">
+        <li class="chapter active" data-level="1.6.1" data-path="shared_routes.html">
             
-                <a href="../patterns/shared_routes.html">
+                <a href="shared_routes.html">
             
                     
                     Shared Routes
@@ -727,7 +727,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Basics</a>
+        <a href=".." >Shared Routes</a>
     </h1>
 </div>
 
@@ -742,16 +742,73 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="basics">Basics</h1>
-<ul>
-<li><a href="route_syntax.html">Route Syntax</a></li>
-<li><a href="router.html">Router</a></li>
-<li><a href="path_based_routing.html">Path-based Routing</a></li>
-<li><a href="name_based_routing.html">Name-based Routing</a></li>
-<li><a href="route_data.html">Route Data</a></li>
-<li><a href="route_data_validation.html">Route Data Validation</a></li>
-<li><a href="route_conflicts.html">Route Conflicts</a></li>
-</ul>
+                                <h1 id="shared-routes">Shared routes</h1>
+<p>As <code>reitit-core</code> works with both Clojure &amp; ClojureScript, one can have a shared routing table for both the frontend and the backend application, using the <a href="https://clojure.org/guides/reader_conditionals" target="_blank">Clujore Common Files</a>.</p>
+<p>For backend, you need to define a <code>:handler</code> for the request processing, for fronend, <code>:name</code> enables the use of <a href="../basics/name_based_routing.html">reverse routing</a>.</p>
+<p>There are multiple options to use shared routing table.</p>
+<h2 id="using-reader-conditionals">Using reader conditionals</h2>
+<pre><code class="lang-clj">;; define the handlers for for clojure
+#?(:clj (declare get-kikka))
+#?(:clj (declare post-kikka))
+
+;; :name for both, :handler just for clojure
+(def routes
+  [&quot;/kikka&quot;
+   {:name ::kikka
+    :get #?(:clj {:handler get-kikka})
+    :post #?(:clj {:handler post-kikka})}]
+</code></pre>
+<h2 id="using-custom-expander">Using custom expander</h2>
+<p>raw-routes can have any non-sequential data as a route argument, which gets expanded using the <code>:expand</code> option given to the <code>reitit.core.router</code> function. It defaults to <code>reitit.core/expand</code> multimethod.</p>
+<p>First, define the common routes (in a <code>.cljc</code> file):</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [[<span class="hljs-string">&quot;/kikka&quot;</span> <span class="hljs-symbol">::kikka</span>]
+   [<span class="hljs-string">&quot;/bar&quot;</span> <span class="hljs-symbol">::bar</span>]])
+</code></pre>
+<p>Those can be used as-is from ClojureScript:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">r/router</span> routes))
+
+(<span class="hljs-name">r/match-by-name</span> router <span class="hljs-symbol">::kikka</span>)
+<span class="hljs-comment">;#Match{:template &quot;/kikka&quot;</span>
+<span class="hljs-comment">;       :data {:name :user/kikka}</span>
+<span class="hljs-comment">;       :result nil</span>
+<span class="hljs-comment">;       :path-params nil</span>
+<span class="hljs-comment">;       :path &quot;/kikka&quot;}</span>
+</code></pre>
+<p>For the backend, we can use a custom-expander to expand the routes:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> my-expand [registry]
+  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [data opts]
+    (<span class="hljs-name"><span class="hljs-builtin-name">or</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">keyword?</span></span> data)
+          (<span class="hljs-name">some-&gt;</span> data
+                  registry
+                  (<span class="hljs-name">r/expand</span> opts)
+                  (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> <span class="hljs-symbol">:name</span> data)))
+        (<span class="hljs-name">r/expand</span> data opts))))
+
+<span class="hljs-comment">;; the handler functions</span>
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> get-kikka [_] {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;get&quot;</span>})
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> post-kikka [_] {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;post&quot;</span>})
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> bar [_] {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;bar&quot;</span>})
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [[<span class="hljs-string">&quot;/kikka&quot;</span> <span class="hljs-symbol">::kikka</span>]
+       [<span class="hljs-string">&quot;/bar&quot;</span> <span class="hljs-symbol">::bar</span>]]
+      <span class="hljs-comment">;; use a custom expander</span>
+      {<span class="hljs-symbol">:expand</span> (<span class="hljs-name">my-expand</span>
+                 {<span class="hljs-symbol">::kikka</span> {<span class="hljs-symbol">:get</span> get-kikka
+                           <span class="hljs-symbol">:post</span> post-kikka}
+                  <span class="hljs-symbol">::bar</span> bar})})))
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:post</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/kikka&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;post&quot;}</span>
+</code></pre>
 
                                 
                                 </section>
@@ -779,12 +836,12 @@
 
             
                 
-                <a href="../" class="navigation navigation-prev " aria-label="Previous page: Introduction">
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: Patterns">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="route_syntax.html" class="navigation navigation-next " aria-label="Next page: Route Syntax">
+                <a href="../frontend/" class="navigation navigation-next " aria-label="Next page: Frontend">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -795,7 +852,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Basics","level":"1.2","depth":1,"next":{"title":"Route Syntax","level":"1.2.1","depth":2,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},"previous":{"title":"Introduction","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/README.md","mtime":"2018-08-25T12:48:47.371Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-25T12:49:29.532Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Shared Routes","level":"1.6.1","depth":2,"next":{"title":"Frontend","level":"1.7","depth":1,"path":"frontend/README.md","ref":"frontend/README.md","articles":[{"title":"Basics","level":"1.7.1","depth":2,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},{"title":"Browser integration","level":"1.7.2","depth":2,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},{"title":"Controllers (WIP)","level":"1.7.3","depth":2,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]}]},"previous":{"title":"Patterns","level":"1.6","depth":1,"path":"patterns/README.md","ref":"patterns/README.md","articles":[{"title":"Shared Routes","level":"1.6.1","depth":2,"path":"patterns/shared_routes.md","ref":"patterns/shared_routes.md","articles":[]}]},"dir":"ltr"},"config":{"plugins":["editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"github":{"url":"https://github.com/metosin/reitit"},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"patterns/shared_routes.md","mtime":"2018-08-25T12:48:47.379Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-25T12:49:29.532Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
