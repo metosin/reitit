@@ -25,9 +25,9 @@
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/muuntaja "0.6.0-alpha1"]
+                         [metosin/muuntaja "0.6.0-alpha3"]
                          [metosin/jsonista "0.2.1"]
-                         [metosin/sieppari "0.0.0-alpha3"]]
+                         [metosin/sieppari "0.0.0-alpha4"]]
 
   :plugins [[jonase/eastwood "0.2.6"]
             [lein-doo "0.1.10"]
@@ -62,9 +62,9 @@
 
                                   [ring "1.6.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.0-alpha1"]
+                                  [metosin/muuntaja "0.6.0-alpha3"]
                                   [metosin/ring-swagger-ui "2.2.10"]
-                                  [metosin/sieppari "0.0.0-alpha3"]
+                                  [metosin/sieppari "0.0.0-alpha4"]
                                   [metosin/jsonista "0.2.1"]
 
                                   [criterium "0.4.4"]
@@ -83,7 +83,7 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.route "0.5.4"]
                                    [org.clojure/core.async "0.4.474"]
-                                   [metosin/sieppari "0.0.0-alpha3"]
+                                   [metosin/sieppari "0.0.0-alpha4"]
                                    [yada "1.2.13"]
                                    [ring/ring-defaults "0.3.1"]
                                    [ataraxy "0.4.0"]
