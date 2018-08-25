@@ -77,7 +77,7 @@
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
-         :config {:validatorUrl nil})
+         :config {:validatorUrl nil}})
       (ring/create-default-handler))))
 
 (defn start []
