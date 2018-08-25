@@ -170,69 +170,68 @@
           (testing "handler rejects"
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
-#_(deftest async-http-test
-    (let [promise #(let [value (atom ::nil)]
-                     (fn
-                       ([] @value)
-                       ([x] (reset! value x))))
-          response {:status 200, :body "ok"}
-          router (http/router
-                   [["/ping" {:get (fn [_ respond _]
-                                     (respond response))}]
-                    ["/pong" (fn [_ respond _]
-                               (respond nil))]])
-          app (http/ring-handler router)]
+(deftest async-http-test
+  (let [promise #(let [value (atom ::nil)]
+                   (fn
+                     ([] @value)
+                     ([x]
+                      (reset! value x))))
+        response {:status 200, :body "ok"}
+        router (http/router
+                 [["/ping" {:get (fn [_] response)}]
+                  ["/pong" (fn [_] nil)]])
+        app (http/ring-handler router nil {:executor sieppari/executor})]
 
-      (testing "match"
-        (let [respond (promise)
-              raise (promise)]
-          (app {:request-method :get, :uri "/ping"} respond raise)
-          (is (= response (respond)))
-          (is (= ::nil (raise)))))
+    (testing "match"
+      (let [respond (promise)
+            raise (promise)]
+        (app {:request-method :get, :uri "/ping"} respond raise)
+        (is (= response (respond)))
+        (is (= ::nil (raise)))))
 
-      (testing "no match"
+    (testing "no match"
 
-        (testing "with defaults"
+      (testing "with defaults"
+        (testing "route doesn't match"
+          (let [respond (promise)
+                raise (promise)]
+            (app {:request-method :get, :uri "/"} respond raise)
+            (is (= nil (respond)))
+            (is (= ::nil (raise)))))
+        (testing "method doesn't match"
+          (let [respond (promise)
+                raise (promise)]
+            (app {:request-method :post, :uri "/ping"} respond raise)
+            (is (= nil (respond)))
+            (is (= ::nil (raise)))))
+        (testing "handler rejects"
+          (let [respond (promise)
+                raise (promise)]
+            (app {:request-method :get, :uri "/pong"} respond raise)
+            (is (= nil (respond)))
+            (is (= ::nil (raise))))))
+
+      (testing "with default http responses"
+
+        (let [app (http/ring-handler router (ring/create-default-handler) {:executor sieppari/executor})]
           (testing "route doesn't match"
             (let [respond (promise)
                   raise (promise)]
               (app {:request-method :get, :uri "/"} respond raise)
-              (is (= nil (respond)))
+              (is (= 404 (:status (respond))))
               (is (= ::nil (raise)))))
           (testing "method doesn't match"
             (let [respond (promise)
                   raise (promise)]
               (app {:request-method :post, :uri "/ping"} respond raise)
-              (is (= nil (respond)))
+              (is (= 405 (:status (respond))))
               (is (= ::nil (raise)))))
-          (testing "handler rejects"
+          (testing "if handler rejects"
             (let [respond (promise)
                   raise (promise)]
               (app {:request-method :get, :uri "/pong"} respond raise)
-              (is (= nil (respond)))
-              (is (= ::nil (raise))))))
-
-        (testing "with default http responses"
-
-          (let [app (http/ring-handler router (ring/create-default-handler))]
-            (testing "route doesn't match"
-              (let [respond (promise)
-                    raise (promise)]
-                (app {:request-method :get, :uri "/"} respond raise)
-                (is (= 404 (:status (respond))))
-                (is (= ::nil (raise)))))
-            (testing "method doesn't match"
-              (let [respond (promise)
-                    raise (promise)]
-                (app {:request-method :post, :uri "/ping"} respond raise)
-                (is (= 405 (:status (respond))))
-                (is (= ::nil (raise)))))
-            (testing "if handler rejects"
-              (let [respond (promise)
-                    raise (promise)]
-                (app {:request-method :get, :uri "/pong"} respond raise)
-                (is (= 406 (:status (respond))))
-                (is (= ::nil (raise))))))))))
+              (is (= 406 (:status (respond))))
+              (is (= ::nil (raise))))))))))
 
 (deftest interceptor-transform-test
   (let [interceptor (fn [name] {:name name

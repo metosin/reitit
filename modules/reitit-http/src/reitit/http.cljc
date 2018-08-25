@@ -96,17 +96,24 @@
                  (interceptor/execute executor default-queue request)))
            (interceptor/execute executor default-queue request)))
         ([request respond raise]
-         (if-let [match (r/match-by-path router (:uri request))]
-           (let [method (:request-method request)
-                 path-params (:path-params match)
-                 endpoint (-> match :result method)
-                 interceptors (or (:queue endpoint) (:interceptors endpoint))
-                 request (-> request
-                             (impl/fast-assoc :path-params path-params)
-                             (impl/fast-assoc ::r/match match)
-                             (impl/fast-assoc ::r/router router))]
-             (interceptor/execute executor interceptors request respond raise))
-           (interceptor/execute executor default-queue request respond raise))
+         (let [default #(interceptor/execute executor default-queue % respond raise)]
+           (if-let [match (r/match-by-path router (:uri request))]
+             (let [method (:request-method request)
+                   path-params (:path-params match)
+                   endpoint (-> match :result method)
+                   interceptors (or (:queue endpoint) (:interceptors endpoint))
+                   request (-> request
+                               (impl/fast-assoc :path-params path-params)
+                               (impl/fast-assoc ::r/match match)
+                               (impl/fast-assoc ::r/router router))
+                   respond' (fn [response]
+                              (if response
+                                (respond response)
+                                (default request)))]
+               (if interceptors
+                 (interceptor/execute executor interceptors request respond' raise)
+                 (default request)))
+             (default request)))
          nil))
       {::r/router router})))
 
