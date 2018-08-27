@@ -16,7 +16,7 @@
 
 ;; This version listens for both pop-state and hash-change for
 ;; compatibility for old browsers not supporting History API.
-(defrecord FragmentHistory [on-navigate router listen-key last-fragment]
+(defrecord FragmentHistory [on-navigate router popstate-listener hashchange-listener last-fragment]
   History
   (-init [this]
     ;; Link clicks and e.g. back button trigger both events, if fragment is same as previous ignore second event.
@@ -30,12 +30,11 @@
                         (-on-navigate this path))))]
       (-on-navigate this (-get-path this))
       (assoc this
-             :listen-key (gevents/listen js/window
-                                         #js [goog.events.EventType.POPSTATE goog.events.EventType.HASHCHANGE]
-                                         handler
-                                         false))))
+             :popstate-listener (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
+             :hashchange-listener (gevents/listen js/window goog.events.EventType.HASHCHANGE handler false))))
   (-stop [this]
-    (gevents/unlistenByKey listen-key))
+    (gevents/unlistenByKey popstate-listener)
+    (gevents/unlistenByKey hashchange-listener))
   (-on-navigate [this path]
     (reset! last-fragment path)
     (on-navigate (rf/match-by-path router path) this))
