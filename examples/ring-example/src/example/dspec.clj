@@ -3,8 +3,7 @@
 
 (def routes
   ["/dspec" {:coercion reitit.coercion.spec/coercion}
-   ["/plus" {:name ::plus
-             :responses {200 {:body {:total int?}}}
+   ["/plus" {:responses {200 {:body {:total int?}}}
              :get {:summary "plus with query-params"
                    :parameters {:query {:x int?, :y int?}}
                    :handler (fn [{{{:keys [x y]} :query} :parameters}]

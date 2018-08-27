@@ -6,15 +6,16 @@ A Sample project with ring.
 
 ```clj
 > lein repl
-
-(require '[example.server :as server])
-
-(server/restart)
+(start)
 ```
 
 To test the endpoints using [httpie](https://httpie.org/):
 
 ```bash
+# Plain
+http GET :3000/plain/plus x==1 y==20
+http POST :3000/plain/plus x:=1 y:=20
+
 # Schema
 http GET :3000/schema/plus x==1 y==20
 http POST :3000/schema/plus x:=1 y:=20

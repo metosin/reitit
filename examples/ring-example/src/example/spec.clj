@@ -10,8 +10,7 @@
 
 (def routes
   ["/spec" {:coercion reitit.coercion.spec/coercion}
-   ["/plus" {:name ::plus
-             :responses {200 {:body (s/keys :req-un [::total])}}
+   ["/plus" {:responses {200 {:body (s/keys :req-un [::total])}}
              :get {:summary "plus with query-params"
                    :parameters {:query (s/keys :req-un [::x ::y])}
                    :handler (fn [{{{:keys [x y]} :query} :parameters}]
