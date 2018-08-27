@@ -102,11 +102,14 @@
 
 (defn start!
   "This registers event listeners on HTML5 history and hashchange events.
+
+  Returns History object.
+
   When using with development workflow like Figwheel, rememeber to
   remove listeners using stop! call before calling start! again.
 
   Parameters:
-  - router         The Reitit routing tree.
+  - router         The Reitit router.
   - on-navigate    Function to be called when route changes. Takes two parameters, ´match´ and ´history´ object.
 
   Options:

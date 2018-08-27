@@ -15,15 +15,15 @@
   remove listeners using stop! call before calling start! again.
 
   Parameters:
-  - router         The Reitit routing tree.
-  - on-navigate    Function to be called when route changes. Takes two parameters, ´token´ and ´history´ object.
+  - router         The Reitit router.
+  - on-navigate    Function to be called when route changes. Takes two parameters, ´match´ and ´history´ object.
 
   Options:
   - :use-fragment  (default true) If true, onhashchange and location hash are used to store the token."
-  [routes on-navigate opts]
+  [router on-navigate opts]
   (swap! history (fn [old-history]
                    (rfh/stop! old-history)
-                   (rfh/start! routes on-navigate opts))))
+                   (rfh/start! router on-navigate opts))))
 
 (defn href
   ([k]
