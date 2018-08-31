@@ -30,7 +30,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
-* [`reitit-frontend`](frontend/basics.md) Tools for frontend routing.
+* [`reitit-frontend`](doc/frontend/basics.md) Tools for frontend routing.
 
 Bubblin' under:
 
