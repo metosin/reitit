@@ -1,34 +1,50 @@
 (ns example.server
   (:require [io.pedestal.http :as http]
-            [io.pedestal.http.route :as route]
-            [io.pedestal.http.body-params :as body-params]
-            [io.pedestal.http.route.definition :refer [defroutes]]))
+            [reitit.pedestal :as pedestal]
+            [reitit.http :as reitit-http]
+            [reitit.ring :as ring]))
 
-(defn hello-world [request]
-  (let [name (get-in request [:params :name] "World")]
-    {:status 200 :body (str "Hello " name "!\n")}))
+(defn interceptor [x]
+  {:enter (fn [ctx] (println ">>" x) ctx)
+   :leave (fn [ctx] (println "<<" x) ctx)})
 
-(defroutes routes
-           [[["/"
-              ["/hello" {:get hello-world}]]]])
+(def routing-interceptor
+  (pedestal/routing-interceptor
+    (reitit-http/router
+      ["/api"
+       {:interceptors [[interceptor :api]
+                       [interceptor :apa]]}
 
-(def service {:env                 :prod
-              ::http/routes        routes
-              ::http/resource-path "/public"
-              ::http/type          :jetty
-              ::http/port          8080})
+       ["/ping"
+        {:interceptors [[interceptor :ping]]
+         :get {:interceptors [[interceptor :get]]
+               :handler (fn [_]
+                          (println "handler")
+                          {:status 200,
+                           :body "pong"})}}]]
+      {:data {:interceptors [[interceptor :router]]}})
+    (ring/create-default-handler)
+    {:interceptors [[interceptor :top]]}))
+
+(defonce server (atom nil))
 
 (defn start []
-  (-> service/service
+  (when @server
+    (http/stop @server)
+    (println "server stopped"))
+  (-> {:env :prod
+       ::http/routes []
+       ::http/resource-path "/public"
+       ::http/type :jetty
+       ::http/port 3000}
       (merge {:env :dev
               ::http/join? false
-              ::http/routes #(deref #'routes)
               ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
-      http/default-interceptors
+      (pedestal/default-interceptors routing-interceptor)
       http/dev-interceptors
       http/create-server
-      http/start))
+      http/start
+      (->> (reset! server)))
+  (println "server running in port 3000"))
 
-
-(comment
-  (start))
+(start)

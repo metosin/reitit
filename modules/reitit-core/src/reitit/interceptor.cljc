@@ -18,7 +18,10 @@
   (execute
     [this interceptors request]
     [this interceptors request respond raise]
-    "executes the interceptor chain"))
+    "executes the interceptor chain with a request")
+  (enqueue
+    [this context interceptors]
+    "enqueues the interceptors into the queue"))
 
 (defn context [request]
   (map->Context {:request request}))

@@ -61,6 +61,33 @@
    (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
      (r/router data opts))))
 
+(defn routing-interceptor
+  "A Pedestal-style routing interceptor that enqueus the interceptors into context."
+  [router default-handler {:keys [interceptors executor]}]
+  (let [default-handler (or default-handler (fn ([_])))
+        default-interceptors (->> interceptors
+                                  (map #(interceptor/into-interceptor % nil (r/options router))))
+        default-queue (interceptor/queue executor default-interceptors)]
+    {:name ::router
+     :enter (fn [{:keys [request] :as context}]
+              (if-let [match (r/match-by-path router (:uri request))]
+                (let [method (:request-method request)
+                      path-params (:path-params match)
+                      endpoint (-> match :result method)
+                      interceptors (or (:queue endpoint) (:interceptors endpoint))
+                      request (-> request
+                                  (impl/fast-assoc :path-params path-params)
+                                  (impl/fast-assoc ::r/match match)
+                                  (impl/fast-assoc ::r/router router))
+                      context (assoc context :request request)
+                      queue (interceptor/queue executor (concat default-interceptors interceptors))]
+                  (interceptor/enqueue executor context queue))
+                (interceptor/enqueue executor context default-queue)))
+     :leave (fn [context]
+              (if-not (:response context)
+                (assoc context :response (default-handler (:request context)))
+                context))}))
+
 (defn ring-handler
   "Creates a ring-handler out of a http-router,
   a default ring-handler and options map, with the following keys:
