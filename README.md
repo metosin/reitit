@@ -153,7 +153,13 @@ Invalid request:
 * content negotiation library like [Muuntaja](https://github.com/metosin/muuntaja)
 * some default Ring-middleware like `ring.middleware.params/wrap-params`
 
-See [Ring with Swagger Example](https://github.com/metosin/reitit/tree/master/examples/ring-swagger) for a runnable example. Plan is to have more batteries as separate modules, templates and example projects. Stay tuned.
+## More examples
+
+* `reitit-ring` with coercion, swagger and default middleware: https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
+* `reitit-frontend`, the easy way: https://github.com/metosin/reitit/blob/master/examples/frontend/src/frontend/core.cljs
+* `reitit-frontent` with [Keechma](https://github.com/keechma/keechma)-style controllers: https://github.com/metosin/reitit/blob/master/examples/frontend-controllers/src/frontend/core.cljs
+
+All examples are in https://github.com/metosin/reitit/tree/master/examples
 
 ## More info
 

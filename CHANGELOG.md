@@ -1,5 +1,11 @@
 ## 0.2.0-SNAPSHOT
 
+Sample apps demonstraing the current status of `reitit`:
+
+* `reitit-ring` with coercion, swagger and default middleware: https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
+* `reitit-frontend`, the easy way: https://github.com/metosin/reitit/blob/master/examples/frontend/src/frontend/core.cljs
+* `reitit-frontent` with [Keechma](https://github.com/keechma/keechma)-style controllers: https://github.com/metosin/reitit/blob/master/examples/frontend-controllers/src/frontend/core.cljs
+
 ## `reitit-core`
 
 * **BREAKING**: the router option key to extract body format has been renamed: `:extract-request-format` => `:reitit.coercion/extract-request-format`
@@ -88,6 +94,10 @@
    :config {:jsonEditor true
             :validatorUrl nil}})
 ```
+
+## `reitit-frontend`
+
+* new module for frontend-routing. See [docs](https://metosin.github.io/reitit/frontend/basics.html) for details.
 
 ## 0.1.3 (2018-6-25)
 
