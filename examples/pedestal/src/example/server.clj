@@ -1,7 +1,8 @@
 (ns example.server
-  (:require [io.pedestal.http :as http]
+  (:require [io.pedestal.http]
+            [clojure.core.async :as a]
             [reitit.pedestal :as pedestal]
-            [reitit.http :as reitit-http]
+            [reitit.http :as http]
             [reitit.ring :as ring]))
 
 (defn interceptor [x]
@@ -10,18 +11,27 @@
 
 (def routing-interceptor
   (pedestal/routing-interceptor
-    (reitit-http/router
+    (http/router
       ["/api"
        {:interceptors [[interceptor :api]
                        [interceptor :apa]]}
 
-       ["/ping"
-        {:interceptors [[interceptor :ping]]
+       ["/sync"
+        {:interceptors [[interceptor :sync]]
          :get {:interceptors [[interceptor :get]]
                :handler (fn [_]
                           (println "handler")
                           {:status 200,
-                           :body "pong"})}}]]
+                           :body "pong"})}}]
+
+       ["/async"
+        {:interceptors [[interceptor :async]]
+         :get {:interceptors [[interceptor :get]]
+               :handler (fn [_]
+                          (a/go
+                            (println "handler")
+                            {:status 200,
+                             :body "pong"}))}}]]
       {:data {:interceptors [[interceptor :router]]}})
     (ring/create-default-handler)
     {:interceptors [[interceptor :top]]}))
@@ -30,21 +40,22 @@
 
 (defn start []
   (when @server
-    (http/stop @server)
+    (io.pedestal.http/stop @server)
     (println "server stopped"))
   (-> {:env :prod
-       ::http/routes []
-       ::http/resource-path "/public"
-       ::http/type :jetty
-       ::http/port 3000}
+       :io.pedestal.http/routes []
+       :io.pedestal.http/resource-path "/public"
+       :io.pedestal.http/type :jetty
+       :io.pedestal.http/port 3000}
       (merge {:env :dev
-              ::http/join? false
-              ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
+              :io.pedestal.http/join? false
+              :io.pedestal.http/allowed-origins {:creds true :allowed-origins (constantly true)}})
       (pedestal/default-interceptors routing-interceptor)
-      http/dev-interceptors
-      http/create-server
-      http/start
+      io.pedestal.http/dev-interceptors
+      io.pedestal.http/create-server
+      io.pedestal.http/start
       (->> (reset! server)))
   (println "server running in port 3000"))
 
-(start)
+(comment
+  (start))
