@@ -178,6 +178,7 @@
 (defn coerce!
   "Returns a map of coerced input parameters using pre-compiled
   coercers under `:result` (provided by [[compile-request-coercers]].
+  Throws `ex-info` if parameters can't be coerced
   If coercion or parameters are not defined, return `nil`"
   [match]
   (if-let [coercers (:result match)]
