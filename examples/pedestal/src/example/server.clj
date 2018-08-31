@@ -35,8 +35,13 @@
         {:interceptors [[interceptor :async]]
          :get {:interceptors [[interceptor :get] async-handler]}}]]
 
+      ;; optional interceptors for all matched routes
       {:data {:interceptors [[interceptor :router]]}})
+
+    ;; optional default ring handler (if no routes have matched)
     (ring/create-default-handler)
+
+    ;; optional top-level routes for both routes & default route
     {:interceptors [[interceptor :top]]}))
 
 (defonce server (atom nil))
