@@ -1,9 +1,7 @@
 (ns reitit.frontend.history
-  ""
   (:require [reitit.core :as reitit]
             [reitit.core :as r]
             [reitit.frontend :as rf]
-            [reitit.impl :as impl]
             [goog.events :as gevents])
   (:import goog.Uri))
 

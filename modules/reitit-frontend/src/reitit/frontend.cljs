@@ -1,5 +1,4 @@
 (ns reitit.frontend
-  ""
   (:require [clojure.set :as set]
             [reitit.coercion :as coercion]
             [reitit.coercion :as rc]
@@ -31,6 +30,9 @@
         (assoc match :parameters parameters)))))
 
 (defn match-by-name
+  "Given a router, route name and optionally path-parameters,
+  will return a Match (exact match), PartialMatch (missing path-parameters)
+  or `nil` (no match)."
   ([router name]
    (match-by-name router name {}))
   ([router name path-params]
