@@ -9,6 +9,16 @@
   {:enter (fn [ctx] (println ">>" x) ctx)
    :leave (fn [ctx] (println "<<" x) ctx)})
 
+(defn handler [_]
+  (println "handler")
+  {:status 200,
+   :body "pong"})
+
+(def async-handler
+  {:enter (fn [{:keys [request] :as ctx}]
+            (a/go
+              (assoc ctx :response (handler request))))})
+
 (def routing-interceptor
   (pedestal/routing-interceptor
     (http/router
@@ -19,19 +29,11 @@
        ["/sync"
         {:interceptors [[interceptor :sync]]
          :get {:interceptors [[interceptor :get]]
-               :handler (fn [_]
-                          (println "handler")
-                          {:status 200,
-                           :body "pong"})}}]
+               :handler handler}}]
 
        ["/async"
         {:interceptors [[interceptor :async]]
-         :get {:interceptors [[interceptor :get]]
-               :handler (fn [_]
-                          (a/go
-                            (println "handler")
-                            {:status 200,
-                             :body "pong"}))}}]]
+         :get {:interceptors [[interceptor :get] async-handler]}}]]
       {:data {:interceptors [[interceptor :router]]}})
     (ring/create-default-handler)
     {:interceptors [[interceptor :top]]}))
