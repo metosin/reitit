@@ -34,6 +34,7 @@
        ["/async"
         {:interceptors [[interceptor :async]]
          :get {:interceptors [[interceptor :get] async-handler]}}]]
+
       {:data {:interceptors [[interceptor :router]]}})
     (ring/create-default-handler)
     {:interceptors [[interceptor :top]]}))
