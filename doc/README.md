@@ -22,7 +22,7 @@ Modules:
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
-* [`reitit-frontend`](frontend/basics.md) Tools for frontend routing.
+* `reitit-frontend` Tools for [frontend routing](frontend/basics.md)
 
 Bubblin' under:
 
