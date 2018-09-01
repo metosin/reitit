@@ -25,7 +25,7 @@
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/muuntaja "0.6.0-alpha3"]
+                         [metosin/muuntaja "0.6.0-alpha4"]
                          [metosin/jsonista "0.2.1"]
                          [metosin/sieppari "0.0.0-alpha4"]]
 
@@ -58,11 +58,11 @@
                                   [metosin/reitit]
 
                                   [expound "0.7.1"]
-                                  [orchestra "2017.11.12-1"]
+                                  [orchestra "2018.08.19-1"]
 
                                   [ring "1.6.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.0-alpha3"]
+                                  [metosin/muuntaja "0.6.0-alpha4"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/sieppari "0.0.0-alpha4"]
                                   [metosin/jsonista "0.2.1"]
@@ -86,7 +86,7 @@
                                    [org.clojure/core.async "0.4.474"]
                                    [metosin/sieppari "0.0.0-alpha4"]
                                    [yada "1.2.13"]
-                                   [ring/ring-defaults "0.3.1"]
+                                   [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.0"]
                                    [bidi "2.1.3"]]}
              :analyze {:jvm-opts ^:replace ["-server"
