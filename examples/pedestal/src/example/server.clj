@@ -1,7 +1,7 @@
 (ns example.server
   (:require [io.pedestal.http]
             [clojure.core.async :as a]
-            [reitit.pedestal :as pedestal]
+            [reitit.interceptor.pedestal :as pedestal]
             [reitit.http :as http]
             [reitit.ring :as ring]))
 
@@ -24,7 +24,7 @@
     (http/router
       ["/api"
        {:interceptors [[interceptor :api]
-                       [interceptor :apa]]}
+                       [interceptor :ipa]]}
 
        ["/sync"
         {:interceptors [[interceptor :sync]]
