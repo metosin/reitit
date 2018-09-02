@@ -89,60 +89,63 @@
                 context))}))
 
 (defn ring-handler
-  "Creates a ring-handler out of a http-router,
-  a default ring-handler and options map, with the following keys:
+  "Creates a ring-handler out of a http-router, optional default ring-handler
+  and options map, with the following keys:
 
   | key             | description |
   | ----------------|-------------|
   | `:executor`     | `reitit.interceptor.Executor` for the interceptor chain
   | `:interceptors` | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler"
-  [router default-handler {:keys [executor interceptors]}]
-  (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
-        default-queue (->> [default-handler]
-                           (concat interceptors)
-                           (map #(interceptor/into-interceptor % nil (r/options router)))
-                           (interceptor/queue executor))
-        router-opts (-> (r/options router)
-                        (assoc ::interceptor/queue (partial interceptor/queue executor))
-                        (cond-> (seq interceptors)
-                                (update-in [:data :interceptors] (partial into (vec interceptors)))))
-        router (reitit.http/router (r/routes router) router-opts)]
-    (with-meta
-      (fn
-        ([request]
-         (if-let [match (r/match-by-path router (:uri request))]
-           (let [method (:request-method request)
-                 path-params (:path-params match)
-                 endpoint (-> match :result method)
-                 interceptors (or (:queue endpoint) (:interceptors endpoint))
-                 request (-> request
-                             (impl/fast-assoc :path-params path-params)
-                             (impl/fast-assoc ::r/match match)
-                             (impl/fast-assoc ::r/router router))]
-             (or (interceptor/execute executor interceptors request)
-                 (interceptor/execute executor default-queue request)))
-           (interceptor/execute executor default-queue request)))
-        ([request respond raise]
-         (let [default #(interceptor/execute executor default-queue % respond raise)]
-           (if-let [match (r/match-by-path router (:uri request))]
-             (let [method (:request-method request)
-                   path-params (:path-params match)
-                   endpoint (-> match :result method)
-                   interceptors (or (:queue endpoint) (:interceptors endpoint))
-                   request (-> request
-                               (impl/fast-assoc :path-params path-params)
-                               (impl/fast-assoc ::r/match match)
-                               (impl/fast-assoc ::r/router router))
-                   respond' (fn [response]
-                              (if response
-                                (respond response)
-                                (default request)))]
-               (if interceptors
-                 (interceptor/execute executor interceptors request respond' raise)
-                 (default request)))
-             (default request)))
-         nil))
-      {::r/router router})))
+  ([router opts]
+    (ring-handler router nil opts))
+  ([router default-handler {:keys [executor interceptors]}]
+   (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
+         default-queue (->> [default-handler]
+                            (concat interceptors)
+                            (map #(interceptor/into-interceptor % nil (r/options router)))
+                            (interceptor/queue executor))
+         router-opts (-> (r/options router)
+                         (assoc ::interceptor/queue (partial interceptor/queue executor))
+                         (dissoc :data) ; data is already merged into routes
+                         (cond-> (seq interceptors)
+                                 (update-in [:data :interceptors] (partial into (vec interceptors)))))
+         router (reitit.http/router (r/routes router) router-opts)]
+     (with-meta
+       (fn
+         ([request]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  endpoint (-> match :result method)
+                  interceptors (or (:queue endpoint) (:interceptors endpoint))
+                  request (-> request
+                              (impl/fast-assoc :path-params path-params)
+                              (impl/fast-assoc ::r/match match)
+                              (impl/fast-assoc ::r/router router))]
+              (or (interceptor/execute executor interceptors request)
+                  (interceptor/execute executor default-queue request)))
+            (interceptor/execute executor default-queue request)))
+         ([request respond raise]
+          (let [default #(interceptor/execute executor default-queue % respond raise)]
+            (if-let [match (r/match-by-path router (:uri request))]
+              (let [method (:request-method request)
+                    path-params (:path-params match)
+                    endpoint (-> match :result method)
+                    interceptors (or (:queue endpoint) (:interceptors endpoint))
+                    request (-> request
+                                (impl/fast-assoc :path-params path-params)
+                                (impl/fast-assoc ::r/match match)
+                                (impl/fast-assoc ::r/router router))
+                    respond' (fn [response]
+                               (if response
+                                 (respond response)
+                                 (default request)))]
+                (if interceptors
+                  (interceptor/execute executor interceptors request respond' raise)
+                  (default request)))
+              (default request)))
+          nil))
+       {::r/router router}))))
 
 (defn get-router [handler]
   (-> handler meta ::r/router))
