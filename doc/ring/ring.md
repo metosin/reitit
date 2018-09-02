@@ -3,7 +3,7 @@
 [Ring](https://github.com/ring-clojure/ring) is a Clojure web applications library inspired by Python's WSGI and Ruby's Rack. By abstracting the details of HTTP into a simple, unified API, Ring allows web applications to be constructed of modular components that can be shared among a variety of applications, web servers, and web frameworks.
 
 ```clj
-[metosin/reitit-ring "0.2.0-SNAPSHOT"]
+[metosin/reitit-ring "0.2.0-alpha1"]
 ```
 
 Ring-router adds support for [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`. Ring-router is created with `reitit.ring/router` function. It uses a custom route compiler, creating a optimized data structure for handling route matches, with compiled middleware chain & handlers for all request methods. It also ensures that all routes have a `:handler` defined. `reitit.ring/ring-handler` is used to create a Ring handler out of ring-router.

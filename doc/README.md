@@ -34,32 +34,32 @@ Bubblin' under:
 All bundled:
 
 ```clj
-[metosin/reitit "0.2.0-SNAPSHOT"]
+[metosin/reitit "0.2.0-alpha1"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.0-SNAPSHOT"]
+[metosin/reitit-core "0.2.0-alpha1"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.0-SNAPSHOT"]
-[metosin/reitit-schema "0.2.0-SNAPSHOT"]
+[metosin/reitit-spec "0.2.0-alpha1"]
+[metosin/reitit-schema "0.2.0-alpha1"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.0-SNAPSHOT"]
-[metosin/reitit-middleware "0.2.0-SNAPSHOT"]
+[metosin/reitit-ring "0.2.0-alpha1"]
+[metosin/reitit-middleware "0.2.0-alpha1"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.0-SNAPSHOT"]
-[metosin/reitit-swagger-ui "0.2.0-SNAPSHOT"]
+[metosin/reitit-swagger "0.2.0-alpha1"]
+[metosin/reitit-swagger-ui "0.2.0-alpha1"]
 
 ;; frontend helpers (alpha)
-[metosin/reitit-frontend "0.2.0-SNAPSHOT"]
+[metosin/reitit-frontend "0.2.0-alpha1"]
 
 ;; http with interceptors (alpha)
-[metosin/reitit-http "0.2.0-SNAPSHOT"]
-[metosin/reitit-sieppari "0.2.0-SNAPSHOT"]
+[metosin/reitit-http "0.2.0-alpha1"]
+[metosin/reitit-sieppari "0.2.0-alpha1"]
 ```
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.

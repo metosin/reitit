@@ -1,4 +1,4 @@
-(defproject metosin/reitit-ring "0.2.0-SNAPSHOT"
+(defproject metosin/reitit-ring "0.2.0-alpha1"
   :description "Reitit: Ring routing"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
