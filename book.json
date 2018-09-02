@@ -1,6 +1,6 @@
 {
   "root": "doc",
-  "plugins": ["editlink", "github", "highlight"],
+  "plugins": ["hints", "editlink", "github", "highlight"],
   "pluginsConfig": {
     "editlink": {
       "base": "https://github.com/metosin/reitit/tree/master/doc",
