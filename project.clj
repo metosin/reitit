@@ -25,7 +25,7 @@
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.3"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/muuntaja "0.6.0-alpha4"]
+                         [metosin/muuntaja "0.6.0-alpha5"]
                          [metosin/jsonista "0.2.1"]
                          [metosin/sieppari "0.0.0-alpha4"]]
 
@@ -62,7 +62,7 @@
 
                                   [ring "1.6.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.0-alpha4"]
+                                  [metosin/muuntaja "0.6.0-alpha5"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/sieppari "0.0.0-alpha4"]
                                   [metosin/jsonista "0.2.1"]
