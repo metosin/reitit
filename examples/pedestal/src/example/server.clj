@@ -6,43 +6,42 @@
             [reitit.ring :as ring]))
 
 (defn interceptor [x]
-  {:enter (fn [ctx] (println ">>" x) ctx)
-   :leave (fn [ctx] (println "<<" x) ctx)})
+  {:enter (fn [ctx] (update-in ctx [:request :via] (fnil conj []) {:enter x}))
+   :leave (fn [ctx] (update-in ctx [:response :body] conj {:leave x}))})
 
-(defn handler [_]
-  (println "handler")
+(defn handler [{:keys [via]}]
   {:status 200,
-   :body "pong"})
+   :body (conj via :handler)})
 
 (def async-handler
   {:enter (fn [{:keys [request] :as ctx}]
-            (a/go
-              (assoc ctx :response (handler request))))})
+            (a/go (assoc ctx :response (handler request))))})
 
 (def routing-interceptor
   (pedestal/routing-interceptor
     (http/router
       ["/api"
-       {:interceptors [[interceptor :api]
-                       [interceptor :ipa]]}
+       {:interceptors [(interceptor :api)
+                       (interceptor :ipa)]}
 
        ["/sync"
-        {:interceptors [[interceptor :sync]]
-         :get {:interceptors [[interceptor :get]]
+        {:interceptors [(interceptor :sync)]
+         :get {:interceptors [(interceptor :get)]
                :handler handler}}]
 
        ["/async"
-        {:interceptors [[interceptor :async]]
-         :get {:interceptors [[interceptor :get] async-handler]}}]]
+        {:interceptors [(interceptor :async)]
+         :get {:interceptors [(interceptor :get) async-handler]}}]]
 
       ;; optional interceptors for all matched routes
-      {:data {:interceptors [[interceptor :router]]}})
+      {:data {:interceptors [(interceptor :router)]}})
 
     ;; optional default ring handler (if no routes have matched)
     (ring/create-default-handler)
 
     ;; optional top-level routes for both routes & default route
-    {:interceptors [[interceptor :top]]}))
+    {:interceptors [(muuntaja.interceptor/format-interceptor)
+                    (interceptor :top)]}))
 
 (defonce server (atom nil))
 
