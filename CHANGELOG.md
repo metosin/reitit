@@ -1,4 +1,4 @@
-## 0.2.0-SNAPSHOT
+## 0.2.0 (2018-09-03)
 
 Sample apps demonstraing the current status of `reitit`:
 
