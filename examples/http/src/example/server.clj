@@ -1,48 +1,62 @@
 (ns example.server
   (:require [reitit.http :as http]
             [reitit.ring :as ring]
-            [clojure.core.async :as a]
             [reitit.interceptor.sieppari]
-            [ring.adapter.jetty :as jetty]))
+            [ring.adapter.jetty :as jetty]
+            [muuntaja.interceptor]
+            [clojure.core.async :as a]
+            [manifold.deferred :as d]
+            [promesa.core :as p]))
 
-(defn -interceptor [f x]
-  {:enter (fn [ctx] (f (update-in ctx [:request :via] (fnil conj []) x)))
-   :leave (fn [ctx] (f (update-in ctx [:response :body] str "\n<- " x)))})
+(defn interceptor [f x]
+  {:enter (fn [ctx] (f (update-in ctx [:request :via] (fnil conj []) {:enter x})))
+   :leave (fn [ctx] (f (update-in ctx [:response :body] conj {:leave x})))})
 
-(def interceptor (partial -interceptor identity))
-(def future-interceptor (partial -interceptor #(future %)))
-(def async-interceptor (partial -interceptor #(a/go %)))
+(defn handler [f]
+  (fn [{:keys [via]}]
+    (f {:status 200,
+        :body (conj via :handler)})))
 
-(defn -handler [f {:keys [via]}]
-  (f {:status 200,
-      :body (str (apply str (map #(str "-> " % "\n") via)) "   hello!")}))
-
-(def handler (partial -handler identity))
-(def future-handler (partial -handler #(future %)))
-(def async-handler (partial -handler #(a/go %)))
+(def <sync> identity)
+(def <future> #(future %))
+(def <async> #(a/go %))
+(def <deferred> d/success-deferred)
+(def <promesa> p/promise)
 
 (def app
   (http/ring-handler
     (http/router
       ["/api"
-       {:interceptors [(interceptor :api)]}
+       {:interceptors [(interceptor <sync> :api)]}
 
        ["/sync"
-        {:interceptors [(interceptor :sync)]
-         :get {:interceptors [(interceptor :hello)]
-               :handler handler}}]
+        {:interceptors [(interceptor <sync> :sync)]
+         :get {:interceptors [(interceptor <sync> :get)]
+               :handler (handler <sync>)}}]
 
        ["/future"
-        {:interceptors [(future-interceptor :future)]
-         :get {:interceptors [(future-interceptor :hello)]
-               :handler future-handler}}]
+        {:interceptors [(interceptor <future> :future)]
+         :get {:interceptors [(interceptor <future> :get)]
+               :handler (handler <future>)}}]
 
        ["/async"
-        {:interceptors [(async-interceptor :async)]
-         :get {:interceptors [(async-interceptor :async-hello)]
-               :handler async-handler}}]])
+        {:interceptors [(interceptor <async> :async)]
+         :get {:interceptors [(interceptor <async> :get)]
+               :handler (handler <async>)}}]
+
+       ["/deferred"
+        {:interceptors [(interceptor <deferred> :deferred)]
+         :get {:interceptors [(interceptor <deferred> :get)]
+               :handler (handler <deferred>)}}]
+
+       ["/promesa"
+        {:interceptors [(interceptor <promesa> :promesa)]
+         :get {:interceptors [(interceptor <promesa> :get)]
+               :handler (handler <promesa>)}}]])
+
     (ring/create-default-handler)
-    {:executor reitit.interceptor.sieppari/executor}))
+    {:executor reitit.interceptor.sieppari/executor
+     :interceptors [(muuntaja.interceptor/format-interceptor)]}))
 
 (defn start []
   (jetty/run-jetty #'app {:port 3000, :join? false, :async? true})

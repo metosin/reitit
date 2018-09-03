@@ -27,7 +27,7 @@
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/muuntaja "0.6.0-alpha5"]
                          [metosin/jsonista "0.2.1"]
-                         [metosin/sieppari "0.0.0-alpha4"]]
+                         [metosin/sieppari "0.0.0-alpha5"]]
 
   :plugins [[jonase/eastwood "0.2.6"]
             [lein-doo "0.1.10"]
@@ -64,13 +64,17 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/muuntaja "0.6.0-alpha5"]
                                   [metosin/ring-swagger-ui "2.2.10"]
-                                  [metosin/sieppari "0.0.0-alpha4"]
+                                  [metosin/sieppari "0.0.0-alpha5"]
                                   [metosin/jsonista "0.2.1"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.9"]
+
+                                  [org.clojure/core.async "0.4.474"]
+                                  [manifold "0.1.8"]
+                                  [funcool/promesa "1.9.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
                                   [fipp "0.6.12"]]}
@@ -84,7 +88,9 @@
                                    [io.pedestal/pedestal.service "0.5.4"]
                                    [io.pedestal/pedestal.jetty "0.5.4"]
                                    [org.clojure/core.async "0.4.474"]
-                                   [metosin/sieppari "0.0.0-alpha4"]
+                                   [manifold "0.1.8"]
+                                   [funcool/promesa "1.9.0"]
+                                   [metosin/sieppari "0.0.0-alpha5"]
                                    [yada "1.2.13"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.0"]
