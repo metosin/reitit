@@ -26,10 +26,11 @@
         ["/upload"
          {:post {:summary "upload a file"
                  :parameters {:multipart {:file multipart/temp-file-part}}
-                 :responses {200 {:body {:file multipart/temp-file-part}}}
+                 :responses {200 {:body {:name string?, :size int?}}}
                  :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                             {:status 200
-                             :body {:file file}})}}]
+                             :body {:name (:filename file)
+                                    :size (:size file)}})}}]
 
         ["/download"
          {:get {:summary "downloads a file"
@@ -37,7 +38,8 @@
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
-                            :body (io/input-stream (io/resource "reitit.png"))})}}]]
+                            :body (io/input-stream
+                                    (io/resource "reitit.png"))})}}]]
 
        ["/math"
         {:swagger {:tags ["math"]}}

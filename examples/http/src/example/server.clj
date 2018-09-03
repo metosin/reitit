@@ -3,18 +3,19 @@
             [reitit.ring :as ring]
             [reitit.interceptor.sieppari]
             [ring.adapter.jetty :as jetty]
+            [muuntaja.interceptor]
             [clojure.core.async :as a]
             [manifold.deferred :as d]
             [promesa.core :as p]))
 
 (defn interceptor [f x]
-  {:enter (fn [ctx] (f (update-in ctx [:request :via] (fnil conj []) x)))
-   :leave (fn [ctx] (f (update-in ctx [:response :body] str "\n<- " x)))})
+  {:enter (fn [ctx] (f (update-in ctx [:request :via] (fnil conj []) {:enter x})))
+   :leave (fn [ctx] (f (update-in ctx [:response :body] conj {:leave x})))})
 
 (defn handler [f]
   (fn [{:keys [via]}]
     (f {:status 200,
-        :body (str (apply str (map #(str "-> " % "\n") via)) "   hello!")})))
+        :body (conj via :handler)})))
 
 (def <sync> identity)
 (def <future> #(future %))
@@ -54,7 +55,8 @@
                :handler (handler <promesa>)}}]])
 
     (ring/create-default-handler)
-    {:executor reitit.interceptor.sieppari/executor}))
+    {:executor reitit.interceptor.sieppari/executor
+     :interceptors [(muuntaja.interceptor/format-interceptor)]}))
 
 (defn start []
   (jetty/run-jetty #'app {:port 3000, :join? false, :async? true})
