@@ -39,32 +39,32 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.2.0-alpha1"]
+[metosin/reitit "0.2.0"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.0-alpha1"]
+[metosin/reitit-core "0.2.0"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.0-alpha1"]
-[metosin/reitit-schema "0.2.0-alpha1"]
+[metosin/reitit-spec "0.2.0"]
+[metosin/reitit-schema "0.2.0"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.0-alpha1"]
-[metosin/reitit-middleware "0.2.0-alpha1"]
+[metosin/reitit-ring "0.2.0"]
+[metosin/reitit-middleware "0.2.0"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.0-alpha1"]
-[metosin/reitit-swagger-ui "0.2.0-alpha1"]
+[metosin/reitit-swagger "0.2.0"]
+[metosin/reitit-swagger-ui "0.2.0"]
 
 ;; frontend helpers
-[metosin/reitit-frontend "0.2.0-alpha1"]
+[metosin/reitit-frontend "0.2.0"]
 
 ;; http with interceptors (WIP)
-[metosin/reitit-http "0.2.0-alpha1"]
-[metosin/reitit-sieppari "0.2.0-alpha1"]
+[metosin/reitit-http "0.2.0"]
+[metosin/reitit-sieppari "0.2.0"]
 ```
 
 ## Quick start

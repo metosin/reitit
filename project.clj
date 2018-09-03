@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.0-alpha1"
+(defproject metosin/reitit-parent "0.2.0"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,17 +10,17 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :managed-dependencies [[metosin/reitit "0.2.0-alpha1"]
-                         [metosin/reitit-core "0.2.0-alpha1"]
-                         [metosin/reitit-spec "0.2.0-alpha1"]
-                         [metosin/reitit-schema "0.2.0-alpha1"]
-                         [metosin/reitit-ring "0.2.0-alpha1"]
-                         [metosin/reitit-middleware "0.2.0-alpha1"]
-                         [metosin/reitit-http "0.2.0-alpha1"]
-                         [metosin/reitit-swagger "0.2.0-alpha1"]
-                         [metosin/reitit-swagger-ui "0.2.0-alpha1"]
-                         [metosin/reitit-frontend "0.2.0-alpha1"]
-                         [metosin/reitit-sieppari "0.2.0-alpha1"]
+  :managed-dependencies [[metosin/reitit "0.2.0"]
+                         [metosin/reitit-core "0.2.0"]
+                         [metosin/reitit-spec "0.2.0"]
+                         [metosin/reitit-schema "0.2.0"]
+                         [metosin/reitit-ring "0.2.0"]
+                         [metosin/reitit-middleware "0.2.0"]
+                         [metosin/reitit-http "0.2.0"]
+                         [metosin/reitit-swagger "0.2.0"]
+                         [metosin/reitit-swagger-ui "0.2.0"]
+                         [metosin/reitit-frontend "0.2.0"]
+                         [metosin/reitit-sieppari "0.2.0"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
                          [metosin/spec-tools "0.7.1"]

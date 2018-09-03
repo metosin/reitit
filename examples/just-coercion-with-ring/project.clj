@@ -3,4 +3,4 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [ring "1.6.3"]
                  [metosin/muuntaja "0.4.1"]
-                 [metosin/reitit "0.2.0-alpha1"]])
+                 [metosin/reitit "0.2.0"]])
