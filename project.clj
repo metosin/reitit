@@ -8,7 +8,8 @@
   :codox {:output-path "doc"
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
-
+  :scm {:name "git"
+        :url "https://github.com/metosin/reitit"}
   :managed-dependencies [[metosin/reitit "0.2.0-alpha1"]
                          [metosin/reitit-core "0.2.0-alpha1"]
                          [metosin/reitit-spec "0.2.0-alpha1"]
