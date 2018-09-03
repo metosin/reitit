@@ -420,3 +420,26 @@
                 (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
                 (is (get-in @result [:headers "Last-Modified"]))
                 (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))))
+
+(deftest execution-times-test
+  (let [times (atom {})
+        response {:status 200, :body "pong"}
+        interceptor (fn [x] {:enter (fn [ctx] (swap! times update-in [:enter x] (fnil inc 0)) ctx)
+                             :leave (fn [ctx] (swap! times update-in [:leave x] (fnil inc 0)) ctx)})
+        app (http/ring-handler
+              (http/router
+                ["/api"
+                 {:interceptors [(interceptor :api)]}
+                 ["/ping"
+                  {:interceptors [(interceptor :ping)]
+                   :get {:interceptors [(interceptor :get)]
+                         :handler (fn [_] response)}}]])
+              (ring/routes
+                (ring/create-default-handler)
+                {:data {:interceptors [(interceptor :router)]}})
+              {:executor sieppari/executor
+               :interceptors [(interceptor :top)]})]
+    (is (= response (app {:request-method :get, :uri "/api/ping"})))
+    (is (= {:enter {:top 1, :api 1, :ping 1, :get 1}
+            :leave {:get 1, :ping 1, :api 1, :top 1}}
+           @times))))
