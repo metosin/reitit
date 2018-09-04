@@ -9,7 +9,7 @@ Work-in-progress and considered alpha quality.
 ## Reitit-http
 
 ```clj
-[metosin/reitit-http "0.2.0"]
+[metosin/reitit-http "0.2.1"]
 ```
 
 An module for http-routing using interceptors instead of middleware. Builds on top of the [`reitit-ring`](../ring/ring.md) module. The differences:

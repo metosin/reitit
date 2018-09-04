@@ -2,5 +2,5 @@
   :description "Reitit Ring App with Swagger"
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [ring "1.6.3"]
-                 [metosin/reitit "0.2.0"]]
+                 [metosin/reitit "0.2.1"]]
   :repl-options {:init-ns example.server})

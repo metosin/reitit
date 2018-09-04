@@ -1,3 +1,21 @@
+## 0.2.1 (2018-09-04)
+
+## `reitit-schema`
+
+* updated deps:
+
+```clj
+[metosin/schema-tools "0.10.4"] is available but we use "0.10.3"
+```
+
+## `reitit-middleware`
+
+* updated deps:
+
+```clj
+[metosin/muuntaja "0.6.0"] is available but we use "0.6.0-alpha5"
+```
+
 ## 0.2.0 (2018-09-03)
 
 Sample apps demonstraing the current status of `reitit`:

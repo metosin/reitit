@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.0"
+(defproject metosin/reitit-parent "0.2.1"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,23 +10,23 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :managed-dependencies [[metosin/reitit "0.2.0"]
-                         [metosin/reitit-core "0.2.0"]
-                         [metosin/reitit-spec "0.2.0"]
-                         [metosin/reitit-schema "0.2.0"]
-                         [metosin/reitit-ring "0.2.0"]
-                         [metosin/reitit-middleware "0.2.0"]
-                         [metosin/reitit-http "0.2.0"]
-                         [metosin/reitit-swagger "0.2.0"]
-                         [metosin/reitit-swagger-ui "0.2.0"]
-                         [metosin/reitit-frontend "0.2.0"]
-                         [metosin/reitit-sieppari "0.2.0"]
+  :managed-dependencies [[metosin/reitit "0.2.1"]
+                         [metosin/reitit-core "0.2.1"]
+                         [metosin/reitit-spec "0.2.1"]
+                         [metosin/reitit-schema "0.2.1"]
+                         [metosin/reitit-ring "0.2.1"]
+                         [metosin/reitit-middleware "0.2.1"]
+                         [metosin/reitit-http "0.2.1"]
+                         [metosin/reitit-swagger "0.2.1"]
+                         [metosin/reitit-swagger-ui "0.2.1"]
+                         [metosin/reitit-frontend "0.2.1"]
+                         [metosin/reitit-sieppari "0.2.1"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.6.3"]
                          [metosin/spec-tools "0.7.1"]
-                         [metosin/schema-tools "0.10.3"]
+                         [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/muuntaja "0.6.0-alpha5"]
+                         [metosin/muuntaja "0.6.0"]
                          [metosin/jsonista "0.2.1"]
                          [metosin/sieppari "0.0.0-alpha5"]]
 
@@ -63,7 +63,7 @@
 
                                   [ring "1.6.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.0-alpha5"]
+                                  [metosin/muuntaja "0.6.0"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/sieppari "0.0.0-alpha5"]
                                   [metosin/jsonista "0.2.1"]
@@ -94,8 +94,8 @@
                                    [metosin/sieppari "0.0.0-alpha5"]
                                    [yada "1.2.13"]
                                    [ring/ring-defaults "0.3.2"]
-                                   [ataraxy "0.4.0"]
-                                   [bidi "2.1.3"]]}
+                                   [ataraxy "0.4.1"]
+                                   [bidi "2.1.4"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"
