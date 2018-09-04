@@ -13,6 +13,7 @@ A fast data-driven router for Clojure(Script).
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
 Posts:
+* [Welcome Reitit 0.2.0!](https://www.metosin.fi/blog/reitit020/)
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 

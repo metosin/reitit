@@ -2,7 +2,7 @@
   (:require [io.pedestal.http]
             [clojure.core.async :as a]
             [reitit.interceptor.pedestal :as pedestal]
-            muuntaja.interceptor
+            [muuntaja.interceptor]
             [reitit.http :as http]
             [reitit.ring :as ring]))
 
@@ -22,8 +22,7 @@
   (pedestal/routing-interceptor
     (http/router
       ["/api"
-       {:interceptors [(interceptor :api)
-                       (interceptor :ipa)]}
+       {:interceptors [(interceptor :api)]}
 
        ["/sync"
         {:interceptors [(interceptor :sync)]
