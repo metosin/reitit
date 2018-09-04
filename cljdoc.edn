@@ -47,7 +47,7 @@
    ["Different Routers" {:file "doc/advanced/different_routers.md"}]
    ["Route Validation" {:file "doc/advanced/route_validation.md"}]
    ["Dev Workflow" {:file "doc/advanced/dev_workflow.md"}]
-   ["Shared Routes" {:file "doc/patterns/shared_routes.md"}]]
+   ["Shared Routes" {:file "doc/advanced/shared_routes.md"}]]
   ["Misc"
    ["Performance" {:file "doc/performance.md"}]
    ["Interceptors (WIP)" {:file "doc/interceptors.md"}]
