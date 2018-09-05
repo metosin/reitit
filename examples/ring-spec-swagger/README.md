@@ -1,4 +1,4 @@
-# Ring with Swagger example
+# reitit-ring, clojure.spec, swagger
 
 ## Usage
 
@@ -16,7 +16,7 @@ http POST :3000/math/spec/plus x:=1 y:=20
 http GET :3000/swagger.json
 ```
 
-<img src="https://raw.githubusercontent.com/metosin/reitit/master/examples/ring-swagger/swagger.png" />
+<img src="https://raw.githubusercontent.com/metosin/reitit/master/examples/ring-spec-swagger/swagger.png" />
 
 ## License
 
