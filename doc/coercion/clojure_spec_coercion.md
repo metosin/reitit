@@ -2,7 +2,15 @@
 
 The [clojure.spec](https://clojure.org/guides/spec) library specifies the structure of data, validates or destructures it, and can generate data based on the spec.
 
-**NOTE**: Currently, `clojure.spec` [doesn't support runtime transformations via conforming](https://dev.clojure.org/jira/browse/CLJ-2116), so one needs to wrap all specs into [Spec Records](https://github.com/metosin/spec-tools/blob/master/README.md#spec-records) to get the coercion working.
+## Warning
+
+`clojure.spec` by itself doesn't support coercion. `reitit` uses [spec-tools](https://github.com/metosin/spec-tools) that adds coercion to spec. Like `clojure.spec`, it's alpha as it leans on `clojure.spec.alpha/conform`, which is concidered a spec internal, that might be changed or removed later.
+
+For now, all leaf specs need to be wrapped into [Spec Records](https://github.com/metosin/spec-tools/blob/master/README.md#spec-records) to get the coercion working.
+
+There are [CLJ-2116](https://dev.clojure.org/jira/browse/CLJ-2116) and [CLJ-2251](https://dev.clojure.org/jira/browse/CLJ-2251) that would help solve this elegantly.
+
+## Example
 
 ```clj
 (require '[reitit.coercion.spec])
