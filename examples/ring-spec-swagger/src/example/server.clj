@@ -10,7 +10,22 @@
             [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
+            [clojure.spec.alpha :as s]
+            [spec-tools.spec :as spec]
             [clojure.java.io :as io]))
+
+(s/def ::file multipart/temp-file-part)
+(s/def ::file-params (s/keys :req-un [::file]))
+
+(s/def ::name spec/string?)
+(s/def ::size spec/int?)
+(s/def ::file-response (s/keys :req-un [::name ::size]))
+
+(s/def ::x spec/int?)
+(s/def ::y spec/int?)
+(s/def ::total spec/int?)
+(s/def ::math-request (s/keys :req-un [::x ::y]))
+(s/def ::math-response (s/keys :req-un [::total]))
 
 (def app
   (ring/ring-handler
@@ -25,8 +40,8 @@
 
         ["/upload"
          {:post {:summary "upload a file"
-                 :parameters {:multipart {:file multipart/temp-file-part}}
-                 :responses {200 {:body {:name string?, :size int?}}}
+                 :parameters {:multipart ::file-params}
+                 :responses {200 {:body ::file-response}}
                  :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                             {:status 200
                              :body {:name (:filename file)
@@ -46,14 +61,14 @@
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
-                :parameters {:query {:x int?, :y int?}}
-                :responses {200 {:body {:total int?}}}
+                :parameters {:query ::math-request}
+                :responses {200 {:body ::math-response}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
                             :body {:total (+ x y)}})}
           :post {:summary "plus with spec body parameters"
-                 :parameters {:body {:x int?, :y int?}}
-                 :responses {200 {:body {:total int?}}}
+                 :parameters {:body ::math-request}
+                 :responses {200 {:body ::math-response}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
