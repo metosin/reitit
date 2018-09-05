@@ -112,17 +112,6 @@
 (defn find-names [routes _]
   (into [] (keep #(-> % second :name)) routes))
 
-(defn- encode-route
-  "URL-encode all non-parameter segments"
-  [[p m]]
-  (let [segments (str/split p #"/")
-        encoded-segments (map #(if (impl/wild-or-catch-all-param? %) % (impl/url-encode %)) segments)
-        encoded-path (str/join "/" encoded-segments)]
-    [encoded-path m]))
-
-(defn- encode-routes [routes]
-  (map encode-route routes))
-
 (defn- compile-route [[p m :as route] {:keys [compile] :as opts}]
   [p m (if compile (compile route opts))])
 
@@ -432,8 +421,7 @@
          routes (resolve-routes raw-routes opts)
          path-conflicting (path-conflicting-routes routes)
          name-conflicting (name-conflicting-routes routes)
-         encoded-routes (encode-routes routes)
-         compiled-routes (compile-routes encoded-routes opts)
+         compiled-routes (compile-routes routes opts)
          wilds? (boolean (some impl/wild-route? compiled-routes))
          all-wilds? (every? impl/wild-route? compiled-routes)
          router (cond
