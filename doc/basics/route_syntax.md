@@ -84,3 +84,8 @@ Routes are just data, so it's easy to create them programmatically:
 ;   ["/add-user" {:post {:interceptors [add-user]}}]
 ;   ["/add-order" {:post {:interceptors [add-order]}}])]
 ```
+
+### Encoding
+
+Reitit does not apply any encoding to your paths. If you need that, you must encode them yourself. 
+E.g., `/foo bar` should be `/foo%20bar`.
