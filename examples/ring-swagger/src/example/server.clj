@@ -7,7 +7,7 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
-            [ring.middleware.params :as params]
+            [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]))
@@ -17,7 +17,8 @@
     (ring/router
       [["/swagger.json"
         {:get {:no-doc true
-               :swagger {:info {:title "my-api"}}
+               :swagger {:info {:title "my-api"
+                                :description "with reitit-ring"}}
                :handler (swagger/create-swagger-handler)}}]
 
        ["/files"
@@ -38,8 +39,9 @@
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
-                            :body (io/input-stream
-                                    (io/resource "reitit.png"))})}}]]
+                            :body (-> "reitit.png"
+                                      (io/resource)
+                                      (io/input-stream))})}}]]
 
        ["/math"
         {:swagger {:tags ["math"]}}
@@ -61,7 +63,7 @@
       {:data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :middleware [;; query-params & form-params
-                           params/wrap-params
+                           parameters/parameters-middleware
                            ;; content-negotiation
                            muuntaja/format-negotiate-middleware
                            ;; encoding response body
