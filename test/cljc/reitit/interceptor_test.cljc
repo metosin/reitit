@@ -111,21 +111,21 @@
           (let [app (create [[i1 :value]])]
             (dotimes [_ 10]
               (is (= [:data :value :ok] (app ctx)))
-              (is (= 2 @calls)))))
+              (is (= 1 @calls)))))
 
         (testing "as interceptor"
           (reset! calls 0)
           (let [app (create [(i1 :value)])]
             (dotimes [_ 10]
               (is (= [:data :value :ok] (app ctx)))
-              (is (= 2 @calls)))))
+              (is (= 1 @calls)))))
 
         (testing "deeply compiled interceptor"
           (reset! calls 0)
           (let [app (create [[i3 :value]])]
             (dotimes [_ 10]
               (is (= [:data :value :ok] (app ctx)))
-              (is (= 4 @calls)))))
+              (is (= 3 @calls)))))
 
         (testing "too deeply compiled interceptor fails"
           (binding [interceptor/*max-compile-depth* 2]
