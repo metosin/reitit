@@ -23,8 +23,8 @@ Modules:
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
 * `reitit-frontend` Tools for [frontend routing](frontend/basics.md)
-* `reitit-http` http-routing with Pedestal-style Interceptors (WIP)
-* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors (WIP)
+* `reitit-http` http-routing with Pedestal-style Interceptors
+* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors
 
 ## Latest version
 
@@ -54,7 +54,7 @@ Optionally, the parts can be required separately:
 ;; frontend helpers
 [metosin/reitit-frontend "0.2.1"]
 
-;; http with interceptors (WIP)
+;; http with interceptors
 [metosin/reitit-http "0.2.1"]
 [metosin/reitit-sieppari "0.2.1"]
 ```

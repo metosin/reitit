@@ -38,7 +38,7 @@
   ["Frontend" {}
    ["Basics" {:file "doc/frontend/basics.md"}]
    ["Browser integration" {:file "doc/frontend/browser.md"}]
-   ["Controllers (WIP)" {:file "doc/frontend/controllers.md"}]]
+   ["Controllers" {:file "doc/frontend/controllers.md"}]]
   ["HTTP" {}
    ["Interceptors" {:file "doc/http/interceptors.md"}]
    ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]]

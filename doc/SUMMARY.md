@@ -41,7 +41,7 @@
 
 * [Basics](frontend/basics.md)
 * [Browser integration](frontend/browser.md)
-* [Controllers (WIP)](frontend/controllers.md)
+* [Controllers](frontend/controllers.md)
 
 ## HTTP
 
