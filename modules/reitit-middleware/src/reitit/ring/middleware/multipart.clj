@@ -1,4 +1,4 @@
-(ns ^:no-doc reitit.ring.middleware.multipart
+(ns reitit.ring.middleware.multipart
   (:refer-clojure :exclude [compile])
   (:require [reitit.coercion :as coercion]
             [ring.middleware.multipart-params :as multipart-params]
@@ -40,14 +40,10 @@
          :wrap (fn [handler]
                  (fn
                    ([request]
-                    (try
-                      (-> request
-                          (multipart-params/multipart-params-request options)
-                          (coerced-request coercers)
-                          (handler))
-                      (catch Exception e
-                        (.printStackTrace e)
-                        (throw e))))
+                    (-> request
+                        (multipart-params/multipart-params-request options)
+                        (coerced-request coercers)
+                        (handler)))
                    ([request respond raise]
                     (-> request
                         (multipart-params/multipart-params-request options)
