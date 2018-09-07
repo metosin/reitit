@@ -14,6 +14,7 @@
                  [metosin/reitit-ring]
                  [metosin/reitit-middleware]
                  [metosin/reitit-http]
+                 [metosin/reitit-interceptors]
                  [metosin/reitit-swagger]
                  [metosin/reitit-swagger-ui]
                  [metosin/reitit-frontend]
