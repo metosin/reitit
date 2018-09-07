@@ -6,9 +6,17 @@
 
 Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases, yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.
 
+* [Parameter handling](#parameters-handling)
 * [Exception handling](#exception-handling)
 * [Content negotiation](#content-negotiation)
 * [Multipart request handling](#multipart-request-handling)
+
+## Parameters handling
+
+`reitit.ring.middleware.parameters/parameters-middleware` to capture query- and form-params. Wraps
+`ring.middleware.params/wrap-params`.
+
+**NOTE**: will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.
 
 ## Exception handling
 
