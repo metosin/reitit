@@ -101,5 +101,5 @@
     :compile (fn [{:keys [muuntaja]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
-                   (stripped (muuntaja.interceptor/format-request-interceptor muuntaja))
+                   (stripped (muuntaja.interceptor/format-response-interceptor muuntaja))
                    {:data {:swagger {:produces (displace (m/encodes muuntaja))}}})))}))
