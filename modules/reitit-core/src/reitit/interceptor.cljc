@@ -92,7 +92,7 @@
         (if-let [interceptor (into-interceptor (compile data opts) data opts)]
           (map->Interceptor
             (merge
-              (dissoc this :create)
+              (dissoc this :compile)
               (impl/strip-nils interceptor)))))))
 
   nil
