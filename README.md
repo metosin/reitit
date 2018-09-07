@@ -147,10 +147,6 @@ Invalid request:
 ;        :in [:request :query-params]}}
 ```
 
-**NOTE**: Reitit is not a batteries included web-stack. You should also include at least:
-* content negotiation library like [Muuntaja](https://github.com/metosin/muuntaja)
-* some default Ring-middleware like `ring.middleware.params/wrap-params`
-
 ## More examples
 
 * [`reitit-ring` with coercion, swagger and default middleware](https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj)

@@ -128,6 +128,7 @@ Whole example project is in [`/examples/ring-swagger`](https://github.com/metosi
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
+            [reitit.ring.middleware.parameters :as parameters]
             [ring.middleware.params :as params]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
@@ -180,7 +181,7 @@ Whole example project is in [`/examples/ring-swagger`](https://github.com/metosi
       {:data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :middleware [;; query-params & form-params
-                           params/wrap-params
+                           parameters/parameters-middleware
                            ;; content-negotiation
                            muuntaja/format-negotiate-middleware
                            ;; encoding response body
