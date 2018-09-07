@@ -46,6 +46,7 @@
 ## HTTP
 
 * [Interceptors](http/interceptors.md)
+* [Default Interceptors](http/default_interceptors.md)
 
 ## Advanced
 

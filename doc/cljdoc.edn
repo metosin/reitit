@@ -40,7 +40,8 @@
    ["Browser integration" {:file "doc/frontend/browser.md"}]
    ["Controllers (WIP)" {:file "doc/frontend/controllers.md"}]]
   ["HTTP" {}
-   ["Interceptors" {:file "doc/http/interceptors.md"}]]
+   ["Interceptors" {:file "doc/http/interceptors.md"}]
+   ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]]
   ["Advanced" {}
    ["Configuring Routers" {:file "doc/advanced/configuring_routers.md"}]
    ["Composing Routers" {:file "doc/advanced/composing_routers.md"}]
