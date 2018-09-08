@@ -61,10 +61,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="../advanced/configuring_routers.html" />
+    <link rel="next" href="pedestal.html" />
     
     
-    <link rel="prev" href="../frontend/controllers.html" />
+    <link rel="prev" href="../ring/swagger.html" />
     
 
     </head>
@@ -444,11 +444,70 @@
 
     
         
+        <li class="header">HTTP</li>
+        
+        
+    
+        <li class="chapter active" data-level="5.1" data-path="interceptors.html">
+            
+                <a href="interceptors.html">
+            
+                    
+                    Interceptors
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="pedestal.html">
+            
+                <a href="pedestal.html">
+            
+                    
+                    Pedestal
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="sieppari.html">
+            
+                <a href="sieppari.html">
+            
+                    
+                    Sieppari
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="default_interceptors.html">
+            
+                <a href="default_interceptors.html">
+            
+                    
+                    Default Interceptors
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
         <li class="header">Frontend</li>
         
         
     
-        <li class="chapter " data-level="5.1" data-path="../frontend/basics.html">
+        <li class="chapter " data-level="6.1" data-path="../frontend/basics.html">
             
                 <a href="../frontend/basics.html">
             
@@ -461,7 +520,7 @@
             
         </li>
     
-        <li class="chapter " data-level="5.2" data-path="../frontend/browser.html">
+        <li class="chapter " data-level="6.2" data-path="../frontend/browser.html">
             
                 <a href="../frontend/browser.html">
             
@@ -474,32 +533,12 @@
             
         </li>
     
-        <li class="chapter " data-level="5.3" data-path="../frontend/controllers.html">
+        <li class="chapter " data-level="6.3" data-path="../frontend/controllers.html">
             
                 <a href="../frontend/controllers.html">
             
                     
-                    Controllers (WIP)
-            
-                </a>
-            
-
-            
-        </li>
-    
-
-    
-        
-        <li class="header">HTTP</li>
-        
-        
-    
-        <li class="chapter active" data-level="6.1" data-path="interceptors.html">
-            
-                <a href="interceptors.html">
-            
-                    
-                    Interceptors
+                    Controllers
             
                 </a>
             
@@ -683,24 +722,23 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="interceptors-wip">Interceptors (WIP)</h1>
-<p>Reitit also support for <a href="pedestal.io">Pedestal</a>-style <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> as an alternative to using middleware. Basic interceptor handling is implemented in <code>reitit.interceptor</code> package.  There is no interceptor executor shipped, but you can use libraries like <a href="https://github.com/pedestal/pedestal/tree/master/interceptor" target="_blank">Pedestal Interceptor</a> or <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> to execute the chains.</p>
-<h2 id="current-status">Current Status</h2>
-<p>Work-in-progress and considered alpha quality.</p>
+                                <h1 id="interceptors">Interceptors</h1>
+<p>Reitit also support for <a href="http://pedestal.io/reference/interceptors" target="_blank">interceptors</a> as an alternative to using middleware. Basic interceptor handling is implemented in <code>reitit.interceptor</code> package.  There is no interceptor executor shipped, but you can use libraries like <a href="https://github.com/pedestal/pedestal/tree/master/interceptor" target="_blank">Pedestal Interceptor</a> or <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> to execute the chains.</p>
 <h2 id="reitit-http">Reitit-http</h2>
 <pre><code class="lang-clj">[metosin/reitit-http <span class="hljs-string">&quot;0.2.1&quot;</span>]
 </code></pre>
-<p>An module for http-routing using interceptors instead of middleware. Builds on top of the <a href="../ring/ring.html"><code>reitit-ring</code></a> module. The differences:</p>
+<p>An module for http-routing using interceptors instead of middleware. Builds on top of the <a href="../ring/ring.html"><code>reitit-ring</code></a> module having all the same features.</p>
+<p>The differences:</p>
 <ul>
 <li>instead of <code>:middleware</code>, uses <code>:interceptors</code></li>
-<li>compared to <code>reitit.http/http-router</code> takes an extra options map with mandatory key <code>:executor</code> (of type <code>reitit.interceptor/Executor</code>) and optional top level <code>:interceptors</code> - wrapping both routes and default handler.</li>
-<li>optional entry poitn <code>reitit.http/routing-interceptor</code> to provide a routing interceptor, to be used with Pedestal.</li>
+<li>compared to <code>reitit.ring/ring-router</code>, the <code>reitit.http/http-router</code> takes an extra options map with mandatory key <code>:executor</code> (of type <code>reitit.interceptor/Executor</code>) and optional top level <code>:interceptors</code> - wrapping both routes and default handler.</li>
+<li>instead of creating a ring-handler, apps can be wrapped into a routing interceptor that enqueues the matched interceptors into the context. For this, there is <code>reitit.http/routing-interceptor</code>.</li>
 </ul>
-<h2 id="examples">Examples</h2>
-<h3 id="sieppari">Sieppari</h3>
-<p>See code at: <a href="https://github.com/metosin/reitit/tree/master/examples/http" target="_blank">https://github.com/metosin/reitit/tree/master/examples/http</a></p>
-<h3 id="pedestal">Pedestal</h3>
-<p>See example at: <a href="https://github.com/metosin/reitit/tree/master/examples/pedestal" target="_blank">https://github.com/metosin/reitit/tree/master/examples/pedestal</a></p>
+<h2 id="why-interceptors">Why interceptors?</h2>
+<ul>
+<li><a href="https://quanttype.net/posts/2018-08-03-why-interceptors.html" target="_blank">https://quanttype.net/posts/2018-08-03-why-interceptors.html</a></li>
+<li><a href="https://www.reddit.com/r/Clojure/comments/9csmty/why_interceptors/" target="_blank">https://www.reddit.com/r/Clojure/comments/9csmty/why_interceptors/</a></li>
+</ul>
 
                                 
                                 </section>
@@ -728,12 +766,12 @@
 
             
                 
-                <a href="../frontend/controllers.html" class="navigation navigation-prev " aria-label="Previous page: Controllers (WIP)">
+                <a href="../ring/swagger.html" class="navigation navigation-prev " aria-label="Previous page: Swagger Support">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="../advanced/configuring_routers.html" class="navigation navigation-next " aria-label="Next page: Configuring Routers">
+                <a href="pedestal.html" class="navigation navigation-next " aria-label="Next page: Pedestal">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -744,7 +782,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Interceptors","level":"6.1","depth":1,"next":{"title":"Configuring Routers","level":"7.1","depth":1,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"previous":{"title":"Controllers (WIP)","level":"5.3","depth":1,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/interceptors.md","mtime":"2018-09-06T05:35:21.528Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-06T05:36:02.695Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Interceptors","level":"5.1","depth":1,"next":{"title":"Pedestal","level":"5.2","depth":1,"path":"http/pedestal.md","ref":"http/pedestal.md","articles":[]},"previous":{"title":"Swagger Support","level":"4.13","depth":1,"path":"ring/swagger.md","ref":"ring/swagger.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/interceptors.md","mtime":"2018-09-08T07:53:07.907Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-08T07:54:08.830Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

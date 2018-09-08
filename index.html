@@ -442,11 +442,70 @@
 
     
         
+        <li class="header">HTTP</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="http/interceptors.html">
+            
+                <a href="http/interceptors.html">
+            
+                    
+                    Interceptors
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="http/pedestal.html">
+            
+                <a href="http/pedestal.html">
+            
+                    
+                    Pedestal
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="http/sieppari.html">
+            
+                <a href="http/sieppari.html">
+            
+                    
+                    Sieppari
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.4" data-path="http/default_interceptors.html">
+            
+                <a href="http/default_interceptors.html">
+            
+                    
+                    Default Interceptors
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
         <li class="header">Frontend</li>
         
         
     
-        <li class="chapter " data-level="5.1" data-path="frontend/basics.html">
+        <li class="chapter " data-level="6.1" data-path="frontend/basics.html">
             
                 <a href="frontend/basics.html">
             
@@ -459,7 +518,7 @@
             
         </li>
     
-        <li class="chapter " data-level="5.2" data-path="frontend/browser.html">
+        <li class="chapter " data-level="6.2" data-path="frontend/browser.html">
             
                 <a href="frontend/browser.html">
             
@@ -472,32 +531,12 @@
             
         </li>
     
-        <li class="chapter " data-level="5.3" data-path="frontend/controllers.html">
+        <li class="chapter " data-level="6.3" data-path="frontend/controllers.html">
             
                 <a href="frontend/controllers.html">
             
                     
-                    Controllers (WIP)
-            
-                </a>
-            
-
-            
-        </li>
-    
-
-    
-        
-        <li class="header">HTTP</li>
-        
-        
-    
-        <li class="chapter " data-level="6.1" data-path="http/interceptors.html">
-            
-                <a href="http/interceptors.html">
-            
-                    
-                    Interceptors
+                    Controllers
             
                 </a>
             
@@ -705,8 +744,8 @@
 <li><code>reitit-swagger</code> <a href="https://swagger.io/" target="_blank">Swagger2</a> apidocs</li>
 <li><code>reitit-swagger-ui</code> Integrated <a href="https://github.com/swagger-api/swagger-ui" target="_blank">Swagger UI</a>.</li>
 <li><code>reitit-frontend</code> Tools for <a href="frontend/basics.html">frontend routing</a></li>
-<li><code>reitit-http</code> http-routing with Pedestal-style Interceptors (WIP)</li>
-<li><code>reitit-sieppari</code> support for <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> Interceptors (WIP)</li>
+<li><code>reitit-http</code> http-routing with Pedestal-style Interceptors</li>
+<li><code>reitit-sieppari</code> support for <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> Interceptors</li>
 </ul>
 <h2 id="latest-version">Latest version</h2>
 <p>All bundled:</p>
@@ -730,7 +769,7 @@
 <span class="hljs-comment">;; frontend helpers</span>
 [metosin/reitit-frontend <span class="hljs-string">&quot;0.2.1&quot;</span>]
 
-<span class="hljs-comment">;; http with interceptors (WIP)</span>
+<span class="hljs-comment">;; http with interceptors</span>
 [metosin/reitit-http <span class="hljs-string">&quot;0.2.1&quot;</span>]
 [metosin/reitit-sieppari <span class="hljs-string">&quot;0.2.1&quot;</span>]
 </code></pre>
@@ -869,7 +908,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Route Syntax","level":"2.1","depth":1,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-09-06T05:35:21.520Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-06T05:36:02.695Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Route Syntax","level":"2.1","depth":1,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-09-08T07:53:07.907Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-08T07:54:08.830Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

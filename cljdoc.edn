@@ -35,12 +35,15 @@
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
    ["Swagger Support" {:file "doc/ring/swagger.md"}]]
+  ["HTTP" {}
+   ["Interceptors" {:file "doc/http/interceptors.md"}]
+   ["Pedestal" {:file "doc/http/pedestal.md"}]
+   ["Sieppari" {:file "doc/http/sieppar.md"}]
+   ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]]
   ["Frontend" {}
    ["Basics" {:file "doc/frontend/basics.md"}]
    ["Browser integration" {:file "doc/frontend/browser.md"}]
-   ["Controllers (WIP)" {:file "doc/frontend/controllers.md"}]]
-  ["HTTP" {}
-   ["Interceptors" {:file "doc/http/interceptors.md"}]]
+   ["Controllers" {:file "doc/frontend/controllers.md"}]]
   ["Advanced" {}
    ["Configuring Routers" {:file "doc/advanced/configuring_routers.md"}]
    ["Composing Routers" {:file "doc/advanced/composing_routers.md"}]
