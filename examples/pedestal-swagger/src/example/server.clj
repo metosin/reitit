@@ -9,7 +9,7 @@
             [reitit.coercion.spec :as spec-coercion]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
-            [reitit.http.interceptors.exception :as exception]
+            #_[reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
             [muuntaja.core :as m]
             [clojure.java.io :as io]))
@@ -69,8 +69,8 @@
                              (muuntaja/format-negotiate-interceptor)
                              ;; encoding response body
                              (muuntaja/format-response-interceptor)
-                             ;; exception handling
-                             (exception/exception-interceptor)
+                             ;; exception handling - doesn't work
+                             ;;(exception/exception-interceptor)
                              ;; decoding request body
                              (muuntaja/format-request-interceptor)
                              ;; coercing response bodys

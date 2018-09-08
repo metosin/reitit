@@ -37,16 +37,18 @@
 * [Compiling Middleware](ring/compiling_middleware.md)
 * [Swagger Support](ring/swagger.md)
 
+## HTTP
+
+* [Interceptors](http/interceptors.md)
+* [Pedestal](http/pedestal.md)
+* [Sieppari](http/sieppari.md)
+* [Default Interceptors](http/default_interceptors.md)
+
 ## Frontend
 
 * [Basics](frontend/basics.md)
 * [Browser integration](frontend/browser.md)
 * [Controllers](frontend/controllers.md)
-
-## HTTP
-
-* [Interceptors](http/interceptors.md)
-* [Default Interceptors](http/default_interceptors.md)
 
 ## Advanced
 
