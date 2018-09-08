@@ -3,5 +3,5 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [io.pedestal/pedestal.service "0.5.4"]
                  [io.pedestal/pedestal.jetty "0.5.4"]
-                 [metosin/reitit "0.2.1"]]
+                 [metosin/reitit "0.2.2-SNAPSHOT"]]
   :repl-options {:init-ns example.server})
