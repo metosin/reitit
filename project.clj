@@ -17,6 +17,7 @@
                          [metosin/reitit-ring "0.2.1"]
                          [metosin/reitit-middleware "0.2.1"]
                          [metosin/reitit-http "0.2.1"]
+                         [metosin/reitit-interceptors "0.2.1"]
                          [metosin/reitit-swagger "0.2.1"]
                          [metosin/reitit-swagger-ui "0.2.1"]
                          [metosin/reitit-frontend "0.2.1"]
@@ -45,6 +46,7 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
+                                  "modules/reitit-interceptors/src"
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
                                   "modules/reitit-swagger/src"

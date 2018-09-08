@@ -7,7 +7,7 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
-            [ring.middleware.params :as params]
+            [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]
@@ -76,7 +76,7 @@
       {:data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :middleware [;; query-params & form-params
-                           params/wrap-params
+                           parameters/parameters-middleware
                            ;; content-negotiation
                            muuntaja/format-negotiate-middleware
                            ;; encoding response body

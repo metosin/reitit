@@ -10,6 +10,7 @@ for ext in \
   reitit-ring \
   reitit-middleware \
   reitit-http \
+  reitit-interceptors \
   reitit-swagger \
   reitit-swagger-ui \
   reitit-frontend \

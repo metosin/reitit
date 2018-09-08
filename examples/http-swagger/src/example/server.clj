@@ -1,24 +1,26 @@
 (ns example.server
   (:require [reitit.ring :as ring]
+            [reitit.http :as http]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
-            [reitit.ring.coercion :as coercion]
-            [reitit.coercion.spec]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.ring.middleware.exception :as exception]
-            [reitit.ring.middleware.multipart :as multipart]
-            [reitit.ring.middleware.parameters :as parameters]
+            [reitit.http.coercion :as coercion]
+            [reitit.coercion.spec :as spec-coercion]
+            [reitit.http.interceptors.parameters :as parameters]
+            [reitit.http.interceptors.muuntaja :as muuntaja]
+            [reitit.http.interceptors.exception :as exception]
+            [reitit.http.interceptors.multipart :as multipart]
+            [reitit.interceptor.sieppari :as sieppari]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]))
 
 (def app
-  (ring/ring-handler
-    (ring/router
+  (http/ring-handler
+    (http/router
       [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"
-                                :description "with reitit-ring"}}
+                                :description "with reitit-http"}}
                :handler (swagger/create-swagger-handler)}}]
 
        ["/files"
@@ -39,9 +41,8 @@
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
-                            :body (-> "reitit.png"
-                                      (io/resource)
-                                      (io/input-stream))})}}]]
+                            :body (io/input-stream
+                                    (io/resource "reitit.png"))})}}]]
 
        ["/math"
         {:swagger {:tags ["math"]}}
@@ -60,29 +61,30 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:data {:coercion reitit.coercion.spec/coercion
+      {:data {:coercion spec-coercion/coercion
               :muuntaja m/instance
-              :middleware [;; query-params & form-params
-                           parameters/parameters-middleware
-                           ;; content-negotiation
-                           muuntaja/format-negotiate-middleware
-                           ;; encoding response body
-                           muuntaja/format-response-middleware
-                           ;; exception handling
-                           exception/exception-middleware
-                           ;; decoding request body
-                           muuntaja/format-request-middleware
-                           ;; coercing response bodys
-                           coercion/coerce-response-middleware
-                           ;; coercing request parameters
-                           coercion/coerce-request-middleware
-                           ;; multipart
-                           multipart/multipart-middleware]}})
+              :interceptors [;; query-params & form-params
+                             (parameters/parameters-interceptor)
+                             ;; content-negotiation
+                             (muuntaja/format-negotiate-interceptor)
+                             ;; encoding response body
+                             (muuntaja/format-response-interceptor)
+                             ;; exception handling
+                             (exception/exception-interceptor)
+                             ;; decoding request body
+                             (muuntaja/format-request-interceptor)
+                             ;; coercing response bodys
+                             (coercion/coerce-response-interceptor)
+                             ;; coercing request parameters
+                             (coercion/coerce-request-interceptor)
+                             ;; multipart
+                             (multipart/multipart-interceptor)]}})
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil}})
-      (ring/create-default-handler))))
+      (ring/create-default-handler))
+    {:executor sieppari/executor}))
 
 (defn start []
   (jetty/run-jetty #'app {:port 3000, :join? false})
