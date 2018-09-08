@@ -1,3 +1,18 @@
+## 0.2.2-SNAPSHOT
+
+* better documentation for interceptors
+* sample apps:
+  * [Sieppari, reitit-http & swagger](https://github.com/metosin/reitit/blob/master/examples/http-swagger/src/example/server.clj)
+  * [Pedestal, reitit-http & swagger](https://github.com/metosin/reitit/blob/master/examples/pedestal-swagger/src/example/server.clj)
+
+## `reitit-middleware`
+
+* new middleware `reitit.ring.middleware.parameters/parameters-middleware` to wrap query & form params.
+
+## `reitit-interceptors`
+
+* new module like `reitit-middleware` but for interceptors. See the [Docs](https://metosin.github.io/reitit/http/default_interceptors.html).
+
 ## 0.2.1 (2018-09-04)
 
 ## `reitit-schema`
