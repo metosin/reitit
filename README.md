@@ -33,6 +33,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
 * `reitit-frontend` Tools for [frontend routing]((https://metosin.github.io/reitit/frontend/basics.html))
 * `reitit-http` http-routing with Pedestal-style Interceptors
+* `reitit-interceptors` - [common interceptors](https://metosin.github.io/reitit/http/default_interceptors.html) for `reitit-http`
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors
 
 ## Latest version
@@ -65,6 +66,7 @@ Optionally, the parts can be required separately:
 
 ;; http with interceptors
 [metosin/reitit-http "0.2.1"]
+[metosin/reitit-interceptors "0.2.1"]
 [metosin/reitit-sieppari "0.2.1"]
 ```
 
