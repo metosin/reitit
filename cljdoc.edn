@@ -38,7 +38,7 @@
   ["HTTP" {}
    ["Interceptors" {:file "doc/http/interceptors.md"}]
    ["Pedestal" {:file "doc/http/pedestal.md"}]
-   ["Sieppari" {:file "doc/http/sieppar.md"}]
+   ["Sieppari" {:file "doc/http/sieppari.md"}]
    ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]]
   ["Frontend" {}
    ["Basics" {:file "doc/frontend/basics.md"}]
