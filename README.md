@@ -7,7 +7,7 @@ A fast data-driven router for Clojure(Script).
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html) & [the browser](https://metosin.github.io/reitit/frontend/basics.html)
+* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html) & [the browser](https://metosin.github.io/reitit/frontend/basics.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)

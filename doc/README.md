@@ -7,7 +7,7 @@
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
 * [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](./ring/ring.html) & [the browser](./frontend/basics.html)
+* Helpers for [ring](./ring/ring.html), [http](./http/interceptors.md) & [the browser](./frontend/basics.html)
 * Extendable
 * Modular
 * [Fast](performance.md)
