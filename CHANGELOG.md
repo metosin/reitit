@@ -1,4 +1,4 @@
-## 0.2.2-SNAPSHOT
+## 0.2.2 (2018-09-09)
 
 * better documentation for interceptors
 * sample apps:
