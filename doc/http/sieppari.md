@@ -4,11 +4,13 @@
 [metosin/reitit-sieppari "0.2.1"]
 ```
 
-[Sieppari](https://github.com/metosin/sieppari) is a new and fast interceptor implementation with pluggable async ([core.async](https://github.com/clojure/core.async), [Manifold](https://github.com/ztellman/manifold) and [Promesa](http://funcool.github.io/promesa/latest)).
+[Sieppari](https://github.com/metosin/sieppari) is a new and fast interceptor implementation for Clojure, with pluggable async supporting [core.async](https://github.com/clojure/core.async), [Manifold](https://github.com/ztellman/manifold) and [Promesa](http://funcool.github.io/promesa/latest).
 
-To use Sieppari with `reitit-http`, there is `reitit-sieppari` module, which has an `reitit.interceptor.Executor` implementation for Sieppari. All reitit interceptors use the Sieppari Interceptor model, so they work seamlesly together.
+To use Sieppari with `reitit-http`, we need to attach a `reitit.interceptor.sieppari/executor` to a `http-router` to compile and execute the interceptor chains. Reitit and Sieppari share the same interceptor model, so all reitit default interceptors work seamlesly together.
 
-Synchronous Ring:
+We can use both syncronous ring and [async-ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) with Sieppari.
+
+## Synchronous Ring
 
 ```clj
 (require '[reitit.http :as http])
@@ -43,7 +45,7 @@ Synchronous Ring:
 ;=> {:status 200, :body "pong"}
 ```
 
-Ring-async:
+## Async-ring
 
 ```clj
 (let [respond (promise)]

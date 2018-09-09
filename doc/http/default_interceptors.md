@@ -4,7 +4,7 @@
 [metosin/reitit-interceptors "0.2.1"]
 ```
 
-Just like the [ring default middleware](../ring/default_middleware.md), but for interceptors. The default interceptors are:
+Just like the [ring default middleware](../ring/default_middleware.md), but for interceptors.
 
 ### Parameters handling
 * `reitit.http.interceptors.parameters/parameters-interceptor` 

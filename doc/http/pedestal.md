@@ -1,10 +1,10 @@
 # Pedestal
 
-[Pedestal](http://pedestal.io/) is a well known interceptor implmementation for Clojure. To use `reitit-http` with it, we need to change the default routing interceptor into a new one. Currently, there isn't a separate Pedestal-module in reitit, but the examples have the example code how to do this.
+[Pedestal](http://pedestal.io/) is a well known interceptor-based web framework for Clojure. To use `reitit-http` with Pedestal, we need to change the default routing interceptor into a new one. Examples projects show how to do this.
 
 ## Caveat
 
-`reitit-http` defines Interceptors as `reitit.interceptor/Interceptor`. Compared to Pedestal (2-arity), reitit uses a simplified (1-arity) model for handling errors, described in the [Sieppari README](https://github.com/metosin/sieppari#differences-to-pedestal). 
+`reitit-http` defines Interceptors as `reitit.interceptor/Interceptor`. Compared to Pedestal 2-arity error handlers, reitit uses a simplified (1-arity) handlers. Differences in error handling are described in the [Sieppari README](https://github.com/metosin/sieppari#differences-to-pedestal).
 
 * you can use any [pedestal-style interceptor](http://pedestal.io/reference/interceptors) within reitit router (as Pedestal is executing those anyway)
 * you can use any reitit-style interceptor that doesn't have `:error`-stage defined
