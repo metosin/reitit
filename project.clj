@@ -104,6 +104,7 @@
                                   [funcool/promesa "2.0.1"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "0.3.1"]
+                                  [ring-cors "0.1.12"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
