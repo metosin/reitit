@@ -14,6 +14,9 @@
     ([request respond raise]
      (handler (update request ::mw (fnil conj []) name) respond raise))))
 
+(defn mw-variadic [handler name name2 name3]
+  (mw handler (keyword (str name "_" name2 "_" name3))))
+
 (defn handler
   ([{:keys [::mw]}]
    {:status 200 :body (conj mw :ok)})
@@ -104,6 +107,14 @@
       (if (and (seq required) (not (set/intersection required roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
+
+(deftest mw-variadic-test
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/" {:middleware [[mw-variadic "kikka" "kakka" "kukka"]]
+                      :handler handler}]))]
+    (is (= {:status 200, :body [:kikka_kakka_kukka :ok]}
+           (app {:request-method :get, :uri "/"})))))
 
 (deftest enforcing-data-rules-at-runtime-test
   (let [handler (constantly {:status 200, :body "ok"})
