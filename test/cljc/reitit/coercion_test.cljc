@@ -54,3 +54,17 @@
           (is (= nil (coercion/coerce! m))))
         (let [m (r/match-by-path r "/none/kikka/abba")]
           (is (= nil (coercion/coerce! m))))))))
+
+(defn match-by-path-and-coerce! [router path]
+  (if-let [match (r/match-by-path router path)]
+    (assoc match :parameters (coercion/coerce! match))))
+
+(deftest data-spec-example-test
+  (let [router (r/router
+                 ["/:company/users/:user-id" {:name ::user-view
+                                              :coercion reitit.coercion.spec/coercion
+                                              :parameters {:path {:company string?
+                                                                  :user-id int?}}}]
+                 {:compile coercion/compile-request-coercers})]
+    (is (= {:path {:user-id 123, :company "metosin"}}
+           (:parameters (match-by-path-and-coerce! router "/metosin/users/123"))))))

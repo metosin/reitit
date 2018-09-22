@@ -1,6 +1,7 @@
 (ns reitit.ring-coercion-test
   (:require [clojure.test :refer [deftest testing is]]
             [schema.core :as s]
+            [spec-tools.data-spec :as ds]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
@@ -48,7 +49,7 @@
                    (ring/router
                      ["/api"
                       ["/plus/:e"
-                       {:get {:parameters {:query {:a int?}
+                       {:get {:parameters {:query {(ds/opt :a) int?}
                                            :body {:b int?}
                                            :form {:c int?}
                                            :header {:d int?}
