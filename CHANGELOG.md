@@ -2,6 +2,35 @@
 
 ## `reitit-ring`
 
+* `ring-handler` takes optionally a 3rd argument, an options map which can be used to se top-level middleware, applied before any routing is done:
+
+```clj
+(require '[reitit.ring :as ring])
+
+(defn wrap [handler id]
+  (fn [request]
+    (handler (update request ::acc (fnil conj []) id))))
+
+(defn handler [{:keys [::acc]}]
+  {:status 200, :body (conj acc :handler)})
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[mw :api]]}
+       ["/get" {:get handler}]])
+    (ring/create-default-handler)
+    {:middleware [[mw :top]]}))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:top :api :ok]}
+
+(require '[reitit.core :as r])
+
+(-> app (ring/get-router))
+; #object[reitit.core$single_static_path_router]
+```
+
 * updated deps:
 
 ```clj
