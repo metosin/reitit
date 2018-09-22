@@ -61,7 +61,7 @@
                                   [metosin/reitit]
 
                                   [expound "0.7.1"]
-                                  [orchestra "2018.08.19-1"]
+                                  [orchestra "2018.09.10-1"]
 
                                   [ring "1.7.0"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
@@ -94,7 +94,7 @@
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]
                                    [metosin/sieppari "0.0.0-alpha5"]
-                                   [yada "1.2.13"]
+                                   [yada "1.2.14"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.1"]
                                    [bidi "2.1.4"]]}
