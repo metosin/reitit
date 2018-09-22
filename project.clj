@@ -23,7 +23,7 @@
                          [metosin/reitit-frontend "0.2.2"]
                          [metosin/reitit-sieppari "0.2.2"]
                          [meta-merge "1.0.0"]
-                         [ring/ring-core "1.6.3"]
+                         [ring/ring-core "1.7.0"]
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
@@ -63,7 +63,7 @@
                                   [expound "0.7.1"]
                                   [orchestra "2018.08.19-1"]
 
-                                  [ring "1.6.3"]
+                                  [ring "1.7.0"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/muuntaja "0.6.0"]
                                   [metosin/ring-swagger-ui "2.2.10"]
