@@ -78,6 +78,22 @@
           (is (= {:status 200, :body [:api :users :post :ok]}
                  @result))))))
 
+  (testing "with top-level middleware"
+    (let [router (ring/router
+                   ["/api" {:middleware [[mw :api]]}
+                    ["/get" {:get handler}]])
+          app (ring/ring-handler router nil {:middleware [[mw :top]]})]
+
+      (testing "router can be extracted"
+        (is (= router (ring/get-router app))))
+
+      (testing "not found"
+        (is (= nil (app {:uri "/favicon.ico"}))))
+
+      (testing "on match"
+        (is (= {:status 200, :body [:top :api :ok]}
+               (app {:uri "/api/get" :request-method :get}))))))
+
   (testing "named routes"
     (let [router (ring/router
                    [["/api"

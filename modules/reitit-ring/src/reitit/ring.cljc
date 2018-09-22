@@ -177,41 +177,47 @@
         (create handler)))))
 
 (defn ring-handler
-  "Creates a ring-handler out of a ring-router.
-  Supports both 1 (sync) and 3 (async) arities.
-  Optionally takes a ring-handler which is called
-  in no route matches."
+  "Creates a ring-handler out of a router, optional default ring-handler
+  and options map, with the following keys:
+
+  | key           | description |
+  | --------------|-------------|
+  | `:middleware` | Optional sequence of middleware that are wrap the [[ring-handler]]"
   ([router]
    (ring-handler router nil))
   ([router default-handler]
-   (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))]
+   (ring-handler router default-handler nil))
+  ([router default-handler {:keys [middleware]}]
+   (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
+         wrap (if middleware (partial middleware/chain middleware) identity)]
      (with-meta
-       (fn
-         ([request]
-          (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request)
-                  path-params (:path-params match)
-                  result (:result match)
-                  handler (-> result method :handler (or default-handler))
-                  request (-> request
-                              (impl/fast-assoc :path-params path-params)
-                              (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router))]
-              (or (handler request) (default-handler request)))
-            (default-handler request)))
-         ([request respond raise]
-          (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request)
-                  path-params (:path-params match)
-                  result (:result match)
-                  handler (-> result method :handler (or default-handler))
-                  request (-> request
-                              (impl/fast-assoc :path-params path-params)
-                              (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router))]
-              ((routes handler default-handler) request respond raise))
-            (default-handler request respond raise))
-          nil))
+       (wrap
+         (fn
+           ([request]
+            (if-let [match (r/match-by-path router (:uri request))]
+              (let [method (:request-method request)
+                    path-params (:path-params match)
+                    result (:result match)
+                    handler (-> result method :handler (or default-handler))
+                    request (-> request
+                                (impl/fast-assoc :path-params path-params)
+                                (impl/fast-assoc ::r/match match)
+                                (impl/fast-assoc ::r/router router))]
+                (or (handler request) (default-handler request)))
+              (default-handler request)))
+           ([request respond raise]
+            (if-let [match (r/match-by-path router (:uri request))]
+              (let [method (:request-method request)
+                    path-params (:path-params match)
+                    result (:result match)
+                    handler (-> result method :handler (or default-handler))
+                    request (-> request
+                                (impl/fast-assoc :path-params path-params)
+                                (impl/fast-assoc ::r/match match)
+                                (impl/fast-assoc ::r/router router))]
+                ((routes handler default-handler) request respond raise))
+              (default-handler request respond raise))
+            nil)))
        {::r/router router}))))
 
 (defn get-router [handler]

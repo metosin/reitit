@@ -127,6 +127,21 @@ Middleware is applied correctly:
 ; {:status 200, :body [:api :admin :db :delete :handler]}
 ```
 
+Top-level middleware, applied before any routing is done:
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[mw :api]]}
+       ["/get" {:get handler}]])
+    nil 
+    {:middleware [[mw :top]]}))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:top :api :ok]}
+```
+
 # Async Ring
 
 All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure & ClojureScript, so they work with [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) and [Node.js](https://nodejs.org) too.
