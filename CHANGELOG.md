@@ -45,6 +45,20 @@
 
 * fix `reitit.ring.middleware.parameters/parameters-middleware`
 
+* updated deps:
+
+```clj
+[metosin/muuntaja "0.6.1"] is available but we use "0.6.0"
+```
+
+## `reitit-swagger-ui`
+
+* updated deps:
+
+```clj
+[metosin/jsonista "0.2.2"] is available but we use "0.2.1"
+```
+
 ## 0.2.2 (2018-09-09)
 
 * better documentation for interceptors

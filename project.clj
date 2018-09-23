@@ -27,8 +27,8 @@
                          [metosin/spec-tools "0.7.1"]
                          [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/muuntaja "0.6.0"]
-                         [metosin/jsonista "0.2.1"]
+                         [metosin/muuntaja "0.6.1"]
+                         [metosin/jsonista "0.2.2"]
                          [metosin/sieppari "0.0.0-alpha5"]]
 
   :plugins [[jonase/eastwood "0.2.6"]
@@ -65,10 +65,10 @@
 
                                   [ring "1.7.0"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.0"]
+                                  [metosin/muuntaja "0.6.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/sieppari "0.0.0-alpha5"]
-                                  [metosin/jsonista "0.2.1"]
+                                  [metosin/jsonista "0.2.2"]
 
                                   [criterium "0.4.4"]
                                   [org.clojure/test.check "0.9.0"]
