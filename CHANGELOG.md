@@ -31,6 +31,10 @@
 ; #object[reitit.core$single_static_path_router]
 ```
 
+* `:options` requests are served for all routes by default with 200 OK to better support things like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  * the default handler is undocumented (for Swagger)
+  * new router option `:reitit.ring/default-options-handler` to change this behavior. Setting `nil` disables this.
+
 * updated deps:
 
 ```clj
