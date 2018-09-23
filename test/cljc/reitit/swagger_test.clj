@@ -183,6 +183,19 @@
            (-> {:request-method :get :uri "/swagger.json"}
                (app) :body :x-id)))))
 
+(deftest with-options-endpoint-test
+  (let [app (ring/ring-handler
+              (ring/router
+                [["/ping"
+                  {:options (constantly "options")}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))]
+    (is (= ["/ping"] (spec-paths app "/swagger.json")))
+    (is (= #{::swagger/default}
+           (-> {:request-method :get :uri "/swagger.json"}
+               (app) :body :x-id)))))
+
 (deftest all-parameter-types-test
   (let [app (ring/ring-handler
               (ring/router

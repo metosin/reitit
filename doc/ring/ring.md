@@ -2,15 +2,25 @@
 
 [Ring](https://github.com/ring-clojure/ring) is a Clojure web applications library inspired by Python's WSGI and Ruby's Rack. By abstracting the details of HTTP into a simple, unified API, Ring allows web applications to be constructed of modular components that can be shared among a variety of applications, web servers, and web frameworks.
 
+Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
+
 ```clj
 [metosin/reitit-ring "0.2.2"]
 ```
 
-Ring-router adds support for [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers), [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) and routing based on `:request-method`. Ring-router is created with `reitit.ring/router` function. It uses a custom route compiler, creating a optimized data structure for handling route matches, with compiled middleware chain & handlers for all request methods. It also ensures that all routes have a `:handler` defined. `reitit.ring/ring-handler` is used to create a Ring handler out of ring-router.
+## `reitit.ring/ring-router`
 
-### Example
+`ring-router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
+ 
+ It accepts the following options:
 
-Simple Ring app:
+| key                                    | description |
+| ---------------------------------------|-------------|
+| `:reitit.middleware/transform`         | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
+| `:reitit.middleware/registry`          | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
+| `:reitit.ring/default-options-handler` | Default handler for `:options` method in endpoints (default: default-options-handler)
+
+Example router:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -18,10 +28,37 @@ Simple Ring app:
 (defn handler [_]
   {:status 200, :body "ok"})
 
-(def app
-  (ring/ring-handler
-    (ring/router
-      ["/ping" handler])))
+(def router
+  (ring/router
+    ["/ping" {:get handler}]))
+```
+
+Match contains the ring-optimized `:result`:
+
+```clj
+(require '[reitit.core :as r])
+
+(r/match-by-path router "/ping")
+;#Match{:template "/ping"
+;       :data {:get {:handler #object[...]}}
+;       :result #Methods{:get #Endpoint{...}
+;                        :options #Endpoint{...}}
+;       :path-params {}
+;       :path "/ping"}
+```
+
+## `reitit.ring/ring-handler`
+
+Given a `ring-router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
+
+| key           | description |
+| --------------|-------------|
+| `:middleware` | Optional sequence of middleware that wrap the ring-handler"
+
+Simple Ring app:
+
+```clj
+(def app (ring/ring-handler router))
 ```
 
 Applying the handler:
@@ -36,31 +73,46 @@ Applying the handler:
 ; {:status 200, :body "ok"}
 ```
 
-The expanded routes shows the compilation results:
+The router can be accessed via `get-router`:
 
 ```clj
-(-> app (ring/get-router) (reitit/routes))
-; [["/ping"
-;   {:handler #object[...]}
-;   #Methods{:any #Endpoint{:data {:handler #object[...]},
-;                           :handler #object[...],
-;                           :middleware []}}]]
+(-> app (ring/get-router) (r/compiled-routes))
+;[["/ping"
+;  {:handler #object[...]}
+;  #Methods{:get #Endpoint{:data {:handler #object[...]}
+;                          :handler #object[...]
+;                          :middleware []}
+;           :options #Endpoint{:data {:handler #object[...]}
+;                              :handler #object[...]
+;                              :middleware []}}]]
 ```
-
-Note the compiled resuts as third element in the route vector.
 
 # Request-method based routing
 
-Handler are also looked under request-method keys: `:get`, `:head`, `:patch`, `:delete`, `:options`, `:post` or `:put`. Top-level handler is used if request-method based handler is not found.
+Handlers can be placed either to the top-level (all methods) or under a spesific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found. 
+
+By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
 ```clj
 (def app
   (ring/ring-handler
     (ring/router
-      ["/ping" {:name ::ping
-                :get handler
-                :post handler}])))
+      [["/all" handler]
+       ["/ping" {:name ::ping
+                 :get handler
+                 :post handler}]])))
+```
 
+Top-level handler catches all methods:
+
+```clj
+(app {:request-method :delete, :uri "/all"})
+; {:status 200, :body "ok"}
+```
+
+Method-level handler catches only the method:
+
+```clj
 (app {:request-method :get, :uri "/ping"})
 ; {:status 200, :body "ok"}
 
@@ -68,19 +120,26 @@ Handler are also looked under request-method keys: `:get`, `:head`, `:patch`, `:
 ; nil
 ```
 
+By default, `:options` is also supported (ree router options to change this):
+
+```clj
+(app {:request-method :options, :uri "/ping"})
+; {:status 200, :body ""}
+```
+
 Name-based reverse routing:
 
 ```clj
 (-> app
     (ring/get-router)
-    (reitit/match-by-name ::ping)
-    :path)
+    (r/match-by-name ::ping)
+    (r/match->path))
 ; "/ping"
 ```
 
 # Middleware
 
-Middleware can be added with a `:middleware` key, either to top-level or under `:request-method` submap. It's value should be a vector of any the following:
+Middleware can be mounted using a `:middleware` key - either to top-level or under `:request-method` submap. It's value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
 
 1. normal ring middleware function `handler -> request -> response`
 2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
@@ -141,7 +200,3 @@ Top-level middleware, applied before any routing is done:
 (app {:request-method :get, :uri "/api/get"})
 ; {:status 200, :body [:top :api :ok]}
 ```
-
-# Async Ring
-
-All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure & ClojureScript, so they work with [Async Ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) and [Node.js](https://nodejs.org) too.
