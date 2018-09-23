@@ -188,10 +188,12 @@
               (ring/router
                 [["/ping"
                   {:options (constantly "options")}]
+                 ["/pong"
+                  (constantly "options")]
                  ["/swagger.json"
                   {:get {:no-doc true
                          :handler (swagger/create-swagger-handler)}}]]))]
-    (is (= ["/ping"] (spec-paths app "/swagger.json")))
+    (is (= ["/ping" "/pong"] (spec-paths app "/swagger.json")))
     (is (= #{::swagger/default}
            (-> {:request-method :get :uri "/swagger.json"}
                (app) :body :x-id)))))
