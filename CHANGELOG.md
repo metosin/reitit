@@ -41,6 +41,10 @@
 [ring/ring-core "1.7.0"] is available but we use "1.6.3"
 ```
 
+## `reitit-middleware`
+
+* fix `reitit.ring.middleware.parameters/parameters-middleware`
+
 ## 0.2.2 (2018-09-09)
 
 * better documentation for interceptors
