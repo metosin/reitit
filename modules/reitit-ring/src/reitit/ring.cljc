@@ -7,6 +7,9 @@
                       [ring.util.response :as response]])
             [clojure.string :as str]))
 
+(declare get-match)
+(declare get-router)
+
 (def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
 (defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
@@ -53,8 +56,10 @@
         (->methods (:handler top) data)
         childs))))
 
-(defn default-options-handler [_]
-  {:status 200, :body ""})
+(defn default-options-handler [request]
+  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+    {:status 200, :body "", :headers {"Allow" allow}}))
 
 ;;
 ;; public api

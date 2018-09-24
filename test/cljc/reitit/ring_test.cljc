@@ -198,19 +198,20 @@
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
 (deftest default-options-handler-test
-  (let [response {:status 200, :body "ok"}
-        options-response (ring/default-options-handler :request)]
+  (let [response {:status 200, :body "ok"}]
 
     (testing "with defaults"
       (let [app (ring/ring-handler
                   (ring/router
-                    [["/get" {:get (constantly response)}]
+                    [["/get" {:get (constantly response)
+                              :post (constantly response)}]
                      ["/options" {:options (constantly response)}]
                      ["/any" (constantly response)]]))]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
-          (is (= options-response (app {:request-method :options, :uri "/get"}))))
+          (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                 (app {:request-method :options, :uri "/get"}))))
 
         (testing "endpoint with a options handler"
           (is (= response (app {:request-method :options, :uri "/options"}))))
