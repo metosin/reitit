@@ -724,20 +724,73 @@
                                 
                                 <h1 id="ring-router">Ring Router</h1>
 <p><a href="https://github.com/ring-clojure/ring" target="_blank">Ring</a> is a Clojure web applications library inspired by Python&apos;s WSGI and Ruby&apos;s Rack. By abstracting the details of HTTP into a simple, unified API, Ring allows web applications to be constructed of modular components that can be shared among a variety of applications, web servers, and web frameworks.</p>
+<p>Read more about the <a href="https://github.com/ring-clojure/ring/wiki/Concepts" target="_blank">Ring Concepts</a>.</p>
 <pre><code class="lang-clj">[metosin/reitit-ring <span class="hljs-string">&quot;0.2.2&quot;</span>]
 </code></pre>
-<p>Ring-router adds support for <a href="https://github.com/ring-clojure/ring/wiki/Concepts#handlers" target="_blank">handlers</a>, <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">middleware</a> and routing based on <code>:request-method</code>. Ring-router is created with <code>reitit.ring/router</code> function. It uses a custom route compiler, creating a optimized data structure for handling route matches, with compiled middleware chain &amp; handlers for all request methods. It also ensures that all routes have a <code>:handler</code> defined. <code>reitit.ring/ring-handler</code> is used to create a Ring handler out of ring-router.</p>
-<h3 id="example">Example</h3>
-<p>Simple Ring app:</p>
+<h2 id="reititringring-router"><code>reitit.ring/ring-router</code></h2>
+<p><code>ring-router</code> is a higher order router, which adds support for <code>:request-method</code> based routing, <a href="https://github.com/ring-clojure/ring/wiki/Concepts#handlers" target="_blank">handlers</a> and <a href="https://github.com/ring-clojure/ring/wiki/Concepts#middleware" target="_blank">middleware</a>.</p>
+<p> It accepts the following options:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:reitit.middleware/transform</code></td>
+<td>Function of <code>[Middleware] =&gt; [Middleware]</code> to transform the expanded Middleware (default: identity).</td>
+</tr>
+<tr>
+<td><code>:reitit.middleware/registry</code></td>
+<td>Map of <code>keyword =&gt; IntoMiddleware</code> to replace keyword references into Middleware</td>
+</tr>
+<tr>
+<td><code>:reitit.ring/default-options-handler</code></td>
+<td>Default handler for <code>:options</code> method in endpoints (default: default-options-handler)</td>
+</tr>
+</tbody>
+</table>
+<p>Example router:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [_]
   {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>})
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
-  (<span class="hljs-name">ring/ring-handler</span>
-    (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> handler])))
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">ring/router</span>
+    [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> handler}]))
+</code></pre>
+<p>Match contains <code>:result</code> compiled by the <code>ring-router</code>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
+
+(<span class="hljs-name">r/match-by-path</span> router <span class="hljs-string">&quot;/ping&quot;</span>)
+<span class="hljs-comment">;#Match{:template &quot;/ping&quot;</span>
+<span class="hljs-comment">;       :data {:get {:handler #object[...]}}</span>
+<span class="hljs-comment">;       :result #Methods{:get #Endpoint{...}</span>
+<span class="hljs-comment">;                        :options #Endpoint{...}}</span>
+<span class="hljs-comment">;       :path-params {}</span>
+<span class="hljs-comment">;       :path &quot;/ping&quot;}</span>
+</code></pre>
+<h2 id="reititringring-handler"><code>reitit.ring/ring-handler</code></h2>
+<p>Given a <code>ring-router</code>, optional default-handler &amp; options, <code>ring-handler</code> function will return a valid ring handler supporting both synchronous and <a href="https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html" target="_blank">asynchronous</a> request handling. The following options are available:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:middleware</code></td>
+<td>Optional sequence of middleware that wrap the ring-handler&quot;</td>
+</tr>
+</tbody>
+</table>
+<p>Simple Ring app:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app (<span class="hljs-name">ring/ring-handler</span> router))
 </code></pre>
 <p>Applying the handler:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/favicon.ico&quot;</span>})
@@ -746,39 +799,52 @@
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
 <span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
 </code></pre>
-<p>The expanded routes shows the compilation results:</p>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app (<span class="hljs-name">ring/get-router</span>) (<span class="hljs-name">reitit/routes</span>))
-<span class="hljs-comment">; [[&quot;/ping&quot;</span>
-<span class="hljs-comment">;   {:handler #object[...]}</span>
-<span class="hljs-comment">;   #Methods{:any #Endpoint{:data {:handler #object[...]},</span>
-<span class="hljs-comment">;                           :handler #object[...],</span>
-<span class="hljs-comment">;                           :middleware []}}]]</span>
+<p>The router can be accessed via <code>get-router</code>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app (<span class="hljs-name">ring/get-router</span>) (<span class="hljs-name">r/compiled-routes</span>))
+<span class="hljs-comment">;[[&quot;/ping&quot;</span>
+<span class="hljs-comment">;  {:handler #object[...]}</span>
+<span class="hljs-comment">;  #Methods{:get #Endpoint{:data {:handler #object[...]}</span>
+<span class="hljs-comment">;                          :handler #object[...]</span>
+<span class="hljs-comment">;                          :middleware []}</span>
+<span class="hljs-comment">;           :options #Endpoint{:data {:handler #object[...]}</span>
+<span class="hljs-comment">;                              :handler #object[...]</span>
+<span class="hljs-comment">;                              :middleware []}}]]</span>
 </code></pre>
-<p>Note the compiled resuts as third element in the route vector.</p>
 <h1 id="request-method-based-routing">Request-method based routing</h1>
-<p>Handler are also looked under request-method keys: <code>:get</code>, <code>:head</code>, <code>:patch</code>, <code>:delete</code>, <code>:options</code>, <code>:post</code> or <code>:put</code>. Top-level handler is used if request-method based handler is not found.</p>
+<p>Handlers can be placed either to the top-level (all methods) or under a specific method (<code>:get</code>, <code>:head</code>, <code>:patch</code>, <code>:delete</code>, <code>:options</code>, <code>:post</code>, <code>:put</code> or <code>:trace</code>). Top-level handler is used if request-method based handler is not found. </p>
+<p>By default, the <code>:options</code> route is generated for all paths - to enable thing like <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing" target="_blank">CORS</a>.</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>
-                <span class="hljs-symbol">:get</span> handler
-                <span class="hljs-symbol">:post</span> handler}])))
-
-(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+      [[<span class="hljs-string">&quot;/all&quot;</span> handler]
+       [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>
+                 <span class="hljs-symbol">:get</span> handler
+                 <span class="hljs-symbol">:post</span> handler}]])))
+</code></pre>
+<p>Top-level handler catches all methods:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:delete</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/all&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
+</code></pre>
+<p>Method-level handler catches only the method:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
 <span class="hljs-comment">; {:status 200, :body &quot;ok&quot;}</span>
 
 (<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:put</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
 <span class="hljs-comment">; nil</span>
 </code></pre>
+<p>By default, <code>:options</code> is also supported (see router options to change this):</p>
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:options</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})
+<span class="hljs-comment">; {:status 200, :body &quot;&quot;}</span>
+</code></pre>
 <p>Name-based reverse routing:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> app
     (<span class="hljs-name">ring/get-router</span>)
-    (<span class="hljs-name">reitit/match-by-name</span> <span class="hljs-symbol">::ping</span>)
-    <span class="hljs-symbol">:path</span>)
+    (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::ping</span>)
+    (<span class="hljs-name">r/match-&gt;path</span>))
 <span class="hljs-comment">; &quot;/ping&quot;</span>
 </code></pre>
 <h1 id="middleware">Middleware</h1>
-<p>Middleware can be added with a <code>:middleware</code> key, either to top-level or under <code>:request-method</code> submap. It&apos;s value should be a vector of any the following:</p>
+<p>Middleware can be mounted using a <code>:middleware</code> key - either to top-level or under request method submap. Its value should be a vector of <code>reitit.middleware/IntoMiddleware</code> values. These include:</p>
 <ol>
 <li>normal ring middleware function <code>handler -&gt; request -&gt; response</code></li>
 <li>vector of middleware function <code>[handler args*] -&gt; request -&gt; response</code> and it&apos;s arguments</li>
@@ -826,8 +892,6 @@
 (<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api/get&quot;</span>})
 <span class="hljs-comment">; {:status 200, :body [:top :api :ok]}</span>
 </code></pre>
-<h1 id="async-ring">Async Ring</h1>
-<p>All built-in middleware provide both 2 and 3-arity and are compiled for both Clojure &amp; ClojureScript, so they work with <a href="https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html" target="_blank">Async Ring</a> and <a href="https://nodejs.org" target="_blank">Node.js</a> too.</p>
 
                                 
                                 </section>
@@ -871,7 +935,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Ring-router","level":"4.1","depth":1,"next":{"title":"Reverse-routing","level":"4.2","depth":1,"path":"ring/reverse_routing.md","ref":"ring/reverse_routing.md","articles":[]},"previous":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/ring.md","mtime":"2018-09-24T04:34:00.916Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-24T04:34:56.547Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring-router","level":"4.1","depth":1,"next":{"title":"Reverse-routing","level":"4.2","depth":1,"path":"ring/reverse_routing.md","ref":"ring/reverse_routing.md","articles":[]},"previous":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/ring.md","mtime":"2018-09-24T17:29:55.647Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-09-24T17:30:40.365Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
