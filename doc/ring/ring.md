@@ -33,7 +33,7 @@ Example router:
     ["/ping" {:get handler}]))
 ```
 
-Match contains the ring-optimized `:result`:
+Match contains `:result` compiled by the `ring-router`:
 
 ```clj
 (require '[reitit.core :as r])
@@ -89,7 +89,7 @@ The router can be accessed via `get-router`:
 
 # Request-method based routing
 
-Handlers can be placed either to the top-level (all methods) or under a spesific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found. 
+Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found. 
 
 By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
@@ -120,7 +120,7 @@ Method-level handler catches only the method:
 ; nil
 ```
 
-By default, `:options` is also supported (ree router options to change this):
+By default, `:options` is also supported (see router options to change this):
 
 ```clj
 (app {:request-method :options, :uri "/ping"})
@@ -139,7 +139,7 @@ Name-based reverse routing:
 
 # Middleware
 
-Middleware can be mounted using a `:middleware` key - either to top-level or under `:request-method` submap. It's value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
+Middleware can be mounted using a `:middleware` key - either to top-level or under request method submap. Its value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
 
 1. normal ring middleware function `handler -> request -> response`
 2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
