@@ -7,6 +7,9 @@
                       [ring.util.response :as response]])
             [clojure.string :as str]))
 
+(declare get-match)
+(declare get-router)
+
 (def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
 (defrecord Methods [get head post put delete connect options trace patch])
 (defrecord Endpoint [data handler path method middleware])
@@ -25,7 +28,7 @@
               (update acc method expand opts)
               acc)) data http-methods)])
 
-(defn compile-result [[path data] opts]
+(defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
   (let [[top childs] (group-keys data)
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
@@ -37,7 +40,12 @@
                       (fn [acc method]
                         (cond-> acc
                                 any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods {})
+                      (map->Methods
+                        {:options
+                         (if default-options-handler
+                           (->endpoint path (assoc data
+                                              :handler default-options-handler
+                                              :no-doc true) :options nil))})
                       http-methods))]
     (if-not (seq childs)
       (->methods true top)
@@ -48,6 +56,11 @@
         (->methods (:handler top) data)
         childs))))
 
+(defn default-options-handler [request]
+  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+    {:status 200, :body "", :headers {"Allow" allow}}))
+
 ;;
 ;; public api
 ;;
@@ -57,6 +70,14 @@
   support for http-methods and Middleware. See [docs](https://metosin.github.io/reitit/)
   for details.
 
+  Options:
+
+  | key                                    | description |
+  | ---------------------------------------|-------------|
+  | `:reitit.middleware/transform`         | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
+  | `:reitit.middleware/registry`          | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
+  | `:reitit.ring/default-options-handler` | Default handler for `:options` method in endpoints (default: default-options-handler)
+
   Example:
 
       (router
@@ -64,13 +85,13 @@
           [\"/users\" {:get get-user
                        :post update-user
                        :delete {:middleware [wrap-delete]
-                               :handler delete-user}}]])
-
-  See router options from [[reitit.core/router]] and [[reitit.middleware/router]]."
+                               :handler delete-user}}]])"
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
+   (let [opts (merge {:coerce coerce-handler
+                      :compile compile-result
+                      ::default-options-handler default-options-handler} opts)]
      (r/router data opts))))
 
 (defn routes
@@ -182,7 +203,7 @@
 
   | key           | description |
   | --------------|-------------|
-  | `:middleware` | Optional sequence of middleware that are wrap the [[ring-handler]]"
+  | `:middleware` | Optional sequence of middleware that wrap the ring-handler"
   ([router]
    (ring-handler router nil))
   ([router default-handler]

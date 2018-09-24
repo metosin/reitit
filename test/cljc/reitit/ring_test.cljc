@@ -197,6 +197,48 @@
           (testing "handler rejects"
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
+(deftest default-options-handler-test
+  (let [response {:status 200, :body "ok"}]
+
+    (testing "with defaults"
+      (let [app (ring/ring-handler
+                  (ring/router
+                    [["/get" {:get (constantly response)
+                              :post (constantly response)}]
+                     ["/options" {:options (constantly response)}]
+                     ["/any" (constantly response)]]))]
+
+        (testing "endpoint with a non-options handler"
+          (is (= response (app {:request-method :get, :uri "/get"})))
+          (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                 (app {:request-method :options, :uri "/get"}))))
+
+        (testing "endpoint with a options handler"
+          (is (= response (app {:request-method :options, :uri "/options"}))))
+
+        (testing "endpoint with top-level handler"
+          (is (= response (app {:request-method :get, :uri "/any"})))
+          (is (= response (app {:request-method :options, :uri "/any"}))))))
+
+    (testing "disabled via options"
+      (let [app (ring/ring-handler
+                  (ring/router
+                    [["/get" {:get (constantly response)}]
+                     ["/options" {:options (constantly response)}]
+                     ["/any" (constantly response)]]
+                    {::ring/default-options-handler nil}))]
+
+        (testing "endpoint with a non-options handler"
+          (is (= response (app {:request-method :get, :uri "/get"})))
+          (is (= nil (app {:request-method :options, :uri "/get"}))))
+
+        (testing "endpoint with a options handler"
+          (is (= response (app {:request-method :options, :uri "/options"}))))
+
+        (testing "endpoint with top-level handler"
+          (is (= response (app {:request-method :get, :uri "/any"})))
+          (is (= response (app {:request-method :options, :uri "/any"}))))))))
+
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
                    (fn

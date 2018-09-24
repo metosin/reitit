@@ -10,6 +10,4 @@
   :form-params  - a map of parameters from the body
   :params       - a merged map of all types of parameter"
   {:name ::parameters
-   :enter (fn [ctx]
-            (let [request (:request ctx)]
-              (assoc ctx :request (params/params-request request))))})
+   :wrap params/wrap-params})

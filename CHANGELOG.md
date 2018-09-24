@@ -31,10 +31,38 @@
 ; #object[reitit.core$single_static_path_router]
 ```
 
+* `:options` requests are served for all routes by default with 200 OK to better support things like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  * the default handler is not documented in Swagger
+  * new router option `:reitit.ring/default-options-handler` to change this behavior. Setting `nil` disables this.
+
 * updated deps:
 
 ```clj
 [ring/ring-core "1.7.0"] is available but we use "1.6.3"
+```
+
+## `reitit-http`
+
+* `:options` requests are served for all routes by default with 200 OK to better support things like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  * the default handler is not documented in Swagger
+  * new router option `:reitit.http/default-options-handler` to change this behavior. Setting `nil` disables this.
+
+## `reitit-middleware`
+
+* fix `reitit.ring.middleware.parameters/parameters-middleware`
+
+* updated deps:
+
+```clj
+[metosin/muuntaja "0.6.1"] is available but we use "0.6.0"
+```
+
+## `reitit-swagger-ui`
+
+* updated deps:
+
+```clj
+[metosin/jsonista "0.2.2"] is available but we use "0.2.1"
 ```
 
 ## 0.2.2 (2018-09-09)
