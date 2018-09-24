@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.2.3 (2018-09-24)
 
 ## `reitit-ring`
 
