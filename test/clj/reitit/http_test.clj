@@ -169,6 +169,50 @@
           (testing "handler rejects"
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
+(deftest default-options-handler-test
+  (let [response {:status 200, :body "ok"}]
+
+    (testing "with defaults"
+      (let [app (http/ring-handler
+                  (http/router
+                    [["/get" {:get (constantly response)
+                              :post (constantly response)}]
+                     ["/options" {:options (constantly response)}]
+                     ["/any" (constantly response)]])
+                  {:executor sieppari/executor})]
+
+        (testing "endpoint with a non-options handler"
+          (is (= response (app {:request-method :get, :uri "/get"})))
+          (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                 (app {:request-method :options, :uri "/get"}))))
+
+        (testing "endpoint with a options handler"
+          (is (= response (app {:request-method :options, :uri "/options"}))))
+
+        (testing "endpoint with top-level handler"
+          (is (= response (app {:request-method :get, :uri "/any"})))
+          (is (= response (app {:request-method :options, :uri "/any"}))))))
+
+    (testing "disabled via options"
+      (let [app (http/ring-handler
+                  (http/router
+                    [["/get" {:get (constantly response)}]
+                     ["/options" {:options (constantly response)}]
+                     ["/any" (constantly response)]]
+                    {::http/default-options-handler nil})
+                  {:executor sieppari/executor})]
+
+        (testing "endpoint with a non-options handler"
+          (is (= response (app {:request-method :get, :uri "/get"})))
+          (is (= nil (app {:request-method :options, :uri "/get"}))))
+
+        (testing "endpoint with a options handler"
+          (is (= response (app {:request-method :options, :uri "/options"}))))
+
+        (testing "endpoint with top-level handler"
+          (is (= response (app {:request-method :get, :uri "/any"})))
+          (is (= response (app {:request-method :options, :uri "/any"}))))))))
+
 (deftest async-http-test
   (let [promise #(let [value (atom ::nil)]
                    (fn

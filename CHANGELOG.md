@@ -41,6 +41,12 @@
 [ring/ring-core "1.7.0"] is available but we use "1.6.3"
 ```
 
+## `reitit-http`
+
+* `:options` requests are served for all routes by default with 200 OK to better support things like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  * the default handler is not documented in Swagger
+  * new router option `:reitit.http/default-options-handler` to change this behavior. Setting `nil` disables this.
+
 ## `reitit-middleware`
 
 * fix `reitit.ring.middleware.parameters/parameters-middleware`

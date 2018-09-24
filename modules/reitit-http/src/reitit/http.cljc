@@ -14,7 +14,7 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] opts]
+(defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
   (let [[top childs] (ring/group-keys data)
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
@@ -29,7 +29,12 @@
                       (fn [acc method]
                         (cond-> acc
                                 any? (assoc method (->endpoint path data method nil))))
-                      (ring/map->Methods {})
+                      (ring/map->Methods
+                        {:options
+                         (if default-options-handler
+                           (->endpoint path (assoc data
+                                              :handler default-options-handler
+                                              :no-doc true) :options nil))})
                       ring/http-methods))]
     (if-not (seq childs)
       (->methods true top)
@@ -45,6 +50,14 @@
   support for http-methods and Interceptors. See [docs](https://metosin.github.io/reitit/)
   for details.
 
+  Options:
+
+  | key                                    | description |
+  | ---------------------------------------|-------------|
+  | `:reitit.interceptor/transform`         | Function of `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity).
+  | `:reitit.interceptor/registry`          | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptors
+  | `:reitit.http/default-options-handler` | Default handler for `:options` method in endpoints (default: reitit.ring/default-options-handler)
+
   Example:
 
       (router
@@ -58,7 +71,9 @@
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (meta-merge {:coerce coerce-handler, :compile compile-result} opts)]
+   (let [opts (merge {:coerce coerce-handler
+                      :compile compile-result
+                      ::default-options-handler ring/default-options-handler} opts)]
      (r/router data opts))))
 
 (defn routing-interceptor
