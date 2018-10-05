@@ -17,8 +17,8 @@ There are multiple options to use shared routing table.
 (def routes
   ["/kikka"
    {:name ::kikka
-    :get #?(:clj {:handler get-kikka})
-    :post #?(:clj {:handler post-kikka})}])
+    #?@(:clj [:get {:handler get-kikka}])
+    #?@(:clj [:post {:handler post-kikka}])}])
 ```
 
 ## Using custom expander
