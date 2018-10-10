@@ -160,11 +160,12 @@
      | :index-files     | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root path loader allow-symlinks? index-files paths]
+     ([{:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
         :or {parameter (keyword "")
              root "public"
              index-files ["index.html"]
-             paths (constantly nil)}}]
+             paths (constantly nil)
+             not-found-handler (constantly {:status 404, :body "", :headers {}})}}]
       (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
             path-size (count path)
             create (fn [handler]
@@ -193,8 +194,7 @@
                         (let [uri (:uri request)
                               path (-> request :path-params parameter)]
                           (or (path-or-index-response path uri)
-                              ;; TODO: use generic not-found handler
-                              {:status 404}))))]
+                              (not-found-handler request)))))]
         (create handler)))))
 
 (defn ring-handler
