@@ -151,13 +151,14 @@
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
-     | key              | description |
-     | -----------------|-------------|
-     | :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root            | optional resource root, defaults to `\"public\"`
-     | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
-     | :loader          | optional class loader to resolve the resources
-     | :index-files     | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`"
+     | key                | description |
+     | -------------------|-------------|
+     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root              | optional resource root, defaults to `\"public\"`
+     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :loader            | optional class loader to resolve the resources
+     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-resource-handler nil))
      ([{:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
