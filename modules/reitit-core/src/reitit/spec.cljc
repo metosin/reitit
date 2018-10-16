@@ -74,13 +74,13 @@
 ;; coercion
 ;;
 
-(s/def :reitit.core.coercion/kw-map (s/or :map (s/map-of any? any?) :spec s/spec?))
+(s/def :reitit.core.coercion/model any?)
 
-(s/def :reitit.core.coercion/query :reitit.core.coercion/kw-map)
-(s/def :reitit.core.coercion/body :reitit.core.coercion/kw-map)
-(s/def :reitit.core.coercion/form :reitit.core.coercion/kw-map)
-(s/def :reitit.core.coercion/header :reitit.core.coercion/kw-map)
-(s/def :reitit.core.coercion/path :reitit.core.coercion/kw-map)
+(s/def :reitit.core.coercion/query :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/body :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/form :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/header :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/path :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/parameters
   (s/keys :opt-un [:reitit.core.coercion/query
                    :reitit.core.coercion/body

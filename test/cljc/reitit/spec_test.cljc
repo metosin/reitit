@@ -118,7 +118,7 @@
 
   (is (s/valid?
         ::rs/parameters
-        {:parameters {:header {"d" string?}}}))
+        {:parameters {:header (s/keys)}}))
 
   (is (s/valid?
         ::rs/responses

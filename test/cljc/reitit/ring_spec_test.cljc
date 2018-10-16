@@ -103,7 +103,7 @@
         (ring/router
           ["/api"
            ["/plus/:e"
-            {:get {:parameters {:query {"a" string?}}
+            {:get {:parameters {:query (s/keys)}
                    :handler identity}}]]
           {:data {:middleware [rrc/coerce-exceptions-middleware
                                rrc/coerce-request-middleware
