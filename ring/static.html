@@ -770,7 +770,7 @@
 </tr>
 <tr>
 <td>:root</td>
-<td>optional resource root, defaults to <code>&quot;public&quot;</code></td>
+<td>optional resource root, defaults to <code>\&quot;public\&quot;</code></td>
 </tr>
 <tr>
 <td>:path</td>
@@ -782,7 +782,11 @@
 </tr>
 <tr>
 <td>:index-files</td>
-<td>optional vector of index-files to look in a resource directory, defaults to <code>[&quot;index.html&quot;]</code></td>
+<td>optional vector of index-files to look in a resource directory, defaults to <code>[\&quot;index.html\&quot;]</code></td>
+</tr>
+<tr>
+<td>:not-found-handler</td>
+<td>optional handler function to use if the requested resource is missing (404 Not Found)</td>
 </tr>
 </tbody>
 </table>
@@ -835,7 +839,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Static Resources","level":"4.4","depth":1,"next":{"title":"Dynamic Extensions","level":"4.5","depth":1,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"previous":{"title":"Default handler","level":"4.3","depth":1,"path":"ring/default_handler.md","ref":"ring/default_handler.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/static.md","mtime":"2018-10-16T17:26:07.288Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-10-16T17:26:30.863Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Static Resources","level":"4.4","depth":1,"next":{"title":"Dynamic Extensions","level":"4.5","depth":1,"path":"ring/dynamic_extensions.md","ref":"ring/dynamic_extensions.md","articles":[]},"previous":{"title":"Default handler","level":"4.3","depth":1,"path":"ring/default_handler.md","ref":"ring/default_handler.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/static.md","mtime":"2018-10-16T17:32:51.350Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-10-16T17:33:13.563Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
