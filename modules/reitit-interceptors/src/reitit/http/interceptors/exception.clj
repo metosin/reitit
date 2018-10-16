@@ -66,9 +66,9 @@
    :headers {"Content-Type" "text/plain"}
    :body (str "Malformed " (-> e ex-data :format pr-str) " request.")})
 
-(defn wrap-log-to-console [handler e {:keys [uri request-method] :as req}]
+(defn wrap-log-to-console [handler ^Throwable e {:keys [uri request-method] :as req}]
   (print! *out* (Instant/now) request-method (pr-str uri) "=>" (.getMessage e))
-  (.printStackTrace e *out*)
+  (.printStackTrace e ^PrintWriter *out*)
   (handler e req))
 
 ;;
