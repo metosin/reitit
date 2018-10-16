@@ -99,9 +99,7 @@
                   :coercion reitit.coercion.spec/coercion}
            :validate rrs/validate-spec!})))
 
-  (is (thrown-with-msg?
-        ExceptionInfo
-        #"Invalid route data"
+  (is (r/router?
         (ring/router
           ["/api"
            ["/plus/:e"

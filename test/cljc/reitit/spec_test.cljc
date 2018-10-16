@@ -116,9 +116,9 @@
                       :header {:d string?}
                       :path {:e string?}}}))
 
-  (is (not (s/valid?
-             ::rs/parameters
-             {:parameters {:header {"d" string?}}})))
+  (is (s/valid?
+        ::rs/parameters
+        {:parameters {:header {"d" string?}}}))
 
   (is (s/valid?
         ::rs/responses
