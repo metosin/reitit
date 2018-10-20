@@ -1,10 +1,10 @@
 ## UNRELEASED
 
-** `reitit-ring`
+## `reitit-ring`
 
 * New option `:not-found-handler` in `reitit.ring/create-resource-handler` to set how 404 is handled. Fixes [#89](https://github.com/metosin/reitit/issues/89), thanks to [valerauko](https://github.com/valerauko).
 
-** `reitit-spec`
+## `reitit-spec`
 
 * updated deps:
 

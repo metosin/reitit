@@ -24,7 +24,7 @@
                          [metosin/reitit-sieppari "0.2.3"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.7.0"]
-                         [metosin/spec-tools "0.7.1"]
+                         [metosin/spec-tools "0.8.0-SNAPSHOT"]
                          [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/muuntaja "0.6.1"]
@@ -80,7 +80,7 @@
                                   [funcool/promesa "1.9.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
-                                  [fipp "0.6.12"]]}
+                                  [fipp "0.6.13"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
@@ -94,9 +94,9 @@
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]
                                    [metosin/sieppari "0.0.0-alpha5"]
-                                   [yada "1.2.14"]
+                                   [yada "1.2.15"]
                                    [ring/ring-defaults "0.3.2"]
-                                   [ataraxy "0.4.1"]
+                                   [ataraxy "0.4.2"]
                                    [bidi "2.1.4"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
