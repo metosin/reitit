@@ -95,6 +95,7 @@
                                    [funcool/promesa "1.9.0"]
                                    [metosin/sieppari "0.0.0-alpha5"]
                                    [yada "1.2.15"]
+                                   [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
                                    [bidi "2.1.4"]]}

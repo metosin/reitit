@@ -11,8 +11,24 @@
             [reitit.http.interceptors.multipart :as multipart]
             [reitit.interceptor.sieppari :as sieppari]
             [ring.adapter.jetty :as jetty]
+            [aleph.http :as client]
             [muuntaja.core :as m]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
+            [spec-tools.core :as st]
+            [manifold.deferred :as d]))
+
+(s/def ::x int?)
+(s/def ::y int?)
+(s/def ::total pos-int?)
+
+(s/def ::seed string?)
+(s/def ::results
+  (st/spec
+    {:spec (s/and int? #(< 0 % 100))
+     :description "between 1-100"
+     :swagger/default 10
+     :reason "invalid number"}))
 
 (def app
   (http/ring-handler
@@ -44,22 +60,53 @@
                             :body (io/input-stream
                                     (io/resource "reitit.png"))})}}]]
 
+       ["/async"
+        {:get {:swagger {:tags ["async"]}
+               :summary "fetches random users asynchronously over the internet"
+               :parameters {:query (s/keys :req-un [::results] :opt-un [::seed])}
+               :responses {200 {:body any?}}
+               :handler (fn [{{{:keys [seed results]} :query} :parameters}]
+                          (d/chain
+                            (client/get
+                              "https://randomuser.me/api/"
+                              {:query-params {:seed seed, :results results}})
+                            :body
+                            (partial m/decode m/instance "application/json")
+                            :results
+                            (fn [results]
+                              {:status 200
+                               :body results})))}}]
+
        ["/math"
         {:swagger {:tags ["math"]}}
 
         ["/plus"
-         {:get {:summary "plus with spec query parameters"
+         {:get {:summary "plus with data-spec query parameters"
                 :parameters {:query {:x int?, :y int?}}
-                :responses {200 {:body {:total int?}}}
+                :responses {200 {:body {:total pos-int?}}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
                             :body {:total (+ x y)}})}
-          :post {:summary "plus with spec body parameters"
+          :post {:summary "plus with data-spec body parameters"
                  :parameters {:body {:x int?, :y int?}}
                  :responses {200 {:body {:total int?}}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
-                             :body {:total (+ x y)}})}}]]]
+                             :body {:total (+ x y)}})}}]
+
+        ["/minus"
+         {:get {:summary "minus with clojure.spec query parameters"
+                :parameters {:query (s/keys :req-un [::x ::y])}
+                :responses {200 {:body (s/keys :req-un [::total])}}
+                :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                           {:status 200
+                            :body {:total (- x y)}})}
+          :post {:summary "minus with clojure.spec body parameters"
+                 :parameters {:body (s/keys :req-un [::x ::y])}
+                 :responses {200 {:body (s/keys :req-un [::total])}}
+                 :handler (fn [{{{:keys [x y]} :body} :parameters}]
+                            {:status 200
+                             :body {:total (- x y)}})}}]]]
 
       {:data {:coercion spec-coercion/coercion
               :muuntaja m/instance
@@ -87,7 +134,7 @@
     {:executor sieppari/executor}))
 
 (defn start []
-  (jetty/run-jetty #'app {:port 3000, :join? false})
+  (jetty/run-jetty #'app {:port 3000, :join? false, :async true})
   (println "server running in port 3000"))
 
 (comment
