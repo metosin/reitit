@@ -1,4 +1,4 @@
-## 0.2.4-SNAPSHOT
+## 0.2.4 (21.10.2018)
 
 ## `reitit-ring`
 
@@ -6,8 +6,8 @@
 
 ## `reitit-spec`
 
-* Latest goodies from [spec-tools](https://github.com/metosin/spec-tools)
-  * Swagger parameter fixes
+* Latest features from [spec-tools](https://github.com/metosin/spec-tools)
+  * Swagger enchancements
   * Better spec coercion via `st/coerce` using spec walking & inference: many simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`) can be transformed without needing spec to be wrapped. Fallbacks to old conformed based approach.
   * [example app](https://github.com/metosin/reitit/blob/master/examples/ring-spec-swagger/src/example/server.clj).
   
