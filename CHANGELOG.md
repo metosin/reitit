@@ -9,11 +9,12 @@
 * Latest goodies from [spec-tools](https://github.com/metosin/spec-tools)
   * Swagger parameter fixes
   * Better spec coercion via `st/coerce` using spec walking & inference: many simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`) can be transformed without needing spec to be wrapped. Fallbacks to old conformed based approach.
+  * [example app](https://github.com/metosin/reitit/blob/master/examples/ring-spec-swagger/src/example/server.clj).
   
 * updated deps:
 
 ```clj
-[metosin/spec-tools "0.8.0-SNAPSHOT"] is available but we use "0.7.1"
+[metosin/spec-tools "0.8.0"] is available but we use "0.7.1"
 ```
 
 ## 0.2.3 (2018-09-24)

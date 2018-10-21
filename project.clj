@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.3"
+(defproject metosin/reitit-parent "0.2.4"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,21 +10,21 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :managed-dependencies [[metosin/reitit "0.2.3"]
-                         [metosin/reitit-core "0.2.3"]
-                         [metosin/reitit-spec "0.2.3"]
-                         [metosin/reitit-schema "0.2.3"]
-                         [metosin/reitit-ring "0.2.3"]
-                         [metosin/reitit-middleware "0.2.3"]
-                         [metosin/reitit-http "0.2.3"]
-                         [metosin/reitit-interceptors "0.2.3"]
-                         [metosin/reitit-swagger "0.2.3"]
-                         [metosin/reitit-swagger-ui "0.2.3"]
-                         [metosin/reitit-frontend "0.2.3"]
-                         [metosin/reitit-sieppari "0.2.3"]
+  :managed-dependencies [[metosin/reitit "0.2.4"]
+                         [metosin/reitit-core "0.2.4"]
+                         [metosin/reitit-spec "0.2.4"]
+                         [metosin/reitit-schema "0.2.4"]
+                         [metosin/reitit-ring "0.2.4"]
+                         [metosin/reitit-middleware "0.2.4"]
+                         [metosin/reitit-http "0.2.4"]
+                         [metosin/reitit-interceptors "0.2.4"]
+                         [metosin/reitit-swagger "0.2.4"]
+                         [metosin/reitit-swagger-ui "0.2.4"]
+                         [metosin/reitit-frontend "0.2.4"]
+                         [metosin/reitit-sieppari "0.2.4"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.7.0"]
-                         [metosin/spec-tools "0.8.0-SNAPSHOT"]
+                         [metosin/spec-tools "0.8.0"]
                          [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/muuntaja "0.6.1"]
