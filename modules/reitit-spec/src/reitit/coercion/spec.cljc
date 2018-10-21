@@ -39,19 +39,19 @@
   (into-spec [this name]))
 
 (defn- ensure-name [?name]
-  (or ?name (keyword "" (name (gensym "spec")))))
+  (or ?name (keyword "spec" (name (gensym "")))))
 
 (extend-protocol IntoSpec
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
   (into-spec [this name]
-    (ds/spec (ensure-name name) this))
+    (dissoc (ds/spec (ensure-name name) this) :name))
 
   #?(:clj  clojure.lang.PersistentHashMap
      :cljs cljs.core.PersistentHashMap)
   (into-spec [this name]
-    (ds/spec (ensure-name name) this))
+    (dissoc (ds/spec (ensure-name name) this) :name))
 
   Maybe
   (into-spec [this name]
