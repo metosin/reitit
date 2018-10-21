@@ -11,19 +11,18 @@
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]
-            [spec-tools.spec :as spec]
             [clojure.java.io :as io]))
 
 (s/def ::file multipart/temp-file-part)
 (s/def ::file-params (s/keys :req-un [::file]))
 
-(s/def ::name spec/string?)
-(s/def ::size spec/int?)
+(s/def ::name string?)
+(s/def ::size int?)
 (s/def ::file-response (s/keys :req-un [::name ::size]))
 
-(s/def ::x spec/int?)
-(s/def ::y spec/int?)
-(s/def ::total spec/int?)
+(s/def ::x int?)
+(s/def ::y int?)
+(s/def ::total int?)
 (s/def ::math-request (s/keys :req-un [::x ::y]))
 (s/def ::math-response (s/keys :req-un [::total]))
 

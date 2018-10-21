@@ -122,13 +122,16 @@
             {:keys [formats default]} (transformers type)]
         (fn [value format]
           (if-let [transformer (or (get formats format) default)]
-            (let [transformed (st/conform spec value transformer)]
-              (if (s/invalid? transformed)
-                (let [problems (st/explain-data spec value transformer)]
-                  (coercion/map->CoercionError
-                    {:spec spec
-                     :problems (::s/problems problems)}))
-                (s/unform spec transformed)))
+            (let [coerced (st/coerce spec value transformer)]
+              (if (s/valid? spec coerced)
+                coerced
+                (let [transformed (st/conform spec value transformer)]
+                  (if (s/invalid? transformed)
+                    (let [problems (st/explain-data spec value transformer)]
+                      (coercion/map->CoercionError
+                        {:spec spec
+                         :problems (::s/problems problems)}))
+                    (s/unform spec transformed)))))
             value))))
     (-response-coercer [this spec]
       (if (coerce-response? spec)

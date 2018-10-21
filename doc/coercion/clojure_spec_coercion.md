@@ -4,11 +4,13 @@ The [clojure.spec](https://clojure.org/guides/spec) library specifies the struct
 
 ## Warning
 
-`clojure.spec` by itself doesn't support coercion. `reitit` uses [spec-tools](https://github.com/metosin/spec-tools) that adds coercion to spec. Like `clojure.spec`, it's alpha as it leans on `clojure.spec.alpha/conform`, which is concidered a spec internal, that might be changed or removed later.
+`clojure.spec` by itself doesn't support coercion. `reitit` uses [spec-tools](https://github.com/metosin/spec-tools) that adds coercion to spec. Like `clojure.spec`, it's alpha as it leans both on spec walking and `clojure.spec.alpha/conform`, which is concidered a spec internal, that might be changed or removed later.
 
-For now, all leaf specs need to be wrapped into [Spec Records](https://github.com/metosin/spec-tools/blob/master/README.md#spec-records) to get the coercion working.
+## Usage
 
-There are [CLJ-2116](https://dev.clojure.org/jira/browse/CLJ-2116) and [CLJ-2251](https://dev.clojure.org/jira/browse/CLJ-2251) that would help solve this elegantly.
+For simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`), the transformation is inferred using [spec-walker](https://github.com/metosin/spec-tools#spec-walker) and is automatic. To support all specs (like regex-specs), specs need to be wrapped into [Spec Records](https://github.com/metosin/spec-tools/blob/master/README.md#spec-records).
+
+There are [CLJ-2116](https://dev.clojure.org/jira/browse/CLJ-2116) and [CLJ-2251](https://dev.clojure.org/jira/browse/CLJ-2251) that would help solve this elegantly. Go vote 'em up.
 
 ## Example
 
@@ -19,9 +21,9 @@ There are [CLJ-2116](https://dev.clojure.org/jira/browse/CLJ-2116) and [CLJ-2251
 (require '[clojure.spec.alpha :as s])
 (require '[reitit.core :as r])
 
-;; need to wrap the primitives!
-(s/def ::company spec/string?)
-(s/def ::user-id spec/int?)
+;; simple specs, inferred
+(s/def ::company string?)
+(s/def ::user-id int?)
 (s/def ::path-params (s/keys :req-un [::company ::user-id]))
 
 (def router
