@@ -208,8 +208,13 @@
        (match-by-path [_ path]
          (reduce
            (fn [_ ^Route route]
-             (if-let [path-params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) (impl/url-decode-coll path-params) path))))
+             (let [slashed-path (ensure-slash path)]
+               (if-let [path-params ((:matcher route) slashed-path)]
+                 (reduced (->Match (:path route)
+                                   (:data route)
+                                   (:result route)
+                                   (impl/url-decode-coll path-params)
+                                   slashed-path)))))
            nil pl))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -255,7 +260,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (impl/fast-get data path))
+         (impl/fast-get data (ensure-slash path)))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -296,10 +301,11 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (segment/lookup pl path)]
-           (-> (:data match)
-               (assoc :path-params (impl/url-decode-coll (:path-params match)))
-               (assoc :path path))))
+         (let [slashed-path (ensure-slash path)]
+           (if-let [match (segment/lookup pl slashed-path)]
+             (-> (:data match)
+                 (assoc :path-params (impl/url-decode-coll (:path-params match)))
+                 (assoc :path slashed-path)))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -336,7 +342,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if (#?(:clj .equals :cljs =) p path)
+         (if (#?(:clj .equals :cljs =) p (ensure-slash path))
            match))
        (match-by-name [_ name]
          (if (= n name)
@@ -372,8 +378,9 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (or (match-by-path static-router path)
-             (match-by-path wildcard-router path)))
+         (let [slashed-path (ensure-slash path)]
+           (or (match-by-path static-router path)
+               (match-by-path wildcard-router path))))
        (match-by-name [_ name]
          (or (match-by-name static-router name)
              (match-by-name wildcard-router name)))
