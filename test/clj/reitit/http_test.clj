@@ -500,7 +500,6 @@
     ((http/ring-handler
        (http/router [])
        (fn [{:keys [::r/router]}]
-         (println "here...")
          (is router))
        {:executor sieppari/executor})
-      {} (promise) (promise))))
+      {} ::respond ::raise)))
