@@ -33,8 +33,8 @@
 (defn ensure-slash
   [^String string]
   (if (.endsWith string "/")
-    string
-    (str string "/")))
+    (str/replace string #"/+$" "")
+    string))
 
 (defn walk [raw-routes {:keys [path data routes expand]
                         :or {data [], routes [], expand expand}
