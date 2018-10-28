@@ -139,7 +139,7 @@
                               (impl/fast-assoc ::r/router router))]
               (or (interceptor/execute executor interceptors request)
                   (interceptor/execute executor default-queue request)))
-            (interceptor/execute executor default-queue request)))
+            (interceptor/execute executor default-queue (impl/fast-assoc request ::r/router router))))
          ([request respond raise]
           (let [default #(interceptor/execute executor default-queue % respond raise)]
             (if-let [match (r/match-by-path router (:uri request))]
@@ -158,7 +158,7 @@
                 (if interceptors
                   (interceptor/execute executor interceptors request respond' raise)
                   (default request)))
-              (default request)))
+              (default (impl/fast-assoc request ::r/router router))))
           nil))
        {::r/router router}))))
 

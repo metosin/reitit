@@ -487,3 +487,15 @@
                    (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
                    (is (get-in @result [:headers "Last-Modified"]))
                    (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))))))
+
+(deftest router-available-in-default-branch
+  (testing "1-arity"
+    ((ring/ring-handler
+       (ring/router [])
+       (fn [{:keys [::r/router]}]
+         (is router))) {}))
+  (testing "3-arity"
+    ((ring/ring-handler
+       (ring/router [])
+       (fn [{:keys [::r/router]} _ _]
+         (is router))) {} (promise) (promise))))
