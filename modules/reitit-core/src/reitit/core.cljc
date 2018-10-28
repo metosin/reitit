@@ -378,9 +378,8 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (let [slashed-path (ensure-slash path)]
-           (or (match-by-path static-router path)
-               (match-by-path wildcard-router path))))
+         (or (match-by-path static-router path)
+             (match-by-path wildcard-router path)))
        (match-by-name [_ name]
          (or (match-by-name static-router name)
              (match-by-name wildcard-router name)))
