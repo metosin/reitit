@@ -30,6 +30,12 @@
   nil
   (expand [_ _]))
 
+(defn ensure-slash
+  [^String string]
+  (if (.endsWith string "/")
+    string
+    (str string "/")))
+
 (defn walk [raw-routes {:keys [path data routes expand]
                         :or {data [], routes [], expand expand}
                         :as opts}]
