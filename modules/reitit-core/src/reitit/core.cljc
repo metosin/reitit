@@ -55,7 +55,9 @@
                                  [maybe-arg (rest args)])
                  macc (into macc (expand data opts))
                  child-routes (walk-many (str pacc path) macc (keep identity childs))]
-             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
+             (if (seq childs)
+               (seq child-routes)
+               [[(str pacc (ensure-slash path)) macc]])))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
