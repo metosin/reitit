@@ -30,12 +30,6 @@
   nil
   (expand [_ _]))
 
-(defn ensure-slash
-  [^String string]
-  (if (.endsWith string "/")
-    (str/replace string #"/+$" "")
-    string))
-
 (defn walk [raw-routes {:keys [path data routes expand]
                         :or {data [], routes [], expand expand}
                         :as opts}]
@@ -55,9 +49,7 @@
                                  [maybe-arg (rest args)])
                  macc (into macc (expand data opts))
                  child-routes (walk-many (str pacc path) macc (keep identity childs))]
-             (if (seq childs)
-               (seq child-routes)
-               [[(str pacc (ensure-slash path)) macc]])))))]
+             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
@@ -208,13 +200,8 @@
        (match-by-path [_ path]
          (reduce
            (fn [_ ^Route route]
-             (let [slashed-path (ensure-slash path)]
-               (if-let [path-params ((:matcher route) slashed-path)]
-                 (reduced (->Match (:path route)
-                                   (:data route)
-                                   (:result route)
-                                   (impl/url-decode-coll path-params)
-                                   slashed-path)))))
+             (if-let [path-params ((:matcher route) path)]
+               (reduced (->Match (:path route) (:data route) (:result route) (impl/url-decode-coll path-params) path))))
            nil pl))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -260,7 +247,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (impl/fast-get data (ensure-slash path)))
+         (impl/fast-get data path))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -301,11 +288,10 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (let [slashed-path (ensure-slash path)]
-           (if-let [match (segment/lookup pl slashed-path)]
-             (-> (:data match)
-                 (assoc :path-params (impl/url-decode-coll (:path-params match)))
-                 (assoc :path slashed-path)))))
+         (if-let [match (segment/lookup pl path)]
+           (-> (:data match)
+               (assoc :path-params (impl/url-decode-coll (:path-params match)))
+               (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
@@ -342,7 +328,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if (#?(:clj .equals :cljs =) p (ensure-slash path))
+         (if (#?(:clj .equals :cljs =) p path)
            match))
        (match-by-name [_ name]
          (if (= n name)
