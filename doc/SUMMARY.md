@@ -26,6 +26,7 @@
 * [Ring-router](ring/ring.md)
 * [Reverse-routing](ring/reverse_routing.md)
 * [Default handler](ring/default_handler.md)
+* [Slash handler](ring/slash_handler.md)
 * [Static Resources](ring/static.md)
 * [Dynamic Extensions](ring/dynamic_extensions.md)
 * [Data-driven Middleware](ring/data_driven_middleware.md)
