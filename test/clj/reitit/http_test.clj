@@ -487,3 +487,19 @@
     (is (= {:enter {:top 1, :api 1, :ping 1, :get 1}
             :leave {:get 1, :ping 1, :api 1, :top 1}}
            @times))))
+
+(deftest router-available-in-default-branch
+  (testing "1-arity"
+    ((http/ring-handler
+       (http/router [])
+       (fn [{:keys [::r/router]}]
+         (is router))
+       {:executor sieppari/executor})
+      {}))
+  (testing "3-arity"
+    ((http/ring-handler
+       (http/router [])
+       (fn [{:keys [::r/router]}]
+         (is router))
+       {:executor sieppari/executor})
+      {} ::respond ::raise)))

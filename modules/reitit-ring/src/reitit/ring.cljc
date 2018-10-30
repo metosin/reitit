@@ -256,7 +256,7 @@
                                 (impl/fast-assoc ::r/match match)
                                 (impl/fast-assoc ::r/router router))]
                 (or (handler request) (default-handler request)))
-              (default-handler request)))
+              (default-handler (impl/fast-assoc request ::r/router router))))
            ([request respond raise]
             (if-let [match (r/match-by-path router (:uri request))]
               (let [method (:request-method request)
@@ -268,7 +268,7 @@
                                 (impl/fast-assoc ::r/match match)
                                 (impl/fast-assoc ::r/router router))]
                 ((routes handler default-handler) request respond raise))
-              (default-handler request respond raise))
+              (default-handler (impl/fast-assoc request ::r/router router) respond raise))
             nil)))
        {::r/router router}))))
 
