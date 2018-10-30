@@ -123,7 +123,7 @@
   [{:keys [method] :or {method :both}}]
   (let [redirect-handler (fn redirect-handler [request]
                            (let [uri (:uri request)
-                                 status (if (= (:method request) :get) 301 308)
+                                 status (if (= (:request-method request) :get) 301 308)
                                  maybe-redirect (fn maybe-redirect [path]
                                                   (if (r/match-by-path (::r/router request) path)
                                                     {:status status
