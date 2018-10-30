@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.2.5 (2018-10-30)
 
 ## `reitit-ring`
 
@@ -21,6 +21,12 @@
 
 (app {:uri "/pong"})
 ; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+```
+
+* updated deps:
+
+```clj
+[ring/ring-core "1.7.1"] is available but we use "1.7.0"
 ```
 
 ## `reitit-http`

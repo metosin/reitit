@@ -23,7 +23,7 @@
                          [metosin/reitit-frontend "0.2.4"]
                          [metosin/reitit-sieppari "0.2.4"]
                          [meta-merge "1.0.0"]
-                         [ring/ring-core "1.7.0"]
+                         [ring/ring-core "1.7.1"]
                          [metosin/spec-tools "0.8.0"]
                          [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
