@@ -33,7 +33,7 @@
 
 * router is injected into request also in the default branch
 
-## 0.2.4 (21.10.2018)
+## 0.2.4 (2018-10-21)
 
 ## `reitit-ring`
 
