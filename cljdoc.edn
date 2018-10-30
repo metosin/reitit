@@ -25,6 +25,7 @@
    ["Ring-router" {:file "doc/ring/ring.md"}]
    ["Reverse-routing" {:file "doc/ring/reverse_routing.md"}]
    ["Default handler" {:file "doc/ring/default_handler.md"}]
+   ["Slash handler" {:file "doc/ring/slash_handler.md"}]
    ["Static Resources" {:file "doc/ring/static.md"}]
    ["Dynamic Extensions" {:file "doc/ring/dynamic_extensions.md"}]
    ["Data-driven Middleware" {:file "doc/ring/data_driven_middleware.md"}]
