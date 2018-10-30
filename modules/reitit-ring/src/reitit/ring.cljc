@@ -120,25 +120,26 @@
   |         | :strip - redirects slashed to slash-less |
   |         | :both - works both ways (default) |
   "
-  [{:keys [method] :or {method :both}}]
-  (let [redirect-handler (fn redirect-handler [request]
-                           (let [uri (:uri request)
-                                 status (if (= (:request-method request) :get) 301 308)
-                                 maybe-redirect (fn maybe-redirect [path]
-                                                  (if (r/match-by-path (::r/router request) path)
-                                                    {:status status
-                                                     :headers {"Location" path}
-                                                     :body ""}))]
-                             (if (str/ends-with? uri "/")
-                               (if (not= method :add)
-                                 (maybe-redirect (subs uri 0 (-> uri count dec))))
-                               (if (not= method :strip)
-                                 (maybe-redirect (str uri "/"))))))]
-    (fn
-      ([request]
-       (redirect-handler request))
-      ([request respond _]
-       (respond (redirect-handler request))))))
+  ([] (redirect-trailing-slash-handler {:method :both}))
+  ([{:keys [method]}]
+   (let [redirect-handler (fn redirect-handler [request]
+                            (let [uri (:uri request)
+                                  status (if (= (:request-method request) :get) 301 308)
+                                  maybe-redirect (fn maybe-redirect [path]
+                                                   (if (r/match-by-path (::r/router request) path)
+                                                     {:status status
+                                                      :headers {"Location" path}
+                                                      :body ""}))]
+                              (if (str/ends-with? uri "/")
+                                (if (not= method :add)
+                                  (maybe-redirect (subs uri 0 (-> uri count dec))))
+                                (if (not= method :strip)
+                                  (maybe-redirect (str uri "/"))))))]
+     (fn
+       ([request]
+        (redirect-handler request))
+       ([request respond _]
+        (respond (redirect-handler request)))))))
 
 (defn create-default-handler
   "A default ring handler that can handle the following cases,
