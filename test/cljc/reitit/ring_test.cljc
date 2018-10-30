@@ -247,8 +247,8 @@
                                  :post (constantly ok)}]]]
     (testing "using :method :add"
       (let [app (ring/ring-handler
-                 (ring/router routes)
-                 (ring/redirect-trailing-slash-handler {:method :add}))]
+                  (ring/router routes)
+                  (ring/redirect-trailing-slash-handler {:method :add}))]
 
         (testing "exact matches work"
           (is (= ok (app {:request-method :get, :uri "/slash-less"})))
