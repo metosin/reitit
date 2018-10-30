@@ -122,19 +122,18 @@
   "
   ([] (redirect-trailing-slash-handler {:method :both}))
   ([{:keys [method]}]
-   (let [redirect-handler (fn redirect-handler [request]
-                            (let [uri (:uri request)
-                                  status (if (= (:request-method request) :get) 301 308)
-                                  maybe-redirect (fn maybe-redirect [path]
-                                                   (if (r/match-by-path (::r/router request) path)
-                                                     {:status status
-                                                      :headers {"Location" path}
-                                                      :body ""}))]
-                              (if (str/ends-with? uri "/")
-                                (if (not= method :add)
-                                  (maybe-redirect (subs uri 0 (-> uri count dec))))
-                                (if (not= method :strip)
-                                  (maybe-redirect (str uri "/"))))))]
+   (letfn [(maybe-redirect [request path]
+             (if (r/match-by-path (::r/router request) path)
+               {:status (if (= (:request-method request) :get) 301 308)
+                :headers {"Location" path}
+                :body ""}))
+           (redirect-handler [request]
+             (let [uri (:uri request)]
+               (if (str/ends-with? uri "/")
+                 (if (not= method :add)
+                   (maybe-redirect request (subs uri 0 (-> uri count dec))))
+                 (if (not= method :strip)
+                   (maybe-redirect request (str uri "/"))))))]
      (fn
        ([request]
         (redirect-handler request))
