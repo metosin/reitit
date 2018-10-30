@@ -239,6 +239,31 @@
           (is (= response (app {:request-method :get, :uri "/any"})))
           (is (= response (app {:request-method :options, :uri "/any"}))))))))
 
+(deftest trailing-slash-handler-test
+  (testing "using :method :add"
+    (let [ok {:status 200 :body "ok"}
+          app (ring/ring-handler
+                (ring/router
+                  [["/slash-less" {:get (constantly ok),
+                                   :post (constantly ok)}]
+                   ["/with-slash/" {:get (constantly ok),
+                                    :post (constantly ok)}]])
+                (ring/redirect-trailing-slash-handler {:method :add}))]
+
+      (testing "exact matches work"
+        (is (= ok (app {:request-method :get, :uri "/slash-less"})))
+        (is (= ok (app {:request-method :post, :uri "/slash-less"})))
+        (is (= ok (app {:request-method :get, :uri "/with-slash/"})))
+        (is (= ok (app {:request-method :post, :uri "/with-slash/"}))))
+
+      (testing "adds slashes"
+        (is (= 301 (:status (app {:request-method :get, :uri "/with-slash"}))))
+        (is (= 308 (:status (app {:request-method :post, :uri "/with-slash"})))))
+
+      (testing "does not strip slashes"
+        (is (= nil (app {:request-method :get, :uri "/slash-less/"})))
+        (is (= nil (app {:request-method :post, :uri "/slash-less/"})))))))
+
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
                    (fn
