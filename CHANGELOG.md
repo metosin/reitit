@@ -3,6 +3,25 @@
 ## `reitit-ring`
 
 * router is injected into request also in the default branch
+* new `reitit.ring/redirect-trailing-slash-handler` to [handle trailing slashes](https://metosin.github.io/reitit/ring/slash_handler.html) with style!
+  * Fixes [#92](https://github.com/metosin/reitit/issues/92), thanks to [valerauko](https://github.com/valerauko).
+
+```clj
+(require '[reitit.ring :as ring])
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      [["/ping" (constantly {:status 200, :body ""})]
+       ["/pong/" (constantly {:status 200, :body ""})]])
+    (ring/redirect-trailing-slash-handler)))
+
+(app {:uri "/ping/"})
+; {:status 308, :headers {"Location" "/ping"}, :body ""}
+
+(app {:uri "/pong"})
+; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+```
 
 ## `reitit-http`
 
