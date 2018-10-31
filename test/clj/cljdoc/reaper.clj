@@ -1,5 +1,6 @@
 (ns cljdoc.reaper
   (:require [clojure.java.io :as io]
+            [clojure.pprint :as pprint]
             [clojure.string :as str]))
 
 (defn reap! []
@@ -27,7 +28,7 @@
                                                             'metosin/reitit-frontend
                                                             'metosin/reitit-middleware]
               :cljdoc.doc/tree docs}]
-    (spit "doc/cljdoc.edn" (with-out-str (clojure.pprint/pprint data)))))
+    (spit "doc/cljdoc.edn" (with-out-str (pprint/pprint data)))))
 
 (comment
   (reap!))
