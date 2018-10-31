@@ -28,6 +28,7 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
 
 (app {:uri "/ping/"})
 ; {:status 308, :headers {"Location" "/ping"}, :body ""}
+
 (app {:uri "/pong"})
 ; {:status 308, :headers {"Location" "/pong/"}, :body ""}
 ```
@@ -45,9 +46,11 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
 
 (app {:uri "/ping/"})
 ; {:status 308, :headers {"Location" "/ping"}, :body ""}
+
 (app {:uri "/pong"})
 ; nil
 ```
+
 ```clj
 (def app
   (ring/ring-handler
@@ -59,6 +62,7 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
 
 (app {:uri "/ping/"})
 ; nil
+
 (app {:uri "/pong"})
 ; {:status 308, :headers {"Location" "/pong/"}, :body ""}
 ```

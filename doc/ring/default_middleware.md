@@ -54,12 +54,16 @@ A preconfigured middleware using `exception/default-handlers`. Catches:
 
 Creates the exception-middleware with custom options. Takes a map of `identifier => exception request => response` that is used to select the exception handler for the thown/raised exception identifier. Exception idenfier is either a `Keyword` or a Exception Class.
 
-The following handlers special keys are available:
+The following handlers are available by default:
 
-| key                    | description
-|------------------------|-------------
-| `::exception/default`  | a default exception handler if nothing else mathced (default `exception/default-handler`).
-| `::exception/wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response` (no default).
+| key                                  | description
+|--------------------------------------|-------------
+| `:reitit.ring/response`              | value in ex-data key `:response` will be returned
+| `:muuntaja/decode`                   | handle Muuntaja decoding exceptions
+| `:reitit.coercion/request-coercion`  | request coercion errors (http 400 response)
+| `:reitit.coercion/response-coercion` | response coercion errors (http 500 response)
+| `::exception/default`                | a default exception handler if nothing else mathced (default `exception/default-handler`).
+| `::exception/wrap`                   | a 3-arity handler to wrap the actual handler `handler exception request => response` (no default).
 
 The handler is selected from the options map by exception idenfitifier in the following lookup order:
 
