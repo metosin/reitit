@@ -1,8 +1,13 @@
-How to contribute
+# How to contribute
 
 Contributions are welcome.
 
 Please file bug reports and feature requests to https://github.com/metosin/reitit/issues.
+
+## Environment setup
+
+1. Clone this git repository
+2. For CLJS support, install NPM dependencies: `npm install`.
 
 ## Making changes
 
@@ -10,7 +15,7 @@ Please file bug reports and feature requests to https://github.com/metosin/reiti
 * Create a topic branch from where you want to base your work (usually the master branch)
 * Check the formatting rules from existing code (no trailing whitepace, mostly default indentation)
 * Ensure any new code is well-tested, and if possible, any issue fixed is covered by one or more new tests
-* Verify that all tests pass using ```lein test```
+* Verify that all tests pass using `./scripts/test.sh clj` and `./scripts/test.sh cljs`.
 * Push your code to your fork of the repository
 * Make a Pull Request
 
