@@ -281,7 +281,11 @@
 
         (testing "strips slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less/"})))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less/"})))))
+
+        (testing "strips multiple slashes"
+          (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))
 
     (testing "without option (equivalent to using :method :both)"
       (let [app (ring/ring-handler
@@ -300,7 +304,11 @@
 
         (testing "strips slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less/"})))))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less/"})))))
+
+        (testing "strips multiple slashes"
+          (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))))
 
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
