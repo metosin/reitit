@@ -131,7 +131,7 @@
              (let [uri (:uri request)]
                (if (str/ends-with? uri "/")
                  (if (not= method :add)
-                   (maybe-redirect request (subs uri 0 (-> uri count dec))))
+                   (maybe-redirect request (str/replace-first uri #"/+$" "")))
                  (if (not= method :strip)
                    (maybe-redirect request (str uri "/"))))))]
      (fn
