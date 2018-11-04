@@ -25,7 +25,7 @@
   [f coll]
   (reduce-kv
     (fn [coll k v]
-      (if-let [v' (f v)]
+      (if-some [v' (f v)]
         (assoc coll k v')
         coll))
     coll
