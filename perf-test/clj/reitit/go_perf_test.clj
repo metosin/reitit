@@ -2,8 +2,7 @@
   (:require [criterium.core :as cc]
             [reitit.perf-utils :refer :all]
             [reitit.ring :as ring]
-            [clojure.string :as str]
-            [reitit.core :as r]))
+            [clojure.string :as str]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -313,20 +312,23 @@
 
   ;;  40ns (httprouter)
   ;; 140ns
+  ;; 120ns (faster decode params)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
-      (title "static")
-      (assert (= {:status 200, :body "/user/repos"} (app req)))
-      (cc/quick-bench (app req)))
+    (title "static")
+    (assert (= {:status 200, :body "/user/repos"} (app req)))
+    (cc/quick-bench (app req)))
 
   ;; 160ns (httprouter)
   ;; 990ns
+  ;; 830ns (faster decode params)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
-      (title "param")
-      (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
-      (cc/quick-bench (app req)))
+    (title "param")
+    (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
+    (cc/quick-bench (app req)))
 
   ;;  30µs (httprouter)
   ;; 190µs
+  ;; 160µs (faster decode params)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench

@@ -1,15 +1,3 @@
-; Copyright 2013 Relevance, Inc.
-; Copyright 2014-2016 Cognitect, Inc.
-
-; The use and distribution terms for this software are covered by the
-; Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0)
-; which can be found in the file epl-v10.html at the root of this distribution.
-;
-; By using this software in any fashion, you are agreeing to be bound by
-; the terms of this license.
-;
-; You must not remove this notice, or any other, from this software.
-
 (ns ^:no-doc reitit.impl
   #?(:cljs (:require-macros [reitit.impl]))
   (:require [clojure.string :as str]
@@ -19,16 +7,21 @@
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
-(defn map-kv
-  "Applies a function to every value of a map.
-
+(defn maybe-map-values
+  "Applies a function to every value of a map, updates the value if not nil.
   Also works on vectors. Maintains key for maps, order for vectors."
   [f coll]
   (reduce-kv
-    (fn [m k v]
-      (assoc m k (f v)))
-    (empty coll)
+    (fn [coll k v]
+      (if-some [v' (f v)]
+        (assoc coll k v')
+        coll))
+    coll
     coll))
+
+;;
+;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
+;;
 
 (defn wild? [s]
   (contains? #{\: \*} (first (str s))))
@@ -191,16 +184,18 @@
     #?(:clj  (str/replace s #"[^A-Za-z0-9\!'\(\)\*_~.-]+" percent-encode)
        :cljs (js/encodeURIComponent s))))
 
-(defn url-decode [s]
+(defn maybe-url-decode [s]
   (if s
     #?(:clj  (if (.contains ^String s "%")
                (URLDecoder/decode
                  (if (.contains ^String s "+")
                    (.replace ^String s "+" "%2B")
                    s)
-                 "UTF-8")
-               s)
+                 "UTF-8"))
        :cljs (js/decodeURIComponent s))))
+
+(defn url-decode [s]
+  (or (maybe-url-decode s) s))
 
 (defn form-encode [s]
   (if s
@@ -217,7 +212,7 @@
 (defn url-decode-coll
   "URL-decodes maps and vectors"
   [coll]
-  (map-kv url-decode coll))
+  (maybe-map-values maybe-url-decode coll))
 
 (defprotocol IntoString
   (into-string [_]))
@@ -251,7 +246,7 @@
 (defn path-params
   "Convert parameters' values into URL-encoded strings, suitable for URL paths"
   [params]
-  (map-kv #(url-encode (into-string %)) params))
+  (maybe-map-values #(url-encode (into-string %)) params))
 
 (defn query-string
   "shallow transform of query parameters into query string"
@@ -270,7 +265,7 @@
      (goog/inherits ~type ~base-type)
 
      ~@(map
-        (fn [method]
-          `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
-                 (fn ~@(rest method))))
-        methods)))
+         (fn [method]
+           `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
+                  (fn ~@(rest method))))
+         methods)))

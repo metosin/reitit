@@ -2,7 +2,8 @@
   (:require [criterium.core :as cc]
             [reitit.perf-utils :refer :all]
             [ring.util.codec]
-            [reitit.impl])
+            [reitit.impl]
+            [reitit.impl :as impl])
   (:import (java.net URLDecoder URLEncoder)))
 
 ;;
@@ -163,8 +164,30 @@
                "1"]]
       (test! f s))))
 
+(defn url-encode-coll! []
+
+  (suite "url-encode-coll")
+
+  ;; 740ns
+  (test "something to decode")
+  (test! impl/url-decode-coll
+         {:a "aja%20hiljaa+sillalla"
+          :b "aja_hiljaa_sillalla"
+          :c "1+1"
+          :d "1"})
+
+  ;; 124ns
+  ;;  50ns (maybe-map-values)
+  (test "nothing to decode")
+  (test! impl/url-decode-coll
+         {:a "aja+20hiljaa+sillalla"
+          :b "aja_hiljaa_sillalla"
+          :c "1+1"
+          :d "1"}))
+
 (comment
   (url-decode!)
   (url-encode!)
   (form-decode!)
-  (form-encode!))
+  (form-encode!)
+  (url-encode-coll!))

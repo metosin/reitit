@@ -80,39 +80,36 @@
 
 (defn bench! []
 
-  ;; 2.3ms
-  (cc/quick-bench
-    (dotimes [_ 1000]
-      (p/lookup pedestal-tree "/v1/orgs/1/topics")))
-
-  ;; 3.1ms
-  ;; 2.5ms (string equals)
-  ;; 2.5ms (protocol)
-  ;; 2.3ms (nil childs)
-  ;; 2.0ms (rando impros)
-  ;; 1.9ms (wild & catch shortcuts)
-  ;; 1.5ms (inline child fetching)
-  ;; 1.5ms (WildNode also backtracks)
-  ;; 1.4ms (precalculate segment-size)
-  ;; 1.3ms (fast-map)
-  ;; 1.3ms (dissoc wild & catch-all from children)
-  ;; 1.3ms (reified protocols)
-  ;; 0.8ms (flattened matching)
-  ;; 0.8ms (return route-data)
-  ;; 0.8ms (fix payloads)
+  ;; 2.3µs
   #_(cc/quick-bench
-      (dotimes [_ 1000]
-        (trie/lookup reitit-tree "/v1/orgs/1/topics" {})))
+      (p/lookup pedestal-tree "/v1/orgs/1/topics"))
 
-  ;;  0.9ms (initial)
-  ;;  0.5ms (protocols)
-  ;;  1.0ms (with path params)
-  ;;  1.0ms (Match records)
-  ;; 0.63ms (Single sweep path params)
-  ;; 0.51ms (Cleanup)
+  ;; 3.1µs
+  ;; 2.5µs (string equals)
+  ;; 2.5µs (protocol)
+  ;; 2.3µs (nil childs)
+  ;; 2.0µs (rando impros)
+  ;; 1.9µs (wild & catch shortcuts)
+  ;; 1.5µs (inline child fetching)
+  ;; 1.5µs (WildNode also backtracks)
+  ;; 1.4µs (precalculate segment-size)
+  ;; 1.3µs (fast-map)
+  ;; 1.3µs (dissoc wild & catch-all from children)
+  ;; 1.3µs (reified protocols)
+  ;; 0.8µs (flattened matching)
+  ;; 0.8µs (return route-data)
+  ;; 0.8µs (fix payloads)
+  #_(cc/quick-bench
+      (trie/lookup reitit-tree "/v1/orgs/1/topics" {}))
+
+  ;;  0.9µs (initial)
+  ;;  0.5µs (protocols)
+  ;;  1.0µs (with path paraµs)
+  ;;  1.0µs (Match records)
+  ;; 0.63µs (Single sweep path paraµs)
+  ;; 0.51µs (Cleanup)
   (cc/quick-bench
-    (dotimes [_ 1000]
-      (segment/lookup reitit-segment "/v1/orgs/1/topics"))))
+    (segment/lookup reitit-segment "/v1/orgs/1/topics")))
 
 (comment
   (bench!))
