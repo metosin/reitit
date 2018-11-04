@@ -440,6 +440,7 @@
     ;;   723ns (segment-router)
     ;;   702ns (before path-parameters)
     ;;   806ns (decode path-parameters)
+    ;;   735ns (maybe-map-values)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;  2821ns
