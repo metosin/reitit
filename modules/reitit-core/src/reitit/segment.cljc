@@ -15,16 +15,16 @@
   (-lookup [_ _ _]))
 
 (defn- -catch-all [children catch-all path-params p ps]
-  (if catch-all
-    (-lookup
-      (impl/fast-get children catch-all)
-      nil
-      (assoc path-params catch-all (str/join "/" (cons p ps))))))
+  (-lookup
+    (impl/fast-get children catch-all)
+    nil
+    (assoc path-params catch-all (str/join "/" (cons p ps)))))
 
 (defn- segment
   ([] (segment {} #{} nil nil))
   ([children wilds catch-all match]
-   (let [children' (impl/fast-map children)]
+   (let [children' (impl/fast-map children)
+         wilds? (seq wilds)]
      ^{:type ::segment}
      (reify
        Segment
@@ -40,8 +40,8 @@
          (if (nil? p)
            (when match (assoc match :path-params path-params))
            (or (-lookup (impl/fast-get children' p) ps path-params)
-               (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds)
-               (-catch-all children' catch-all path-params p ps))))))))
+               (if wilds? (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds))
+               (if catch-all (-catch-all children' catch-all path-params p ps)))))))))
 
 (defn insert [root path data]
   (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))
