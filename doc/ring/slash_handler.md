@@ -66,3 +66,21 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
 (app {:uri "/pong"})
 ; {:status 308, :headers {"Location" "/pong/"}, :body ""}
 ```
+
+`redirect-trailing-slash-handler` can be composed with the default handler using `ring/routes` for more correct http error responses:
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      [["/ping" (constantly {:status 200, :body ""})]
+       ["/pong/" (constantly {:status 200, :body ""})]])
+    (ring/routes
+      (ring/redirect-trailing-slash-handler {:method :add})
+      (ring/create-default-handler))))
+
+(app {:uri "/ping/"})
+; {:status 404, :body "", :headers {}}
+
+(app {:uri "/pong"})
+; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+  ```
