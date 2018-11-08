@@ -82,7 +82,7 @@
 ;; TODO: is this correct?
 (defn- re-quote [x]
   #?(:clj  (Pattern/quote x)
-     :cljs (str/replace-all x #"([.?*+^$[\\]\\\\(){}|-])" "\\$1")))
+     :cljs (str/replace x #"([.?*+^$[\\]\\\\(){}|-])" "\\$1")))
 
 (defn- path-regex [{:keys [path-parts path-constraints] :as route}]
   (let [[pp & pps] path-parts
