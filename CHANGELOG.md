@@ -2,11 +2,13 @@
 
 ## `reitit-core`
 
-* faster path-parameter decoding: doing less work when parameters don't need decoding. Wildcard-routing is now 10-15% faster in perf tests (opensensors & github api)
+* Faster path-parameter decoding: doing less work when parameters don't need decoding. Wildcard-routing is now 10-15% faster in perf tests (opensensors & github api).
+* Fixed a ClojureScript compiler warning about private var usage. [#169](https://github.com/metosin/reitit/issues/169)
 
 ## `reitit-ring`
 
 * `redirect-trailing-slash-handler` can strip multiple slashes from end of the uri, by [Hannu Hartikainen](https://github.com/dancek).
+* Fixed a ClojureScript compiler warning about `satisfies?` being a macro.
 
 ## 0.2.5 (2018-10-30)
 
