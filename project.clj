@@ -24,18 +24,18 @@
                          [metosin/reitit-sieppari "0.2.5"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.7.1"]
-                         [metosin/spec-tools "0.8.0"]
-                         [metosin/schema-tools "0.10.4"]
                          [metosin/ring-swagger-ui "2.2.10"]
+                         [metosin/spec-tools "0.8.1"]
+                         [metosin/schema-tools "0.10.5"]
                          [metosin/muuntaja "0.6.1"]
                          [metosin/jsonista "0.2.2"]
-                         [metosin/sieppari "0.0.0-alpha5"]]
+                         [metosin/sieppari "0.0.0-alpha6"]]
 
-  :plugins [[jonase/eastwood "0.2.6"]
+  :plugins [[jonase/eastwood "0.3.3"]
             [lein-doo "0.1.10"]
             [lein-cljsbuild "1.1.7"]
-            [lein-cloverage "1.0.10"]
-            [lein-codox "0.10.3"]
+            [lein-cloverage "1.0.13"]
+            [lein-codox "0.10.5"]
             [metosin/bat-test "0.4.0"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
@@ -58,12 +58,12 @@
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
-                                  [metosin/reitit]
+                                  [metosin/reitit "0.2.5"]
 
                                   [expound "0.7.1"]
-                                  [orchestra "2018.09.10-1"]
+                                  [orchestra "2018.11.07-1"]
 
-                                  [ring "1.7.0"]
+                                  [ring "1.7.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/muuntaja "0.6.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
@@ -80,7 +80,7 @@
                                   [funcool/promesa "1.9.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
-                                  [fipp "0.6.13"]]}
+                                  [fipp "0.6.14"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]

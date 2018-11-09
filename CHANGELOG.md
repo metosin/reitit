@@ -10,6 +10,36 @@
 * `redirect-trailing-slash-handler` can strip multiple slashes from end of the uri, by [Hannu Hartikainen](https://github.com/dancek).
 * Fixed a ClojureScript compiler warning about `satisfies?` being a macro.
 
+* updated deps:
+
+```clj
+[ring "1.7.1"] is available but we use "1.7.0"
+```
+
+## `reitit-spec`
+
+* updated deps:
+
+```clj
+[metosin/spec-tools "0.8.1"] is available but we use "0.8.0"
+```
+
+## `reitit-schema`
+
+* updated deps:
+
+```clj
+[metosin/schema-tools "0.10.5"] is available but we use "0.10.4"
+```
+
+## `reitit-sieppari`
+
+* updated deps:
+
+```clj
+[metosin/sieppari "0.0.0-alpha6"] is available but we use "0.0.0-alpha5"
+```
+
 ## 0.2.5 (2018-10-30)
 
 ## `reitit-ring`
