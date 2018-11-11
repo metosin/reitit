@@ -39,7 +39,7 @@
           (and leave (stages :leave)) (assoc :leave (handle name :leave))
           (and error (stages :error)) (assoc :error (handle name :error))))
 
-(defn print-request-diffs
+(defn print-context-diffs
   "A interceptor chain transformer that adds a context diff printer between all interceptors"
   [chain]
   (reduce
