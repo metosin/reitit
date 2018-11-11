@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.6"
+(defproject metosin/reitit-parent "0.2.7"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,22 +10,22 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :managed-dependencies [[metosin/reitit "0.2.6"]
-                         [metosin/reitit-core "0.2.6"]
-                         [metosin/reitit-spec "0.2.6"]
-                         [metosin/reitit-schema "0.2.6"]
-                         [metosin/reitit-ring "0.2.6"]
-                         [metosin/reitit-middleware "0.2.6"]
-                         [metosin/reitit-http "0.2.6"]
-                         [metosin/reitit-interceptors "0.2.6"]
-                         [metosin/reitit-swagger "0.2.6"]
-                         [metosin/reitit-swagger-ui "0.2.6"]
-                         [metosin/reitit-frontend "0.2.6"]
-                         [metosin/reitit-sieppari "0.2.6"]
+  :managed-dependencies [[metosin/reitit "0.2.7"]
+                         [metosin/reitit-core "0.2.7"]
+                         [metosin/reitit-spec "0.2.7"]
+                         [metosin/reitit-schema "0.2.7"]
+                         [metosin/reitit-ring "0.2.7"]
+                         [metosin/reitit-middleware "0.2.7"]
+                         [metosin/reitit-http "0.2.7"]
+                         [metosin/reitit-interceptors "0.2.7"]
+                         [metosin/reitit-swagger "0.2.7"]
+                         [metosin/reitit-swagger-ui "0.2.7"]
+                         [metosin/reitit-frontend "0.2.7"]
+                         [metosin/reitit-sieppari "0.2.7"]
                          [meta-merge "1.0.0"]
                          [ring/ring-core "1.7.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.8.1"]
+                         [metosin/spec-tools "0.8.2"]
                          [metosin/schema-tools "0.10.5"]
                          [metosin/muuntaja "0.6.1"]
                          [metosin/jsonista "0.2.2"]
@@ -58,7 +58,7 @@
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
-                                  [metosin/reitit "0.2.6"]
+                                  [metosin/reitit "0.2.7"]
 
                                   [expound "0.7.1"]
                                   [orchestra "2018.11.07-1"]

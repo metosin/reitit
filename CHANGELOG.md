@@ -1,3 +1,15 @@
+## 0.2.7 (2018-11-11)
+
+## `reitit-spec`
+
+* Fixes [spec coercion issue with aliased specs](https://github.com/metosin/spec-tools/issues/145)
+
+* updated deps:
+
+```clj
+[metosin/spec-tools "0.8.2"] is available but we use "0.8.1"
+```
+
 ## 0.2.6 (2018-11-09)
 
 ## `reitit-core`
