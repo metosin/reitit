@@ -8,6 +8,7 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
+            [reitit.ring.middleware.dev :as dev]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]))
@@ -60,7 +61,8 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:data {:coercion reitit.coercion.spec/coercion
+      {;:reitit.middleware/transform dev/print-request-diffs
+       :data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :middleware [;; query-params & form-params
                            parameters/parameters-middleware

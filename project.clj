@@ -23,6 +23,7 @@
                          [metosin/reitit-frontend "0.2.7"]
                          [metosin/reitit-sieppari "0.2.7"]
                          [meta-merge "1.0.0"]
+                         [lambdaisland/deep-diff "0.0-25"]
                          [ring/ring-core "1.7.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.8.2"]
@@ -80,7 +81,7 @@
                                   [funcool/promesa "1.9.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
-                                  [fipp "0.6.14"]]}
+                                  [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]

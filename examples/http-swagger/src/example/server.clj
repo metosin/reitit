@@ -9,6 +9,7 @@
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
+            [reitit.http.interceptors.dev :as dev]
             [reitit.interceptor.sieppari :as sieppari]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as client]
@@ -108,7 +109,8 @@
                             {:status 200
                              :body {:total (- x y)}})}}]]]
 
-      {:data {:coercion spec-coercion/coercion
+      {;:reitit.interceptor/transform dev/print-request-diffs
+       :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
               :interceptors [;; query-params & form-params
                              (parameters/parameters-interceptor)
