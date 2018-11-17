@@ -1,3 +1,51 @@
+## UNRELEASED
+
+## `reitit-spec`
+
+* Spec problems are exposed as-is into request & response coercion errors, enabling pretty-printers like [expound](https://github.com/bhb/expound) to be used:
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.ring.middleware.exception :as exception])
+(require '[reitit.ring.coercion :as coercion])
+(require '[expound.alpha :as expound])
+
+(defn coercion-error-handler [status]
+  (let [printer (expound/custom-printer {:theme :figwheel-theme, :print-specs? false})
+        handler (exception/create-coercion-handler status)]
+    (fn [exception request]
+      (printer (-> exception ex-data :problems))
+      (handler exception request))))
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/plus"
+       {:get
+        {:parameters {:query {:x int?, :y int?}}
+         :responses {200 {:body {:total pos-int?}}}
+         :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                    {:status 200, :body {:total (+ x y)}})}}]
+      {:data {:coercion reitit.coercion.spec/coercion
+              :middleware [(exception/create-exception-middleware
+                             (merge
+                               exception/default-handlers
+                               {:reitit.coercion/request-coercion (coercion-error-handler 400)
+                                :reitit.coercion/response-coercion (coercion-error-handler 500)}))
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]}})))
+
+(app
+  {:uri "/plus"
+   :request-method :get
+   :query-params {"x" "1", "y" "fail"}})
+
+(app
+  {:uri "/plus"
+   :request-method :get
+   :query-params {"x" "1", "y" "-2"}})
+```
+
 ## 0.2.7 (2018-11-11)
 
 ## `reitit-spec`

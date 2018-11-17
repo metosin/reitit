@@ -114,9 +114,10 @@
       (into-spec model name))
     (-open-model [_ spec] spec)
     (-encode-error [_ error]
-      (-> error
-          (update :spec (comp str s/form))
-          (update :problems (partial mapv #(update % :pred stringify-pred)))))
+      (let [problems (::s/problems error)]
+        (-> error
+            (update :spec (comp str s/form))
+            (assoc :problems (mapv #(update % :pred stringify-pred) problems)))))
     (-request-coercer [this type spec]
       (let [spec (coercion/-compile-model this spec nil)
             {:keys [formats default]} (transformers type)]
@@ -130,7 +131,7 @@
                     (let [problems (st/explain-data spec value transformer)]
                       (coercion/map->CoercionError
                         {:spec spec
-                         :problems (::s/problems problems)}))
+                         :problems problems}))
                     (s/unform spec transformed)))))
             value))))
     (-response-coercer [this spec]

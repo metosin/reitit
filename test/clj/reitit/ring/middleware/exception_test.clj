@@ -2,6 +2,8 @@
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.ring :as ring]
             [reitit.ring.middleware.exception :as exception]
+            [reitit.coercion :as coercion]
+            [clojure.spec.alpha :as s]
             [reitit.coercion.spec]
             [reitit.ring.coercion]
             [muuntaja.core :as m])
@@ -114,3 +116,43 @@
                (app {:request-method :get, :uri "/defaults"})))
         (is (= {:status 500, :body "too many tries"}
                (app {:request-method :get, :uri "/defaults"})))))))
+
+(deftest spec-coercion-exception-test
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/plus"
+                 {:get
+                  {:parameters {:query {:x int?, :y int?}}
+                   :responses {200 {:body {:total pos-int?}}}
+                   :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                              {:status 200, :body {:total (+ x y)}})}}]
+                {:data {:coercion reitit.coercion.spec/coercion
+                        :middleware [(exception/create-exception-middleware
+                                       (merge
+                                         exception/default-handlers
+                                         {::coercion/request-coercion (fn [e _] {:status 400, :body (ex-data e)})
+                                          ::coercion/response-coercion (fn [e _] {:status 500, :body (ex-data e)})}))
+                                     reitit.ring.coercion/coerce-request-middleware
+                                     reitit.ring.coercion/coerce-response-middleware]}}))]
+    (testing "success"
+      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "2"}})]
+        (is (= 200 status))
+        (is (= body {:total 3}))))
+
+    (testing "request error"
+      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "fail"}})]
+        (is (= 400 status))
+        (testing "spec error is exposed as is"
+          (let [problems (:problems body)]
+            (is (contains? problems ::s/spec))
+            (is (contains? problems ::s/value))
+            (is (contains? problems ::s/problems))))))
+
+    (testing "response error"
+      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "-2"}})]
+        (is (= 500 status))
+        (testing "spec error is exposed as is"
+          (let [problems (:problems body)]
+            (is (contains? problems ::s/spec))
+            (is (contains? problems ::s/value))
+            (is (contains? problems ::s/problems))))))))
