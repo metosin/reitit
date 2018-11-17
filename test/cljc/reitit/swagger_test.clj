@@ -68,66 +68,73 @@
   (testing "swagger-spec"
     (let [spec (:body (app
                         {:request-method :get
-                         :uri "/api/swagger.json"}))]
-      (is (= {:x-id #{::math}
-              :swagger "2.0"
-              :info {:title "my-api"}
-              :paths {"/api/schema/plus/{z}" {:get {:parameters [{:description ""
-                                                                  :format "int32"
-                                                                  :in "query"
-                                                                  :name "x"
-                                                                  :required true
-                                                                  :type "integer"}
-                                                                 {:description ""
-                                                                  :format "int32"
-                                                                  :in "query"
-                                                                  :name "y"
-                                                                  :required true
-                                                                  :type "integer"}
-                                                                 {:in "path"
-                                                                  :name "z"
-                                                                  :description ""
-                                                                  :type "integer"
-                                                                  :required true
-                                                                  :format "int32"}]
-                                                    :responses {200 {:description ""
-                                                                     :schema {:additionalProperties false
-                                                                              :properties {"total" {:format "int32"
-                                                                                                    :type "integer"}}
-                                                                              :required ["total"]
-                                                                              :type "object"}}
-                                                                400 {:schema {:type "string"}
-                                                                     :description "kosh"}
-                                                                500 {:description "fail"}}
-                                                    :summary "plus"}}
-                      "/api/spec/plus/{z}" {:get {:parameters [{:description ""
-                                                                :format "int64"
-                                                                :in "query"
-                                                                :name "x"
-                                                                :required true
-                                                                :type "integer"}
-                                                               {:description ""
-                                                                :format "int64"
-                                                                :in "query"
-                                                                :name "y"
-                                                                :required true
-                                                                :type "integer"}
-                                                               {:in "path"
-                                                                :name "z"
-                                                                :description ""
-                                                                :type "integer"
-                                                                :required true
-                                                                :format "int64"}]
-                                                  :responses {200 {:description ""
-                                                                   :schema {:properties {"total" {:format "int64"
-                                                                                                  :type "integer"}}
-                                                                            :required ["total"]
-                                                                            :type "object"}}
-                                                              400 {:schema {:type "string"}
-                                                                   :description "kosh"}
-                                                              500 {:description "fail"}}
-                                                  :summary "plus"}}}}
-             spec)))))
+                         :uri "/api/swagger.json"}))
+          expected {:x-id #{::math}
+                    :swagger "2.0"
+                    :info {:title "my-api"}
+                    :paths {"/api/schema/plus/{z}" {:get {:parameters [{:description ""
+                                                                        :format "int32"
+                                                                        :in "query"
+                                                                        :name "x"
+                                                                        :required true
+                                                                        :type "integer"}
+                                                                       {:description ""
+                                                                        :format "int32"
+                                                                        :in "query"
+                                                                        :name "y"
+                                                                        :required true
+                                                                        :type "integer"}
+                                                                       {:in "path"
+                                                                        :name "z"
+                                                                        :description ""
+                                                                        :type "integer"
+                                                                        :required true
+                                                                        :format "int32"}]
+                                                          :responses {200 {:description ""
+                                                                           :schema {:additionalProperties false
+                                                                                    :properties {"total" {:format "int32"
+                                                                                                          :type "integer"}}
+                                                                                    :required ["total"]
+                                                                                    :type "object"}}
+                                                                      400 {:schema {:type "string"}
+                                                                           :description "kosh"}
+                                                                      500 {:description "fail"}}
+                                                          :summary "plus"}}
+                            "/api/spec/plus/{z}" {:get {:parameters [{:description ""
+                                                                      :format "int64"
+                                                                      :in "query"
+                                                                      :name "x"
+                                                                      :required true
+                                                                      :type "integer"}
+                                                                     {:description ""
+                                                                      :format "int64"
+                                                                      :in "query"
+                                                                      :name "y"
+                                                                      :required true
+                                                                      :type "integer"}
+                                                                     {:in "path"
+                                                                      :name "z"
+                                                                      :description ""
+                                                                      :type "integer"
+                                                                      :required true
+                                                                      :format "int64"}]
+                                                        :responses {200 {:description ""
+                                                                         :schema {:properties {"total" {:format "int64"
+                                                                                                        :type "integer"}}
+                                                                                  :required ["total"]
+                                                                                  :type "object"}}
+                                                                    400 {:schema {:type "string"}
+                                                                         :description "kosh"}
+                                                                    500 {:description "fail"}}
+                                                        :summary "plus"}}}}]
+      (is (= expected spec))
+
+      (testing "ring-async swagger-spec"
+        (let [response* (atom nil)
+              respond (partial reset! response*)]
+          (app {:request-method :get
+                :uri "/api/swagger.json"} respond (fn [_] (is false)))
+          (is (= expected (:body @response*))))))))
 
 (defn spec-paths [app uri]
   (-> {:request-method :get, :uri uri} app :body :paths keys))
