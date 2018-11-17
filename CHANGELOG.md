@@ -46,6 +46,10 @@
    :query-params {"x" "1", "y" "-2"}})
 ```
 
+## `reitit-swagger`
+
+* `create-swagger-handler` support now 3-arity ring-async, thanks to [Miloslav Nenadál](https://github.com/nenadalm)
+
 ## 0.2.7 (2018-11-11)
 
 ## `reitit-spec`
