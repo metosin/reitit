@@ -32,33 +32,33 @@ Modules:
 All bundled:
 
 ```clj
-[metosin/reitit "0.2.7"]
+[metosin/reitit "0.2.8"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.7"]
+[metosin/reitit-core "0.2.8"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.7"]
-[metosin/reitit-schema "0.2.7"]
+[metosin/reitit-spec "0.2.8"]
+[metosin/reitit-schema "0.2.8"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.7"]
-[metosin/reitit-middleware "0.2.7"]
+[metosin/reitit-ring "0.2.8"]
+[metosin/reitit-middleware "0.2.8"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.7"]
-[metosin/reitit-swagger-ui "0.2.7"]
+[metosin/reitit-swagger "0.2.8"]
+[metosin/reitit-swagger-ui "0.2.8"]
 
 ;; frontend helpers
-[metosin/reitit-frontend "0.2.7"]
+[metosin/reitit-frontend "0.2.8"]
 
 ;; http with interceptors
-[metosin/reitit-http "0.2.7"]
-[metosin/reitit-interceptors "0.2.7"]
-[metosin/reitit-sieppari "0.2.7"]
+[metosin/reitit-http "0.2.8"]
+[metosin/reitit-interceptors "0.2.8"]
+[metosin/reitit-sieppari "0.2.8"]
 ```
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.

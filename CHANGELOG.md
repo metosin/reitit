@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.2.8 (2018-11-18)
 
 ## `reitit-core`
 

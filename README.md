@@ -7,7 +7,7 @@ A fast data-driven router for Clojure(Script).
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html) & [the browser](https://metosin.github.io/reitit/frontend/basics.html)
+* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html) & [the frontend](https://metosin.github.io/reitit/frontend/basics.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
@@ -26,48 +26,48 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit` - all bundled
 * `reitit-core` - the routing core
 * `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
-* `reitit-middleware` - [common middleware](https://metosin.github.io/reitit/ring/default_middleware.html) for `reitit-ring`
+* `reitit-middleware` - [common middleware](https://metosin.github.io/reitit/ring/default_middleware.html)
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
 * `reitit-frontend` Tools for [frontend routing]((https://metosin.github.io/reitit/frontend/basics.html))
-* `reitit-http` http-routing with Pedestal-style Interceptors
-* `reitit-interceptors` - [common interceptors](https://metosin.github.io/reitit/http/default_interceptors.html) for `reitit-http`
-* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors
+* `reitit-http` http-routing with Interceptors
+* `reitit-interceptors` - [common interceptors](https://metosin.github.io/reitit/http/default_interceptors.html)
+* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
 
 ## Latest version
 
 All bundled:
 
 ```clj
-[metosin/reitit "0.2.7"]
+[metosin/reitit "0.2.8"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.7"]
+[metosin/reitit-core "0.2.8"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.7"]
-[metosin/reitit-schema "0.2.7"]
+[metosin/reitit-spec "0.2.8"]
+[metosin/reitit-schema "0.2.8"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.7"]
-[metosin/reitit-middleware "0.2.7"]
+[metosin/reitit-ring "0.2.8"]
+[metosin/reitit-middleware "0.2.8"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.7"]
-[metosin/reitit-swagger-ui "0.2.7"]
+[metosin/reitit-swagger "0.2.8"]
+[metosin/reitit-swagger-ui "0.2.8"]
 
 ;; frontend helpers
-[metosin/reitit-frontend "0.2.7"]
+[metosin/reitit-frontend "0.2.8"]
 
 ;; http with interceptors
-[metosin/reitit-http "0.2.7"]
-[metosin/reitit-interceptors "0.2.7"]
-[metosin/reitit-sieppari "0.2.7"]
+[metosin/reitit-http "0.2.8"]
+[metosin/reitit-interceptors "0.2.8"]
+[metosin/reitit-sieppari "0.2.8"]
 ```
 
 ## Quick start
