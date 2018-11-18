@@ -254,4 +254,9 @@
 
     (testing "adding debug middleware between middleware"
       (let [app (create {::middleware/transform #(interleave % (repeat debug-mw))})]
-        (is (= [::olipa ::debug ::kerran ::debug ::avaruus ::debug :ok] (app "/ping")))))))
+        (is (= [::olipa ::debug ::kerran ::debug ::avaruus ::debug :ok] (app "/ping")))))
+
+    (testing "vector of transformations"
+      (let [app (create {::middleware/transform [#(interleave % (repeat debug-mw))
+                                                 (partial sort-by :name)]})]
+        (is (= [::avaruus ::debug ::debug ::debug ::kerran ::olipa :ok] (app "/ping")))))))

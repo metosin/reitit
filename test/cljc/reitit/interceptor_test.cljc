@@ -222,19 +222,29 @@
                                               (enter ::kerran)
                                               (enter ::avaruus)]
                                :handler handler}]
-                     options)))]
+                     options)))
+        inject-debug (fn [interceptors]
+                       (concat
+                         (interleave (butlast interceptors) (repeat debug-i))
+                         [(last interceptors)]))
+        sort-interceptors (fn [interceptors]
+                            (concat
+                              (sort-by :name (butlast interceptors))
+                              [(last interceptors)]))]
 
     (testing "by default, all interceptors are applied in order"
       (let [app (create nil)]
         (is (= [::olipa ::kerran ::avaruus :ok] (app "/ping")))))
 
     (testing "interceptors can be re-ordered"
-      (let [app (create {::interceptor/transform (fn [interceptors]
-                                                   (concat
-                                                     (sort-by :name (butlast interceptors))
-                                                     [(last interceptors)]))})]
+      (let [app (create {::interceptor/transform sort-interceptors})]
         (is (= [::avaruus ::kerran ::olipa :ok] (app "/ping")))))
 
     (testing "adding debug interceptor between interceptors"
-      (let [app (create {::interceptor/transform #(interleave % (repeat debug-i))})]
-        (is (= [::olipa ::debug ::kerran ::debug ::avaruus ::debug :ok] (app "/ping")))))))
+      (let [app (create {::interceptor/transform inject-debug})]
+        (is (= [::olipa ::debug ::kerran ::debug ::avaruus ::debug :ok] (app "/ping")))))
+
+    (testing "vector of transformations"
+      (let [app (create {::interceptor/transform [inject-debug
+                                                  sort-interceptors]})]
+        (is (= [::avaruus ::debug ::debug ::debug ::kerran ::olipa :ok] (app "/ping")))))))

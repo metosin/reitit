@@ -1,5 +1,9 @@
 ## UNRELEASED
 
+## `reitit-core`
+
+* Added support for composing middleware & interceptor transformations, fixes [#167](https://github.com/metosin/reitit/issues/167).
+
 ## `reitit-spec`
 
 * Spec problems are exposed as-is into request & response coercion errors, enabling pretty-printers like [expound](https://github.com/bhb/expound) to be used:
