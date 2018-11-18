@@ -84,12 +84,13 @@
 
 (defn- expand-and-transform
   [middleware data {:keys [::transform] :or {transform identity} :as opts}]
-  (->> middleware
-       (keep #(into-middleware % data opts))
-       (into [])
-       (transform)
-       (keep #(into-middleware % data opts))
-       (into [])))
+  (let [transform (if (vector? transform) (apply comp (reverse transform)) transform)]
+    (->> middleware
+         (keep #(into-middleware % data opts))
+         (into [])
+         (transform)
+         (keep #(into-middleware % data opts))
+         (into []))))
 
 (defn- compile-handler [middleware handler]
   ((apply comp identity (keep :wrap middleware)) handler))

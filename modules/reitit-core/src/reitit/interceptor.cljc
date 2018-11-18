@@ -110,11 +110,12 @@
   ([interceptors data]
    (chain interceptors data nil))
   ([interceptors data {:keys [::transform] :or {transform identity} :as opts}]
-   (->> interceptors
-        (keep #(into-interceptor % data opts))
-        (transform)
-        (keep #(into-interceptor % data opts))
-        (into []))))
+   (let [transform (if (vector? transform) (apply comp (reverse transform)) transform)]
+     (->> interceptors
+          (keep #(into-interceptor % data opts))
+          (transform)
+          (keep #(into-interceptor % data opts))
+          (into [])))))
 
 (defn compile-result
   ([route opts]
