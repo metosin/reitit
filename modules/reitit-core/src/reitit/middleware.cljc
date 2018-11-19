@@ -122,23 +122,20 @@
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
-  support for Middleware. See [docs](https://metosin.github.io/reitit/) for details.
+  support for Middleware. See documentation on [[reitit.core/router]] for available options.
+  In addition, the following options are available:
+
+  | key                            | description
+  | -------------------------------|-------------
+  | `:reitit.middleware/transform` | Function or vector of functions of type `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity)
+  | `:reitit.middleware/registry`  | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
 
   Example:
 
-    (router
-      [\"/api\" {:middleware [wrap-format wrap-oauth2]}
+      (router
+        [\"/api\" {:middleware [wrap-format wrap-oauth2]}
         [\"/users\" {:middleware [wrap-delete]
-                     :handler get-user}]])
-
-  Options:
-
-  | key                            | description |
-  | -------------------------------|-------------|
-  | `:reitit.middleware/transform` | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
-  | `:reitit.middleware/registry`  | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
-
-  See other router options from [[reitit.core/router]]."
+                     :handler get-user}]])"
   ([data]
    (router data nil))
   ([data opts]

@@ -40,7 +40,7 @@
 
 (defn router
   "Create a `reitit.core.router` from raw route data and optionally an options map.
-  Enables request coercion. See [[reitit.core.router]] for details on options."
+  Enables request coercion. See [[reitit.core/router]] for details on options."
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]

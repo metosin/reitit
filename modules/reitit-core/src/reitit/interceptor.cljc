@@ -129,23 +129,22 @@
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
-  support for Interceptors. See [docs](https://metosin.github.io/reitit/) for details.
-
-  Example:
-
-    (router
-      [\"/api\" {:interceptors [format-body oauth2]}
-        [\"/users\" {:interceptors [delete]
-                     :handler get-user}]])
+  support for Interceptors. See documentation on [[reitit.core/router]] for available options.
+  In addition, the following options are available:
 
   Options:
 
   | key                             | description
   | --------------------------------|-------------
-  | `:reitit.interceptor/transform` | Function of [Interceptor] => [Interceptor] to transform the expanded Interceptors (default: identity).
+  | `:reitit.interceptor/transform` | Function or vector of functions of type `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity).
   | `:reitit.interceptor/registry`  | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptor
 
-  See router options from [[reitit.core/router]]."
+  Example:
+
+      (router
+        [\"/api\" {:interceptors [format-body oauth2]}
+        [\"/users\" {:interceptors [delete]
+                     :handler get-user}]])"
   ([data]
    (router data nil))
   ([data opts]

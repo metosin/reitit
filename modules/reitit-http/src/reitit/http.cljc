@@ -47,15 +47,13 @@
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
-  support for http-methods and Interceptors. See [docs](https://metosin.github.io/reitit/)
-  for details.
+  support for http-methods and Interceptors. See documentation on [[reitit.core/router]]
+  for available options. In addition, the following options are available:
 
-  Options:
-
-  | key                                    | description |
-  | ---------------------------------------|-------------|
-  | `:reitit.interceptor/transform`         | Function of `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity).
-  | `:reitit.interceptor/registry`          | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptors
+  | key                                    | description
+  | ---------------------------------------|-------------
+  | `:reitit.interceptor/transform`        | Function or vector of functions of type `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity)
+  | `:reitit.interceptor/registry`         | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptors
   | `:reitit.http/default-options-handler` | Default handler for `:options` method in endpoints (default: reitit.ring/default-options-handler)
 
   Example:
@@ -65,9 +63,7 @@
           [\"/users\" {:get get-user
                        :post update-user
                        :delete {:interceptors [delete-i]
-                               :handler delete-user}}]])
-
-  See router options from [[reitit.core/router]] and [[reitit.middleware/router]]."
+                               :handler delete-user}}]])"
   ([data]
    (router data nil))
   ([data opts]
@@ -112,7 +108,7 @@
   | `:executor`     | `reitit.interceptor.Executor` for the interceptor chain
   | `:interceptors` | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler"
   ([router opts]
-    (ring-handler router nil opts))
+   (ring-handler router nil opts))
   ([router default-handler {:keys [executor interceptors]}]
    (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
          default-queue (->> [default-handler]
