@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.8"
+(defproject metosin/reitit-parent "0.2.9"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,18 +10,18 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :managed-dependencies [[metosin/reitit "0.2.8"]
-                         [metosin/reitit-core "0.2.8"]
-                         [metosin/reitit-spec "0.2.8"]
-                         [metosin/reitit-schema "0.2.8"]
-                         [metosin/reitit-ring "0.2.8"]
-                         [metosin/reitit-middleware "0.2.8"]
-                         [metosin/reitit-http "0.2.8"]
-                         [metosin/reitit-interceptors "0.2.8"]
-                         [metosin/reitit-swagger "0.2.8"]
-                         [metosin/reitit-swagger-ui "0.2.8"]
-                         [metosin/reitit-frontend "0.2.8"]
-                         [metosin/reitit-sieppari "0.2.8"]
+  :managed-dependencies [[metosin/reitit "0.2.9"]
+                         [metosin/reitit-core "0.2.9"]
+                         [metosin/reitit-spec "0.2.9"]
+                         [metosin/reitit-schema "0.2.9"]
+                         [metosin/reitit-ring "0.2.9"]
+                         [metosin/reitit-middleware "0.2.9"]
+                         [metosin/reitit-http "0.2.9"]
+                         [metosin/reitit-interceptors "0.2.9"]
+                         [metosin/reitit-swagger "0.2.9"]
+                         [metosin/reitit-swagger-ui "0.2.9"]
+                         [metosin/reitit-frontend "0.2.9"]
+                         [metosin/reitit-sieppari "0.2.9"]
                          [meta-merge "1.0.0"]
                          [lambdaisland/deep-diff "0.0-25"]
                          [ring/ring-core "1.7.1"]
@@ -59,7 +59,7 @@
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
-                                  [metosin/reitit "0.2.8"]
+                                  [metosin/reitit "0.2.9"]
 
                                   [expound "0.7.1"]
                                   [orchestra "2018.11.07-1"]
