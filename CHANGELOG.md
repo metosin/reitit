@@ -1,3 +1,9 @@
+## 0.2.9 (2018-11-21)
+
+## `reitit-spec`
+
+* support for vector data-specs for request & response parameters by [Heikki Hämäläinen](https://github.com/hjhamala).
+
 ## 0.2.8 (2018-11-18)
 
 ## `reitit-core`

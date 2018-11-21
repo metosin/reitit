@@ -14,11 +14,11 @@
             [["/schema" {:coercion reitit.coercion.schema/coercion}
               ["/:number/:keyword" {:parameters {:path {:number s/Int
                                                         :keyword s/Keyword}
-                                                 :query (s/maybe {:int s/Int})}}]]
+                                                 :query (s/maybe {:int s/Int, :ints [s/Int]})}}]]
              ["/spec" {:coercion reitit.coercion.spec/coercion}
               ["/:number/:keyword" {:parameters {:path {:number int?
                                                         :keyword keyword?}
-                                                 :query (ds/maybe {:int int?})}}]]
+                                                 :query (ds/maybe {:int int?, :ints [int?]})}}]]
              ["/none"
               ["/:number/:keyword" {:parameters {:path {:number int?
                                                         :keyword keyword?}}}]]]
@@ -30,8 +30,8 @@
           (is (= {:path {:keyword :abba, :number 1}, :query nil}
                  (coercion/coerce! m))))
         (let [m (r/match-by-path r "/schema/1/abba")]
-          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10}}
-                 (coercion/coerce! (assoc m :query-params {:int "10"}))))))
+          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1,2,3]}}
+                 (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"]}))))))
       (testing "throws with invalid input"
         (let [m (r/match-by-path r "/schema/kikka/abba")]
           (is (thrown? ExceptionInfo (coercion/coerce! m))))))
@@ -42,8 +42,8 @@
           (is (= {:path {:keyword :abba, :number 1}, :query nil}
                  (coercion/coerce! m))))
         (let [m (r/match-by-path r "/schema/1/abba")]
-          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10}}
-                 (coercion/coerce! (assoc m :query-params {:int "10"}))))))
+          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1,2,3]}}
+                 (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"]}))))))
       (testing "throws with invalid input"
         (let [m (r/match-by-path r "/spec/kikka/abba")]
           (is (thrown? ExceptionInfo (coercion/coerce! m))))))
