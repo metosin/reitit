@@ -53,6 +53,11 @@
   (into-spec [this name]
     (dissoc (ds/spec (ensure-name name) this) :name))
 
+  #?(:clj  clojure.lang.PersistentVector
+     :cljs cljs.core.PersistentVector)
+  (into-spec [this name]
+    (dissoc (ds/spec (ensure-name name) this) :name))
+
   Maybe
   (into-spec [this name]
     (ds/spec (ensure-name name) this))
