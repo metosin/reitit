@@ -70,6 +70,10 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
 * two routes
 * swagger-spec served from  `"/swagger.json"`
 * swagger-ui mounted to `"/"`
+* note that for real-world use, you need a [content-negation middleware][muuntaja] -
+  see the next example
+
+[muuntaja]: ../ring/default_middleware.md#content-negotiation
 
 ```clj
 (require '[reitit.ring :as ring])
