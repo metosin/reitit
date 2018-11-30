@@ -744,6 +744,73 @@
 <li>Load resources</li>
 <li>Update application state</li>
 </ul>
+<h2 id="how-controllers-work">How controllers work</h2>
+<p>A controller consists of three functions:</p>
+<ul>
+<li><code>params</code> which takes a Match and returns an arbitrary value.</li>
+<li><code>start</code> which takes the result of params and whose return value is discarded.</li>
+<li><code>stop</code> which takes the result of params and whose return value is discarded.</li>
+</ul>
+<p>When you navigate to a route that has a controller, <code>params</code> gets called first
+and then <code>start</code> is called with its return value. When you exit that route,
+<code>stop</code> is called with the return value of <code>params.</code></p>
+<p>If you navigate to the same route with different parameters, <code>params</code> gets
+called again. If the return value changes from the previous return value, <code>stop</code>
+and <code>start</code> get called again.</p>
+<p>You can add controllers to a route by adding them to the route data in the
+<code>:controllers</code> vector. For example:</p>
+<pre><code class="lang-clojure">[<span class="hljs-string">&quot;/item/:id&quot;</span>
+ {<span class="hljs-symbol">:controllers</span> [{<span class="hljs-symbol">:params</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [match] (<span class="hljs-name"><span class="hljs-builtin-name">get-in</span></span> match [<span class="hljs-symbol">:path-params</span> <span class="hljs-symbol">:id</span>]))
+                 <span class="hljs-symbol">:start</span>  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [item-id] (<span class="hljs-name">js/console.log</span> <span class="hljs-symbol">:start</span> item-id))
+                 <span class="hljs-symbol">:stop</span>   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [item-id] (<span class="hljs-name">js/console.log</span> <span class="hljs-symbol">:stop</span> item-id))}]}]
+</code></pre>
+<p>If you leave out <code>params</code>, <code>start</code> and <code>stop</code> get called with <code>nil</code>. You can
+leave out <code>start</code> or <code>stop</code> if you do not need both of them.</p>
+<h2 id="enabling-controllers">Enabling controllers</h2>
+<p>You need to
+call
+<a href="https://cljdoc.org/d/metosin/reitit-frontend/CURRENT/api/reitit.frontend.controllers#apply-controllers" target="_blank"><code>reitit.frontend.controllers/apply-controllers</code></a> whenever
+the URL changes. You can call it from the <code>on-navigate</code> callback of
+<code>reitit.frontend.easy</code>:</p>
+<pre><code class="lang-clojure">
+(<span class="hljs-name"><span class="hljs-builtin-name">ns</span></span> frontend.core
+  (<span class="hljs-symbol">:require</span> [reitit.frontend.easy <span class="hljs-symbol">:as</span> rfe]
+            [reitit.frontend.controllers <span class="hljs-symbol">:as</span> rfc]))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defonce</span></span> match-a (<span class="hljs-name"><span class="hljs-builtin-name">atom</span></span> <span class="hljs-literal">nil</span>))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [<span class="hljs-string">&quot;/&quot;</span> ...])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> init! []
+  (<span class="hljs-name">rfe/start!</span>
+    routes
+    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [new-match]
+      (<span class="hljs-name"><span class="hljs-builtin-name">swap!</span></span> match-a
+        (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [old-match]
+          (<span class="hljs-name"><span class="hljs-builtin-name">when</span></span> new-match
+            (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> new-match
+              <span class="hljs-symbol">:controllers</span> (<span class="hljs-name">rfc/apply-controllers</span> (<span class="hljs-symbol">:controllers</span> old-match) new-match))))))))
+</code></pre>
+<p>See also <a href="https://github.com/metosin/reitit/tree/master/examples/frontend-controllers" target="_blank">the full example</a>.</p>
+<h2 id="nested-controllers">Nested controllers</h2>
+<p>When you nest routes in the route tree, the controllers get nested as well.
+Consider this route tree:</p>
+<pre><code class="lang-clojure">[<span class="hljs-string">&quot;/&quot;</span> {<span class="hljs-symbol">:controllers</span> [{<span class="hljs-symbol">:start</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_] (<span class="hljs-name">js/console.log</span> <span class="hljs-string">&quot;root start&quot;</span>))}]}
+ [<span class="hljs-string">&quot;/item/:id&quot;</span>
+  {<span class="hljs-symbol">:controllers</span> [{<span class="hljs-symbol">:params</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [match] (<span class="hljs-name"><span class="hljs-builtin-name">get-in</span></span> match [<span class="hljs-symbol">:path-params</span> <span class="hljs-symbol">:id</span>]))
+                  <span class="hljs-symbol">:start</span>  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [item-id] (<span class="hljs-name">js/console.log</span> <span class="hljs-string">&quot;item start&quot;</span> item-id))
+                  <span class="hljs-symbol">:stop</span>   (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [item-id] (<span class="hljs-name">js/console.log</span> <span class="hljs-string">&quot;item stop&quot;</span> item-id))}]}]]
+</code></pre>
+<ul>
+<li>When you navigate to any route at all, the root controller gets started.</li>
+<li>If you navigate to <code>/item/something</code>, the root controller gets started first
+and then the item controller gets started.</li>
+<li>If you then navigate from <code>/item/something</code> to <code>/item/something-else</code>, first
+the item controller gets stopped with parameter <code>something</code> and then it gets
+started with the parameter <code>something-else</code>. The root controller stays on the
+whole time since its parameters do not change.</li>
+</ul>
 <h2 id="authentication">Authentication</h2>
 <p>Controllers can be used to load resources from a server. If and when your
 API requires authentication you will need to implement logic to prevent controllers
@@ -765,6 +832,10 @@ authentication is done.</p>
 <p>Similar solution could be used to describe required resources as data (maybe
 even GraphQL query) per route, and then have code automatically load
 missing resources.</p>
+<h2 id="controllers-elsewhere">Controllers elsewhere</h2>
+<ul>
+<li><a href="https://keechma.com/guides/controllers/" target="_blank">Controllers in Keechma</a></li>
+</ul>
 
                                 
                                 </section>
@@ -808,7 +879,7 @@ missing resources.</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Controllers","level":"6.3","depth":1,"next":{"title":"Configuring Routers","level":"7.1","depth":1,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"previous":{"title":"Browser integration","level":"6.2","depth":1,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"frontend/controllers.md","mtime":"2018-11-22T08:36:19.273Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-11-22T08:36:45.787Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Controllers","level":"6.3","depth":1,"next":{"title":"Configuring Routers","level":"7.1","depth":1,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"previous":{"title":"Browser integration","level":"6.2","depth":1,"path":"frontend/browser.md","ref":"frontend/browser.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"frontend/controllers.md","mtime":"2018-11-30T18:33:47.801Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-11-30T18:34:09.486Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
