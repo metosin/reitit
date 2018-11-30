@@ -7,6 +7,89 @@ Controllers run code when a route is entered and left. This can be useful to:
 - Load resources
 - Update application state
 
+## How controllers work
+
+A controller consists of three functions:
+
+* `params` which takes a Match and returns an arbitrary value.
+* `start` which takes the result of params and whose return value is discarded.
+* `stop` which takes the result of params and whose return value is discarded.
+
+When you navigate to a route that has a controller, `params` gets called first
+and then `start` is called with its return value. When you exit that route,
+`stop` is called with the return value of `params.`
+
+If you navigate to the same route with different parameters, `params` gets
+called again. If the return value changes from the previous return value, `stop`
+and `start` get called again.
+
+You can add controllers to a route by adding them to the route data in the
+`:controllers` vector. For example:
+
+```clojure
+["/item/:id"
+ {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
+                 :start  (fn [item-id] (js/console.log :start item-id))
+                 :stop   (fn [item-id] (js/console.log :stop item-id))}]}]
+```
+
+If you leave out `params`, `start` and `stop` get called with `nil`. You can
+leave out `start` or `stop` if you do not need both of them.
+
+## Enabling controllers
+
+You need to
+call
+[`reitit.frontend.controllers/apply-controllers`](https://cljdoc.org/d/metosin/reitit-frontend/CURRENT/api/reitit.frontend.controllers#apply-controllers) whenever
+the URL changes. You can call it from the `on-navigate` callback of
+`reitit.frontend.easy`:
+
+```clojure
+
+(ns frontend.core
+  (:require [reitit.frontend.easy :as rfe]
+            [reitit.frontend.controllers :as rfc]))
+
+(defonce match-a (atom nil))
+
+(def routes
+  ["/" ...])
+
+(defn init! []
+  (rfe/start!
+    routes
+    (fn [new-match]
+      (swap! match-a
+        (fn [old-match]
+          (when new-match
+            (assoc new-match
+              :controllers (rfc/apply-controllers (:controllers old-match) new-match))))))))
+```
+
+See also [the full example](https://github.com/metosin/reitit/tree/master/examples/frontend-controllers).
+
+## Nested controllers
+
+When you nest routes in the route tree, the controllers get nested as well.
+Consider this route tree:
+
+```clojure
+["/" {:controllers [{:start (fn [_] (js/console.log "root start"))}]}
+ ["/item/:id"
+  {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
+                  :start  (fn [item-id] (js/console.log "item start" item-id))
+                  :stop   (fn [item-id] (js/console.log "item stop" item-id))}]}]]
+
+```
+
+* When you navigate to any route at all, the root controller gets started.
+* If you navigate to `/item/something`, the root controller gets started first
+  and then the item controller gets started.
+* If you then navigate from `/item/something` to `/item/something-else`, first
+  the item controller gets stopped with parameter `something` and then it gets
+  started with the parameter `something-else`. The root controller stays on the
+  whole time since its parameters do not change.
+
 ## Authentication
 
 Controllers can be used to load resources from a server. If and when your
@@ -35,3 +118,8 @@ authentication is done.
 Similar solution could be used to describe required resources as data (maybe
 even GraphQL query) per route, and then have code automatically load
 missing resources.
+
+
+## Controllers elsewhere
+
+* [Controllers in Keechma](https://keechma.com/guides/controllers/)
