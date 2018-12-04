@@ -64,5 +64,46 @@
 
       (is (= [[:stop-3 1] :stop-1] @log))
       (is (= [] @controller-state))
+      (reset! log []))))
+
+(deftest controller-data-parameters
+  (let [log (atom [])
+        controller-state (atom [])
+        static {:start (fn [params] (swap! log conj [:start-static]))
+                :stop  (fn [params] (swap! log conj [:stop-static]))
+                :params rfc/static}
+        controller {:start (fn [params] (swap! log conj [:start params]))
+                    :stop  (fn [params] (swap! log conj [:stop params]))
+                    :params (rfc/parameters {:path [:foo]})}]
+
+    (testing "init"
+      (swap! controller-state rfc/apply-controllers
+             {:data {:controllers [static controller]}
+              :parameters {:path {:foo 1}}})
+
+      (is (= [[:start-static]
+              [:start {:path {:foo 1}}]] @log))
+      (is (= [(assoc static ::rfc/params nil)
+              (assoc controller ::rfc/params {:path {:foo 1}})]
+             @controller-state))
       (reset! log []))
-    ))
+
+    (testing "params change"
+      (swap! controller-state rfc/apply-controllers
+             {:data {:controllers [static controller]}
+              :parameters {:path {:foo 5}}})
+
+      (is (= [[:stop {:path {:foo 1}}]
+              [:start {:path {:foo 5}}]] @log))
+      (is (= [(assoc static ::rfc/params nil)
+              (assoc controller ::rfc/params {:path {:foo 5}})]
+             @controller-state))
+      (reset! log []))
+
+    (testing "stop"
+      (swap! controller-state rfc/apply-controllers
+             {:data {:controllers []}})
+
+      (is (= [[:stop {:path {:foo 5}}]
+              [:stop-static]] @log))
+      (reset! log []))))

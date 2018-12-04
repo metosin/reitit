@@ -1,4 +1,6 @@
 (ns reitit.frontend.history
+  "Provides integration to hash-change or HTML5 History
+  events."
   (:require [reitit.core :as reitit]
             [reitit.core :as r]
             [reitit.frontend :as rf]
