@@ -9,32 +9,34 @@ Controllers run code when a route is entered and left. This can be useful to:
 
 ## How controllers work
 
-A controller consists of three functions:
+A controller map can contain these properties:
 
-* `params` which takes a Match and returns an arbitrary value.
-* `start` which takes the result of params and whose return value is discarded.
-* `stop` which takes the result of params and whose return value is discarded.
+* `identity` function which takes a Match and returns an arbitrary value,
+* or `parameters` value, which declares which parameters should affect
+controller identity
+* `start` & `stop` functions, which are called with controller identity
 
-When you navigate to a route that has a controller, `params` gets called first
-and then `start` is called with its return value. When you exit that route,
-`stop` is called with the return value of `params.`
+When you navigate to a route that has a controller, controller identity
+is first resolved by calling `identity` function, or by using `parameters`
+declaration, or if neither is set, the identity is `nil`. Next controller
+is initialized by calling `start` is called with the identity value.
+When you exit that route, `stop` is called with the return value of `params.`
 
-If you navigate to the same route with different parameters, `params` gets
-called again. If the return value changes from the previous return value, `stop`
-and `start` get called again.
+If you navigate to the same route with different match, identity gets
+resolved again. If the identity changes from the previous value, controller
+is reinitialized: `stop` and `start` get called again.
 
 You can add controllers to a route by adding them to the route data in the
 `:controllers` vector. For example:
 
 ```cljs
 ["/item/:id"
- {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
-                 :start  (fn [item-id] (js/console.log :start item-id))
-                 :stop   (fn [item-id] (js/console.log :stop item-id))}]}]
+ {:controllers [{:parameters {:path [:id]}
+                 :start  (fn [parameters] (js/console.log :start (-> parameters :path :id)))
+                 :stop   (fn [parameters] (js/console.log :stop (-> parameters :path :id)))}]}]
 ```
 
-If you leave out `params`, `start` and `stop` get called with `nil`. You can
-leave out `start` or `stop` if you do not need both of them.
+You can leave out `start` or `stop` if you do not need both of them.
 
 ## Enabling controllers
 

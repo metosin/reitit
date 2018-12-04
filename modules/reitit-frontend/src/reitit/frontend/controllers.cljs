@@ -7,8 +7,9 @@
 (defn get-identity
   "Get controller identity given controller and match.
 
-  To select interesting properties from Match :parameters option can be used.
-  Resulting value is map of param-type => param => value.
+  To select interesting properties from Match :parameters option can be set.
+  Value should be param-type => [param-key]
+  Resulting value is map of param-type => param-key => value.
 
   For other uses, :identity option can be used to provide function from
   Match to identity.
@@ -35,7 +36,7 @@
 
 (defn apply-controller
   "Run side-effects (:start or :stop) for controller.
-  The side-effect function is called with controller params."
+  The side-effect function is called with controller identity value."
   [controller method]
   (when-let [f (get controller method)]
     (f (::identity controller))))
