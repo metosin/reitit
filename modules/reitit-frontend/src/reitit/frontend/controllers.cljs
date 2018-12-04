@@ -33,7 +33,7 @@
                                       (pad-same-length new-controllers old-controllers))
                                  (keep identity)
                                  vec)]
-    (doseq [controller (map :old changed-controllers)]
+    (doseq [controller (reverse (map :old changed-controllers))]
       (apply-controller controller :stop))
     (doseq [controller (map :new changed-controllers)]
       (apply-controller controller :start))

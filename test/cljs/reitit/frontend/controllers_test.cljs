@@ -62,7 +62,7 @@
       (swap! controller-state rfc/apply-controllers
              {:data {:controllers []}})
 
-      (is (= [:stop-1 [:stop-3 1]] @log))
+      (is (= [[:stop-3 1] :stop-1] @log))
       (is (= [] @controller-state))
       (reset! log []))
     ))
