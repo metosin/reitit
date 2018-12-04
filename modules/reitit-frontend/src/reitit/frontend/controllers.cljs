@@ -4,38 +4,41 @@
 (defn- pad-same-length [a b]
   (concat a (take (- (count b) (count a)) (repeat nil))))
 
-(defn get-params
-  "Get controller parameters given match. If controller provides :params
-  function that will be called with the match. Default is nil."
-  [controller match]
-  (if-let [f (:params controller)]
-    (f match)))
+(defn get-identity
+  "Get controller identity given controller and match.
 
-(def static
-  "Static params means that the identity of controller
-  doesn't not depend on Match, i.e. any parameters.
+  To select interesting properties from Match :parameters option can be used.
+  Resulting value is map of param-type => param => value.
 
-  This is same as just not defining :params."
-  nil)
+  For other uses, :identity option can be used to provide function from
+  Match to identity.
 
-(defn parameters
-  "Given map of parameter-type => list of keys,
-  returns function taking Match and returning
-  value containing given parameter types and their
-  keys.
+  Default value is nil, i.e. controller identity doesn't depend on Match."
+  [{:keys [identity parameters params]} match]
+  (assert (not (and identity parameters))
+          "Use either :identity or :parameters for controller, not both.")
+  (when params
+    (js/console.warn "Controller :params is deprecated. Replace with :identity or :parameters option."))
+  (cond
+    parameters
+    (into {} (for [[param-type ks] parameters]
+               [param-type (select-keys (get (:parameters match) param-type) ks)]))
 
-  The resulting function can be used for :params."
-  [p]
-  (fn [match]
-    (into {} (for [[param-type ks] p]
-               [param-type (select-keys (get (:parameters match) param-type) ks)]))))
+    identity
+    (identity match)
+
+    ;; Support deprecated :params for transition period. Can be removed later.
+    params
+    (params match)
+
+    :else nil))
 
 (defn apply-controller
   "Run side-effects (:start or :stop) for controller.
   The side-effect function is called with controller params."
   [controller method]
   (when-let [f (get controller method)]
-    (f (::params controller))))
+    (f (::identity controller))))
 
 (defn apply-controllers
   "Applies changes between current controllers and
@@ -43,7 +46,7 @@
   identity has changed."
   [old-controllers new-match]
   (let [new-controllers (mapv (fn [controller]
-                                (assoc controller ::params (get-params controller new-match)))
+                                (assoc controller ::identity (get-identity controller new-match)))
                               (:controllers (:data new-match)))
         changed-controllers (->> (map (fn [old new]
                                         ;; different controllers, or params changed
