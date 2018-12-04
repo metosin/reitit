@@ -26,7 +26,7 @@ and `start` get called again.
 You can add controllers to a route by adding them to the route data in the
 `:controllers` vector. For example:
 
-```clojure
+```cljs
 ["/item/:id"
  {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
                  :start  (fn [item-id] (js/console.log :start item-id))
@@ -44,8 +44,7 @@ call
 the URL changes. You can call it from the `on-navigate` callback of
 `reitit.frontend.easy`:
 
-```clojure
-
+```cljs
 (ns frontend.core
   (:require [reitit.frontend.easy :as rfe]
             [reitit.frontend.controllers :as rfc]))
@@ -70,10 +69,10 @@ See also [the full example](https://github.com/metosin/reitit/tree/master/exampl
 
 ## Nested controllers
 
-When you nest routes in the route tree, the controllers get nested as well.
-Consider this route tree:
+When you nest routes in the route tree, the controllers get concatenated when
+route data is merged. Consider this route tree:
 
-```clojure
+```cljs
 ["/" {:controllers [{:start (fn [_] (js/console.log "root start"))}]}
  ["/item/:id"
   {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
@@ -90,20 +89,22 @@ Consider this route tree:
   started with the parameter `something-else`. The root controller stays on the
   whole time since its parameters do not change.
 
-## Authentication
+## Tips
+
+### Authentication
 
 Controllers can be used to load resources from a server. If and when your
 API requires authentication you will need to implement logic to prevent controllers
 trying to do requests if user isn't authenticated yet.
 
-### Run controllers and check authentication
+#### Run controllers and check authentication
 
 If you have both unauthenticated and authenticated resources, you can
 run the controllers always and then check the authentication status
 on controller code, or on the code called from controllers (e.g. re-frame event
 handler).
 
-### Disable controllers until user is authenticated
+#### Disable controllers until user is authenticated
 
 If all your resources require authentication an easy way to prevent bad
 requests is to enable controllers only after authentication is done.
@@ -118,7 +119,6 @@ authentication is done.
 Similar solution could be used to describe required resources as data (maybe
 even GraphQL query) per route, and then have code automatically load
 missing resources.
-
 
 ## Controllers elsewhere
 
