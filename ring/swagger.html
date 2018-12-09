@@ -841,7 +841,7 @@
 <ul>
 <li>two routes</li>
 <li>swagger-spec served from  <code>&quot;/swagger.json&quot;</code></li>
-<li>swagger-ui mounted to <code>&quot;/&quot;</code></li>
+<li>swagger-ui mounted to <code>&quot;/api-docs&quot;</code></li>
 <li>note that for real-world use, you need a <a href="default_middleware.html#content-negotiation">content-negation middleware</a> -
 see the next example</li>
 </ul>
@@ -855,10 +855,9 @@ see the next example</li>
       [[<span class="hljs-string">&quot;/api&quot;</span>
         [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ping&quot;</span>})}]
         [<span class="hljs-string">&quot;/pong&quot;</span> {<span class="hljs-symbol">:post</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})}]]
-       [<span class="hljs-string">&quot;/swagger.json&quot;</span>
-        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
-               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]]) 
-    (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span> {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/&quot;</span>})))
+       [<span class="hljs-string">&quot;&quot;</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>}
+        [<span class="hljs-string">&quot;/swagger.json&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}]
+        [<span class="hljs-string">&quot;/api-docs/*&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span>)}]]])))
 </code></pre>
 <p>The generated swagger spec:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span> <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/swagger.json&quot;</span>})
@@ -869,8 +868,21 @@ see the next example</li>
 <span class="hljs-comment">;                &quot;/api/pong&quot; {:post {}}}}}</span>
 </code></pre>
 <p>Swagger-ui:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span> <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/&quot;</span>})
+<pre><code class="lang-clj">(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/api-docs/index.html&quot;</span>})
 <span class="hljs-comment">; ... the swagger-ui index-page, configured correctly</span>
+</code></pre>
+<p>You might be interested in adding a <a href="slash_handler.html">trailing slash handler</a> to the app to serve the swagger-ui from <code>/api-docs</code> (without the trailing slash) too.</p>
+<p>Another way to serve the swagger-ui is using the <a href="default_handler.html">default handler</a>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [[<span class="hljs-string">&quot;/api&quot;</span>
+        [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ping&quot;</span>})}]
+        [<span class="hljs-string">&quot;/pong&quot;</span> {<span class="hljs-symbol">:post</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})}]]
+       [<span class="hljs-string">&quot;/swagger.json&quot;</span>
+        {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>
+               <span class="hljs-symbol">:handler</span> (<span class="hljs-name">swagger/create-swagger-handler</span>)}}]]) 
+    (<span class="hljs-name">swagger-ui/create-swagger-ui-handler</span> {<span class="hljs-symbol">:path</span> <span class="hljs-string">&quot;/api-docs&quot;</span>})))
 </code></pre>
 <h3 id="more-complete-example">More complete example</h3>
 <ul>
@@ -1059,7 +1071,7 @@ see the next example</li>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"4.14","depth":1,"next":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"previous":{"title":"Compiling Middleware","level":"4.13","depth":1,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-11-30T18:33:47.801Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-11-30T18:34:09.486Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Swagger Support","level":"4.14","depth":1,"next":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"previous":{"title":"Compiling Middleware","level":"4.13","depth":1,"path":"ring/compiling_middleware.md","ref":"ring/compiling_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/swagger.md","mtime":"2018-12-09T18:16:46.289Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-09T18:17:15.273Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
