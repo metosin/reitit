@@ -69,7 +69,7 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
 
 * two routes
 * swagger-spec served from  `"/swagger.json"`
-* swagger-ui mounted to `"/"`
+* swagger-ui mounted to `"/api-docs"`
 * note that for real-world use, you need a [content-negation middleware][muuntaja] -
   see the next example
 
@@ -86,10 +86,9 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
       [["/api"
         ["/ping" {:get (constantly {:status 200, :body "ping"})}]
         ["/pong" {:post (constantly {:status 200, :body "pong"})}]]
-       ["/swagger.json"
-        {:get {:no-doc true
-               :handler (swagger/create-swagger-handler)}}]]) 
-    (swagger-ui/create-swagger-ui-handler {:path "/"})))
+       ["" {:no-doc true}
+        ["/swagger.json" {:get (swagger/create-swagger-handler)}]
+        ["/api-docs/*" {:get (swagger-ui/create-swagger-ui-handler)}]]])))
 ```
 
 The generated swagger spec:
@@ -106,8 +105,25 @@ The generated swagger spec:
 Swagger-ui:
 
 ```clj
-(app {:request-method :get :uri "/"})
+(app {:request-method :get, :uri "/api-docs/index.html"})
 ; ... the swagger-ui index-page, configured correctly
+```
+
+You might be interested in adding a [trailing slash handler](slash_handler.md) to the app to serve the swagger-ui from `/api-docs` (without the trailing slash) too.
+
+Another way to serve the swagger-ui is using the [default handler](default_handler.md):
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      [["/api"
+        ["/ping" {:get (constantly {:status 200, :body "ping"})}]
+        ["/pong" {:post (constantly {:status 200, :body "pong"})}]]
+       ["/swagger.json"
+        {:get {:no-doc true
+               :handler (swagger/create-swagger-handler)}}]]) 
+    (swagger-ui/create-swagger-ui-handler {:path "/api-docs"})))
 ```
 
 ### More complete example
