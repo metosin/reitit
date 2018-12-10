@@ -1,3 +1,9 @@
+## UNRELEASED
+
+## `reitit-core`
+
+* `segment-router` doesn't accept empty segments as path-parameters, fixes [#181](https://github.com/metosin/reitit/issues/181).
+
 ## 0.2.9 (2018-11-21)
 
 ## `reitit-spec`

@@ -79,7 +79,20 @@
             (is (= ::jabba2 (matches "/abba/2")))
             (is (= ::doo (matches "/abba/1/doo")))
             (is (= ::boo (matches "/abba/1/boo")))
-            (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa"))))))
+            (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
+
+        (testing "empty path segments"
+          (let [router (r/router
+                         [["/items" ::list]
+                          ["/items/:id" ::item]
+                          ["/items/:id/:side" ::deep]]
+                         {:router r})
+                matches #(-> router (r/match-by-path %) :data :name)]
+            (is (= ::list (matches "/items")))
+            (is (= nil (matches "/items/")))
+            (is (= ::item (matches "/items/1")))
+            (is (= ::deep (matches "/items/1/2")))
+            (is (= nil (matches "/items//2"))))))
 
       r/linear-router :linear-router
       r/segment-router :segment-router

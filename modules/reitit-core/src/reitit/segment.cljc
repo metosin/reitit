@@ -40,7 +40,7 @@
          (if (nil? p)
            (when match (assoc match :path-params path-params))
            (or (-lookup (impl/fast-get children' p) ps path-params)
-               (if wilds? (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds))
+               (if (and wilds? (not (str/blank? p))) (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds))
                (if catch-all (-catch-all children' catch-all path-params p ps)))))))))
 
 (defn insert [root path data]
