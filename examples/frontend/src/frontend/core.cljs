@@ -1,11 +1,11 @@
 (ns frontend.core
-    (:require [reagent.core :as r]
-              [reitit.frontend :as rf]
-              [reitit.frontend.easy :as rfe]
-              [reitit.coercion :as rc]
-              [reitit.coercion.schema :as rsc]
-              [schema.core :as s]
-              [fipp.edn :as fedn]))
+  (:require [reagent.core :as r]
+            [reitit.frontend :as rf]
+            [reitit.frontend.easy :as rfe]
+            [reitit.coercion :as rc]
+            [reitit.coercion.schema :as rsc]
+            [schema.core :as s]
+            [fipp.edn :as fedn]))
 
 (defn home-page []
   [:div
@@ -19,7 +19,7 @@
    [:button
     {:type "button"
      :on-click #(rfe/replace-state ::item {:id 4})}
-    "Replace State Item 4"] ])
+    "Replace State Item 4"]])
 
 (defn about-page []
   [:div
@@ -52,25 +52,25 @@
    [:pre (with-out-str (fedn/pprint @match))]])
 
 (def routes
-  (rf/router
-    ["/"
-     [""
-      {:name ::frontpage
-       :view home-page}]
-     ["about"
-      {:name ::about
-       :view about-page}]
-     ["item/:id"
-      {:name ::item
-       :view item-page
-       :parameters {:path {:id s/Int}
-                    :query {(s/optional-key :foo) s/Keyword}}}]]
-    {:data {:coercion rsc/coercion}}))
+  [["/"
+    {:name ::frontpage
+     :view home-page}]
+
+   ["/about"
+    {:name ::about
+     :view about-page}]
+
+   ["/item/:id"
+    {:name ::item
+     :view item-page
+     :parameters {:path {:id s/Int}
+                  :query {(s/optional-key :foo) s/Keyword}}}]])
 
 (defn init! []
-  (rfe/start! routes
-              (fn [m] (reset! match m))
-              {:use-fragment true})
+  (rfe/start!
+    (rf/router routes {:data {:coercion rsc/coercion}})
+    (fn [m] (reset! match m))
+    {:use-fragment true})
   (r/render [current-page] (.getElementById js/document "app")))
 
 (init!)
