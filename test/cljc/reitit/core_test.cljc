@@ -52,12 +52,14 @@
                     (r/match-by-name! router ::beer))))))
 
         (testing "decode %-encoded path params"
-          (let [router (r/router [["/one-param-path/:param1"]
+          (let [router (r/router [["/one-param-path/:param1" ::one]
                                   ["/two-param-path/:param1/:param2"]
                                   ["/catchall/*remaining-path"]] {:router r})
                 decoded-params #(-> router (r/match-by-path %) :path-params)
                 decoded-param1 #(-> (decoded-params %) :param1)
                 decoded-remaining-path #(-> (decoded-params %) :remaining-path)]
+            (is (= {:param1 "käki"} (:path-params (r/match-by-name router ::one {:param1 "käki"}))))
+            (is (= "/one-param-path/k%C3%A4ki" (:path (r/match-by-name router ::one {:param1 "käki"}))))
             (is (= "foo bar" (decoded-param1 "/one-param-path/foo%20bar")))
             (is (= {:param1 "foo bar" :param2 "baz qux"} (decoded-params "/two-param-path/foo%20bar/baz%20qux")))
             (is (= "foo bar" (decoded-remaining-path "/catchall/foo%20bar")))
