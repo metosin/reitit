@@ -176,7 +176,7 @@
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/create [p data result])
                            f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result % path)
+                                (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result % path-params))]
                        [(conj pl route)
                         (if name (assoc nl name f) nl)]))
@@ -266,7 +266,7 @@
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/create [p data result])
                            f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result % path)
+                                (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result % path-params))]
                        [(segment/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
