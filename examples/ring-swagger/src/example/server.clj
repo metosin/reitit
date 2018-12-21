@@ -61,7 +61,7 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:reitit.middleware/transform dev/print-context-diffs
+      {:reitit.middleware/transform dev/print-request-diffs
        :data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :middleware [;; query-params & form-params
