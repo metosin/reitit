@@ -9,6 +9,7 @@ Reitit ships with several different implementations for the `Router` protocol, o
 | `:lookup-router`              | Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters and there are no [Route conflicts](../basics/route_conflicts.md).
 | `:single-static-path-router`  | Super fast router: string-matches a route. Valid only if there is one static route.
 | `:mixed-router`               | Contains two routers: `:segment-router` for wildcard routes and a `:lookup-router` or `:single-static-path-router` for static routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
+| `:quarantine-router`          | Contains two routers: `:mixed-router` for non-conflicting routes and a `:linear-router` for conflicting routes.
 
 The router name can be asked from the router:
 

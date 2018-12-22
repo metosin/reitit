@@ -77,6 +77,12 @@
     (seq)
     (into {})))
 
+(defn conflicting-paths [conflicts]
+  (->> (for [[p pc] conflicts]
+         (conj (map first pc) (first p)))
+       (apply concat)
+       (set)))
+
 (defn path-conflicts-str [conflicts]
   (apply str "Router contains conflicting route paths:\n\n"
          (mapv
@@ -373,6 +379,42 @@
          (or (match-by-name static-router name path-params)
              (match-by-name wildcard-router name path-params)))))))
 
+(defn quarantine-router
+  "Creates two routers: [[mixed-router]] for non-conflicting routes
+  and [[linear-router]] for conflicting routes. Takes resolved routes
+  and optional expanded options. See [[router]] for options."
+  ([compiled-routes]
+   (quarantine-router compiled-routes {}))
+  ([compiled-routes opts]
+   (let [conflicting-paths (-> compiled-routes path-conflicting-routes conflicting-paths)
+         conflicting? #(contains? conflicting-paths (first %))
+         {conflicting true, non-conflicting false} (group-by conflicting? compiled-routes)
+         linear-router (linear-router conflicting opts)
+         mixed-router (mixed-router non-conflicting opts)
+         names (find-names compiled-routes opts)
+         routes (uncompile-routes compiled-routes)]
+     ^{:type ::router}
+     (reify Router
+       (router-name [_]
+         :quarantine-router)
+       (routes [_]
+         routes)
+       (compiled-routes [_]
+         compiled-routes)
+       (options [_]
+         opts)
+       (route-names [_]
+         names)
+       (match-by-path [_ path]
+         (or (match-by-path mixed-router path)
+             (match-by-path linear-router path)))
+       (match-by-name [_ name]
+         (or (match-by-name mixed-router name)
+             (match-by-name linear-router name)))
+       (match-by-name [_ name path-params]
+         (or (match-by-name mixed-router name path-params)
+             (match-by-name linear-router name path-params)))))))
+
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
   Selects implementation based on route details. The following options
@@ -403,7 +445,7 @@
          router (cond
                   router router
                   (and (= 1 (count compiled-routes)) (not wilds?)) single-static-path-router
-                  path-conflicting linear-router
+                  path-conflicting quarantine-router
                   (not wilds?) lookup-router
                   all-wilds? segment-router
                   :else mixed-router)]
