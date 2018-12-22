@@ -173,7 +173,7 @@
 
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
-  expanded options. See [[router]] for available options"
+  expanded options. See [[router]] for available options."
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
@@ -218,7 +218,7 @@
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
-  expanded options. See [[router]] for available options"
+  expanded options. See [[router]] for available options."
   ([compiled-routes]
    (lookup-router compiled-routes {}))
   ([compiled-routes opts]
@@ -263,7 +263,7 @@
 
 (defn segment-router
   "Creates a special prefix-tree style segment router from resolved routes and optional
-  expanded options. See [[router]] for available options"
+  expanded options. See [[router]] for available options."
   ([compiled-routes]
    (segment-router compiled-routes {}))
   ([compiled-routes opts]
@@ -307,7 +307,7 @@
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
-  expanded options. See [[router]] for available options"
+  expanded options. See [[router]] for available options."
   ([compiled-routes]
    (single-static-path-router compiled-routes {}))
   ([compiled-routes opts]
