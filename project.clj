@@ -55,7 +55,7 @@
                                   "modules/reitit-frontend/src"
                                   "modules/reitit-sieppari/src"]
 
-                   :dependencies [[org.clojure/clojure "1.9.0"]
+                   :dependencies [[org.clojure/clojure "1.10.0"]
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
@@ -82,6 +82,7 @@
 
                                   ;; https://github.com/bensu/doo/issues/180
                                   [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
@@ -105,7 +106,7 @@
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
                                             "-XX:+PrintInlining"]}}
-  :aliases {"all" ["with-profile" "dev,default"]
+  :aliases {"all" ["with-profile" "dev,default:dev,default,1.9"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
             "test-browser" ["doo" "chrome-headless" "test"]
