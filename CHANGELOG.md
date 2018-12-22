@@ -5,6 +5,12 @@
 * `segment-router` doesn't accept empty segments as path-parameters, fixes [#181](https://github.com/metosin/reitit/issues/181).
 * path-params are decoded correctly with `r/match-by-name`, fixes [#192](https://github.com/metosin/reitit/issues/192).
 
+* updated deps:
+
+```clj
+[metosin/muuntaja "0.6.3"] is available but we use "0.6.1"
+```
+
 ## 0.2.9 (2018-11-21)
 
 ## `reitit-spec`

@@ -28,16 +28,16 @@
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.8.2"]
                          [metosin/schema-tools "0.10.5"]
-                         [metosin/muuntaja "0.6.1"]
+                         [metosin/muuntaja "0.6.3"]
                          [metosin/jsonista "0.2.2"]
                          [metosin/sieppari "0.0.0-alpha6"]]
 
-  :plugins [[jonase/eastwood "0.3.3"]
-            [lein-doo "0.1.10"]
+  :plugins [[jonase/eastwood "0.3.4"]
+            [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.13"]
             [lein-codox "0.10.5"]
-            [metosin/bat-test "0.4.0"]]
+            [metosin/bat-test "0.4.2"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
 
@@ -61,13 +61,13 @@
                                   ;; modules dependencies
                                   [metosin/reitit "0.2.9"]
 
-                                  [expound "0.7.1"]
-                                  [orchestra "2018.11.07-1"]
+                                  [expound "0.7.2"]
+                                  [orchestra "2018.12.06-2"]
 
                                   [ring "1.7.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/muuntaja "0.6.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
+                                  [metosin/muuntaja "0.6.3"]
                                   [metosin/sieppari "0.0.0-alpha5"]
                                   [metosin/jsonista "0.2.2"]
 
@@ -76,7 +76,7 @@
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.9"]
 
-                                  [org.clojure/core.async "0.4.474"]
+                                  [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "1.9.0"]
 
@@ -89,13 +89,13 @@
                     :dependencies [[compojure "1.6.1"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.5.4"]
-                                   [io.pedestal/pedestal.jetty "0.5.4"]
-                                   [org.clojure/core.async "0.4.474"]
+                                   [io.pedestal/pedestal.service "0.5.5"]
+                                   [io.pedestal/pedestal.jetty "0.5.5"]
+                                   [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]
                                    [metosin/sieppari "0.0.0-alpha5"]
-                                   [yada "1.2.15"]
+                                   [yada "1.2.16"]
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
