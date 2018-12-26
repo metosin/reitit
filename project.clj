@@ -22,6 +22,7 @@
                          [metosin/reitit-swagger-ui "0.2.9"]
                          [metosin/reitit-frontend "0.2.9"]
                          [metosin/reitit-sieppari "0.2.9"]
+                         [metosin/reitit-pedestal "0.2.9"]
                          [meta-merge "1.0.0"]
                          [lambdaisland/deep-diff "0.0-25"]
                          [ring/ring-core "1.7.1"]
@@ -53,9 +54,10 @@
                                   "modules/reitit-swagger/src"
                                   "modules/reitit-swagger-ui/src"
                                   "modules/reitit-frontend/src"
-                                  "modules/reitit-sieppari/src"]
+                                  "modules/reitit-sieppari/src"
+                                  "modules/reitit-pedestal/src"]
 
-                   :dependencies [[org.clojure/clojure "1.9.0"]
+                   :dependencies [[org.clojure/clojure "1.10.0"]
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
@@ -76,12 +78,15 @@
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.9"]
 
+                                  [io.pedestal/pedestal.service "0.5.5"]
+
                                   [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "1.9.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
                                   [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
@@ -105,7 +110,7 @@
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
                                             "-XX:+PrintInlining"]}}
-  :aliases {"all" ["with-profile" "dev,default"]
+  :aliases {"all" ["with-profile" "dev,default:dev,default,1.9"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
             "test-browser" ["doo" "chrome-headless" "test"]
