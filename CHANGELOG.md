@@ -4,6 +4,18 @@
 
 * `segment-router` doesn't accept empty segments as path-parameters, fixes [#181](https://github.com/metosin/reitit/issues/181).
 * path-params are decoded correctly with `r/match-by-name`, fixes [#192](https://github.com/metosin/reitit/issues/192).
+* new `:quarantine-router`, which is uses by default if there are any path conflicts: uses internally `:mixed-router` for non-conflicting routes and `:linear-router` for conflicting routes.
+
+```clj
+(-> [["/joulu/kinkku"]   ;; linear router
+     ["/joulu/:torttu"]  ;; linear router
+     ["/tonttu/:id"]     ;; segment-router
+     ["/manna/puuro"]    ;; lookup-router
+     ["/sinappi/silli"]] ;; lookup-router
+    (r/router {:conflicts nil})
+    (r/router-name))
+; => :quarantine-router
+```
 
 * updated deps:
 

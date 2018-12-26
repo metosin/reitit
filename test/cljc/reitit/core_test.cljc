@@ -98,7 +98,8 @@
 
       r/linear-router :linear-router
       r/segment-router :segment-router
-      r/mixed-router :mixed-router))
+      r/mixed-router :mixed-router
+      r/quarantine-router :quarantine-router))
 
   (testing "routers handling static paths"
     (are [r name]
@@ -134,7 +135,8 @@
       r/single-static-path-router :single-static-path-router
       r/linear-router :linear-router
       r/segment-router :segment-router
-      r/mixed-router :mixed-router))
+      r/mixed-router :mixed-router
+      r/quarantine-router :quarantine-router))
 
   (testing "nil routes are stripped"
     (is (= [] (r/routes (r/router nil))))

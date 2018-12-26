@@ -9,26 +9,32 @@
       (assoc :width 70)
       (update :color-scheme merge {:middleware [:blue]})))
 
-(defn diff-doc [x y z]
+(defn diff-doc [name previous current]
   [:group
-   [:span "--- Middleware " (if z (color/document printer :middleware (str z " "))) "---" :break :break]
-   [:nest (printer/format-doc (if x (ddiff/diff x y) y) printer)]
+   [:span "--- Middleware " (if name (color/document printer :middleware (str name " "))) "---" :break :break]
+   [:nest (printer/format-doc (if previous (ddiff/diff previous current) current) printer)]
    :break])
 
 (defn polish [request]
   (dissoc request ::r/match ::r/router ::original ::previous))
 
+(defn printed-request [name {:keys [::original ::previous] :as request}]
+  (printer/print-doc (diff-doc name (polish previous) (polish request)) printer)
+  (-> request
+      (update ::original (fnil identity request))
+      (assoc ::previous request)))
+
 (defn print-diff-middleware
   ([]
    (print-diff-middleware nil))
   ([{:keys [name]}]
-   {:name ::debug
+   {:name ::diff
     :wrap (fn [handler]
-            (fn [{:keys [::original ::previous] :as request}]
-              (printer/print-doc (diff-doc (polish previous) (polish request) name) printer)
-              (handler (-> request
-                           (update ::original (fnil identity request))
-                           (assoc ::previous request)))))}))
+            (fn
+              ([request]
+               (handler (printed-request name request)))
+              ([request respond raise]
+               (handler (printed-request name request) respond raise))))}))
 
 (defn print-request-diffs
   "A middleware chain transformer that adds a request-diff printer between all middleware"
