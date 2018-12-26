@@ -22,6 +22,7 @@
                          [metosin/reitit-swagger-ui "0.2.9"]
                          [metosin/reitit-frontend "0.2.9"]
                          [metosin/reitit-sieppari "0.2.9"]
+                         [metosin/reitit-pedestal "0.2.9"]
                          [meta-merge "1.0.0"]
                          [lambdaisland/deep-diff "0.0-25"]
                          [ring/ring-core "1.7.1"]
@@ -53,7 +54,8 @@
                                   "modules/reitit-swagger/src"
                                   "modules/reitit-swagger-ui/src"
                                   "modules/reitit-frontend/src"
-                                  "modules/reitit-sieppari/src"]
+                                  "modules/reitit-sieppari/src"
+                                  "modules/reitit-pedestal/src"]
 
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [org.clojure/clojurescript "1.10.439"]
@@ -75,6 +77,8 @@
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.9"]
+
+                                  [io.pedestal/pedestal.service "0.5.5"]
 
                                   [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]

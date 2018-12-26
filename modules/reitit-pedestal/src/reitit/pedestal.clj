@@ -1,4 +1,4 @@
-(ns reitit.interceptor.pedestal
+(ns reitit.pedestal
   (:require [io.pedestal.interceptor.chain :as chain]
             [io.pedestal.interceptor :as interceptor]
             [io.pedestal.http :as http]
@@ -19,9 +19,9 @@
 
 (defn routing-interceptor
   ([router]
-    (routing-interceptor router nil))
+   (routing-interceptor router nil))
   ([router default-handler]
-    (routing-interceptor router default-handler nil))
+   (routing-interceptor router default-handler nil))
   ([router default-handler {:keys [interceptors]}]
    (interceptor/interceptor
      (reitit.http/routing-interceptor
@@ -30,9 +30,7 @@
        {:executor pedestal-executor
         :interceptors interceptors}))))
 
-(defn default-interceptors [spec router]
-  (-> spec
-      (assoc ::http/routes [])
-      (http/default-interceptors)
-      (update ::http/interceptors (comp vec butlast))
-      (update ::http/interceptors conj router)))
+(defn replace-last-interceptor [service-map interceptor]
+  (-> service-map
+      (update ::http/interceptors pop)
+      (update ::http/interceptors conj interceptor)))

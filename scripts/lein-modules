@@ -15,6 +15,7 @@ for ext in \
   reitit-swagger-ui \
   reitit-frontend \
   reitit-sieppari \
+  reitit-pedestal \
   reitit; do
   cd modules/$ext; lein "$@"; cd ../..;
 done

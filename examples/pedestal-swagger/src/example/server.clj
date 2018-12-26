@@ -1,6 +1,6 @@
 (ns example.server
-  (:require [io.pedestal.http]
-            [reitit.interceptor.pedestal :as pedestal]
+  (:require [io.pedestal.http :as server]
+            [reitit.pedestal :as pedestal]
             [reitit.ring :as ring]
             [reitit.http :as http]
             [reitit.swagger :as swagger]
@@ -9,12 +9,15 @@
             [reitit.coercion.spec :as spec-coercion]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
-            #_[reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
-            [muuntaja.core :as m]
-            [clojure.java.io :as io]))
+            [clojure.core.async :as a]
+            [clojure.java.io :as io]
+            [muuntaja.core :as m]))
 
-(def routing-interceptor
+(defn interceptor [number]
+  {:enter (fn [ctx] (a/go (update-in ctx [:request :number] (fnil + 0) number)))})
+
+(def router
   (pedestal/routing-interceptor
     (http/router
       [["/swagger.json"
@@ -22,6 +25,17 @@
                :swagger {:info {:title "my-api"
                                 :description "with pedestal & reitit-http"}}
                :handler (swagger/create-swagger-handler)}}]
+
+       ["/interceptors"
+        {:swagger {:tags ["interceptors"]}
+         :interceptors [(interceptor 1)]}
+
+        ["/number"
+         {:interceptors [(interceptor 10)]
+          :get {:interceptors [(interceptor 100)]
+                :handler (fn [req]
+                           {:status 200
+                            :body (select-keys req [:number])})}}]]
 
        ["/files"
         {:swagger {:tags ["files"]}}
@@ -69,8 +83,6 @@
                              (muuntaja/format-negotiate-interceptor)
                              ;; encoding response body
                              (muuntaja/format-response-interceptor)
-                             ;; exception handling - doesn't work
-                             ;;(exception/exception-interceptor)
                              ;; decoding request body
                              (muuntaja/format-request-interceptor)
                              ;; coercing response bodys
@@ -85,27 +97,27 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil}})
+      (ring/create-resource-handler)
       (ring/create-default-handler))))
 
-(defonce server (atom nil))
-
 (defn start []
-  (when @server
-    (io.pedestal.http/stop @server)
-    (println "server stopped"))
-  (-> {:env :prod
-       :io.pedestal.http/routes []
-       :io.pedestal.http/resource-path "/public"
-       :io.pedestal.http/type :jetty
-       :io.pedestal.http/port 3000}
-      (merge {:env :dev
-              :io.pedestal.http/join? false
-              :io.pedestal.http/allowed-origins {:creds true :allowed-origins (constantly true)}})
-      (pedestal/default-interceptors routing-interceptor)
-      io.pedestal.http/dev-interceptors
-      io.pedestal.http/create-server
-      io.pedestal.http/start
-      (->> (reset! server)))
+  (-> {:env :dev
+       ::server/type :jetty
+       ::server/port 3000
+       ::server/join? false
+       ;; no pedestal routes
+       ::server/routes []
+       ;; allow serving the swagger-ui styles & scripts from self
+       ::server/secure-headers {:content-security-policy-settings
+                                {:default-src "'self'"
+                                 :style-src "'self' 'unsafe-inline'"
+                                 :script-src "'self' 'unsafe-inline'"}}}
+      (io.pedestal.http/default-interceptors)
+      ;; use the reitit router
+      (pedestal/replace-last-interceptor router)
+      (io.pedestal.http/dev-interceptors)
+      (io.pedestal.http/create-server)
+      (io.pedestal.http/start))
   (println "server running in port 3000"))
 
 (comment
