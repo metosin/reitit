@@ -736,30 +736,56 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="pedestal">Pedestal</h1>
-<p><a href="http://pedestal.io/" target="_blank">Pedestal</a> is a well known interceptor-based web framework for Clojure. To use <code>reitit-http</code> with Pedestal, we need to change the default routing interceptor into a new one. Examples projects show how to do this.</p>
+<p><a href="http://pedestal.io/" target="_blank">Pedestal</a> is a well known interceptor-based web framework for Clojure. To use <code>reitit-http</code> with Pedestal, we need to change the default routing interceptor. The needed helpers for this are found in a separate package:</p>
+<pre><code class="lang-clj">[metosin/reitit-ring <span class="hljs-string">&quot;0.2.9&quot;</span>]
+</code></pre>
+<p>You should read the <a href="interceptors.html">interceptor guide</a> to understand the basics on Interceptor-based dispatch.</p>
+<h2 id="example">Example</h2>
+<p>A minimalistic example on how to to swap the default-router with a reitit router.</p>
+<pre><code class="lang-clj"><span class="hljs-comment">; [io.pedestal/pedestal.service &quot;0.5.5&quot;]</span>
+<span class="hljs-comment">; [io.pedestal/pedestal.jetty &quot;0.5.5&quot;]</span>
+<span class="hljs-comment">; [metosin/reitit-pedestal &quot;0.2.9&quot;]</span>
+<span class="hljs-comment">; [metosin/reitit &quot;0.2.9&quot;]</span>
+
+(<span class="hljs-name"><span class="hljs-builtin-name">ns</span></span> example.server
+  (<span class="hljs-symbol">:require</span> [io.pedestal.http <span class="hljs-symbol">:as</span> server]
+            [reitit.pedestal <span class="hljs-symbol">:as</span> pedestal]
+            [reitit.http <span class="hljs-symbol">:as</span> http]
+            [reitit.ring <span class="hljs-symbol">:as</span> ring]))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">pedestal/routing-interceptor</span>
+    (<span class="hljs-name">http/router</span>
+      [<span class="hljs-string">&quot;/ping&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_] {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})])
+    (<span class="hljs-name">ring/create-default-handler</span>)))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> start []
+  (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> {<span class="hljs-symbol">::server/type</span> <span class="hljs-symbol">:jetty</span>
+       <span class="hljs-symbol">::server/port</span> <span class="hljs-number">3000</span>
+       <span class="hljs-symbol">::server/join?</span> <span class="hljs-literal">false</span>
+       <span class="hljs-comment">;; no pedestal routes</span>
+       <span class="hljs-symbol">::server/routes</span> []}
+      (<span class="hljs-name">server/default-interceptors</span>)
+      <span class="hljs-comment">;; swap the reitit router</span>
+      (<span class="hljs-name">pedestal/replace-last-interceptor</span> router)
+      (<span class="hljs-name">server/dev-interceptors</span>)
+      (<span class="hljs-name">server/create-server</span>)
+      (<span class="hljs-name">server/start</span>))
+  (<span class="hljs-name">println</span> <span class="hljs-string">&quot;server running in port 3000&quot;</span>))
+
+(<span class="hljs-name">start</span>)
+</code></pre>
 <h2 id="caveat">Caveat</h2>
-<p><code>reitit-http</code> defines Interceptors as <code>reitit.interceptor/Interceptor</code>. Compared to Pedestal 2-arity error handlers, reitit uses a simplified (1-arity) handlers. Differences in error handling are described in the <a href="https://github.com/metosin/sieppari#differences-to-pedestal" target="_blank">Sieppari README</a>.</p>
-<ul>
-<li>you can use any <a href="http://pedestal.io/reference/interceptors" target="_blank">pedestal-style interceptor</a> within reitit router (as Pedestal is executing those anyway)</li>
-<li>you can use any reitit-style interceptor that doesn&apos;t have <code>:error</code>-stage defined</li>
-<li>using a reitit-style interceptor with <code>:error</code> defined will cause <code>ArityException</code> if invoked</li>
-</ul>
+<p>There is no common interceptor spec for Clojure and All default reitit interceptors (coercion, exceptions etc.) use the <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> interceptor model. For most parts, they are fully compatible with the Pedestal Interceptor model. Only exception being that the <code>:error</code> handlers take just 1 arity (<code>context</code>) compared to <a href="http://pedestal.io/reference/error-handling" target="_blank">Pedestal&apos;s 2-arity</a> (<code>context</code> and <code>exception</code>). </p>
+<p>Currently, there is only the <code>reitit.http.interceptors.exception/exception-interceptor</code> which has <code>:error</code> defined - just don&apos;t use it and everything should just work.</p>
+<p>You are most welcome to discuss about a common interceptor spec in <a href="https://clojurians.slack.com/messages/interceptors/" target="_blank">#interceptors</a> in <a href="http://clojurians.net/" target="_blank">Clojurians Slack</a>.</p>
 <p>See the <a href="http://pedestal.io/reference/error-handling" target="_blank">error handling guide</a> on how to handle errors with Pedestal.</p>
-<h2 id="examples">Examples</h2>
+<h2 id="more-examples">More examples</h2>
 <h3 id="simple">Simple</h3>
-<ul>
-<li>simple example, with both sync &amp; async code:<ul>
-<li><a href="https://github.com/metosin/reitit/tree/master/examples/pedestal" target="_blank">https://github.com/metosin/reitit/tree/master/examples/pedestal</a></li>
-</ul>
-</li>
-</ul>
-<h3 id="with-batteries">With batteries</h3>
-<ul>
-<li>with <a href="default_interceptors.html">default interceptors</a>, <a href="../coercion/coercion.html">coercion</a> and <a href="../ring/swagger.html">swagger</a>-support (note: exception handling is disabled):<ul>
-<li><a href="https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger" target="_blank">https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger</a></li>
-</ul>
-</li>
-</ul>
+<p>Simple example, with both sync &amp; async interceptors: <a href="https://github.com/metosin/reitit/tree/master/examples/pedestal" target="_blank">https://github.com/metosin/reitit/tree/master/examples/pedestal</a></p>
+<h3 id="swagger">Swagger</h3>
+<p>More complete example with custom interceptors, <a href="default_interceptors.html">default interceptors</a>, <a href="../coercion/coercion.html">coercion</a> and <a href="../ring/swagger.html">swagger</a>-support: <a href="https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger" target="_blank">https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger</a></p>
+<p>note: exception handling is disabled in this example</p>
 
                                 
                                 </section>
@@ -803,7 +829,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pedestal","level":"5.2","depth":1,"next":{"title":"Sieppari","level":"5.3","depth":1,"path":"http/sieppari.md","ref":"http/sieppari.md","articles":[]},"previous":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/pedestal.md","mtime":"2018-12-26T13:36:18.482Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-26T13:36:39.337Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Pedestal","level":"5.2","depth":1,"next":{"title":"Sieppari","level":"5.3","depth":1,"path":"http/sieppari.md","ref":"http/sieppari.md","articles":[]},"previous":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/pedestal.md","mtime":"2018-12-26T13:48:50.305Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-26T13:49:14.013Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
