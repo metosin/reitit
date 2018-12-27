@@ -3,16 +3,16 @@
 [Reitit](https://github.com/metosin/reitit) is a fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](./basics/route_syntax.md)
-* [Route conflict resolution](./basics/route_conflicts.md)
+* Route [conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
 * [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](./ring/ring.html), [http](./http/interceptors.md) & [the browser](./frontend/basics.html)
+* Helpers for [ring](./ring/ring.md), [http](./http/interceptors.md), [pedestal](./http/pedestal.md) & [frontend](./frontend/basics.md)
 * Extendable
 * Modular
 * [Fast](performance.md)
 
-Modules:
+## Main Modules
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
@@ -26,6 +26,10 @@ Modules:
 * `reitit-http` http-routing with Pedestal-style Interceptors
 * `reitit-interceptors` - [common interceptors](./http/default_interceptors.md) for `reitit-http`
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors
+
+## Extra modules
+
+* `reitit-pedestal` support for [Pedestal](http://pedestal.io)
 
 ## Latest version
 
@@ -59,6 +63,11 @@ Optionally, the parts can be required separately:
 [metosin/reitit-http "0.2.9"]
 [metosin/reitit-interceptors "0.2.9"]
 [metosin/reitit-sieppari "0.2.9"]
+```
+
+```clj
+;; pedestal
+[metosin/reitit-pedestal "0.2.10-alpha1"]
 ```
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
