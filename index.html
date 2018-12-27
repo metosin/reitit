@@ -737,16 +737,16 @@
 <p><a href="https://github.com/metosin/reitit" target="_blank">Reitit</a> is a fast data-driven router for Clojure(Script).</p>
 <ul>
 <li>Simple data-driven <a href="basics/route_syntax.html">route syntax</a></li>
-<li><a href="basics/route_conflicts.html">Route conflict resolution</a></li>
+<li>Route <a href="basics/route_conflicts.html">conflict resolution</a></li>
 <li>First-class <a href="basics/route_data.html">route data</a></li>
 <li>Bi-directional routing</li>
 <li><a href="coercion/coercion.html">Pluggable coercion</a> (<a href="https://github.com/plumatic/schema" target="_blank">schema</a> &amp; <a href="https://clojure.org/about/spec" target="_blank">clojure.spec</a>)</li>
-<li>Helpers for <a href="ring/ring.html">ring</a>, <a href="http/interceptors.html">http</a> &amp; <a href="frontend/basics.html">the browser</a></li>
+<li>Helpers for <a href="ring/ring.html">ring</a>, <a href="http/interceptors.html">http</a>, <a href="http/pedestal.html">pedestal</a> &amp; <a href="frontend/basics.html">frontend</a></li>
 <li>Extendable</li>
 <li>Modular</li>
 <li><a href="performance.html">Fast</a></li>
 </ul>
-<p>Modules:</p>
+<h2 id="main-modules">Main Modules</h2>
 <ul>
 <li><code>reitit</code> - all bundled</li>
 <li><code>reitit-core</code> - the routing core</li>
@@ -760,6 +760,10 @@
 <li><code>reitit-http</code> http-routing with Pedestal-style Interceptors</li>
 <li><code>reitit-interceptors</code> - <a href="http/default_interceptors.html">common interceptors</a> for <code>reitit-http</code></li>
 <li><code>reitit-sieppari</code> support for <a href="https://github.com/metosin/sieppari" target="_blank">Sieppari</a> Interceptors</li>
+</ul>
+<h2 id="extra-modules">Extra modules</h2>
+<ul>
+<li><code>reitit-pedestal</code> support for <a href="http://pedestal.io" target="_blank">Pedestal</a></li>
 </ul>
 <h2 id="latest-version">Latest version</h2>
 <p>All bundled:</p>
@@ -787,6 +791,9 @@
 [metosin/reitit-http <span class="hljs-string">&quot;0.2.9&quot;</span>]
 [metosin/reitit-interceptors <span class="hljs-string">&quot;0.2.9&quot;</span>]
 [metosin/reitit-sieppari <span class="hljs-string">&quot;0.2.9&quot;</span>]
+</code></pre>
+<pre><code class="lang-clj"><span class="hljs-comment">;; pedestal</span>
+[metosin/reitit-pedestal <span class="hljs-string">&quot;0.2.10-alpha1&quot;</span>]
 </code></pre>
 <p>There is <a href="https://clojurians.slack.com/messages/reitit/" target="_blank">#reitit</a> in <a href="http://clojurians.net/" target="_blank">Clojurians Slack</a> for discussion &amp; help.</p>
 <h1 id="examples">Examples</h1>
@@ -923,7 +930,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Route Syntax","level":"2.1","depth":1,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-12-27T14:07:51.770Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-27T14:08:19.567Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Introduction","level":"1.1","depth":1,"next":{"title":"Route Syntax","level":"2.1","depth":1,"path":"basics/route_syntax.md","ref":"basics/route_syntax.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"README.md","mtime":"2018-12-27T14:45:46.094Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-27T14:46:10.864Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
