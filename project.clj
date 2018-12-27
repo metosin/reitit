@@ -23,15 +23,18 @@
                          [metosin/reitit-frontend "0.2.9"]
                          [metosin/reitit-sieppari "0.2.9"]
                          [metosin/reitit-pedestal "0.2.9"]
-                         [meta-merge "1.0.0"]
-                         [lambdaisland/deep-diff "0.0-25"]
-                         [ring/ring-core "1.7.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.8.2"]
                          [metosin/schema-tools "0.10.5"]
                          [metosin/muuntaja "0.6.3"]
                          [metosin/jsonista "0.2.2"]
-                         [metosin/sieppari "0.0.0-alpha6"]]
+                         [metosin/sieppari "0.0.0-alpha6"]
+
+                         [meta-merge "1.0.0"]
+                         [lambdaisland/deep-diff "0.0-25"]
+                         [ring/ring-core "1.7.1"]
+
+                         [io.pedestal/pedestal.service "0.5.5"]]
 
   :plugins [[jonase/eastwood "0.3.4"]
             [lein-doo "0.1.11"]

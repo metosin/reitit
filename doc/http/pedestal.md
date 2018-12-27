@@ -1,12 +1,23 @@
 # Pedestal
 
-[Pedestal](http://pedestal.io/) is a well known interceptor-based web framework for Clojure. To use `reitit-http` with Pedestal, we need to change the default routing interceptor. The needed helpers for this are found in a separate package:
+[Pedestal](http://pedestal.io/) is a backend web framework for Clojure. `reitit-pedestal` provides an alternative routing engine for Pedestal.
 
 ```clj
-[metosin/reitit-ring "0.2.9"]
+[metosin/reitit-pedestal "0.2.9"]
 ```
 
-You should read the [interceptor guide](interceptors.md) to understand the basics on Interceptor-based dispatch.
+Why should one use reitit instead of the Pedestal [default routing](http://pedestal.io/reference/routing-quick-reference)?
+
+* One simple [route syntax](../basics/route_syntax.md), with full [route conflict resolution](../basics/route_conflicts.md).
+* Supports [first class route data](../basics/route_data.md) with [spec validation](../basics/route_data_validation.md).
+* Fixes some [known problems](https://github.com/pedestal/pedestal/issues/532) in routing.
+* Can handle [trailing backslashes](../ring/slash_handler.md).
+* One router for both backend and [frontend](../frontend/basics.md).
+* Supports [parameter coercion](../ring/coercion.md) & [Swagger](../ring/swagger.md).
+* Is even [faster](../performance.md).
+
+To use Pedestal with reitit, you should first read both the [Pedestal docs](http://pedestal.io/) and the [reitit interceptor guide](interceptors.md).
+
 
 ## Example
 
@@ -24,47 +35,38 @@ A minimalistic example on how to to swap the default-router with a reitit router
             [reitit.http :as http]
             [reitit.ring :as ring]))
 
-(def router
-  (pedestal/routing-interceptor
-    (http/router
-      ["/ping" (fn [_] {:status 200, :body "pong"})])
-    (ring/create-default-handler)))
+(def routes
+  ["/ping" {:get (fn [_] {:status 200, :body "pong"})}])
 
-(defn start []
-  (-> {::server/type :jetty
-       ::server/port 3000
-       ::server/join? false
-       ;; no pedestal routes
-       ::server/routes []}
-      (server/default-interceptors)
-      ;; swap the reitit router
-      (pedestal/replace-last-interceptor router)
-      (server/dev-interceptors)
-      (server/create-server)
-      (server/start))
-  (println "server running in port 3000"))
-
-(start)
+(-> {::server/type :jetty
+     ::server/port 3000
+     ::server/join? false
+     ;; no pedestal routes
+     ::server/routes []}
+    (server/default-interceptors)
+    ;; swap the reitit router
+    (pedestal/replace-last-interceptor
+      (pedestal/routing-interceptor
+        (http/router routes)))
+    (server/dev-interceptors)
+    (server/create-server)
+    (server/start))
 ```
 
-## Caveat
+## Compatibility
 
-There is no common interceptor spec for Clojure and All default reitit interceptors (coercion, exceptions etc.) use the [Sieppari](https://github.com/metosin/sieppari) interceptor model. For most parts, they are fully compatible with the Pedestal Interceptor model. Only exception being that the `:error` handlers take just 1 arity (`context`) compared to [Pedestal's 2-arity](http://pedestal.io/reference/error-handling) (`context` and `exception`). 
+There is no common interceptor spec for Clojure and all default reitit interceptors (coercion, exceptions etc.) use the [Sieppari](https://github.com/metosin/sieppari) interceptor model. It is mostly compatible with the Pedestal Interceptor model, only exception being that the `:error` handlers take just 1 arity (`context`) compared to [Pedestal's 2-arity](http://pedestal.io/reference/error-handling) (`context` and `exception`).
 
-Currently, there is only the `reitit.http.interceptors.exception/exception-interceptor` which has `:error` defined - just don't use it and everything should just work.
+Currently, out of the reitit default interceptors, there is only the `reitit.http.interceptors.exception/exception-interceptor` which has the `:error` defined.
 
-You are most welcome to discuss about a common interceptor spec in [#interceptors](https://clojurians.slack.com/messages/interceptors/) in [Clojurians Slack](http://clojurians.net/).
-
-See the [error handling guide](http://pedestal.io/reference/error-handling) on how to handle errors with Pedestal.
+You are most welcome to discuss about a common interceptor spec in [#interceptors](https://clojurians.slack.com/messages/interceptors/) on [Clojurians Slack](http://clojurians.net/).
 
 ## More examples
 
 ### Simple
 
-Simple example, with both sync & async interceptors: https://github.com/metosin/reitit/tree/master/examples/pedestal
+Simple example with sync & async interceptors: https://github.com/metosin/reitit/tree/master/examples/pedestal
 
 ### Swagger
 
-More complete example with custom interceptors, [default interceptors](default_interceptors.md), [coercion](../coercion/coercion.md) and [swagger](../ring/swagger.md)-support: https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger
-
-note: exception handling is disabled in this example
+More complete example with custom interceptors, [default interceptors](default_interceptors.md), [coercion](../coercion/coercion.md) and [swagger](../ring/swagger.md)-support enabled: https://github.com/metosin/reitit/tree/master/examples/pedestal-swagger

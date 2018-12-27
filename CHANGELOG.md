@@ -1,14 +1,14 @@
 ## UNRELEASED
 
-## `reitit-core`
+### `reitit-core`
 
 * `segment-router` doesn't accept empty segments as path-parameters, fixes [#181](https://github.com/metosin/reitit/issues/181).
 * path-params are decoded correctly with `r/match-by-name`, fixes [#192](https://github.com/metosin/reitit/issues/192).
 * new `:quarantine-router`, which is uses by default if there are any path conflicts: uses internally `:mixed-router` for non-conflicting routes and `:linear-router` for conflicting routes.
 
 ```clj
-(-> [["/joulu/kinkku"]   ;; linear router
-     ["/joulu/:torttu"]  ;; linear router
+(-> [["/joulu/kinkku"]   ;; linear-router
+     ["/joulu/:torttu"]  ;; linear-router
      ["/tonttu/:id"]     ;; segment-router
      ["/manna/puuro"]    ;; lookup-router
      ["/sinappi/silli"]] ;; lookup-router
@@ -17,7 +17,13 @@
 ; => :quarantine-router
 ```
 
-* updated deps:
+### `reitit-pedestal`
+
+* new optional module for [Pedestal](http://pedestal.io/) integration. See [the docs](https://metosin.github.io/reitit/http/pedestal.html).
+
+### dependencies
+
+* updated:
 
 ```clj
 [metosin/muuntaja "0.6.3"] is available but we use "0.6.1"
@@ -25,17 +31,17 @@
 
 ## 0.2.9 (2018-11-21)
 
-## `reitit-spec`
+### `reitit-spec`
 
 * support for vector data-specs for request & response parameters by [Heikki Hämäläinen](https://github.com/hjhamala).
 
 ## 0.2.8 (2018-11-18)
 
-## `reitit-core`
+### `reitit-core`
 
 * Added support for composing middleware & interceptor transformations, fixes [#167](https://github.com/metosin/reitit/issues/167).
 
-## `reitit-spec`
+### `reitit-spec`
 
 * Spec problems are exposed as-is into request & response coercion errors, enabling pretty-printers like [expound](https://github.com/bhb/expound) to be used:
 
@@ -81,13 +87,13 @@
    :query-params {"x" "1", "y" "-2"}})
 ```
 
-## `reitit-swagger`
+### `reitit-swagger`
 
 * `create-swagger-handler` support now 3-arity ring-async, thanks to [Miloslav Nenadál](https://github.com/nenadalm)
 
 ## 0.2.7 (2018-11-11)
 
-## `reitit-spec`
+### `reitit-spec`
 
 * Fixes [spec coercion issue with aliased specs](https://github.com/metosin/spec-tools/issues/145)
 
@@ -99,12 +105,12 @@
 
 ## 0.2.6 (2018-11-09)
 
-## `reitit-core`
+### `reitit-core`
 
 * Faster path-parameter decoding: doing less work when parameters don't need decoding. Wildcard-routing is now 10-15% faster in perf tests (opensensors & github api).
 * Fixed a ClojureScript compiler warning about private var usage. [#169](https://github.com/metosin/reitit/issues/169)
 
-## `reitit-ring`
+### `reitit-ring`
 
 * `redirect-trailing-slash-handler` can strip multiple slashes from end of the uri, by [Hannu Hartikainen](https://github.com/dancek).
 * Fixed a ClojureScript compiler warning about `satisfies?` being a macro.
@@ -115,7 +121,7 @@
 [ring "1.7.1"] is available but we use "1.7.0"
 ```
 
-## `reitit-spec`
+### `reitit-spec`
 
 * updated deps:
 
@@ -123,7 +129,7 @@
 [metosin/spec-tools "0.8.1"] is available but we use "0.8.0"
 ```
 
-## `reitit-schema`
+### `reitit-schema`
 
 * updated deps:
 
@@ -131,7 +137,7 @@
 [metosin/schema-tools "0.10.5"] is available but we use "0.10.4"
 ```
 
-## `reitit-sieppari`
+### `reitit-sieppari`
 
 * updated deps:
 
@@ -141,7 +147,7 @@
 
 ## 0.2.5 (2018-10-30)
 
-## `reitit-ring`
+### `reitit-ring`
 
 * router is injected into request also in the default branch
 * new `reitit.ring/redirect-trailing-slash-handler` to [handle trailing slashes](https://metosin.github.io/reitit/ring/slash_handler.html) with style!
@@ -170,17 +176,17 @@
 [ring/ring-core "1.7.1"] is available but we use "1.7.0"
 ```
 
-## `reitit-http`
+### `reitit-http`
 
 * router is injected into request also in the default branch
 
 ## 0.2.4 (2018-10-21)
 
-## `reitit-ring`
+### `reitit-ring`
 
 * New option `:not-found-handler` in `reitit.ring/create-resource-handler` to set how 404 is handled. Fixes [#89](https://github.com/metosin/reitit/issues/89), thanks to [valerauko](https://github.com/valerauko).
 
-## `reitit-spec`
+### `reitit-spec`
 
 * Latest features from [spec-tools](https://github.com/metosin/spec-tools)
   * Swagger enchancements
@@ -195,7 +201,7 @@
 
 ## 0.2.3 (2018-09-24)
 
-## `reitit-ring`
+### `reitit-ring`
 
 * `ring-handler` takes optionally a 3rd argument, an options map which can be used to se top-level middleware, applied before any routing is done:
 
@@ -236,13 +242,13 @@
 [ring/ring-core "1.7.0"] is available but we use "1.6.3"
 ```
 
-## `reitit-http`
+### `reitit-http`
 
 * `:options` requests are served for all routes by default with 200 OK to better support things like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
   * the default handler is not documented in Swagger
   * new router option `:reitit.http/default-options-handler` to change this behavior. Setting `nil` disables this.
 
-## `reitit-middleware`
+### `reitit-middleware`
 
 * fix `reitit.ring.middleware.parameters/parameters-middleware`
 
@@ -252,7 +258,7 @@
 [metosin/muuntaja "0.6.1"] is available but we use "0.6.0"
 ```
 
-## `reitit-swagger-ui`
+### `reitit-swagger-ui`
 
 * updated deps:
 
@@ -267,17 +273,17 @@
   * [Sieppari, reitit-http & swagger](https://github.com/metosin/reitit/blob/master/examples/http-swagger/src/example/server.clj)
   * [Pedestal, reitit-http & swagger](https://github.com/metosin/reitit/blob/master/examples/pedestal-swagger/src/example/server.clj)
 
-## `reitit-middleware`
+### `reitit-middleware`
 
 * new middleware `reitit.ring.middleware.parameters/parameters-middleware` to wrap query & form params.
 
-## `reitit-interceptors`
+### `reitit-interceptors`
 
 * new module like `reitit-middleware` but for interceptors. See the [Docs](https://metosin.github.io/reitit/http/default_interceptors.html).
 
 ## 0.2.1 (2018-09-04)
 
-## `reitit-schema`
+### `reitit-schema`
 
 * updated deps:
 
@@ -285,7 +291,7 @@
 [metosin/schema-tools "0.10.4"] is available but we use "0.10.3"
 ```
 
-## `reitit-middleware`
+### `reitit-middleware`
 
 * updated deps:
 
@@ -303,7 +309,7 @@ Sample apps demonstraing the current status of `reitit`:
 * [`reitit-http` with Pedestal](https://github.com/metosin/reitit/blob/master/examples/pedestal/src/example/server.clj)
 * [`reitit-http` with Sieppari](https://github.com/metosin/reitit/blob/master/examples/http/src/example/server.clj)
 
-## `reitit-core`
+### `reitit-core`
 
 * **BREAKING**: the router option key to extract body format has been renamed: `:extract-request-format` => `:reitit.coercion/extract-request-format`
   * should only concern you if you are not using [Muuntaja](https://github.com/metosin/muuntaja).
@@ -355,7 +361,7 @@ Sample apps demonstraing the current status of `reitit`:
 ; {:status 200, :body {:bonus 30}}
  ```
 
-## `reitit-swagger`
+### `reitit-swagger`
 
 * In case of just one swagger api per router, the swagger api doesn't have to identified, so this works now:
 
@@ -374,12 +380,12 @@ Sample apps demonstraing the current status of `reitit`:
   (swagger-ui/create-swagger-ui-handler {:path "/"}))
 ```
 
-## `reitit-middleware`
+### `reitit-middleware`
 
 * A new module with common data-driven middleware: exception handling, content negotiation & multipart requests. See [the docs](https://metosin.github.io/reitit/ring/default_middleware.html).
 
 
-## `reitit-swagger-ui`
+### `reitit-swagger-ui`
 
 * **BREAKING**: pass swagger-ui `:config` as-is (instead of mixed-casing keys) to swagger-ui, fixes [#109](https://github.com/metosin/reitit/issues/109):
   * see [docs](https://github.com/swagger-api/swagger-ui/tree/2.x#parameters) for available parameters.
@@ -392,13 +398,13 @@ Sample apps demonstraing the current status of `reitit`:
             :validatorUrl nil}})
 ```
 
-## `reitit-frontend`
+### `reitit-frontend`
 
 * new module for frontend-routing. See [docs](https://metosin.github.io/reitit/frontend/basics.html) for details.
 
 ## 0.1.3 (2018-6-25)
 
-## `reitit-core`
+### `reitit-core`
 
 * `reitit.coercion/coerce!` coerced all parameters found in match, e.g. injecting in `:query-parameters` into `Match` with coerce those too if `:query` coercion is defined.
 * if response coercion is not defined for a response status, response is still returned

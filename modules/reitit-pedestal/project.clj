@@ -8,4 +8,5 @@
   :plugins [[lein-parent "0.3.2"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
-  :dependencies [[metosin/reitit-http]])
+  :dependencies [[io.pedestal/pedestal.service]
+                 [metosin/reitit-http]])
