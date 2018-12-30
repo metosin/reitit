@@ -19,10 +19,6 @@
 
 * `reitit.interceptor/transform-butlast` helper to transform the interceptor chains (last one is usually the handler).
 
-### `reitit-pedestal`
-
-* new optional module for [Pedestal](http://pedestal.io/) integration. See [the docs](https://metosin.github.io/reitit/http/pedestal.html).
-
 ## `reitit-middleware`
 
 * `reitit.ring.middleware.dev/print-request-diffs` middleware transformation function to print out request diffs between middleware to the console
@@ -39,12 +35,21 @@
 
 <img src="https://metosin.github.io/reitit/images/http-context-diff.png" width=320>
 
+## `reitit-sieppari`
+
+* New version of Sieppari allows interceptors to run on ClojureScript too.
+
+### `reitit-pedestal`
+
+* new optional module for [Pedestal](http://pedestal.io/) integration. See [the docs](https://metosin.github.io/reitit/http/pedestal.html).
+
 ### dependencies
 
 * updated:
 
 ```clj
 [metosin/muuntaja "0.6.3"] is available but we use "0.6.1"
+[metosin/sieppari "0.0.0-alpha6"] is available but we use "0.0.0-alpha7"
 ```
 
 ## 0.2.9 (2018-11-21)

@@ -81,7 +81,7 @@ To get better view on the real life routing performance, there is [test](https:/
 
 Thanks to the snappy new [segment-tree](https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc) algorithm, `reitit-ring` is fastest here. Pedestal is also fast with it's [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) implementation.
 
-![Opensensors perf test](images/opensensors.png)
+![Opensensors perf](images/opensensors.png)
 
 ### CQRS apis
 
@@ -89,7 +89,7 @@ Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/
 
 Both `reitit-ring` and Pedestal shine in this test, thanks to the fast lookup-routers. On average, they are **two** and on best case, **three orders of magnitude faster** than the other tested libs. Ataraxy failed this test on `Method code too large!` error.
 
-![Opensensors perf test](images/lupapiste.png)
+![lupapiste perf](images/lupapiste.png)
 
 **NOTE**: in real life, there are usually always also wild-card routes present. In this case, Pedestal would fallback from lookup-router to the prefix-tree router, which is order of magnitude slower (30x in this test). Reitit would handle this nicely thanks to it's `:mixed-router`: all static routes would still be served with `:lookup-router`, just the wildcard routes with `:segment-tree`. The performance would not notably degrade.
 

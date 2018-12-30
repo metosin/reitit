@@ -28,7 +28,7 @@
                          [metosin/schema-tools "0.10.5"]
                          [metosin/muuntaja "0.6.3"]
                          [metosin/jsonista "0.2.2"]
-                         [metosin/sieppari "0.0.0-alpha6"]
+                         [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
                          [lambdaisland/deep-diff "0.0-25"]
@@ -72,8 +72,8 @@
                                   [ring "1.7.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
-                                  [metosin/muuntaja "0.6.3"]
-                                  [metosin/sieppari "0.0.0-alpha5"]
+                                  [metosin/muuntaja]
+                                  [metosin/sieppari]
                                   [metosin/jsonista "0.2.2"]
 
                                   [criterium "0.4.4"]
@@ -102,12 +102,12 @@
                                    [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]
-                                   [metosin/sieppari "0.0.0-alpha5"]
+                                   [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
-                                   [bidi "2.1.4"]]}
+                                   [bidi "2.1.5"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"
