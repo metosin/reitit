@@ -10,6 +10,7 @@
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.multipart :as multipart]
+            [reitit.http.interceptors.dev :as dev]
             [clojure.core.async :as a]
             [clojure.java.io :as io]
             [muuntaja.core :as m]))
@@ -75,7 +76,8 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {:data {:coercion spec-coercion/coercion
+      {;;:reitit.interceptor/transform dev/print-context-diffs
+       :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
               :interceptors [;; query-params & form-params
                              (parameters/parameters-interceptor)

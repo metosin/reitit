@@ -127,6 +127,15 @@
         :queue ((or queue identity) chain)
         :data data}))))
 
+(defn transform-butlast
+  "Returns a function to that takes a interceptor transformation function and
+  transforms all but last of the interceptors (e.g. the handler)"
+  [f]
+  (fn [interceptors]
+    (concat
+      (f (butlast interceptors))
+      [(last interceptors)])))
+
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
   support for Interceptors. See documentation on [[reitit.core/router]] for available options.

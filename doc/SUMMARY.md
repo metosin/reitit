@@ -44,6 +44,7 @@
 * [Pedestal](http/pedestal.md)
 * [Sieppari](http/sieppari.md)
 * [Default Interceptors](http/default_interceptors.md)
+* [Transforming Interceptor Chain](http/transforming_interceptor_chain.md)
 
 ## Frontend
 

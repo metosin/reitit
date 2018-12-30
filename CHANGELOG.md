@@ -21,6 +21,22 @@
 
 * new optional module for [Pedestal](http://pedestal.io/) integration. See [the docs](https://metosin.github.io/reitit/http/pedestal.html).
 
+## `reitit-middleware`
+
+* `reitit.ring.middleware.dev/print-request-diffs` middleware transformation function to print out request diffs between middleware to the console
+  * read the [docs](https://metosin.github.io/reitit/ring/transforming_middleware_chain.html#printing-request-diffs)
+  * see [example app](https://github.com/metosin/reitit/tree/master/examples/ring-swagger)
+
+<img src="https://metosin.github.io/reitit/images/ring-request-diff.png" width=320>
+
+## `reitit-interceptors`
+
+* `reitit.http.interceptors.dev/print-context-diffs` interceptor transformation function to print out context diffs between interceptor steps to the console:
+  * read the [docs](https://metosin.github.io/reitit/http/transforming_interceptor_chain.html#printing-context-diffs)
+  * see [example app](https://github.com/metosin/reitit/tree/master/examples/http-swagger)
+
+<img src="https://metosin.github.io/reitit/images/http-context-diff.png" width=320>
+
 ### dependencies
 
 * updated:

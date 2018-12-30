@@ -109,7 +109,7 @@
                             {:status 200
                              :body {:total (- x y)}})}}]]]
 
-      {;:reitit.interceptor/transform dev/print-request-diffs
+      {;;:reitit.interceptor/transform dev/print-context-diffs
        :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
               :interceptors [;; query-params & form-params

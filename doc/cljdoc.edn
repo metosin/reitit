@@ -40,7 +40,8 @@
    ["Interceptors" {:file "doc/http/interceptors.md"}]
    ["Pedestal" {:file "doc/http/pedestal.md"}]
    ["Sieppari" {:file "doc/http/sieppari.md"}]
-   ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]]
+   ["Default Interceptors" {:file "doc/http/default_interceptors.md"}]
+   ["Transforming Interceptor Chain" {:file "doc/http/transforming_interceptor_chain.md"}]]
   ["Frontend" {}
    ["Basics" {:file "doc/frontend/basics.md"}]
    ["Browser integration" {:file "doc/frontend/browser.md"}]

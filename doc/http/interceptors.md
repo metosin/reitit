@@ -12,9 +12,46 @@ An module for http-routing using interceptors instead of middleware. Builds on t
 
 The differences:
 
-* instead of `:middleware`, uses `:interceptors`.
-* `reitit.http/http-router` requires an extra option `:executor` of type `reitit.interceptor/Executor`.
-* instead of creating a ring-handler, apps can be wrapped into a routing interceptor that enqueues the matched interceptors into the context. For this, there is `reitit.http/routing-interceptor`.
+* `:interceptors` key in used in route data instead of `:middleware`
+* `reitit.http/http-router` requires an extra option `:executor` of type `reitit.interceptor/Executor` to execute the interceptor chain
+   * optionally, a routing interceptor can be used - it enqueues the matched interceptors into the context. See `reitit.http/routing-interceptor` for details.
+
+## Simple example
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.http :as http])
+(require '[reitit.interceptor.sieppari :as sieppari])
+
+(defn interceptor [number]
+  {:enter (fn [ctx] (update-in ctx [:request :number] (fnil + 0) number))})
+
+(def app
+  (http/ring-handler
+    (http/router
+      ["/api"
+       {:interceptors [(interceptor 1)]}
+
+       ["/number"
+        {:interceptors [(interceptor 10)]
+         :get {:interceptors [(interceptor 100)]
+               :handler (fn [req]
+                          {:status 200
+                           :body (select-keys req [:number])})}}]])
+
+    ;; the default handler
+    (ring/create-default-handler)
+
+    ;; executor
+    {:executor sieppari/executor}))
+
+
+(app {:request-method :get, :uri "/"})
+; {:status 404, :body "", :headers {}}
+
+(app {:request-method :get, :uri "/api/number"})
+; {:status 200, :body {:number 111}}
+```
 
 ## Why interceptors?
 
