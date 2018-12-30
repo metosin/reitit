@@ -223,14 +223,8 @@
                                               (enter ::avaruus)]
                                :handler handler}]
                      options)))
-        inject-debug (fn [interceptors]
-                       (concat
-                         (interleave (butlast interceptors) (repeat debug-i))
-                         [(last interceptors)]))
-        sort-interceptors (fn [interceptors]
-                            (concat
-                              (sort-by :name (butlast interceptors))
-                              [(last interceptors)]))]
+        inject-debug (interceptor/transform-butlast #(interleave % (repeat debug-i)))
+        sort-interceptors (interceptor/transform-butlast (partial sort-by :name))]
 
     (testing "by default, all interceptors are applied in order"
       (let [app (create nil)]

@@ -29,14 +29,24 @@ A minimalistic example on how to to swap the default-router with a reitit router
 ; [metosin/reitit-pedestal "0.2.10-alpha1"]
 ; [metosin/reitit "0.2.10-alpha1"]
 
-(ns example.server
-  (:require [io.pedestal.http :as server]
-            [reitit.pedestal :as pedestal]
-            [reitit.http :as http]
-            [reitit.ring :as ring]))
+(require '[io.pedestal.http :as server])
+(require '[reitit.pedestal :as pedestal])
+(require '[reitit.http :as http])
+(require '[reitit.ring :as ring])
+
+(defn interceptor [number]
+  {:enter (fn [ctx] (update-in ctx [:request :number] (fnil + 0) number))})
 
 (def routes
-  ["/ping" {:get (fn [_] {:status 200, :body "pong"})}])
+  ["/api"
+   {:interceptors [(interceptor 1)]}
+
+   ["/number"
+    {:interceptors [(interceptor 10)]
+     :get {:interceptors [(interceptor 100)]
+           :handler (fn [req]
+                      {:status 200
+                       :body (select-keys req [:number])})}}]])
 
 (-> {::server/type :jetty
      ::server/port 3000
