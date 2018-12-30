@@ -11,9 +11,9 @@
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
                  [org.clojure/clojurescript "1.10.339"]
-                 [metosin/reitit "0.2.9"]
-                 [metosin/reitit-schema "0.2.9"]
-                 [metosin/reitit-frontend "0.2.9"]
+                 [metosin/reitit "0.2.10"]
+                 [metosin/reitit-schema "0.2.10"]
+                 [metosin/reitit-frontend "0.2.10"]
                  ;; Just for pretty printting the match
                  [fipp "0.6.12"]]
 

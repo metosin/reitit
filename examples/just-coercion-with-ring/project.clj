@@ -3,4 +3,4 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [ring/ring-jetty-adapter "1.7.0"]
                  [metosin/muuntaja "0.4.1"]
-                 [metosin/reitit "0.2.9"]])
+                 [metosin/reitit "0.2.10"]])
