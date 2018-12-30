@@ -513,6 +513,19 @@
             
         </li>
     
+        <li class="chapter " data-level="5.5" data-path="transforming_interceptor_chain.html">
+            
+                <a href="transforming_interceptor_chain.html">
+            
+                    
+                    Transforming Interceptor Chain
+            
+                </a>
+            
+
+            
+        </li>
+    
 
     
         
@@ -757,14 +770,24 @@
 <span class="hljs-comment">; [metosin/reitit-pedestal &quot;0.2.10-alpha1&quot;]</span>
 <span class="hljs-comment">; [metosin/reitit &quot;0.2.10-alpha1&quot;]</span>
 
-(<span class="hljs-name"><span class="hljs-builtin-name">ns</span></span> example.server
-  (<span class="hljs-symbol">:require</span> [io.pedestal.http <span class="hljs-symbol">:as</span> server]
-            [reitit.pedestal <span class="hljs-symbol">:as</span> pedestal]
-            [reitit.http <span class="hljs-symbol">:as</span> http]
-            [reitit.ring <span class="hljs-symbol">:as</span> ring]))
+(<span class="hljs-name">require</span> &apos;[io.pedestal.http <span class="hljs-symbol">:as</span> server])
+(<span class="hljs-name">require</span> &apos;[reitit.pedestal <span class="hljs-symbol">:as</span> pedestal])
+(<span class="hljs-name">require</span> &apos;[reitit.http <span class="hljs-symbol">:as</span> http])
+(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> interceptor [number]
+  {<span class="hljs-symbol">:enter</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [ctx] (<span class="hljs-name"><span class="hljs-builtin-name">update-in</span></span> ctx [<span class="hljs-symbol">:request</span> <span class="hljs-symbol">:number</span>] (<span class="hljs-name">fnil</span> + <span class="hljs-number">0</span>) number))})
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
-  [<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_] {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;pong&quot;</span>})}])
+  [<span class="hljs-string">&quot;/api&quot;</span>
+   {<span class="hljs-symbol">:interceptors</span> [(<span class="hljs-name">interceptor</span> <span class="hljs-number">1</span>)]}
+
+   [<span class="hljs-string">&quot;/number&quot;</span>
+    {<span class="hljs-symbol">:interceptors</span> [(<span class="hljs-name">interceptor</span> <span class="hljs-number">10</span>)]
+     <span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:interceptors</span> [(<span class="hljs-name">interceptor</span> <span class="hljs-number">100</span>)]
+           <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [req]
+                      {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
+                       <span class="hljs-symbol">:body</span> (<span class="hljs-name"><span class="hljs-builtin-name">select-keys</span></span> req [<span class="hljs-symbol">:number</span>])})}}]])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> {<span class="hljs-symbol">::server/type</span> <span class="hljs-symbol">:jetty</span>
      <span class="hljs-symbol">::server/port</span> <span class="hljs-number">3000</span>
@@ -832,7 +855,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pedestal","level":"5.2","depth":1,"next":{"title":"Sieppari","level":"5.3","depth":1,"path":"http/sieppari.md","ref":"http/sieppari.md","articles":[]},"previous":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/pedestal.md","mtime":"2018-12-27T14:54:09.602Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-27T14:54:31.557Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Pedestal","level":"5.2","depth":1,"next":{"title":"Sieppari","level":"5.3","depth":1,"path":"http/sieppari.md","ref":"http/sieppari.md","articles":[]},"previous":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"http/pedestal.md","mtime":"2018-12-30T15:15:51.720Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-30T15:16:25.202Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
