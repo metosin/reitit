@@ -17,6 +17,8 @@
 ; => :quarantine-router
 ```
 
+* `reitit.interceptor/transform-butlast` helper to transform the interceptor chains (last one is usually the handler).
+
 ### `reitit-pedestal`
 
 * new optional module for [Pedestal](http://pedestal.io/) integration. See [the docs](https://metosin.github.io/reitit/http/pedestal.html).
