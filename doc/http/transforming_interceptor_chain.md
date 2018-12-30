@@ -77,3 +77,8 @@ Using `reitit.http.interceptors.dev/print-context-diffs` transformation, the con
 Sample output:
 
 ![Http Context Diff](../images/http-context-diff.png)
+
+Sample applications (uncomment the option to see the diffs):
+
+* Sieppari: https://github.com/metosin/reitit/blob/master/examples/http-swagger/src/example/server.clj
+* Pedestal: https://github.com/metosin/reitit/blob/master/examples/pedestal-swagger/src/example/server.clj
