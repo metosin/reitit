@@ -1,4 +1,5 @@
-# reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit)
+# reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/reitit)](https://cljdoc.xyz/jump/release/metosin/reitit)
+
 
 A fast data-driven router for Clojure(Script).
 
