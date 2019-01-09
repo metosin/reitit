@@ -8,6 +8,21 @@ import static java.util.Arrays.asList;
 
 public class Trie {
 
+  public static ArrayList<String> split(final String path) {
+    final ArrayList<String> segments = new ArrayList<>(4);
+    final int size = path.length();
+    int start = 1;
+    for (int i = start; i < size; i++) {
+      final char c = path.charAt(i);
+      if (c == '/') {
+        segments.add(path.substring(start, i));
+        start = i + 1;
+      }
+    }
+    segments.add(path.substring(start, size));
+    return segments;
+  }
+
   public static class Match {
     public Map<Keyword, String> params = new HashMap<>();
     public Object data;
@@ -112,10 +127,6 @@ public class Trie {
     return this;
   }
 
-  public static List<String> split(String path) {
-    ArrayList<String> strings = new ArrayList<>(asList(path.split("/")));
-    strings.remove(0);
-    return strings;
   }
 
   public static void main(String[] args) {
