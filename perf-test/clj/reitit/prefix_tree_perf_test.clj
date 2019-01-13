@@ -3,7 +3,7 @@
             [io.pedestal.http.route.prefix-tree :as p]
             [reitit.segment :as segment]
             [criterium.core :as cc])
-  (:import (reitit Trie)))
+  (:import (reitit SegmentTrie)))
 
 ;;
 ;; testing
@@ -72,7 +72,7 @@
 
 (def matcher
   (.matcher
-    ^Trie
+    ^SegmentTrie
     (reduce
       (fn [acc [p d]]
         (segment/insert acc p d))

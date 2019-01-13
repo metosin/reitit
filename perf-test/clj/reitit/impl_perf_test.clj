@@ -190,7 +190,7 @@
   (suite "split")
 
   ;; 114ns (String/split)
-  ;;  82ns (Trie/split)
+  ;;  82ns (SegmentTrie/split)
   (test "Splitting a String")
   (test! impl/segments "/olipa/kerran/:avaruus"))
 

@@ -7,7 +7,8 @@
             [reitit.impl :as impl]
             [reitit.ring :as ring]
             [reitit.core :as r])
-  (:import (reitit Trie Trie$Matcher)))
+  (:import (reitit SegmentTrie Trie$Matcher)
+           (calfpath Util)))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -109,20 +110,20 @@
     (impl/segments "/user/1234/profile/compact")))
 
 (comment
-  (Trie/split "/user/1234/profile/compact")
+  (SegmentTrie/split "/user/1234/profile/compact")
   ;; 91ns
   (cc/quick-bench
-    (Trie/split "/user/1234/profile/compact")))
+    (SegmentTrie/split "/user/1234/profile/compact")))
 
 (comment
   (let [router (r/router ["/user/:id/profile/:type"])]
     (cc/quick-bench
       (r/match-by-path router "/user/1234/profile/compact"))))
 
-(let [lookup ^Trie$Matcher (Trie/sample)]
-  (Trie/lookup lookup "/user/1234/profile/compact")
+(let [lookup ^Trie$Matcher (SegmentTrie/sample)]
+  (SegmentTrie/lookup lookup "/user/1234/profile/compact")
   #_(cc/quick-bench
-      (Trie/lookup lookup "/user/1234/profile/compact")))
+      (SegmentTrie/lookup lookup "/user/1234/profile/compact")))
 
 (let [router (r/router [["/user/:id" ::1]
                         ["/user/:id/permissions" ::2]
@@ -144,50 +145,50 @@
 (read-string
   (str
     (.matcher
-      (doto (Trie.)
+      (doto (SegmentTrie.)
         (.add "/user" 1)
         #_(.add "/user/id/permissions" 2)
         (.add "/user/id/permissions2" 3)))))
 
-(Trie/lookup
+(SegmentTrie/lookup
   (.matcher
-    (doto (Trie.)
+    (doto (SegmentTrie.)
       (.add "/user/1" 1)
       (.add "/user/1/permissions" 2)))
   "/user/1")
 
 (.matcher
-  (doto (Trie.)
+  (doto (SegmentTrie.)
     (.add "/user/1" 1)
     (.add "/user/1/permissions" 2)))
 
 ;; 137ns
 (let [m (.matcher
-          (doto (Trie.)
+          (doto (SegmentTrie.)
             (.add "/user/:id/profile/:type" 1)))]
   #_(cc/quick-bench
-      (Trie/lookup m "/user/1234/profile/compact"))
-  (Trie/lookup m "/user/1234/profile/compact"))
+      (SegmentTrie/lookup m "/user/1234/profile/compact"))
+  (SegmentTrie/lookup m "/user/1234/profile/compact"))
 
 (comment
 
-  (let [matcher ^Trie$Matcher (Trie/sample)]
-    (Trie/lookup matcher "/user/1234/profile/compact")
+  (let [matcher ^Trie$Matcher (SegmentTrie/sample)]
+    (SegmentTrie/lookup matcher "/user/1234/profile/compact")
     (cc/quick-bench
-      (Trie/lookup matcher "/user/1234/profile/compact")))
+      (SegmentTrie/lookup matcher "/user/1234/profile/compact")))
 
   ;; 173ns
-  (let [lookup ^Trie$Matcher (Trie/tree2)]
-    (Trie/lookup lookup "/user/1234/profile/compact")
+  (let [lookup ^Trie$Matcher (SegmentTrie/tree2)]
+    (SegmentTrie/lookup lookup "/user/1234/profile/compact")
     (cc/quick-bench
-      (Trie/lookup lookup "/user/1234/profile/compact")))
+      (SegmentTrie/lookup lookup "/user/1234/profile/compact")))
 
 
   ;; 140ns
-  (let [lookup ^Trie$Matcher (Trie/tree1)]
-    (Trie/lookup lookup "/user/1234/profile/compact")
+  (let [lookup ^Trie$Matcher (SegmentTrie/tree1)]
+    (SegmentTrie/lookup lookup "/user/1234/profile/compact")
     (cc/quick-bench
-      (Trie/lookup lookup "/user/1234/profile/compact")))
+      (SegmentTrie/lookup lookup "/user/1234/profile/compact")))
 
   ;; 849ns (clojure, original)
   ;; 599ns (java, initial)
@@ -225,15 +226,13 @@
       (dotimes [_ 1000]
         (handler-reitit request)))))
 
-(import '[reitit Util])
-
 (comment
   (Util/matchURI "/user/1234/profile/compact/" ["/user/" :id "/profile/" :type "/"])
   (cc/quick-bench
     (Util/matchURI "/user/1234/profile/compact/" ["/user/" :id "/profile/" :type "/"]))
 
   (cc/quick-bench
-    (Trie/split "/user/1234/profile/compact/"))
+    (SegmentTrie/split "/user/1234/profile/compact/"))
 
   (cc/quick-bench
     (.split "/user/1234/profile/compact/" "/" 666)))
@@ -265,9 +264,9 @@
       (segment/lookup segment "/user/1/permissions/"))))
 
 #_(cc/quick-bench
-    (Trie/split "/user/1/profile/compat"))
+    (SegmentTrie/split "/user/1/profile/compat"))
 
-#_(Trie/split "/user/1/profile/compat")
+#_(SegmentTrie/split "/user/1/profile/compat")
 
 #_(cc/quick-bench
     (Segment2/hashLookup h "abba"))

@@ -6,7 +6,7 @@
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder)
-              (reitit Trie))))
+              (reitit SegmentTrie))))
 
 (defn maybe-map-values
   "Applies a function to every value of a map, updates the value if not nil.
@@ -21,7 +21,7 @@
     coll))
 
 (defn segments [path]
-  #?(:clj  (Trie/split ^String path)
+  #?(:clj  (SegmentTrie/split ^String path)
      :cljs (.split path #"/" 666)))
 
 ;;

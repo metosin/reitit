@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [-lookup compile])
   (:require [reitit.impl :as impl]
             [clojure.string :as str])
-  #?(:clj (:import (reitit Trie Trie$Match))))
+  #?(:clj (:import (reitit SegmentTrie Trie$Match))))
 
 (defrecord Match [data path-params])
 
@@ -50,13 +50,13 @@
 
 (defn insert [root path data]
   #?(:cljs (-insert (or root (segment)) (impl/segments path) (map->Match {:data data}))
-     :clj  (.add (or ^Trie root ^Trie (Trie.)) ^String path data)))
+     :clj  (.add (or ^SegmentTrie root ^SegmentTrie (SegmentTrie.)) ^String path data)))
 
 (defn compile [segment]
   #?(:cljs segment
-     :clj  (.matcher ^Trie segment)))
+     :clj  (.matcher ^SegmentTrie segment)))
 
 (defn lookup [segment path]
   #?(:cljs (-lookup segment (impl/segments path) {})
-     :clj  (if-let [match ^Trie$Match (Trie/lookup segment path)]
+     :clj  (if-let [match ^Trie$Match (SegmentTrie/lookup segment path)]
              (->Match (.data match) (clojure.lang.PersistentHashMap/create (.params match))))))

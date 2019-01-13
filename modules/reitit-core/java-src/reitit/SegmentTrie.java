@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 
-public class Trie {
+public class SegmentTrie {
 
   public static ArrayList<String> split(final String path) {
     final ArrayList<String> segments = new ArrayList<>(4);
@@ -50,35 +50,35 @@ public class Trie {
     }
   }
 
-  private Map<String, Trie> childs = new HashMap<>();
-  private Map<Keyword, Trie> wilds = new HashMap<>();
-  private Map<Keyword, Trie> catchAll = new HashMap<>();
+  private Map<String, SegmentTrie> childs = new HashMap<>();
+  private Map<Keyword, SegmentTrie> wilds = new HashMap<>();
+  private Map<Keyword, SegmentTrie> catchAll = new HashMap<>();
   private Object data;
 
-  public Trie add(String path, Object data) {
+  public SegmentTrie add(String path, Object data) {
     List<String> paths = split(path);
-    Trie pointer = this;
+    SegmentTrie pointer = this;
     for (String p : paths) {
       if (p.startsWith(":")) {
         Keyword k = Keyword.intern(p.substring(1));
-        Trie s = pointer.wilds.get(k);
+        SegmentTrie s = pointer.wilds.get(k);
         if (s == null) {
-          s = new Trie();
+          s = new SegmentTrie();
           pointer.wilds.put(k, s);
         }
         pointer = s;
       } else if (p.startsWith("*")) {
         Keyword k = Keyword.intern(p.substring(1));
-        Trie s = pointer.catchAll.get(k);
+        SegmentTrie s = pointer.catchAll.get(k);
         if (s == null) {
-          s = new Trie();
+          s = new SegmentTrie();
           pointer.catchAll.put(k, s);
         }
         break;
       } else {
-        Trie s = pointer.childs.get(p);
+        SegmentTrie s = pointer.childs.get(p);
         if (s == null) {
-          s = new Trie();
+          s = new SegmentTrie();
           pointer.childs.put(p, s);
         }
         pointer = s;
@@ -93,7 +93,7 @@ public class Trie {
       return new StaticMatcher(childs.keySet().iterator().next(), childs.values().iterator().next().matcher());
     } else {
       Map<String, Matcher> m = new HashMap<>();
-      for (Map.Entry<String, Trie> e : childs.entrySet()) {
+      for (Map.Entry<String, SegmentTrie> e : childs.entrySet()) {
         m.put(e.getKey(), e.getValue().matcher());
       }
       return new StaticMapMatcher(m);
@@ -112,7 +112,7 @@ public class Trie {
       if (!childs.isEmpty()) {
         matchers.add(staticMatcher());
       }
-      for (Map.Entry<Keyword, Trie> e : wilds.entrySet()) {
+      for (Map.Entry<Keyword, SegmentTrie> e : wilds.entrySet()) {
         matchers.add(new WildMatcher(e.getKey(), e.getValue().matcher()));
       }
       m = new LinearMatcher(matchers);
@@ -301,7 +301,7 @@ public class Trie {
 
   public static void main(String[] args) {
 
-    Trie trie = new Trie();
+    SegmentTrie trie = new SegmentTrie();
     //trie.add("/kikka/:id/permissions", 1);
     trie.add("/kikka/:id", 2);
     trie.add("/kakka/ping", 3);
@@ -311,7 +311,7 @@ public class Trie {
     System.out.println(lookup(m, "/kikka/1"));
 
     /*
-    Trie trie = new Trie();
+    SegmentTrie trie = new SegmentTrie();
     trie.add("/user/:id/profile/:type", 1);
     trie.add("/user/:id/permissions", 2);
     trie.add("/company/:cid/dept/:did", 3);
