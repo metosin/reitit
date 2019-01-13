@@ -68,7 +68,8 @@
   (->> (impl/segments path)
        (map #(if (impl/wild-or-catch-all-param? %)
                (str "{" (subs % 1) "}") %))
-       (str/join "/")))
+       (str/join "/")
+       (str "/")))
 
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
