@@ -513,11 +513,11 @@
     ;;   385ns (java-segment-router, no injects)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
 
-    ;;   474ns (macros)
-    (b! "calfpath" calfpath-f)
-
     ;;  2821ns
     (b! "pedestal" pedestal-f)
+
+    ;;  4364ns (macros)
+    (b! "calfpath" calfpath-f)
 
     ;; 11615ns
     (b! "compojure" compojure-f)
