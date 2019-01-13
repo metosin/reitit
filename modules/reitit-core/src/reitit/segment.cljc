@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [-lookup compile])
   (:require [reitit.impl :as impl]
             [clojure.string :as str])
-  #?(:clj (:import (reitit SegmentTrie Trie$Match))))
+  #?(:clj (:import (reitit SegmentTrie SegmentTrie$Match))))
 
 (defrecord Match [data path-params])
 
@@ -54,9 +54,9 @@
 
 (defn compile [segment]
   #?(:cljs segment
-     :clj  (.matcher ^SegmentTrie segment)))
+     :clj  (.matcher ^SegmentTrie (or segment (SegmentTrie.)))))
 
 (defn lookup [segment path]
   #?(:cljs (-lookup segment (impl/segments path) {})
-     :clj  (if-let [match ^Trie$Match (SegmentTrie/lookup segment path)]
+     :clj  (if-let [match ^SegmentTrie$Match (SegmentTrie/lookup segment path)]
              (->Match (.data match) (clojure.lang.PersistentHashMap/create (.params match))))))

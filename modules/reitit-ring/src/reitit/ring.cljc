@@ -285,7 +285,7 @@
                     handler (-> result method :handler (or default-handler))
                     request (enrich-request request path-params match router)]
                 (or (handler request) (default-handler request)))
-              (default-handler (enrich-default-request request))))
+              (default-handler (enrich-default-request request router))))
            ([request respond raise]
             (if-let [match (r/match-by-path router (:uri request))]
               (let [method (:request-method request)
@@ -294,7 +294,7 @@
                     handler (-> result method :handler (or default-handler))
                     request (enrich-request request path-params match router)]
                 ((routes handler default-handler) request respond raise))
-              (default-handler (enrich-default-request request) respond raise))
+              (default-handler (enrich-default-request request router) respond raise))
             nil)))
        {::r/router router}))))
 

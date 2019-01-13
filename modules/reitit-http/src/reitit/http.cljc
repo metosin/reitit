@@ -144,7 +144,7 @@
                   request (enrich-request request path-params match router)]
               (or (interceptor/execute executor interceptors request)
                   (interceptor/execute executor default-queue request)))
-            (interceptor/execute executor default-queue (enrich-default-request request))))
+            (interceptor/execute executor default-queue (enrich-default-request request router))))
          ([request respond raise]
           (let [default #(interceptor/execute executor default-queue % respond raise)]
             (if-let [match (r/match-by-path router (:uri request))]
@@ -160,7 +160,7 @@
                 (if interceptors
                   (interceptor/execute executor interceptors request respond' raise)
                   (default request)))
-              (default (enrich-default-request request))))
+              (default (enrich-default-request request router))))
           nil))
        {::r/router router}))))
 

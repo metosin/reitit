@@ -7,7 +7,7 @@
             [reitit.impl :as impl]
             [reitit.ring :as ring]
             [reitit.core :as r])
-  (:import (reitit SegmentTrie Trie$Matcher)
+  (:import (reitit SegmentTrie SegmentTrie$Matcher)
            (calfpath Util)))
 
 ;;
@@ -120,7 +120,7 @@
     (cc/quick-bench
       (r/match-by-path router "/user/1234/profile/compact"))))
 
-(let [lookup ^Trie$Matcher (SegmentTrie/sample)]
+(let [lookup ^SegmentTrie$Matcher (SegmentTrie/sample)]
   (SegmentTrie/lookup lookup "/user/1234/profile/compact")
   #_(cc/quick-bench
       (SegmentTrie/lookup lookup "/user/1234/profile/compact")))
@@ -172,20 +172,20 @@
 
 (comment
 
-  (let [matcher ^Trie$Matcher (SegmentTrie/sample)]
+  (let [matcher ^SegmentTrie$Matcher (SegmentTrie/sample)]
     (SegmentTrie/lookup matcher "/user/1234/profile/compact")
     (cc/quick-bench
       (SegmentTrie/lookup matcher "/user/1234/profile/compact")))
 
   ;; 173ns
-  (let [lookup ^Trie$Matcher (SegmentTrie/tree2)]
+  (let [lookup ^SegmentTrie$Matcher (SegmentTrie/tree2)]
     (SegmentTrie/lookup lookup "/user/1234/profile/compact")
     (cc/quick-bench
       (SegmentTrie/lookup lookup "/user/1234/profile/compact")))
 
 
   ;; 140ns
-  (let [lookup ^Trie$Matcher (SegmentTrie/tree1)]
+  (let [lookup ^SegmentTrie$Matcher (SegmentTrie/tree1)]
     (SegmentTrie/lookup lookup "/user/1234/profile/compact")
     (cc/quick-bench
       (SegmentTrie/lookup lookup "/user/1234/profile/compact")))

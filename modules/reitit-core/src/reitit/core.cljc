@@ -289,7 +289,9 @@
          names)
        (match-by-path [_ path]
          (if-let [match (segment/lookup pl path)]
-           (assoc (:data match) :path path)))
+           (-> (:data match)
+               (assoc :path-params (:path-params match))
+               (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))

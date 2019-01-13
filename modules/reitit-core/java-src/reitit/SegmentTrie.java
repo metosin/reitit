@@ -3,7 +3,7 @@ package reitit;
 import clojure.lang.Keyword;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class SegmentTrie {
@@ -30,7 +30,7 @@ public class SegmentTrie {
         if (s.contains("+")) {
           _s = s.replace("+", "%2B");
         }
-        return URLEncoder.encode(_s, "UTF-8");
+        return URLDecoder.decode(_s, "UTF-8");
       }
     } catch (UnsupportedEncodingException ignored) {
     }
@@ -72,6 +72,7 @@ public class SegmentTrie {
         SegmentTrie s = pointer.catchAll.get(k);
         if (s == null) {
           s = new SegmentTrie();
+          s.data = data;
           pointer.catchAll.put(k, s);
         }
         break;
@@ -103,7 +104,7 @@ public class SegmentTrie {
   public Matcher matcher() {
     Matcher m;
     if (!catchAll.isEmpty()) {
-      m = new CatchAllMatcher(catchAll.keySet().iterator().next(), catchAll.values().iterator().next().data);
+      m = new CatchAllMatcher(catchAll.keySet().iterator().next(), data);
     } else if (!wilds.isEmpty()) {
       List<Matcher> matchers = new ArrayList<>();
       if (data != null) {
@@ -118,11 +119,11 @@ public class SegmentTrie {
       m = new LinearMatcher(matchers);
     } else if (!childs.isEmpty()) {
       m = staticMatcher();
+      if (data != null) {
+        m = new LinearMatcher(Arrays.asList(new DataMatcher(data), m));
+      }
     } else {
       return new DataMatcher(data);
-    }
-    if (data != null) {
-      m = new LinearMatcher(Arrays.asList(new DataMatcher(data), m));
     }
     return m;
   }
@@ -165,10 +166,12 @@ public class SegmentTrie {
 
     @Override
     public Match match(int i, List<String> segments, Match match) {
-      final Match m = child.match(i + 1, segments, match);
-      if (m != null) {
-        m.params.put(parameter, encode(segments.get(i)));
-        return m;
+      if (i < segments.size() && !segments.get(i).isEmpty()) {
+        final Match m = child.match(i + 1, segments, match);
+        if (m != null) {
+          m.params.put(parameter, encode(segments.get(i)));
+          return m;
+        }
       }
       return null;
     }
@@ -294,7 +297,7 @@ public class SegmentTrie {
     Map<String, Matcher> m2 = new HashMap<>();
     m2.put("user", new WildMatcher(Keyword.intern("id"), new StaticMapMatcher(m1)));
     m2.put("company", new WildMatcher(Keyword.intern("cid"), new StaticMatcher("dept", new WildMatcher(Keyword.intern("did"), new DataMatcher(3)))));
-    m2.put("public", new CatchAllMatcher(Keyword.intern("*"), 4));
+    m2.put("public", new CatchAllMatcher(Keyword.intern("*"), new DataMatcher(4)));
     m2.put("kikka", new LinearMatcher(Arrays.asList(new StaticMatcher("ping", new DataMatcher(5)), new WildMatcher(Keyword.intern("id"), new StaticMatcher("ping", new DataMatcher(6))))));
     return new StaticMapMatcher(m2);
   }
@@ -302,14 +305,14 @@ public class SegmentTrie {
   public static void main(String[] args) {
 
     SegmentTrie trie = new SegmentTrie();
-    //trie.add("/kikka/:id/permissions", 1);
-    trie.add("/kikka/:id", 2);
-    trie.add("/kakka/ping", 3);
+    trie.add("/:abba", 1);
+    trie.add("/abba/1", 2);
+    trie.add("/:abba/:dabba/doo", 3);
+    trie.add("/abba/:dabba/boo", 4);
     Matcher m = trie.matcher();
     System.err.println(m);
-    System.out.println(lookup(m, "/kikka/1/permissions"));
-    System.out.println(lookup(m, "/kikka/1"));
-
+    System.err.println(m.getClass());
+    System.out.println(lookup(m, "/abba"));
     /*
     SegmentTrie trie = new SegmentTrie();
     trie.add("/user/:id/profile/:type", 1);
