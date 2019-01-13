@@ -20,9 +20,15 @@
     coll
     coll))
 
-(defn segments [path]
+(defn segments
+  "Splits the path into sequence of segments, using `/` char. Assumes that the
+  path starts with `/`, stripping the first empty segment. e.g.
+
+      (segments \"/a/b/c\") ; => (\"a\" \"b\" \"c\")
+      (segments \"/a/)      ; => (\"a\" \"\")"
+  [path]
   #?(:clj  (SegmentTrie/split ^String path)
-     :cljs (.split path #"/" 666)))
+     :cljs (rest (.split path #"/" 666))))
 
 ;;
 ;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj

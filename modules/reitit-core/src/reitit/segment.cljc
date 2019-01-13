@@ -57,6 +57,7 @@
      :clj  (.matcher ^SegmentTrie (or segment (SegmentTrie.)))))
 
 (defn lookup [segment path]
-  #?(:cljs (-lookup segment (impl/segments path) {})
+  #?(:cljs (if-let [match (-lookup segment (impl/segments path) {})]
+             (assoc match :path-params (impl/url-decode-coll (:path-params match))))
      :clj  (if-let [match ^SegmentTrie$Match (SegmentTrie/lookup segment path)]
              (->Match (.data match) (clojure.lang.PersistentHashMap/create (.params match))))))
