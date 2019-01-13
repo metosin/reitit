@@ -108,7 +108,7 @@
   ;;  1.0µs (Match records)
   ;; 0.63µs (Single sweep path paraµs)
   ;; 0.51µs (Cleanup)
-  ;; 0.33µs (Java)
+  ;; 0.30µs (Java)
   (cc/quick-bench
     (segment/lookup matcher "/v1/orgs/1/topics")))
 
