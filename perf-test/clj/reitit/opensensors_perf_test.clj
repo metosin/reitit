@@ -8,6 +8,7 @@
             [bidi.bidi :as bidi]
             [ataraxy.core :as ataraxy]
             [compojure.core :refer [routes context ANY]]
+            [calfpath.core :as cp]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
@@ -366,6 +367,68 @@
        ["/v1/users/:user-id/bookmarks" :get handler :route-name :test/route56]
        ["/v1/orgs/:org-id/topics" :get handler :route-name :test/route57]])))
 
+(defn opensensors-calfpath-handler [request]
+  (cp/->uri
+    request
+    "/v2/whoami" [] (cp/->get request (handler request) nil)
+    "/v2/users/:user-id/datasets" [] (cp/->get request (handler request) nil)
+    "/v2/public/projects/:project-id/datasets" [] (cp/->get request (handler request) nil)
+    "/v1/public/topics/:topic" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/orgs/:org-id" [] (cp/->get request (handler request) nil)
+    "/v1/search/topics/:term" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/invitations" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/devices/:batch/:type" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/topics" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/bookmarks/followers" [] (cp/->get request (handler request) nil)
+    "/v2/datasets/:dataset-id" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/usage-stats" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/devices/:client-id" [] (cp/->get request (handler request) nil)
+    "/v1/messages/user/:user-id" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/devices" [] (cp/->get request (handler request) nil)
+    "/v1/public/users/:user-id" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/errors" [] (cp/->get request (handler request) nil)
+    "/v1/public/orgs/:org-id" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/invitations" [] (cp/->get request (handler request) nil)
+    "/v2/public/messages/dataset/bulk" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/devices/bulk" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/device-errors" [] (cp/->get request (handler request) nil)
+    "/v2/login" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/usage-stats" [] (cp/->get request (handler request) nil)
+    "/v2/users/:user-id/devices" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/claim-device/:client-id" [] (cp/->get request (handler request) nil)
+    "/v2/public/projects/:project-id" [] (cp/->get request (handler request) nil)
+    "/v2/public/datasets/:dataset-id" [] (cp/->get request (handler request) nil)
+    "/v2/users/:user-id/topics/bulk" [] (cp/->get request (handler request) nil)
+    "/v1/messages/device/:client-id" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/owned-orgs" [] (cp/->get request (handler request) nil)
+    "/v1/topics/:topic" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/bookmark/:topic" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/members/:user-id" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/devices/:client-id" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/devices" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/members" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/members/invitation-data/:user-id" [] (cp/->get request (handler request) nil)
+    "/v2/orgs/:org-id/topics" [] (cp/->get request (handler request) nil)
+    "/v1/whoami" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/api-key" [] (cp/->get request (handler request) nil)
+    "/v2/schemas" [] (cp/->get request (handler request) nil)
+    "/v2/users/:user-id/topics" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/confirm-membership/:token" [] (cp/->get request (handler request) nil)
+    "/v2/topics/:topic" [] (cp/->get request (handler request) nil)
+    "/v1/messages/topic/:topic" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/devices/:client-id/reset-password" [] (cp/->get request (handler request) nil)
+    "/v2/topics" [] (cp/->get request (handler request) nil)
+    "/v1/login" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/orgs" [] (cp/->get request (handler request) nil)
+    "/v2/public/messages/dataset/:dataset-id" [] (cp/->get request (handler request) nil)
+    "/v1/topics" [] (cp/->get request (handler request) nil)
+    "/v1/orgs" [] (cp/->get request (handler request) nil)
+    "/v1/users/:user-id/bookmarks" [] (cp/->get request (handler request) nil)
+    "/v1/orgs/:org-id/topics" [] (cp/->get request (handler request) nil)
+    nil))
+
 (comment
   (pedestal/find-route
     (map-tree/router
@@ -422,7 +485,9 @@
         router (reitit/router routes)
         reitit-f #(reitit/match-by-path router (:uri %))
         reitit-ring-f (ring/ring-handler (ring/router opensensors-routes))
+        reitit-ring-fast-f (ring/ring-handler (ring/router opensensors-routes) nil {:inject-router? false, :inject-match? false})
         bidi-f #(bidi/match-route opensensors-bidi-routes (:uri %))
+        calfpath-f opensensors-calfpath-handler
         ataraxy-f (partial ataraxy/matches opensensors-ataraxy-routes)
         compojure-f opensensors-compojure-routes
         pedestal-f (partial pedestal/find-route opensensors-pedestal-routes)
@@ -432,7 +497,7 @@
     ;;  2065ns
     ;;   662ns (prefix-tree-router)
     ;;   567ns (segment-router)
-    ;;   334ns (java-segment-router)
+    ;;   326ns (java-segment-router)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -442,8 +507,14 @@
     ;;   702ns (before path-parameters)
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
-    ;;   487ns (java-segment-router)
+    ;;   474ns (java-segment-router)
     (b! "reitit-ring" reitit-ring-f)
+
+    ;;   385ns (java-segment-router, no injects)
+    (b! "reitit-ring-fast" reitit-ring-fast-f)
+
+    ;;   474ns (macros)
+    (b! "calfpath" calfpath-f)
 
     ;;  2821ns
     (b! "pedestal" pedestal-f)
