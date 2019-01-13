@@ -432,6 +432,7 @@
     ;;  2065ns
     ;;   662ns (prefix-tree-router)
     ;;   567ns (segment-router)
+    ;;   334ns (java-segment-router)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -441,6 +442,7 @@
     ;;   702ns (before path-parameters)
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
+    ;;   487ns (java-segment-router)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;  2821ns

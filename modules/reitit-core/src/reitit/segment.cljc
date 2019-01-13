@@ -1,5 +1,5 @@
 (ns reitit.segment
-  (:refer-clojure :exclude [-lookup])
+  (:refer-clojure :exclude [-lookup compile])
   (:require [reitit.impl :as impl]
             [clojure.string :as str])
   #?(:clj (:import (reitit Trie Trie$Match))))
@@ -44,18 +44,17 @@
                (if (and wilds? (not (str/blank? p))) (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds))
                (if catch-all (-catch-all children' catch-all path-params p ps)))))))))
 
+;;
+;; public api
+;;
+
 (defn insert [root path data]
   #?(:cljs (-insert (or root (segment)) (impl/segments path) (map->Match {:data data}))
-     :clj (.add (or ^Trie root ^Trie (Trie.)) ^String path data)))
+     :clj  (.add (or ^Trie root ^Trie (Trie.)) ^String path data)))
 
-(defn create [paths]
-  (reduce
-    (fn [segment [p data]]
-      #?(:cljs (insert segment p data)
-         :clj  (.add ^Trie segment ^String p data)))
-    #?(:cljs nil
-       :clj  (Trie.))
-    paths))
+(defn compile [segment]
+  #?(:cljs segment
+     :clj  (.matcher ^Trie segment)))
 
 (defn lookup [segment path]
   #?(:cljs (-lookup segment (impl/segments path) {})

@@ -2,9 +2,9 @@ package reitit;
 
 import clojure.lang.Keyword;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
-
-import static java.util.Arrays.asList;
 
 public class Trie {
 
@@ -23,8 +23,22 @@ public class Trie {
     return segments;
   }
 
+  static String encode(String s) {
+    try {
+      if (s.contains("%")) {
+        String _s = s;
+        if (s.contains("+")) {
+          _s = s.replace("+", "%2B");
+        }
+        return URLEncoder.encode(_s, "UTF-8");
+      }
+    } catch (UnsupportedEncodingException ignored) {
+    }
+    return s;
+  }
+
   public static class Match {
-    public Map<Keyword, String> params = new HashMap<>();
+    public final Map<Keyword, String> params = new HashMap<>();
     public Object data;
 
     @Override
@@ -40,59 +54,6 @@ public class Trie {
   private Map<Keyword, Trie> wilds = new HashMap<>();
   private Map<Keyword, Trie> catchAll = new HashMap<>();
   private Object data;
-
-  @Override
-  public String toString() {
-    Map<Object, Object> m = new HashMap<>();
-    m.put(Keyword.intern("childs"), childs);
-    m.put(Keyword.intern("wilds"), wilds);
-    m.put(Keyword.intern("catchAll"), catchAll);
-    m.put(Keyword.intern("data"), data);
-    return m.toString();
-  }
-
-  public static Match lookup(Trie root, String path) {
-    return lookup(root, new Match(), split(path));
-  }
-
-  private static Match lookup(Trie root, Match match, List<String> parts) {
-    Trie childTrie = null;
-    if (parts.isEmpty()) {
-      return match;
-    } else {
-      Trie trie = root;
-      int i = 0;
-      for (final String part : parts) {
-        i++;
-        childTrie = trie.childs.get(part);
-        if (childTrie != null) {
-          trie = childTrie;
-        } else {
-          for (final Map.Entry<Keyword, Trie> e : trie.wilds.entrySet()) {
-            childTrie = e.getValue();
-            match.data = childTrie.data;
-            Match m = lookup(childTrie, match, parts.subList(i, parts.size()));
-            if (m != null) {
-              match.params.put(e.getKey(), part);
-              return m;
-            }
-          }
-          for (Map.Entry<Keyword, Trie> e : trie.catchAll.entrySet()) {
-            childTrie = e.getValue();
-            match.params.put(e.getKey(), String.join("/", parts.subList(i - 1, parts.size())));
-            match.data = childTrie.data;
-            return match;
-          }
-          break;
-        }
-      }
-    }
-    if (childTrie != null) {
-      match.data = childTrie.data;
-      return match;
-    }
-    return null;
-  }
 
   public Trie add(String path, Object data) {
     List<String> paths = split(path);
@@ -127,33 +88,247 @@ public class Trie {
     return this;
   }
 
+  private Matcher staticMatcher() {
+    if (childs.size() == 1) {
+      return new StaticMatcher(childs.keySet().iterator().next(), childs.values().iterator().next().matcher());
+    } else {
+      Map<String, Matcher> m = new HashMap<>();
+      for (Map.Entry<String, Trie> e : childs.entrySet()) {
+        m.put(e.getKey(), e.getValue().matcher());
+      }
+      return new StaticMapMatcher(m);
+    }
+  }
+
+  public Matcher matcher() {
+    Matcher m;
+    if (!catchAll.isEmpty()) {
+      m = new CatchAllMatcher(catchAll.keySet().iterator().next(), catchAll.values().iterator().next().data);
+    } else if (!wilds.isEmpty()) {
+      List<Matcher> matchers = new ArrayList<>();
+      if (data != null) {
+        matchers.add(new DataMatcher(data));
+      }
+      if (!childs.isEmpty()) {
+        matchers.add(staticMatcher());
+      }
+      for (Map.Entry<Keyword, Trie> e : wilds.entrySet()) {
+        matchers.add(new WildMatcher(e.getKey(), e.getValue().matcher()));
+      }
+      m = new LinearMatcher(matchers);
+    } else if (!childs.isEmpty()) {
+      m = staticMatcher();
+    } else {
+      return new DataMatcher(data);
+    }
+    if (data != null) {
+      m = new LinearMatcher(Arrays.asList(new DataMatcher(data), m));
+    }
+    return m;
+  }
+
+  public interface Matcher {
+    Match match(int i, List<String> segments, Match match);
+  }
+
+  public static final class StaticMatcher implements Matcher {
+    private final String segment;
+    private final Matcher child;
+
+    StaticMatcher(String segment, Matcher child) {
+      this.segment = segment;
+      this.child = child;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      if (i < segments.size() && segment.equals(segments.get(i))) {
+        return child.match(i + 1, segments, match);
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return "[\"" + segment + "\" " + child + "]";
+    }
+  }
+
+  public static final class WildMatcher implements Matcher {
+    private final Keyword parameter;
+    private final Matcher child;
+
+    WildMatcher(Keyword parameter, Matcher child) {
+      this.parameter = parameter;
+      this.child = child;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      final Match m = child.match(i + 1, segments, match);
+      if (m != null) {
+        m.params.put(parameter, encode(segments.get(i)));
+        return m;
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return "[" + parameter + " " + child + "]";
+    }
+  }
+
+  public static final class CatchAllMatcher implements Matcher {
+    private final Keyword parameter;
+    private final Object data;
+
+    CatchAllMatcher(Keyword parameter, Object data) {
+      this.parameter = parameter;
+      this.data = data;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      match.params.put(parameter, encode(String.join("/", segments.subList(i, segments.size()))));
+      match.data = data;
+      return match;
+    }
+
+    @Override
+    public String toString() {
+      return "[" + parameter + " " + new DataMatcher(data) + "]";
+    }
+  }
+
+  public static final class StaticMapMatcher implements Matcher {
+    private final Map<String, Matcher> map;
+
+    StaticMapMatcher(Map<String, Matcher> map) {
+      this.map = map;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      final Matcher child = map.get(segments.get(i));
+      if (child != null) {
+        return child.match(i + 1, segments, match);
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder b = new StringBuilder();
+      b.append("{");
+      List<String> keys = new ArrayList<>(map.keySet());
+      for (int i = 0; i < keys.size(); i++) {
+        String path = keys.get(i);
+        Matcher value = map.get(path);
+        b.append("\"").append(path).append("\" ").append(value);
+        if (i < keys.size() - 1) {
+          b.append(", ");
+        }
+      }
+      b.append("}");
+      return b.toString();
+    }
+  }
+
+  public static final class LinearMatcher implements Matcher {
+
+    private final List<Matcher> childs;
+
+    LinearMatcher(List<Matcher> childs) {
+      this.childs = childs;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      for (Matcher child : childs) {
+        final Match m = child.match(i, segments, match);
+        if (m != null) {
+          return m;
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return childs.toString();
+    }
+  }
+
+  public static final class DataMatcher implements Matcher {
+    private final Object data;
+
+    DataMatcher(Object data) {
+      this.data = data;
+    }
+
+    @Override
+    public Match match(int i, List<String> segments, Match match) {
+      if (i == segments.size()) {
+        match.data = data;
+        return match;
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return (data != null ? data.toString() : "null");
+    }
+  }
+
+  public static Match lookup(Matcher matcher, String path) {
+    return matcher.match(0, split(path), new Match());
+  }
+
+  public static Matcher sample() {
+    Map<String, Matcher> m1 = new HashMap<>();
+    m1.put("profile", new WildMatcher(Keyword.intern("type"), new DataMatcher(1)));
+    m1.put("permissions", new DataMatcher(2));
+
+    Map<String, Matcher> m2 = new HashMap<>();
+    m2.put("user", new WildMatcher(Keyword.intern("id"), new StaticMapMatcher(m1)));
+    m2.put("company", new WildMatcher(Keyword.intern("cid"), new StaticMatcher("dept", new WildMatcher(Keyword.intern("did"), new DataMatcher(3)))));
+    m2.put("public", new CatchAllMatcher(Keyword.intern("*"), 4));
+    m2.put("kikka", new LinearMatcher(Arrays.asList(new StaticMatcher("ping", new DataMatcher(5)), new WildMatcher(Keyword.intern("id"), new StaticMatcher("ping", new DataMatcher(6))))));
+    return new StaticMapMatcher(m2);
   }
 
   public static void main(String[] args) {
-    Trie trie =
-            new Trie()
-                    .add("/kikka", 1)
-                    .add("/kakka", 2)
-                    .add("/api/ping", 3)
-                    .add("/api/pong", 4)
-                    .add("/api/ipa/ping", 5)
-                    .add("/api/ipa/pong", 6)
-                    .add("/users/:user-id", 7)
-                    .add("/users/:user-id/orders", 8)
-                    .add("/users/:user-id/price", 9)
-                    .add("/orders/:id/price", 10)
-                    .add("/orders/:super", 11)
-                    .add("/orders/:super/hyper/:giga", 12);
 
-    //System.out.println(lookup(trie, split("/kikka")));
-    System.out.println(lookup(trie, "/orders/mies/hyper/peikko"));
+    Trie trie = new Trie();
+    //trie.add("/kikka/:id/permissions", 1);
+    trie.add("/kikka/:id", 2);
+    trie.add("/kakka/ping", 3);
+    Matcher m = trie.matcher();
+    System.err.println(m);
+    System.out.println(lookup(m, "/kikka/1/permissions"));
+    System.out.println(lookup(m, "/kikka/1"));
 
-    System.out.println(lookup(
-            new Trie().add("/user/:id/profile/:type/", 1),
-            "/user/1/profile/compat"));
+    /*
+    Trie trie = new Trie();
+    trie.add("/user/:id/profile/:type", 1);
+    trie.add("/user/:id/permissions", 2);
+    trie.add("/company/:cid/dept/:did", 3);
+    trie.add("/this/is/a/static/route", 4);
+    Matcher m = trie.matcher();
+    System.out.println(m);
 
-    System.out.println(lookup(
-            new Trie().add("/user/*path", 1),
-            "/user/1/profile/compat"));
+    System.err.println(lookup(m, "/this/is/a/static/route"));
+    System.err.println(lookup(m, "/user/1234/profile/compact"));
+    System.err.println(lookup(m, "/company/1234/dept/5678"));
+    System.err.println();
+    */
+    /*
+    System.err.println(lookup(sample(), "/user/1234/profile/compact"));
+    System.err.println(lookup(sample(), "/public/images/logo.jpg"));
+    System.err.println(lookup(sample(), "/kikka/ping"));
+    System.err.println(lookup(sample(), "/kikka/kukka/ping"));
+    */
   }
 }

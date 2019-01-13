@@ -69,14 +69,11 @@
       (p/insert acc p d))
     nil routes))
 
-#_(def reitit-tree
-    (reduce
-      (fn [acc [p d]]
-        (trie/insert acc p d))
-      nil routes))
-
 (def reitit-segment
-  (segment/create routes))
+  (reduce
+    (fn [acc [p d]]
+      (segment/insert acc p d))
+    nil routes))
 
 (defn bench! []
 

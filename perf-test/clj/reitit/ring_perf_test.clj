@@ -18,21 +18,31 @@
 ;; Memory:                16 GB
 ;;
 
-(def app
+(defn create-app [options]
   (ring/ring-handler
     (ring/router
       [["/auth/login" identity]
        ["/auth/recovery/token/:token" identity]
-       ["/workspace/:project/:page" identity]])))
+       ["/workspace/:project/:page" identity]])
+    (ring/create-default-handler)
+    options))
 
-(comment
-  (let [request {:request-method :post, :uri "/auth/login"}]
+(defn bench-app []
+  (let [request {:request-method :post, :uri "/auth/login"}
+        app1 (create-app nil)
+        app2 (create-app {:inject-match? false, :inject-router? false})]
     ;; 192ns (initial)
     ;; 163ns (always assoc path params)
     ;; 132ns (expand methods)
+    ;; 111ns (java-segment-router)
     (cc/quick-bench
-      (app request))
+      (app1 request))
 
     ;; 113ns (don't inject router)
     ;;  89ns (don't inject router & match)
-    ))
+    ;;  77ns (java-segment-router)
+    (cc/quick-bench
+      (app2 request))))
+
+(comment
+  (bench-app))

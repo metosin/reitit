@@ -8,4 +8,5 @@
   :plugins [[lein-parent "0.3.2"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
+  :java-source-paths ["java-src"]
   :dependencies [[meta-merge]])

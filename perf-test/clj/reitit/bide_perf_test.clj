@@ -89,10 +89,11 @@
 
   ;; 1600 µs
   (title "bidi")
-  (assert (bidi/match-route bidi-routes "/auth/login"))
-  (cc/quick-bench
-    (dotimes [_ 1000]
-      (bidi/match-route bidi-routes "/auth/login")))
+  (let [request "/auth/login"]
+    (assert (bidi/match-route bidi-routes request))
+    (cc/quick-bench
+      (dotimes [_ 1000]
+        (bidi/match-route bidi-routes request))))
 
   ;; 1400 µs
   (title "ataraxy")
@@ -105,10 +106,10 @@
   ;; 1000 µs
   (title "pedestal - map-tree => prefix-tree")
   (let [request {:path-info "/auth/login" :request-method :get}]
-    (assert (pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get}))
+    (assert (pedestal/find-route pedestal-router request))
     (cc/quick-bench
       (dotimes [_ 1000]
-        (pedestal/find-route pedestal-router {:path-info "/auth/login" :request-method :get}))))
+        (pedestal/find-route pedestal-router request))))
 
   ;; 1400 µs
   (title "compojure")
@@ -163,6 +164,7 @@
   ;; 710 µs (3-18x)
   ;; 530 µs (4-24x) -25% prefix-tree-router
   ;; 710 µs (3-18x) segment-router
+  ;; 320 µs (6-40x) java-segment-router
   (title "reitit")
   (assert (reitit/match-by-path reitit-routes "/workspace/1/1"))
   (cc/quick-bench

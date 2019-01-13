@@ -185,9 +185,19 @@
           :c "1+1"
           :d "1"}))
 
+(defn split! []
+
+  (suite "split")
+
+  ;; 114ns (String/split)
+  ;;  82ns (Trie/split)
+  (test "Splitting a String")
+  (test! impl/segments "/olipa/kerran/:avaruus"))
+
 (comment
   (url-decode!)
   (url-encode!)
   (form-decode!)
   (form-encode!)
-  (url-encode-coll!))
+  (url-encode-coll!)
+  (split!))
