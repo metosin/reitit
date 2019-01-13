@@ -7,7 +7,7 @@
             [reitit.impl :as impl]
             [reitit.ring :as ring]
             [reitit.core :as r])
-  (:import (reitit Trie)))
+  (:import (reitit Trie Trie$Matcher)))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -77,35 +77,133 @@
       [["/user/:id/profile/:type/" {:get (fn [{{:keys [id type]} :path-params}] (h11 id type))
                                     :put (fn [{{:keys [id type]} :path-params}] (h12 id type))
                                     :handler (fn [_] (h1x))}]
-       #_["/user/:id/permissions/" {:get (fn [{{:keys [id]} :path-params}] (h21 id))
+       ["/user/:id/permissions/" {:get (fn [{{:keys [id]} :path-params}] (h21 id))
                                   :put (fn [{{:keys [id]} :path-params}] (h22 id))
                                   :handler (fn [_] (h2x))}]
-       #_["/company/:cid/dept/:did/" {:put (fn [{{:keys [cid did]} :path-params}] (h30 cid did))
+       ["/company/:cid/dept/:did/" {:put (fn [{{:keys [cid did]} :path-params}] (h30 cid did))
                                     :handler (fn [_] (h3x))}]
-       #_["/this/is/a/static/route" {:put (fn [_] (h40))
+       ["/this/is/a/static/route" {:put (fn [_] (h40))
                                    :handler (fn [_] (h4x))}]])
     (fn [_] (hxx))))
 
 #_(let [request {:request-method :put
-               :uri "/this/is/a/static/route"}]
-  (handler-reitit request)
-  (cc/quick-bench
-    (handler-reitit request)))
+                 :uri "/this/is/a/static/route"}]
+    (handler-reitit request)
+    (cc/quick-bench
+      (handler-reitit request)))
 
 (let [request {:request-method :get
                :uri "/user/1234/profile/compact/"}]
-  (handler-reitit request)
-  ;; OLD: 1338ns
-  ;; NEW:  981ns
+  ;;  OLD: 1338ns
+  ;;  NEW:  981ns
+  ;; JAVA:  805ns
+  ;; NO-INJECT: 704ns
   #_(cc/quick-bench
-    (handler-reitit request)))
+      (handler-reitit request))
+  (handler-reitit request))
+
+(comment
+  (impl/segments "/user/1234/profile/compact")
+  ;; 145ns
+  (cc/quick-bench
+    (impl/segments "/user/1234/profile/compact")))
+
+(comment
+  (Trie/split "/user/1234/profile/compact")
+  ;; 91ns
+  (cc/quick-bench
+    (Trie/split "/user/1234/profile/compact")))
+
+(comment
+  (let [router (r/router ["/user/:id/profile/:type"])]
+    (cc/quick-bench
+      (r/match-by-path router "/user/1234/profile/compact"))))
+
+(let [lookup ^Trie$Matcher (Trie/sample)]
+  (Trie/lookup lookup "/user/1234/profile/compact")
+  #_(cc/quick-bench
+      (Trie/lookup lookup "/user/1234/profile/compact")))
+
+(let [router (r/router [["/user/:id" ::1]
+                        ["/user/:id/permissions" ::2]
+                        ["/company/:cid/dept/:did" ::3]
+                        ["/this/is/a/static/route" ::4]])]
+  #_(cc/quick-bench
+      (r/match-by-path router "/user/1234/profile/compact"))
+  (r/match-by-path router "/user/1234"))
+
+;; 281ns
+(let [router (r/router [["/user/:id/profile/:type" ::1]
+                        ["/user/:id/permissions" ::2]
+                        ["/company/:cid/dept/:did" ::3]
+                        ["/this/is/a/static/route" ::4]])]
+  #_(cc/quick-bench
+    (r/match-by-path router "/user/1234/profile/compact"))
+  (r/match-by-path router "/user/1234/profile/compact"))
+
+(read-string
+  (str
+    (.matcher
+      (doto (Trie.)
+        (.add "/user" 1)
+        #_(.add "/user/id/permissions" 2)
+        (.add "/user/id/permissions2" 3)))))
+
+(Trie/lookup
+  (.matcher
+    (doto (Trie.)
+      (.add "/user/1" 1)
+      (.add "/user/1/permissions" 2)))
+  "/user/1")
+
+(.matcher
+  (doto (Trie.)
+    (.add "/user/1" 1)
+    (.add "/user/1/permissions" 2)))
+
+;; 137ns
+(let [m (.matcher
+          (doto (Trie.)
+            (.add "/user/:id/profile/:type" 1)))]
+  #_(cc/quick-bench
+      (Trie/lookup m "/user/1234/profile/compact"))
+  (Trie/lookup m "/user/1234/profile/compact"))
 
 (comment
 
+  (let [matcher ^Trie$Matcher (Trie/sample)]
+    (Trie/lookup matcher "/user/1234/profile/compact")
+    (cc/quick-bench
+      (Trie/lookup matcher "/user/1234/profile/compact")))
+
+  ;; 173ns
+  (let [lookup ^Trie$Matcher (Trie/tree2)]
+    (Trie/lookup lookup "/user/1234/profile/compact")
+    (cc/quick-bench
+      (Trie/lookup lookup "/user/1234/profile/compact")))
+
+
+  ;; 140ns
+  (let [lookup ^Trie$Matcher (Trie/tree1)]
+    (Trie/lookup lookup "/user/1234/profile/compact")
+    (cc/quick-bench
+      (Trie/lookup lookup "/user/1234/profile/compact")))
+
   ;; 849ns (clojure, original)
   ;; 599ns (java, initial)
-  ;; 810ns (linear)
+  ;; 173ns (fast split)
   (let [router (r/router ["/user/:id/profile/:type"])]
+    (r/match-by-path router "/user/1234/profile/compact")
+    (cc/quick-bench
+      (r/match-by-path router "/user/1234/profile/compact")))
+
+  ;; 849ns (clojure, original)
+  ;; 599ns (java, initial)
+  ;; 173ns (java, optimized)
+  (let [router (r/router [["/user/:id/profile/:type/" ::1]
+                          ["/user/:id/permissions/" ::2]
+                          ["/company/:cid/dept/:did/" ::3]
+                          ["/this/is/a/static/route" ::4]])]
     (cc/quick-bench
       (r/match-by-path router "/user/1234/profile/compact")))
 
@@ -129,10 +227,16 @@
 
 (import '[reitit Util])
 
-#_(cc/quick-bench
-  (Trie/split "/this/is/a/static/route"))
+(comment
+  (Util/matchURI "/user/1234/profile/compact/" ["/user/" :id "/profile/" :type "/"])
+  (cc/quick-bench
+    (Util/matchURI "/user/1234/profile/compact/" ["/user/" :id "/profile/" :type "/"]))
 
-(Util/matchURI "/user/1234/profile/compact/" ["/user/" :id "/profile/" :type "/"])
+  (cc/quick-bench
+    (Trie/split "/user/1234/profile/compact/"))
+
+  (cc/quick-bench
+    (.split "/user/1234/profile/compact/" "/" 666)))
 
 (import '[reitit Segment2])
 
@@ -161,7 +265,7 @@
       (segment/lookup segment "/user/1/permissions/"))))
 
 #_(cc/quick-bench
-  (Trie/split "/user/1/profile/compat"))
+    (Trie/split "/user/1/profile/compat"))
 
 #_(Trie/split "/user/1/profile/compat")
 
