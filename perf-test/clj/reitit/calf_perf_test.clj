@@ -113,6 +113,6 @@
       (.matcher
         (doto (SegmentTrie.)
           (.add "/user" 1)
-          #_(.add "/user/id/permissions" 2)
-          (.add "/user/id/permissions2" 3))))))
+          (.add "/user/id" 2)
+          (.add "/user/id/permissions2" nil))))))
 

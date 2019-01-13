@@ -23,7 +23,7 @@ public class SegmentTrie {
     return segments;
   }
 
-  private static String encode(String s) {
+  private static String decode(String s) {
     try {
       if (s.contains("%")) {
         String _s = s;
@@ -173,7 +173,7 @@ public class SegmentTrie {
       if (i < segments.size() && !segments.get(i).isEmpty()) {
         final Match m = child.match(i + 1, segments, match);
         if (m != null) {
-          m.params.put(parameter, encode(segments.get(i)));
+          m.params.put(parameter, decode(segments.get(i)));
           return m;
         }
       }
@@ -197,7 +197,7 @@ public class SegmentTrie {
 
     @Override
     public Match match(int i, List<String> segments, Match match) {
-      match.params.put(parameter, encode(String.join("/", segments.subList(i, segments.size()))));
+      match.params.put(parameter, decode(String.join("/", segments.subList(i, segments.size()))));
       match.data = data;
       return match;
     }
@@ -285,7 +285,7 @@ public class SegmentTrie {
 
     @Override
     public String toString() {
-      return (data != null ? data.toString() : "null");
+      return (data != null ? data.toString() : "nil");
     }
   }
 
