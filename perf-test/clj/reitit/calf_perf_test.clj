@@ -3,6 +3,7 @@
             [reitit.perf-utils :refer :all]
             [ring.util.codec]
             [reitit.impl]
+            [clojure.edn :as edn]
             [reitit.ring :as ring]
             [reitit.core :as r])
   (:import (reitit SegmentTrie)))
@@ -108,11 +109,12 @@
     (r/match-by-path router "/user/1234/profile/compact")))
 
 (comment
-  (read-string
+  (edn/read-string
     (str
       (.matcher
         (doto (SegmentTrie.)
           (.add "/user" 1)
-          (.add "/user/id" 2)
-          (.add "/user/id/permissions2" nil))))))
+          (.add "/user/:id" 2)
+          (.add "/user/:id/orders" 3)
+          (.add "/user/id/permissions" 4))))))
 
