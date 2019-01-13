@@ -106,17 +106,21 @@ public class SegmentTrie {
     if (!catchAll.isEmpty()) {
       m = new CatchAllMatcher(catchAll.keySet().iterator().next(), data);
     } else if (!wilds.isEmpty()) {
-      List<Matcher> matchers = new ArrayList<>();
-      if (data != null) {
-        matchers.add(new DataMatcher(data));
+      if(wilds.size() == 1 && data == null && childs.isEmpty()) {
+        m = new WildMatcher(wilds.keySet().iterator().next(), wilds.values().iterator().next().matcher());
+      } else {
+        List<Matcher> matchers = new ArrayList<>();
+        if (data != null) {
+          matchers.add(new DataMatcher(data));
+        }
+        if (!childs.isEmpty()) {
+          matchers.add(staticMatcher());
+        }
+        for (Map.Entry<Keyword, SegmentTrie> e : wilds.entrySet()) {
+          matchers.add(new WildMatcher(e.getKey(), e.getValue().matcher()));
+        }
+        m = new LinearMatcher(matchers);
       }
-      if (!childs.isEmpty()) {
-        matchers.add(staticMatcher());
-      }
-      for (Map.Entry<Keyword, SegmentTrie> e : wilds.entrySet()) {
-        matchers.add(new WildMatcher(e.getKey(), e.getValue().matcher()));
-      }
-      m = new LinearMatcher(matchers);
     } else if (!childs.isEmpty()) {
       m = staticMatcher();
       if (data != null) {
@@ -305,14 +309,11 @@ public class SegmentTrie {
   public static void main(String[] args) {
 
     SegmentTrie trie = new SegmentTrie();
-    trie.add("/:abba", 1);
-    trie.add("/abba/1", 2);
-    trie.add("/:abba/:dabba/doo", 3);
-    trie.add("/abba/:dabba/boo", 4);
+    trie.add("/repos/:owner/:repo/stargazers", 1);
     Matcher m = trie.matcher();
     System.err.println(m);
     System.err.println(m.getClass());
-    System.out.println(lookup(m, "/abba"));
+    System.out.println(lookup(m, "/repos/metosin/reitit/stargazers"));
     /*
     SegmentTrie trie = new SegmentTrie();
     trie.add("/user/:id/profile/:type", 1);

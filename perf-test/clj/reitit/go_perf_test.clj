@@ -327,6 +327,7 @@
   ;; 830ns (faster decode params)
   ;; 560µs (java-segment-router)
   ;; 490ns (java-segment-router, no injects)
+  ;; 440ns (java-segment-router, no injects, single-wild-optimization)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -337,6 +338,7 @@
   ;; 160µs (faster decode params)
   ;; 120µs (java-segment-router)
   ;; 100µs (java-segment-router, no injects)
+  ;;  90µs (java-segment-router, no injects, single-wild-optimization)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench
