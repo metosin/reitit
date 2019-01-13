@@ -23,7 +23,7 @@ public class SegmentTrie {
     return segments;
   }
 
-  static String encode(String s) {
+  private static String encode(String s) {
     try {
       if (s.contains("%")) {
         String _s = s;
@@ -293,19 +293,6 @@ public class SegmentTrie {
     return matcher.match(0, split(path), new Match());
   }
 
-  public static Matcher sample() {
-    Map<String, Matcher> m1 = new HashMap<>();
-    m1.put("profile", new WildMatcher(Keyword.intern("type"), new DataMatcher(1)));
-    m1.put("permissions", new DataMatcher(2));
-
-    Map<String, Matcher> m2 = new HashMap<>();
-    m2.put("user", new WildMatcher(Keyword.intern("id"), new StaticMapMatcher(m1)));
-    m2.put("company", new WildMatcher(Keyword.intern("cid"), new StaticMatcher("dept", new WildMatcher(Keyword.intern("did"), new DataMatcher(3)))));
-    m2.put("public", new CatchAllMatcher(Keyword.intern("*"), new DataMatcher(4)));
-    m2.put("kikka", new LinearMatcher(Arrays.asList(new StaticMatcher("ping", new DataMatcher(5)), new WildMatcher(Keyword.intern("id"), new StaticMatcher("ping", new DataMatcher(6))))));
-    return new StaticMapMatcher(m2);
-  }
-
   public static void main(String[] args) {
 
     SegmentTrie trie = new SegmentTrie();
@@ -314,25 +301,5 @@ public class SegmentTrie {
     System.err.println(m);
     System.err.println(m.getClass());
     System.out.println(lookup(m, "/repos/metosin/reitit/stargazers"));
-    /*
-    SegmentTrie trie = new SegmentTrie();
-    trie.add("/user/:id/profile/:type", 1);
-    trie.add("/user/:id/permissions", 2);
-    trie.add("/company/:cid/dept/:did", 3);
-    trie.add("/this/is/a/static/route", 4);
-    Matcher m = trie.matcher();
-    System.out.println(m);
-
-    System.err.println(lookup(m, "/this/is/a/static/route"));
-    System.err.println(lookup(m, "/user/1234/profile/compact"));
-    System.err.println(lookup(m, "/company/1234/dept/5678"));
-    System.err.println();
-    */
-    /*
-    System.err.println(lookup(sample(), "/user/1234/profile/compact"));
-    System.err.println(lookup(sample(), "/public/images/logo.jpg"));
-    System.err.println(lookup(sample(), "/kikka/ping"));
-    System.err.println(lookup(sample(), "/kikka/kukka/ping"));
-    */
   }
 }
