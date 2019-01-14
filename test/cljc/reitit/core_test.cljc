@@ -17,6 +17,8 @@
             (is (= [["/api/ipa/:size" {:name ::beer}]]
                    (r/routes router)))
             (is (map? (r/options router)))
+            (is (= nil
+                   (r/match-by-path router "/api")))
             (is (= (r/map->Match
                      {:template "/api/ipa/:size"
                       :data {:name ::beer}
@@ -108,6 +110,8 @@
         (is (= [["/api/ipa/large" {:name ::beer}]]
                (r/routes router)))
         (is (map? (r/options router)))
+        (is (= nil
+               (r/match-by-path router "/api")))
         (is (= (r/map->Match
                  {:template "/api/ipa/large"
                   :data {:name ::beer}

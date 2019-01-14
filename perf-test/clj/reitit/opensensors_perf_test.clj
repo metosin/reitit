@@ -489,8 +489,11 @@
    {:uri "/v1/users/:user-id/bookmarks" :nested [{:method :get, :handler handler}]}
    {:uri "/v1/orgs/:org-id/topics" :nested [{:method :get, :handler handler}]}])
 
-(def opensensors-calfpath-data-handler
+(def opensensors-calfpath-walker-handler
   (partial cr/dispatch (cr/compile-routes opensensors-calfpath-routes {:show-uris-400? false})))
+
+(def opensensors-calfpath-unroll-handler
+  (cr/make-dispatcher (cr/compile-routes opensensors-calfpath-routes {:show-uris-400? false})))
 
 (comment
   (pedestal/find-route
@@ -551,7 +554,8 @@
         reitit-ring-fast-f (ring/ring-handler (ring/router opensensors-routes) nil {:inject-router? false, :inject-match? false})
         bidi-f #(bidi/match-route opensensors-bidi-routes (:uri %))
         calfpath-macros-f opensensors-calfpath-macro-handler
-        calfpath-data-f opensensors-calfpath-data-handler
+        calfpath-walker-f opensensors-calfpath-walker-handler
+        calfpath-unroll-f opensensors-calfpath-unroll-handler
         ataraxy-f (partial ataraxy/matches opensensors-ataraxy-routes)
         compojure-f opensensors-compojure-routes
         pedestal-f (partial pedestal/find-route opensensors-pedestal-routes)
@@ -577,13 +581,16 @@
     ;;   385ns (java-segment-router, no injects)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
 
-    ;;  2258ns
-    (b! "calfpath-data" calfpath-data-f)
+    ;;  2137ns
+    (b! "calfpath-walker" calfpath-walker-f)
+
+    ;;  4774ns
+    (b! "calfpath-unroll" calfpath-unroll-f)
 
     ;;  2821ns
     (b! "pedestal" pedestal-f)
 
-    ;;  4364ns
+    ;;  4803ns
     (b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
