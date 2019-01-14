@@ -192,9 +192,12 @@ public class SegmentTrie {
 
     @Override
     public Match match(int i, List<String> segments, Match match) {
-      match.params.put(parameter, decode(String.join("/", segments.subList(i, segments.size()))));
-      match.data = data;
-      return match;
+      if (i < segments.size()) {
+        match.params.put(parameter, decode(String.join("/", segments.subList(i, segments.size()))));
+        match.data = data;
+        return match;
+      }
+      return null;
     }
 
     @Override
@@ -212,9 +215,11 @@ public class SegmentTrie {
 
     @Override
     public Match match(int i, List<String> segments, Match match) {
-      final Matcher child = map.get(segments.get(i));
-      if (child != null) {
-        return child.match(i + 1, segments, match);
+      if (i < segments.size()) {
+        final Matcher child = map.get(segments.get(i));
+        if (child != null) {
+          return child.match(i + 1, segments, match);
+        }
       }
       return null;
     }
