@@ -52,7 +52,7 @@ public class SegmentTrie {
 
   private Map<String, SegmentTrie> childs = new HashMap<>();
   private Map<Keyword, SegmentTrie> wilds = new HashMap<>();
-  private Map<Keyword, SegmentTrie> catchAll = new HashMap<>();
+  private Keyword catchAll = null;
   private Object data;
 
   public SegmentTrie add(String path, Object data) {
@@ -69,12 +69,7 @@ public class SegmentTrie {
         pointer = s;
       } else if (p.startsWith("*")) {
         Keyword k = Keyword.intern(p.substring(1));
-        SegmentTrie s = pointer.catchAll.get(k);
-        if (s == null) {
-          s = new SegmentTrie();
-          s.data = data;
-          pointer.catchAll.put(k, s);
-        }
+        pointer.catchAll = k;
         break;
       } else {
         SegmentTrie s = pointer.childs.get(p);
@@ -103,10 +98,10 @@ public class SegmentTrie {
 
   public Matcher matcher() {
     Matcher m;
-    if (!catchAll.isEmpty()) {
-      m = new CatchAllMatcher(catchAll.keySet().iterator().next(), data);
+    if (catchAll != null) {
+      m = new CatchAllMatcher(catchAll, data);
     } else if (!wilds.isEmpty()) {
-      if(wilds.size() == 1 && data == null && childs.isEmpty()) {
+      if (wilds.size() == 1 && data == null && childs.isEmpty()) {
         m = new WildMatcher(wilds.keySet().iterator().next(), wilds.values().iterator().next().matcher());
       } else {
         List<Matcher> matchers = new ArrayList<>();
