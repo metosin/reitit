@@ -112,10 +112,10 @@
       (f conflicts)
       {:conflicts conflicts})))
 
-(defn name-lookup [[_ {:keys [name]}] _]
+(defn- name-lookup [[_ {:keys [name]}] _]
   (if name #{name}))
 
-(defn find-names [routes _]
+(defn- find-names [routes _]
   (into [] (keep #(-> % second :name)) routes))
 
 (defn- compile-route [[p m :as route] {:keys [compile] :as opts}]
@@ -163,13 +163,6 @@
    (match->path match nil))
   ([match query-params]
    (some-> match :path (cond-> query-params (str "?" (impl/query-string query-params))))))
-
-(def default-router-options
-  {:lookup name-lookup
-   :expand expand
-   :coerce (fn [route _] route)
-   :compile (fn [[_ {:keys [handler]}] _] handler)
-   :conflicts (partial throw-on-conflicts! path-conflicts-str)})
 
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
@@ -415,6 +408,13 @@
          (or (match-by-name mixed-router name path-params)
              (match-by-name linear-router name path-params)))))))
 
+(defn ^:no-doc default-router-options []
+  {:lookup name-lookup
+   :expand expand
+   :coerce (fn [route _] route)
+   :compile (fn [[_ {:keys [handler]}] _] handler)
+   :conflicts (partial throw-on-conflicts! path-conflicts-str)})
+
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
   Selects implementation based on route details. The following options
@@ -435,7 +435,7 @@
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
-   (let [{:keys [router] :as opts} (merge default-router-options opts)
+   (let [{:keys [router] :as opts} (merge (default-router-options) opts)
          routes (resolve-routes raw-routes opts)
          path-conflicting (path-conflicting-routes routes)
          name-conflicting (name-conflicting-routes routes)

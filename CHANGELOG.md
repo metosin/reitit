@@ -1,3 +1,10 @@
+## UNRELEASED
+
+
+### `reitit-core`
+
+* `reitit.core/Expand` can be extended, fixes [#201](https://github.com/metosin/reitit/issues/201).
+
 ## 0.2.10 (2018-12-30)
 
 ### `reitit-core`

@@ -314,3 +314,12 @@
           (-> ["/api"
                (list "/ipa")]
               (r/router))))))
+
+(defrecord Named [n]
+  r/Expand
+  (r/expand [_ _] {:name n}))
+
+(deftest default-expand-test
+  (let [router (r/router ["/endpoint" (->Named :kikka)])]
+    (is (= [["/endpoint" {:name :kikka}]]
+           (r/routes router)))))
