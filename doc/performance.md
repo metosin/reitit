@@ -101,6 +101,34 @@ The reitit routing perf is measured to get an internal baseline to optimize agai
 
 A quick poke to [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that the reitit is only few times slower than the fastest routers in Go. Which is kinda awesome.
 
+### Faster!
+
+By default, `reitit.ring/ring-router`, `reitit.http/ring-router` and `reitit.http/routing-interceptor` inject both `Match` and `Router` into the request. You can remove the injections setting options `:inject-match?` and `:inject-router?` to `false`. This saves some tens of nanos (with the hw described above).
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[criterium.core :as cc])
+
+(defn create [options]
+  (ring/ring-handler
+    (ring/router
+      ["/ping" (constantly {:status 200, :body "ok"})])
+    (ring/create-default-handler)
+    options))
+
+;; 130ns
+(let [app (create nil)]
+  (cc/quick-bench
+    (app {:request-method :get, :uri "/ping"})))
+
+;; 80ns
+(let [app (create {:inject-router? false, :inject-match? false})]
+  (cc/quick-bench
+    (app {:request-method :get, :uri "/ping"})))
+```
+
+**NOTE**: Without `Router`, you can't to do [reverse routing](ring/reverse_routing.md) and without `Match` you can't write [dynamic extensions](ring/dynamic_extensions.md).
+
 ### Performance tips
 
 Few things that have an effect on performance:

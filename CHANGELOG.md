@@ -6,6 +6,14 @@
 * `reitit.core/Expand` can be extended, fixes [#201](https://github.com/metosin/reitit/issues/201).
 * new snappy Java-backed `SegmentTrie` routing algorithm, wildcard routing is ~2x faster on the JVM
 
+### `reitit-ring`
+
+* new options `:inject-match?` and `:inject-router?` on `reitit.ring/ring-handler` to optionally not to inject `Router` and `Match` into the request. See [performance guide](https://metosin.github.io/reitit/performance.html#faster!) for details.
+
+### `reitit-http`
+
+* new options `:inject-match?` and `:inject-router?` on `reitit.http/ring-handler` and `reitit.http/routing-interceptor` to optionally not to inject `Router` and `Match` into the request. See [performance guide](https://metosin.github.io/reitit/performance.html#faster!) for details.
+
 ## 0.2.10 (2018-12-30)
 
 ### `reitit-core`
