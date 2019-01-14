@@ -48,16 +48,20 @@
 ;; public api
 ;;
 
-(defn insert [root path data]
-  #?(:cljs (-insert (or root (segment)) (impl/segments path) (map->Match {:data data}))
-     :clj  (.add (or ^SegmentTrie root ^SegmentTrie (SegmentTrie.)) ^String path data)))
+(defn insert
+  "Returns a Segment Trie with path with data inserted into it. Creates the trie if `nil`."
+  [trie path data]
+  #?(:cljs (-insert (or trie (segment)) (impl/segments path) (map->Match {:data data}))
+     :clj  (.add (or ^SegmentTrie trie ^SegmentTrie (SegmentTrie.)) ^String path data)))
 
-(defn compile [segment]
-  #?(:cljs segment
-     :clj  (.matcher ^SegmentTrie (or segment (SegmentTrie.)))))
+(defn compile [trie]
+  "Compiles the Trie so that [[lookup]] can be used."
+  #?(:cljs trie
+     :clj  (.matcher ^SegmentTrie (or trie (SegmentTrie.)))))
 
-(defn lookup [segment path]
-  #?(:cljs (if-let [match (-lookup segment (impl/segments path) {})]
+(defn lookup [trie path]
+  "Looks the path from a Segment Trie. Returns a [[Match]] or `nil`."
+  #?(:cljs (if-let [match (-lookup trie (impl/segments path) {})]
              (assoc match :path-params (impl/url-decode-coll (:path-params match))))
-     :clj  (if-let [match ^SegmentTrie$Match (SegmentTrie/lookup segment path)]
+     :clj  (if-let [match ^SegmentTrie$Match (SegmentTrie/lookup trie path)]
              (->Match (.data match) (clojure.lang.PersistentHashMap/create (.params match))))))
