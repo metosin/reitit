@@ -1,6 +1,6 @@
 # Performance
 
-Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from [Pedestal](http://pedestal.io/), but has been mostly rewritten.
+Besides having great features, the goal of reitit is to be really, really fast. The routing was originally exported from Pedestal, but since rewritten.
 
 ![Opensensors perf test](images/opensensors.png)
 
@@ -63,13 +63,13 @@ The routing sample taken from [bide](https://github.com/funcool/bide) README:
   (dotimes [_ 1000]
     (r/match-by-path routes "/auth/login")))
 
-;; Execution time mean (per 1000): 530 µs -> 1.9M ops/sec
+;; Execution time mean (per 1000): 315 µs -> 3.2M ops/sec
 (cc/quick-bench
   (dotimes [_ 1000]
     (r/match-by-path routes "/workspace/1/1")))
 ```
 
-Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
+Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 6-40x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
 
 But, the example is too simple for any real benchmark. Also, some of the libraries always match on the `:request-method` too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.
 
@@ -79,7 +79,7 @@ So, we need to test something more realistic.
 
 To get better view on the real life routing performance, there is [test](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj) of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the [OpenSensors](https://opensensors.io/) swagger definitions.
 
-Thanks to the snappy new [segment-tree](https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc) algorithm, `reitit-ring` is fastest here. Pedestal is also fast with it's [prefix-tree](https://en.wikipedia.org/wiki/Radix_tree) implementation.
+Thanks to the snappy [SegmentTrie](https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/SegmentTrie.java) (a modification of [Radix tree](https://en.wikipedia.org/wiki/Radix_tree)), `reitit-ring` is fastest here. [Calfpath](https://github.com/kumarshantanu/calfpath) and [Pedestal](https://github.com/pedestal/pedestal) are also quite fast.
 
 ![Opensensors perf](images/opensensors.png)
 
@@ -99,13 +99,14 @@ The reitit routing perf is measured to get an internal baseline to optimize agai
 
 ### Looking out of the box
 
-A quick poke to [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that the reitit is only few times slower than the fastest routers in Go. Which is really awesome (if true).
+A quick poke to [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that the reitit is only few times slower than the fastest routers in Go. Which is kinda awesome.
 
 ### Performance tips
 
 Few things that have an effect on performance:
 
 * Wildcard-routes are an order of magnitude slower than static routes
-* It's ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don't disable the [conflict resolution](basics/route_conflicts.md) => if no conflicting routes are found, a `:mixed-router` can be created, which internally has a fast static path router and a separate wildcard-router. So, the static paths are still fast.
+* Conflicting routes are served with LinearRouter, which is the slowest implementation.
+* It's ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation. 
 * Move computation from request processing time into creation time, using by compiling [middleware](ring/compiling_middleware.md) & [route data](advanced/configuring_routers.md).
   * Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.

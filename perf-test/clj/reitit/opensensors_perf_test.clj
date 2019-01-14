@@ -9,6 +9,7 @@
             [ataraxy.core :as ataraxy]
             [compojure.core :refer [routes context ANY]]
             [calfpath.core :as cp]
+            [calfpath.route :as cr]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
@@ -367,7 +368,7 @@
        ["/v1/users/:user-id/bookmarks" :get handler :route-name :test/route56]
        ["/v1/orgs/:org-id/topics" :get handler :route-name :test/route57]])))
 
-(defn opensensors-calfpath-handler [request]
+(defn opensensors-calfpath-macro-handler [request]
   (cp/->uri
     request
     "/v2/whoami" [] (cp/->get request (handler request) nil)
@@ -429,6 +430,68 @@
     "/v1/orgs/:org-id/topics" [] (cp/->get request (handler request) nil)
     nil))
 
+(def opensensors-calfpath-routes
+  [{:uri "/v2/whoami" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/users/:user-id/datasets" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/public/projects/:project-id/datasets" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/public/topics/:topic" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/orgs/:org-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/search/topics/:term" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/invitations" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/devices/:batch/:type" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/topics" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/bookmarks/followers" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/datasets/:dataset-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/usage-stats" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/devices/:client-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/messages/user/:user-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/devices" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/public/users/:user-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/errors" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/public/orgs/:org-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/invitations" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/public/messages/dataset/bulk" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/devices/bulk" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/device-errors" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/login" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/usage-stats" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/users/:user-id/devices" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/claim-device/:client-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/public/projects/:project-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/public/datasets/:dataset-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/users/:user-id/topics/bulk" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/messages/device/:client-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/owned-orgs" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/topics/:topic" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/bookmark/:topic" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/members/:user-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/devices/:client-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/devices" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/members" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/members/invitation-data/:user-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/orgs/:org-id/topics" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/whoami" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/api-key" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/schemas" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/users/:user-id/topics" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/confirm-membership/:token" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/topics/:topic" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/messages/topic/:topic" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/devices/:client-id/reset-password" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/topics" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/login" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/orgs" :nested [{:method :get, :handler handler}]}
+   {:uri "/v2/public/messages/dataset/:dataset-id" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/topics" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/users/:user-id/bookmarks" :nested [{:method :get, :handler handler}]}
+   {:uri "/v1/orgs/:org-id/topics" :nested [{:method :get, :handler handler}]}])
+
+(def opensensors-calfpath-data-handler
+  (partial cr/dispatch (cr/compile-routes opensensors-calfpath-routes {:show-uris-400? false})))
+
 (comment
   (pedestal/find-route
     (map-tree/router
@@ -487,7 +550,8 @@
         reitit-ring-f (ring/ring-handler (ring/router opensensors-routes))
         reitit-ring-fast-f (ring/ring-handler (ring/router opensensors-routes) nil {:inject-router? false, :inject-match? false})
         bidi-f #(bidi/match-route opensensors-bidi-routes (:uri %))
-        calfpath-f opensensors-calfpath-handler
+        calfpath-macros-f opensensors-calfpath-macro-handler
+        calfpath-data-f opensensors-calfpath-data-handler
         ataraxy-f (partial ataraxy/matches opensensors-ataraxy-routes)
         compojure-f opensensors-compojure-routes
         pedestal-f (partial pedestal/find-route opensensors-pedestal-routes)
@@ -513,11 +577,14 @@
     ;;   385ns (java-segment-router, no injects)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
 
+    ;;  2258ns
+    (b! "calfpath-data" calfpath-data-f)
+
     ;;  2821ns
     (b! "pedestal" pedestal-f)
 
-    ;;  4364ns (macros)
-    (b! "calfpath" calfpath-f)
+    ;;  4364ns
+    (b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
     (b! "compojure" compojure-f)
