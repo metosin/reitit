@@ -1,6 +1,6 @@
 # Performance
 
-Besides having great features, the goal of reitit is to be really, really fast. The routing was originally exported from Pedestal, but since rewritten.
+Besides having great features, goal of reitit is to be really, really fast. The routing was originally exported from Pedestal, but since rewritten.
 
 ![Opensensors perf test](images/opensensors.png)
 
@@ -79,13 +79,13 @@ So, we need to test something more realistic.
 
 To get better view on the real life routing performance, there is [test](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj) of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the [OpenSensors](https://opensensors.io/) swagger definitions.
 
-Thanks to the snappy [SegmentTrie](https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/SegmentTrie.java) (a modification of [Radix tree](https://en.wikipedia.org/wiki/Radix_tree)), `reitit-ring` is fastest here. [Calfpath](https://github.com/kumarshantanu/calfpath) and [Pedestal](https://github.com/pedestal/pedestal) are also quite fast.
+Thanks to the snappy [SegmentTrie](https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/SegmentTrie.java) (a modification of [Radix Tree](https://en.wikipedia.org/wiki/Radix_tree)), `reitit-ring` is fastest here. [Calfpath](https://github.com/kumarshantanu/calfpath) and [Pedestal](https://github.com/pedestal/pedestal) are also quite fast.
 
 ![Opensensors perf](images/opensensors.png)
 
 ### CQRS apis
 
-Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj) is a [CQRS](https://martinfowler.com/bliki/CQRS.html)-style route tree, where all the paths are static, e.g. `/api/command/add-order`. The 300 route definitions are pulled out from [Lupapiste](https://github.com/lupapiste/lupapiste).
+Another real-life [test scenario](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj) is a [CQRS](https://martinfowler.com/bliki/CQRS.html) style route tree, where all the paths are static, e.g. `/api/command/add-order`. The 300 route definitions are pulled out from [Lupapiste](https://github.com/lupapiste/lupapiste).
 
 Both `reitit-ring` and Pedestal shine in this test, thanks to the fast lookup-routers. On average, they are **two** and on best case, **three orders of magnitude faster** than the other tested libs. Ataraxy failed this test on `Method code too large!` error.
 
@@ -136,5 +136,5 @@ Few things that have an effect on performance:
 * Wildcard-routes are an order of magnitude slower than static routes
 * Conflicting routes are served with LinearRouter, which is the slowest implementation.
 * It's ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation. 
-* Move computation from request processing time into creation time, using by compiling [middleware](ring/compiling_middleware.md) & [route data](advanced/configuring_routers.md).
+* Move computation from request processing time into creation time, using by compiling [middleware](ring/compiling_middleware.md), [interceptors](http/interceptors.md) and [route data](advanced/configuring_routers.md).
   * Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.

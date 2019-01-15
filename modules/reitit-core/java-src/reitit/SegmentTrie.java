@@ -68,8 +68,7 @@ public class SegmentTrie {
         }
         pointer = s;
       } else if (p.startsWith("*")) {
-        Keyword k = Keyword.intern(p.substring(1));
-        pointer.catchAll = k;
+        pointer.catchAll = Keyword.intern(p.substring(1));
         break;
       } else {
         SegmentTrie s = pointer.childs.get(p);

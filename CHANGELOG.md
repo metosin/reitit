@@ -4,7 +4,7 @@
 ### `reitit-core`
 
 * `reitit.core/Expand` can be extended, fixes [#201](https://github.com/metosin/reitit/issues/201).
-* new snappy Java-backed `SegmentTrie` routing algorithm, wildcard routing is ~2x faster on the JVM
+* new snappy Java-backed `SegmentTrie` routing algorithm and data structure, making wildcard routing ~2x faster on the JVM
 
 ### `reitit-ring`
 
