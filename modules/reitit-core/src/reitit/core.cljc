@@ -271,6 +271,7 @@
                         (if name (assoc nl name f) nl)]))
                    [nil {}]
                    compiled-routes)
+         pl (segment/compile pl)
          lookup (impl/fast-map nl)
          routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
@@ -289,7 +290,7 @@
        (match-by-path [_ path]
          (if-let [match (segment/lookup pl path)]
            (-> (:data match)
-               (assoc :path-params (impl/url-decode-coll (:path-params match)))
+               (assoc :path-params (:path-params match))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]

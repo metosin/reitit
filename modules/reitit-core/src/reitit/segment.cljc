@@ -1,7 +1,8 @@
 (ns reitit.segment
-  (:refer-clojure :exclude [-lookup])
+  (:refer-clojure :exclude [-lookup compile])
   (:require [reitit.impl :as impl]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  #?(:clj (:import (reitit SegmentTrie SegmentTrie$Match))))
 
 (defrecord Match [data path-params])
 
@@ -43,14 +44,24 @@
                (if (and wilds? (not (str/blank? p))) (some #(-lookup (impl/fast-get children' %) ps (assoc path-params % p)) wilds))
                (if catch-all (-catch-all children' catch-all path-params p ps)))))))))
 
-(defn insert [root path data]
-  (-insert (or root (segment)) (impl/segments path) (map->Match {:data data})))
+;;
+;; public api
+;;
 
-(defn create [paths]
-  (reduce
-    (fn [segment [p data]]
-      (insert segment p data))
-    nil paths))
+(defn insert
+  "Returns a Segment Trie with path with data inserted into it. Creates the trie if `nil`."
+  [trie path data]
+  #?(:cljs (-insert (or trie (segment)) (impl/segments path) (map->Match {:data data}))
+     :clj  (.add (or ^SegmentTrie trie ^SegmentTrie (SegmentTrie.)) ^String path data)))
 
-(defn lookup [segment path]
-  (-lookup segment (impl/segments path) {}))
+(defn compile [trie]
+  "Compiles the Trie so that [[lookup]] can be used."
+  #?(:cljs trie
+     :clj  (.matcher ^SegmentTrie (or trie (SegmentTrie.)))))
+
+(defn lookup [trie path]
+  "Looks the path from a Segment Trie. Returns a [[Match]] or `nil`."
+  #?(:cljs (if-let [match (-lookup trie (impl/segments path) {})]
+             (assoc match :path-params (impl/url-decode-coll (:path-params match))))
+     :clj  (if-let [match ^SegmentTrie$Match (SegmentTrie/lookup trie path)]
+             (->Match (.data match) (clojure.lang.PersistentHashMap/create (.params match))))))

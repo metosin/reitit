@@ -3,9 +3,9 @@
             [reitit.impl :as impl]))
 
 (deftest segments-test
-  (is (= ["" "api" "ipa" "beer" "craft" "bisse"]
+  (is (= ["api" "ipa" "beer" "craft" "bisse"]
          (into [] (impl/segments "/api/ipa/beer/craft/bisse"))))
-  (is (= ["" "a" "" "b" "" "c" ""]
+  (is (= ["a" "" "b" "" "c" ""]
          (into [] (impl/segments "/a//b//c/")))))
 
 (deftest strip-nils-test

@@ -5,7 +5,8 @@
   #?(:clj
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
-              (java.net URLEncoder URLDecoder))))
+              (java.net URLEncoder URLDecoder)
+              (reitit SegmentTrie))))
 
 (defn maybe-map-values
   "Applies a function to every value of a map, updates the value if not nil.
@@ -18,6 +19,16 @@
         coll))
     coll
     coll))
+
+(defn segments
+  "Splits the path into sequence of segments, using `/` char. Assumes that the
+  path starts with `/`, stripping the first empty segment. e.g.
+
+      (segments \"/a/b/c\") ; => (\"a\" \"b\" \"c\")
+      (segments \"/a/)      ; => (\"a\" \"\")"
+  [path]
+  #?(:clj  (SegmentTrie/split ^String path)
+     :cljs (rest (.split path #"/" 666))))
 
 ;;
 ;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
@@ -41,10 +52,6 @@
 
 (defn wild-or-catch-all-param? [x]
   (boolean (or (wild-param x) (catch-all-param x))))
-
-(defn segments [path]
-  #?(:clj  (.split ^String path "/" 666)
-     :cljs (.split path #"/" 666)))
 
 (defn contains-wilds? [path]
   (boolean (some wild-or-catch-all-param? (segments path))))

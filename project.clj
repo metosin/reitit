@@ -60,6 +60,8 @@
                                   "modules/reitit-sieppari/src"
                                   "modules/reitit-pedestal/src"]
 
+                   :java-source-paths ["modules/reitit-core/java-src"]
+
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [org.clojure/clojurescript "1.10.439"]
 
@@ -99,6 +101,7 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.5.5"]
                                    [io.pedestal/pedestal.jetty "0.5.5"]
+                                   [calfpath "0.7.1"]
                                    [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]

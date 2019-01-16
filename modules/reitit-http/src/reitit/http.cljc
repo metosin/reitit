@@ -73,12 +73,22 @@
      (r/router data opts))))
 
 (defn routing-interceptor
-  "A Pedestal-style routing interceptor that enqueus the interceptors into context."
-  [router default-handler {:keys [interceptors executor]}]
+  "Creates a Pedestal-style routing interceptor that enqueus the interceptors into context.
+  Takes http-router, default ring-handler and and options map, with the following keys:
+
+  | key               | description |
+  | ------------------|-------------|
+  | `:executor`       | `reitit.interceptor.Executor` for the interceptor chain
+  | `:interceptors`   | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler
+  | `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
+  | `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)"
+  [router default-handler {:keys [interceptors executor inject-match? inject-router?]
+                           :or {inject-match? true, inject-router? true}}]
   (let [default-handler (or default-handler (fn ([_])))
         default-interceptors (->> interceptors
                                   (map #(interceptor/into-interceptor % nil (r/options router))))
-        default-queue (interceptor/queue executor default-interceptors)]
+        default-queue (interceptor/queue executor default-interceptors)
+        enrich-request (ring/create-enrich-request inject-match? inject-router?)]
     {:name ::router
      :enter (fn [{:keys [request] :as context}]
               (if-let [match (r/match-by-path router (:uri request))]
@@ -86,10 +96,7 @@
                       path-params (:path-params match)
                       endpoint (-> match :result method)
                       interceptors (or (:queue endpoint) (:interceptors endpoint))
-                      request (-> request
-                                  (impl/fast-assoc :path-params path-params)
-                                  (impl/fast-assoc ::r/match match)
-                                  (impl/fast-assoc ::r/router router))
+                      request (enrich-request request path-params match router)
                       context (assoc context :request request)
                       queue (interceptor/queue executor (concat default-interceptors interceptors))]
                   (interceptor/enqueue executor context queue))
@@ -103,13 +110,16 @@
   "Creates a ring-handler out of a http-router, optional default ring-handler
   and options map, with the following keys:
 
-  | key             | description |
-  | ----------------|-------------|
-  | `:executor`     | `reitit.interceptor.Executor` for the interceptor chain
-  | `:interceptors` | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler"
+  | key               | description |
+  | ------------------|-------------|
+  | `:executor`       | `reitit.interceptor.Executor` for the interceptor chain
+  | `:interceptors`   | Optional sequence of interceptors that are always run before any other interceptors, even for the default handler
+  | `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
+  | `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)"
   ([router opts]
    (ring-handler router nil opts))
-  ([router default-handler {:keys [executor interceptors]}]
+  ([router default-handler {:keys [executor interceptors inject-match? inject-router?]
+                            :or {inject-match? true, inject-router? true}}]
    (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
          default-queue (->> [default-handler]
                             (concat interceptors)
@@ -120,7 +130,9 @@
                          (dissoc :data) ; data is already merged into routes
                          (cond-> (seq interceptors)
                                  (update-in [:data :interceptors] (partial into (vec interceptors)))))
-         router (reitit.http/router (r/routes router) router-opts)]
+         router (reitit.http/router (r/routes router) router-opts)
+         enrich-request (ring/create-enrich-request inject-match? inject-router?)
+         enrich-default-request (ring/create-enrich-default-request inject-router?)]
      (with-meta
        (fn
          ([request]
@@ -129,13 +141,10 @@
                   path-params (:path-params match)
                   endpoint (-> match :result method)
                   interceptors (or (:queue endpoint) (:interceptors endpoint))
-                  request (-> request
-                              (impl/fast-assoc :path-params path-params)
-                              (impl/fast-assoc ::r/match match)
-                              (impl/fast-assoc ::r/router router))]
+                  request (enrich-request request path-params match router)]
               (or (interceptor/execute executor interceptors request)
                   (interceptor/execute executor default-queue request)))
-            (interceptor/execute executor default-queue (impl/fast-assoc request ::r/router router))))
+            (interceptor/execute executor default-queue (enrich-default-request request router))))
          ([request respond raise]
           (let [default #(interceptor/execute executor default-queue % respond raise)]
             (if-let [match (r/match-by-path router (:uri request))]
@@ -143,10 +152,7 @@
                     path-params (:path-params match)
                     endpoint (-> match :result method)
                     interceptors (or (:queue endpoint) (:interceptors endpoint))
-                    request (-> request
-                                (impl/fast-assoc :path-params path-params)
-                                (impl/fast-assoc ::r/match match)
-                                (impl/fast-assoc ::r/router router))
+                    request (enrich-request request path-params match router)
                     respond' (fn [response]
                                (if response
                                  (respond response)
@@ -154,7 +160,7 @@
                 (if interceptors
                   (interceptor/execute executor interceptors request respond' raise)
                   (default request)))
-              (default (impl/fast-assoc request ::r/router router))))
+              (default (enrich-default-request request router))))
           nil))
        {::r/router router}))))
 

@@ -226,20 +226,54 @@
                               (not-found-handler request)))))]
         (create handler)))))
 
+(defn create-enrich-request [inject-match? inject-router?]
+  (cond
+    (and inject-match? inject-router?)
+    (fn enrich-request [request path-params match router]
+      (-> request
+          (impl/fast-assoc :path-params path-params)
+          (impl/fast-assoc ::r/match match)
+          (impl/fast-assoc ::r/router router)))
+    inject-router?
+    (fn enrich-request [request path-params _ router]
+      (-> request
+          (impl/fast-assoc :path-params path-params)
+          (impl/fast-assoc ::r/router router)))
+    inject-match?
+    (fn enrich-request [request path-params match _]
+      (-> request
+          (impl/fast-assoc :path-params path-params)
+          (impl/fast-assoc ::r/match match)))
+    :else
+    (fn enrich-request [request path-params _ _]
+      (-> request
+          (impl/fast-assoc :path-params path-params)))))
+
+(defn create-enrich-default-request [inject-router?]
+  (if inject-router?
+    (fn enrich-request [request router]
+      (impl/fast-assoc request ::r/router router))
+    identity))
+
 (defn ring-handler
   "Creates a ring-handler out of a router, optional default ring-handler
   and options map, with the following keys:
 
-  | key           | description |
-  | --------------|-------------|
-  | `:middleware` | Optional sequence of middleware that wrap the ring-handler"
+  | key               | description |
+  | ------------------|-------------|
+  | `:middleware`     | Optional sequence of middleware that wrap the ring-handler
+  | `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
+  | `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)"
   ([router]
    (ring-handler router nil))
   ([router default-handler]
    (ring-handler router default-handler nil))
-  ([router default-handler {:keys [middleware]}]
+  ([router default-handler {:keys [middleware inject-match? inject-router?]
+                            :or {inject-match? true, inject-router? true}}]
    (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
-         wrap (if middleware (partial middleware/chain middleware) identity)]
+         wrap (if middleware (partial middleware/chain middleware) identity)
+         enrich-request (create-enrich-request inject-match? inject-router?)
+         enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
        (wrap
          (fn
@@ -249,24 +283,18 @@
                     path-params (:path-params match)
                     result (:result match)
                     handler (-> result method :handler (or default-handler))
-                    request (-> request
-                                (impl/fast-assoc :path-params path-params)
-                                (impl/fast-assoc ::r/match match)
-                                (impl/fast-assoc ::r/router router))]
+                    request (enrich-request request path-params match router)]
                 (or (handler request) (default-handler request)))
-              (default-handler (impl/fast-assoc request ::r/router router))))
+              (default-handler (enrich-default-request request router))))
            ([request respond raise]
             (if-let [match (r/match-by-path router (:uri request))]
               (let [method (:request-method request)
                     path-params (:path-params match)
                     result (:result match)
                     handler (-> result method :handler (or default-handler))
-                    request (-> request
-                                (impl/fast-assoc :path-params path-params)
-                                (impl/fast-assoc ::r/match match)
-                                (impl/fast-assoc ::r/router router))]
+                    request (enrich-request request path-params match router)]
                 ((routes handler default-handler) request respond raise))
-              (default-handler (impl/fast-assoc request ::r/router router) respond raise))
+              (default-handler (enrich-default-request request router) respond raise))
             nil)))
        {::r/router router}))))
 

@@ -51,9 +51,11 @@ Match contains `:result` compiled by the `ring-router`:
 
 Given a `ring-router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
 
-| key           | description |
-| --------------|-------------|
-| `:middleware` | Optional sequence of middleware that wrap the ring-handler"
+| key               | description |
+| ------------------|-------------|
+| `:middleware`     | Optional sequence of middleware that wrap the ring-handler"
+| `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
+| `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)
 
 Simple Ring app:
 
