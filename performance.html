@@ -749,7 +749,7 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="performance">Performance</h1>
-<p>Reitit tries to be both great in features and be really, really fast. Originally the routing was ported from <a href="http://pedestal.io/" target="_blank">Pedestal</a>, but has been mostly rewritten.</p>
+<p>Besides having great features, goal of reitit is to be really, really fast. The routing was originally exported from Pedestal, but since rewritten.</p>
 <p><img src="images/opensensors.png" alt="Opensensors perf test"></p>
 <h3 id="rationale">Rationale</h3>
 <ul>
@@ -799,33 +799,57 @@
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/auth/login&quot;</span>)))
 
-<span class="hljs-comment">;; Execution time mean (per 1000): 530 &#xB5;s -&gt; 1.9M ops/sec</span>
+<span class="hljs-comment">;; Execution time mean (per 1000): 315 &#xB5;s -&gt; 3.2M ops/sec</span>
 (<span class="hljs-name">cc/quick-bench</span>
   (<span class="hljs-name"><span class="hljs-builtin-name">dotimes</span></span> [_ <span class="hljs-number">1000</span>]
     (<span class="hljs-name">r/match-by-path</span> routes <span class="hljs-string">&quot;/workspace/1/1&quot;</span>)))
 </code></pre>
-<p>Based on the <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj" target="_blank">perf tests</a>, the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 4-24x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).</p>
+<p>Based on the <a href="https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj" target="_blank">perf tests</a>, the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 6-40x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).</p>
 <p>But, the example is too simple for any real benchmark. Also, some of the libraries always match on the <code>:request-method</code> too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.</p>
 <p>So, we need to test something more realistic.</p>
 <h3 id="restful-apis">RESTful apis</h3>
 <p>To get better view on the real life routing performance, there is <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj" target="_blank">test</a> of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the <a href="https://opensensors.io/" target="_blank">OpenSensors</a> swagger definitions.</p>
-<p>Thanks to the snappy new <a href="https://github.com/metosin/reitit/blob/master/modules/reitit-core/src/reitit/segment.cljc" target="_blank">segment-tree</a> algorithm, <code>reitit-ring</code> is fastest here. Pedestal is also fast with it&apos;s <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">prefix-tree</a> implementation.</p>
+<p>Thanks to the snappy <a href="https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/SegmentTrie.java" target="_blank">SegmentTrie</a> (a modification of <a href="https://en.wikipedia.org/wiki/Radix_tree" target="_blank">Radix Tree</a>), <code>reitit-ring</code> is fastest here. <a href="https://github.com/kumarshantanu/calfpath" target="_blank">Calfpath</a> and <a href="https://github.com/pedestal/pedestal" target="_blank">Pedestal</a> are also quite fast.</p>
 <p><img src="images/opensensors.png" alt="Opensensors perf"></p>
 <h3 id="cqrs-apis">CQRS apis</h3>
-<p>Another real-life <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj" target="_blank">test scenario</a> is a <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank">CQRS</a>-style route tree, where all the paths are static, e.g. <code>/api/command/add-order</code>. The 300 route definitions are pulled out from <a href="https://github.com/lupapiste/lupapiste" target="_blank">Lupapiste</a>.</p>
+<p>Another real-life <a href="https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/lupapiste_perf_test.clj" target="_blank">test scenario</a> is a <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank">CQRS</a> style route tree, where all the paths are static, e.g. <code>/api/command/add-order</code>. The 300 route definitions are pulled out from <a href="https://github.com/lupapiste/lupapiste" target="_blank">Lupapiste</a>.</p>
 <p>Both <code>reitit-ring</code> and Pedestal shine in this test, thanks to the fast lookup-routers. On average, they are <strong>two</strong> and on best case, <strong>three orders of magnitude faster</strong> than the other tested libs. Ataraxy failed this test on <code>Method code too large!</code> error.</p>
 <p><img src="images/lupapiste.png" alt="lupapiste perf"></p>
 <p><strong>NOTE</strong>: in real life, there are usually always also wild-card routes present. In this case, Pedestal would fallback from lookup-router to the prefix-tree router, which is order of magnitude slower (30x in this test). Reitit would handle this nicely thanks to it&apos;s <code>:mixed-router</code>: all static routes would still be served with <code>:lookup-router</code>, just the wildcard routes with <code>:segment-tree</code>. The performance would not notably degrade.</p>
 <h3 id="why-measure">Why measure?</h3>
 <p>The reitit routing perf is measured to get an internal baseline to optimize against. We also want to ensure that new features don&apos;t regress the performance. Perf tests should be run in a stable CI environment. Help welcome!</p>
 <h3 id="looking-out-of-the-box">Looking out of the box</h3>
-<p>A quick poke to <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a> indicates that the reitit is only few times slower than the fastest routers in Go. Which is really awesome (if true).</p>
+<p>A quick poke to <a href="https://github.com/julienschmidt/go-http-routing-benchmark" target="_blank">routers in Go</a> indicates that the reitit is only few times slower than the fastest routers in Go. Which is kinda awesome.</p>
+<h3 id="faster">Faster!</h3>
+<p>By default, <code>reitit.ring/ring-router</code>, <code>reitit.http/ring-router</code> and <code>reitit.http/routing-interceptor</code> inject both <code>Match</code> and <code>Router</code> into the request. You can remove the injections setting options <code>:inject-match?</code> and <code>:inject-router?</code> to <code>false</code>. This saves some tens of nanos (with the hw described above).</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[criterium.core <span class="hljs-symbol">:as</span> cc])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> create [options]
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/ping&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;ok&quot;</span>})])
+    (<span class="hljs-name">ring/create-default-handler</span>)
+    options))
+
+<span class="hljs-comment">;; 130ns</span>
+(<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [app (<span class="hljs-name">create</span> <span class="hljs-literal">nil</span>)]
+  (<span class="hljs-name">cc/quick-bench</span>
+    (<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})))
+
+<span class="hljs-comment">;; 80ns</span>
+(<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [app (<span class="hljs-name">create</span> {<span class="hljs-symbol">:inject-router?</span> <span class="hljs-literal">false</span>, <span class="hljs-symbol">:inject-match?</span> <span class="hljs-literal">false</span>})]
+  (<span class="hljs-name">cc/quick-bench</span>
+    (<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/ping&quot;</span>})))
+</code></pre>
+<p><strong>NOTE</strong>: Without <code>Router</code>, you can&apos;t to do <a href="ring/reverse_routing.html">reverse routing</a> and without <code>Match</code> you can&apos;t write <a href="ring/dynamic_extensions.html">dynamic extensions</a>.</p>
 <h3 id="performance-tips">Performance tips</h3>
 <p>Few things that have an effect on performance:</p>
 <ul>
 <li>Wildcard-routes are an order of magnitude slower than static routes</li>
-<li>It&apos;s ok to mix non-wildcard and wildcard routes in a same routing tree as long as you don&apos;t disable the <a href="basics/route_conflicts.html">conflict resolution</a> =&gt; if no conflicting routes are found, a <code>:mixed-router</code> can be created, which internally has a fast static path router and a separate wildcard-router. So, the static paths are still fast.</li>
-<li>Move computation from request processing time into creation time, using by compiling <a href="ring/compiling_middleware.html">middleware</a> &amp; <a href="advanced/configuring_routers.html">route data</a>.<ul>
+<li>Conflicting routes are served with LinearRouter, which is the slowest implementation.</li>
+<li>It&apos;s ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation. </li>
+<li>Move computation from request processing time into creation time, using by compiling <a href="ring/compiling_middleware.html">middleware</a>, <a href="http/interceptors.html">interceptors</a> and <a href="advanced/configuring_routers.html">route data</a>.<ul>
 <li>Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.</li>
 </ul>
 </li>
@@ -873,7 +897,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Performance","level":"8.1","depth":1,"next":{"title":"Development Instructions","level":"8.2","depth":1,"path":"development.md","ref":"development.md","articles":[]},"previous":{"title":"Shared Routes","level":"7.6","depth":1,"path":"advanced/shared_routes.md","ref":"advanced/shared_routes.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2019-01-14T08:07:32.200Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-14T08:07:55.589Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Performance","level":"8.1","depth":1,"next":{"title":"Development Instructions","level":"8.2","depth":1,"path":"development.md","ref":"development.md","articles":[]},"previous":{"title":"Shared Routes","level":"7.6","depth":1,"path":"advanced/shared_routes.md","ref":"advanced/shared_routes.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"performance.md","mtime":"2019-01-16T07:37:05.932Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-16T07:37:29.306Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
