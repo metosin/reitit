@@ -3,8 +3,8 @@
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion :as rc]
-            [reitit.coercion.schema :as rsc]
-            [schema.core :as s]
+            [reitit.coercion.spec :as rss]
+            [spec-tools.data-spec :as ds]
             [fipp.edn :as fedn]))
 
 (defn home-page []
@@ -63,12 +63,12 @@
    ["/item/:id"
     {:name ::item
      :view item-page
-     :parameters {:path {:id s/Int}
-                  :query {(s/optional-key :foo) s/Keyword}}}]])
+     :parameters {:path {:id int?}
+                  :query {(ds/opt :foo) keyword?}}}]])
 
 (defn init! []
   (rfe/start!
-    (rf/router routes {:data {:coercion rsc/coercion}})
+    (rf/router routes {:data {:coercion rss/coercion}})
     (fn [m] (reset! match m))
     ;; set to false to enable HistoryAPI
     {:use-fragment true})

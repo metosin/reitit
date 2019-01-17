@@ -7,18 +7,18 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [ring-server "0.5.0"]
                  [reagent "0.8.1"]
-                 [ring "1.6.3"]
+                 [ring "1.7.1"]
                  [compojure "1.6.1"]
                  [hiccup "1.0.5"]
-                 [org.clojure/clojurescript "1.10.339"]
+                 [org.clojure/clojurescript "1.10.439"]
                  [metosin/reitit "0.2.10"]
                  [metosin/reitit-schema "0.2.10"]
                  [metosin/reitit-frontend "0.2.10"]
                  ;; Just for pretty printting the match
-                 [fipp "0.6.12"]]
+                 [fipp "0.6.14"]]
 
   :plugins [[lein-cljsbuild "1.1.7"]
-            [lein-figwheel "0.5.16"]]
+            [lein-figwheel "0.5.18"]]
 
   :source-paths []
   :resource-paths ["resources" "target/cljsbuild"]
