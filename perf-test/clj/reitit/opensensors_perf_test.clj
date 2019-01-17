@@ -13,7 +13,8 @@
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
-            [io.pedestal.http.route.router :as pedestal]))
+            [io.pedestal.http.route.router :as pedestal]
+            [reitit.core :as r]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -551,6 +552,7 @@
         router (reitit/router routes)
         reitit-f #(reitit/match-by-path router (:uri %))
         reitit-ring-f (ring/ring-handler (ring/router opensensors-routes))
+        reitit-ring-linear-f (ring/ring-handler (ring/router opensensors-routes {:router r/linear-router}))
         reitit-ring-fast-f (ring/ring-handler (ring/router opensensors-routes) nil {:inject-router? false, :inject-match? false})
         bidi-f #(bidi/match-route opensensors-bidi-routes (:uri %))
         calfpath-macros-f opensensors-calfpath-macro-handler
@@ -579,19 +581,23 @@
     (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
-    (b! "reitit-ring-fast" reitit-ring-fast-f)
+    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
+
+    ;;  2553ns (linear-router)
+    ;;   630ns (segment-router-backed)
+    #_(b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
     (b! "calfpath-walker" calfpath-walker-f)
 
     ;;  4774ns
-    (b! "calfpath-unroll" calfpath-unroll-f)
+    #_(b! "calfpath-unroll" calfpath-unroll-f)
 
     ;;  2821ns
     (b! "pedestal" pedestal-f)
 
     ;;  4803ns
-    (b! "calfpath-macros" calfpath-macros-f)
+    #_(b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
     (b! "compojure" compojure-f)

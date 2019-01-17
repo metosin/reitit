@@ -128,7 +128,7 @@
   (mapv (comp vec (partial take 2)) routes))
 
 (defn route-info [route]
-  (select-keys (impl/create route) [:path :path-parts :path-params :result :data]))
+  (impl/create route))
 
 (defprotocol Router
   (router-name [this])
@@ -177,11 +177,12 @@
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result % path-params))]
-                       [(conj pl route)
+                       [(conj pl (-> (segment/insert nil p (->Match p data result nil nil)) (segment/compile)))
                         (if name (assoc nl name f) nl)]))
                    [[] {}]
                    compiled-routes)
          lookup (impl/fast-map nl)
+         scanner (segment/scanner pl)
          routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
@@ -197,11 +198,10 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (reduce
-           (fn [_ ^Route route]
-             (if-let [path-params ((:matcher route) path)]
-               (reduced (->Match (:path route) (:data route) (:result route) (impl/url-decode-coll path-params) path))))
-           nil pl))
+         (if-let [match (segment/lookup scanner path)]
+           (-> (:data match)
+               (assoc :path-params (:path-params match))
+               (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))

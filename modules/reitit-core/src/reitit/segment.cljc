@@ -59,6 +59,11 @@
   #?(:cljs trie
      :clj  (.matcher ^SegmentTrie (or trie (SegmentTrie.)))))
 
+(defn scanner [compiled-tries]
+  "Returns a new compiled trie that does linear scan on the given compiled tries on [[lookup]]."
+  #?(:cljs (fn [path] (some (fn [trie] (lookup trie path)) compiled-tries))
+     :clj  (SegmentTrie/scanner compiled-tries)))
+
 (defn lookup [trie path]
   "Looks the path from a Segment Trie. Returns a [[Match]] or `nil`."
   #?(:cljs (if-let [match (-lookup trie (impl/segments path) {})]

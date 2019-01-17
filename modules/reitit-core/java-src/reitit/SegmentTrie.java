@@ -297,6 +297,10 @@ public class SegmentTrie {
     }
   }
 
+  public static Matcher scanner(List<Matcher> matchers) {
+    return new LinearMatcher(matchers);
+  }
+
   public static Match lookup(Matcher matcher, String path) {
     return matcher.match(0, split(path), new Match());
   }

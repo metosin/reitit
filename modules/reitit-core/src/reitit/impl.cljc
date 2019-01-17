@@ -66,18 +66,16 @@
                      (let [key (keyword token)]
                        (-> out
                            (update-in [:path-parts] conj key)
-                           (update-in [:path-params] conj key)
-                           (assoc-in [:path-constraints key] "([^/]+)"))))
+                           (update-in [:path-params] conj key))))
     #"^\*(.*)$" :>> (fn [[_ token]]
                       (let [key (keyword token)]
                         (-> out
                             (update-in [:path-parts] conj key)
-                            (update-in [:path-params] conj key)
-                            (assoc-in [:path-constraints key] "(.*)"))))
+                            (update-in [:path-params] conj key))))
     (update-in out [:path-parts] conj string)))
 
 (defn- parse-path
-  ([pattern] (parse-path {:path-parts [] :path-params [] :path-constraints {}} pattern))
+  ([pattern] (parse-path {:path-parts [] :path-params #{}} pattern))
   ([accumulated-info pattern]
    (if-let [m (re-matches #"/(.*)" pattern)]
      (let [[_ path] m]
@@ -86,45 +84,21 @@
                (str/split path #"/")))
      (throw (ex-info "Routes must start from the root, so they must begin with a '/'" {:pattern pattern})))))
 
-;; TODO: is this correct?
-(defn- re-quote [x]
-  #?(:clj  (Pattern/quote x)
-     :cljs (str/replace x #"([.?*+^$[\\]\\\\(){}|-])" "\\$1")))
-
-(defn- path-regex [{:keys [path-parts path-constraints] :as route}]
-  (let [[pp & pps] path-parts
-        path-parts (if (and (seq pps) (string? pp) (empty? pp)) pps path-parts)]
-    (re-pattern
-      (apply str
-             (interleave (repeat "/")
-                         (map #(or (get path-constraints %) (re-quote %))
-                              path-parts))))))
-
-(defn- path-matcher [route]
-  (let [{:keys [path-re path-params]} route]
-    (fn [path]
-      (when-let [m (re-matches path-re path)]
-        (zipmap path-params (rest m))))))
-
 ;;
 ;; Routing (c) Metosin
 ;;
 
-(defrecord Route [path matcher path-parts path-params data result])
+(defrecord Route [path path-parts path-params data result])
 
 (defn create [[path data result]]
-  (let [path #?(:clj (.intern ^String path) :cljs path)]
-    (as-> (parse-path path) $
-          (assoc $ :path-re (path-regex $))
-          (merge $ {:path path
-                    :matcher (if (contains-wilds? path)
-                               (path-matcher $)
-                               #(if (#?(:clj .equals, :cljs =) path %) {}))
-                    :result result
-                    :data data})
-          (dissoc $ :path-re :path-constraints)
-          (update $ :path-params set)
-          (map->Route $))))
+  (let [path #?(:clj (.intern ^String path) :cljs path)
+        {:keys [path-parts path-params]} (parse-path path)]
+    (map->Route
+      {:path-params path-params
+       :path-parts path-parts
+       :path path
+       :result result
+       :data data})))
 
 (defn wild-route? [[path]]
   (contains-wilds? path))
