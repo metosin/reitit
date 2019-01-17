@@ -581,23 +581,23 @@
     (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
-    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
+    (b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
-    #_(b! "reitit-ring-linear" reitit-ring-linear-f)
+    (b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
     (b! "calfpath-walker" calfpath-walker-f)
 
     ;;  4774ns
-    #_(b! "calfpath-unroll" calfpath-unroll-f)
+    (b! "calfpath-unroll" calfpath-unroll-f)
 
     ;;  2821ns
     (b! "pedestal" pedestal-f)
 
     ;;  4803ns
-    #_(b! "calfpath-macros" calfpath-macros-f)
+    (b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
     (b! "compojure" compojure-f)
