@@ -1,4 +1,6 @@
-## UNRELEASED
+## 0.2.11 (2019-01-17)
+
+* new guide on [pretty printing spec coercion errors with expound](https://metosin.github.io/reitit/ring/coercion.html#pretty-printing-spec-errors), fixes [#153](https://github.com/metosin/reitit/issues/153).
 
 ### `reitit-core`
 
