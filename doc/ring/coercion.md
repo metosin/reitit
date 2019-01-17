@@ -135,6 +135,72 @@ Invalid response:
 ;         :in [:response :body]}}
 ```
 
+## Pretty printing spec errors
+
+Spec problems are exposed as-is into request & response coercion errors, enabling pretty-printers like [expound](https://github.com/bhb/expound) to be used:
+
+```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.ring.middleware.exception :as exception])
+(require '[reitit.ring.coercion :as coercion])
+(require '[expound.alpha :as expound])
+
+(defn coercion-error-handler [status]
+  (let [printer (expound/custom-printer {:theme :figwheel-theme, :print-specs? false})
+        handler (exception/create-coercion-handler status)]
+    (fn [exception request]
+      (printer (-> exception ex-data :problems))
+      (handler exception request))))
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/plus"
+       {:get
+        {:parameters {:query {:x int?, :y int?}}
+         :responses {200 {:body {:total pos-int?}}}
+         :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                    {:status 200, :body {:total (+ x y)}})}}]
+      {:data {:coercion reitit.coercion.spec/coercion
+              :middleware [(exception/create-exception-middleware
+                             (merge
+                               exception/default-handlers
+                               {:reitit.coercion/request-coercion (coercion-error-handler 400)
+                                :reitit.coercion/response-coercion (coercion-error-handler 500)}))
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]}})))
+
+(app
+  {:uri "/plus"
+   :request-method :get
+   :query-params {"x" "1", "y" "fail"}})
+; => ...
+; -- Spec failed --------------------
+;
+;   {:x ..., :y "fail"}
+;                ^^^^^^
+;
+; should satisfy
+;
+;   int?
+
+
+
+(app
+  {:uri "/plus"
+   :request-method :get
+   :query-params {"x" "1", "y" "-2"}})
+; => ...
+;-- Spec failed --------------------
+;
+;   {:total -1}
+;           ^^
+;
+; should satisfy
+;
+;   pos-int?
+```
+
 ### Optimizations
 
 The coercion middleware are [compiled againts a route](compiling_middleware.md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
