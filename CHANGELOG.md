@@ -1,6 +1,5 @@
 ## UNRELEASED
 
-
 ### `reitit-core`
 
 * `reitit.core/Expand` can be extended, fixes [#201](https://github.com/metosin/reitit/issues/201).
@@ -14,6 +13,14 @@
 ### `reitit-http`
 
 * new options `:inject-match?` and `:inject-router?` on `reitit.http/ring-handler` and `reitit.http/routing-interceptor` to optionally not to inject `Router` and `Match` into the request. See [performance guide](https://metosin.github.io/reitit/performance.html#faster!) for details.
+
+### dependencies 
+
+* updated:
+
+```clj
+[metosin/spec-tools "0.8.3"] is available but we use "0.8.2"
+```
 
 ## 0.2.10 (2018-12-30)
 

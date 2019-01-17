@@ -10,6 +10,7 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
+  :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
   :managed-dependencies [[metosin/reitit "0.2.10"]
                          [metosin/reitit-core "0.2.10"]
                          [metosin/reitit-spec "0.2.10"]
@@ -24,7 +25,7 @@
                          [metosin/reitit-sieppari "0.2.10"]
                          [metosin/reitit-pedestal "0.2.10"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.8.2"]
+                         [metosin/spec-tools "0.8.3"]
                          [metosin/schema-tools "0.10.5"]
                          [metosin/muuntaja "0.6.3"]
                          [metosin/jsonista "0.2.2"]
@@ -101,7 +102,7 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.5.5"]
                                    [io.pedestal/pedestal.jetty "0.5.5"]
-                                   [calfpath "0.7.1"]
+                                   [calfpath "0.7.2"]
                                    [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "1.9.0"]
