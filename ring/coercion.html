@@ -860,6 +860,68 @@
 <span class="hljs-comment">;         :value {:total -6},</span>
 <span class="hljs-comment">;         :in [:response :body]}}</span>
 </code></pre>
+<h2 id="pretty-printing-spec-errors">Pretty printing spec errors</h2>
+<p>Spec problems are exposed as-is into request &amp; response coercion errors, enabling pretty-printers like <a href="https://github.com/bhb/expound" target="_blank">expound</a> to be used:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware.exception <span class="hljs-symbol">:as</span> exception])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[expound.alpha <span class="hljs-symbol">:as</span> expound])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> coercion-error-handler [status]
+  (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [printer (<span class="hljs-name">expound/custom-printer</span> {<span class="hljs-symbol">:theme</span> <span class="hljs-symbol">:figwheel-theme</span>, <span class="hljs-symbol">:print-specs?</span> <span class="hljs-literal">false</span>})
+        handler (<span class="hljs-name">exception/create-coercion-handler</span> status)]
+    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [exception request]
+      (<span class="hljs-name">printer</span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> exception ex-data <span class="hljs-symbol">:problems</span>))
+      (<span class="hljs-name">handler</span> exception request))))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/plus&quot;</span>
+       {<span class="hljs-symbol">:get</span>
+        {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+         <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> pos-int?}}}
+         <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                    {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:coercion</span> reitit.coercion.spec/coercion
+              <span class="hljs-symbol">:middleware</span> [(<span class="hljs-name">exception/create-exception-middleware</span>
+                             (<span class="hljs-name"><span class="hljs-builtin-name">merge</span></span>
+                               exception/default-handlers
+                               {<span class="hljs-symbol">:reitit.coercion/request-coercion</span> (<span class="hljs-name">coercion-error-handler</span> <span class="hljs-number">400</span>)
+                                <span class="hljs-symbol">:reitit.coercion/response-coercion</span> (<span class="hljs-name">coercion-error-handler</span> <span class="hljs-number">500</span>)}))
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]}})))
+
+(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/plus&quot;</span>
+   <span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;y&quot;</span> <span class="hljs-string">&quot;fail&quot;</span>}})
+<span class="hljs-comment">; =&gt; ...</span>
+<span class="hljs-comment">; -- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   {:x ..., :y &quot;fail&quot;}</span>
+<span class="hljs-comment">;                ^^^^^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   int?</span>
+
+
+
+(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/plus&quot;</span>
+   <span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;y&quot;</span> <span class="hljs-string">&quot;-2&quot;</span>}})
+<span class="hljs-comment">; =&gt; ...</span>
+<span class="hljs-comment">;-- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   {:total -1}</span>
+<span class="hljs-comment">;           ^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   pos-int?</span>
+</code></pre>
 <h3 id="optimizations">Optimizations</h3>
 <p>The coercion middleware are <a href="compiling_middleware.html">compiled againts a route</a>. In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn&apos;t mount itself if a route doesn&apos;t have <code>:coercion</code> and <code>:parameters</code> or <code>:responses</code> defined.</p>
 <p>We can query the compiled middleware chain for the routes:</p>
@@ -927,7 +989,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"4.11","depth":1,"next":{"title":"Route Data Validation","level":"4.12","depth":1,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Default Middleware","level":"4.10","depth":1,"path":"ring/default_middleware.md","ref":"ring/default_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2019-01-17T17:31:17.962Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-17T17:31:46.860Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"4.11","depth":1,"next":{"title":"Route Data Validation","level":"4.12","depth":1,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Default Middleware","level":"4.10","depth":1,"path":"ring/default_middleware.md","ref":"ring/default_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2019-01-17T17:40:49.508Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-17T17:41:15.391Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
