@@ -793,6 +793,68 @@
 <pre><code class="lang-clj">(<span class="hljs-name">match-by-path-and-coerce!</span> <span class="hljs-string">&quot;/metosin/users/ikitommi&quot;</span>)
 <span class="hljs-comment">; =&gt; ExceptionInfo Request coercion failed...</span>
 </code></pre>
+<h2 id="error-printing">Error printing</h2>
+<p>Spec problems are exposed as-is into request &amp; response coercion errors, enabling pretty-printers like expound to be used:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware.exception <span class="hljs-symbol">:as</span> exception])
+(<span class="hljs-name">require</span> &apos;[reitit.ring.coercion <span class="hljs-symbol">:as</span> coercion])
+(<span class="hljs-name">require</span> &apos;[expound.alpha <span class="hljs-symbol">:as</span> expound])
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> coercion-error-handler [status]
+  (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [printer (<span class="hljs-name">expound/custom-printer</span> {<span class="hljs-symbol">:theme</span> <span class="hljs-symbol">:figwheel-theme</span>, <span class="hljs-symbol">:print-specs?</span> <span class="hljs-literal">false</span>})
+        handler (<span class="hljs-name">exception/create-coercion-handler</span> status)]
+    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [exception request]
+      (<span class="hljs-name">printer</span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> exception ex-data <span class="hljs-symbol">:problems</span>))
+      (<span class="hljs-name">handler</span> exception request))))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/plus&quot;</span>
+       {<span class="hljs-symbol">:get</span>
+        {<span class="hljs-symbol">:parameters</span> {<span class="hljs-symbol">:query</span> {<span class="hljs-symbol">:x</span> int?, <span class="hljs-symbol">:y</span> int?}}
+         <span class="hljs-symbol">:responses</span> {<span class="hljs-number">200</span> {<span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> pos-int?}}}
+         <span class="hljs-symbol">:handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{{{<span class="hljs-symbol">:keys</span> [x y]} <span class="hljs-symbol">:query</span>} <span class="hljs-symbol">:parameters</span>}]
+                    {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:total</span> (<span class="hljs-name"><span class="hljs-builtin-name">+</span></span> x y)}})}}]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:coercion</span> reitit.coercion.spec/coercion
+              <span class="hljs-symbol">:middleware</span> [(<span class="hljs-name">exception/create-exception-middleware</span>
+                             (<span class="hljs-name"><span class="hljs-builtin-name">merge</span></span>
+                               exception/default-handlers
+                               {<span class="hljs-symbol">:reitit.coercion/request-coercion</span> (<span class="hljs-name">coercion-error-handler</span> <span class="hljs-number">400</span>)
+                                <span class="hljs-symbol">:reitit.coercion/response-coercion</span> (<span class="hljs-name">coercion-error-handler</span> <span class="hljs-number">500</span>)}))
+                           coercion/coerce-request-middleware
+                           coercion/coerce-response-middleware]}})))
+
+(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/plus&quot;</span>
+   <span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;y&quot;</span> <span class="hljs-string">&quot;fail&quot;</span>}})
+<span class="hljs-comment">; =&gt; ...</span>
+<span class="hljs-comment">; -- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   {:x ..., :y &quot;fail&quot;}</span>
+<span class="hljs-comment">;                ^^^^^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   int?</span>
+
+
+
+(<span class="hljs-name">app</span>
+  {<span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/plus&quot;</span>
+   <span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>
+   <span class="hljs-symbol">:query-params</span> {<span class="hljs-string">&quot;x&quot;</span> <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;y&quot;</span> <span class="hljs-string">&quot;-2&quot;</span>}})
+<span class="hljs-comment">; =&gt; ...</span>
+<span class="hljs-comment">;-- Spec failed --------------------</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   {:total -1}</span>
+<span class="hljs-comment">;           ^^</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">; should satisfy</span>
+<span class="hljs-comment">;</span>
+<span class="hljs-comment">;   pos-int?</span>
+</code></pre>
 
                                 
                                 </section>
@@ -836,7 +898,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"3.3","depth":1,"next":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"3.2","depth":1,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2019-01-17T17:30:01.993Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-17T17:30:33.728Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"3.3","depth":1,"next":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"3.2","depth":1,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2019-01-17T17:31:17.958Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-17T17:31:46.860Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
