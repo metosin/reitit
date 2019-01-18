@@ -253,7 +253,8 @@
   (if inject-router?
     (fn enrich-request [request router]
       (impl/fast-assoc request ::r/router router))
-    identity))
+    (fn enrich-request [request _]
+      request)))
 
 (defn ring-handler
   "Creates a ring-handler out of a router, optional default ring-handler
