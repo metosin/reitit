@@ -83,8 +83,8 @@
     (if-not compile
       this
       (let [compiled (::compiled opts 0)
-            opts (assoc opts ::compiled (inc compiled))]
-        (when (>= compiled *max-compile-depth*)
+            opts (assoc opts ::compiled (inc ^long compiled))]
+        (when (>= ^long compiled ^long *max-compile-depth*)
           (throw
             (ex-info
               (str "Too deep Interceptor compilation - " compiled)

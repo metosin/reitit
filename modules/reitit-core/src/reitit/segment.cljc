@@ -57,7 +57,7 @@
 (defn compile [trie]
   "Compiles the Trie so that [[lookup]] can be used."
   #?(:cljs trie
-     :clj  (.matcher ^SegmentTrie (or trie (SegmentTrie.)))))
+     :clj  (.matcher (or ^SegmentTrie trie (SegmentTrie.)))))
 
 (defn scanner [compiled-tries]
   "Returns a new compiled trie that does linear scan on the given compiled tries on [[lookup]]."

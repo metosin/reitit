@@ -149,7 +149,7 @@
 
 #?(:clj (def +percents+ (into [] (map #(format "%%%02X" %) (range 0 256)))))
 
-#?(:clj (defn byte->percent [byte]
+#?(:clj (defn byte->percent [^long byte]
           (nth +percents+ (if (< byte 0) (+ 256 byte) byte))))
 
 #?(:clj (defn percent-encode [^String s]
