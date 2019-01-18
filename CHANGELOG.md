@@ -1,3 +1,8 @@
+## 0.2.12 (2019-01-18)
+
+* fixed reflection & boxed math warnings, fixes [#207](https://github.com/metosin/reitit/issues/207)
+* fixed arity-error on default routes with `reitit-ring` & `reitit-http` when `:inject-router?` set to `false`.
+
 ## 0.2.11 (2019-01-17)
 
 * new guide on [pretty printing spec coercion errors with expound](https://metosin.github.io/reitit/ring/coercion.html#pretty-printing-spec-errors), fixes [#153](https://github.com/metosin/reitit/issues/153).

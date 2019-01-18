@@ -1,4 +1,4 @@
-(defproject metosin/reitit-sieppari "0.2.11"
+(defproject metosin/reitit-sieppari "0.2.12"
   :description "Reitit: Sieppari Interceptors"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

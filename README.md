@@ -46,38 +46,38 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.2.11"]
+[metosin/reitit "0.2.12"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.11"]
+[metosin/reitit-core "0.2.12"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.11"]
-[metosin/reitit-schema "0.2.11"]
+[metosin/reitit-spec "0.2.12"]
+[metosin/reitit-schema "0.2.12"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.11"]
-[metosin/reitit-middleware "0.2.11"]
+[metosin/reitit-ring "0.2.12"]
+[metosin/reitit-middleware "0.2.12"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.11"]
-[metosin/reitit-swagger-ui "0.2.11"]
+[metosin/reitit-swagger "0.2.12"]
+[metosin/reitit-swagger-ui "0.2.12"]
 
 ;; frontend helpers
-[metosin/reitit-frontend "0.2.11"]
+[metosin/reitit-frontend "0.2.12"]
 
 ;; http with interceptors
-[metosin/reitit-http "0.2.11"]
-[metosin/reitit-interceptors "0.2.11"]
-[metosin/reitit-sieppari "0.2.11"]
+[metosin/reitit-http "0.2.12"]
+[metosin/reitit-interceptors "0.2.12"]
+[metosin/reitit-sieppari "0.2.12"]
 ```
 
 ```clj
 ;; pedestal
-[metosin/reitit-pedestal "0.2.11"]
+[metosin/reitit-pedestal "0.2.12"]
 ```
 
 ## Quick start
