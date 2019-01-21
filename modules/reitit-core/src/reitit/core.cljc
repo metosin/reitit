@@ -65,17 +65,17 @@
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
            coerce (into [] (keep #(coerce % opts)))))
 
-;; This whole function might be more efficient and easier to understand with transducers.
 (defn path-conflicting-routes [routes]
-  (some->>
-    (loop [[r & rest] routes, acc {}]
-      (if (seq rest)
-        (let [conflicting (set (keep #(if (impl/conflicting-routes? r %) %) rest))]
-          (recur rest (update acc r (fnil (comp set concat) #{}) conflicting)))
-        acc))
-    (filter (comp seq second))
-    (seq)
-    (into {})))
+  (let [conflicting-routes
+        (into {}
+              (comp (map-indexed (fn [index route]
+                                   [route (into #{}
+                                                (filter #(impl/conflicting-routes? route %))
+                                                (subvec routes (inc index)))]))
+                    (filter (comp seq second)))
+              routes)]
+    (when (seq conflicting-routes)
+      conflicting-routes)))
 
 (defn conflicting-paths [conflicts]
   (->> (for [[p pc] conflicts]
