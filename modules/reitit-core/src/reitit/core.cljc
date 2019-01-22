@@ -66,16 +66,14 @@
            coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes]
-  (let [conflicting-routes
-        (into {}
-              (comp (map-indexed (fn [index route]
-                                   [route (into #{}
-                                                (filter #(impl/conflicting-routes? route %))
-                                                (subvec routes (inc index)))]))
-                    (filter (comp seq second)))
-              routes)]
-    (when (seq conflicting-routes)
-      conflicting-routes)))
+  (-> (into {}
+            (comp (map-indexed (fn [index route]
+                                 [route (into #{}
+                                              (filter #(impl/conflicting-routes? route %))
+                                              (subvec routes (inc index)))]))
+                  (filter (comp seq second)))
+            routes)
+      (not-empty)))
 
 (defn conflicting-paths [conflicts]
   (->> (for [[p pc] conflicts]
