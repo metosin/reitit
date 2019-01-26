@@ -99,7 +99,8 @@
             (is (= nil (matches "/items/")))
             (is (= ::item (matches "/items/1")))
             (is (= ::deep (matches "/items/1/2")))
-            (is (= nil (matches "/items//2"))))))
+            (is (= nil (matches "/items//2")))
+            (is (= nil (matches ""))))))
 
       r/linear-router :linear-router
       r/segment-router :segment-router

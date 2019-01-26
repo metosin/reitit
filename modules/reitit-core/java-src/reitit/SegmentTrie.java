@@ -19,7 +19,9 @@ public class SegmentTrie {
         start = i + 1;
       }
     }
-    segments.add(path.substring(start, size));
+    if (start <= size) {
+      segments.add(path.substring(start, size));
+    }
     return segments;
   }
 

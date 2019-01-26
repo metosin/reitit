@@ -18,4 +18,9 @@
          (-> (s/insert nil "/foo" {:a 1})
              (s/insert "/foo/*bar" {:b 1})
              (s/compile)
-             (s/lookup "/foo/bar")))))
+             (s/lookup "/foo/bar"))))
+
+  (is (= (s/->Match {:a 1} {})
+         (-> (s/insert nil "" {:a 1})
+             (s/compile)
+             (s/lookup "")))))

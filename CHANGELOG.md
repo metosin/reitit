@@ -1,3 +1,7 @@
+## 0.2.13 (2019-01-26)
+
+* Don't throw `StringIndexOutOfBoundsException` with empty path lookup on wildcard paths, fixes [#209](https://github.com/metosin/reitit/issues/209)
+
 ## 0.2.12 (2019-01-18)
 
 * fixed reflection & boxed math warnings, fixes [#207](https://github.com/metosin/reitit/issues/207)
