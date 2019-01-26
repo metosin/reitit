@@ -121,7 +121,7 @@
   ([] (redirect-trailing-slash-handler {:method :both}))
   ([{:keys [method]}]
    (letfn [(maybe-redirect [request path]
-             (if (r/match-by-path (::r/router request) path)
+             (if (and (seq path) (r/match-by-path (::r/router request) path))
                {:status (if (= (:request-method request) :get) 301 308)
                 :headers {"Location" path}
                 :body ""}))

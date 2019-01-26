@@ -241,7 +241,9 @@
 
 (deftest trailing-slash-handler-test
   (let [ok {:status 200, :body "ok"}
-        routes [["/slash-less" {:get (constantly ok),
+        routes [["" {:summary "unreachable"
+                     :get (constantly ok)}]
+                ["/slash-less" {:get (constantly ok),
                                 :post (constantly ok)}]
                 ["/with-slash/" {:get (constantly ok),
                                  :post (constantly ok)}]]]
@@ -268,6 +270,9 @@
       (let [app (ring/ring-handler
                   (ring/router routes)
                   (ring/redirect-trailing-slash-handler {:method :strip}))]
+
+        (testing "stripping to empty string doesn't match"
+          (is (= nil (:status (app {:request-method :get, :uri "/"})))))
 
         (testing "exact matches work"
           (is (= ok (app {:request-method :get, :uri "/slash-less"})))
