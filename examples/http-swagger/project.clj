@@ -3,5 +3,5 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [ring/ring-jetty-adapter "1.7.1"]
                  [aleph "0.4.6"]
-                 [metosin/reitit "0.2.12"]]
+                 [metosin/reitit "0.2.13"]]
   :repl-options {:init-ns example.server})

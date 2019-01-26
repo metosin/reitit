@@ -18,7 +18,7 @@ Posts:
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
 
-See the [full documentation](https://metosin.github.io/reitit/) for details. 
+## [Full Documentation](https://metosin.github.io/reitit/)
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
 
@@ -46,38 +46,38 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.2.12"]
+[metosin/reitit "0.2.13"]
 ```
 
 Optionally, the parts can be required separately:
 
 ```clj
-[metosin/reitit-core "0.2.12"]
+[metosin/reitit-core "0.2.13"]
 
 ;; coercion
-[metosin/reitit-spec "0.2.12"]
-[metosin/reitit-schema "0.2.12"]
+[metosin/reitit-spec "0.2.13"]
+[metosin/reitit-schema "0.2.13"]
 
 ;; ring helpers
-[metosin/reitit-ring "0.2.12"]
-[metosin/reitit-middleware "0.2.12"]
+[metosin/reitit-ring "0.2.13"]
+[metosin/reitit-middleware "0.2.13"]
 
 ;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.12"]
-[metosin/reitit-swagger-ui "0.2.12"]
+[metosin/reitit-swagger "0.2.13"]
+[metosin/reitit-swagger-ui "0.2.13"]
 
 ;; frontend helpers
-[metosin/reitit-frontend "0.2.12"]
+[metosin/reitit-frontend "0.2.13"]
 
 ;; http with interceptors
-[metosin/reitit-http "0.2.12"]
-[metosin/reitit-interceptors "0.2.12"]
-[metosin/reitit-sieppari "0.2.12"]
+[metosin/reitit-http "0.2.13"]
+[metosin/reitit-interceptors "0.2.13"]
+[metosin/reitit-sieppari "0.2.13"]
 ```
 
 ```clj
 ;; pedestal
-[metosin/reitit-pedestal "0.2.12"]
+[metosin/reitit-pedestal "0.2.13"]
 ```
 
 ## Quick start
