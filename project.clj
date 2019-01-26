@@ -38,6 +38,7 @@
                          [io.pedestal/pedestal.service "0.5.5"]]
 
   :plugins [[jonase/eastwood "0.3.4"]
+            [lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.13"]
@@ -61,7 +62,7 @@
                                   "modules/reitit-sieppari/src"
                                   "modules/reitit-pedestal/src"]
 
-                   :java-source-paths ["modules/reitit-core/java-src"]
+                   ;:java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.10.0"]
                                   [org.clojure/clojurescript "1.10.439"]

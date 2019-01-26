@@ -578,35 +578,36 @@
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
     ;;   474ns (java-segment-router)
-    (b! "reitit-ring" reitit-ring-f)
+    #_(b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
-    (b! "reitit-ring-fast" reitit-ring-fast-f)
+    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
-    (b! "reitit-ring-linear" reitit-ring-linear-f)
+    #_(b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
-    (b! "calfpath-walker" calfpath-walker-f)
+    #_(b! "calfpath-walker" calfpath-walker-f)
 
     ;;  4774ns
-    (b! "calfpath-unroll" calfpath-unroll-f)
+    #_(b! "calfpath-unroll" calfpath-unroll-f)
 
     ;;  2821ns
-    (b! "pedestal" pedestal-f)
+    #_(b! "pedestal" pedestal-f)
 
     ;;  4803ns
-    (b! "calfpath-macros" calfpath-macros-f)
+    #_(b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
-    (b! "compojure" compojure-f)
+    #_(b! "compojure" compojure-f)
 
     ;; 15034ns
-    (b! "bidi" bidi-f)
+    #_(b! "bidi" bidi-f)
 
     ;; 19688ns
-    (b! "ataraxy" ataraxy-f)))
+    #_(b! "ataraxy" ataraxy-f)))
 
 (comment
   (bench-rest!))
+

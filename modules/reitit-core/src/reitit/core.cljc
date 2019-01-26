@@ -2,6 +2,7 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
             [reitit.segment :as segment]
+            [reitit.segment :as trie]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))
@@ -265,11 +266,11 @@
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result % path-params))]
-                       [(segment/insert pl p (->Match p data result nil nil))
+                       [(trie/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
                    [nil {}]
                    compiled-routes)
-         pl (segment/compile pl)
+         pl (trie/compile pl)
          lookup (impl/fast-map nl)
          routes (uncompile-routes compiled-routes)]
      ^{:type ::router}
@@ -286,7 +287,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (segment/lookup pl path)]
+         (if-let [match (trie/lookup pl path)]
            (-> (:data match)
                (assoc :path-params (:path-params match))
                (assoc :path path))))

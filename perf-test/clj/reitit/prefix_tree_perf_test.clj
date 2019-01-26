@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [io.pedestal.http.route.prefix-tree :as p]
             [reitit.segment :as segment]
+            [reitit.trie :as trie]
             [criterium.core :as cc])
   (:import (reitit SegmentTrie)))
 
@@ -70,12 +71,19 @@
       (p/insert acc p d))
     nil routes))
 
-(def matcher
+(def segment-matcher
   (.matcher
     ^SegmentTrie
     (reduce
       (fn [acc [p d]]
         (segment/insert acc p d))
+      nil routes)))
+
+(def trie-matcher
+  (trie/compile
+    (reduce
+      (fn [acc [p d]]
+        (trie/insert acc p d))
       nil routes)))
 
 (defn bench! []
@@ -110,12 +118,21 @@
   ;; 0.51µs (Cleanup)
   ;; 0.30µs (Java)
   (cc/quick-bench
-    (segment/lookup matcher "/v1/orgs/1/topics")))
+    (segment/lookup segment-matcher "/v1/orgs/1/topics"))
+
+  ;; 0.32µs (initial)
+  ;; 0.30µs (iterate arrays)
+  ;; 0.28µs (list-params)
+  (cc/quick-bench
+    (trie/lookup trie-matcher "/v1/orgs/1/topics")))
 
 (comment
   (bench!))
 
+(set! *warn-on-reflection* true)
+
 (comment
   (p/lookup pedestal-tree "/v1/orgs/1/topics")
-  #_(trie/lookup reitit-tree "/v1/orgs/1/topics" {})
-  (segment/lookup matcher "/v1/orgs/1/topics"))
+  (trie/lookup trie-matcher "/v1/orgs/1/topics")
+  (segment/lookup segment-matcher "/v1/orgs/1/topics"))
+
