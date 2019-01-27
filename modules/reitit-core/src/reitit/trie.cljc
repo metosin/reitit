@@ -106,7 +106,7 @@
 
 (defn lookup [^Trie$Matcher matcher path]
   (if-let [match ^Trie$Match (Trie/lookup matcher ^String path)]
-    (->Match (.data match) (clojure.lang.PersistentHashMap/create (.toArray (.params match))))))
+    (->Match (.data match) (.parameters match))))
 
 ;;
 ;; matcher

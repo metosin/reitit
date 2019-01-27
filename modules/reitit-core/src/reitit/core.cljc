@@ -2,7 +2,7 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.string :as str]
             [reitit.segment :as segment]
-            [reitit.segment :as trie]
+            [reitit.trie :as trie]
             [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
   #?(:clj
      (:import (reitit.impl Route))))

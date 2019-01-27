@@ -568,6 +568,7 @@
     ;;   662ns (prefix-tree-router)
     ;;   567ns (segment-router)
     ;;   326ns (java-segment-router)
+    ;;   194ms (trie)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -578,10 +579,12 @@
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
     ;;   474ns (java-segment-router)
-    #_(b! "reitit-ring" reitit-ring-f)
+    ;;   373ms (trie)
+    (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
-    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
+    ;;   271ms (trie)
+    (b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
@@ -611,3 +614,19 @@
 (comment
   (bench-rest!))
 
+(set! *warn-on-reflection* true)
+
+(require '[clj-async-profiler.core :as prof])
+
+(comment
+  ;; 629ms (arraylist)
+  ;; 395ns (transient)
+  (let [app (ring/ring-handler (ring/router opensensors-routes))]
+    (doseq [[p r] (-> app (ring/get-router) (r/routes))]
+      (when-not (app {:uri p, :request-method :get})
+        (println "FAIL:" p)))
+    (println (app {:uri "/v1/users/1/devices/1", :request-method :get}))
+    (prof/start {})
+    (dotimes [_ 100000]
+      (app {:uri "/v1/users/1/devices/1", :request-method :get}))
+    (str (prof/stop {}))))

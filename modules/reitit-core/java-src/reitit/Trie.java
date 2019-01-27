@@ -2,7 +2,10 @@ package reitit;
 
 // https://www.codeproject.com/Tips/1190293/Iteration-Over-Java-Collections-with-High-Performa
 
+import clojure.lang.IPersistentMap;
+import clojure.lang.ITransientMap;
 import clojure.lang.Keyword;
+import clojure.lang.PersistentArrayMap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -22,14 +25,18 @@ public class Trie {
   }
 
   public static class Match {
-    public final List<Object> params = new ArrayList<>();
+    final ITransientMap params = PersistentArrayMap.EMPTY.asTransient();
     public Object data;
+
+    public IPersistentMap parameters() {
+      return params.persistent();
+    }
 
     @Override
     public String toString() {
       Map<Object, Object> m = new HashMap<>();
       m.put(Keyword.intern("data"), data);
-      m.put(Keyword.intern("params"), params);
+      m.put(Keyword.intern("params"), params.persistent());
       return m.toString();
     }
   }
@@ -132,8 +139,7 @@ public class Trie {
           if (value[j] == '/') {
             final Match m = child.match(j, path, match);
             if (m != null) {
-              m.params.add(key);
-              m.params.add(decode(value, i, j - i, hasPercent, hasPlus));
+              m.params.assoc(key, decode(value, i, j - i, hasPercent, hasPlus));
             }
             return m;
           } else if (value[j] == '%') {
@@ -142,12 +148,11 @@ public class Trie {
             hasPlus = true;
           }
         }
-        if (child instanceof DataMatcher) {
-          final Match m = child.match(path.size, path, match);
-          m.params.add(key);
-          m.params.add(decode(value, i, path.size - i, hasPercent, hasPlus));
-          return m;
+        final Match m = child.match(path.size, path, match);
+        if (m != null) {
+          m.params.assoc(key, decode(value, i, path.size - i, hasPercent, hasPlus));
         }
+        return m;
       }
       return null;
     }
