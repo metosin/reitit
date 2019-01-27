@@ -2,14 +2,14 @@
 
 As `reitit-core` works with both Clojure & ClojureScript, one can have a shared routing table for both the frontend and the backend application, using the [Clojure Common Files](https://clojure.org/guides/reader_conditionals).
 
-For backend, you need to define a `:handler` for the request processing, for fronend, `:name` enables the use of [reverse routing](../basics/name_based_routing.md).
+For backend, you need to define a `:handler` for the request processing, for frontend, `:name` enables the use of [reverse routing](../basics/name_based_routing.md).
 
 There are multiple options to use shared routing table.
 
 ## Using reader conditionals
 
 ```clj
-;; define the handlers for for clojure
+;; define the handlers for clojure
 #?(:clj (declare get-kikka))
 #?(:clj (declare post-kikka))
 

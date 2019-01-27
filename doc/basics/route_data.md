@@ -1,6 +1,6 @@
 # Route Data
 
-Route data is the core feature of reitit. Routes can have any map-like data attached to them. This data is interpreted either by the client application or the `Router` via its `:coerce` and `:compile` hooks. Route data format can be defined and validated with `clojure.spec` enabling a architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+Route data is the core feature of reitit. Routes can have any map-like data attached to them. This data is interpreted either by the client application or the `Router` via its `:coerce` and `:compile` hooks. Route data format can be defined and validated with `clojure.spec` enabling an architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
 
 Raw routes can have a non-sequential route argument that is expanded (via router `:expand` hook) into route data at router creation time. By default, Keywords are expanded into `:name` and functions into `:handler` keys.
 
@@ -45,7 +45,7 @@ The expanded route data can be retrieved from a router with `routes` and is retu
 
 ## Nested route data
 
-For nested route trees, route data is accumulated recursively from root towards leafs using [meta-merge](https://github.com/weavejester/meta-merge). Default behavior for colections is `:append`, but this can be overridden to `:prepend`, `:replace` or `:displace` using the target meta-data.
+For nested route trees, route data is accumulated recursively from root towards leafs using [meta-merge](https://github.com/weavejester/meta-merge). Default behavior for collections is `:append`, but this can be overridden to `:prepend`, `:replace` or `:displace` using the target meta-data.
 
 An example router with nested data:
 
@@ -72,7 +72,6 @@ Resolved route tree:
 ;  ["/api/admin/db" {:interceptors [::api ::db]
 ;                    :roles #{:db-admin}}]]
 ```
-
 
 ## Expansion
 

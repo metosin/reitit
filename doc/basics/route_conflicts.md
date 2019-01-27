@@ -2,7 +2,7 @@
 
 We should fast if a router contains conflicting paths or route names. 
 
-When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. Is some (legacy api) cases, path conflicts are should be allowed and one can override the path conflict resolution via `:conflicts` router option.
+When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via `:conflicts` router option.
 
 ## Path Conflicts
 

@@ -8,7 +8,7 @@ Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema
 
 To enable swagger-documentation for a ring-router:
 
-1. annotate you routes with swagger-data
+1. annotate your routes with swagger-data
 2. mount a swagger-handler to serve the swagger-spec
 3. optionally mount a swagger-ui to visualize the swagger-spec
 
