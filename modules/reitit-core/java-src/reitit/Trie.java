@@ -13,8 +13,8 @@ import java.util.*;
 
 public class Trie {
 
-  private static String decode(char[] chars, int i, int j, boolean hasPercent, boolean hasPlus) {
-    final String s = new String(chars, i, j);
+  private static String decode(char[] chars, int offset, int count, boolean hasPercent, boolean hasPlus) {
+    final String s = new String(chars, offset, count);
     try {
       if (hasPercent) {
         return URLDecoder.decode(hasPlus ? s.replace("+", "%2B") : s, "UTF-8");
@@ -22,6 +22,20 @@ public class Trie {
     } catch (UnsupportedEncodingException ignored) {
     }
     return s;
+  }
+
+  private static String decode(char[] chars, int offset, int count) {
+    boolean hasPercent = false;
+    boolean hasPlus = false;
+    for (int j = offset; j < offset + count; j++) {
+      if (chars[j] == '%') {
+        hasPercent = true;
+      } else if (chars[j] == '+') {
+        hasPlus = true;
+      }
+    }
+    System.err.println();
+    return decode(chars, offset, count, hasPercent, hasPlus);
   }
 
   public static class Match {
@@ -36,7 +50,7 @@ public class Trie {
     public String toString() {
       Map<Object, Object> m = new HashMap<>();
       m.put(Keyword.intern("data"), data);
-      m.put(Keyword.intern("params"), params.persistent());
+      m.put(Keyword.intern("params"), parameters());
       return m.toString();
     }
   }
@@ -163,6 +177,35 @@ public class Trie {
     }
   }
 
+  public static CatchAllMatcher catchAllMatcher(Keyword parameter, Object data) {
+    return new CatchAllMatcher(parameter, data);
+  }
+
+  static final class CatchAllMatcher implements Matcher {
+    private final Keyword parameter;
+    private final Object data;
+
+    CatchAllMatcher(Keyword parameter, Object data) {
+      this.parameter = parameter;
+      this.data = data;
+    }
+
+    @Override
+    public Match match(int i, Path path, Match match) {
+      if (i < path.value.length) {
+        match.params.assoc(parameter, decode(path.value, i, path.size - i));
+        match.data = data;
+        return match;
+      }
+      return null;
+    }
+
+    @Override
+    public String toString() {
+      return "[" + parameter + " " + new DataMatcher(data) + "]";
+    }
+  }
+
   public static LinearMatcher linearMatcher(List<Matcher> childs) {
     return new LinearMatcher(childs);
   }
@@ -196,6 +239,10 @@ public class Trie {
 
   public static Object lookup(Matcher matcher, String path) {
     return matcher.match(0, new Path(path), new Match());
+  }
+
+  public static Matcher scanner(List<Matcher> matchers) {
+    return new LinearMatcher(matchers);
   }
 
   public static void main(String[] args) {

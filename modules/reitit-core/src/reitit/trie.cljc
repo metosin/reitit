@@ -94,7 +94,8 @@
   (let [matchers (cond-> []
                          data (conj (Trie/dataMatcher data))
                          children (into (for [[p c] children] (Trie/staticMatcher p (compile c))))
-                         wilds (into (for [[p c] wilds] (Trie/wildMatcher p (compile c)))))]
+                         wilds (into (for [[p c] wilds] (Trie/wildMatcher p (compile c))))
+                         catch-all (into (for [[p c] catch-all] (Trie/catchAllMatcher (first p) (:data c)))))]
     (if (rest matchers)
       (Trie/linearMatcher matchers)
       (first matchers))))
@@ -107,6 +108,9 @@
 (defn lookup [^Trie$Matcher matcher path]
   (if-let [match ^Trie$Match (Trie/lookup matcher ^String path)]
     (->Match (.data match) (.parameters match))))
+
+(defn scanner [compiled-tries]
+  (Trie/scanner compiled-tries))
 
 ;;
 ;; matcher
