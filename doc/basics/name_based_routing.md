@@ -75,7 +75,7 @@ Path-parameters are automatically coerced into strings, with the help of (curren
 ;        :path-params {:id "1"}}
 ```
 
-There is also a exception throwing version:
+There is also an exception throwing version:
 
 ```clj
 (r/match-by-name! router ::user)

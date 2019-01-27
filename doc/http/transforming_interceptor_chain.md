@@ -2,7 +2,7 @@
 
 There is an extra option in http-router (actually, in the underlying interceptor-router): `:reitit.interceptor/transform` to transform the interceptor chain per endpoint. Value should be a function or a vector of functions that get a vector of compiled interceptors and should return a new vector of interceptors.
 
-**Note:** the last interceptor in the chain is usually the handler, compiled into an Interceptor. Applying a tranfromation `clojure.core/reverse` would put this interceptor into first in the chain, making the rest of the interceptors effectively unreachable. There is a helper `reitit.interceptor/transform-butlast` to transform all but the last interceptor.
+**Note:** the last interceptor in the chain is usually the handler, compiled into an Interceptor. Applying a transformation `clojure.core/reverse` would put this interceptor into first in the chain, making the rest of the interceptors effectively unreachable. There is a helper `reitit.interceptor/transform-butlast` to transform all but the last interceptor.
 
 ## Example Application
 

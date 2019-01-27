@@ -16,7 +16,7 @@ Example middleware to guard routes based on user roles:
         (handler request)))))
 ```
 
-Mounted to an app via router data (effecting all routes):
+Mounted to an app via router data (affecting all routes):
 
 ```clj
 (def handler (constantly {:status 200, :body "ok"}))

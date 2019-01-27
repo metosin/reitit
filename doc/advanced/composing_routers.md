@@ -43,7 +43,7 @@ Let's add a helper function to create a new router with extra routes:
     (r/options router)))
 ```
 
-We can now create a new router with an extra routes:
+We can now create a new router with extra routes:
 
 ```clj
 (def router2
@@ -137,7 +137,7 @@ Matching by path:
 
 That didn't work as we wanted, as the nested routers don't have such a route. The core routing doesn't understand anything the `:router` key, so it only matched against the top-level router, which gave a match for the catch-all path.
 
-As the `Match` contains all the route data, we can create a new matching function that understands the `:router` key. Below is a function that does recursive matching using the subrouters. It returns either `nil` or a vector of mathces.
+As the `Match` contains all the route data, we can create a new matching function that understands the `:router` key. Below is a function that does recursive matching using the subrouters. It returns either `nil` or a vector of matches.
 
 ```clj
 (require '[clojure.string :as str])
@@ -196,7 +196,7 @@ So, we can nest routers, but why would we do that?
 
 ## Dynamic routing
 
-In all the examples above, the routers were created ahead of time, making the whole route tree effective static.  To have more dynamic routing, we can use router references allowing the router to be swapped over time. We can also create fully dynamic routers where the router is re-created for each request. Let's walk through both cases.
+In all the examples above, the routers were created ahead of time, making the whole route tree effectively static.  To have more dynamic routing, we can use router references allowing the router to be swapped over time. We can also create fully dynamic routers where the router is re-created for each request. Let's walk through both cases.
 
 First, we need to modify our matching function to support router references:
 

@@ -138,7 +138,7 @@ We get the coerced paremeters back. If a coercion fails, a typed (`:reitit.coerc
 
 ## Full example
 
-Here's an full example for doing routing and coercion with Reitit and Schema:
+Here's a full example for doing routing and coercion with Reitit and Schema:
 
 ```clj
 (require '[reitit.coercion.schema])

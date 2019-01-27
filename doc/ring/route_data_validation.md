@@ -144,7 +144,7 @@ Adding the `:zone` to route data fixes the problem:
 
 ### Implicit specs
 
-By design, clojure.spec validates all fully-qualified keys with `s/keys` specs even if they are not defined in that keyset. Validation in implicit but powerful.
+By design, clojure.spec validates all fully-qualified keys with `s/keys` specs even if they are not defined in that keyset. Validation is implicit but powerful.
 
 Let's reuse the `wrap-enforce-roles` from [Dynamic extensions](dynamic_extensions.md) and define specs for the data:
 
