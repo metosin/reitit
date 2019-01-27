@@ -779,7 +779,7 @@
     (<span class="hljs-name"><span class="hljs-builtin-name">into</span></span> (<span class="hljs-name">r/routes</span> router) routes)
     (<span class="hljs-name">r/options</span> router)))
 </code></pre>
-<p>We can now create a new router with an extra routes:</p>
+<p>We can now create a new router with extra routes:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router2
   (<span class="hljs-name">add-routes</span>
     router
@@ -848,7 +848,7 @@
 <span class="hljs-comment">;       :path &quot;/olipa/iso/kala&quot;}</span>
 </code></pre>
 <p>That didn&apos;t work as we wanted, as the nested routers don&apos;t have such a route. The core routing doesn&apos;t understand anything the <code>:router</code> key, so it only matched against the top-level router, which gave a match for the catch-all path.</p>
-<p>As the <code>Match</code> contains all the route data, we can create a new matching function that understands the <code>:router</code> key. Below is a function that does recursive matching using the subrouters. It returns either <code>nil</code> or a vector of mathces.</p>
+<p>As the <code>Match</code> contains all the route data, we can create a new matching function that understands the <code>:router</code> key. Below is a function that does recursive matching using the subrouters. It returns either <code>nil</code> or a vector of matches.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.string <span class="hljs-symbol">:as</span> str])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> recursive-match-by-path [router path]
@@ -893,7 +893,7 @@
 </code></pre>
 <p>So, we can nest routers, but why would we do that?</p>
 <h2 id="dynamic-routing">Dynamic routing</h2>
-<p>In all the examples above, the routers were created ahead of time, making the whole route tree effective static.  To have more dynamic routing, we can use router references allowing the router to be swapped over time. We can also create fully dynamic routers where the router is re-created for each request. Let&apos;s walk through both cases.</p>
+<p>In all the examples above, the routers were created ahead of time, making the whole route tree effectively static.  To have more dynamic routing, we can use router references allowing the router to be swapped over time. We can also create fully dynamic routers where the router is re-created for each request. Let&apos;s walk through both cases.</p>
 <p>First, we need to modify our matching function to support router references:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn-</span></span> &lt;&lt; [x] 
   (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">instance?</span></span> clojure.lang.IDeref x) 
@@ -1137,7 +1137,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Composing Routers","level":"7.2","depth":1,"next":{"title":"Different Routers","level":"7.3","depth":1,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Configuring Routers","level":"7.1","depth":1,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/composing_routers.md","mtime":"2019-01-26T14:34:29.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-26T14:34:51.694Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Composing Routers","level":"7.2","depth":1,"next":{"title":"Different Routers","level":"7.3","depth":1,"path":"advanced/different_routers.md","ref":"advanced/different_routers.md","articles":[]},"previous":{"title":"Configuring Routers","level":"7.1","depth":1,"path":"advanced/configuring_routers.md","ref":"advanced/configuring_routers.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"advanced/composing_routers.md","mtime":"2019-01-27T20:50:40.124Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-27T20:51:01.801Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
