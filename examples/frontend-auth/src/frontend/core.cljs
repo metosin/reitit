@@ -140,6 +140,10 @@
     (fn [new-match]
       (swap! state (fn [state]
                      (if new-match
+                       ;; Only run the controllers, which are likely to call authentcated APIs,
+                       ;; if user has been authenticated.
+                       ;; Alternative solution could be to always run controllers,
+                       ;; check authentication status in each controller, or check authentication status in API calls.
                        (if (:user state)
                          (assoc state :match (assoc new-match :controllers (rfc/apply-controllers (:controllers (:match state)) new-match)))
                          (assoc state :match new-match))))))
