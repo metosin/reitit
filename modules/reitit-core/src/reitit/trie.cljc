@@ -89,8 +89,16 @@
           (update :children dissoc ""))
       node')))
 
-(defn insert [node path data]
-  (-insert (or node (-node {})) (-split path) data))
+(defn insert
+  ([routes]
+    (insert nil routes))
+  ([node routes]
+   (reduce
+     (fn [acc [p d]]
+       (insert acc p d))
+     node routes))
+  ([node path data]
+   (-insert (or node (-node {})) (-split path) data)))
 
 (defn ^Trie$Matcher compile [{:keys [data children wilds catch-all]}]
   (let [matchers (cond-> []
