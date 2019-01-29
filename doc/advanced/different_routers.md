@@ -5,10 +5,10 @@ Reitit ships with several different implementations for the `Router` protocol, o
 | router                        | description |
 | ------------------------------|-------------|
 | `:linear-router`              | Matches the routes one-by-one starting from the top until a match is found. Slow, but works with all route trees.
-| `:segment-router`             | Router that creates a optimized [search trie](https://en.wikipedia.org/wiki/Trie) out of an route table. Much faster than `:linear-router` for wildcard routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
+| `:trie-router`                | Router that creates a optimized [search trie](https://en.wikipedia.org/wiki/Trie) out of an route table. Much faster than `:linear-router` for wildcard routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
 | `:lookup-router`              | Fast router, uses hash-lookup to resolve the route. Valid if no paths have path or catch-all parameters and there are no [Route conflicts](../basics/route_conflicts.md).
 | `:single-static-path-router`  | Super fast router: string-matches a route. Valid only if there is one static route.
-| `:mixed-router`               | Contains two routers: `:segment-router` for wildcard routes and a `:lookup-router` or `:single-static-path-router` for static routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
+| `:mixed-router`               | Contains two routers: `:trie-router` for wildcard routes and a `:lookup-router` or `:single-static-path-router` for static routes. Valid only if there are no [Route conflicts](../basics/route_conflicts.md).
 | `:quarantine-router`          | Contains two routers: `:mixed-router` for non-conflicting routes and a `:linear-router` for conflicting routes.
 
 The router name can be asked from the router:

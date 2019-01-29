@@ -35,7 +35,9 @@
         (concat ss (-static from to))
         (condp = (get s to)
           \{ (let [to' (or (str/index-of s "}" to) (throw (ex-info (str "Unbalanced brackets: " (pr-str s)) {})))]
-               (recur (concat ss (-static from to) (-wild to to')) (inc to') (inc to')))
+               (if (= \* (get s (inc to)))
+                 (recur (concat ss (-static from to) (-catch-all (inc to) to')) (inc to') (inc to'))
+                 (recur (concat ss (-static from to) (-wild to to')) (inc to') (inc to'))))
           \: (let [to' (or (str/index-of s "/" to) (count s))]
                (recur (concat ss (-static from to) (-wild to to')) to' to'))
           \* (let [to' (count s)]

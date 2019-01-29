@@ -252,11 +252,11 @@
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params))))))))
 
-(defn segment-router
-  "Creates a special prefix-tree style segment router from resolved routes and optional
+(defn trie-router
+  "Creates a special prefix-tree router from resolved routes and optional
   expanded options. See [[router]] for available options."
   ([compiled-routes]
-   (segment-router compiled-routes {}))
+   (trie-router compiled-routes {}))
   ([compiled-routes opts]
    (let [names (find-names compiled-routes opts)
          [pl nl] (reduce
@@ -276,7 +276,7 @@
      (reify
        Router
        (router-name [_]
-         :segment-router)
+         :trie-router)
        (routes [_]
          routes)
        (compiled-routes [_]
@@ -345,7 +345,7 @@
   ([compiled-routes opts]
    (let [{wild true, lookup false} (group-by impl/wild-route? compiled-routes)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
-         wildcard-router (segment-router wild opts)
+         wildcard-router (trie-router wild opts)
          static-router (->static-router lookup opts)
          names (find-names compiled-routes opts)
          routes (uncompile-routes compiled-routes)]
@@ -446,7 +446,7 @@
                   (and (= 1 (count compiled-routes)) (not wilds?)) single-static-path-router
                   path-conflicting quarantine-router
                   (not wilds?) lookup-router
-                  all-wilds? segment-router
+                  all-wilds? trie-router
                   :else mixed-router)]
 
      (when-let [validate (:validate opts)]

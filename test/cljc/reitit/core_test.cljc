@@ -103,7 +103,7 @@
             (is (= nil (matches ""))))))
 
       r/linear-router :linear-router
-      r/segment-router :segment-router
+      r/trie-router :trie-router
       r/mixed-router :mixed-router
       r/quarantine-router :quarantine-router))
 
@@ -142,7 +142,7 @@
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
       r/linear-router :linear-router
-      r/segment-router :segment-router
+      r/trie-router :trie-router
       r/mixed-router :mixed-router
       r/quarantine-router :quarantine-router))
 
