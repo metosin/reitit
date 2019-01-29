@@ -67,6 +67,8 @@ public class Trie {
 
   public interface Matcher {
     Match match(int i, Path path, Match match);
+
+    int depth();
   }
 
   public static StaticMatcher staticMatcher(String path, Matcher child) {
@@ -99,6 +101,11 @@ public class Trie {
     }
 
     @Override
+    public int depth() {
+      return child.depth() + 1;
+    }
+
+    @Override
     public String toString() {
       return "[\"" + new String(path) + "\" " + child + "]";
     }
@@ -122,6 +129,11 @@ public class Trie {
         return match;
       }
       return null;
+    }
+
+    @Override
+    public int depth() {
+      return 1;
     }
 
     @Override
@@ -172,6 +184,11 @@ public class Trie {
     }
 
     @Override
+    public int depth() {
+      return child.depth() + 1;
+    }
+
+    @Override
     public String toString() {
       return "[" + key + " " + child + "]";
     }
@@ -201,6 +218,11 @@ public class Trie {
     }
 
     @Override
+    public int depth() {
+      return 1;
+    }
+
+    @Override
     public String toString() {
       return "[" + parameter + " " + new DataMatcher(data) + "]";
     }
@@ -217,6 +239,7 @@ public class Trie {
 
     LinearMatcher(List<Matcher> childs) {
       this.childs = childs.toArray(new Matcher[0]);
+      Arrays.sort(this.childs, Comparator.comparing(Matcher::depth).reversed());
       this.size = childs.size();
     }
 
@@ -229,6 +252,11 @@ public class Trie {
         }
       }
       return null;
+    }
+
+    @Override
+    public int depth() {
+      return Arrays.stream(childs).mapToInt(Matcher::depth).max().orElseThrow(NoSuchElementException::new);
     }
 
     @Override

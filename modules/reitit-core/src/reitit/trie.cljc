@@ -85,7 +85,7 @@
                   (assoc-in node [:children path] (-insert (-node {}) ps data))))]
     (if-let [child (get-in node' [:children ""])]
       ;; optimize by removing empty paths
-      (-> (merge-with merge node' child)
+      (-> (merge-with merge (dissoc node' :data) child)
           (update :children dissoc ""))
       node')))
 
