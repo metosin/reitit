@@ -621,8 +621,8 @@
 
 (comment
   ;; 629ms (arraylist)
-  ;; 395ns (transient)
-  ;; (staticMultiMatcher)
+  ;; 409ns (transient)
+  ;; 409ns (staticMultiMatcher)
   (let [app (ring/ring-handler (ring/router opensensors-routes) {:inject-match? false, :inject-router? false})
         request {:uri "/v1/users/1/devices/1", :request-method :get}]
     (doseq [[p r] (-> app (ring/get-router) (r/routes))]
@@ -631,7 +631,7 @@
     (println (app request))
     (cc/quick-bench
       (app request))
-    #_#_#_(prof/start {})
+    (prof/start {})
     ; "Elapsed time: 9183.657012 msecs"
     ; "Elapsed time: 8674.70132 msecs"
     (time
