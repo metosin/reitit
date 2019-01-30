@@ -35,7 +35,8 @@
    ["Pluggable Coercion" {:file "doc/ring/coercion.md"}]
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
-   ["Swagger Support" {:file "doc/ring/swagger.md"}]]
+   ["Swagger Support" {:file "doc/ring/swagger.md"}]
+   ["RESTful form methods" {:file "doc/ring/ring/RESTful_form_methods.md"}]]
   ["HTTP" {}
    ["Interceptors" {:file "doc/http/interceptors.md"}]
    ["Pedestal" {:file "doc/http/pedestal.md"}]
