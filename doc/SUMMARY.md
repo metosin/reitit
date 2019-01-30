@@ -37,7 +37,7 @@
 * [Route Data Validation](ring/route_data_validation.md)
 * [Compiling Middleware](ring/compiling_middleware.md)
 * [Swagger Support](ring/swagger.md)
-* [RESTful form methods](ring/ring/RESTful_form_methods.md)
+* [RESTful form methods](ring/RESTful_form_methods.md)
 
 ## HTTP
 
