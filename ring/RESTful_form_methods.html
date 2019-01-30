@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Compiling Middleware · GitBook</title>
+        <title>RESTful form methods · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -61,10 +61,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="swagger.html" />
+    <link rel="next" href="../http/interceptors.html" />
     
     
-    <link rel="prev" href="route_data_validation.html" />
+    <link rel="prev" href="swagger.html" />
     
 
     </head>
@@ -428,7 +428,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="4.13" data-path="compiling_middleware.html">
+        <li class="chapter " data-level="4.13" data-path="compiling_middleware.html">
             
                 <a href="compiling_middleware.html">
             
@@ -454,7 +454,7 @@
             
         </li>
     
-        <li class="chapter " data-level="4.15" data-path="RESTful_form_methods.html">
+        <li class="chapter active" data-level="4.15" data-path="RESTful_form_methods.html">
             
                 <a href="RESTful_form_methods.html">
             
@@ -746,7 +746,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Compiling Middleware</a>
+        <a href=".." >RESTful form methods</a>
     </h1>
 </div>
 
@@ -761,69 +761,36 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="compiling-middleware">Compiling Middleware</h1>
-<p>The <a href="dynamic_extensions.html">dynamic extensions</a> is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.</p>
-<p>But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass the optimized data into the actual request-handler via a closure - yielding much faster runtime processing. Middleware can also decide not to mount itself by returning <code>nil</code>. Why mount a <code>wrap-enforce-roles</code> middleware for a route if there are no roles required for it?</p>
-<p>To enable this we use <a href="data_driven_middleware.html">middleware records</a> <code>:compile</code> key instead of the normal <code>:wrap</code>. <code>:compile</code> expects a function of <code>route-data router-opts =&gt; ?IntoMiddleware</code>.</p>
-<p>To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with <code>:compile</code>.</p>
-<h2 id="normal-middleware">Normal Middleware</h2>
-<ul>
-<li>Reads the compiled route information on every request. Everything is done at request-time.</li>
-</ul>
-<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> wrap-coerce-response
-  <span class="hljs-string">&quot;Middleware for pluggable response coercion.
-  Expects a :coercion of type `reitit.coercion/Coercion`
-  and :responses from route data, otherwise will do nothing.&quot;</span>
-  [handler]
-  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
-    ([request]
-     (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [response (<span class="hljs-name">handler</span> request)
-           method (<span class="hljs-symbol">:request-method</span> request)
-           match (<span class="hljs-name">ring/get-match</span> request)
-           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:responses</span>)
-           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:coercion</span>)
-           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:opts</span>)]
-       (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
-         (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
-           (<span class="hljs-name">coerce-response</span> coercers request response))
-         response)))
-    ([request respond raise]
-     (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [method (<span class="hljs-symbol">:request-method</span> request)
-           match (<span class="hljs-name">ring/get-match</span> request)
-           responses (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:result</span> method <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:responses</span>)
-           coercion (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:coercion</span>)
-           opts (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> match <span class="hljs-symbol">:data</span> <span class="hljs-symbol">:opts</span>)]
-       (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
-         (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">response-coercers</span> coercion responses opts)]
-           (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coerce-response</span> coercers request %))))
-         (<span class="hljs-name">handler</span> request respond raise))))))
-</code></pre>
-<h2 id="compiled-middleware">Compiled Middleware</h2>
-<ul>
-<li>Route information is provided at creation-time</li>
-<li>Coercers are compiled at creation-time</li>
-<li>Middleware mounts only if <code>:coercion</code> and <code>:responses</code> are defined for the route</li>
-<li>Also defines spec for the route data <code>:responses</code> for the <a href="route_data_validation.html">route data validation</a>.</li>
-</ul>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.spec <span class="hljs-symbol">:as</span> rs])
+                                <h1 id="restful-form-methods">RESTful form methods</h1>
+<p>When designing RESTful applications you will be doing a lot of &quot;PATCH&quot; and &quot;DELETE&quot; request, but  most browsers don&apos;t support methods other than &quot;GET&quot; and &quot;POST&quot; when it comes to submitting forms. </p>
+<p>There is a pattern to solve this (pioneered by Rails) using a hidden &quot;_method&quot; field in the form and swapping out the &quot;POST&quot; method for whatever is in that field.</p>
+<p>We can do this with middleware in reitit like this: </p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn-</span></span> hidden-method
+  [request]
+  (<span class="hljs-name"><span class="hljs-builtin-name">keyword</span></span> 
+    (<span class="hljs-name"><span class="hljs-builtin-name">or</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">get-in</span></span> request [<span class="hljs-symbol">:form-params</span> <span class="hljs-string">&quot;_method&quot;</span>])         <span class="hljs-comment">;; look for &quot;_method&quot; field in :form-params</span>
+        (<span class="hljs-name"><span class="hljs-builtin-name">get-in</span></span> request [<span class="hljs-symbol">:multipart-params</span> <span class="hljs-string">&quot;_method&quot;</span>])))) <span class="hljs-comment">;; or in :multipart-params</span>
 
-(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> coerce-response-middleware
-  <span class="hljs-string">&quot;Middleware for pluggable response coercion.
-  Expects a :coercion of type `reitit.coercion/Coercion`
-  and :responses from route data, otherwise does not mount.&quot;</span>
-  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::coerce-response</span>
-   <span class="hljs-symbol">:spec</span> <span class="hljs-symbol">::rs/responses</span>
-   <span class="hljs-symbol">:compile</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">:keys</span> [coercion responses]} opts]
-              (<span class="hljs-name"><span class="hljs-builtin-name">if</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> coercion responses)
-                (<span class="hljs-name"><span class="hljs-builtin-name">let</span></span> [coercers (<span class="hljs-name">coercion/response-coercers</span> coercion responses opts)]
-                  (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
-                    (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span>
-                      ([request]
-                       (<span class="hljs-name">coercion/coerce-response</span> coercers request (<span class="hljs-name">handler</span> request)))
-                      ([request respond raise]
-                       (<span class="hljs-name">handler</span> request #(<span class="hljs-name">respond</span> (<span class="hljs-name">coercion/coerce-response</span> coercers request %)) raise)))))))})
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> wrap-hidden-method
+  {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::wrap-hidden-method</span>
+   <span class="hljs-symbol">:wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler]
+           (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [request]
+             (<span class="hljs-name"><span class="hljs-builtin-name">if-let</span></span> [fm (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> (<span class="hljs-name"><span class="hljs-builtin-name">=</span></span> <span class="hljs-symbol">:post</span> (<span class="hljs-symbol">:request-method</span> request)) <span class="hljs-comment">;; if this is a :post request</span>
+                              (<span class="hljs-name">hidden-method</span> request))]           <span class="hljs-comment">;; and there is a &quot;_method&quot; field </span>
+               (<span class="hljs-name">handler</span> (<span class="hljs-name"><span class="hljs-builtin-name">assoc</span></span> request <span class="hljs-symbol">:request-method</span> fm)) <span class="hljs-comment">;; replace :request-method</span>
+               (<span class="hljs-name">handler</span> request))))})
 </code></pre>
-<p>It has 50% less code, it&apos;s much easier to reason about and is much faster.</p>
+<p>And apply the middleware like this: </p>
+<pre><code class="lang-clj">(<span class="hljs-name">reitit.ring/ring-handler</span>
+  (<span class="hljs-name">reitit.ring/router</span> ...)
+  (<span class="hljs-name">reitit.ring/create-default-handler</span>)
+  {<span class="hljs-symbol">:middleware</span> 
+    [reitit.ring.middleware.parameters/parameters-middleware <span class="hljs-comment">;; needed to have :form-params in the request map</span>
+     reitit.ring.middleware.multipart/multipart-middleware   <span class="hljs-comment">;; needed to have :multipart-params in the request map</span>
+     wrap-hidden-method]}) <span class="hljs-comment">;; our hidden method wrapper</span>
+</code></pre>
+<p>(NOTE: This middleware must be placed here and not inside the route data given to <code>reitit.ring/handler</code>. 
+This is so that our middleware is applied before reitit matches the request with a spesific handler using the wrong method.)</p>
 
                                 
                                 </section>
@@ -851,12 +818,12 @@
 
             
                 
-                <a href="route_data_validation.html" class="navigation navigation-prev " aria-label="Previous page: Route Data Validation">
+                <a href="swagger.html" class="navigation navigation-prev " aria-label="Previous page: Swagger Support">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="swagger.html" class="navigation navigation-next " aria-label="Next page: Swagger Support">
+                <a href="../http/interceptors.html" class="navigation navigation-next " aria-label="Next page: Interceptors">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -867,7 +834,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Compiling Middleware","level":"4.13","depth":1,"next":{"title":"Swagger Support","level":"4.14","depth":1,"path":"ring/swagger.md","ref":"ring/swagger.md","articles":[]},"previous":{"title":"Route Data Validation","level":"4.12","depth":1,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/compiling_middleware.md","mtime":"2019-01-30T14:33:44.693Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-30T14:34:11.729Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"RESTful form methods","level":"4.15","depth":1,"next":{"title":"Interceptors","level":"5.1","depth":1,"path":"http/interceptors.md","ref":"http/interceptors.md","articles":[]},"previous":{"title":"Swagger Support","level":"4.14","depth":1,"path":"ring/swagger.md","ref":"ring/swagger.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/RESTful_form_methods.md","mtime":"2019-01-30T14:33:44.693Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-01-30T14:34:11.729Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
