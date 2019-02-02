@@ -13,8 +13,8 @@ import java.util.*;
 
 public class Trie {
 
-  private static String decode(char[] chars, int offset, int count, boolean hasPercent, boolean hasPlus) {
-    final String s = new String(chars, offset, count);
+  private static String decode(String ss, int begin, int end, boolean hasPercent, boolean hasPlus) {
+    final String s = ss.substring(begin, end);
     try {
       if (hasPercent) {
         return URLDecoder.decode(hasPlus ? s.replace("+", "%2B") : s, "UTF-8");
@@ -24,17 +24,18 @@ public class Trie {
     return s;
   }
 
-  private static String decode(char[] chars, int offset, int count) {
+  private static String decode(String s, int begin, int end) {
     boolean hasPercent = false;
     boolean hasPlus = false;
-    for (int j = offset; j < offset + count; j++) {
-      if (chars[j] == '%') {
+    for (int j = begin; j < end; j++) {
+      final char c = s.charAt(j);
+      if (c == '%') {
         hasPercent = true;
-      } else if (chars[j] == '+') {
+      } else if (c == '+') {
         hasPlus = true;
       }
     }
-    return decode(chars, offset, count, hasPercent, hasPlus);
+    return decode(s, begin, end, hasPercent, hasPlus);
   }
 
   public static class Match {
@@ -54,18 +55,8 @@ public class Trie {
     }
   }
 
-  public static class Path {
-    final char[] value;
-    final int size;
-
-    Path(String value) {
-      this.value = value.toCharArray();
-      this.size = value.length();
-    }
-  }
-
   public interface Matcher {
-    Match match(int i, Path path, Match match);
+    Match match(int i, int max, String path, Match match);
 
     int depth();
   }
@@ -86,17 +77,16 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, Path path, Match match) {
-      final char[] value = path.value;
-      if (path.size < i + size) {
+    public Match match(int i, int max, String path, Match match) {
+      if (max < i + size) {
         return null;
       }
       for (int j = 0; j < size; j++) {
-        if (value[j + i] != this.path[j]) {
+        if (path.charAt(j + i) != this.path[j]) {
           return null;
         }
       }
-      return child.match(i + size, path, match);
+      return child.match(i + size, max, path, match);
     }
 
     @Override
@@ -122,8 +112,8 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, Path path, Match match) {
-      if (i == path.size) {
+    public Match match(int i, int max, String path, Match match) {
+      if (i == max) {
         match.data = data;
         return match;
       }
@@ -155,27 +145,27 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, Path path, Match match) {
-      final char[] value = path.value;
-      if (i < path.size && value[i] != '/') {
+    public Match match(int i, int max, String path, Match match) {
+      if (i < max && path.charAt(i) != '/') {
         boolean hasPercent = false;
         boolean hasPlus = false;
-        for (int j = i; j < path.size; j++) {
-          if (value[j] == '/') {
-            final Match m = child.match(j, path, match);
+        for (int j = i; j < max; j++) {
+          final char c = path.charAt(j);
+          if (c == '/') {
+            final Match m = child.match(j, max, path, match);
             if (m != null) {
-              m.params.assoc(key, decode(value, i, j - i, hasPercent, hasPlus));
+              m.params.assoc(key, decode(path, i, j, hasPercent, hasPlus));
             }
             return m;
-          } else if (value[j] == '%') {
+          } else if (c == '%') {
             hasPercent = true;
-          } else if (value[j] == '+') {
+          } else if (c == '+') {
             hasPlus = true;
           }
         }
-        final Match m = child.match(path.size, path, match);
+        final Match m = child.match(max, max, path, match);
         if (m != null) {
-          m.params.assoc(key, decode(value, i, path.size - i, hasPercent, hasPlus));
+          m.params.assoc(key, decode(path, i, max, hasPercent, hasPlus));
         }
         return m;
       }
@@ -207,9 +197,9 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, Path path, Match match) {
-      if (i < path.value.length) {
-        match.params.assoc(parameter, decode(path.value, i, path.size - i));
+    public Match match(int i, int max, String path, Match match) {
+      if (i < max) {
+        match.params.assoc(parameter, decode(path, i, max));
         match.data = data;
         return match;
       }
@@ -243,9 +233,9 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, Path path, Match match) {
+    public Match match(int i, int max, String path, Match match) {
       for (int j = 0; j < size; j++) {
-        final Match m = childs[j].match(i, path, match);
+        final Match m = childs[j].match(i, max, path, match);
         if (m != null) {
           return m;
         }
@@ -265,7 +255,7 @@ public class Trie {
   }
 
   public static Object lookup(Matcher matcher, String path) {
-    return matcher.match(0, new Path(path), new Match());
+    return matcher.match(0, path.length(), path, new Match());
   }
 
   public static Matcher scanner(List<Matcher> matchers) {
