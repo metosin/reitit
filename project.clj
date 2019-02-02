@@ -10,7 +10,7 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :managed-dependencies [[metosin/reitit "0.2.13"]
                          [metosin/reitit-core "0.2.13"]
                          [metosin/reitit-spec "0.2.13"]
