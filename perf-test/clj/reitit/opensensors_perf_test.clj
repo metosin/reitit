@@ -237,78 +237,78 @@
 (def opensensors-compojure-routes
   (routes
     (context "/v1" []
-             (context "/public" []
-                      (ANY "/topics/:topic" [] {:name :test/route4} handler)
-                      (ANY "/users/:user-id" [] {:name :test/route16} handler)
-                      (ANY "/orgs/:org-id" [] {:name :test/route18} handler))
-             (context "/users/:user-id" []
-                      (ANY "/orgs/:org-id" [] {:name :test/route5} handler)
-                      (ANY "/invitations" [] {:name :test/route7} handler)
-                      (ANY "/topics" [] {:name :test/route9} handler)
-                      (ANY "/bookmarks/followers" [] {:name :test/route10} handler)
-                      (context "/devices" []
-                               (ANY "/" [] {:name :test/route15} handler)
-                               #_(ANY "/bulk" [] {:name :test/route21} handler)
-                               (ANY "/:client-id" [] {:name :test/route35} handler)
-                               (ANY "/:client-id/reset-password" [] {:name :test/route49} handler))
-                      (ANY "/device-errors" [] {:name :test/route22} handler)
-                      (ANY "/usage-stats" [] {:name :test/route24} handler)
-                      (ANY "/claim-device/:client-id" [] {:name :test/route26} handler)
-                      (ANY "/owned-orgs" [] {:name :test/route31} handler)
-                      (ANY "/bookmark/:topic" [] {:name :test/route33} handler)
-                      (ANY "/" [] {:name :test/route36} handler)
-                      (ANY "/orgs" [] {:name :test/route52} handler)
-                      (ANY "/api-key" [] {:name :test/route43} handler)
-                      (ANY "/bookmarks" [] {:name :test/route56} handler))
-             (ANY "/search/topics/:term" [] {:name :test/route6} handler)
-             (context "/orgs" []
-                      (ANY "/" [] {:name :test/route55} handler)
-                      (context "/:org-id" []
-                               (context "/devices" []
-                                        (ANY "/" [] {:name :test/route37} handler)
-                                        (ANY "/:device-id" [] {:name :test/route13} handler)
-                                        #_(ANY "/:batch/:type" [] {:name :test/route8} handler))
-                               (ANY "/usage-stats" [] {:name :test/route12} handler)
-                               (ANY "/invitations" [] {:name :test/route19} handler)
-                               (context "/members" []
-                                        (ANY "/:user-id" [] {:name :test/route34} handler)
-                                        (ANY "/" [] {:name :test/route38} handler)
-                                        #_(ANY "/invitation-data/:user-id" [] {:name :test/route39} handler))
-                               (ANY "/errors" [] {:name :test/route17} handler)
-                               (ANY "/" [] {:name :test/route42} handler)
-                               (ANY "/confirm-membership/:token" [] {:name :test/route46} handler)
-                               (ANY "/topics" [] {:name :test/route57} handler)))
-             (context "/messages" []
-                      (ANY "/user/:user-id" [] {:name :test/route14} handler)
-                      (ANY "/device/:client-id" [] {:name :test/route30} handler)
-                      (ANY "/topic/:topic" [] {:name :test/route48} handler))
-             (context "/topics" []
-                      (ANY "/:topic" [] {:name :test/route32} handler)
-                      (ANY "/" [] {:name :test/route54} handler))
-             (ANY "/whoami" [] {:name :test/route41} handler)
-             (ANY "/login" [] {:name :test/route51} handler))
+      (context "/public" []
+        (ANY "/topics/:topic" [] {:name :test/route4} handler)
+        (ANY "/users/:user-id" [] {:name :test/route16} handler)
+        (ANY "/orgs/:org-id" [] {:name :test/route18} handler))
+      (context "/users/:user-id" []
+        (ANY "/orgs/:org-id" [] {:name :test/route5} handler)
+        (ANY "/invitations" [] {:name :test/route7} handler)
+        (ANY "/topics" [] {:name :test/route9} handler)
+        (ANY "/bookmarks/followers" [] {:name :test/route10} handler)
+        (context "/devices" []
+          (ANY "/" [] {:name :test/route15} handler)
+          #_(ANY "/bulk" [] {:name :test/route21} handler)
+          (ANY "/:client-id" [] {:name :test/route35} handler)
+          (ANY "/:client-id/reset-password" [] {:name :test/route49} handler))
+        (ANY "/device-errors" [] {:name :test/route22} handler)
+        (ANY "/usage-stats" [] {:name :test/route24} handler)
+        (ANY "/claim-device/:client-id" [] {:name :test/route26} handler)
+        (ANY "/owned-orgs" [] {:name :test/route31} handler)
+        (ANY "/bookmark/:topic" [] {:name :test/route33} handler)
+        (ANY "/" [] {:name :test/route36} handler)
+        (ANY "/orgs" [] {:name :test/route52} handler)
+        (ANY "/api-key" [] {:name :test/route43} handler)
+        (ANY "/bookmarks" [] {:name :test/route56} handler))
+      (ANY "/search/topics/:term" [] {:name :test/route6} handler)
+      (context "/orgs" []
+        (ANY "/" [] {:name :test/route55} handler)
+        (context "/:org-id" []
+          (context "/devices" []
+            (ANY "/" [] {:name :test/route37} handler)
+            (ANY "/:device-id" [] {:name :test/route13} handler)
+            #_(ANY "/:batch/:type" [] {:name :test/route8} handler))
+          (ANY "/usage-stats" [] {:name :test/route12} handler)
+          (ANY "/invitations" [] {:name :test/route19} handler)
+          (context "/members" []
+            (ANY "/:user-id" [] {:name :test/route34} handler)
+            (ANY "/" [] {:name :test/route38} handler)
+            #_(ANY "/invitation-data/:user-id" [] {:name :test/route39} handler))
+          (ANY "/errors" [] {:name :test/route17} handler)
+          (ANY "/" [] {:name :test/route42} handler)
+          (ANY "/confirm-membership/:token" [] {:name :test/route46} handler)
+          (ANY "/topics" [] {:name :test/route57} handler)))
+      (context "/messages" []
+        (ANY "/user/:user-id" [] {:name :test/route14} handler)
+        (ANY "/device/:client-id" [] {:name :test/route30} handler)
+        (ANY "/topic/:topic" [] {:name :test/route48} handler))
+      (context "/topics" []
+        (ANY "/:topic" [] {:name :test/route32} handler)
+        (ANY "/" [] {:name :test/route54} handler))
+      (ANY "/whoami" [] {:name :test/route41} handler)
+      (ANY "/login" [] {:name :test/route51} handler))
     (context "/v2" []
-             (ANY "/whoami" [] {:name :test/route1} handler)
-             (context "/users/:user-id" []
-                      (ANY "/datasets" [] {:name :test/route2} handler)
-                      (ANY "/devices" [] {:name :test/route25} handler)
-                      (context "/topics" []
-                               (ANY "/bulk" [] {:name :test/route29} handler)
-                               (ANY "/" [] {:name :test/route54} handler))
-                      (ANY "/" [] {:name :test/route45} handler))
-             (context "/public" []
-                      (context "/projects/:project-id" []
-                               (ANY "/datasets" [] {:name :test/route3} handler)
-                               (ANY "/" [] {:name :test/route27} handler))
-                      #_(ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
-                      (ANY "/datasets/:dataset-id" [] {:name :test/route28} handler)
-                      (ANY "/messages/dataset/:dataset-id" [] {:name :test/route53} handler))
-             (ANY "/datasets/:dataset-id" [] {:name :test/route11} handler)
-             (ANY "/login" [] {:name :test/route23} handler)
-             (ANY "/orgs/:org-id/topics" [] {:name :test/route40} handler)
-             (ANY "/schemas" [] {:name :test/route44} handler)
-             (ANY "/topics/:topic" [] {:name :test/route47} handler)
-             (ANY "/topics" [] {:name :test/route50} handler))))
+      (ANY "/whoami" [] {:name :test/route1} handler)
+      (context "/users/:user-id" []
+        (ANY "/datasets" [] {:name :test/route2} handler)
+        (ANY "/devices" [] {:name :test/route25} handler)
+        (context "/topics" []
+          (ANY "/bulk" [] {:name :test/route29} handler)
+          (ANY "/" [] {:name :test/route54} handler))
+        (ANY "/" [] {:name :test/route45} handler))
+      (context "/public" []
+        (context "/projects/:project-id" []
+          (ANY "/datasets" [] {:name :test/route3} handler)
+          (ANY "/" [] {:name :test/route27} handler))
+        #_(ANY "/messages/dataset/bulk" [] {:name :test/route20} handler)
+        (ANY "/datasets/:dataset-id" [] {:name :test/route28} handler)
+        (ANY "/messages/dataset/:dataset-id" [] {:name :test/route53} handler))
+      (ANY "/datasets/:dataset-id" [] {:name :test/route11} handler)
+      (ANY "/login" [] {:name :test/route23} handler)
+      (ANY "/orgs/:org-id/topics" [] {:name :test/route40} handler)
+      (ANY "/schemas" [] {:name :test/route44} handler)
+      (ANY "/topics/:topic" [] {:name :test/route47} handler)
+      (ANY "/topics" [] {:name :test/route50} handler))))
 
 (def opensensors-pedestal-routes
   (map-tree/router
