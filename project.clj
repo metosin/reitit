@@ -68,10 +68,13 @@
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
-                                  ;[metosin/reitit "0.2.13"]
-                                  [meta-merge]
                                   [metosin/schema-tools]
                                   [metosin/spec-tools]
+                                  [metosin/muuntaja]
+                                  [metosin/sieppari]
+                                  [metosin/jsonista]
+                                  [lambdaisland/deep-diff]
+                                  [meta-merge]
 
                                   [expound "0.7.2"]
                                   [orchestra "2018.12.06-2"]

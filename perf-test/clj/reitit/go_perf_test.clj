@@ -300,7 +300,7 @@
     (ring/create-default-handler)
     {:inject-match? false, :inject-router? false}))
 
-(defrecord Req [uri request-method])
+(defrecord Req [uri request-method path-params])
 
 (defn route->req [route]
   (map->Req {:request-method (-> route keys first str/lower-case keyword)
@@ -317,6 +317,7 @@
   ;; 120ns (faster decode params)
   ;; 140µs (java-segment-router)
   ;;  60ns (java-segment-router, no injects)
+  ;;  55ns (trie-router, no injects)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
     (title "static")
     (assert (= {:status 200, :body "/user/repos"} (app req)))
@@ -328,6 +329,7 @@
   ;; 560µs (java-segment-router)
   ;; 490ns (java-segment-router, no injects)
   ;; 440ns (java-segment-router, no injects, single-wild-optimization)
+  ;; 305ns (trie-router, no injects)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -339,6 +341,7 @@
   ;; 120µs (java-segment-router)
   ;; 100µs (java-segment-router, no injects)
   ;;  90µs (java-segment-router, no injects, single-wild-optimization)
+  ;;  66µs (trie-router, no injects)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench
