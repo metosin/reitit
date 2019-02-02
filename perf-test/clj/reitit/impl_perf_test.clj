@@ -185,15 +185,6 @@
           :c "1+1"
           :d "1"}))
 
-(defn split! []
-
-  (suite "split")
-
-  ;; 114ns (String/split)
-  ;;  82ns (SegmentTrie/split)
-  (test "Splitting a String")
-  (test! impl/segments "/olipa/kerran/:avaruus"))
-
 (comment
   (url-decode!)
   (url-encode!)

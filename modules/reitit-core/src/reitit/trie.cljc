@@ -3,11 +3,16 @@
   (:require [clojure.string :as str])
   (:import [reitit Trie Trie$Match Trie$Matcher]))
 
+(defrecord Wild [value])
+(defrecord CatchAll [value])
 (defrecord Match [data path-params])
 (defrecord Node [children wilds catch-all data])
 
+(defn wild? [x] (instance? Wild x))
+(defn catch-all? [x] (instance? CatchAll x))
+
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
-(defn- -common-prefix [s1 s2]
+(defn common-prefix [s1 s2]
   (let [max (min (count s1) (count s2))]
     (loop [i 0]
       (cond
@@ -26,10 +31,10 @@
     (keyword (subs s 0 i) (subs s (inc i)))
     (keyword s)))
 
-(defn- -split [s]
+(defn split-path [s]
   (let [-static (fn [from to] (if-not (= from to) [(subs s from to)]))
-        -wild (fn [from to] [(-keyword (subs s (inc from) to))])
-        -catch-all (fn [from to] [#{(keyword (subs s (inc from) to))}])]
+        -wild (fn [from to] [(->Wild (-keyword (subs s (inc from) to)))])
+        -catch-all (fn [from to] [(->CatchAll (keyword (subs s (inc from) to)))])]
     (loop [ss nil, from 0, to 0]
       (if (= to (count s))
         (concat ss (-static from to))
@@ -44,6 +49,15 @@
                (recur (concat ss (-static from to) (-catch-all to to')) to' to'))
           (recur ss from (inc to)))))))
 
+(defn join-path [xs]
+  (reduce
+    (fn [s x]
+      (str s (cond
+               (string? x) x
+               (instance? Wild x) (str "{" (-> x :value str (subs 1)) "}")
+               (instance? CatchAll x) (str "{*" (-> x :value str (subs 1)) "}"))))
+    "" xs))
+
 (defn- -node [m]
   (map->Node (merge {:children {}, :wilds {}, :catch-all {}} m)))
 
@@ -53,11 +67,11 @@
                 (nil? path)
                 (assoc node :data data)
 
-                (keyword? path)
-                (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps data)))
+                (instance? Wild path)
+                (update-in node [:wilds (:value path)] (fn [n] (-insert (or n (-node {})) ps data)))
 
-                (set? path)
-                (assoc-in node [:catch-all path] (-node {:data data}))
+                (instance? CatchAll path)
+                (assoc-in node [:catch-all (:value path)] (-node {:data data}))
 
                 (str/blank? path)
                 (-insert node ps data)
@@ -66,7 +80,7 @@
                 (or
                   (reduce
                     (fn [_ [p n]]
-                      (if-let [cp (-common-prefix p path)]
+                      (if-let [cp (common-prefix p path)]
                         (if (= cp p)
                           ;; insert into child node
                           (let [n' (-insert n (conj ps (subs path (count p))) data)]
@@ -89,6 +103,10 @@
           (update :children dissoc ""))
       node')))
 
+;;
+;; public api
+;;
+
 (defn insert
   ([routes]
    (insert nil routes))
@@ -98,14 +116,14 @@
        (insert acc p d))
      node routes))
   ([node path data]
-   (-insert (or node (-node {})) (-split path) data)))
+   (-insert (or node (-node {})) (split-path path) data)))
 
 (defn ^Trie$Matcher compile [{:keys [data children wilds catch-all]}]
   (let [matchers (cond-> []
                          data (conj (Trie/dataMatcher data))
                          children (into (for [[p c] children] (Trie/staticMatcher p (compile c))))
                          wilds (into (for [[p c] wilds] (Trie/wildMatcher p (compile c))))
-                         catch-all (into (for [[p c] catch-all] (Trie/catchAllMatcher (first p) (:data c)))))]
+                         catch-all (into (for [[p c] catch-all] (Trie/catchAllMatcher p (:data c)))))]
     (if (rest matchers)
       (Trie/linearMatcher matchers)
       (first matchers))))
@@ -182,10 +200,10 @@
   (compile)
   (pretty))
 
-(-> nil
-    (insert "/kikka" 2)
-    (insert "/kikka/kakka/kukka" 3)
-    (insert "/kikka/:kakka/kurkku" 4)
-    (insert "/kikka/kuri/{user/doc}/html" 5)
+(-> [["/kikka" 2]
+     ["/kikka/kakka/kukka" 3]
+     ["/kikka/:kakka/kurkku" 4]
+     ["/kikka/kuri/{user/doc}/html" 5]]
+    (insert)
     (compile)
     (pretty))

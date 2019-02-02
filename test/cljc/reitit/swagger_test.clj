@@ -32,16 +32,16 @@
                 :handler (fn [{{{:keys [x y]} :query
                                 {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary    "plus with body"
+          :post {:summary "plus with body"
                  :parameters {:body [int?]
                               :path {:z int?}}
-                 :swagger    {:responses {400 {:schema      {:type "string"}
-                                               :description "kosh"}}}
-                 :responses  {200 {:body {:total int?}}
-                              500 {:description "fail"}}
-                 :handler    (fn [{{{:keys [z]} :path
-                                    xs          :body} :parameters}]
-                               {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+                 :swagger {:responses {400 {:schema {:type "string"}
+                                            :description "kosh"}}}
+                 :responses {200 {:body {:total int?}}
+                             500 {:description "fail"}}
+                 :handler (fn [{{{:keys [z]} :path
+                                 xs :body} :parameters}]
+                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
        ["/schema" {:coercion schema/coercion}
         ["/plus/*z"
@@ -72,8 +72,8 @@
       (is (= {:body {:total 7}, :status 200}
              (app
                {:request-method :post
-                :uri            "/api/spec/plus/3"
-                :body-params   [1 3]}))))
+                :uri "/api/spec/plus/3"
+                :body-params [1 3]}))))
     (testing "schema"
       (is (= {:body {:total 6}, :status 200}
              (app
@@ -142,28 +142,28 @@
                                                                          :description "kosh"}
                                                                     500 {:description "fail"}}
                                                         :summary "plus"}
-                                                  :post {:parameters [{:in          "body",
-                                                                       :name        "",
+                                                  :post {:parameters [{:in "body",
+                                                                       :name "",
                                                                        :description "",
-                                                                       :required    true,
-                                                                       :schema      {:type  "array",
-                                                                                     :items {:type "integer",
-                                                                                             :format "int64"}}}
-                                                                      {:in          "path"
-                                                                       :name        "z"
+                                                                       :required true,
+                                                                       :schema {:type "array",
+                                                                                :items {:type "integer",
+                                                                                        :format "int64"}}}
+                                                                      {:in "path"
+                                                                       :name "z"
                                                                        :description ""
-                                                                       :type        "integer"
-                                                                       :required    true
-                                                                       :format      "int64"}]
-                                                         :responses  {200 {:description ""
-                                                                           :schema      {:properties {"total" {:format "int64"
-                                                                                                               :type   "integer"}}
-                                                                                         :required   ["total"]
-                                                                                         :type       "object"}}
-                                                                      400 {:schema      {:type "string"}
-                                                                           :description "kosh"}
-                                                                      500 {:description "fail"}}
-                                                         :summary    "plus with body"}}}}]
+                                                                       :type "integer"
+                                                                       :required true
+                                                                       :format "int64"}]
+                                                         :responses {200 {:description ""
+                                                                          :schema {:properties {"total" {:format "int64"
+                                                                                                         :type "integer"}}
+                                                                                   :required ["total"]
+                                                                                   :type "object"}}
+                                                                     400 {:schema {:type "string"}
+                                                                          :description "kosh"}
+                                                                     500 {:description "fail"}}
+                                                         :summary "plus with body"}}}}]
       (is (= expected spec))
 
       (testing "ring-async swagger-spec"

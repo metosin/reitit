@@ -34,7 +34,6 @@ public class Trie {
         hasPlus = true;
       }
     }
-    System.err.println();
     return decode(chars, offset, count, hasPercent, hasPlus);
   }
 

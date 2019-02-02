@@ -1,10 +1,11 @@
 (ns reitit.core
-  (:require [meta-merge.core :refer [meta-merge]]
-            [clojure.string :as str]
-            [reitit.trie :as trie]
-            [reitit.impl :as impl #?@(:cljs [:refer [Route]])])
-  #?(:clj
-     (:import (reitit.impl Route))))
+  (:require [clojure.string :as str]
+            [reitit.impl :as impl]
+            [reitit.trie :as trie]))
+
+;;
+;; Expand
+;;
 
 (defprotocol Expand
   (expand [this opts]))
@@ -30,56 +31,9 @@
   nil
   (expand [_ _]))
 
-(defn walk [raw-routes {:keys [path data routes expand]
-                        :or {data [], routes [], expand expand}
-                        :as opts}]
-  (letfn
-    [(walk-many [p m r]
-       (reduce #(into %1 (walk-one p m %2)) [] r))
-     (walk-one [pacc macc routes]
-       (if (vector? (first routes))
-         (walk-many pacc macc routes)
-         (when (string? (first routes))
-           (let [[path & [maybe-arg :as args]] routes
-                 [data childs] (if (or (vector? maybe-arg)
-                                       (and (sequential? maybe-arg)
-                                            (sequential? (first maybe-arg)))
-                                       (nil? maybe-arg))
-                                 [{} args]
-                                 [maybe-arg (rest args)])
-                 macc (into macc (expand data opts))
-                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
-             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
-    (walk-one path (mapv identity data) raw-routes)))
-
-(defn map-data [f routes]
-  (mapv #(update % 1 f) routes))
-
-(defn merge-data [x]
-  (reduce
-    (fn [acc [k v]]
-      (meta-merge acc {k v}))
-    {} x))
-
-(defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
-  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
-           coerce (into [] (keep #(coerce % opts)))))
-
-(defn path-conflicting-routes [routes]
-  (-> (into {}
-            (comp (map-indexed (fn [index route]
-                                 [route (into #{}
-                                              (filter #(impl/conflicting-routes? route %))
-                                              (subvec routes (inc index)))]))
-                  (filter (comp seq second)))
-            routes)
-      (not-empty)))
-
-(defn conflicting-paths [conflicts]
-  (->> (for [[p pc] conflicts]
-         (conj (map first pc) (first p)))
-       (apply concat)
-       (set)))
+;;
+;; Conflicts
+;;
 
 (defn path-conflicts-str [conflicts]
   (apply str "Router contains conflicting route paths:\n\n"
@@ -87,15 +41,6 @@
            (fn [[[path] vals]]
              (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
            conflicts)))
-
-(defn name-conflicting-routes [routes]
-  (some->> routes
-           (group-by (comp :name second))
-           (remove (comp nil? first))
-           (filter (comp pos? count butlast second))
-           (seq)
-           (map (fn [[k v]] [k (set v)]))
-           (into {})))
 
 (defn name-conflicts-str [conflicts]
   (apply str "Router contains conflicting route names:\n\n"
@@ -110,23 +55,9 @@
       (f conflicts)
       {:conflicts conflicts})))
 
-(defn- name-lookup [[_ {:keys [name]}] _]
-  (if name #{name}))
-
-(defn- find-names [routes _]
-  (into [] (keep #(-> % second :name)) routes))
-
-(defn- compile-route [[p m :as route] {:keys [compile] :as opts}]
-  [p m (if compile (compile route opts))])
-
-(defn- compile-routes [routes opts]
-  (into [] (keep #(compile-route % opts) routes)))
-
-(defn- uncompile-routes [routes]
-  (mapv (comp vec (partial take 2)) routes))
-
-(defn route-info [route]
-  (impl/create route))
+;;
+;; Router
+;;
 
 (defprotocol Router
   (router-name [this])
@@ -162,26 +93,30 @@
   ([match query-params]
    (some-> match :path (cond-> query-params (str "?" (impl/query-string query-params))))))
 
+;;
+;; Different routers
+;;
+
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
   expanded options. See [[router]] for available options."
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [names (find-names compiled-routes opts)
+   (let [names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/create [p data result])
+                     (let [{:keys [path-params] :as route} (impl/parse p)
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
-                                (->PartialMatch p data result % path-params))]
+                                (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
                        [(conj pl (-> (trie/insert nil p (->Match p data result nil nil)) (trie/compile)))
                         (if name (assoc nl name f) nl)]))
                    [[] {}]
                    compiled-routes)
          lookup (impl/fast-map nl)
          scanner (trie/scanner pl)
-         routes (uncompile-routes compiled-routes)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
        Router
@@ -219,7 +154,7 @@
          (str "can't create :lookup-router with wildcard routes: " wilds)
          {:wilds wilds
           :routes compiled-routes})))
-   (let [names (find-names compiled-routes opts)
+   (let [names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      [(assoc pl p (->Match p data result {} p))
@@ -230,7 +165,7 @@
                    compiled-routes)
          data (impl/fast-map pl)
          lookup (impl/fast-map nl)
-         routes (uncompile-routes compiled-routes)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
@@ -258,20 +193,20 @@
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [names (find-names compiled-routes opts)
+   (let [names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/create [p data result])
+                     (let [{:keys [path-params] :as route} (impl/parse p)
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
-                                (->PartialMatch p data result % path-params))]
+                                (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
                        [(trie/insert pl p (->Match p data result nil nil))
                         (if name (assoc nl name f) nl)]))
                    [nil {}]
                    compiled-routes)
          pl (trie/compile pl)
          lookup (impl/fast-map nl)
-         routes (uncompile-routes compiled-routes)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
        Router
@@ -308,11 +243,11 @@
        (ex-info
          (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
          {:routes compiled-routes})))
-   (let [[n :as names] (find-names compiled-routes opts)
+   (let [[n :as names] (impl/find-names compiled-routes opts)
          [[p data result]] compiled-routes
          p #?(:clj (.intern ^String p) :cljs p)
          match (->Match p data result {} p)
-         routes (uncompile-routes compiled-routes)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
@@ -347,8 +282,8 @@
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (trie-router wild opts)
          static-router (->static-router lookup opts)
-         names (find-names compiled-routes opts)
-         routes (uncompile-routes compiled-routes)]
+         names (impl/find-names compiled-routes opts)
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
@@ -378,13 +313,13 @@
   ([compiled-routes]
    (quarantine-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [conflicting-paths (-> compiled-routes path-conflicting-routes conflicting-paths)
+   (let [conflicting-paths (-> compiled-routes impl/path-conflicting-routes impl/conflicting-paths)
          conflicting? #(contains? conflicting-paths (first %))
          {conflicting true, non-conflicting false} (group-by conflicting? compiled-routes)
          linear-router (linear-router conflicting opts)
          mixed-router (mixed-router non-conflicting opts)
-         names (find-names compiled-routes opts)
-         routes (uncompile-routes compiled-routes)]
+         names (impl/find-names compiled-routes opts)
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_]
@@ -407,8 +342,12 @@
          (or (match-by-name mixed-router name path-params)
              (match-by-name linear-router name path-params)))))))
 
+;;
+;; Creating Routers
+;;
+
 (defn ^:no-doc default-router-options []
-  {:lookup name-lookup
+  {:lookup (fn [[_ {:keys [name]}] _] (if name #{name}))
    :expand expand
    :coerce (fn [route _] route)
    :compile (fn [[_ {:keys [handler]}] _] handler)
@@ -435,10 +374,10 @@
    (router raw-routes {}))
   ([raw-routes opts]
    (let [{:keys [router] :as opts} (merge (default-router-options) opts)
-         routes (resolve-routes raw-routes opts)
-         path-conflicting (path-conflicting-routes routes)
-         name-conflicting (name-conflicting-routes routes)
-         compiled-routes (compile-routes routes opts)
+         routes (impl/resolve-routes raw-routes opts)
+         path-conflicting (impl/path-conflicting-routes routes)
+         name-conflicting (impl/name-conflicting-routes routes)
+         compiled-routes (impl/compile-routes routes opts)
          wilds? (boolean (some impl/wild-route? compiled-routes))
          all-wilds? (every? impl/wild-route? compiled-routes)
          router (cond

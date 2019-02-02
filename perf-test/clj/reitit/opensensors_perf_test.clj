@@ -15,7 +15,8 @@
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
             [reitit.core :as r]
-            [criterium.core :as cc]))
+            [criterium.core :as cc]
+            [reitit.trie :as trie]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -581,11 +582,11 @@
     ;;   735ns (maybe-map-values)
     ;;   474ns (java-segment-router)
     ;;   373ms (trie)
-    (b! "reitit-ring" reitit-ring-f)
+    #_(b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
     ;;   271ms (trie)
-    (b! "reitit-ring-fast" reitit-ring-fast-f)
+    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
@@ -614,6 +615,11 @@
 
 (comment
   (bench-rest!))
+
+(-> opensensors-routes
+    trie/insert
+    trie/compile
+    trie/pretty)
 
 (set! *warn-on-reflection* true)
 

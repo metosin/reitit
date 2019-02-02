@@ -64,12 +64,8 @@
   {:name ::swagger
    :spec ::spec})
 
-(defn- path->template [path]
-  (->> (impl/segments path)
-       (map #(if (impl/wild-or-catch-all-param? %)
-               (str "{" (subs % 1) "}") %))
-       (str/join "/")
-       (str "/")))
+(defn- swagger-path [path]
+  (-> path impl/normalize (str/replace #"\{\*" "{")))
 
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
@@ -100,7 +96,7 @@
                                     (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                              [(path->template p) endpoint]))]
+                              [(swagger-path p) endpoint]))]
        (let [paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) (into {}))]
          {:status 200
           :body (meta-merge swagger {:paths paths})})))
