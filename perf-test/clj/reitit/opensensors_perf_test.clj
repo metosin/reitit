@@ -570,7 +570,8 @@
     ;;   662ns (prefix-tree-router)
     ;;   567ns (segment-router)
     ;;   326ns (java-segment-router)
-    ;;   194ms (trie)
+    ;;   194ns (trie)
+    ;;   160ns (trie, prioritized)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -581,51 +582,46 @@
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
     ;;   474ns (java-segment-router)
-    ;;   373ms (trie)
-    #_(b! "reitit-ring" reitit-ring-f)
+    ;;   373ns (trie)
+    ;;   323ns (trie, prioritized)
+    (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
     ;;   271ms (trie)
-    #_(b! "reitit-ring-fast" reitit-ring-fast-f)
+    ;;   240ns (trie, prioritized)
+    (b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
-    #_(b! "reitit-ring-linear" reitit-ring-linear-f)
+    (b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
-    #_(b! "calfpath-walker" calfpath-walker-f)
+    (b! "calfpath-walker" calfpath-walker-f)
 
     ;;  4774ns
-    #_(b! "calfpath-unroll" calfpath-unroll-f)
+    (b! "calfpath-unroll" calfpath-unroll-f)
 
     ;;  2821ns
-    #_(b! "pedestal" pedestal-f)
+    (b! "pedestal" pedestal-f)
 
     ;;  4803ns
-    #_(b! "calfpath-macros" calfpath-macros-f)
+    (b! "calfpath-macros" calfpath-macros-f)
 
     ;; 11615ns
-    #_(b! "compojure" compojure-f)
+    (b! "compojure" compojure-f)
 
     ;; 15034ns
-    #_(b! "bidi" bidi-f)
+    (b! "bidi" bidi-f)
 
     ;; 19688ns
-    #_(b! "ataraxy" ataraxy-f)))
+    (b! "ataraxy" ataraxy-f)))
 
 (comment
   (bench-rest!))
 
-(-> opensensors-routes
-    trie/insert
-    trie/compile
-    trie/pretty)
-
-(set! *warn-on-reflection* true)
-
-(require '[clj-async-profiler.core :as prof])
-
 (comment
+  (set! *warn-on-reflection* true)
+  (require '[clj-async-profiler.core :as prof])
   ;; 629ms (arraylist)
   ;; 409ns (transient)
   ;; 409ns (staticMultiMatcher)
