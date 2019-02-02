@@ -13,8 +13,8 @@ import java.util.*;
 
 public class Trie {
 
-  private static String decode(String ss, int begin, int end, boolean hasPercent, boolean hasPlus) {
-    final String s = ss.substring(begin, end);
+  private static String decode(char[] chars, int begin, int end, boolean hasPercent, boolean hasPlus) {
+    final String s = new String(chars, begin, end - begin);
     try {
       if (hasPercent) {
         return URLDecoder.decode(hasPlus ? s.replace("+", "%2B") : s, "UTF-8");
@@ -24,18 +24,18 @@ public class Trie {
     return s;
   }
 
-  private static String decode(String s, int begin, int end) {
+  private static String decode(char[] chars, int begin, int end) {
     boolean hasPercent = false;
     boolean hasPlus = false;
     for (int j = begin; j < end; j++) {
-      final char c = s.charAt(j);
+      final char c = chars[j];
       if (c == '%') {
         hasPercent = true;
       } else if (c == '+') {
         hasPlus = true;
       }
     }
-    return decode(s, begin, end, hasPercent, hasPlus);
+    return decode(chars, begin, end, hasPercent, hasPlus);
   }
 
   public static class Match {
@@ -56,7 +56,7 @@ public class Trie {
   }
 
   public interface Matcher {
-    Match match(int i, int max, String path, Match match);
+    Match match(int i, int max, char[] path, Match match);
 
     int depth();
   }
@@ -77,12 +77,12 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, String path, Match match) {
+    public Match match(int i, int max, char[] path, Match match) {
       if (max < i + size) {
         return null;
       }
       for (int j = 0; j < size; j++) {
-        if (path.charAt(j + i) != this.path[j]) {
+        if (path[j + i] != this.path[j]) {
           return null;
         }
       }
@@ -112,7 +112,7 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, String path, Match match) {
+    public Match match(int i, int max, char[] path, Match match) {
       if (i == max) {
         match.data = data;
         return match;
@@ -145,12 +145,12 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, String path, Match match) {
-      if (i < max && path.charAt(i) != '/') {
+    public Match match(int i, int max, char[] path, Match match) {
+      if (i < max && path[i] != '/') {
         boolean hasPercent = false;
         boolean hasPlus = false;
         for (int j = i; j < max; j++) {
-          final char c = path.charAt(j);
+          final char c = path[j];
           if (c == '/') {
             final Match m = child.match(j, max, path, match);
             if (m != null) {
@@ -197,7 +197,7 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, String path, Match match) {
+    public Match match(int i, int max, char[] path, Match match) {
       if (i < max) {
         match.params.assoc(parameter, decode(path, i, max));
         match.data = data;
@@ -233,7 +233,7 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, String path, Match match) {
+    public Match match(int i, int max, char[] path, Match match) {
       for (int j = 0; j < size; j++) {
         final Match m = childs[j].match(i, max, path, match);
         if (m != null) {
@@ -255,7 +255,7 @@ public class Trie {
   }
 
   public static Object lookup(Matcher matcher, String path) {
-    return matcher.match(0, path.length(), path, new Match());
+    return matcher.match(0, path.length(), path.toCharArray(), new Match());
   }
 
   public static Matcher scanner(List<Matcher> matchers) {
@@ -263,13 +263,6 @@ public class Trie {
   }
 
   public static void main(String[] args) {
-
-    //Matcher matcher = new StaticMatcher("/kikka", new StaticMatcher("/kukka", new DataMatcher(1)));
-//    Matcher matcher =
-//            staticMatcher("/kikka/",
-//                    wildMatcher(Keyword.intern("kukka"),
-//                            staticMatcher("/kikka",
-//                                    dataMatcher(1))));
     Matcher matcher =
             linearMatcher(
                     Arrays.asList(

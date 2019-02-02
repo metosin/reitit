@@ -20,8 +20,7 @@
 ;;
 
 (defn h [path]
-  (fn [_]
-    {:status 200, :body path}))
+  (constantly {:status 200, :body path}))
 
 (defn add [handler routes route]
   (let [method (-> route keys first str/lower-case keyword)
@@ -318,6 +317,7 @@
   ;; 140µs (java-segment-router)
   ;;  60ns (java-segment-router, no injects)
   ;;  55ns (trie-router, no injects)
+  ;;  54µs (trie-router, no injects, optimized)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
     (title "static")
     (assert (= {:status 200, :body "/user/repos"} (app req)))
@@ -330,6 +330,7 @@
   ;; 490ns (java-segment-router, no injects)
   ;; 440ns (java-segment-router, no injects, single-wild-optimization)
   ;; 305ns (trie-router, no injects)
+  ;; 281µs (trie-router, no injects, optimized)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -342,6 +343,7 @@
   ;; 100µs (java-segment-router, no injects)
   ;;  90µs (java-segment-router, no injects, single-wild-optimization)
   ;;  66µs (trie-router, no injects)
+  ;;  64µs (trie-router, no injects, optimized)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench

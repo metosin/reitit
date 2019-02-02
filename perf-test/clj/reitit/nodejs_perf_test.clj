@@ -69,7 +69,7 @@
   ;; 25310 / 25126
   "regex"
 
-  ;; 112017 / 113811
+  ;; 112719 / 113959
   (title "reitit")
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/product/foo
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/twenty/bar

@@ -584,12 +584,14 @@
     ;;   474ns (java-segment-router)
     ;;   373ns (trie)
     ;;   323ns (trie, prioritized)
+    ;;   289ns (trie, prioritized, zero-copy)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
     ;;   271ms (trie)
     ;;   240ns (trie, prioritized)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
+    ;;   240ns (trie, prioritized, zero-copy)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
