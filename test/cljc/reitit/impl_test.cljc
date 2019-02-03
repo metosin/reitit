@@ -2,17 +2,6 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.impl :as impl]))
 
-(deftest normalize-test
-  (are [path expected]
-    (is (= expected (impl/normalize path)))
-
-    "/olipa/:kerran/avaruus", "/olipa/{kerran}/avaruus"
-    "/olipa/{kerran}/avaruus", "/olipa/{kerran}/avaruus"
-    "/olipa/{a.b/c}/avaruus", "/olipa/{a.b/c}/avaruus"
-    "/olipa/kerran/*avaruus", "/olipa/kerran/{*avaruus}"
-    "/olipa/kerran/{*avaruus}", "/olipa/kerran/{*avaruus}"
-    "/olipa/kerran/{*valvavan.suuri/avaruus}", "/olipa/kerran/{*valvavan.suuri/avaruus}"))
-
 (deftest conflicting-route-test
   (are [c? p1 p2]
     (is (= c? (impl/conflicting-routes? [p1] [p2])))

@@ -11,6 +11,9 @@
 (defn wild? [x] (instance? Wild x))
 (defn catch-all? [x] (instance? CatchAll x))
 
+(defprotocol Matcher
+  (match [this i max path match]))
+
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
 (defn common-prefix [s1 s2]
   (let [max (min (count s1) (count s2))]
@@ -58,6 +61,9 @@
                (instance? CatchAll x) (str "{*" (-> x :value str (subs 1)) "}"))))
     "" xs))
 
+(defn normalize [s]
+  (-> s (split-path) (join-path)))
+
 (defn- -node [m]
   (map->Node (merge {:children {}, :wilds {}, :catch-all {}} m)))
 
@@ -103,6 +109,21 @@
           (update :children dissoc ""))
       node')))
 
+(defn data-matcher [data]
+  #?(:clj (Trie/dataMatcher data)))
+
+(defn static-matcher [path matcher]
+  #?(:clj (Trie/staticMatcher path matcher)))
+
+(defn wild-matcher [path matcher]
+  #?(:clj (Trie/wildMatcher path matcher)))
+
+(defn catch-all-matcher [path data]
+  #?(:clj (Trie/catchAllMatcher path data)))
+
+(defn linear-matcher [matchers]
+  #?(:clj (Trie/linearMatcher matchers)))
+
 ;;
 ;; public api
 ;;
@@ -118,14 +139,14 @@
   ([node path data]
    (-insert (or node (-node {})) (split-path path) data)))
 
-(defn ^Trie$Matcher compile [{:keys [data children wilds catch-all]}]
+(defn compile [{:keys [data children wilds catch-all]}]
   (let [matchers (cond-> []
-                         data (conj (Trie/dataMatcher data))
-                         children (into (for [[p c] children] (Trie/staticMatcher p (compile c))))
-                         wilds (into (for [[p c] wilds] (Trie/wildMatcher p (compile c))))
-                         catch-all (into (for [[p c] catch-all] (Trie/catchAllMatcher p (:data c)))))]
+                         data (conj (data-matcher data))
+                         children (into (for [[p c] children] (static-matcher p (compile c))))
+                         wilds (into (for [[p c] wilds] (wild-matcher p (compile c))))
+                         catch-all (into (for [[p c] catch-all] (catch-all-matcher p (:data c)))))]
     (if (rest matchers)
-      (Trie/linearMatcher matchers)
+      (linear-matcher matchers)
       (first matchers))))
 
 (defn pretty [matcher]
@@ -134,9 +155,6 @@
 (defn lookup [^Trie$Matcher matcher path]
   (if-let [match ^Trie$Match (Trie/lookup matcher ^String path)]
     (->Match (.data match) (.parameters match))))
-
-(defn scanner [compiled-tries]
-  (Trie/scanner compiled-tries))
 
 ;;
 ;; spike

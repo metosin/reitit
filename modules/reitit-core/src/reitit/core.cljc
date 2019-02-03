@@ -115,7 +115,7 @@
                    [[] {}]
                    compiled-routes)
          lookup (impl/fast-map nl)
-         scanner (trie/scanner pl)
+         matcher (trie/linear-matcher pl)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
@@ -131,7 +131,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (trie/lookup scanner path)]
+         (if-let [match (trie/lookup matcher path)]
            (-> (:data match)
                (assoc :path-params (:path-params match))
                (assoc :path path))))

@@ -5,7 +5,8 @@
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
             [clojure.string :as str]
-            [reitit.coercion :as coercion]))
+            [reitit.coercion :as coercion]
+            [reitit.trie :as trie]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
@@ -65,7 +66,7 @@
    :spec ::spec})
 
 (defn- swagger-path [path]
-  (-> path impl/normalize (str/replace #"\{\*" "{")))
+  (-> path trie/normalize (str/replace #"\{\*" "{")))
 
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have

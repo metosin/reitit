@@ -258,10 +258,6 @@ public class Trie {
     return matcher.match(0, path.length(), path.toCharArray(), new Match());
   }
 
-  public static Matcher scanner(List<Matcher> matchers) {
-    return new LinearMatcher(matchers);
-  }
-
   public static void main(String[] args) {
     Matcher matcher =
             linearMatcher(

@@ -9,13 +9,10 @@
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
-(defn normalize [s]
-  (-> s (trie/split-path) (trie/join-path)))
-
 (defrecord Route [path path-parts path-params])
 
 (defn parse [path]
-  (let [path #?(:clj (.intern ^String (normalize path)) :cljs (normalize path))
+  (let [path #?(:clj (.intern ^String (trie/normalize path)) :cljs (trie/normalize path))
         path-parts (trie/split-path path)
         path-params (->> path-parts (remove string?) (map :value) set)]
     (map->Route {:path-params path-params
