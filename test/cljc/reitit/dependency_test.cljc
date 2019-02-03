@@ -1,6 +1,6 @@
 (ns reitit.dependency-test
-  (:require [clojure.test :refer :all]
-            [reitit.dependency :refer [post-order]])
+  (:require [clojure.test :refer [deftest testing is are]]
+            [reitit.dependency :as rc])
   #?(:clj (:import [clojure.lang ExceptionInfo])))
 
 (deftest post-order-test
@@ -9,26 +9,25 @@
                           {:name ::foo, :provides #{:foo}, :requires #{}, :wrap identity}]]
     (testing "happy cases"
       (testing "default ordering works"
-        (is (= (post-order base-middlewares)
+        (is (= (rc/post-order base-middlewares)
                (into (vec (drop 2 base-middlewares)) (take 2 base-middlewares)))))
 
       (testing "custom provides and requires work"
-        (is (= (post-order (comp hash-set :name)
-                           (fn [node
-                                ](into #{} (map (fn [k] (keyword "reitit.dependency-test" (name k))))
-                                       (:requires node)))
-                           base-middlewares)
+        (is (= (rc/post-order (comp hash-set :name)
+                              (fn [node] (into #{} (map (fn [k] (keyword "reitit.dependency-test" (name k))))
+                                               (:requires node)))
+                              base-middlewares)
                (into (vec (drop 2 base-middlewares)) (take 2 base-middlewares))))))
 
     (testing "errors"
       (testing "missing dependency detection"
         (is (thrown-with-msg? ExceptionInfo #"missing"
-                              (post-order (drop 1 base-middlewares)))))
+                              (rc/post-order (drop 1 base-middlewares)))))
 
       (testing "ambiguous dependency detection"
         (is (thrown-with-msg? ExceptionInfo #"multiple providers"
-                              (post-order (update-in base-middlewares [0 :provides] conj :foo)))))
+                              (rc/post-order (update-in base-middlewares [0 :provides] conj :foo)))))
 
       (testing "circular dependency detection"
         (is (thrown-with-msg? ExceptionInfo #"circular"
-                              (post-order (assoc-in base-middlewares [2 :requires] #{:baz}))))))))
+                              (rc/post-order (assoc-in base-middlewares [2 :requires] #{:baz}))))))))
