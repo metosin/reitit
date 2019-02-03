@@ -84,7 +84,7 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
-         	      :operationsSorter "alpha"}})
+                  :operationsSorter "alpha"}})
       (ring/create-default-handler))))
 
 (defn start []
