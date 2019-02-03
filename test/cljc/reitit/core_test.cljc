@@ -333,13 +333,3 @@
   (let [router (r/router ["/endpoint" (->Named :kikka)])]
     (is (= [["/endpoint" {:name :kikka}]]
            (r/routes router)))))
-
-(r/router
-  [["/:abba" ::abba]
-   ["/abba/1" ::abba2]
-   ["/:jabba/2" ::jabba2]
-   ["/:abba/:dabba/doo" ::doo]
-   ["/abba/dabba/boo/baa" ::baa]
-   ["/abba/:dabba/boo" ::boo]
-   ["/:jabba/:dabba/:doo/:daa/*foo" ::wild]]
-  {:router r/trie-router})
