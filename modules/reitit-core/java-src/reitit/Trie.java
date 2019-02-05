@@ -28,11 +28,15 @@ public class Trie {
     boolean hasPercent = false;
     boolean hasPlus = false;
     for (int j = begin; j < end; j++) {
-      final char c = chars[j];
-      if (c == '%') {
-        hasPercent = true;
-      } else if (c == '+') {
-        hasPlus = true;
+      switch (chars[j]) {
+        case '%':
+          hasPercent = true;
+          break;
+        case '+':
+          hasPlus = true;
+          break;
+        default:
+          break;
       }
     }
     return decode(chars, begin, end, hasPercent, hasPlus);
@@ -151,16 +155,21 @@ public class Trie {
         boolean hasPlus = false;
         for (int j = i; j < max; j++) {
           final char c = path[j];
-          if (c == '/') {
-            final Match m = child.match(j, max, path, match);
-            if (m != null) {
-              m.params.assoc(key, decode(path, i, j, hasPercent, hasPlus));
-            }
-            return m;
-          } else if (c == '%') {
-            hasPercent = true;
-          } else if (c == '+') {
-            hasPlus = true;
+          switch (c) {
+            case '/':
+              final Match m = child.match(j, max, path, match);
+              if (m != null) {
+                m.params.assoc(key, decode(path, i, j, hasPercent, hasPlus));
+              }
+              return m;
+            case '%':
+              hasPercent = true;
+              break;
+            case '+':
+              hasPlus = true;
+              break;
+            default:
+              break;
           }
         }
         final Match m = child.match(max, max, path, match);

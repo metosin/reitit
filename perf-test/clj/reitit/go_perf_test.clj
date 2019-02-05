@@ -330,7 +330,8 @@
   ;; 490ns (java-segment-router, no injects)
   ;; 440ns (java-segment-router, no injects, single-wild-optimization)
   ;; 305ns (trie-router, no injects)
-  ;; 281ns (trie-router, no injects, optimized) - 690ns (clojure)
+  ;; 281ns (trie-router, no injects, optimized)
+  ;; 277ns (trie-router, no injects, switch-case) - 690ns clojure
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -344,6 +345,7 @@
   ;;  90µs (java-segment-router, no injects, single-wild-optimization)
   ;;  66µs (trie-router, no injects)
   ;;  64µs (trie-router, no injects, optimized) - 124µs (clojure)
+  ;;  63µs (trie-router, no injects, switch-case) - 124µs (clojure)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench
@@ -357,8 +359,7 @@
   (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})
   (do
     (require '[clj-async-profiler.core :as prof])
-    (prof/start {})
-    (time
-      (dotimes [_ 10000000]
+    (prof/profile
+      (dotimes [_ 1000000]
         (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})))
-    (str (prof/stop {}))))
+    (prof/serve-files 8080)))
