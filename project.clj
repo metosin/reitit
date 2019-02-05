@@ -97,7 +97,7 @@
                                   [manifold "0.1.8"]
                                   [funcool/promesa "1.9.0"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.2.3-SNAPSHOT"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.3.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
                                   [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}

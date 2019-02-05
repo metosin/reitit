@@ -1,7 +1,8 @@
 (ns reitit.trie
   (:refer-clojure :exclude [compile])
   (:require [clojure.string :as str])
-  (:import [reitit Trie Trie$Match Trie$Matcher]))
+  (:import [reitit Trie Trie$Match Trie$Matcher]
+           (java.net URLDecoder)))
 
 (defrecord Wild [value])
 (defrecord CatchAll [value])
@@ -12,7 +13,13 @@
 (defn catch-all? [x] (instance? CatchAll x))
 
 (defprotocol Matcher
-  (match [this i max path match]))
+  (match [this i max ^chars path])
+  (view [this])
+  (depth [this]))
+
+(defn -assoc! [match k v]
+  (let [params (or (:path-params match) (transient {}))]
+    (assoc match :path-params (assoc! params k v))))
 
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
 (defn common-prefix [s1 s2]
@@ -41,7 +48,7 @@
     (loop [ss nil, from 0, to 0]
       (if (= to (count s))
         (concat ss (-static from to))
-        (condp = (get s to)
+        (case (get s to)
           \{ (let [to' (or (str/index-of s "}" to) (throw (ex-info (str "Unbalanced brackets: " (pr-str s)) {})))]
                (if (= \* (get s (inc to)))
                  (recur (concat ss (-static from to) (-catch-all (inc to) to')) (inc to') (inc to'))
@@ -109,20 +116,90 @@
           (update :children dissoc ""))
       node')))
 
+(set! *warn-on-reflection* true)
+
+(defn decode!
+  ([chars start end]
+   (let [s (String. ^chars chars ^int start ^int (- end start))]
+     (if (str/index-of s \%)
+       (URLDecoder/decode
+         (if (str/index-of s \+) (.replace ^String s "+" "%2B") s)
+         "UTF-8")
+       s)))
+  ([chars start end percent? plus?]
+   (let [s (String. ^chars chars ^int start ^int (- end start))]
+     (if percent?
+       (URLDecoder/decode
+         (if plus? (.replace ^String s "+" "%2B") s)
+         "UTF-8")
+       s))))
+
 (defn data-matcher [data]
-  #?(:clj (Trie/dataMatcher data)))
+  #?(:cljx (Trie/dataMatcher data)
+     :clj  (let [match (->Match data nil)]
+             (reify Matcher
+               (match [_ i max _]
+                 (if (= i max)
+                   match))
+               (view [_] data)
+               (depth [_] 1)))))
 
-(defn static-matcher [path matcher]
-  #?(:clj (Trie/staticMatcher path matcher)))
+(defn static-matcher [^String path matcher]
+  #?(:cljx (Trie/staticMatcher path matcher)
+     :clj  (let [^chars chars (.toCharArray path)
+                 size (alength chars)]
+             (reify Matcher
+               (match [_ i max path]
+                 (if-not (< max (+ ^int i size))
+                   (loop [j 0]
+                     (if (= j size)
+                       (match matcher (+ ^int i size) max path)
+                       (if (= ^char (aget ^chars path (+ ^int i j)) ^char (aget ^chars chars j))
+                         (recur (inc j)))))))
+               (view [_] [path (view matcher)])
+               (depth [_] (inc (depth matcher)))))))
 
-(defn wild-matcher [path matcher]
-  #?(:clj (Trie/wildMatcher path matcher)))
+(defn wild-matcher [key matcher]
+  #?(:cljx (Trie/wildMatcher key matcher)
+     :clj  (reify Matcher
+             (match [_ i max path]
+               (if (and (< ^int i ^int max) (not= ^char (aget ^chars path i) \/))
+                 (loop [percent? false, plus? false, ^int j ^int i]
+                   (if (= ^int max j)
+                     (if-let [match (match matcher max max path)]
+                       (-assoc! match key (decode! path i max percent? plus?)))
+                     (let [c ^char (aget ^chars path j)]
+                       (case c
+                         \/ (if-let [match (match matcher j max path)]
+                              (-assoc! match key (decode! path i j percent? plus?)))
+                         \% (recur true plus? (inc j))
+                         \+ (recur percent? true (inc j))
+                         (recur percent? plus? (inc j))))))))
+             (view [_] [key (view matcher)])
+             (depth [_] (inc (depth matcher))))))
 
-(defn catch-all-matcher [path data]
-  #?(:clj (Trie/catchAllMatcher path data)))
+(defn catch-all-matcher [key data]
+  #?(:cljx (Trie/catchAllMatcher key data)
+     :clj  (let [match (->Match data nil)]
+             (reify Matcher
+               (match [_ i max path]
+                 (if (< ^int i max)
+                   (-assoc! match key (decode! path i max))))
+               (view [_] [key [data]])
+               (depth [_] 1)))))
 
 (defn linear-matcher [matchers]
-  #?(:clj (Trie/linearMatcher matchers)))
+  #?(:cljx (Trie/linearMatcher matchers)
+     :clj  (let [matchers (.toArray ^java.util.List (reverse (sort-by depth matchers)))
+                 size (alength matchers)]
+             (reify Matcher
+               (match [_ i max path]
+                 (loop [j 0]
+                   (if (< j size)
+                     (or (match (aget matchers j) i max path)
+                         (recur (inc j))))))
+               (view [_] (mapv view matchers))
+               (depth [_] (apply max (map depth matchers)))))))
 
 ;;
 ;; public api
@@ -150,11 +227,18 @@
       (first matchers))))
 
 (defn pretty [matcher]
-  (-> matcher str read-string eval))
+  #?(:cljx (-> matcher str read-string eval)
+     :clj (view matcher)))
 
-(defn lookup [^Trie$Matcher matcher path]
-  (if-let [match ^Trie$Match (Trie/lookup matcher ^String path)]
-    (->Match (.data match) (.parameters match))))
+(defn lookup [matcher ^String path]
+  #?(:cljx (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
+             (->Match (.data match) (.parameters match)))
+     :clj  (let [chars (.toCharArray path)]
+             (if-let [match (match matcher 0 (alength chars) chars)]
+               (let [params (if-let [path-params (:path-params match)]
+                              (persistent! path-params)
+                              {})]
+                 (assoc match :path-params params))))))
 
 ;;
 ;; spike

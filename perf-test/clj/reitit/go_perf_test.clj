@@ -317,7 +317,7 @@
   ;; 140µs (java-segment-router)
   ;;  60ns (java-segment-router, no injects)
   ;;  55ns (trie-router, no injects)
-  ;;  54µs (trie-router, no injects, optimized)
+  ;;  54ns (trie-router, no injects, optimized)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
     (title "static")
     (assert (= {:status 200, :body "/user/repos"} (app req)))
@@ -330,7 +330,7 @@
   ;; 490ns (java-segment-router, no injects)
   ;; 440ns (java-segment-router, no injects, single-wild-optimization)
   ;; 305ns (trie-router, no injects)
-  ;; 281µs (trie-router, no injects, optimized)
+  ;; 281ns (trie-router, no injects, optimized) - 690ns (clojure)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -343,7 +343,7 @@
   ;; 100µs (java-segment-router, no injects)
   ;;  90µs (java-segment-router, no injects, single-wild-optimization)
   ;;  66µs (trie-router, no injects)
-  ;;  64µs (trie-router, no injects, optimized)
+  ;;  64µs (trie-router, no injects, optimized) - 124µs (clojure)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench
@@ -351,4 +351,14 @@
         (app r)))))
 
 (comment
-  (routing-test))
+  (routing-test)
+  (ring/get-router app)
+  (app {:uri "/authorizations/1", :request-method :get})
+  (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})
+  (do
+    (require '[clj-async-profiler.core :as prof])
+    (prof/start {})
+    (time
+      (dotimes [_ 10000000]
+        (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})))
+    (str (prof/stop {}))))
