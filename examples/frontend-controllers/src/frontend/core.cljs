@@ -65,12 +65,11 @@
        {:name ::item
         :parameters {:path {:id s/Int}
                      :query {(s/optional-key :foo) s/Keyword}}
-        :controllers [{:params (fn [match]
-                                 (:path (:parameters match)))
-                       :start (fn [params]
-                                (js/console.log "start" "item controller" (:id params)))
-                       :stop (fn [params]
-                               (js/console.log "stop" "item controller" (:id params)))}]}]]]
+        :controllers [{:parameters {:path [:id]}
+                       :start (fn [{:keys [path]}]
+                                (js/console.log "start" "item controller" (:id path)))
+                       :stop (fn [{:keys [path]}]
+                               (js/console.log "stop" "item controller" (:id path)))}]}]]]
     {:data {:controllers [{:start (log-fn "start" "root-controller")
                            :stop (log-fn "stop" "root controller")}]
             :coercion rsc/coercion}}))
