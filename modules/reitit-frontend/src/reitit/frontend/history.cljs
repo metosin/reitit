@@ -54,10 +54,10 @@
   ;; for XML or XHTML it would be in the original case.
   (let [tag (.toUpperCase tag)]
     (loop [el el]
-    (if el
-      (if (= tag (.-nodeName el))
-        el
-        (recur (.-parentNode el)))))))
+      (if el
+        (if (= tag (.-nodeName el))
+          el
+          (recur (.-parentNode el)))))))
 
 (defrecord Html5History [on-navigate router listen-key click-listen-key]
   History
