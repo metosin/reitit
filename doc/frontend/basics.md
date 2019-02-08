@@ -2,9 +2,8 @@
 
 Reitit frontend integration is built from multiple layers:
 
-- Core functions which are enchanted with few browser specific
-features
-- [Browser integration](./browser.md) for attaching Reitit to hash-change or HTML5
+- Core functions with some additional browser oriented features
+- [Browser integration](./browser.md) for attaching Reitit to hash-change or HTML
 history events
 - Stateful wrapper for easy use of history integration
 - Optional [controller extension](./controllers.md)
