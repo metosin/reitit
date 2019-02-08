@@ -49,6 +49,16 @@
     (if path
       (str "#" path))))
 
+(defn- closest-by-tag [el tag]
+  ;; nodeName is upper case for HTML always,
+  ;; for XML or XHTML it would be in the original case.
+  (let [tag (.toUpperCase tag)]
+    (loop [el el]
+    (if el
+      (if (= tag (.-nodeName el))
+        el
+        (recur (.-parentNode el)))))))
+
 (defrecord Html5History [on-navigate router listen-key click-listen-key]
   History
   (-init [this]
@@ -66,7 +76,7 @@
           (fn ignore-anchor-click
             [e]
             ;; Returns the next matching anchestor of event target
-            (when-let [el (.closest (.-target e) "a")]
+            (when-let [el (closest-by-tag (.-target e) "a")]
               (let [uri (.parse Uri (.-href el))]
                 (when (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
                                (= current-domain (.getDomain uri)))
@@ -79,7 +89,7 @@
                            (= 0 (.-button e))
                            ;; isContentEditable property is inherited from parents,
                            ;; so if the anchor is inside contenteditable div, the property will be true.
-                           (not (.-isContentEditable (.-target e)))
+                           (not (.-isContentEditable el))
                            (reitit/match-by-path router (.getPath uri)))
                   (.preventDefault e)
                   (let [path (str (.getPath uri)
