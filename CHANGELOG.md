@@ -1,3 +1,12 @@
+## Unreleased
+
+* Frontend controllers:
+    * Controller `:params` function has been deprecated
+    * Controller `:identity` function works the same as `:params`
+    * New `:parameters` option can be used to declare which parameters
+    controller is interested in, as data, which should cover most
+    use cases: `{:start start-fn, :parameters {:path [:foo-id]}}`
+
 ## 0.2.13 (2019-01-26)
 
 * Don't throw `StringIndexOutOfBoundsException` with empty path lookup on wildcard paths, fixes [#209](https://github.com/metosin/reitit/issues/209)
@@ -25,7 +34,7 @@
 
 * new options `:inject-match?` and `:inject-router?` on `reitit.http/ring-handler` and `reitit.http/routing-interceptor` to optionally not to inject `Router` and `Match` into the request. See [performance guide](https://metosin.github.io/reitit/performance.html#faster!) for details.
 
-### dependencies 
+### dependencies
 
 * updated:
 
@@ -250,7 +259,7 @@
   * Swagger enchancements
   * Better spec coercion via `st/coerce` using spec walking & inference: many simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`) can be transformed without needing spec to be wrapped. Fallbacks to old conformed based approach.
   * [example app](https://github.com/metosin/reitit/blob/master/examples/ring-spec-swagger/src/example/server.clj).
-  
+
 * updated deps:
 
 ```clj
@@ -396,7 +405,7 @@ Sample apps demonstraing the current status of `reitit`:
   * when Keywords are used in place of middleware / interceptor, a lookup is done into Router option `::middleware/registry` (or `::interceptor/registry`) with the key. Fails fast with missing registry entries.
   * fixes [#32](https://github.com/metosin/reitit/issues/32).
   * full documentation [here](https://metosin.github.io/reitit/ring/middleware_registry.html).
-  
+
  ```clj
 (require '[reitit.ring :as ring])
 (require '[reitit.middleware :as middleware])

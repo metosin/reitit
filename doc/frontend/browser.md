@@ -21,5 +21,7 @@ Check examples for simple Ring handler example.
 ## Easy
 
 Reitit frontend routers require storing the state somewhere and passing it to
-all the calls. Wrapper (`reitit.frontend.easy`) is provided which manages
-router instance and passes the instance to all calls.
+all the calls. Wrapper `reitit.frontend.easy` is provided which manages
+a router instance and passes the instance to all calls. This should
+allow easy use in most applications, as browser anyway can only have single
+event handler for page change events.
