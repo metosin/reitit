@@ -116,23 +116,10 @@
           (update :children dissoc ""))
       node')))
 
-(defn decode!
-  ([path start end]
-    #?(:clj  (let [s (subs path start end)]
-               (if (str/index-of s \%)
-                 (URLDecoder/decode
-                   (if (str/index-of s \+) (.replace ^String s "+" "%2B") s)
-                   "UTF-8")
-                 s))
-       :cljs (js/decodeURIComponent (subs path start end))))
-  ([path start end percent? plus?]
-    #?(:clj  (let [s (String. ^chars path ^int start ^int (- end start))]
-               (if percent?
-                 (URLDecoder/decode
-                   (if plus? (.replace ^String s "+" "%2B") s)
-                   "UTF-8")
-                 s))
-       :cljs (js/decodeURIComponent (subs path start end)))))
+#?(:cljs
+   (defn decode! [path start end percent?]
+     (let [path (subs path start end)]
+       (if percent? (js/decodeURIComponent path) path))))
 
 (defn data-matcher [data]
   #?(:clj  (Trie/dataMatcher data)
@@ -163,17 +150,16 @@
      :cljs (reify Matcher
              (match [_ i max path]
                (if (and (< i max) (not= (get path i) \/))
-                 (loop [percent? false, plus? false, j i]
+                 (loop [percent? false, j i]
                    (if (= max j)
                      (if-let [match (match matcher max max path)]
-                       (-assoc! match key (decode! path i max percent? plus?)))
+                       (-assoc! match key (decode! path i max percent?)))
                      (let [c ^char (get path j)]
                        (case c
                          \/ (if-let [match (match matcher j max path)]
-                              (-assoc! match key (decode! path i j percent? plus?)))
-                         \% (recur true plus? (inc j))
-                         \+ (recur percent? true (inc j))
-                         (recur percent? plus? (inc j))))))))
+                              (-assoc! match key (decode! path i j percent?)))
+                         \% (recur true (inc j))
+                         (recur percent? (inc j))))))))
              (view [_] [key (view matcher)])
              (depth [_] (inc (depth matcher))))))
 
@@ -182,8 +168,7 @@
      :cljs (let [match (->Match data nil)]
              (reify Matcher
                (match [_ i max path]
-                 (if (< i max)
-                   (-assoc! match key (decode! path i max))))
+                 (if (< i max) (-assoc! match key (decode! path i max true))))
                (view [_] [key [data]])
                (depth [_] 1)))))
 
