@@ -4,8 +4,7 @@
   (:require [reitit.core :as reitit]
             [reitit.core :as r]
             [reitit.frontend :as rf]
-            [goog.events :as gevents]
-            [goog.dom :as gdom])
+            [goog.events :as gevents])
   (:import goog.Uri))
 
 (defprotocol History
@@ -78,8 +77,10 @@
                            (not (contains? #{"_blank" "self"} (.getAttribute el "target")))
                            ;; Left button
                            (= 0 (.-button e))
-                           (reitit/match-by-path router (.getPath uri))
-                           (not (gdom/getAncestor el (fn [node] (.isContentEditable node)))))
+                           ;; isContentEditable property is inherited from parents,
+                           ;; so if the anchor is inside contenteditable div, the property will be true.
+                           (not (.-isContentEditable (.-target e)))
+                           (reitit/match-by-path router (.getPath uri)))
                   (.preventDefault e)
                   (let [path (str (.getPath uri)
                                   (if (seq (.getQuery uri))

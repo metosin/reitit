@@ -27,7 +27,13 @@
    [:ul
     [:li [:a {:href "http://google.com"} "external link"]]
     [:li [:a {:href (rfe/href ::foobar)} "Missing route"]]
-    [:li [:a {:href (rfe/href ::item)} "Missing route params"]]]])
+    [:li [:a {:href (rfe/href ::item)} "Missing route params"]]]
+
+   [:div
+    {:content-editable true
+     :suppressContentEditableWarning true}
+    [:p "Link inside contentEditable element is ignored."]
+    [:a {:href (rfe/href ::frontpage)} "Link"]]])
 
 (defn item-page [match]
   (let [{:keys [path query]} (:parameters match)
