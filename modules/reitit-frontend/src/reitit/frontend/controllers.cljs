@@ -4,6 +4,9 @@
 (defn- pad-same-length [a b]
   (concat a (take (- (count b) (count a)) (repeat nil))))
 
+(def ^:private params-warning
+  (delay (js/console.warn "Reitit-frontend controller :params is deprecated. Replace with :identity or :parameters option.")))
+
 (defn get-identity
   "Get controller identity given controller and match.
 
@@ -19,7 +22,7 @@
   (assert (not (and identity parameters))
           "Use either :identity or :parameters for controller, not both.")
   (when params
-    (js/console.warn "Controller :params is deprecated. Replace with :identity or :parameters option."))
+    @params-warning)
   (cond
     parameters
     (into {} (for [[param-type ks] parameters]
