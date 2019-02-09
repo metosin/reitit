@@ -15,7 +15,8 @@
 (defprotocol Matcher
   (match [this i max path])
   (view [this])
-  (depth [this]))
+  (depth [this])
+  (length [this]))
 
 (defn -assoc! [match k v]
   (let [params (or (:path-params match) (transient {}))]
@@ -33,8 +34,7 @@
         (not= (get s1 i) (get s2 i))
         (if-not (zero? i) (subs s1 0 i))
         ;; recur
-        :else
-        (recur (inc i))))))
+        :else (recur (inc i))))))
 
 (defn- -keyword [s]
   (if-let [i (str/index-of s "/")]
@@ -81,10 +81,13 @@
                 (assoc node :data data)
 
                 (instance? Wild path)
-                (update-in node [:wilds (:value path)] (fn [n] (-insert (or n (-node {})) ps data)))
+                (let [next (first ps)]
+                  (if (or (instance? Wild next) (instance? CatchAll next))
+                    (throw (ex-info (str "Two following wilds: " path ", " next) {}))
+                    (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps data)))))
 
                 (instance? CatchAll path)
-                (assoc-in node [:catch-all (:value path)] (-node {:data data}))
+                (assoc-in node [:catch-all path] (-node {:data data}))
 
                 (str/blank? path)
                 (-insert node ps data)
@@ -118,8 +121,7 @@
 
 #?(:cljs
    (defn decode! [path start end percent?]
-     (let [path (subs path start end)]
-       (if percent? (js/decodeURIComponent path) path))))
+     (if percent? (js/decodeURIComponent (subs path start end)) path)))
 
 (defn data-matcher [data]
   #?(:clj  (Trie/dataMatcher data)
@@ -129,7 +131,8 @@
                  (if (= i max)
                    match))
                (view [_] data)
-               (depth [_] 1)))))
+               (depth [_] 1)
+               (length [_])))))
 
 (defn static-matcher [path matcher]
   #?(:clj  (Trie/staticMatcher ^String path ^Trie$Matcher matcher)
@@ -143,25 +146,27 @@
                        (if (= (get p (+ i j)) (get path j))
                          (recur (inc j)))))))
                (view [_] [path (view matcher)])
-               (depth [_] (inc (depth matcher)))))))
+               (depth [_] (inc (depth matcher)))
+               (length [_] (count path))))))
 
-(defn wild-matcher [key matcher]
-  #?(:clj  (Trie/wildMatcher key matcher)
+(defn wild-matcher [key end matcher]
+  #?(:clj  (Trie/wildMatcher key (if end (Character. end)) matcher)
      :cljs (reify Matcher
              (match [_ i max path]
-               (if (and (< i max) (not= (get path i) \/))
+               (if (and (< i max) (not= (get path i) end))
                  (loop [percent? false, j i]
                    (if (= max j)
                      (if-let [match (match matcher max max path)]
                        (-assoc! match key (decode! path i max percent?)))
                      (let [c ^char (get path j)]
-                       (case c
-                         \/ (if-let [match (match matcher j max path)]
-                              (-assoc! match key (decode! path i j percent?)))
+                       (condp = c
+                         end (if-let [match (match matcher j max path)]
+                               (-assoc! match key (decode! path i j percent?)))
                          \% (recur true (inc j))
                          (recur percent? (inc j))))))))
              (view [_] [key (view matcher)])
-             (depth [_] (inc (depth matcher))))))
+             (depth [_] (inc (depth matcher)))
+             (length [_]))))
 
 (defn catch-all-matcher [key data]
   #?(:clj  (Trie/catchAllMatcher key data)
@@ -170,11 +175,12 @@
                (match [_ i max path]
                  (if (< i max) (-assoc! match key (decode! path i max true))))
                (view [_] [key [data]])
-               (depth [_] 1)))))
+               (depth [_] 1)
+               (length [_])))))
 
 (defn linear-matcher [matchers]
   #?(:clj  (Trie/linearMatcher matchers)
-     :cljs (let [matchers (vec (reverse (sort-by depth matchers)))
+     :cljs (let [matchers (vec (reverse (sort-by (juxt depth length) matchers)))
                  size (count matchers)]
              (reify Matcher
                (match [_ i max path]
@@ -183,7 +189,8 @@
                      (or (match (get matchers j) i max path)
                          (recur (inc j))))))
                (view [_] (mapv view matchers))
-               (depth [_] (apply max (map depth matchers)))))))
+               (depth [_] (apply max 0 (map depth matchers)))
+               (length [_])))))
 
 ;;
 ;; public api
@@ -201,14 +208,17 @@
    (-insert (or node (-node {})) (split-path path) data)))
 
 (defn compile [{:keys [data children wilds catch-all]}]
-  (let [matchers (cond-> []
-                         data (conj (data-matcher data))
-                         children (into (for [[p c] children] (static-matcher p (compile c))))
-                         wilds (into (for [[p c] wilds] (wild-matcher p (compile c))))
-                         catch-all (into (for [[p c] catch-all] (catch-all-matcher p (:data c)))))]
-    (if (rest matchers)
-      (linear-matcher matchers)
-      (first matchers))))
+  (let [ends (fn [{:keys [children]}] (or (keys children) ["/"]))
+        matchers (-> []
+                     (cond-> data (conj (data-matcher data)))
+                     (into (for [[p c] children] (static-matcher p (compile c))))
+                     (into (for [[p c] wilds, end (ends c)]
+                             (wild-matcher (:value p) (first end) (compile (update c :children select-keys [end])))))
+                     (into (for [[p c] catch-all] (catch-all-matcher (:value p) (:data c)))))]
+    (cond
+      (> (count matchers) 1) (linear-matcher matchers)
+      (= (count matchers) 1) (first matchers)
+      :else (data-matcher nil))))
 
 (defn pretty [matcher]
   #?(:clj  (-> matcher str read-string eval)
@@ -284,7 +294,13 @@
      ["/v1/orgs/:org-id/topics" 57]]
     (insert)
     (compile)
-    (pretty))
+    (pretty)
+    (./aprint))
+
+  (-> [["/{a}/2"]
+       ["/{a}.2"]]
+      (insert)
+      (compile))
 
   (-> [["/kikka" 2]
        ["/kikka/kakka/kukka" 3]

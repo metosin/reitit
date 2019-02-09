@@ -332,6 +332,7 @@
   ;; 305ns (trie-router, no injects)
   ;; 281ns (trie-router, no injects, optimized)
   ;; 277ns (trie-router, no injects, switch-case) - 690ns clojure
+  ;; 273ns (trie-router, no injects, direct-data)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -346,6 +347,7 @@
   ;;  66µs (trie-router, no injects)
   ;;  64µs (trie-router, no injects, optimized) - 124µs (clojure)
   ;;  63µs (trie-router, no injects, switch-case) - 124µs (clojure)
+  ;;  63ns (trie-router, no injects, direct-data)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench

@@ -63,6 +63,8 @@ public class Trie {
     Match match(int i, int max, char[] path, Match match);
 
     int depth();
+
+    int length();
   }
 
   public static StaticMatcher staticMatcher(String path, Matcher child) {
@@ -99,6 +101,11 @@ public class Trie {
     }
 
     @Override
+    public int length() {
+      return path.length;
+    }
+
+    @Override
     public String toString() {
       return "[\"" + new String(path) + "\" " + child + "]";
     }
@@ -130,51 +137,49 @@ public class Trie {
     }
 
     @Override
+    public int length() {
+      return 0;
+    }
+
+    @Override
     public String toString() {
       return (data != null ? data.toString() : "nil");
     }
   }
 
-  public static WildMatcher wildMatcher(Keyword parameter, Matcher child) {
-    return new WildMatcher(parameter, child);
+  public static WildMatcher wildMatcher(Keyword parameter, char end, Matcher child) {
+    return new WildMatcher(parameter, end, child);
   }
 
   static final class WildMatcher implements Matcher {
     private final Keyword key;
+    private final char end;
     private final Matcher child;
 
-    WildMatcher(Keyword key, Matcher child) {
+    WildMatcher(Keyword key, char end, Matcher child) {
       this.key = key;
+      this.end = end;
       this.child = child;
     }
 
     @Override
     public Match match(int i, int max, char[] path, Match match) {
-      if (i < max && path[i] != '/') {
+      if (i < max && path[i] != end) {
         boolean hasPercent = false;
         boolean hasPlus = false;
+        int stop = max;
         for (int j = i; j < max; j++) {
           final char c = path[j];
-          switch (c) {
-            case '/':
-              final Match m = child.match(j, max, path, match);
-              if (m != null) {
-                m.params.assoc(key, decode(path, i, j, hasPercent, hasPlus));
-              }
-              return m;
-            case '%':
-              hasPercent = true;
-              break;
-            case '+':
-              hasPlus = true;
-              break;
-            default:
-              break;
+          if (c == end) {
+            stop = j;
+            break;
           }
+          hasPercent = hasPercent || c == '%';
+          hasPlus = hasPlus || c == '+';
         }
-        final Match m = child.match(max, max, path, match);
+        final Match m = child.match(stop, max, path, match);
         if (m != null) {
-          m.params.assoc(key, decode(path, i, max, hasPercent, hasPlus));
+          m.params.assoc(key, decode(path, i, stop, hasPercent, hasPlus));
         }
         return m;
       }
@@ -184,6 +189,11 @@ public class Trie {
     @Override
     public int depth() {
       return child.depth() + 1;
+    }
+
+    @Override
+    public int length() {
+      return 0;
     }
 
     @Override
@@ -221,6 +231,11 @@ public class Trie {
     }
 
     @Override
+    public int length() {
+      return 0;
+    }
+
+    @Override
     public String toString() {
       return "[" + parameter + " " + new DataMatcher(data) + "]";
     }
@@ -237,7 +252,7 @@ public class Trie {
 
     LinearMatcher(List<Matcher> childs) {
       this.childs = childs.toArray(new Matcher[0]);
-      Arrays.sort(this.childs, Comparator.comparing(Matcher::depth).reversed());
+      Arrays.sort(this.childs, Comparator.comparing(Matcher::depth).thenComparing(Matcher::length).reversed());
       this.size = childs.size();
     }
 
@@ -255,6 +270,11 @@ public class Trie {
     @Override
     public int depth() {
       return Arrays.stream(childs).mapToInt(Matcher::depth).max().orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
+    public int length() {
+      return 0;
     }
 
     @Override
