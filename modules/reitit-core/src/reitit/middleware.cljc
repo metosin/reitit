@@ -2,7 +2,8 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.pprint :as pprint]
             [reitit.core :as r]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+            [reitit.exception :as exception]))
 
 (defprotocol IntoMiddleware
   (into-middleware [this data opts]))
@@ -17,10 +18,9 @@
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
   (into-middleware [this data {:keys [::registry] :as opts}]
-    (if-let [middleware (if registry (registry this))]
-      (into-middleware middleware data opts)
-      (throw
-        (ex-info
+    (or (if-let [middleware (if registry (registry this))]
+          (into-middleware middleware data opts))
+        (exception/fail!
           (str
             "Middleware " this " not found in registry.\n\n"
             (if (seq registry)
@@ -30,7 +30,7 @@
                   (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
               "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
           {:id this
-           :registry registry}))))
+           :registry registry})))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
@@ -61,10 +61,9 @@
       (let [compiled (::compiled opts 0)
             opts (assoc opts ::compiled (inc ^long compiled))]
         (when (>= ^long compiled ^long *max-compile-depth*)
-          (throw
-            (ex-info
-              (str "Too deep Middleware compilation - " compiled)
-              {:this this, :data data, :opts opts})))
+          (exception/fail!
+            (str "Too deep Middleware compilation - " compiled)
+            {:this this, :data data, :opts opts}))
         (if-let [middeware (into-middleware (compile data opts) data opts)]
           (map->Middleware
             (merge
@@ -76,11 +75,11 @@
 
 (defn- ensure-handler! [path data scope]
   (when-not (:handler data)
-    (throw (ex-info
-             (str "path \"" path "\" doesn't have a :handler defined"
-                  (if scope (str " for " scope)))
-             (merge {:path path, :data data}
-                    (if scope {:scope scope}))))))
+    (exception/fail!
+      (str "path \"" path "\" doesn't have a :handler defined"
+           (if scope (str " for " scope)))
+      (merge {:path path, :data data}
+             (if scope {:scope scope})))))
 
 (defn- expand-and-transform
   [middleware data {:keys [::transform] :or {transform identity} :as opts}]

@@ -1,7 +1,8 @@
 (ns reitit.spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [reitit.core :as reitit]))
+            [reitit.core :as reitit]
+            [reitit.exception :as exception]))
 
 ;;
 ;; routes
@@ -119,10 +120,9 @@
            problems)))
 
 (defn throw-on-problems! [problems explain]
-  (throw
-    (ex-info
-      (problems-str problems explain)
-      {:problems problems})))
+  (exception/fail!
+    (problems-str problems explain)
+    {:problems problems}))
 
 (defn validate-route-data [routes spec]
   (->> (for [[p d _] routes]

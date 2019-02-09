@@ -3,7 +3,8 @@
   (:require [clojure.string :as str]
             [clojure.set :as set]
             [meta-merge.core :as mm]
-            [reitit.trie :as trie])
+            [reitit.trie :as trie]
+            [reitit.exception :as exception])
   #?(:clj
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
@@ -126,10 +127,9 @@
   (when-not (every? #(contains? path-params %) required)
     (let [defined (-> path-params keys set)
           missing (set/difference required defined)]
-      (throw
-        (ex-info
-          (str "missing path-params for route " template " -> " missing)
-          {:path-params path-params, :required required})))))
+      (exception/fail!
+        (str "missing path-params for route " template " -> " missing)
+        {:path-params path-params, :required required}))))
 
 (defn fast-assoc
   #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]

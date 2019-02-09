@@ -1,6 +1,7 @@
 (ns reitit.core
   (:require [clojure.string :as str]
             [reitit.impl :as impl]
+            [reitit.exception :as exception]
             [reitit.trie :as trie]))
 
 ;;
@@ -50,10 +51,7 @@
            conflicts)))
 
 (defn throw-on-conflicts! [f conflicts]
-  (throw
-    (ex-info
-      (f conflicts)
-      {:conflicts conflicts})))
+  (exception/fail! (f conflicts) {:conflicts conflicts}))
 
 ;;
 ;; Router
@@ -149,11 +147,10 @@
    (lookup-router compiled-routes {}))
   ([compiled-routes opts]
    (when-let [wilds (seq (filter impl/wild-route? compiled-routes))]
-     (throw
-       (ex-info
-         (str "can't create :lookup-router with wildcard routes: " wilds)
-         {:wilds wilds
-          :routes compiled-routes})))
+     (exception/fail!
+       (str "can't create :lookup-router with wildcard routes: " wilds)
+       {:wilds wilds
+        :routes compiled-routes}))
    (let [names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
@@ -239,10 +236,9 @@
    (single-static-path-router compiled-routes {}))
   ([compiled-routes opts]
    (when (or (not= (count compiled-routes) 1) (some impl/wild-route? compiled-routes))
-     (throw
-       (ex-info
-         (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
-         {:routes compiled-routes})))
+     (exception/fail!
+       (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
+       {:routes compiled-routes}))
    (let [[n :as names] (impl/find-names compiled-routes opts)
          [[p data result]] compiled-routes
          p #?(:clj (.intern ^String p) :cljs p)

@@ -114,7 +114,7 @@
         (throw
           (ex-info
             (str "Can't produce Spec apidocs for " spesification)
-            {:type spesification, :coercion :spec}))))
+            {:spesification spesification, :coercion :spec}))))
     (-compile-model [_ model name]
       (into-spec model name))
     (-open-model [_ spec] spec)

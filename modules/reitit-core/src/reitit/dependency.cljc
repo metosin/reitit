@@ -1,5 +1,6 @@
 (ns reitit.dependency
-  "Dependency resolution for middleware/interceptors.")
+  "Dependency resolution for middleware/interceptors."
+  (:require [reitit.exception :as exception]))
 
 (defn- providers
   "Map from provision key to provider. `get-provides` should return the provision keys of a dependent."
@@ -8,8 +9,9 @@
             (into acc
                   (map (fn [provide]
                          (when (contains? acc provide)
-                           (throw (ex-info (str "multiple providers for: " provide)
-                                           {::multiple-providers provide})))
+                           (exception/fail!
+                             (str "multiple providers for: " provide)
+                             {::multiple-providers provide}))
                          [provide dependent]))
                   (get-provides dependent)))
           {} nodes))
@@ -19,8 +21,9 @@
   [providers k]
   (if (contains? providers k)
     (get providers k)
-    (throw (ex-info (str "provider missing for dependency: " k)
-                    {::missing-provider k}))))
+    (exception/fail!
+      (str "provider missing for dependency: " k)
+      {::missing-provider k})))
 
 (defn post-order
   "Put `nodes` in post-order. Can also be described as a reverse topological sort.
@@ -37,8 +40,7 @@
                                                             (assoc colors node :grey))]
                           [(conj nodes* node)
                            (assoc colors node :black)])
-                 :grey (throw (ex-info "circular dependency"
-                                       {:cycle (drop-while #(not= % node) (conj path node))}))
+                 :grey (exception/fail! "circular dependency" {:cycle (drop-while #(not= % node) (conj path node))})
                  :black [() colors]))
 
              (toposort-seq [nodes path colors]

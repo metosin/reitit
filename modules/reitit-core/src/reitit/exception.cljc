@@ -2,6 +2,6 @@
 
 (defn fail!
   ([message]
-    (throw (ex-info message {:type ::exeption})))
+    (throw (ex-info message {::type :exeption})))
   ([message data]
-   (throw (ex-info message (assoc data :type ::exeption)))))
+   (throw (ex-info message (merge {::type ::exeption} data)))))
