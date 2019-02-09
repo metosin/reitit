@@ -90,37 +90,46 @@
             (is (= ::wild (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
 
         (testing "bracket-params"
-          (let [router (r/router
-                         [["/{abba}" ::abba]
-                          ["/abba/1" ::abba2]
-                          ["/{jabba}/2" ::jabba2]
-                          ["/{abba}/{dabba}/doo" ::doo]
-                          ["/abba/dabba/boo/baa" ::baa]
-                          ["/abba/{dabba}/boo" ::boo]
-                          ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
-                          ["/files/file-{name}.html" ::html]
-                          ["/files/file-{name}.json" ::json]
-                          ["/files/file-{name}-large.json" ::large]]
-                         {:router r})
-                by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
-            (is (= [::abba {:abba "abba"}] (by-path "/abba")))
-            (is (= [::abba2 {}] (by-path "/abba/1")))
-            (is (= [::jabba2 {:jabba "abba"}] (by-path "/abba/2")))
-            (is (= [::doo {:abba "abba", :dabba "1"}] (by-path "/abba/1/doo")))
-            (is (= [::boo {:dabba "1"}] (by-path "/abba/1/boo")))
-            (is (= [::baa {}] (by-path "/abba/dabba/boo/baa")))
-            (is (= [::boo {:dabba "dabba"}] (by-path "/abba/dabba/boo")))
-            (is (= [::wild {:a/jabba "olipa"
-                            :a.b/dabba "kerran"
-                            :a.b.c/doo "avaruus"
-                            :a.b.c.d/daa "vaan"
-                            :foo/bar "ei/toista/kertaa"}]
-                   (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
-            (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
-            (is (= [::json {:name "10"}] (by-path "/files/file-10.json")))
-            ;(is (= [::large {:name "10"}] (by-path "/files/file-10-large.json")))
+          (testing "successful"
+            (let [router (r/router
+                           [["/{abba}" ::abba]
+                            ["/abba/1" ::abba2]
+                            ["/{jabba}/2" ::jabba2]
+                            ["/{abba}/{dabba}/doo" ::doo]
+                            ["/abba/dabba/boo/baa" ::baa]
+                            ["/abba/{dabba}/boo" ::boo]
+                            ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
+                            ["/files/file-{name}.html" ::html]
+                            ["/files/file-{name}.json" ::json]]
+                           {:router r})
+                  by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
+              (is (= [::abba {:abba "abba"}] (by-path "/abba")))
+              (is (= [::abba2 {}] (by-path "/abba/1")))
+              (is (= [::jabba2 {:jabba "abba"}] (by-path "/abba/2")))
+              (is (= [::doo {:abba "abba", :dabba "1"}] (by-path "/abba/1/doo")))
+              (is (= [::boo {:dabba "1"}] (by-path "/abba/1/boo")))
+              (is (= [::baa {}] (by-path "/abba/dabba/boo/baa")))
+              (is (= [::boo {:dabba "dabba"}] (by-path "/abba/dabba/boo")))
+              (is (= [::wild {:a/jabba "olipa"
+                              :a.b/dabba "kerran"
+                              :a.b.c/doo "avaruus"
+                              :a.b.c.d/daa "vaan"
+                              :foo/bar "ei/toista/kertaa"}]
+                     (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
+              (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))))
 
-            ))
+          (testing "invalid syntax fails fast"
+            (testing "unbalanced brackets"
+              (is (thrown-with-msg?
+                    ExceptionInfo
+                    #"^Unbalanced brackets"
+                    (r/router ["/kikka/{kukka"]))))
+            (testing "multiple terminators"
+              (is (thrown-with-msg?
+                    ExceptionInfo
+                    #"^Trie compliation error: wild :kukka has two terminators"
+                    (r/router [["/{kukka}.json"]
+                               ["/{kukka}-json"]]))))))
 
         (testing "empty path segments"
           (let [router (r/router

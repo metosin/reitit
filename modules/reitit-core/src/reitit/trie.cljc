@@ -260,8 +260,15 @@
         matchers (-> []
                      (cond-> data (conj (data-matcher data)))
                      (into (for [[p c] children] (static-matcher p (compile c))))
-                     (into (for [[p c] wilds, end (ends c)]
-                             (wild-matcher (:value p) (first end) (compile (update c :children select-keys [end])))))
+                     (into
+                       (for [[p c] wilds]
+                         (let [p (:value p)
+                               ends (ends c)]
+                           (if (seq (rest ends))
+                             (throw
+                               (ex-info
+                                 (str "Trie compliation error: wild " p " has two terminators: " ends) {}))
+                             (wild-matcher p (ffirst ends) (compile c))))))
                      (into (for [[p c] catch-all] (catch-all-matcher (:value p) (:data c)))))]
     (cond
       (> (count matchers) 1) (linear-matcher matchers)
