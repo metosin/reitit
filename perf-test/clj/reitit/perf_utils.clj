@@ -62,7 +62,7 @@
   (println)
   (let [times (for [[path [mean lower]] (bench-routes routes req f)]
                 (do
-                  (when verbose? (println (format "%7s %7s" mean lower) "\t" path))
+                  (when verbose? (println (format "%7s\t%7s" mean lower) "\t" path))
                   [mean lower]))]
     (title (str "average, lower/mean: "
                 (int (/ (reduce + (map second times)) (count times))) "/"

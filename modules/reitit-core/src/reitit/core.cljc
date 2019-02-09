@@ -131,7 +131,7 @@
        (match-by-path [_ path]
          (if-let [match (trie/lookup matcher path)]
            (-> (:data match)
-               (assoc :path-params (:path-params match))
+               (assoc :path-params (:params match))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -220,7 +220,7 @@
        (match-by-path [_ path]
          (if-let [match (trie/lookup pl path)]
            (-> (:data match)
-               (assoc :path-params (:path-params match))
+               (assoc :path-params (:params match))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]

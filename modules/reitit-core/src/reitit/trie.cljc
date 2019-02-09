@@ -7,8 +7,8 @@
 
 (defrecord Wild [value])
 (defrecord CatchAll [value])
-(defrecord Match [data path-params])
-(defrecord Node [children wilds catch-all data])
+(defrecord Match [params data])
+(defrecord Node [children wilds catch-all params data])
 
 (defn wild? [x] (instance? Wild x))
 (defn catch-all? [x] (instance? CatchAll x))
@@ -19,9 +19,9 @@
   (depth [this])
   (length [this]))
 
-(defn assoc-path-param [match k v]
-  (let [params (:path-params match)]
-    (assoc match :path-params (assoc params k v))))
+(defn assoc-param [match k v]
+  (let [params (:params match)]
+    (assoc match :params (assoc params k v))))
 
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
 (defn common-prefix [s1 s2]
@@ -121,25 +121,25 @@
 ;;
 
 (defn- -node [m]
-  (map->Node (merge {:children {}, :wilds {}, :catch-all {}} m)))
+  (map->Node (merge {:children {}, :wilds {}, :catch-all {}, :params {}} m)))
 
-(defn- -insert [node [path & ps] data]
+(defn- -insert [node [path & ps] params data]
   (let [node' (cond
 
                 (nil? path)
-                (assoc node :data data)
+                (assoc node :data data :params params)
 
                 (instance? Wild path)
                 (let [next (first ps)]
                   (if (or (instance? Wild next) (instance? CatchAll next))
                     (ex/fail! (str "Two following wilds: " path ", " next))
-                    (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps data)))))
+                    (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps params data)))))
 
                 (instance? CatchAll path)
-                (assoc-in node [:catch-all path] (-node {:data data}))
+                (assoc-in node [:catch-all path] (-node {:params params, :data data}))
 
                 (str/blank? path)
-                (-insert node ps data)
+                (-insert node ps params data)
 
                 :else
                 (or
@@ -148,20 +148,20 @@
                       (if-let [cp (common-prefix p path)]
                         (if (= cp p)
                           ;; insert into child node
-                          (let [n' (-insert n (conj ps (subs path (count p))) data)]
+                          (let [n' (-insert n (conj ps (subs path (count p))) params data)]
                             (reduced (assoc-in node [:children p] n')))
                           ;; split child node
                           (let [rp (subs p (count cp))
                                 rp' (subs path (count cp))
-                                n' (-insert (-node {}) ps data)
-                                n'' (-insert (-node {:children {rp n, rp' n'}}) nil nil)]
+                                n' (-insert (-node {}) ps params data)
+                                n'' (-insert (-node {:children {rp n, rp' n'}}) nil nil nil)]
                             (reduced (update node :children (fn [children]
                                                               (-> children
                                                                   (dissoc p)
                                                                   (assoc cp n'')))))))))
                     nil (:children node))
                   ;; new child node
-                  (assoc-in node [:children path] (-insert (-node {}) ps data))))]
+                  (assoc-in node [:children path] (-insert (-node {}) ps params data))))]
     (if-let [child (get-in node' [:children ""])]
       ;; optimize by removing empty paths
       (-> (merge-with merge (dissoc node' :data) child)
@@ -173,9 +173,9 @@
      (let [param (subs path start end)]
        (if percent? (js/decodeURIComponent param) param))))
 
-(defn data-matcher [data]
-  #?(:clj  (Trie/dataMatcher data)
-     :cljs (let [match (->Match data {})]
+(defn data-matcher [params data]
+  #?(:clj  (Trie/dataMatcher params data)
+     :cljs (let [match (->Match params data)]
              (reify Matcher
                (match [_ i max _]
                  (if (= i max)
@@ -207,23 +207,23 @@
                  (loop [percent? false, j i]
                    (if (= max j)
                      (if-let [match (match matcher max max path)]
-                       (assoc-path-param match key (decode path i max percent?)))
+                       (assoc-param match key (decode path i max percent?)))
                      (let [c ^char (get path j)]
                        (condp = c
                          end (if-let [match (match matcher j max path)]
-                               (assoc-path-param match key (decode path i j percent?)))
+                               (assoc-param match key (decode path i j percent?)))
                          \% (recur true (inc j))
                          (recur percent? (inc j))))))))
              (view [_] [key (view matcher)])
              (depth [_] (inc (depth matcher)))
              (length [_]))))
 
-(defn catch-all-matcher [key data]
-  #?(:clj  (Trie/catchAllMatcher key data)
-     :cljs (let [match (->Match data nil)]
+(defn catch-all-matcher [key params data]
+  #?(:clj  (Trie/catchAllMatcher key params data)
+     :cljs (let [match (->Match params data)]
              (reify Matcher
                (match [_ i max path]
-                 (if (< i max) (assoc-path-param match key (decode path i max true))))
+                 (if (< i max) (assoc-param match key (decode path i max true))))
                (view [_] [key [data]])
                (depth [_] 1)
                (length [_])))))
@@ -255,12 +255,14 @@
        (insert acc p d))
      node routes))
   ([node path data]
-   (-insert (or node (-node {})) (split-path path) data)))
+   (let [parts (split-path path)
+         params (zipmap (->> parts (remove string?) (map :value)) (repeat nil))]
+     (-insert (or node (-node {})) (split-path path) params data))))
 
-(defn compile [{:keys [data children wilds catch-all]}]
+(defn compile [{:keys [data params children wilds catch-all] :or {params {}}}]
   (let [ends (fn [{:keys [children]}] (or (keys children) ["/"]))
         matchers (-> []
-                     (cond-> data (conj (data-matcher data)))
+                     (cond-> data (conj (data-matcher params data)))
                      (into (for [[p c] children] (static-matcher p (compile c))))
                      (into
                        (for [[p c] wilds]
@@ -269,11 +271,11 @@
                            (if (next ends)
                              (ex/fail! (str "Trie compliation error: wild " p " has two terminators: " ends))
                              (wild-matcher p (ffirst ends) (compile c))))))
-                     (into (for [[p c] catch-all] (catch-all-matcher (:value p) (:data c)))))]
+                     (into (for [[p c] catch-all] (catch-all-matcher (:value p) params (:data c)))))]
     (cond
       (> (count matchers) 1) (linear-matcher matchers)
       (= (count matchers) 1) (first matchers)
-      :else (data-matcher nil))))
+      :else (data-matcher {} nil))))
 
 (defn pretty [matcher]
   #?(:clj  (-> matcher str read-string eval)
@@ -281,9 +283,9 @@
 
 (defn lookup [matcher path]
   #?(:clj  (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
-             (->Match (.data match) (.params match)))
+             (->Match (.params match) (.data match)))
      :cljs (if-let [match (match matcher 0 (count path) path)]
-             (->Match (:data match) (:path-params match)))))
+             (->Match (:params match) (:data match)))))
 
 ;;
 ;; spike

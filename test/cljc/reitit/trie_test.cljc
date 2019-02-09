@@ -14,24 +14,24 @@
     "/olipa/kerran/{*valvavan.suuri/avaruus}", "/olipa/kerran/{*valvavan.suuri/avaruus}"))
 
 (deftest tests
-  (is (= (trie/->Match {:a 1} {})
+  (is (= (trie/->Match {} {:a 1})
          (-> (trie/insert nil "/foo" {:a 1})
              (trie/compile)
              (trie/lookup "/foo"))))
 
-  (is (= (trie/->Match {:a 1} {})
+  (is (= (trie/->Match {} {:a 1})
          (-> (trie/insert nil "/foo" {:a 1})
              (trie/insert "/foo/*bar" {:b 1})
              (trie/compile)
              (trie/lookup "/foo"))))
 
-  (is (= (trie/->Match {:b 1} {:bar "bar"})
+  (is (= (trie/->Match {:bar "bar"} {:b 1})
          (-> (trie/insert nil "/foo" {:a 1})
              (trie/insert "/foo/*bar" {:b 1})
              (trie/compile)
              (trie/lookup "/foo/bar"))))
 
-  (is (= (trie/->Match {:a 1} {})
+  (is (= (trie/->Match {} {:a 1})
          (-> (trie/insert nil "" {:a 1})
              (trie/compile)
              (trie/lookup "")))))

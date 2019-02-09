@@ -40,8 +40,13 @@ public class Trie {
   }
 
   public static class Match {
-    public IPersistentMap params = PersistentArrayMap.EMPTY;
+    public IPersistentMap params;
     public Object data;
+
+    public Match(IPersistentMap params, Object data) {
+      this.params = params;
+      this.data = data;
+    }
 
     @Override
     public String toString() {
@@ -53,7 +58,7 @@ public class Trie {
   }
 
   public interface Matcher {
-    Match match(int i, int max, char[] path, Match match);
+    Match match(int i, int max, char[] path);
 
     int depth();
 
@@ -76,7 +81,7 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, char[] path, Match match) {
+    public Match match(int i, int max, char[] path) {
       if (max < i + size) {
         return null;
       }
@@ -85,7 +90,7 @@ public class Trie {
           return null;
         }
       }
-      return child.match(i + size, max, path, match);
+      return child.match(i + size, max, path);
     }
 
     @Override
@@ -104,22 +109,23 @@ public class Trie {
     }
   }
 
-  public static DataMatcher dataMatcher(Object data) {
-    return new DataMatcher(data);
+  public static DataMatcher dataMatcher(IPersistentMap params, Object data) {
+    return new DataMatcher(params, data);
   }
 
   static final class DataMatcher implements Matcher {
+    private final IPersistentMap params;
     private final Object data;
 
-    DataMatcher(Object data) {
+    DataMatcher(IPersistentMap params, Object data) {
+      this.params = params;
       this.data = data;
     }
 
     @Override
-    public Match match(int i, int max, char[] path, Match match) {
+    public Match match(int i, int max, char[] path) {
       if (i == max) {
-        match.data = data;
-        return match;
+        return new Match(params, data);
       }
       return null;
     }
@@ -156,7 +162,7 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, char[] path, Match match) {
+    public Match match(int i, int max, char[] path) {
       if (i < max && path[i] != end) {
         int stop = max;
         for (int j = i; j < max; j++) {
@@ -166,7 +172,7 @@ public class Trie {
             break;
           }
         }
-        final Match m = child.match(stop, max, path, match);
+        final Match m = child.match(stop, max, path);
         if (m != null) {
           m.params = m.params.assoc(key, decode(path, i, stop));
         }
@@ -191,25 +197,25 @@ public class Trie {
     }
   }
 
-  public static CatchAllMatcher catchAllMatcher(Keyword parameter, Object data) {
-    return new CatchAllMatcher(parameter, data);
+  public static CatchAllMatcher catchAllMatcher(Keyword parameter, IPersistentMap params, Object data) {
+    return new CatchAllMatcher(parameter, params, data);
   }
 
   static final class CatchAllMatcher implements Matcher {
     private final Keyword parameter;
+    private final IPersistentMap params;
     private final Object data;
 
-    CatchAllMatcher(Keyword parameter, Object data) {
+    CatchAllMatcher(Keyword parameter, IPersistentMap params, Object data) {
       this.parameter = parameter;
+      this.params = params;
       this.data = data;
     }
 
     @Override
-    public Match match(int i, int max, char[] path, Match match) {
+    public Match match(int i, int max, char[] path) {
       if (i < max) {
-        match.params = match.params.assoc(parameter, decode(path, i, max));
-        match.data = data;
-        return match;
+        return new Match(params.assoc(parameter, decode(path, i, max)), data);
       }
       return null;
     }
@@ -226,7 +232,7 @@ public class Trie {
 
     @Override
     public String toString() {
-      return "[" + parameter + " " + new DataMatcher(data) + "]";
+      return "[" + parameter + " " + new DataMatcher(null, data) + "]";
     }
   }
 
@@ -246,9 +252,9 @@ public class Trie {
     }
 
     @Override
-    public Match match(int i, int max, char[] path, Match match) {
+    public Match match(int i, int max, char[] path) {
       for (int j = 0; j < size; j++) {
-        final Match m = childs[j].match(i, max, path, match);
+        final Match m = childs[j].match(i, max, path);
         if (m != null) {
           return m;
         }
@@ -273,7 +279,7 @@ public class Trie {
   }
 
   public static Object lookup(Matcher matcher, String path) {
-    return matcher.match(0, path.length(), path.toCharArray(), new Match());
+    return matcher.match(0, path.length(), path.toCharArray());
   }
 
   public static void main(String[] args) {
@@ -283,8 +289,8 @@ public class Trie {
                             staticMatcher("/auth/",
                                     linearMatcher(
                                             Arrays.asList(
-                                                    staticMatcher("login", dataMatcher(1)),
-                                                    staticMatcher("recovery", dataMatcher(2)))))));
+                                                    staticMatcher("login", dataMatcher(null, 1)),
+                                                    staticMatcher("recovery", dataMatcher(null, 2)))))));
     System.err.println(matcher);
     System.out.println(lookup(matcher, "/auth/login"));
     System.out.println(lookup(matcher, "/auth/recovery"));
