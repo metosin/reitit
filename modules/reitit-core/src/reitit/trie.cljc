@@ -1,6 +1,7 @@
 (ns reitit.trie
   (:refer-clojure :exclude [compile])
-  (:require [clojure.string :as str])
+  (:require [clojure.string :as str]
+            [reitit.exception :as ex])
   #?(:clj (:import [reitit Trie Trie$Match Trie$Matcher]
                    (java.net URLDecoder))))
 
@@ -49,7 +50,7 @@
       (if (= to (count s))
         (concat ss (-static from to))
         (case (get s to)
-          \{ (let [to' (or (str/index-of s "}" to) (throw (ex-info (str "Unbalanced brackets: " (pr-str s)) {})))]
+          \{ (let [to' (or (str/index-of s "}" to) (ex/fail! (str "Unclosed brackets: " (pr-str s))))]
                (if (= \* (get s (inc to)))
                  (recur (concat ss (-static from to) (-catch-all (inc to) to')) (inc to') (inc to'))
                  (recur (concat ss (-static from to) (-wild to to')) (inc to') (inc to'))))
@@ -131,7 +132,7 @@
                 (instance? Wild path)
                 (let [next (first ps)]
                   (if (or (instance? Wild next) (instance? CatchAll next))
-                    (throw (ex-info (str "Two following wilds: " path ", " next) {}))
+                    (ex/fail! (str "Two following wilds: " path ", " next))
                     (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps data)))))
 
                 (instance? CatchAll path)
@@ -169,11 +170,12 @@
 
 #?(:cljs
    (defn decode [path start end percent?]
-     (if percent? (js/decodeURIComponent (subs path start end)) path)))
+     (let [param (subs path start end)]
+       (if percent? (js/decodeURIComponent param) param))))
 
 (defn data-matcher [data]
   #?(:clj  (Trie/dataMatcher data)
-     :cljs (let [match (->Match data nil)]
+     :cljs (let [match (->Match data {})]
              (reify Matcher
                (match [_ i max _]
                  (if (= i max)
@@ -264,10 +266,8 @@
                        (for [[p c] wilds]
                          (let [p (:value p)
                                ends (ends c)]
-                           (if (seq (rest ends))
-                             (throw
-                               (ex-info
-                                 (str "Trie compliation error: wild " p " has two terminators: " ends) {}))
+                           (if (next ends)
+                             (ex/fail! (str "Trie compliation error: wild " p " has two terminators: " ends))
                              (wild-matcher p (ffirst ends) (compile c))))))
                      (into (for [[p c] catch-all] (catch-all-matcher (:value p) (:data c)))))]
     (cond
@@ -283,10 +283,7 @@
   #?(:clj  (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
              (->Match (.data match) (.params match)))
      :cljs (if-let [match (match matcher 0 (count path) path)]
-             (let [params (if-let [path-params (:path-params match)]
-                            (persistent! path-params)
-                            {})]
-               (assoc match :path-params params)))))
+             (->Match (:data match) (:path-params match)))))
 
 ;;
 ;; spike

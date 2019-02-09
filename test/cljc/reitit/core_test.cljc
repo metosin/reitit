@@ -101,7 +101,8 @@
                             ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
                             ["/files/file-{name}.html" ::html]
                             ["/files/file-{name}.json" ::json]
-                            ["/{eskon}/{saum}/pium\u2215paum" ::loru]]
+                            ["/{eskon}/{saum}/pium\u2215paum" ::loru]
+                            ["/extra-end}s-are/ok" ::bracket]]
                            {:router r})
                   by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
               (is (= [::abba {:abba "abba"}] (by-path "/abba")))
@@ -119,13 +120,14 @@
                      (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
               (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
               (is (= [::loru {:eskon "viitan", :saum "aa"}] (by-path "/viitan/aa/pium\u2215paum")))
-              (is (= [nil nil] (by-path "/ei/osu/pium/paum")))))
+              (is (= [nil nil] (by-path "/ei/osu/pium/paum")))
+              (is (= [::bracket {}] (by-path "/extra-end}s-are/ok")))))
 
           (testing "invalid syntax fails fast"
-            (testing "unbalanced brackets"
+            (testing "unclosed brackets"
               (is (thrown-with-msg?
                     ExceptionInfo
-                    #"^Unbalanced brackets"
+                    #"^Unclosed brackets"
                     (r/router ["/kikka/{kukka"]))))
             (testing "multiple terminators"
               (is (thrown-with-msg?
