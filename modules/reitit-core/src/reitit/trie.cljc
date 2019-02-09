@@ -226,7 +226,7 @@
 
 (defn lookup [matcher path]
   #?(:clj  (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
-             (->Match (.data match) (.parameters match)))
+             (->Match (.data match) (.params match)))
      :cljs (if-let [match (match matcher 0 (count path) path)]
              (let [params (if-let [path-params (:path-params match)]
                             (persistent! path-params)

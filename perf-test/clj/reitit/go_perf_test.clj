@@ -348,6 +348,7 @@
   ;;  64µs (trie-router, no injects, optimized) - 124µs (clojure)
   ;;  63µs (trie-router, no injects, switch-case) - 124µs (clojure)
   ;;  63ns (trie-router, no injects, direct-data)
+  ;;  54ns (trie-router, non-transient params)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench

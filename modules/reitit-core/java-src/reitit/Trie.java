@@ -3,7 +3,6 @@ package reitit;
 // https://www.codeproject.com/Tips/1190293/Iteration-Over-Java-Collections-with-High-Performa
 
 import clojure.lang.IPersistentMap;
-import clojure.lang.ITransientMap;
 import clojure.lang.Keyword;
 import clojure.lang.PersistentArrayMap;
 
@@ -35,26 +34,20 @@ public class Trie {
         case '+':
           hasPlus = true;
           break;
-        default:
-          break;
       }
     }
     return decode(chars, begin, end, hasPercent, hasPlus);
   }
 
   public static class Match {
-    final ITransientMap params = PersistentArrayMap.EMPTY.asTransient();
+    public IPersistentMap params = PersistentArrayMap.EMPTY;
     public Object data;
-
-    public IPersistentMap parameters() {
-      return params.persistent();
-    }
 
     @Override
     public String toString() {
       Map<Object, Object> m = new HashMap<>();
       m.put(Keyword.intern("data"), data);
-      m.put(Keyword.intern("params"), parameters());
+      m.put(Keyword.intern("params"), params);
       return m.toString();
     }
   }
@@ -165,8 +158,6 @@ public class Trie {
     @Override
     public Match match(int i, int max, char[] path, Match match) {
       if (i < max && path[i] != end) {
-        boolean hasPercent = false;
-        boolean hasPlus = false;
         int stop = max;
         for (int j = i; j < max; j++) {
           final char c = path[j];
@@ -174,12 +165,10 @@ public class Trie {
             stop = j;
             break;
           }
-          hasPercent = hasPercent || c == '%';
-          hasPlus = hasPlus || c == '+';
         }
         final Match m = child.match(stop, max, path, match);
         if (m != null) {
-          m.params.assoc(key, decode(path, i, stop, hasPercent, hasPlus));
+          m.params = m.params.assoc(key, decode(path, i, stop));
         }
         return m;
       }
@@ -218,7 +207,7 @@ public class Trie {
     @Override
     public Match match(int i, int max, char[] path, Match match) {
       if (i < max) {
-        match.params.assoc(parameter, decode(path, i, max));
+        match.params = match.params.assoc(parameter, decode(path, i, max));
         match.data = data;
         return match;
       }

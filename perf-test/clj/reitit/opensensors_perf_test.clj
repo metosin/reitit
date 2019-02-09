@@ -572,6 +572,7 @@
     ;;   326ns (java-segment-router)
     ;;   194ns (trie)
     ;;   160ns (trie, prioritized)
+    ;;   130ns (trie, non-transient, direct-data)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -585,16 +586,18 @@
     ;;   373ns (trie)
     ;;   323ns (trie, prioritized)
     ;;   289ns (trie, prioritized, zero-copy)
+    ;;   266ns (trie, non-transient, direct-data)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
     ;;   271ms (trie)
     ;;   240ns (trie, prioritized)
+    ;;   214ns (trie, non-transient, direct-data)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
-    ;;   240ns (trie, prioritized, zero-copy)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
+    ;;   464ns (trie, non-transient, direct-data)
     (b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
@@ -627,6 +630,7 @@
   ;; 629ms (arraylist)
   ;; 409ns (transient)
   ;; 409ns (staticMultiMatcher)
+  ;; 305ns (non-persistent-params)
   (let [app (ring/ring-handler (ring/router opensensors-routes) {:inject-match? false, :inject-router? false})
         request {:uri "/v1/users/1/devices/1", :request-method :get}]
     (doseq [[p r] (-> app (ring/get-router) (r/routes))]
@@ -638,6 +642,7 @@
     (prof/start {})
     ; "Elapsed time: 9183.657012 msecs"
     ; "Elapsed time: 8674.70132 msecs"
+    ; "Elapsed time: 6714.434915 msecs"
     (time
       (dotimes [_ 20000000]
         (app request)))
