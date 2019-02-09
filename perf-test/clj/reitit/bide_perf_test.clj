@@ -165,6 +165,7 @@
   ;; 530 µs (4-24x) -25% prefix-tree-router
   ;; 710 µs (3-18x) segment-router
   ;; 320 µs (6-40x) java-segment-router
+  ;; 115 µs (18-111x) trie-router
   (title "reitit")
   (assert (reitit/match-by-path reitit-routes "/workspace/1/1"))
   (cc/quick-bench
