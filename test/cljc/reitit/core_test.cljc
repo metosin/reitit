@@ -79,15 +79,48 @@
                           ["/abba/:dabba/boo" ::boo]
                           ["/:jabba/:dabba/:doo/:daa/*foo" ::wild]]
                          {:router r})
-                matches #(-> router (r/match-by-path %) :data :name)]
-            (is (= ::abba (matches "/abba")))
-            (is (= ::abba2 (matches "/abba/1")))
-            (is (= ::jabba2 (matches "/abba/2")))
-            (is (= ::doo (matches "/abba/1/doo")))
-            (is (= ::boo (matches "/abba/1/boo")))
-            (is (= ::baa (matches "/abba/dabba/boo/baa")))
-            (is (= ::boo (matches "/abba/dabba/boo")))
-            (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
+                by-path #(-> router (r/match-by-path %) :data :name)]
+            (is (= ::abba (by-path "/abba")))
+            (is (= ::abba2 (by-path "/abba/1")))
+            (is (= ::jabba2 (by-path "/abba/2")))
+            (is (= ::doo (by-path "/abba/1/doo")))
+            (is (= ::boo (by-path "/abba/1/boo")))
+            (is (= ::baa (by-path "/abba/dabba/boo/baa")))
+            (is (= ::boo (by-path "/abba/dabba/boo")))
+            (is (= ::wild (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
+
+        (testing "bracket-params"
+          (let [router (r/router
+                         [["/{abba}" ::abba]
+                          ["/abba/1" ::abba2]
+                          ["/{jabba}/2" ::jabba2]
+                          ["/{abba}/{dabba}/doo" ::doo]
+                          ["/abba/dabba/boo/baa" ::baa]
+                          ["/abba/{dabba}/boo" ::boo]
+                          ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
+                          ["/files/file-{name}.html" ::html]
+                          ["/files/file-{name}.json" ::json]
+                          ["/files/file-{name}-large.json" ::large]]
+                         {:router r})
+                by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
+            (is (= [::abba {:abba "abba"}] (by-path "/abba")))
+            (is (= [::abba2 {}] (by-path "/abba/1")))
+            (is (= [::jabba2 {:jabba "abba"}] (by-path "/abba/2")))
+            (is (= [::doo {:abba "abba", :dabba "1"}] (by-path "/abba/1/doo")))
+            (is (= [::boo {:dabba "1"}] (by-path "/abba/1/boo")))
+            (is (= [::baa {}] (by-path "/abba/dabba/boo/baa")))
+            (is (= [::boo {:dabba "dabba"}] (by-path "/abba/dabba/boo")))
+            (is (= [::wild {:a/jabba "olipa"
+                            :a.b/dabba "kerran"
+                            :a.b.c/doo "avaruus"
+                            :a.b.c.d/daa "vaan"
+                            :foo/bar "ei/toista/kertaa"}]
+                   (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
+            (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
+            (is (= [::json {:name "10"}] (by-path "/files/file-10.json")))
+            ;(is (= [::large {:name "10"}] (by-path "/files/file-10-large.json")))
+
+            ))
 
         (testing "empty path segments"
           (let [router (r/router

@@ -34,45 +34,6 @@
     coll
     coll))
 
-(defn- -slice-start [[p1 :as p1s] [p2 :as p2s]]
-  (let [-split (fn [p]
-                 (if-let [i (and p (str/index-of p "/"))]
-                   [(subs p 0 i) (subs p i)]
-                   [p]))
-        -slash (fn [cp p]
-                 (cond
-                   (not (string? cp)) [cp]
-                   (and (string? cp) (not= (count cp) (count p))) [(subs p (count cp))]
-                   (and (string? p) (not cp)) (-split p)))
-        -postcut (fn [[p :as pps]]
-                   (let [i (and p (str/index-of p "/"))]
-                     (if (and i (pos? i))
-                       (concat [(subs p 0 i) (subs p i)] (rest pps))
-                       pps)))
-        -tailcut (fn [cp [p :as ps]] (concat (-slash cp p) (rest ps)))]
-    (if (or (nil? p1) (nil? p2))
-      [(-postcut p1s) (-postcut p2s)]
-      (let [cp (and (string? p1) (string? p2) (trie/common-prefix p1 p2))]
-        [(-tailcut cp p1s) (-tailcut cp p2s)]))))
-
-(defn- -slice-end [x xs]
-  (let [i (if (string? x) (str/index-of x "/"))]
-    (if (and (number? i) (pos? i))
-      (concat [(subs x i)] xs)
-      xs)))
-
-(defn conflicting-routes? [route1 route2]
-  (loop [parts1 (-> route1 first parse :path-parts)
-         parts2 (-> route2 first parse :path-parts)]
-    (let [[[s1 & ss1] [s2 & ss2]] (-slice-start parts1 parts2)]
-      (cond
-        (= s1 s2 nil) true
-        (or (nil? s1) (nil? s2)) false
-        (or (trie/catch-all? s1) (trie/catch-all? s2)) true
-        (or (trie/wild? s1) (trie/wild? s2)) (recur (-slice-end s1 ss1) (-slice-end s2 ss2))
-        (not= s1 s2) false
-        :else (recur ss1 ss2)))))
-
 (defn walk [raw-routes {:keys [path data routes expand]
                         :or {data [], routes []}
                         :as opts}]
@@ -108,11 +69,14 @@
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
            coerce (into [] (keep #(coerce % opts)))))
 
+(defn conflicting-routes? [route1 route2]
+  (trie/conflicting-paths? (first route1) (first route2)))
+
 (defn path-conflicting-routes [routes]
   (-> (into {}
             (comp (map-indexed (fn [index route]
                                  [route (into #{}
-                                              (filter #(conflicting-routes? route %))
+                                              (filter (partial conflicting-routes? route))
                                               (subvec routes (inc index)))]))
                   (filter (comp seq second)))
             routes)

@@ -1,5 +1,5 @@
 (ns reitit.trie
-  (:refer-clojure :exclude [compile -assoc!])
+  (:refer-clojure :exclude [compile])
   (:require [clojure.string :as str])
   #?(:clj (:import [reitit Trie Trie$Match Trie$Matcher]
                    (java.net URLDecoder))))
@@ -18,9 +18,9 @@
   (depth [this])
   (length [this]))
 
-(defn -assoc! [match k v]
-  (let [params (or (:path-params match) (transient {}))]
-    (assoc match :path-params (assoc! params k v))))
+(defn assoc-path-param [match k v]
+  (let [params (:path-params match)]
+    (assoc match :path-params (assoc params k v))))
 
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
 (defn common-prefix [s1 s2]
@@ -71,6 +71,54 @@
 (defn normalize [s]
   (-> s (split-path) (join-path)))
 
+;;
+;; Conflict Resolution
+;;
+
+(defn- -slice-start [[p1 :as p1s] [p2 :as p2s]]
+  (let [-split (fn [p]
+                 (if-let [i (and p (str/index-of p "/"))]
+                   [(subs p 0 i) (subs p i)]
+                   [p]))
+        -slash (fn [cp p]
+                 (cond
+                   (not (string? cp)) [cp]
+                   (and (string? cp) (not= (count cp) (count p))) [(subs p (count cp))]
+                   (and (string? p) (not cp)) (-split p)))
+        -postcut (fn [[p :as pps]]
+                   (let [i (and p (str/index-of p "/"))]
+                     (if (and i (pos? i))
+                       (concat [(subs p 0 i) (subs p i)] (rest pps))
+                       pps)))
+        -tailcut (fn [cp [p :as ps]] (concat (-slash cp p) (rest ps)))]
+    (if (or (nil? p1) (nil? p2))
+      [(-postcut p1s) (-postcut p2s)]
+      (if-let [cp (and (string? p1) (string? p2) (common-prefix p1 p2))]
+        [(-tailcut cp p1s) (-tailcut cp p2s)]
+        [p1s p2s]))))
+
+(defn- -slice-end [x xs]
+  (let [i (if (string? x) (str/index-of x "/"))]
+    (if (and (number? i) (pos? i))
+      (concat [(subs x i)] xs)
+      xs)))
+
+(defn conflicting-paths? [path1 path2]
+  (loop [parts1 (split-path path1)
+         parts2 (split-path path2)]
+    (let [[[s1 & ss1] [s2 & ss2]] (-slice-start parts1 parts2)]
+      (cond
+        (= s1 s2 nil) true
+        (or (nil? s1) (nil? s2)) false
+        (or (catch-all? s1) (catch-all? s2)) true
+        (or (wild? s1) (wild? s2)) (recur (-slice-end s1 ss1) (-slice-end s2 ss2))
+        (not= s1 s2) false
+        :else (recur ss1 ss2)))))
+
+;;
+;; Creating Tries
+;;
+
 (defn- -node [m]
   (map->Node (merge {:children {}, :wilds {}, :catch-all {}} m)))
 
@@ -120,7 +168,7 @@
       node')))
 
 #?(:cljs
-   (defn decode! [path start end percent?]
+   (defn decode [path start end percent?]
      (if percent? (js/decodeURIComponent (subs path start end)) path)))
 
 (defn data-matcher [data]
@@ -157,11 +205,11 @@
                  (loop [percent? false, j i]
                    (if (= max j)
                      (if-let [match (match matcher max max path)]
-                       (-assoc! match key (decode! path i max percent?)))
+                       (assoc-path-param match key (decode path i max percent?)))
                      (let [c ^char (get path j)]
                        (condp = c
                          end (if-let [match (match matcher j max path)]
-                               (-assoc! match key (decode! path i j percent?)))
+                               (assoc-path-param match key (decode path i j percent?)))
                          \% (recur true (inc j))
                          (recur percent? (inc j))))))))
              (view [_] [key (view matcher)])
@@ -173,7 +221,7 @@
      :cljs (let [match (->Match data nil)]
              (reify Matcher
                (match [_ i max path]
-                 (if (< i max) (-assoc! match key (decode! path i max true))))
+                 (if (< i max) (assoc-path-param match key (decode path i max true))))
                (view [_] [key [data]])
                (depth [_] 1)
                (length [_])))))
