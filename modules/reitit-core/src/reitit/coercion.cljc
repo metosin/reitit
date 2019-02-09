@@ -132,15 +132,6 @@
          [status (response-coercer coercion body opts)])
        (into {})))
 
-(defn- coercers-not-compiled! [match]
-  (throw
-    (ex-info
-      (str
-        "Match didn't have a compiled coercion attached.\n"
-        "Maybe you should have defined a router option:\n"
-        "{:compile reitit.coercion/compile-request-coercers}\n")
-      {:match match})))
-
 ;;
 ;; api-docs
 ;;
