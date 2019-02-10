@@ -102,6 +102,7 @@
                             ["/files/file-{name}.html" ::html]
                             ["/files/file-{name}.json" ::json]
                             ["/{eskon}/{saum}/pium\u2215paum" ::loru]
+                            ["/{🌈}🤔/🎈" ::emoji]
                             ["/extra-end}s-are/ok" ::bracket]]
                            {:router r})
                   by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
@@ -121,6 +122,7 @@
               (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
               (is (= [::loru {:eskon "viitan", :saum "aa"}] (by-path "/viitan/aa/pium\u2215paum")))
               (is (= [nil nil] (by-path "/ei/osu/pium/paum")))
+              (is (= [::emoji {:🌈 "brackets"}] (by-path "/brackets🤔/🎈")))
               (is (= [::bracket {}] (by-path "/extra-end}s-are/ok")))))
 
           (testing "invalid syntax fails fast"
