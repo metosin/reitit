@@ -343,11 +343,11 @@
 ;;
 
 (defn ^:no-doc default-router-options []
-  {:lookup (fn [[_ {:keys [name]}] _] (if name #{name}))
+  {:lookup (fn lookup [[_ {:keys [name]}] _] (if name #{name}))
    :expand expand
-   :coerce (fn [route _] route)
-   :compile (fn [[_ {:keys [handler]}] _] handler)
-   :conflicts (partial throw-on-conflicts! path-conflicts-str)})
+   :coerce (fn coerce [route _] route)
+   :compile (fn compile [[_ {:keys [handler]}] _] handler)
+   :conflicts (fn throw! [conflicts] (throw-on-conflicts! path-conflicts-str conflicts))})
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
@@ -384,13 +384,13 @@
                   all-wilds? trie-router
                   :else mixed-router)]
 
-     (when-let [validate (:validate opts)]
-       (validate compiled-routes opts))
-
      (when-let [conflicts (:conflicts opts)]
        (when path-conflicting (conflicts path-conflicting)))
 
      (when name-conflicting
        (throw-on-conflicts! name-conflicts-str name-conflicting))
+
+     (when-let [validate (:validate opts)]
+       (validate compiled-routes opts))
 
      (router compiled-routes opts))))
