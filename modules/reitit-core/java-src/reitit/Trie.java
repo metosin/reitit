@@ -12,8 +12,7 @@ import java.util.*;
 
 public class Trie {
 
-  private static String decode(char[] chars, int begin, int end, boolean hasPercent, boolean hasPlus) {
-    final String s = new String(chars, begin, end - begin);
+  private static String decode(String s, boolean hasPercent, boolean hasPlus) {
     try {
       if (hasPercent) {
         return URLDecoder.decode(hasPlus ? s.replace("+", "%2B") : s, "UTF-8");
@@ -36,7 +35,7 @@ public class Trie {
           break;
       }
     }
-    return decode(chars, begin, end, hasPercent, hasPlus);
+    return decode(new String(chars, begin, end - begin), hasPercent, hasPlus);
   }
 
   public static class Match {
@@ -114,18 +113,16 @@ public class Trie {
   }
 
   static final class DataMatcher implements Matcher {
-    private final IPersistentMap params;
-    private final Object data;
+    private final Match match;
 
     DataMatcher(IPersistentMap params, Object data) {
-      this.params = params;
-      this.data = data;
+      this.match = new Match(params, data);
     }
 
     @Override
     public Match match(int i, int max, char[] path) {
       if (i == max) {
-        return new Match(params, data);
+        return match;
       }
       return null;
     }
@@ -142,7 +139,7 @@ public class Trie {
 
     @Override
     public String toString() {
-      return (data != null ? data.toString() : "nil");
+      return (match.data != null ? match.data.toString() : "nil");
     }
   }
 
