@@ -78,6 +78,10 @@
                 #"Interceptor :enter not found in registry"
                 (create [:enter]))))
 
+        (testing "existing keyword, compiling to nil"
+          (let [app (create [:enter] {::interceptor/registry {:enter {:compile (constantly nil)}}})]
+            (is (= [:ok] (app ctx)))))
+
         (testing "as map"
           (reset! calls 0)
           (let [app (create [{:enter (:enter (enter :value))}])]

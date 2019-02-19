@@ -17,20 +17,20 @@
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
   (into-middleware [this data {:keys [::registry] :as opts}]
-    (or (if-let [middleware (if registry (registry this))]
-          (into-middleware middleware data opts))
-        (throw
-          (ex-info
-            (str
-              "Middleware " this " not found in registry.\n\n"
-              (if (seq registry)
-                (str
-                  "Available middleware in registry:\n"
-                  (with-out-str
-                    (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
-                "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
-            {:id this
-             :registry registry}))))
+    (if-let [middleware (if registry (registry this))]
+      (into-middleware middleware data opts)
+      (throw
+        (ex-info
+          (str
+            "Middleware " this " not found in registry.\n\n"
+            (if (seq registry)
+              (str
+                "Available middleware in registry:\n"
+                (with-out-str
+                  (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+              "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
+          {:id this
+           :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)

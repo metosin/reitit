@@ -12,7 +12,7 @@
 
 (defn create
   ([middleware]
-    (create middleware nil))
+   (create middleware nil))
   ([middleware opts]
    (middleware/chain
      middleware
@@ -64,6 +64,10 @@
                 ExceptionInfo
                 #"Middleware :wrap not found in registry"
                 (create [:wrap]))))
+
+        (testing "existing keyword, compiling to nil"
+          (let [app (create [:wrap] {::middleware/registry {:wrap {:compile (constantly nil)}}})]
+            (is (= [:ok] (app request)))))
 
         (testing "as function vector with value(s)"
           (reset! calls 0)

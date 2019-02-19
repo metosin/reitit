@@ -9,6 +9,14 @@
     controller is interested in, as data, which should cover most
     use cases: `{:start start-fn, :parameters {:path [:foo-id]}}`
 
+## `reitit-ring`
+
+* Allow Middleware to compile to `nil` with Middleware Registries, fixes to [#216](https://github.com/metosin/reitit/issues/216).
+
+## `reitit-http`
+
+* Allow Interceptors to compile to `nil` with Interceptor Registries, related to [#216](https://github.com/metosin/reitit/issues/216).
+
 ## 0.2.13 (2019-01-26)
 
 * Don't throw `StringIndexOutOfBoundsException` with empty path lookup on wildcard paths, fixes [#209](https://github.com/metosin/reitit/issues/209)
