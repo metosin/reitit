@@ -1,6 +1,8 @@
 ## Unreleased
 
-* Frontend controllers:
+## `reitit-frontend`
+
+* **BREAKING** New frontend controllers:
     * Controller `:params` function has been deprecated
     * Controller `:identity` function works the same as `:params`
     * New `:parameters` option can be used to declare which parameters
