@@ -61,7 +61,7 @@ Failing coercion:
 
 ## Deeply nested
 
-As spec coercion is not complete (before `clojure.spec` adds support to it), not all specs can be coerced. One can test the coercion easily in the REPL.
+Spec-tools allow deeply nested specs to be coerced. One can test the coercion easily in the REPL.
 
 Define some specs:
 
@@ -97,7 +97,7 @@ Apply a json->edn coercion to the data:
 ```clj
 (st/coerce
   ::my-json-api
-  {:skus [{:id :123}]
+  {:skus [{:id "123"}]
    :photos [{:id "123"}]}
   st/json-transformer)
 ; {:skus [{:id :123}]
@@ -112,11 +112,11 @@ By default, reitit uses custom transformers that also strip out extra keys from 
 (st/coerce
   ::my-json-api
   {:TOO "MUCH"
-   :skus [{:id :123
+   :skus [{:id "123"
            :INFOR "MATION"}]
    :photos [{:id "123"
              :HERE "TOO"}]}
   rcs/json-transformer)
-; {:photos [{:id "123"}]
-;  :skus [{:id :123}]}
+; {:skus [{:id :123}]
+;  :photos [{:id "123"}]}
 ```
