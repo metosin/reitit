@@ -59,10 +59,9 @@ Failing coercion:
 ; => ExceptionInfo Request coercion failed...
 ```
 
-## Running coercions from REPL
+## Deeply nested
 
-Simplest way to test spec coercion is to run them directly in the REPL.
-
+As spec coercion is not complete (before `clojure.spec` adds support to it), not all specs can be coerced. One can test the coercion easily in the REPL.
 
 Define some specs:
 
