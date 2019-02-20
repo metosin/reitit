@@ -58,3 +58,34 @@ Failing coercion:
 (match-by-path-and-coerce! "/metosin/users/ikitommi")
 ; => ExceptionInfo Request coercion failed...
 ```
+
+## Deeply nested specs
+
+```clj
+(require '[clojure.spec.alpha :as s])
+(require '[spec-tools.core :as st])
+
+(s/def :sku/id keyword?)
+(s/def ::sku (s/keys :req-un [:sku/id]))
+(s/def ::skus (s/coll-of ::sku :into []))
+
+(s/def :photo/id int?)
+(s/def ::photo (s/keys :req-un [:photo/id]))
+(s/def ::photos (s/coll-of ::photo :into []))
+
+(s/def ::my-json-api (s/keys :req-un [::skus ::photos]))
+
+(st/coerce
+  ::my-json-api
+  {:skus [{:id "123"}]
+   :photos [{:id "123"}]}
+  st/string-transformer)
+; {:skus [{:id :123}], :photos [{:id 123}]}
+
+(st/coerce
+  ::my-json-api
+  {:skus [{:id :123}]
+   :photos [{:id "123"}]}
+  st/json-transformer)
+; {:skus [{:id :123}], :photos [{:id "123"}]}
+```
