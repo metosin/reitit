@@ -59,7 +59,12 @@ Failing coercion:
 ; => ExceptionInfo Request coercion failed...
 ```
 
-## Deeply nested specs
+## Running coercions from REPL
+
+Simplest way to test spec coercion is to run them directly in the REPL.
+
+
+Define some specs:
 
 ```clj
 (require '[clojure.spec.alpha :as s])
@@ -74,18 +79,45 @@ Failing coercion:
 (s/def ::photos (s/coll-of ::photo :into []))
 
 (s/def ::my-json-api (s/keys :req-un [::skus ::photos]))
+```
 
+Apply a string->edn coercion to the data:
+
+```clj
 (st/coerce
   ::my-json-api
   {:skus [{:id "123"}]
    :photos [{:id "123"}]}
   st/string-transformer)
-; {:skus [{:id :123}], :photos [{:id 123}]}
+; {:skus [{:id :123}]
+;  :photos [{:id 123}]}
+```
 
+Apply a json->edn coercion to the data:
+
+```clj
 (st/coerce
   ::my-json-api
   {:skus [{:id :123}]
    :photos [{:id "123"}]}
   st/json-transformer)
-; {:skus [{:id :123}], :photos [{:id "123"}]}
+; {:skus [{:id :123}]
+;  :photos [{:id "123"}]}
+```
+
+By default, reitit uses custom transformers that also strip out extra keys from `s/keys` specs:
+
+```clj
+(require '[reitit.coercion.spec :as rcs])
+
+(st/coerce
+  ::my-json-api
+  {:TOO "MUCH"
+   :skus [{:id :123
+           :INFOR "MATION"}]
+   :photos [{:id "123"
+             :HERE "TOO"}]}
+  rcs/json-transformer)
+; {:photos [{:id "123"}]
+;  :skus [{:id :123}]}
 ```
