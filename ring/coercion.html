@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Pluggable Coercion · GitBook</title>
+        <title>Ring Coercion · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -407,7 +407,7 @@
                 <a href="coercion.html">
             
                     
-                    Pluggable Coercion
+                    Ring Coercion
             
                 </a>
             
@@ -746,7 +746,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Pluggable Coercion</a>
+        <a href=".." >Ring Coercion</a>
     </h1>
 </div>
 
@@ -761,8 +761,39 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="pluggable-coercion">Pluggable Coercion</h1>
-<p>Basic coercion is explained in detail <a href="../coercion/coercion.html">in the Coercion Guide</a>. With Ring, both request parameters (<code>:query</code>, <code>:body</code>, <code>:form</code>, <code>:header</code> and <code>:path</code>) and response <code>:body</code> can be coerced.</p>
+                                <h1 id="ring-coercion">Ring Coercion</h1>
+<p>Basic coercion is explained in detail <a href="../coercion/coercion.html">in the Coercion Guide</a>. With Ring, both request parameters and response bodies can be coerced.</p>
+<p>The following request parameters are currently supported:</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>request source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:query</code></td>
+<td><code>:query-params</code></td>
+</tr>
+<tr>
+<td><code>:body</code></td>
+<td><code>:body-params</code></td>
+</tr>
+<tr>
+<td><code>:form</code></td>
+<td><code>:form-params</code></td>
+</tr>
+<tr>
+<td><code>:header</code></td>
+<td><code>:header-params</code></td>
+</tr>
+<tr>
+<td><code>:path</code></td>
+<td><code>:path-params</code></td>
+</tr>
+</tbody>
+</table>
 <p>To enable coercion, the following things need to be done:</p>
 <ul>
 <li>Define a <code>reitit.coercion/Coercion</code> for the routes</li>
@@ -779,8 +810,9 @@
 </ul>
 <p>Coercion can be attached to route data under <code>:coercion</code> key. There can be multiple <code>Coercion</code> implementations within a single router, normal <a href="../basics/route_data.html#nested-route-data">scoping rules</a> apply.</p>
 <h2 id="defining-parameters-and-responses">Defining parameters and responses</h2>
-<p>Parameters are defined in <code>:parameters</code> key and responses in <code>:responses</code>.</p>
-<p>Below is an example with <a href="https://github.com/plumatic/schema" target="_blank">Plumatic Schema</a>. It defines input schemas for <code>:query</code>, <code>:body</code> and <code>:path</code> parameters and a schema for a successful response <code>:body</code>.</p>
+<p>Parameters are defined in route data under <code>:parameters</code> key. It&apos;s value should be a map of parameter <code>:type</code> -&gt; Coercion Schema.</p>
+<p>Responses are defined in route data under <code>:responses</code> key. It&apos;s value should be a map of http status code to a map which can contain <code>:body</code> key with Coercion Schema as value.</p>
+<p>Below is an example with <a href="https://github.com/plumatic/schema" target="_blank">Plumatic Schema</a>. It defines schemas for <code>:query</code>, <code>:body</code> and <code>:path</code> parameters and for http 200 response <code>:body</code>.</p>
 <p>Handler can access the coerced parameters can be read under <code>:parameters</code> key in the request.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.coercion.schema])
 (<span class="hljs-name">require</span> &apos;[schema.core <span class="hljs-symbol">:as</span> s])
@@ -1002,7 +1034,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Pluggable Coercion","level":"4.11","depth":1,"next":{"title":"Route Data Validation","level":"4.12","depth":1,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Default Middleware","level":"4.10","depth":1,"path":"ring/default_middleware.md","ref":"ring/default_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2019-02-19T17:54:23.995Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-19T17:54:47.686Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Ring Coercion","level":"4.11","depth":1,"next":{"title":"Route Data Validation","level":"4.12","depth":1,"path":"ring/route_data_validation.md","ref":"ring/route_data_validation.md","articles":[]},"previous":{"title":"Default Middleware","level":"4.10","depth":1,"path":"ring/default_middleware.md","ref":"ring/default_middleware.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/coercion.md","mtime":"2019-02-20T06:28:37.612Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-20T06:29:00.708Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
