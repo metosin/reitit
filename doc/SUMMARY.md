@@ -33,7 +33,7 @@
 * [Transforming Middleware Chain](ring/transforming_middleware_chain.md)
 * [Middleware Registry](ring/middleware_registry.md)
 * [Default Middleware](ring/default_middleware.md)
-* [Pluggable Coercion](ring/coercion.md)
+* [Ring Coercion](ring/coercion.md)
 * [Route Data Validation](ring/route_data_validation.md)
 * [Compiling Middleware](ring/compiling_middleware.md)
 * [Swagger Support](ring/swagger.md)

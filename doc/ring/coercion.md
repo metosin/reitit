@@ -1,6 +1,16 @@
-# Pluggable Coercion
+# Ring Coercion
 
-Basic coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). With Ring, both request parameters (`:query`, `:body`, `:form`, `:header` and `:path`) and response `:body` can be coerced.
+Basic coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). With Ring, both request parameters and response bodies can be coerced.
+
+The following request parameters are currently supported:
+
+| type      | request source   |
+|-----------|------------------|
+| `:query`  | `:query-params`  |
+| `:body`   | `:body-params`   |
+| `:form`   | `:form-params`   |
+| `:header` | `:header-params` |
+| `:path`   | `:path-params`   |
 
 To enable coercion, the following things need to be done:
 
@@ -22,9 +32,11 @@ Coercion can be attached to route data under `:coercion` key. There can be multi
 
 ## Defining parameters and responses
 
-Parameters are defined in `:parameters` key and responses in `:responses`.
+Parameters are defined in route data under `:parameters` key. It's value should be a map of parameter `:type` -> Coercion Schema.
 
-Below is an example with [Plumatic Schema](https://github.com/plumatic/schema). It defines input schemas for `:query`, `:body` and `:path` parameters and a schema for a successful response `:body`.
+Responses are defined in route data under `:responses` key. It's value should be a map of http status code to a map which can contain `:body` key with Coercion Schema as value.
+
+Below is an example with [Plumatic Schema](https://github.com/plumatic/schema). It defines schemas for `:query`, `:body` and `:path` parameters and for http 200 response `:body`.
 
 Handler can access the coerced parameters can be read under `:parameters` key in the request.
 
