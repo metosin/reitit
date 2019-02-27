@@ -4,7 +4,7 @@ Routes are defined as vectors of String path and optional (non-sequential) route
 
 Routes can be wrapped in vectors and lists and `nil` routes are ignored.
 
-Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Since `0.4.0`, parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. The non-bracket syntax might be deprecated later.
+Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Since version `0.4.0`, parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. The non-bracket syntax might be deprecated later.
 
 ### Examples
 
