@@ -97,11 +97,16 @@
 
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
-  expanded options. See [[router]] for available options."
+  expanded options. See [[router]] for available options, plus the following:
+
+  | key                          | description |
+  | -----------------------------|-------------|
+  | `:reitit.core/trie-compiler` | Optional trie-compiler."
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [names (impl/find-names compiled-routes opts)
+   (let [compiler (::trie-compiler opts (trie/compiler))
+         names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/parse p)
@@ -113,7 +118,8 @@
                    [[] {}]
                    compiled-routes)
          lookup (impl/fast-map nl)
-         matcher (trie/linear-matcher pl)
+         matcher (trie/linear-matcher compiler pl)
+         match-by-path (trie/matcher matcher compiler)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
@@ -129,7 +135,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (trie/lookup matcher path)]
+         (if-let [match (match-by-path path)]
            (-> (:data match)
                (assoc :path-params (:params match))
                (assoc :path path))))
@@ -186,11 +192,16 @@
 
 (defn trie-router
   "Creates a special prefix-tree router from resolved routes and optional
-  expanded options. See [[router]] for available options."
+  expanded options. See [[router]] for available options, plus the following:
+
+  | key                          | description |
+  | -----------------------------|-------------|
+  | `:reitit.core/trie-compiler` | Optional trie-compiler."
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [names (impl/find-names compiled-routes opts)
+   (let [compiler (::trie-compiler opts (trie/compiler))
+         names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
                      (let [{:keys [path-params] :as route} (impl/parse p)
@@ -201,7 +212,8 @@
                         (if name (assoc nl name f) nl)]))
                    [nil {}]
                    compiled-routes)
-         pl (trie/compile pl)
+         matcher (trie/compile pl compiler)
+         match-by-path (trie/matcher matcher compiler)
          lookup (impl/fast-map nl)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
@@ -218,7 +230,7 @@
        (route-names [_]
          names)
        (match-by-path [_ path]
-         (if-let [match (trie/lookup pl path)]
+         (if-let [match (match-by-path path)]
            (-> (:data match)
                (assoc :path-params (:params match))
                (assoc :path path))))

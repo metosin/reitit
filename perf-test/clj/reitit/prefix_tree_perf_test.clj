@@ -98,7 +98,7 @@
   ;; 0.8µs (return route-data)
   ;; 0.8µs (fix payloads)
   #_(cc/quick-bench
-      (trie/lookup reitit-tree "/v1/orgs/1/topics" {}))
+      (trie/matcher reitit-tree "/v1/orgs/1/topics" {}))
 
   ;;  0.9µs (initial)
   ;;  0.5µs (protocols)
@@ -114,7 +114,7 @@
   ;; 0.30µs (iterate arrays)
   ;; 0.28µs (list-params)
   (cc/quick-bench
-    (trie/lookup trie-matcher "/v1/orgs/1/topics")))
+    (trie/matcher trie-matcher "/v1/orgs/1/topics")))
 
 (comment
   (bench!))
@@ -123,6 +123,6 @@
 
 (comment
   (p/lookup pedestal-tree "/v1/orgs/1/topics")
-  (trie/lookup trie-matcher "/v1/orgs/1/topics")
+  (trie/matcher trie-matcher "/v1/orgs/1/topics")
   #_(segment/lookup segment-matcher "/v1/orgs/1/topics"))
 

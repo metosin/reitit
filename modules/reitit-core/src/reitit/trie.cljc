@@ -19,6 +19,15 @@
   (depth [this])
   (length [this]))
 
+(defprotocol TrieCompiler
+  (data-matcher [this params data])
+  (static-matcher [this path matcher])
+  (wild-matcher [this key end matcher])
+  (catch-all-matcher [this key params data])
+  (linear-matcher [this matchers])
+  (prettify [this matcher])
+  (path-matcher [this matcher]))
+
 (defn assoc-param [match k v]
   (let [params (:params match)]
     (assoc match :params (assoc params k v))))
@@ -168,82 +177,113 @@
           (update :children dissoc ""))
       node')))
 
-#?(:cljs
-   (defn decode [path start end percent?]
-     (let [param (subs path start end)]
-       (if percent? (js/decodeURIComponent param) param))))
-
-(defn data-matcher [params data]
-  #?(:clj  (Trie/dataMatcher params data)
-     :cljs (let [match (->Match params data)]
-             (reify Matcher
-               (match [_ i max _]
-                 (if (= i max)
-                   match))
-               (view [_] data)
-               (depth [_] 1)
-               (length [_])))))
-
-(defn static-matcher [path matcher]
-  #?(:clj  (Trie/staticMatcher ^String path ^Trie$Matcher matcher)
-     :cljs (let [size (count path)]
-             (reify Matcher
-               (match [_ i max p]
-                 (if-not (< max (+ i size))
-                   (loop [j 0]
-                     (if (= j size)
-                       (match matcher (+ i size) max p)
-                       (if (= (get p (+ i j)) (get path j))
-                         (recur (inc j)))))))
-               (view [_] [path (view matcher)])
-               (depth [_] (inc (depth matcher)))
-               (length [_] (count path))))))
-
-(defn wild-matcher [key end matcher]
-  #?(:clj  (Trie/wildMatcher key (if end (Character. end)) matcher)
-     :cljs (reify Matcher
-             (match [_ i max path]
-               (if (and (< i max) (not= (get path i) end))
-                 (loop [percent? false, j i]
-                   (if (= max j)
-                     (if-let [match (match matcher max max path)]
-                       (assoc-param match key (decode path i max percent?)))
-                     (let [c ^char (get path j)]
-                       (condp = c
-                         end (if-let [match (match matcher j max path)]
-                               (assoc-param match key (decode path i j percent?)))
-                         \% (recur true (inc j))
-                         (recur percent? (inc j))))))))
-             (view [_] [key (view matcher)])
-             (depth [_] (inc (depth matcher)))
-             (length [_]))))
-
-(defn catch-all-matcher [key params data]
-  #?(:clj  (Trie/catchAllMatcher key params data)
-     :cljs (let [match (->Match params data)]
-             (reify Matcher
-               (match [_ i max path]
-                 (if (< i max) (assoc-param match key (decode path i max true))))
-               (view [_] [key [data]])
-               (depth [_] 1)
-               (length [_])))))
-
-(defn linear-matcher [matchers]
-  #?(:clj  (Trie/linearMatcher matchers)
-     :cljs (let [matchers (vec (reverse (sort-by (juxt depth length) matchers)))
-                 size (count matchers)]
-             (reify Matcher
-               (match [_ i max path]
-                 (loop [j 0]
-                   (if (< j size)
-                     (or (match (get matchers j) i max path)
-                         (recur (inc j))))))
-               (view [_] (mapv view matchers))
-               (depth [_] (apply max 0 (map depth matchers)))
-               (length [_])))))
+(defn decode [path start end percent?]
+  (let [param (subs path start end)]
+    (if percent?
+      #?(:cljs (js/decodeURIComponent param)
+         :clj  (URLDecoder/decode
+                 (if (.contains ^String param "+")
+                   (.replace ^String param "+" "%2B")
+                   param)
+                 "UTF-8"))
+      param)))
 
 ;;
-;; public api
+;; Compilers
+;;
+
+(defn clojure-trie-compiler []
+  (reify
+    TrieCompiler
+    (data-matcher [_ params data]
+      (let [match (->Match params data)]
+        (reify Matcher
+          (match [_ i max _]
+            (if (= i max)
+              match))
+          (view [_] data)
+          (depth [_] 1)
+          (length [_]))))
+    (static-matcher [_ path matcher]
+      (let [size (count path)]
+        (reify Matcher
+          (match [_ i max p]
+            (if-not (< max (+ i size))
+              (loop [j 0]
+                (if (= j size)
+                  (match matcher (+ i size) max p)
+                  (if (= (get p (+ i j)) (get path j))
+                    (recur (inc j)))))))
+          (view [_] [path (view matcher)])
+          (depth [_] (inc (depth matcher)))
+          (length [_] (count path)))))
+    (wild-matcher [_ key end matcher]
+      (reify Matcher
+        (match [_ i max path]
+          (if (and (< i max) (not= (get path i) end))
+            (loop [percent? false, j i]
+              (if (= max j)
+                (if-let [match (match matcher max max path)]
+                  (assoc-param match key (decode path i max percent?)))
+                (let [c ^char (get path j)]
+                  (condp = c
+                    end (if-let [match (match matcher j max path)]
+                          (assoc-param match key (decode path i j percent?)))
+                    \% (recur true (inc j))
+                    (recur percent? (inc j))))))))
+        (view [_] [key (view matcher)])
+        (depth [_] (inc (depth matcher)))
+        (length [_])))
+    (catch-all-matcher [_ key params data]
+      (let [match (->Match params data)]
+        (reify Matcher
+          (match [_ i max path]
+            (if (< i max) (assoc-param match key (decode path i max true))))
+          (view [_] [key [data]])
+          (depth [_] 1)
+          (length [_]))))
+    (linear-matcher [_ matchers]
+      (let [matchers (vec (reverse (sort-by (juxt depth length) matchers)))
+            size (count matchers)]
+        (reify Matcher
+          (match [_ i max path]
+            (loop [j 0]
+              (if (< j size)
+                (or (match (get matchers j) i max path)
+                    (recur (inc j))))))
+          (view [_] (mapv view matchers))
+          (depth [_] (inc (apply max 0 (map depth matchers))))
+          (length [_]))))
+    (prettify [_ matcher]
+      (view matcher))
+    (path-matcher [_ matcher]
+      (fn [path]
+        (if-let [match (match matcher 0 (count path) path)]
+          (->Match (:params match) (:data match)))))))
+
+#?(:clj
+   (defn java-trie-compiler []
+     (reify
+       TrieCompiler
+       (data-matcher [_ params data]
+         (Trie/dataMatcher params data))
+       (static-matcher [_ path matcher]
+         (Trie/staticMatcher ^String path ^Trie$Matcher matcher))
+       (wild-matcher [_ key end matcher]
+         (Trie/wildMatcher key (if end (Character. end)) matcher))
+       (catch-all-matcher [_ key params data]
+         (Trie/catchAllMatcher key params data))
+       (linear-matcher [_ matchers]
+         (Trie/linearMatcher matchers))
+       (prettify [_ matcher]
+         (-> matcher str read-string eval))
+       (path-matcher [_ matcher]
+         (fn [path]
+           (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
+             (->Match (.params match) (.data match))))))))
+
+;;
+;; Managing Tries
 ;;
 
 (defn insert
@@ -259,33 +299,42 @@
          params (zipmap (->> parts (remove string?) (map :value)) (repeat nil))]
      (-insert (or node (-node {})) (split-path path) params data))))
 
-(defn compile [{:keys [data params children wilds catch-all] :or {params {}}}]
-  (let [ends (fn [{:keys [children]}] (or (keys children) ["/"]))
-        matchers (-> []
-                     (cond-> data (conj (data-matcher params data)))
-                     (into (for [[p c] children] (static-matcher p (compile c))))
-                     (into
-                       (for [[p c] wilds]
-                         (let [p (:value p)
-                               ends (ends c)]
-                           (if (next ends)
-                             (ex/fail! (str "Trie compliation error: wild " p " has two terminators: " ends))
-                             (wild-matcher p (ffirst ends) (compile c))))))
-                     (into (for [[p c] catch-all] (catch-all-matcher (:value p) params (:data c)))))]
-    (cond
-      (> (count matchers) 1) (linear-matcher matchers)
-      (= (count matchers) 1) (first matchers)
-      :else (data-matcher {} nil))))
+(defn compiler []
+  #?(:cljs (clojure-trie-compiler)
+     :clj  (java-trie-compiler)))
 
-(defn pretty [matcher]
-  #?(:clj  (-> matcher str read-string eval)
-     :cljs (view matcher)))
+(defn compile
+  ([options]
+   (compile options (compiler)))
+  ([{:keys [data params children wilds catch-all] :or {params {}}} compiler]
+   (let [ends (fn [{:keys [children]}] (or (keys children) ["/"]))
+         matchers (-> []
+                      (cond-> data (conj (data-matcher compiler params data)))
+                      (into (for [[p c] children] (static-matcher compiler p (compile c compiler))))
+                      (into
+                        (for [[p c] wilds]
+                          (let [p (:value p)
+                                ends (ends c)]
+                            (if (next ends)
+                              (ex/fail! (str "Trie compliation error: wild " p " has two terminators: " ends))
+                              (wild-matcher compiler p (ffirst ends) (compile c compiler))))))
+                      (into (for [[p c] catch-all] (catch-all-matcher compiler (:value p) params (:data c)))))]
+     (cond
+       (> (count matchers) 1) (linear-matcher compiler matchers)
+       (= (count matchers) 1) (first matchers)
+       :else (data-matcher compiler {} nil)))))
 
-(defn lookup [matcher path]
-  #?(:clj  (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
-             (->Match (.params match) (.data match)))
-     :cljs (if-let [match (match matcher 0 (count path) path)]
-             (->Match (:params match) (:data match)))))
+(defn pretty
+  ([trie]
+   (pretty trie (compiler)))
+  ([trie compiler]
+   (prettify compiler trie)))
+
+(defn matcher
+  ([trie]
+   (matcher trie (compiler)))
+  ([trie compiler]
+   (path-matcher compiler trie)))
 
 ;;
 ;; spike
