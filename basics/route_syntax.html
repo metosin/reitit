@@ -764,7 +764,7 @@
                                 <h1 id="route-syntax">Route Syntax</h1>
 <p>Routes are defined as vectors of String path and optional (non-sequential) route argument child routes.</p>
 <p>Routes can be wrapped in vectors and lists and <code>nil</code> routes are ignored.</p>
-<p>Paths can have path-parameters (<code>:id</code>) or catch-all-parameters (<code>*path</code>).</p>
+<p>Paths can have path-parameters (<code>:id</code>) or catch-all-parameters (<code>*path</code>). Since version <code>0.4.0</code>, parameters can also be wrapped in brackets, enabling use of qualified keywords <code>{user/id}</code>, <code>{*user/path}</code>. The non-bracket syntax might be deprecated later.</p>
 <h3 id="examples">Examples</h3>
 <p>Simple route:</p>
 <pre><code class="lang-clj">[<span class="hljs-string">&quot;/ping&quot;</span>]
@@ -781,8 +781,13 @@
 <pre><code class="lang-clj">[[<span class="hljs-string">&quot;/users/:user-id&quot;</span>]
  [<span class="hljs-string">&quot;/api/:version/ping&quot;</span>]]
 </code></pre>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/users/{user-id}&quot;</span>]
+ [<span class="hljs-string">&quot;/files/file-{number}.pdf&quot;</span>]]
+</code></pre>
 <p>Route with catch-all parameter:</p>
 <pre><code class="lang-clj">[<span class="hljs-string">&quot;/public/*path&quot;</span>]
+</code></pre>
+<pre><code class="lang-clj">[<span class="hljs-string">&quot;/public/{*path}&quot;</span>]
 </code></pre>
 <p>Nested routes:</p>
 <pre><code class="lang-clj">[<span class="hljs-string">&quot;/api&quot;</span>
@@ -796,13 +801,34 @@
  [<span class="hljs-string">&quot;/api/admin/db&quot;</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">::admin</span>], <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::db</span>}]
  [<span class="hljs-string">&quot;/api/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]]
 </code></pre>
+<h3 id="encoding">Encoding</h3>
+<p>Reitit does not apply any encoding to your paths. If you need that, you must encode them yourself. E.g., <code>/foo bar</code> should be <code>/foo%20bar</code>.</p>
+<h3 id="wildcards">Wildcards</h3>
+<p>Normal path-parameters (<code>:id</code>) can start anywhere in the path string, but have to end either to slash <code>/</code> (currently hardcoded) or to en end of path string:</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/api/:version&quot;</span>]
+ [<span class="hljs-string">&quot;/files/file-:number&quot;</span>]
+ [<span class="hljs-string">&quot;/user/:user-id/orders&quot;</span>]]
+</code></pre>
+<p>Bracket path-parameters can start and stop anywhere in the path-string, the following character is used as a terminator.</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/api/{version}&quot;</span>]
+ [<span class="hljs-string">&quot;/files/{name}.{extension}&quot;</span>]
+ [<span class="hljs-string">&quot;/user/{user-id}/orders&quot;</span>]]
+</code></pre>
+<p>Having multiple terminators after a bracket path-path parameter with identical path prefix will cause a compile-time error at router creation:</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/files/file-{name}.pdf&quot;</span>]            <span class="hljs-comment">;; terminator \.</span>
+ [<span class="hljs-string">&quot;/files/file-{name}-{version}.pdf&quot;</span>]] <span class="hljs-comment">;; terminator \-</span>
+</code></pre>
+<h3 id="slash-free-routing">Slash Free Routing</h3>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;broker.{customer}.{device}.{*data}&quot;</span>]
+ [<span class="hljs-string">&quot;events.{target}.{type}&quot;</span>]]
+</code></pre>
 <h3 id="generating-routes">Generating routes</h3>
 <p>Routes are just data, so it&apos;s easy to create them programmatically:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> cqrs-routes [actions]
   [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:interceptors</span> [<span class="hljs-symbol">::api</span> <span class="hljs-symbol">::db</span>]}
    (<span class="hljs-name"><span class="hljs-builtin-name">for</span></span> [[type interceptor] actions
          <span class="hljs-symbol">:let</span> [path (<span class="hljs-name"><span class="hljs-builtin-name">str</span></span> <span class="hljs-string">&quot;/&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">name</span></span> interceptor))
-               method (<span class="hljs-name"><span class="hljs-builtin-name">condp</span></span> = type
+               method (<span class="hljs-name"><span class="hljs-builtin-name">case</span></span> type
                         <span class="hljs-symbol">:query</span> <span class="hljs-symbol">:get</span>
                         <span class="hljs-symbol">:command</span> <span class="hljs-symbol">:post</span>)]]
      [path {method {<span class="hljs-symbol">:interceptors</span> [interceptor]}}])])
@@ -816,9 +842,6 @@
 <span class="hljs-comment">;   [&quot;/add-user&quot; {:post {:interceptors [add-user]}}]</span>
 <span class="hljs-comment">;   [&quot;/add-order&quot; {:post {:interceptors [add-order]}}])]</span>
 </code></pre>
-<h3 id="encoding">Encoding</h3>
-<p>Reitit does not apply any encoding to your paths. If you need that, you must encode them yourself. 
-E.g., <code>/foo bar</code> should be <code>/foo%20bar</code>.</p>
 
                                 
                                 </section>
@@ -862,7 +885,7 @@ E.g., <code>/foo bar</code> should be <code>/foo%20bar</code>.</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Syntax","level":"2.1","depth":1,"next":{"title":"Router","level":"2.2","depth":1,"path":"basics/router.md","ref":"basics/router.md","articles":[]},"previous":{"title":"Introduction","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_syntax.md","mtime":"2019-02-20T07:05:23.179Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-20T07:05:49.328Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Syntax","level":"2.1","depth":1,"next":{"title":"Router","level":"2.2","depth":1,"path":"basics/router.md","ref":"basics/router.md","articles":[]},"previous":{"title":"Introduction","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_syntax.md","mtime":"2019-02-28T10:22:27.859Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-28T10:23:06.883Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>

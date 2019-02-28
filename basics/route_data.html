@@ -762,8 +762,14 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="route-data">Route Data</h1>
-<p>Route data is the core feature of reitit. Routes can have any map-like data attached to them. This data is interpreted either by the client application or the <code>Router</code> via its <code>:coerce</code> and <code>:compile</code> hooks. Route data format can be defined and validated with <code>clojure.spec</code> enabling an architecture of both <a href="https://youtu.be/x9pxbnFC4aQ?t=1907" target="_blank">adaptive and principled</a> components.</p>
-<p>Raw routes can have a non-sequential route argument that is expanded (via router <code>:expand</code> hook) into route data at router creation time. By default, Keywords are expanded into <code>:name</code> and functions into <code>:handler</code> keys.</p>
+<p>Route data is the key feature of reitit. Routes can have any map-like data attached to them, to be interpreted by the client application, <code>Router</code> or routing components like <code>Middleware</code> or <code>Interceptors</code>.</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/ping&quot;</span> {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]
+ [<span class="hljs-string">&quot;/pong&quot;</span> {<span class="hljs-symbol">:handler</span> identity}]
+ [<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:roles</span> #{<span class="hljs-symbol">:admin</span>}
+                  <span class="hljs-symbol">:handler</span> identity}}]]
+</code></pre>
+<p>Besides map-like data, raw routes can have any non-sequential route argument after the path. This argument is expanded by <code>Router</code> (via <code>:expand</code> option) into route data at router creation time. </p>
+<p>By default, Keywords are expanded into <code>:name</code> and functions into <code>:handler</code> keys.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
@@ -773,9 +779,10 @@
      [<span class="hljs-string">&quot;/users&quot;</span> {<span class="hljs-symbol">:get</span> {<span class="hljs-symbol">:roles</span> #{<span class="hljs-symbol">:admin</span>}
                       <span class="hljs-symbol">:handler</span> identity}}]]))
 </code></pre>
-<p>The expanded route data can be retrieved from a router with <code>routes</code> and is returned with <code>match-by-path</code> and <code>match-by-name</code> in case of a route match.</p>
+<h2 id="using-route-data">Using Route Data</h2>
+<p>Expanded route data can be retrieved from a router with <code>routes</code> and is returned with <code>match-by-path</code> and <code>match-by-name</code> in case of a route match.</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/routes</span> router)
-<span class="hljs-comment">; [[&quot;/ping&quot; {:name :user/ping}]</span>
+<span class="hljs-comment">; [[&quot;/ping&quot; {:name ::ping}]</span>
 <span class="hljs-comment">;  [&quot;/pong&quot; {:handler identity]}</span>
 <span class="hljs-comment">;  [&quot;/users&quot; {:get {:roles #{:admin}</span>
 <span class="hljs-comment">;                   :handler identity}}]]</span>
@@ -794,7 +801,7 @@
 <span class="hljs-comment">;        :path-params {}</span>
 <span class="hljs-comment">;        :path &quot;/ping&quot;}</span>
 </code></pre>
-<h2 id="nested-route-data">Nested route data</h2>
+<h2 id="nested-route-data">Nested Route Data</h2>
 <p>For nested route trees, route data is accumulated recursively from root towards leafs using <a href="https://github.com/weavejester/meta-merge" target="_blank">meta-merge</a>. Default behavior for collections is <code>:append</code>, but this can be overridden to <code>:prepend</code>, <code>:replace</code> or <code>:displace</code> using the target meta-data.</p>
 <p>An example router with nested data:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
@@ -816,8 +823,52 @@
 <span class="hljs-comment">;  [&quot;/api/admin/db&quot; {:interceptors [::api ::db]</span>
 <span class="hljs-comment">;                    :roles #{:db-admin}}]]</span>
 </code></pre>
-<h2 id="expansion">Expansion</h2>
-<p>By default, router <code>:expand</code> hook maps to <code>reitit.core/expand</code> function, backed by a <code>reitit.core/Expand</code> protocol. One can provide either a totally different function or add new implementations to that protocol. Expand implementations can be recursive.</p>
+<h2 id="route-data-fragments">Route Data Fragments</h2>
+<p>Just like <a href="https://reactjs.org/docs/fragments.html" target="_blank">fragments in React.js</a>, we can create routing tree fragments by using empty path <code>&quot;&quot;</code>. This allows us to add route data without accumulating to path.</p>
+<p>Given a route tree:</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/swagger.json&quot;</span> <span class="hljs-symbol">::swagger</span>]
+ [<span class="hljs-string">&quot;/api-docs&quot;</span> <span class="hljs-symbol">::api-docs</span>]
+ [<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+ [<span class="hljs-string">&quot;/api/pong&quot;</span> <span class="hljs-symbol">::pong</span>]]
+</code></pre>
+<p>Adding <code>:no-doc</code> route data to exclude the first routes from generated <a href="../ring/swagger.html">Swagger documentation</a>:</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;&quot;</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>}
+  [<span class="hljs-string">&quot;/swagger.json&quot;</span> <span class="hljs-symbol">::swagger</span>]
+  [<span class="hljs-string">&quot;/api-docs&quot;</span> <span class="hljs-symbol">::api-docs</span>]]
+ [<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+ [<span class="hljs-string">&quot;/api/pong&quot;</span> <span class="hljs-symbol">::pong</span>]]
+</code></pre>
+<p>Accumulated route data:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">r/router</span>
+    [[<span class="hljs-string">&quot;&quot;</span> {<span class="hljs-symbol">:no-doc</span> <span class="hljs-literal">true</span>}
+      [<span class="hljs-string">&quot;/swagger.json&quot;</span> <span class="hljs-symbol">::swagger</span>]
+      [<span class="hljs-string">&quot;/api-docs&quot;</span> <span class="hljs-symbol">::api-docs</span>]]
+     [<span class="hljs-string">&quot;/api/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+     [<span class="hljs-string">&quot;/api/pong&quot;</span> <span class="hljs-symbol">::pong</span>]]))
+
+(<span class="hljs-name">r/routes</span> router)
+<span class="hljs-comment">; [[&quot;/swagger.json&quot; {:no-doc true, :name ::swagger}]</span>
+<span class="hljs-comment">;  [&quot;/api-docs&quot; {:no-doc true, :name ::api-docs}]</span>
+<span class="hljs-comment">;  [&quot;/api/ping&quot; {:name ::ping}]</span>
+<span class="hljs-comment">;  [&quot;/api/pong&quot; {:name ::pong}]]</span>
+</code></pre>
+<h2 id="top-level-route-data">Top-level Route Data</h2>
+<p>Route data can be introduced also via <code>Router</code> option <code>:data</code>:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> router
+  (<span class="hljs-name">r/router</span>
+    [<span class="hljs-string">&quot;/api&quot;</span>
+     {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">::api</span>]}
+     [<span class="hljs-string">&quot;/ping&quot;</span> <span class="hljs-symbol">::ping</span>]
+     [<span class="hljs-string">&quot;/pong&quot;</span> <span class="hljs-symbol">::pong</span>]]
+    {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">::session</span>]}}))
+</code></pre>
+<p>Expanded routes:</p>
+<pre><code class="lang-clj">[[<span class="hljs-string">&quot;/api/ping&quot;</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">::session</span> <span class="hljs-symbol">::api</span>], <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::ping</span>}]
+ [<span class="hljs-string">&quot;/api/pong&quot;</span> {<span class="hljs-symbol">:middleware</span> [<span class="hljs-symbol">::session</span> <span class="hljs-symbol">::api</span>], <span class="hljs-symbol">:name</span> <span class="hljs-symbol">::pong</span>}]]
+</code></pre>
+<h2 id="customizing-expansion">Customizing Expansion</h2>
+<p>By default, router <code>:expand</code> option has value <code>r/expand</code> function, backed by a <code>r/Expand</code> protocol. Expansion can be customized either by swapping the <code>:expand</code> implementation or by extending the Protocol. <code>r/Expand</code> implementations can be recursive.</p>
 <p>Naive example to add direct support for <code>java.io.File</code> route argument:</p>
 <pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">extend-type</span></span> java.io.File
   r/Expand
@@ -829,7 +880,9 @@
 (<span class="hljs-name">r/router</span>
   [<span class="hljs-string">&quot;/&quot;</span> (<span class="hljs-name">java.io.File.</span> <span class="hljs-string">&quot;index.html&quot;</span>)])
 </code></pre>
-<p>See <a href="../advanced/configuring_routers.html">router options</a> for all available options.</p>
+<p>Page <a href="../advanced/shared_routes.html#using-custom-expander">shared routes</a> has an example of an custom <code>:expand</code> implementation.</p>
+<h2 id="route-data-validation">Route data validation</h2>
+<p>See <a href="route_data_validation.html">Route data validation</a>.</p>
 
                                 
                                 </section>
@@ -873,7 +926,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Data","level":"2.5","depth":1,"next":{"title":"Route Data Validation","level":"2.6","depth":1,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"previous":{"title":"Name-based Routing","level":"2.4","depth":1,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data.md","mtime":"2019-02-20T07:05:23.179Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-20T07:05:49.328Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Data","level":"2.5","depth":1,"next":{"title":"Route Data Validation","level":"2.6","depth":1,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"previous":{"title":"Name-based Routing","level":"2.4","depth":1,"path":"basics/name_based_routing.md","ref":"basics/name_based_routing.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data.md","mtime":"2019-02-28T10:22:27.859Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-02-28T10:23:06.883Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
