@@ -64,6 +64,4 @@
                 (do
                   (when verbose? (println (format "%7s\t%7s" mean lower) "\t" path))
                   [mean lower]))]
-    (title (str "average, lower/mean: "
-                (int (/ (reduce + (map second times)) (count times))) "/"
-                (int (/ (reduce + (map first times)) (count times)))))))
+    (title (str "average, mean: " (int (/ (reduce + (map first times)) (count times)))))))
