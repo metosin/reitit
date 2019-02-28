@@ -28,7 +28,7 @@
                 "Available middleware in registry:\n"
                 (with-out-str
                   (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
-              "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
+              "See [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
           {:id this
            :registry registry})))
 

@@ -147,7 +147,7 @@ Expanded routes:
 ```
 
 
-## Expansion
+## Customizing Expansion
 
 By default, router `:expand` option has value `r/expand` function, backed by a `r/Expand` protocol. Expansion can be customized either by swapping the `:expand` implementation or by extending the Protocol. `r/Expand` implementations can be recursive.
 
@@ -169,4 +169,4 @@ Page [shared routes](../advanced/shared_routes.md#using-custom-expander) has an 
 
 ## Route data validation
 
-See [Route data validation](route_data_validation.md), which enables an architecture of both [adaptive and principled](https://youtu.be/x9pxbnFC4aQ?t=1907) components.
+See [Route data validation](route_data_validation.md).

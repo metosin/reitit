@@ -261,7 +261,7 @@ public class Trie {
 
     @Override
     public int depth() {
-      return Arrays.stream(childs).mapToInt(Matcher::depth).max().orElseThrow(NoSuchElementException::new);
+      return Arrays.stream(childs).mapToInt(Matcher::depth).max().orElseThrow(NoSuchElementException::new) + 1;
     }
 
     @Override

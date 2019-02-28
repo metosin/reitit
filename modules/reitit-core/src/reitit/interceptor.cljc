@@ -44,7 +44,7 @@
                 "Available interceptors in registry:\n"
                 (with-out-str
                   (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
-              "see [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
+              "See [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
           {:id this
            :registry registry})))
 
