@@ -5,8 +5,7 @@
             [reitit.impl]
             [clojure.edn :as edn]
             [reitit.ring :as ring]
-            [reitit.core :as r])
-  (:import (reitit SegmentTrie)))
+            [reitit.core :as r]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -87,34 +86,23 @@
     {:inject-match? false, :inject-router? false}))
 
 (comment
-  (let [request {:request-method :get
-                 :uri "/user/1234/profile/compact/"}]
-    ;;  OLD: 1338ns
-    ;;  NEW:  981ns
-    ;; JAVA:  805ns
-    ;; NO-INJECT: 704ns
-    #_(cc/quick-bench
-        (handler-reitit request))
+  (let [request {:request-method :get, :uri "/user/1234/profile/compact/"}]
+    ;; 1338ns (old)
+    ;;  981ns (new)
+    ;;  805ns (java)
+    ;;  704ns (no-inject)
+    ;;  458ns (trie)
+    (cc/quick-bench
+      (handler-reitit request))
     (handler-reitit request)))
 
-
 (comment
-  ;; 281ns
+  ;; 190ns
   (let [router (r/router [["/user/:id/profile/:type" ::1]
                           ["/user/:id/permissions" ::2]
                           ["/company/:cid/dept/:did" ::3]
                           ["/this/is/a/static/route" ::4]])]
-    #_(cc/quick-bench
-        (r/match-by-path router "/user/1234/profile/compact"))
+    (cc/quick-bench
+      (r/match-by-path router "/user/1234/profile/compact"))
     (r/match-by-path router "/user/1234/profile/compact")))
-
-(comment
-  (edn/read-string
-    (str
-      (.matcher
-        (doto (SegmentTrie.)
-          (.add "/user" 1)
-          (.add "/user/:id" 2)
-          (.add "/user/:id/orders" 3)
-          (.add "/user/id/permissions" 4))))))
 

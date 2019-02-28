@@ -1,9 +1,8 @@
 (ns reitit.prefix-tree-perf-test
   (:require [clojure.test :refer :all]
             [io.pedestal.http.route.prefix-tree :as p]
-            [reitit.segment :as segment]
-            [criterium.core :as cc])
-  (:import (reitit SegmentTrie)))
+            [reitit.trie :as trie]
+            [criterium.core :as cc]))
 
 ;;
 ;; testing
@@ -70,19 +69,21 @@
       (p/insert acc p d))
     nil routes))
 
-(def matcher
-  (.matcher
-    ^SegmentTrie
-    (reduce
-      (fn [acc [p d]]
-        (segment/insert acc p d))
-      nil routes)))
+(def trie-matcher
+  (trie/path-matcher
+    (trie/compile
+      (reduce
+        (fn [acc [p d]]
+          (trie/insert acc p d))
+        nil routes))))
 
 (defn bench! []
 
   ;; 2.3µs
-  #_(cc/quick-bench
-      (p/lookup pedestal-tree "/v1/orgs/1/topics"))
+  ;; 2.1µs (28.2.2019)
+  (cc/with-progress-reporting
+    (cc/bench
+      (p/lookup pedestal-tree "/v1/orgs/1/topics")))
 
   ;; 3.1µs
   ;; 2.5µs (string equals)
@@ -100,7 +101,7 @@
   ;; 0.8µs (return route-data)
   ;; 0.8µs (fix payloads)
   #_(cc/quick-bench
-      (trie/lookup reitit-tree "/v1/orgs/1/topics" {}))
+      (trie/path-matcher reitit-tree "/v1/orgs/1/topics" {}))
 
   ;;  0.9µs (initial)
   ;;  0.5µs (protocols)
@@ -109,13 +110,24 @@
   ;; 0.63µs (Single sweep path paraµs)
   ;; 0.51µs (Cleanup)
   ;; 0.30µs (Java)
-  (cc/quick-bench
-    (segment/lookup matcher "/v1/orgs/1/topics")))
+  #_(cc/quick-bench
+      (segment/lookup segment-matcher "/v1/orgs/1/topics"))
+
+  ;; 0.320µs (initial)
+  ;; 0.300µs (iterate arrays)
+  ;; 0.280µs (list-params)
+  ;; 0.096µs (trie)
+  (cc/with-progress-reporting
+    (cc/bench
+      (trie-matcher "/v1/orgs/1/topics"))))
 
 (comment
   (bench!))
 
+(set! *warn-on-reflection* true)
+
 (comment
   (p/lookup pedestal-tree "/v1/orgs/1/topics")
-  #_(trie/lookup reitit-tree "/v1/orgs/1/topics" {})
-  (segment/lookup matcher "/v1/orgs/1/topics"))
+  (trie-matcher "/v1/orgs/1/topics")
+  #_(segment/lookup segment-matcher "/v1/orgs/1/topics"))
+

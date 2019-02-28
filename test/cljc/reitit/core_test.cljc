@@ -1,6 +1,7 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as r #?@(:cljs [:refer [Match Router]])])
+            [reitit.core :as r #?@(:cljs [:refer [Match Router]])]
+            [reitit.impl :as impl])
   #?(:clj
      (:import (reitit.core Match Router)
               (clojure.lang ExceptionInfo))))
@@ -78,15 +79,64 @@
                           ["/abba/:dabba/boo" ::boo]
                           ["/:jabba/:dabba/:doo/:daa/*foo" ::wild]]
                          {:router r})
-                matches #(-> router (r/match-by-path %) :data :name)]
-            (is (= ::abba (matches "/abba")))
-            (is (= ::abba2 (matches "/abba/1")))
-            (is (= ::jabba2 (matches "/abba/2")))
-            (is (= ::doo (matches "/abba/1/doo")))
-            (is (= ::boo (matches "/abba/1/boo")))
-            (is (= ::baa (matches "/abba/dabba/boo/baa")))
-            (is (= ::boo (matches "/abba/dabba/boo")))
-            (is (= ::wild (matches "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
+                by-path #(-> router (r/match-by-path %) :data :name)]
+            (is (= ::abba (by-path "/abba")))
+            (is (= ::abba2 (by-path "/abba/1")))
+            (is (= ::jabba2 (by-path "/abba/2")))
+            (is (= ::doo (by-path "/abba/1/doo")))
+            (is (= ::boo (by-path "/abba/1/boo")))
+            (is (= ::baa (by-path "/abba/dabba/boo/baa")))
+            (is (= ::boo (by-path "/abba/dabba/boo")))
+            (is (= ::wild (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
+
+        (testing "bracket-params"
+          (testing "successful"
+            (let [router (r/router
+                           [["/{abba}" ::abba]
+                            ["/abba/1" ::abba2]
+                            ["/{jabba}/2" ::jabba2]
+                            ["/{abba}/{dabba}/doo" ::doo]
+                            ["/abba/dabba/boo/baa" ::baa]
+                            ["/abba/{dabba}/boo" ::boo]
+                            ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
+                            ["/files/file-{name}.html" ::html]
+                            ["/files/file-{name}.json" ::json]
+                            ["/{eskon}/{saum}/pium\u2215paum" ::loru]
+                            ["/{🌈}🤔/🎈" ::emoji]
+                            ["/extra-end}s-are/ok" ::bracket]]
+                           {:router r})
+                  by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
+              (is (= [::abba {:abba "abba"}] (by-path "/abba")))
+              (is (= [::abba2 {}] (by-path "/abba/1")))
+              (is (= [::jabba2 {:jabba "abba"}] (by-path "/abba/2")))
+              (is (= [::doo {:abba "abba", :dabba "1"}] (by-path "/abba/1/doo")))
+              (is (= [::boo {:dabba "1"}] (by-path "/abba/1/boo")))
+              (is (= [::baa {}] (by-path "/abba/dabba/boo/baa")))
+              (is (= [::boo {:dabba "dabba"}] (by-path "/abba/dabba/boo")))
+              (is (= [::wild {:a/jabba "olipa"
+                              :a.b/dabba "kerran"
+                              :a.b.c/doo "avaruus"
+                              :a.b.c.d/daa "vaan"
+                              :foo/bar "ei/toista/kertaa"}]
+                     (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
+              (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
+              (is (= [::loru {:eskon "viitan", :saum "aa"}] (by-path "/viitan/aa/pium\u2215paum")))
+              (is (= [nil nil] (by-path "/ei/osu/pium/paum")))
+              (is (= [::emoji {:🌈 "brackets"}] (by-path "/brackets🤔/🎈")))
+              (is (= [::bracket {}] (by-path "/extra-end}s-are/ok")))))
+
+          (testing "invalid syntax fails fast"
+            (testing "unclosed brackets"
+              (is (thrown-with-msg?
+                    ExceptionInfo
+                    #"^Unclosed brackets"
+                    (r/router ["/kikka/{kukka"]))))
+            (testing "multiple terminators"
+              (is (thrown-with-msg?
+                    ExceptionInfo
+                    #"^Trie compliation error: wild :kukka has two terminators"
+                    (r/router [["/{kukka}.json"]
+                               ["/{kukka}-json"]]))))))
 
         (testing "empty path segments"
           (let [router (r/router
@@ -103,7 +153,7 @@
             (is (= nil (matches ""))))))
 
       r/linear-router :linear-router
-      r/segment-router :segment-router
+      r/trie-router :trie-router
       r/mixed-router :mixed-router
       r/quarantine-router :quarantine-router))
 
@@ -136,13 +186,14 @@
                 ExceptionInfo
                 #"can't create :lookup-router with wildcard routes"
                 (r/lookup-router
-                  (r/resolve-routes
-                    ["/api/:version/ping"] {}))))))
+                  (impl/resolve-routes
+                    ["/api/:version/ping"]
+                    (r/default-router-options)))))))
 
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
       r/linear-router :linear-router
-      r/segment-router :segment-router
+      r/trie-router :trie-router
       r/mixed-router :mixed-router
       r/quarantine-router :quarantine-router))
 
@@ -208,7 +259,7 @@
           expected [["/auth/login" {:name :auth/login}]
                     ["/auth/recovery/token/:token" {:name :auth/recovery}]
                     ["/workspace/:project-uuid/:page-uuid" {:name :workspace/page}]]]
-      (is (= expected (r/resolve-routes routes {})))))
+      (is (= expected (impl/resolve-routes routes (r/default-router-options))))))
 
   (testing "ring sample"
     (let [pong (constantly "ok")
@@ -226,7 +277,7 @@
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
           router (r/router routes)]
-      (is (= expected (r/resolve-routes routes {})))
+      (is (= expected (impl/resolve-routes routes (r/default-router-options))))
       (is (= (r/map->Match
                {:template "/api/user/:id/:sub-id"
                 :data {:mw [:api], :parameters {:id "String", :sub-id "String"}}
@@ -237,10 +288,10 @@
 (deftest conflicting-routes-test
   (testing "path conflicts"
     (are [conflicting? data]
-      (let [routes (r/resolve-routes data {})
+      (let [routes (impl/resolve-routes data (r/default-router-options))
             conflicts (-> routes
-                          (r/resolve-routes {})
-                          (r/path-conflicting-routes))]
+                          (impl/resolve-routes (r/default-router-options))
+                          (impl/path-conflicting-routes))]
         (if conflicting? (seq conflicts) (nil? conflicts)))
 
       true [["/a"]
@@ -275,8 +326,8 @@
               ["/:b" {}] #{["/c" {}] ["/*d" {}]},
               ["/c" {}] #{["/*d" {}]}}
              (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
-                 (r/resolve-routes {})
-                 (r/path-conflicting-routes)))))
+                 (impl/resolve-routes (r/default-router-options))
+                 (impl/path-conflicting-routes)))))
 
     (testing "router with conflicting routes"
       (testing "throws by default"

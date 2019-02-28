@@ -14,7 +14,9 @@
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
-            [reitit.core :as r]))
+            [reitit.core :as r]
+            [criterium.core :as cc]
+            [reitit.trie :as trie]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -568,6 +570,10 @@
     ;;   662ns (prefix-tree-router)
     ;;   567ns (segment-router)
     ;;   326ns (java-segment-router)
+    ;;   194ns (trie)
+    ;;   160ns (trie, prioritized)
+    ;;   130ns (trie, non-transient, direct-data)
+    ;;   121ns (trie, pre-defined parameters)
     (b! "reitit" reitit-f)
 
     ;;  2845ns
@@ -578,13 +584,23 @@
     ;;   806ns (decode path-parameters)
     ;;   735ns (maybe-map-values)
     ;;   474ns (java-segment-router)
+    ;;   373ns (trie)
+    ;;   323ns (trie, prioritized)
+    ;;   289ns (trie, prioritized, zero-copy)
+    ;;   266ns (trie, non-transient, direct-data)
+    ;;   251ns (trie, pre-defined parameters)
     (b! "reitit-ring" reitit-ring-f)
 
     ;;   385ns (java-segment-router, no injects)
+    ;;   271ms (trie)
+    ;;   240ns (trie, prioritized)
+    ;;   214ns (trie, non-transient, direct-data)
+    ;;   187ns (trie, pre-defined parameters)
     (b! "reitit-ring-fast" reitit-ring-fast-f)
 
     ;;  2553ns (linear-router)
     ;;   630ns (segment-router-backed)
+    ;;   464ns (trie, non-transient, direct-data)
     (b! "reitit-ring-linear" reitit-ring-linear-f)
 
     ;;  2137ns
@@ -610,3 +626,29 @@
 
 (comment
   (bench-rest!))
+
+(comment
+  (set! *warn-on-reflection* true)
+  (require '[clj-async-profiler.core :as prof])
+  ;; 629ms (arraylist)
+  ;; 409ns (transient)
+  ;; 409ns (staticMultiMatcher)
+  ;; 305ns (non-persistent-params)
+  ;; 293ns (pre-defined parameters)
+  (let [app (ring/ring-handler (ring/router opensensors-routes) {:inject-match? false, :inject-router? false})
+        request {:uri "/v1/users/1/devices/1", :request-method :get}]
+    (doseq [[p r] (-> app (ring/get-router) (r/routes))]
+      (when-not (app {:uri p, :request-method :get})
+        (println "FAIL:" p)))
+    (println (app request))
+    (cc/quick-bench
+      (app request))
+    (prof/start {})
+    ; "Elapsed time: 9183.657012 msecs"
+    ; "Elapsed time: 8674.70132 msecs"
+    ; "Elapsed time: 6714.434915 msecs"
+    ; "Elapsed time: 6325.310043 msecs"
+    (time
+      (dotimes [_ 20000000]
+        (app request)))
+    (str (prof/stop {}))))

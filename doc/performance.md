@@ -1,6 +1,6 @@
 # Performance
 
-Besides having great features, goal of reitit is to be really, really fast. The routing was originally exported from Pedestal, but since rewritten.
+Reitit tries to be really, really fast.
 
 ![Opensensors perf test](images/opensensors.png)
 
@@ -9,9 +9,10 @@ Besides having great features, goal of reitit is to be really, really fast. The 
 * Multiple routing algorithms, chosen based on the route tree
 * Route flattening and re-ordering
 * Managed mutability over immutability
-* Precompute/compile as much as possible (matches, middleware, interceptors, routes)
+* Precompute/compile as much as possible (matches, middleware, interceptors, routes, path-parameter sets)
 * Use abstractions that enable JVM optimizations
 * Use small functions to enable JVM Inlining
+* Use Java where needed
 * Protocols over Multimethods
 * Records over Maps
 * Always be measuring
@@ -63,13 +64,13 @@ The routing sample taken from [bide](https://github.com/funcool/bide) README:
   (dotimes [_ 1000]
     (r/match-by-path routes "/auth/login")))
 
-;; Execution time mean (per 1000): 315 µs -> 3.2M ops/sec
+;; Execution time mean (per 1000): 115 µs -> 8.7M ops/sec
 (cc/quick-bench
   (dotimes [_ 1000]
     (r/match-by-path routes "/workspace/1/1")))
 ```
 
-Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 6-40x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
+Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 18-110x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
 
 But, the example is too simple for any real benchmark. Also, some of the libraries always match on the `:request-method` too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.
 
@@ -79,7 +80,7 @@ So, we need to test something more realistic.
 
 To get better view on the real life routing performance, there is [test](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/opensensors_perf_test.clj) of a mid-size rest(ish) http api with 50+ routes, having a lot of path parameters. The route definitions are pulled off from the [OpenSensors](https://opensensors.io/) swagger definitions.
 
-Thanks to the snappy [SegmentTrie](https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/SegmentTrie.java) (a modification of [Radix Tree](https://en.wikipedia.org/wiki/Radix_tree)), `reitit-ring` is fastest here. [Calfpath](https://github.com/kumarshantanu/calfpath) and [Pedestal](https://github.com/pedestal/pedestal) are also quite fast.
+Thanks to the snappy [Wildcard  Trie](https://github.com/metosin/reitit/blob/master/modules/reitit-core/java-src/reitit/Trie.java) (a modification of [Radix Tree](https://en.wikipedia.org/wiki/Radix_tree)), `reitit-ring` is fastest here. [Calfpath](https://github.com/kumarshantanu/calfpath) and [Pedestal](https://github.com/pedestal/pedestal) are also quite fast.
 
 ![Opensensors perf](images/opensensors.png)
 
@@ -93,13 +94,17 @@ Both `reitit-ring` and Pedestal shine in this test, thanks to the fast lookup-ro
 
 **NOTE**: in real life, there are usually always also wild-card routes present. In this case, Pedestal would fallback from lookup-router to the prefix-tree router, which is order of magnitude slower (30x in this test). Reitit would handle this nicely thanks to it's `:mixed-router`: all static routes would still be served with `:lookup-router`, just the wildcard routes with `:segment-tree`. The performance would not notably degrade.
 
+### Path conflicts
+
+**TODO**
+
 ### Why measure?
 
 The reitit routing perf is measured to get an internal baseline to optimize against. We also want to ensure that new features don't regress the performance. Perf tests should be run in a stable CI environment. Help welcome!
 
 ### Looking out of the box
 
-A quick poke to [routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that the reitit is only few times slower than the fastest routers in Go. Which is kinda awesome.
+A quick poke to [the fast routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that reitit is less 50% slower than the fastest routers in Go. Which is kinda awesome.
 
 ### Faster!
 

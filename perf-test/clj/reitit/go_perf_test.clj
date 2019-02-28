@@ -20,8 +20,7 @@
 ;;
 
 (defn h [path]
-  (fn [_]
-    {:status 200, :body path}))
+  (constantly {:status 200, :body path}))
 
 (defn add [handler routes route]
   (let [method (-> route keys first str/lower-case keyword)
@@ -300,7 +299,7 @@
     (ring/create-default-handler)
     {:inject-match? false, :inject-router? false}))
 
-(defrecord Req [uri request-method])
+(defrecord Req [uri request-method path-params])
 
 (defn route->req [route]
   (map->Req {:request-method (-> route keys first str/lower-case keyword)
@@ -317,6 +316,8 @@
   ;; 120ns (faster decode params)
   ;; 140µs (java-segment-router)
   ;;  60ns (java-segment-router, no injects)
+  ;;  55ns (trie-router, no injects)
+  ;;  54ns (trie-router, no injects, optimized)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
     (title "static")
     (assert (= {:status 200, :body "/user/repos"} (app req)))
@@ -328,6 +329,11 @@
   ;; 560µs (java-segment-router)
   ;; 490ns (java-segment-router, no injects)
   ;; 440ns (java-segment-router, no injects, single-wild-optimization)
+  ;; 305ns (trie-router, no injects)
+  ;; 281ns (trie-router, no injects, optimized)
+  ;; 277ns (trie-router, no injects, switch-case) - 690ns clojure
+  ;; 273ns (trie-router, no injects, direct-data)
+  ;; 256ns (trie-router, pre-defined parameters)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -339,6 +345,12 @@
   ;; 120µs (java-segment-router)
   ;; 100µs (java-segment-router, no injects)
   ;;  90µs (java-segment-router, no injects, single-wild-optimization)
+  ;;  66µs (trie-router, no injects)
+  ;;  64µs (trie-router, no injects, optimized) - 124µs (clojure)
+  ;;  63µs (trie-router, no injects, switch-case) - 124µs (clojure)
+  ;;  63µs (trie-router, no injects, direct-data)
+  ;;  54µs (trie-router, non-transient params)
+  ;;  49µs (trie-router, pre-defined parameters)
   (let [requests (mapv route->req routes)]
     (title "all")
     (cc/quick-bench
@@ -346,4 +358,13 @@
         (app r)))))
 
 (comment
-  (routing-test))
+  (routing-test)
+  (ring/get-router app)
+  (app {:uri "/authorizations/1", :request-method :get})
+  (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})
+  (do
+    (require '[clj-async-profiler.core :as prof])
+    (prof/profile
+      (dotimes [_ 1000000]
+        (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})))
+    (prof/serve-files 8080)))

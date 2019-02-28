@@ -34,9 +34,11 @@
     (mapv
       (fn [path]
         (let [request (map->Request (req path))
-              time (int (* (first (:sample-mean (cc/quick-benchmark (dotimes [_ 1000] (f request)) {}))) 1e6))]
-          (println path "=>" time "ns")
-          [path time]))
+              results (cc/quick-benchmark (dotimes [_ 1000] (f request)) {})
+              mean (int (* (first (:sample-mean results)) 1e6))
+              lower (int (* (first (:lower-q results)) 1e6))]
+          (println path "=>" lower "/" mean "ns")
+          [path [mean lower]]))
       urls)))
 
 (defn bench [routes req no-paths?]
@@ -45,8 +47,8 @@
                          [(str/replace path #"\:" "") name]
                          [path name])) routes)
         router (reitit/router routes)]
-    (doseq [[path time] (bench-routes routes req #(reitit/match-by-path router %))]
-      (println path "\t" time))))
+    (doseq [[path [mean lower]] (bench-routes routes req #(reitit/match-by-path router %))]
+      (println path "\t" mean lower))))
 
 ;;
 ;; Perf tests
@@ -58,8 +60,8 @@
   (println)
   (suite name)
   (println)
-  (let [times (for [[path time] (bench-routes routes req f)]
+  (let [times (for [[path [mean lower]] (bench-routes routes req f)]
                 (do
-                  (when verbose? (println (format "%7s" time) "\t" path))
-                  time))]
-    (title (str "average: " (int (/ (reduce + times) (count times)))))))
+                  (when verbose? (println (format "%7s\t%7s" mean lower) "\t" path))
+                  [mean lower]))]
+    (title (str "average, mean: " (int (/ (reduce + (map first times)) (count times)))))))

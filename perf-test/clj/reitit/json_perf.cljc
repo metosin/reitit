@@ -2,9 +2,13 @@
   (:require [criterium.core :as cc]
             [reitit.perf-utils :refer :all]
 
+    ;; aleph
+            [aleph.http :as http]
+
     ;; reitit
             [reitit.ring :as ring]
-            [muuntaja.middleware :as mm]
+            [muuntaja.core :as m]
+            [reitit.ring.middleware.muuntaja :as rm]
 
     ;; bidi-yada
             [yada.yada :as yada]
@@ -14,7 +18,8 @@
     ;; defaults
             [ring.middleware.defaults :as defaults]
             [compojure.core :as compojure]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [muuntaja.middleware :as mm]))
 
 ;;
 ;; start repl with `lein perf repl`
@@ -31,16 +36,16 @@
 ;; Memory:                16 GB
 ;;
 
-;; TODO: naive implementation
 (defn- with-security-headers [response]
-  (update
+  (assoc
     response
     :headers
-    (fn [headers]
-      (-> headers
-          (assoc "x-frame-options" "SAMEORIGIN")
-          (assoc "x-xss-protection" "1; mode=block")
-          (assoc "x-content-type-options" "nosniff")))))
+    (reduce-kv
+      assoc
+      {"x-frame-options" "SAMEORIGIN"
+       "x-xss-protection" "1; mode=block"
+       "x-content-type-options" "nosniff"}
+      (:headers response))))
 
 (def security-middleware
   {:name ::security
@@ -53,7 +58,8 @@
     (ring/router
       ["/api/ping"
        {:get {:handler (fn [_] {:status 200, :body {:ping "pong"}})}}]
-      {:data {:middleware [mm/wrap-format
+      {:data {:muuntaja (m/create (assoc m/default-options :return :bytes))
+              :middleware [rm/format-middleware
                            security-middleware]}})))
 
 (def bidi-yada-app
@@ -87,7 +93,7 @@
 
 (defn perf-test []
 
-  ;; 176µs
+  ;; 206µs
   (title "compojure + ring-defaults")
   (let [f (fn [] (defaults-app request))]
     (expect! (-> (f) :body slurp))
@@ -99,7 +105,7 @@
     (expect! (-> (f) deref :body bs/to-string))
     (cc/quick-bench (f)))
 
-  ;; 5.0µs
+  ;; 6.0µs
   (title "reitit-ring")
   (let [f (fn [] (reitit-app request))]
     (expect! (-> (f) :body slurp))
@@ -107,3 +113,20 @@
 
 (comment
   (perf-test))
+
+(comment
+
+  ;; 10198
+  ;; http :3000/api/ping
+  ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:3000/api/ping
+  (http/start-server defaults-app {:port 3000})
+
+  ;; 16230
+  ;; http :3001/api/ping
+  ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:3001/api/ping
+  (http/start-server bidi-yada-app {:port 3001})
+
+  ;; 48084
+  ;; http :3002/api/ping
+  ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:3002/api/ping
+  (http/start-server reitit-app {:port 3002}))

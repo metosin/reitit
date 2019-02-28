@@ -1,5 +1,19 @@
 ## 0.3.0-SNAPSHOT
 
+### `reitit.core`
+
+* welcome new wildcard routing!
+  * optional bracket-syntax with parameters
+     * `"/user/:user-id"` = `"/user/{user-id}"`
+     * `"/assets/*asset"` = `"/assets/{*asset}`
+  * enabling qualified parameters
+     * `"/user/{my.user/id}/{my.order/id}"`
+  * parameters don't have to span whole segments
+     * `"/file-:id/topics"` (free start, ends at slash)
+     * `"/file-{name}.html"` (free start & end)
+  * backed by a new `:trie-router`, replacing `:segment-router`
+     * [over 40% faster](https://metosin.github.io/reitit/performance.html) on the JVM
+
 ## `reitit-frontend`
 
 * **BREAKING** New frontend controllers:

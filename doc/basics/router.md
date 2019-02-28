@@ -41,10 +41,74 @@ The flattened route tree:
 ;  ["/api/user/:id" {:name :user/user}]]
 ```
 
+With a router instance, we can do [Path-based routing](path_based_routing.md) or [Name-based (Reverse) routing](name_based_routing.md).
+
+## More details
+
+Router options:
+
+```clj
+(r/options router)
+{:lookup #object[...]
+ :expand #object[...]
+ :coerce #object[...]
+ :compile #object[...]
+ :conflicts #object[...]}
+```
+
+Route names:
+
+```clj
+(r/route-names router)
+; [:user/ping :user/user]
+```
+
+The compiled route tree:
+
+```clj
+(r/routes router)
+; [["/api/ping" {:name :user/ping} nil]
+;  ["/api/user/:id" {:name :user/user} nil]]
+```
+
+### Composing
+
+As routes are defined as plain data, it's easy to merge multiple route trees into a single router
+
+```clj
+(def user-routes
+  [["/users" ::users]
+   ["/users/:id" ::user]]) 
+
+(def admin-routes
+  ["/admin"
+   ["/ping" ::ping]
+   ["/users" ::users]]) 
+
+(r/router
+  [admin-routes
+   user-routes])
+```
+
+Merged route tree:
+
+```clj
+(r/routes router)
+; [["/admin/ping" {:name :user/ping}]
+;  ["/admin/db" {:name :user/db}]
+;  ["/users" {:name :user/users}]
+;  ["/users/:id" {:name :user/user}]]
+``` 
+
+More details on [composing routers](../advanced/composing_routers.md).
+
 ### Behind the scenes
+
 When router is created, the following steps are done:
 * route tree is flattened
-* route arguments are expanded (via `reitit.core/Expand` protocol) and optionally coerced
-* [route conflicts](advanced/route_conflicts.md) are resolved
-* route tree is compiled
-* actual [router implementation](../advanced/different_routers.md) is selected and created
+* route arguments are expanded (via `:expand` option)
+* routes are coerced (via `:coerce` options)
+* route tree is compiled (via `:compile` options)
+* [route conflicts](advanced/route_conflicts.md) are resolved (via `:conflicts` options)
+* optionally, route data is validated (via `:validate` options)
+* [router implementation](../advanced/different_routers.md) is automatically selected (or forced via `:router` options) and created

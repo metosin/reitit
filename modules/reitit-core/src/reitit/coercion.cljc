@@ -12,7 +12,7 @@
   "Pluggable coercion protocol"
   (-get-name [this] "Keyword name for the coercion")
   (-get-options [this] "Coercion options")
-  (-get-apidocs [this spesification data] "Returns api documentation")
+  (-get-apidocs [this specification data] "Returns api documentation")
   (-compile-model [this model name] "Compiles a model")
   (-open-model [this model] "Returns a new model which allows extra keys in maps")
   (-encode-error [this error] "Converts error in to a serializable format")
@@ -132,27 +132,18 @@
          [status (response-coercer coercion body opts)])
        (into {})))
 
-(defn- coercers-not-compiled! [match]
-  (throw
-    (ex-info
-      (str
-        "Match didn't have a compiled coercion attached.\n"
-        "Maybe you should have defined a router option:\n"
-        "{:compile reitit.coercion/compile-request-coercers}\n")
-      {:match match})))
-
 ;;
 ;; api-docs
 ;;
 
-(defn get-apidocs [this spesification data]
+(defn get-apidocs [this specification data]
   (let [swagger-parameter {:query :query
                            :body :body
                            :form :formData
                            :header :header
                            :path :path
                            :multipart :formData}]
-    (case spesification
+    (case specification
       :swagger (->> (update
                       data
                       :parameters
@@ -161,7 +152,7 @@
                              (map (fn [[k v]] [(swagger-parameter k) v]))
                              (filter first)
                              (into {}))))
-                    (-get-apidocs this spesification)))))
+                    (-get-apidocs this specification)))))
 
 ;;
 ;; integration

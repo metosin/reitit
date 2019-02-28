@@ -2,11 +2,26 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.impl :as impl]))
 
-(deftest segments-test
-  (is (= ["api" "ipa" "beer" "craft" "bisse"]
-         (into [] (impl/segments "/api/ipa/beer/craft/bisse"))))
-  (is (= ["a" "" "b" "" "c" ""]
-         (into [] (impl/segments "/a//b//c/")))))
+(deftest conflicting-route-test
+  (are [c? p1 p2]
+    (is (= c? (impl/conflicting-routes? [p1] [p2])))
+
+    true "/a" "/a"
+    true "/a" "/:a"
+    true "/a/:b" "/:a/b"
+    true "/ab/:b" "/:a/ba"
+    true "/*a" "/:a/ba/ca"
+
+    true "/a" "/{a}"
+    true "/a/{b}" "/{a}/b"
+    true "/ab/{b}" "/{a}/ba"
+    true "/{*a}" "/{a}/ba/ca"
+
+    false "/a" "/:a/b"
+    false "/a" "/:a/b"
+
+    false "/a" "/{a}/b"
+    false "/a" "/{a}/b"))
 
 (deftest strip-nils-test
   (is (= {:a 1, :c false} (impl/strip-nils {:a 1, :b nil, :c false}))))

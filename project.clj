@@ -10,7 +10,7 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :managed-dependencies [[metosin/reitit "0.2.13"]
                          [metosin/reitit-core "0.2.13"]
                          [metosin/reitit-spec "0.2.13"]
@@ -38,6 +38,7 @@
                          [io.pedestal/pedestal.service "0.5.5"]]
 
   :plugins [[jonase/eastwood "0.3.4"]
+            ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.13"]
@@ -67,7 +68,13 @@
                                   [org.clojure/clojurescript "1.10.439"]
 
                                   ;; modules dependencies
-                                  [metosin/reitit "0.2.13"]
+                                  [metosin/schema-tools]
+                                  [metosin/spec-tools]
+                                  [metosin/muuntaja]
+                                  [metosin/sieppari]
+                                  [metosin/jsonista]
+                                  [lambdaisland/deep-diff]
+                                  [meta-merge]
 
                                   [expound "0.7.2"]
                                   [orchestra "2018.12.06-2"]
@@ -89,6 +96,8 @@
                                   [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "1.9.0"]
+
+                                  [com.clojure-goes-fast/clj-async-profiler "0.3.0"]
 
                                   ;; https://github.com/bensu/doo/issues/180
                                   [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}

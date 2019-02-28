@@ -29,6 +29,9 @@
       (for [name ["product" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "twenty"]]
         [(str "/" name "/:id") {:get (partial h name)}]))))
 
+(for [name ["product" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "twenty"]]
+  [(str "/" name "/:id") {:get (partial h name)}])
+
 (app {:request-method :get, :uri "/product/foo"})
 
 (defn routing-test []
@@ -69,7 +72,7 @@
   ;; 25310 / 25126
   "regex"
 
-  ;; 88060 / 90778
+  ;; 112719 / 113959
   (title "reitit")
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/product/foo
   ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:2048/twenty/bar
@@ -79,3 +82,16 @@
 (comment
   (web/run app {:port 2048, :dispatch? false, :server {:always-set-keep-alive false}})
   (routing-test))
+
+(comment
+  (require '[compojure.core :as c])
+  (def app (apply
+             c/routes
+             (for [name ["product" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "twenty"]]
+               (eval `(c/GET ~(str "/" name "/:id") [~'id] (str "Got " ~name " id " ~'id))))))
+
+  (require '[ring.adapter.jetty :as jetty])
+  ;; 57862 / 54290
+  ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:8080/product/foo
+  ;; wrk -d ${DURATION:="30s"} http://127.0.0.1:8080/twenty/bar
+  (jetty/run-jetty app {:port 8080}))

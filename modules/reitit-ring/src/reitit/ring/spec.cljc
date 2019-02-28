@@ -1,7 +1,8 @@
 (ns reitit.ring.spec
   (:require [clojure.spec.alpha :as s]
             [reitit.middleware :as middleware]
-            [reitit.spec :as rs]))
+            [reitit.spec :as rs]
+            [reitit.exception :as exception]))
 
 ;;
 ;; Specs
@@ -19,11 +20,10 @@
 
 (defn merge-specs [specs]
   (when-let [non-specs (seq (remove #(or (s/spec? %) (s/get-spec %)) specs))]
-    (throw
-      (ex-info
-        (str "Not all specs satisfy the Spec protocol: " non-specs)
-        {:specs specs
-         :non-specs non-specs})))
+    (exception/fail!
+      (str "Not all specs satisfy the Spec protocol: " non-specs)
+      {:specs specs
+       :non-specs non-specs}))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
 (defn validate-route-data [routes key spec]

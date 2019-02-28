@@ -165,6 +165,7 @@
   ;; 530 µs (4-24x) -25% prefix-tree-router
   ;; 710 µs (3-18x) segment-router
   ;; 320 µs (6-40x) java-segment-router
+  ;; 115 µs (18-111x) trie-router
   (title "reitit")
   (assert (reitit/match-by-path reitit-routes "/workspace/1/1"))
   (cc/quick-bench
@@ -205,3 +206,41 @@
   (routing-test1)
   (routing-test2)
   (reverse-routing-test))
+
+
+(comment
+  (import '[reitit Trie])
+  (set! *warn-on-reflection* true)
+
+  (let [trie (Trie/linearMatcher
+               [(Trie/staticMatcher
+                  "/auth/" (Trie/linearMatcher
+                             [(Trie/staticMatcher "login" (Trie/dataMatcher 1))
+                              (Trie/staticMatcher "recovery/token/" (Trie/wildMatcher :token (Trie/dataMatcher 2)))]))
+                (Trie/staticMatcher
+                  "/workspace/" (Trie/wildMatcher :project (Trie/staticMatcher "/" (Trie/wildMatcher :page (Trie/dataMatcher 3)))))])]
+
+
+    (println
+      (Trie/lookup trie "/auth/login"))
+
+    ;; 27ns
+    (cc/quick-bench
+      (dotimes [_ 1000]
+        (Trie/lookup trie "/auth/login")))
+
+    (println
+      (Trie/lookup trie "/auth/recovery/token/123"))
+
+    ;; 82ns
+    (cc/quick-bench
+      (dotimes [_ 1000]
+        (Trie/lookup trie "/auth/recovery/token/123")))
+
+    (println
+      (Trie/lookup trie "/workspace/1/1"))
+
+    ;; 96ns
+    (cc/quick-bench
+      (dotimes [_ 1000]
+        (Trie/lookup trie "/workspace/1/1")))))

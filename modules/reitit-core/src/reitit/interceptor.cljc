@@ -2,7 +2,8 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [clojure.pprint :as pprint]
             [reitit.core :as r]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+            [reitit.exception :as exception]))
 
 (defprotocol IntoInterceptor
   (into-interceptor [this data opts]))
@@ -52,10 +53,9 @@
      :cljs cljs.core.PersistentVector)
   (into-interceptor [[f & args :as form] data opts]
     (when (and (seq args) (not (fn? f)))
-      (throw
-        (ex-info
-          (str "Invalid Interceptor form: " form "")
-          {:form form})))
+      (exception/fail!
+        (str "Invalid Interceptor form: " form "")
+        {:form form}))
     (into-interceptor (apply f args) data opts))
 
   #?(:clj  clojure.lang.Fn
@@ -85,10 +85,9 @@
       (let [compiled (::compiled opts 0)
             opts (assoc opts ::compiled (inc ^long compiled))]
         (when (>= ^long compiled ^long *max-compile-depth*)
-          (throw
-            (ex-info
-              (str "Too deep Interceptor compilation - " compiled)
-              {:this this, :data data, :opts opts})))
+          (exception/fail!
+            (str "Too deep Interceptor compilation - " compiled)
+            {:this this, :data data, :opts opts}))
         (if-let [interceptor (into-interceptor (compile data opts) data opts)]
           (map->Interceptor
             (merge

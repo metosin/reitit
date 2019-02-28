@@ -1,12 +1,27 @@
 (ns ^:no-doc reitit.impl
   #?(:cljs (:require-macros [reitit.impl]))
   (:require [clojure.string :as str]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [meta-merge.core :as mm]
+            [reitit.trie :as trie]
+            [reitit.exception :as exception])
   #?(:clj
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
-              (java.net URLEncoder URLDecoder)
-              (reitit SegmentTrie))))
+              (java.net URLEncoder URLDecoder))))
+
+(defrecord Route [path path-parts path-params])
+
+(defn parse [path]
+  (let [path #?(:clj (.intern ^String (trie/normalize path)) :cljs (trie/normalize path))
+        path-parts (trie/split-path path)
+        path-params (->> path-parts (remove string?) (map :value) set)]
+    (map->Route {:path-params path-params
+                 :path-parts path-parts
+                 :path path})))
+
+(defn wild-route? [[path]]
+  (-> path parse :path-params seq boolean))
 
 (defn maybe-map-values
   "Applies a function to every value of a map, updates the value if not nil.
@@ -20,117 +35,101 @@
     coll
     coll))
 
-(defn segments
-  "Splits the path into sequence of segments, using `/` char. Assumes that the
-  path starts with `/`, stripping the first empty segment. e.g.
+(defn walk [raw-routes {:keys [path data routes expand]
+                        :or {data [], routes []}
+                        :as opts}]
+  (letfn
+    [(walk-many [p m r]
+       (reduce #(into %1 (walk-one p m %2)) [] r))
+     (walk-one [pacc macc routes]
+       (if (vector? (first routes))
+         (walk-many pacc macc routes)
+         (when (string? (first routes))
+           (let [[path & [maybe-arg :as args]] routes
+                 [data childs] (if (or (vector? maybe-arg)
+                                       (and (sequential? maybe-arg)
+                                            (sequential? (first maybe-arg)))
+                                       (nil? maybe-arg))
+                                 [{} args]
+                                 [maybe-arg (rest args)])
+                 macc (into macc (expand data opts))
+                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
+             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
+    (walk-one path (mapv identity data) raw-routes)))
 
-      (segments \"/a/b/c\") ; => (\"a\" \"b\" \"c\")
-      (segments \"/a/)      ; => (\"a\" \"\")"
-  [path]
-  #?(:clj  (SegmentTrie/split ^String path)
-     :cljs (rest (.split path #"/" 666))))
+(defn map-data [f routes]
+  (mapv #(update % 1 f) routes))
 
-;;
-;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/prefix_tree.clj
-;;
+(defn merge-data [x]
+  (reduce
+    (fn [acc [k v]]
+      (mm/meta-merge acc {k v}))
+    {} x))
 
-(defn wild? [s]
-  (contains? #{\: \*} (first (str s))))
+(defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
+  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
+           coerce (into [] (keep #(coerce % opts)))))
 
-(defn catch-all? [s]
-  (= \* (first (str s))))
+(defn conflicting-routes? [route1 route2]
+  (trie/conflicting-paths? (first route1) (first route2)))
 
-(defn wild-param [s]
-  (let [ss (str s)]
-    (if (= \: (first ss))
-      (keyword (subs ss 1)))))
+(defn path-conflicting-routes [routes]
+  (-> (into {}
+            (comp (map-indexed (fn [index route]
+                                 [route (into #{}
+                                              (filter (partial conflicting-routes? route))
+                                              (subvec routes (inc index)))]))
+                  (filter (comp seq second)))
+            routes)
+      (not-empty)))
 
-(defn catch-all-param [s]
-  (let [ss (str s)]
-    (if (= \* (first ss))
-      (keyword (subs ss 1)))))
+(defn conflicting-paths [conflicts]
+  (->> (for [[p pc] conflicts]
+         (conj (map first pc) (first p)))
+       (apply concat)
+       (set)))
 
-(defn wild-or-catch-all-param? [x]
-  (boolean (or (wild-param x) (catch-all-param x))))
+(defn name-conflicting-routes [routes]
+  (some->> routes
+           (group-by (comp :name second))
+           (remove (comp nil? first))
+           (filter (comp pos? count butlast second))
+           (seq)
+           (map (fn [[k v]] [k (set v)]))
+           (into {})))
 
-(defn contains-wilds? [path]
-  (boolean (some wild-or-catch-all-param? (segments path))))
+(defn find-names [routes _]
+  (into [] (keep #(-> % second :name)) routes))
 
-;;
-;; https://github.com/pedestal/pedestal/blob/master/route/src/io/pedestal/http/route/path.clj
-;;
+(defn compile-route [[p m :as route] {:keys [compile] :as opts}]
+  [p m (if compile (compile route opts))])
 
-(defn- parse-path-token [out string]
-  (condp re-matches string
-    #"^:(.+)$" :>> (fn [[_ token]]
-                     (let [key (keyword token)]
-                       (-> out
-                           (update-in [:path-parts] conj key)
-                           (update-in [:path-params] conj key))))
-    #"^\*(.*)$" :>> (fn [[_ token]]
-                      (let [key (keyword token)]
-                        (-> out
-                            (update-in [:path-parts] conj key)
-                            (update-in [:path-params] conj key))))
-    (update-in out [:path-parts] conj string)))
+(defn compile-routes [routes opts]
+  (into [] (keep #(compile-route % opts) routes)))
 
-(defn- parse-path
-  ([pattern] (parse-path {:path-parts [] :path-params #{}} pattern))
-  ([accumulated-info pattern]
-   (if-let [m (re-matches #"/(.*)" pattern)]
-     (let [[_ path] m]
-       (reduce parse-path-token
-               accumulated-info
-               (str/split path #"/")))
-     (throw (ex-info "Routes must start from the root, so they must begin with a '/'" {:pattern pattern})))))
-
-;;
-;; Routing (c) Metosin
-;;
-
-(defrecord Route [path path-parts path-params data result])
-
-(defn create [[path data result]]
-  (let [path #?(:clj (.intern ^String path) :cljs path)
-        {:keys [path-parts path-params]} (parse-path path)]
-    (map->Route
-      {:path-params path-params
-       :path-parts path-parts
-       :path path
-       :result result
-       :data data})))
-
-(defn wild-route? [[path]]
-  (contains-wilds? path))
-
-(defn conflicting-routes? [[p1] [p2]]
-  (loop [[s1 & ss1] (segments p1)
-         [s2 & ss2] (segments p2)]
-    (cond
-      (= s1 s2 nil) true
-      (or (nil? s1) (nil? s2)) false
-      (or (catch-all? s1) (catch-all? s2)) true
-      (or (wild? s1) (wild? s2)) (recur ss1 ss2)
-      (not= s1 s2) false
-      :else (recur ss1 ss2))))
+(defn uncompile-routes [routes]
+  (mapv (comp vec (partial take 2)) routes))
 
 (defn path-for [^Route route path-params]
-  (if-let [required (:path-params route)]
-    (if (every? #(contains? path-params %) required)
-      (->> (:path-parts route)
-           (map #(get (or path-params {}) % %))
-           (str/join \/)
-           (str "/")))
+  (if (:path-params route)
+    (if-let [parts (reduce
+                     (fn [acc part]
+                       (if (string? part)
+                         (conj acc part)
+                         (if-let [p (get path-params (:value part))]
+                           (conj acc p)
+                           (reduced nil))))
+                     [] (:path-parts route))]
+      (apply str parts))
     (:path route)))
 
 (defn throw-on-missing-path-params [template required path-params]
   (when-not (every? #(contains? path-params %) required)
     (let [defined (-> path-params keys set)
           missing (set/difference required defined)]
-      (throw
-        (ex-info
-          (str "missing path-params for route " template " -> " missing)
-          {:path-params path-params, :required required})))))
+      (exception/fail!
+        (str "missing path-params for route " template " -> " missing)
+        {:path-params path-params, :required required}))))
 
 (defn fast-assoc
   #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
