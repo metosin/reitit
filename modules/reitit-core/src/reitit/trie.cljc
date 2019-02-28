@@ -25,15 +25,15 @@
   (wild-matcher [this key end matcher])
   (catch-all-matcher [this key params data])
   (linear-matcher [this matchers])
-  (prettify [this matcher])
-  (path-matcher [this matcher]))
+  (-pretty [this matcher])
+  (-path-matcher [this matcher]))
 
-(defn assoc-param [match k v]
+(defn- assoc-param [match k v]
   (let [params (:params match)]
     (assoc match :params (assoc params k v))))
 
 ;; https://stackoverflow.com/questions/8033655/find-longest-common-prefix
-(defn common-prefix [s1 s2]
+(defn- common-prefix [s1 s2]
   (let [max (min (count s1) (count s2))]
     (loop [i 0]
       (cond
@@ -177,7 +177,7 @@
           (update :children dissoc ""))
       node')))
 
-(defn decode [path start end percent?]
+(defn- decode [path start end percent?]
   (let [param (subs path start end)]
     (if percent?
       #?(:cljs (js/decodeURIComponent param)
@@ -254,9 +254,9 @@
           (view [_] (mapv view matchers))
           (depth [_] (inc (apply max 0 (map depth matchers))))
           (length [_]))))
-    (prettify [_ matcher]
+    (-pretty [_ matcher]
       (view matcher))
-    (path-matcher [_ matcher]
+    (-path-matcher [_ matcher]
       (fn [path]
         (if-let [match (match matcher 0 (count path) path)]
           (->Match (:params match) (:data match)))))))
@@ -275,9 +275,9 @@
          (Trie/catchAllMatcher key params data))
        (linear-matcher [_ matchers]
          (Trie/linearMatcher matchers))
-       (prettify [_ matcher]
+       (-pretty [_ matcher]
          (-> matcher str read-string eval))
-       (path-matcher [_ matcher]
+       (-path-matcher [_ matcher]
          (fn [path]
            (if-let [match ^Trie$Match (Trie/lookup ^Trie$Matcher matcher ^String path)]
              (->Match (.params match) (.data match))))))))
@@ -287,6 +287,7 @@
 ;;
 
 (defn insert
+  "Returns a trie with routes added to it."
   ([routes]
    (insert nil routes))
   ([node routes]
@@ -299,11 +300,14 @@
          params (zipmap (->> parts (remove string?) (map :value)) (repeat nil))]
      (-insert (or node (-node {})) (split-path path) params data))))
 
-(defn compiler []
+(defn compiler
+  "Returns a default [[TrieCompiler]]."
+  []
   #?(:cljs (clojure-trie-compiler)
      :clj  (java-trie-compiler)))
 
 (defn compile
+  "Returns a compiled trie, to be used with [[pretty]] or [[path-matcher]]."
   ([options]
    (compile options (compiler)))
   ([{:keys [data params children wilds catch-all] :or {params {}}} compiler]
@@ -325,16 +329,18 @@
        :else (data-matcher compiler {} nil)))))
 
 (defn pretty
-  ([trie]
-   (pretty trie (compiler)))
-  ([trie compiler]
-   (prettify compiler trie)))
+  "Returns a simplified EDN structure of a compiled trie for printing purposes."
+  ([compiled-trie]
+   (pretty compiled-trie (compiler)))
+  ([compiled-trie compiler]
+   (-pretty compiler compiled-trie)))
 
-(defn matcher
-  ([trie]
-   (matcher trie (compiler)))
-  ([trie compiler]
-   (path-matcher compiler trie)))
+(defn path-matcher
+  "Returns a function of `path -> Match` from a compiled trie."
+  ([compiled-trie]
+   (path-matcher compiled-trie (compiler)))
+  ([compiled-trie compiler]
+   (-path-matcher compiler compiled-trie)))
 
 ;;
 ;; spike

@@ -70,7 +70,7 @@
     nil routes))
 
 (def trie-matcher
-  (trie/matcher
+  (trie/path-matcher
     (trie/compile
       (reduce
         (fn [acc [p d]]
@@ -80,8 +80,10 @@
 (defn bench! []
 
   ;; 2.3µs
-  #_(cc/quick-bench
-      (p/lookup pedestal-tree "/v1/orgs/1/topics"))
+  ;; 2.1µs (28.2.2019)
+  (cc/with-progress-reporting
+    (cc/bench
+      (p/lookup pedestal-tree "/v1/orgs/1/topics")))
 
   ;; 3.1µs
   ;; 2.5µs (string equals)
@@ -99,7 +101,7 @@
   ;; 0.8µs (return route-data)
   ;; 0.8µs (fix payloads)
   #_(cc/quick-bench
-      (trie/matcher reitit-tree "/v1/orgs/1/topics" {}))
+      (trie/path-matcher reitit-tree "/v1/orgs/1/topics" {}))
 
   ;;  0.9µs (initial)
   ;;  0.5µs (protocols)
@@ -111,11 +113,13 @@
   #_(cc/quick-bench
       (segment/lookup segment-matcher "/v1/orgs/1/topics"))
 
-  ;; 0.32µs (initial)
-  ;; 0.30µs (iterate arrays)
-  ;; 0.28µs (list-params)
-  (cc/quick-bench
-    (trie-matcher "/v1/orgs/1/topics")))
+  ;; 0.320µs (initial)
+  ;; 0.300µs (iterate arrays)
+  ;; 0.280µs (list-params)
+  ;; 0.096µs (trie)
+  (cc/with-progress-reporting
+    (cc/bench
+      (trie-matcher "/v1/orgs/1/topics"))))
 
 (comment
   (bench!))

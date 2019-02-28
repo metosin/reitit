@@ -119,7 +119,7 @@
                    compiled-routes)
          lookup (impl/fast-map nl)
          matcher (trie/linear-matcher compiler pl)
-         match-by-path (trie/matcher matcher compiler)
+         match-by-path (trie/path-matcher matcher compiler)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify
@@ -213,7 +213,7 @@
                    [nil {}]
                    compiled-routes)
          matcher (trie/compile pl compiler)
-         match-by-path (trie/matcher matcher compiler)
+         match-by-path (trie/path-matcher matcher compiler)
          lookup (impl/fast-map nl)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
