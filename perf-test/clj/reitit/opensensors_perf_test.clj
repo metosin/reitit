@@ -1,5 +1,5 @@
 (ns reitit.opensensors-perf-test
-  (:require [reitit.perf-utils :refer :all]
+  (:require [reitit.perf-utils :refer [bench bench!! handler valid-urls]]
             [cheshire.core :as json]
             [clojure.string :as str]
             [reitit.core :as reitit]
