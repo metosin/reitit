@@ -98,7 +98,8 @@
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p) endpoint]))]
-       (let [paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) (into {}))]
+       (let [map-in-order #(->> % (apply concat) (apply array-map))
+             paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
          {:status 200
           :body (meta-merge swagger {:paths paths})})))
     ([req res raise]
