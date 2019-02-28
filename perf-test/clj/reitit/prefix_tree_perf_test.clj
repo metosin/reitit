@@ -70,11 +70,12 @@
     nil routes))
 
 (def trie-matcher
-  (trie/compile
-    (reduce
-      (fn [acc [p d]]
-        (trie/insert acc p d))
-      nil routes)))
+  (trie/matcher
+    (trie/compile
+      (reduce
+        (fn [acc [p d]]
+          (trie/insert acc p d))
+        nil routes))))
 
 (defn bench! []
 
@@ -108,13 +109,13 @@
   ;; 0.51µs (Cleanup)
   ;; 0.30µs (Java)
   #_(cc/quick-bench
-    (segment/lookup segment-matcher "/v1/orgs/1/topics"))
+      (segment/lookup segment-matcher "/v1/orgs/1/topics"))
 
   ;; 0.32µs (initial)
   ;; 0.30µs (iterate arrays)
   ;; 0.28µs (list-params)
   (cc/quick-bench
-    (trie/matcher trie-matcher "/v1/orgs/1/topics")))
+    (trie-matcher "/v1/orgs/1/topics")))
 
 (comment
   (bench!))
@@ -123,6 +124,6 @@
 
 (comment
   (p/lookup pedestal-tree "/v1/orgs/1/topics")
-  (trie/matcher trie-matcher "/v1/orgs/1/topics")
+  (trie-matcher "/v1/orgs/1/topics")
   #_(segment/lookup segment-matcher "/v1/orgs/1/topics"))
 
