@@ -186,3 +186,10 @@
     (= out (impl/form-decode in))
 
     "%2B632+905+123+4567" "+632 905 123 4567"))
+
+(deftest parse-test
+  (is (= (impl/map->Route
+           {:path "https://google.com"
+            :path-parts ["https://google.com"]
+            :path-params #{}})
+         (impl/parse "https://google.com"))))

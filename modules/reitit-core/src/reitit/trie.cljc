@@ -64,7 +64,9 @@
                  (recur (concat ss (-static from to) (-catch-all (inc to) to')) (inc to') (inc to'))
                  (recur (concat ss (-static from to) (-wild to to')) (inc to') (inc to'))))
           \: (let [to' (or (str/index-of s "/" to) (count s))]
-               (recur (concat ss (-static from to) (-wild to to')) to' to'))
+               (if (= 1 (- to' to))
+                 (recur ss from (inc to))
+                 (recur (concat ss (-static from to) (-wild to to')) (long to') (long to'))))
           \* (let [to' (count s)]
                (recur (concat ss (-static from to) (-catch-all to to')) to' to'))
           (recur ss from (inc to)))))))
