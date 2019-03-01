@@ -22,6 +22,7 @@
     * New `:parameters` option can be used to declare which parameters
     controller is interested in, as data, which should cover most
     use cases: `{:start start-fn, :parameters {:path [:foo-id]}}`
+- Ensure HTML5 routing works with IE11
 
 ## `reitit-ring`
 
