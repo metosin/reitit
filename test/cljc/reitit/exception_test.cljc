@@ -15,40 +15,35 @@
 (deftest errors-test
 
   (are [exception]
-    (are [error routes opts]
+    (are [error routes]
       (is (thrown-with-msg?
             ExceptionInfo
             error
             (r/router
               routes
-              (merge {:exception exception} opts))))
+              {:validate rs/validate
+               :exception exception})))
 
       #"Router contains conflicting route paths"
       [["/:a/1"]
        ["/1/:a"]]
-      nil
 
       #"Router contains conflicting route names"
       [["/kikka" ::kikka]
        ["/kukka" ::kikka]]
-      nil
 
       #":reitit.trie/multiple-terminators"
       [["/{a}.pdf"]
        ["/{a}-pdf"]]
-      nil
 
       #":reitit.trie/following-parameters"
       ["/{a}{b}"]
-      nil
 
       #":reitit.trie/unclosed-brackets"
       ["/api/{ipa"]
-      nil
 
       #"Invalid route data"
-      ["/api/ipa" {::roles #{:adminz}}]
-      {:validate rs/validate})
+      ["/api/ipa" {::roles #{:adminz}}])
 
     exception/exception
     pretty/exception))
