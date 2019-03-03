@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
-            [spec-tools.transform :as stt]
             [spec-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]
             [clojure.set :as set])
@@ -12,21 +11,13 @@
 
 (def string-transformer
   (st/type-transformer
-    {:name :string
-     :decoders (merge
-                 stt/string-type-decoders
-                 stt/strip-extra-keys-type-decoders)
-     :encoders stt/string-type-encoders
-     :default-encoder stt/any->any}))
+    st/strip-extra-keys-transformer
+    st/string-transformer))
 
 (def json-transformer
   (st/type-transformer
-    {:name :json
-     :decoders (merge
-                 stt/json-type-decoders
-                 stt/strip-extra-keys-type-decoders)
-     :encoders stt/json-type-encoders
-     :default-encoder stt/any->any}))
+    st/strip-extra-keys-transformer
+    st/json-transformer))
 
 (def no-op-transformer
   (reify
@@ -131,9 +122,9 @@
             (let [coerced (st/coerce spec value transformer)]
               (if (s/valid? spec coerced)
                 coerced
-                (let [transformed (st/conform spec value transformer)]
+                (let [transformed (st/conform spec coerced transformer)]
                   (if (s/invalid? transformed)
-                    (let [problems (st/explain-data spec value transformer)]
+                    (let [problems (st/explain-data spec coerced transformer)]
                       (coercion/map->CoercionError
                         {:spec spec
                          :problems problems}))
