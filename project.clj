@@ -69,7 +69,7 @@
                    :java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.10.0"]
-                                  [org.clojure/clojurescript "1.10.439"]
+                                  [org.clojure/clojurescript "1.10.520"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools]

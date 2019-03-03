@@ -389,5 +389,4 @@
          (router compiled-routes opts))
 
        (catch #?(:clj Exception, :cljs js/Error) e
-         (let [exception (:exception opts)]
-           (throw (if exception (exception e) e))))))))
+         (throw ((get opts :exception identity) e)))))))

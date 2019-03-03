@@ -20,7 +20,7 @@
 
 * new module for friendly router creation time exception handling
   * new option `:exception` in `r/router`, of type `Exception => Exception` (default `reitit.exception/exception`)
-  * new exception pretty-printer `reitit.dev.pretty/exception`, based on [fipp](https://github.com/brandonbloom/fipp) and [expund](https://github.com/bhb/expound) for human readable, newbie-friendly errors.
+  * new exception pretty-printer `reitit.dev.pretty/exception`, based on [fipp](https://github.com/brandonbloom/fipp) and [expound](https://github.com/bhb/expound) for human readable, newbie-friendly errors.
   
 #### Conflicting paths
  

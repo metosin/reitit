@@ -123,7 +123,7 @@
       ::invalid-route-data
       {:problems problems})))
 
-(defmethod exception/format-type :reitit.spec/invalid-route-data [_ _ {:keys [problems]}]
+(defmethod exception/format-exception :reitit.spec/invalid-route-data [_ _ {:keys [problems]}]
   (apply str "Invalid route data:\n\n"
          (mapv
            (fn [{:keys [path scope data spec]}]
