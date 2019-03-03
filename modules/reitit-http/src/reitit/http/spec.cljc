@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [reitit.ring.spec :as rrs]
             [reitit.interceptor :as interceptor]
+            [reitit.exception :as exception]
             [reitit.spec :as rs]))
 
 ;;
@@ -17,7 +18,9 @@
 ;; Validator
 ;;
 
-(defn validate-spec!
-  [routes {:keys [spec ::rs/explain] :or {explain s/explain-str, spec ::data}}]
+(defn validate
+  [routes {:keys [spec] :or {spec ::data}}]
   (when-let [problems (rrs/validate-route-data routes :interceptors spec)]
-    (rs/throw-on-problems! problems explain)))
+    (exception/fail!
+      ::invalid-route-data
+      {:problems problems})))

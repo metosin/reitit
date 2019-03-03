@@ -2,7 +2,7 @@
 
 Ring route validation works [just like with core router](../basics/route_data_validation.md), with few differences:
 
-* `reitit.ring.spec/validate-spec!` should be used instead of `reitit.spec/validate-spec!` - to support validating all endpoints (`:get`, `:post` etc.)
+* `reitit.ring.spec/validate` should be used instead of `reitit.spec/validate` - to support validating all endpoints (`:get`, `:post` etc.)
 * With `clojure.spec` validation, Middleware can contribute to route spec via `:specs` key. The effective route data spec is router spec merged with middleware specs.
 
 ## Example
@@ -28,7 +28,7 @@ A simple app with spec-validation turned on:
        ["/internal"
         ["/users" {:get {:handler handler}
                    :delete {:handler handler}}]]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 ```
 
@@ -69,7 +69,7 @@ Missing route data fails fast at router creation:
        ["/internal"
         ["/users" {:get {:handler handler}
                    :delete {:handler handler}}]]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
@@ -133,7 +133,7 @@ Adding the `:zone` to route data fixes the problem:
        ["/internal" {:zone :internal} ;; <--- added
         ["/users" {:get {:handler handler}
                    :delete {:handler handler}}]]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 
 (app {:request-method :get
@@ -175,7 +175,7 @@ Let's reuse the `wrap-enforce-roles` from [Dynamic extensions](dynamic_extension
        ["/internal" {:zone :internal}
         ["/users" {:get {:handler handler}
                    :delete {:handler handler}}]]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 
 (app {:request-method :get
@@ -199,7 +199,7 @@ But fails if they are present and invalid:
                          ::roles #{:manager} ;; <--- added
                    :delete {:handler handler
                             ::roles #{:adminz}}}]]] ;; <--- added
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
@@ -240,7 +240,7 @@ Ability to define (and reuse) route-data in mid-paths is a powerful feature, but
                          ::roles #{:manager}}
                    :delete {:handler handler
                             ::roles #{:admin}}}]]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 ```
 
@@ -261,7 +261,7 @@ Or even flatten the routes:
                                      ::roles #{:manager}}
                                :delete {:handler handler
                                         ::roles #{:admin}}}]]
-      {:validate rrs/validate-spec!
+      {:validate rrs/validate
        ::rs/explain e/expound-str})))
 ```
 
@@ -279,6 +279,6 @@ The common Middleware can also be pushed to the router, here cleanly separing be
                                :delete {:handler handler
                                         ::roles #{:admin}}}]]
       {:data {:middleware [zone-middleware wrap-enforce-roles]}
-       :validate rrs/validate-spec!
+       :validate rrs/validate
        ::rs/explain e/expound-str})))
 ```

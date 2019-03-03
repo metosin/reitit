@@ -1,8 +1,8 @@
 (ns reitit.spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [reitit.core :as reitit]
-            [reitit.exception :as exception]))
+            [reitit.exception :as exception]
+            [reitit.core :as r]))
 
 ;;
 ;; routes
@@ -45,7 +45,7 @@
 ;; router
 ;;
 
-(s/def ::router reitit/router?)
+(s/def ::router r/router?)
 (s/def :reitit.router/path ::path)
 (s/def :reitit.router/routes ::routes)
 (s/def :reitit.router/data ::data)
@@ -66,7 +66,7 @@
                      :reitit.router/conflicts
                      :reitit.router/router])))
 
-(s/fdef reitit/router
+(s/fdef r/router
         :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
                     :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
         :ret ::router)
@@ -111,28 +111,24 @@
 
 (defrecord Problem [path scope data spec problems])
 
-(defn problems-str [problems explain]
+(defn validate-route-data [routes spec]
+  (some->> (for [[p d _] routes]
+             (when-let [problems (and spec (s/explain-data spec d))]
+               (->Problem p nil d spec problems)))
+           (keep identity) (seq) (vec)))
+
+(defn validate [routes {:keys [spec] :or {spec ::default-data}}]
+  (when-let [problems (validate-route-data routes spec)]
+    (exception/fail!
+      ::invalid-route-data
+      {:problems problems})))
+
+(defmethod exception/format-type :reitit.spec/invalid-route-data [_ _ {:keys [problems]}]
   (apply str "Invalid route data:\n\n"
          (mapv
            (fn [{:keys [path scope data spec]}]
              (str "-- On route -----------------------\n\n"
-                  (pr-str path) (if scope (str " " (pr-str scope))) "\n\n" (explain spec data) "\n"))
+                  (pr-str path) (if scope (str " " (pr-str scope))) "\n\n"
+                  (pr-str data) "\n\n"
+                  (s/explain-str spec data) "\n"))
            problems)))
-
-(defn throw-on-problems! [problems explain]
-  (exception/fail!
-    (problems-str problems explain)
-    {:problems problems}))
-
-(defn validate-route-data [routes spec]
-  (->> (for [[p d _] routes]
-         (when-let [problems (and spec (s/explain-data spec d))]
-           (->Problem p nil d spec problems)))
-       (keep identity) (seq)))
-
-(defn validate-spec!
-  [routes {:keys [spec ::explain]
-           :or {explain s/explain-str
-                spec ::default-data}}]
-  (when-let [problems (validate-route-data routes spec)]
-    (throw-on-problems! problems explain)))

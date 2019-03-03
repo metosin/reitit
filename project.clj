@@ -13,6 +13,7 @@
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :managed-dependencies [[metosin/reitit "0.2.13"]
                          [metosin/reitit-core "0.2.13"]
+                         [metosin/reitit-dev "0.2.13"]
                          [metosin/reitit-spec "0.2.13"]
                          [metosin/reitit-schema "0.2.13"]
                          [metosin/reitit-ring "0.2.13"]
@@ -25,24 +26,26 @@
                          [metosin/reitit-sieppari "0.2.13"]
                          [metosin/reitit-pedestal "0.2.13"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.8.3"]
-                         [metosin/schema-tools "0.10.5"]
+                         [metosin/spec-tools "0.9.0"]
+                         [metosin/schema-tools "0.11.0"]
                          [metosin/muuntaja "0.6.3"]
                          [metosin/jsonista "0.2.2"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
+                         [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
+                         [expound "0.7.2"]
                          [lambdaisland/deep-diff "0.0-25"]
                          [ring/ring-core "1.7.1"]
 
                          [io.pedestal/pedestal.service "0.5.5"]]
 
-  :plugins [[jonase/eastwood "0.3.4"]
+  :plugins [[jonase/eastwood "0.3.5"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.0.13"]
-            [lein-codox "0.10.5"]
+            [lein-codox "0.10.6"]
             [metosin/bat-test "0.4.2"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
@@ -50,6 +53,7 @@
                    ;; all module sources for development
                    :source-paths ["modules/reitit/src"
                                   "modules/reitit-core/src"
+                                  "modules/reitit-dev/src"
                                   "modules/reitit-ring/src"
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
@@ -75,9 +79,10 @@
                                   [metosin/jsonista]
                                   [lambdaisland/deep-diff]
                                   [meta-merge]
+                                  [expound]
+                                  [fipp]
 
-                                  [expound "0.7.2"]
-                                  [orchestra "2018.12.06-2"]
+                                  [orchestra "2019.02.06-1"]
 
                                   [ring "1.7.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
@@ -95,12 +100,11 @@
 
                                   [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]
-                                  [funcool/promesa "1.9.0"]
+                                  [funcool/promesa "2.0.0"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "0.3.0"]
 
-                                  ;; https://github.com/bensu/doo/issues/180
-                                  [fipp "0.6.14" :exclusions [org.clojure/core.rrb-vector]]]}
+                                  [com.bhauman/rebel-readline "0.1.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
@@ -114,7 +118,7 @@
                                    [calfpath "0.7.2"]
                                    [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
-                                   [funcool/promesa "1.9.0"]
+                                   [funcool/promesa "2.0.0"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.4.6"]

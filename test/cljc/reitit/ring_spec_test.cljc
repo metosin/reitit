@@ -21,59 +21,59 @@
   (testing "with default spec validates :name, :handler and :middleware"
     (is (thrown-with-msg?
           ExceptionInfo
-          #"Invalid route data"
+          #":reitit.ring.spec/invalid-route-data"
           (ring/router
             ["/api" {:handler "identity"}]
-            {:validate rrs/validate-spec!})))
+            {:validate rrs/validate})))
     (is (thrown-with-msg?
           ExceptionInfo
-          #"Invalid route data"
+          #":reitit.ring.spec/invalid-route-data"
           (ring/router
             ["/api" {:handler identity
                      :name "kikka"}]
-            {:validate rrs/validate-spec!}))))
+            {:validate rrs/validate}))))
 
   (testing "all endpoints are validated"
     (is (thrown-with-msg?
           ExceptionInfo
-          #"Invalid route data"
+          #":reitit.ring.spec/invalid-route-data"
           (ring/router
             ["/api" {:patch {:handler "identity"}}]
-            {:validate rrs/validate-spec!}))))
+            {:validate rrs/validate}))))
 
   (testing "spec can be overridden"
     (is (r/router?
           (ring/router
             ["/api" {:handler "identity"}]
             {:spec (s/spec any?)
-             :validate rrs/validate-spec!})))
+             :validate rrs/validate})))
 
     (testing "predicates are not allowed"
       (is (thrown-with-msg?
             ExceptionInfo
-            #"Not all specs satisfy the Spec protocol"
+            #":reitit.ring.spec/invalid-specs"
             (ring/router
               ["/api" {:handler "identity"}]
               {:spec any?
-               :validate rrs/validate-spec!})))))
+               :validate rrs/validate})))))
 
   (testing "middleware can contribute to specs"
     (is (r/router?
           (ring/router
             ["/api" {:get {:handler identity
                            :roles #{:admin}}}]
-            {:validate rrs/validate-spec!
+            {:validate rrs/validate
              :data {:middleware [{:spec (s/keys :opt-un [::roles])
                                   :wrap (fn [handler]
                                           (fn [request]
                                             (handler request)))}]}})))
     (is (thrown-with-msg?
           ExceptionInfo
-          #"Invalid route data"
+          #":reitit.ring.spec/invalid-route-data"
           (ring/router
             ["/api" {:get {:handler identity
                            :roles #{:adminz}}}]
-            {:validate rrs/validate-spec!
+            {:validate rrs/validate
              :data {:middleware [{:spec (s/keys :opt-un [::roles])
                                   :wrap (fn [handler]
                                           (fn [request]
@@ -97,7 +97,7 @@
                                rrc/coerce-request-middleware
                                rrc/coerce-response-middleware]
                   :coercion reitit.coercion.spec/coercion}
-           :validate rrs/validate-spec!})))
+           :validate rrs/validate})))
 
   (is (r/router?
         (ring/router
@@ -109,11 +109,11 @@
                                rrc/coerce-request-middleware
                                rrc/coerce-response-middleware]
                   :coercion reitit.coercion.spec/coercion}
-           :validate rrs/validate-spec!})))
+           :validate rrs/validate})))
 
   (is (thrown-with-msg?
         ExceptionInfo
-        #"Invalid route data"
+        #":reitit.ring.spec/invalid-route-data"
         (ring/router
           ["/api"
            ["/plus/:e"
@@ -123,4 +123,4 @@
                                rrc/coerce-request-middleware
                                rrc/coerce-response-middleware]
                   :coercion reitit.coercion.spec/coercion}
-           :validate rrs/validate-spec!}))))
+           :validate rrs/validate}))))

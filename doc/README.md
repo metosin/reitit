@@ -12,6 +12,8 @@
 * Modular
 * [Fast](performance.md)
 
+There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
+
 ## Main Modules
 
 * `reitit` - all bundled
@@ -26,6 +28,7 @@
 * `reitit-http` http-routing with Pedestal-style Interceptors
 * `reitit-interceptors` - [common interceptors](./http/default_interceptors.md) for `reitit-http`
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari) Interceptors
+* `reitit-dev` - development utilities
 
 ## Extra modules
 
@@ -39,38 +42,7 @@ All bundled:
 [metosin/reitit "0.2.13"]
 ```
 
-Optionally, the parts can be required separately:
-
-```clj
-[metosin/reitit-core "0.2.13"]
-
-;; coercion
-[metosin/reitit-spec "0.2.13"]
-[metosin/reitit-schema "0.2.13"]
-
-;; ring helpers
-[metosin/reitit-ring "0.2.13"]
-[metosin/reitit-middleware "0.2.13"]
-
-;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.13"]
-[metosin/reitit-swagger-ui "0.2.13"]
-
-;; frontend helpers
-[metosin/reitit-frontend "0.2.13"]
-
-;; http with interceptors
-[metosin/reitit-http "0.2.13"]
-[metosin/reitit-interceptors "0.2.13"]
-[metosin/reitit-sieppari "0.2.13"]
-```
-
-```clj
-;; pedestal
-[metosin/reitit-pedestal "0.2.13"]
-```
-
-There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
+Optionally, the parts can be required separately.
 
 # Examples
 

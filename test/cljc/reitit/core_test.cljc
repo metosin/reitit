@@ -129,12 +129,12 @@
             (testing "unclosed brackets"
               (is (thrown-with-msg?
                     ExceptionInfo
-                    #"^Unclosed brackets"
+                    #":reitit.trie/unclosed-brackets"
                     (r/router ["/kikka/{kukka"]))))
             (testing "multiple terminators"
               (is (thrown-with-msg?
                     ExceptionInfo
-                    #"^Trie compliation error: wild :kukka has two terminators"
+                    #":reitit.trie/multiple-terminators"
                     (r/router [["/{kukka}.json"]
                                ["/{kukka}-json"]]))))))
 

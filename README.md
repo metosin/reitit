@@ -1,6 +1,5 @@
 # reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/reitit)](https://cljdoc.xyz/jump/release/metosin/reitit)
 
-
 A fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
@@ -36,6 +35,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-http` http-routing with Interceptors
 * `reitit-interceptors` - [common interceptors](https://metosin.github.io/reitit/http/default_interceptors.html)
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
+* `reitit-dev` - development utilities
 
 ## Extra modules
 
@@ -49,36 +49,7 @@ All main modules bundled:
 [metosin/reitit "0.2.13"]
 ```
 
-Optionally, the parts can be required separately:
-
-```clj
-[metosin/reitit-core "0.2.13"]
-
-;; coercion
-[metosin/reitit-spec "0.2.13"]
-[metosin/reitit-schema "0.2.13"]
-
-;; ring helpers
-[metosin/reitit-ring "0.2.13"]
-[metosin/reitit-middleware "0.2.13"]
-
-;; swagger-support for ring & http
-[metosin/reitit-swagger "0.2.13"]
-[metosin/reitit-swagger-ui "0.2.13"]
-
-;; frontend helpers
-[metosin/reitit-frontend "0.2.13"]
-
-;; http with interceptors
-[metosin/reitit-http "0.2.13"]
-[metosin/reitit-interceptors "0.2.13"]
-[metosin/reitit-sieppari "0.2.13"]
-```
-
-```clj
-;; pedestal
-[metosin/reitit-pedestal "0.2.13"]
-```
+Optionally, the parts can be required separately.
 
 ## Quick start
 

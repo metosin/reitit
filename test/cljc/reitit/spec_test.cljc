@@ -93,19 +93,19 @@
           #"Invalid route data"
           (r/router
             ["/api" {:handler "identity"}]
-            {:validate rs/validate-spec!})))
+            {:validate rs/validate})))
     (is (thrown-with-msg?
           ExceptionInfo
           #"Invalid route data"
           (r/router
             ["/api" {:name "kikka"}]
-            {:validate rs/validate-spec!}))))
+            {:validate rs/validate}))))
 
   (testing "spec can be overridden"
     (is (r/router? (r/router
                      ["/api" {:handler "identity"}]
                      {:spec any?
-                      :validate rs/validate-spec!})))))
+                      :validate rs/validate})))))
 
 (deftest parameters-test
   (is (s/valid?
