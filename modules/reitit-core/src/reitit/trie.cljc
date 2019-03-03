@@ -68,7 +68,7 @@
                  (recur ss from (inc to))
                  (recur (concat ss (-static from to) (-wild to to')) (long to') (long to'))))
           \* (let [to' (count s)]
-               (recur (concat ss (-static from to) (-catch-all to to')) to' to'))
+               (recur (concat ss (-static from to) (-catch-all to to')) (long to') (long to')))
           (recur ss from (inc to)))))))
 
 (defn join-path [xs]
@@ -405,21 +405,4 @@
      ["/v1/orgs/:org-id/topics" 57]]
     (insert)
     (compile)
-    (pretty)
-    (./aprint))
-
-  (-> [["/{a}/2"]
-       ["/{a}.2"]]
-      (insert)
-      (compile))
-
-  (-> [["/kikka" 2]
-       ["/kikka/kakka/kukka" 3]
-       ["/kikka/:kakka/kurkku" 4]
-       ["/kikka/kuri/{user/doc}/html" 5]]
-      (insert)
-      (compile)
-      (pretty))
-
-  (map str (.toCharArray "\u2215\u0048\u0065\u006C\u006C\u006F"))
-  (count ["∕" "H" "e" "l" "l" "o" " " "W" "o" "r" "l" "d"]))
+    (pretty)))

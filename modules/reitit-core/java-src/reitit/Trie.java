@@ -40,7 +40,7 @@ public class Trie {
 
   public static class Match {
     public IPersistentMap params;
-    public Object data;
+    public final Object data;
 
     public Match(IPersistentMap params, Object data) {
       this.params = params;
@@ -68,7 +68,7 @@ public class Trie {
     return new StaticMatcher(path, child);
   }
 
-  static class StaticMatcher implements Matcher {
+  static final class StaticMatcher implements Matcher {
     private final Matcher child;
     private final char[] path;
     private final int size;
@@ -238,7 +238,6 @@ public class Trie {
   }
 
   static final class LinearMatcher implements Matcher {
-
     private final Matcher[] childs;
     private final int size;
 

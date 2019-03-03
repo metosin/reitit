@@ -15,8 +15,7 @@
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
             [reitit.core :as r]
-            [criterium.core :as cc]
-            [reitit.trie :as trie]))
+            [criterium.core :as cc]))
 
 ;;
 ;; start repl with `lein perf repl`
