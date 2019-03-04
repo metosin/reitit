@@ -10,6 +10,7 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-core]
+                 [metosin/reitit-dev]
                  [metosin/reitit-spec]
                  [metosin/reitit-schema]
                  [metosin/reitit-ring]

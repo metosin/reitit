@@ -14,9 +14,52 @@
   * backed by a new `:trie-router`, replacing `:segment-router`
      * [over 40% faster](https://metosin.github.io/reitit/performance.html) on the JVM
 
-## `reitit-frontend`
+* **BREAKING**: `reitit.spec/validate-spec!` has been renamed to `validate`
+* With `clojure.spec` coercion, values flow through both `st/coerce` & `st/conform` yielding better error messages. Original issue in [compojure-api](https://github.com/metosin/compojure-api/issues/409).
 
-* **BREAKING** New frontend controllers:
+### `reitit-dev`
+
+* new module for friendly router creation time exception handling
+  * new option `:exception` in `r/router`, of type `Exception => Exception` (default `reitit.exception/exception`)
+  * new exception pretty-printer `reitit.dev.pretty/exception`, based on [fipp](https://github.com/brandonbloom/fipp) and [expound](https://github.com/bhb/expound) for human readable, newbie-friendly errors.
+  
+#### Conflicting paths
+ 
+```clj
+(require '[reitit.core :as r])
+(require '[reitit.dev.pretty :as pretty])
+
+(r/router
+  [["/ping"]
+   ["/:user-id/orders"]
+   ["/bulk/:bulk-id"]
+   ["/public/*path"]
+   ["/:version/status"]]
+  {:exception pretty/exception})
+```
+
+<img src="https://gist.githubusercontent.com/ikitommi/ff9b091ffe87880d9847c9832bbdd3d2/raw/0e185e07e4ac49109bb653b4ad4656896cb41b2f/path-conflicts.png" width=640>
+
+#### Route data error
+
+```clj
+(require '[reitit.spec :as spec])
+(require '[clojure.spec.alpha :as s])
+
+(s/def ::role #{:admin :user})
+(s/def ::roles (s/coll-of ::role :into #{}))
+
+(r/router
+  ["/api/admin" {::roles #{:adminz}}]
+  {:validate spec/validate
+   :exception pretty/exception})
+```
+
+<img src="https://gist.githubusercontent.com/ikitommi/ff9b091ffe87880d9847c9832bbdd3d2/raw/0e185e07e4ac49109bb653b4ad4656896cb41b2f/route-data-error.png" width=640>
+
+### `reitit-frontend`
+
+* **BREAKING**: Frontend controllers redesigned
     * Controller `:params` function has been deprecated
     * Controller `:identity` function works the same as `:params`
     * New `:parameters` option can be used to declare which parameters
@@ -24,13 +67,24 @@
     use cases: `{:start start-fn, :parameters {:path [:foo-id]}}`
 * Ensure HTML5 History routing works with IE11
 
-## `reitit-ring`
+### `reitit-ring`
 
 * Allow Middleware to compile to `nil` with Middleware Registries, fixes to [#216](https://github.com/metosin/reitit/issues/216).
+* **BREAKING**: `reitit.ring.spec/validate-spec!` has been renamed to `validate`
 
-## `reitit-http`
+### `reitit-http`
 
 * Allow Interceptors to compile to `nil` with Interceptor Registries, related to [#216](https://github.com/metosin/reitit/issues/216).
+* **BREAKING**: `reitit.http.spec/validate-spec!` has been renamed to `validate`
+
+## Dependencies
+
+* updated:
+
+```clj
+[metosin/spec-tools "0.9.0"] is available but we use "0.8.3"
+[metosin/schema-tools "0.11.0"] is available but we use "0.10.5"
+```
 
 ## 0.2.13 (2019-01-26)
 

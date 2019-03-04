@@ -8,7 +8,7 @@ But there is a better way. Router has a `:validation` hook to validate the whole
 
 ## clojure.spec
 
-Namespace `reitit.spec` contains specs for main parts of `reitit.core` and a helper function `validate-spec!` that runs spec validation for all route data and throws an exception if any errors are found.
+Namespace `reitit.spec` contains specs for main parts of `reitit.core` and a helper function `validate` that runs spec validation for all route data and throws an exception if any errors are found.
 
 A Router with invalid route data:
 
@@ -27,7 +27,7 @@ Fails fast with `clojure.spec` validation turned on:
 
 (r/router
   ["/api" {:handler "identity"}]
-  {:validate rs/validate-spec!})
+  {:validate rs/validate})
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------
@@ -42,7 +42,7 @@ Fails fast with `clojure.spec` validation turned on:
 
 ### Customizing spec validation
 
-`rs/validate-spec!` reads the following router options:
+`rs/validate` reads the following router options:
 
   | key            | description |
   | ---------------|-------------|
@@ -64,7 +64,7 @@ Below is an example of using [expound](https://github.com/bhb/expound) to pretty
   ["/api" {:handler identity
            ::roles #{:adminz}}]
   {::rs/explain e/expound-str
-   :validate rs/validate-spec!})
+   :validate rs/validate})
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------
@@ -102,7 +102,7 @@ Explicitly requiring a `::roles` key in a route data:
   ["/api" {:handler identity}]
   {:spec (s/merge (s/keys :req [::roles]) ::rs/default-data)
    ::rs/explain e/expound-str
-   :validate rs/validate-spec!})
+   :validate rs/validate})
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------

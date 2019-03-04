@@ -59,7 +59,7 @@
       (if (= to (count s))
         (concat ss (-static from to))
         (case (get s to)
-          \{ (let [to' (or (str/index-of s "}" to) (ex/fail! (str "Unclosed brackets: " (pr-str s))))]
+          \{ (let [to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
                (if (= \* (get s (inc to)))
                  (recur (concat ss (-static from to) (-catch-all (inc to) to')) (long (inc to')) (long (inc to')))
                  (recur (concat ss (-static from to) (-wild to to')) (long (inc to')) (long (inc to')))))
@@ -134,7 +134,7 @@
 (defn- -node [m]
   (map->Node (merge {:children {}, :wilds {}, :catch-all {}, :params {}} m)))
 
-(defn- -insert [node [path & ps] params data]
+(defn- -insert [node [path & ps] fp params data]
   (let [node' (cond
 
                 (nil? path)
@@ -143,14 +143,14 @@
                 (instance? Wild path)
                 (let [next (first ps)]
                   (if (or (instance? Wild next) (instance? CatchAll next))
-                    (ex/fail! (str "Two following wilds: " path ", " next))
-                    (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps params data)))))
+                    (ex/fail! ::following-parameters {:path fp, :parameters (map :value [path next])})
+                    (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps fp params data)))))
 
                 (instance? CatchAll path)
                 (assoc-in node [:catch-all path] (-node {:params params, :data data}))
 
                 (str/blank? path)
-                (-insert node ps params data)
+                (-insert node ps fp params data)
 
                 :else
                 (or
@@ -159,20 +159,20 @@
                       (if-let [cp (common-prefix p path)]
                         (if (= cp p)
                           ;; insert into child node
-                          (let [n' (-insert n (conj ps (subs path (count p))) params data)]
+                          (let [n' (-insert n (conj ps (subs path (count p))) fp params data)]
                             (reduced (assoc-in node [:children p] n')))
                           ;; split child node
                           (let [rp (subs p (count cp))
                                 rp' (subs path (count cp))
-                                n' (-insert (-node {}) ps params data)
-                                n'' (-insert (-node {:children {rp n, rp' n'}}) nil nil nil)]
+                                n' (-insert (-node {}) ps fp params data)
+                                n'' (-insert (-node {:children {rp n, rp' n'}}) nil nil nil nil)]
                             (reduced (update node :children (fn [children]
                                                               (-> children
                                                                   (dissoc p)
                                                                   (assoc cp n'')))))))))
                     nil (:children node))
                   ;; new child node
-                  (assoc-in node [:children path] (-insert (-node {}) ps params data))))]
+                  (assoc-in node [:children path] (-insert (-node {}) ps fp params data))))]
     (if-let [child (get-in node' [:children ""])]
       ;; optimize by removing empty paths
       (-> (merge-with merge (dissoc node' :data) child)
@@ -300,7 +300,7 @@
   ([node path data]
    (let [parts (split-path path)
          params (zipmap (->> parts (remove string?) (map :value)) (repeat nil))]
-     (-insert (or node (-node {})) (split-path path) params data))))
+     (-insert (or node (-node {})) (split-path path) path params data))))
 
 (defn compiler
   "Returns a default [[TrieCompiler]]."
@@ -312,18 +312,20 @@
   "Returns a compiled trie, to be used with [[pretty]] or [[path-matcher]]."
   ([options]
    (compile options (compiler)))
-  ([{:keys [data params children wilds catch-all] :or {params {}}} compiler]
+  ([options compiler]
+   (compile options compiler []))
+  ([{:keys [data params children wilds catch-all] :or {params {}}} compiler cp]
    (let [ends (fn [{:keys [children]}] (or (keys children) ["/"]))
          matchers (-> []
                       (cond-> data (conj (data-matcher compiler params data)))
-                      (into (for [[p c] children] (static-matcher compiler p (compile c compiler))))
+                      (into (for [[p c] children] (static-matcher compiler p (compile c compiler (conj cp p)))))
                       (into
                         (for [[p c] wilds]
-                          (let [p (:value p)
+                          (let [pv (:value p)
                                 ends (ends c)]
                             (if (next ends)
-                              (ex/fail! (str "Trie compliation error: wild " p " has two terminators: " ends))
-                              (wild-matcher compiler p (ffirst ends) (compile c compiler))))))
+                              (ex/fail! ::multiple-terminators {:terminators ends, :path (join-path (conj cp p))})
+                              (wild-matcher compiler pv (ffirst ends) (compile c compiler (conj cp pv)))))))
                       (into (for [[p c] catch-all] (catch-all-matcher compiler (:value p) params (:data c)))))]
      (cond
        (> (count matchers) 1) (linear-matcher compiler matchers)

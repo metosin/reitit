@@ -35,22 +35,22 @@
                               (let [response (coercion/coerce-response coercers request response)]
                                 (assoc ctx :response response))))})))})
 
-  (defn coerce-exceptions-interceptor
-    "Interceptor for handling coercion exceptions.
-    Expects a :coercion of type `reitit.coercion/Coercion`
-    and :parameters or :responses from route data, otherwise does not mount."
-    []
-    {:name ::coerce-exceptions
-     :compile (fn [{:keys [coercion parameters responses]} _]
-                (if (and coercion (or parameters responses))
-                  {:error (fn [ctx]
-                            (let [data (ex-data (:error ctx))]
-                              (if-let [status (case (:type data)
-                                                ::coercion/request-coercion 400
-                                                ::coercion/response-coercion 500
-                                                nil)]
-                                (let [response {:status status, :body (coercion/encode-error data)}]
-                                  (-> ctx
-                                      (assoc :response response)
-                                      (assoc :error nil)))
-                                ctx)))}))})
+(defn coerce-exceptions-interceptor
+  "Interceptor for handling coercion exceptions.
+  Expects a :coercion of type `reitit.coercion/Coercion`
+  and :parameters or :responses from route data, otherwise does not mount."
+  []
+  {:name ::coerce-exceptions
+   :compile (fn [{:keys [coercion parameters responses]} _]
+              (if (and coercion (or parameters responses))
+                {:error (fn [ctx]
+                          (let [data (ex-data (:error ctx))]
+                            (if-let [status (case (:type data)
+                                              ::coercion/request-coercion 400
+                                              ::coercion/response-coercion 500
+                                              nil)]
+                              (let [response {:status status, :body (coercion/encode-error data)}]
+                                (-> ctx
+                                    (assoc :response response)
+                                    (assoc :error nil)))
+                              ctx)))}))})

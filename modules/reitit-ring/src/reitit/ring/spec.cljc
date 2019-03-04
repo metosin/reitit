@@ -21,9 +21,9 @@
 (defn merge-specs [specs]
   (when-let [non-specs (seq (remove #(or (s/spec? %) (s/get-spec %)) specs))]
     (exception/fail!
-      (str "Not all specs satisfy the Spec protocol: " non-specs)
+      ::invalid-specs
       {:specs specs
-       :non-specs non-specs}))
+       :invalid non-specs}))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
 (defn validate-route-data [routes key spec]
@@ -31,14 +31,16 @@
              [method {:keys [data] :as endpoint}] c
              :when endpoint
              :let [target (key endpoint)
-                   mw-specs (seq (keep :spec target))
-                   specs (keep identity (into [spec] mw-specs))
+                   component-specs (seq (keep :spec target))
+                   specs (keep identity (into [spec] component-specs))
                    spec (merge-specs specs)]]
          (when-let [problems (and spec (s/explain-data spec data))]
            (rs/->Problem p method data spec problems)))
        (keep identity) (seq)))
 
-(defn validate-spec!
-  [routes {:keys [spec ::rs/explain] :or {explain s/explain-str, spec ::data}}]
+(defn validate
+  [routes {:keys [spec] :or {spec ::data}}]
   (when-let [problems (validate-route-data routes :middleware spec)]
-    (rs/throw-on-problems! problems explain)))
+    (exception/fail!
+      ::invalid-route-data
+      {:problems problems})))

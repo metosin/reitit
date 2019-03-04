@@ -5,6 +5,7 @@ set -e
 # Modules
 for ext in \
   reitit-core \
+  reitit-dev \
   reitit-spec \
   reitit-schema \
   reitit-ring \
