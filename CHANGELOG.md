@@ -15,6 +15,7 @@
      * [over 40% faster](https://metosin.github.io/reitit/performance.html) on the JVM
 
 * **BREAKING**: `reitit.spec/validate-spec!` has been renamed to `validate`
+* With `clojure.spec` coercion, values flow through both `st/coerce` & `st/conform` yielding better error messages. Original issue in [compojure-api](https://github.com/metosin/compojure-api/issues/409).
 
 ### `reitit-dev`
 

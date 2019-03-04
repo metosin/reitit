@@ -12,6 +12,7 @@
 (defn exception [e]
   (let [data (ex-data e)
         message (format-exception (:type data) #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)) (:data data))]
+    ;; there is a 3-arity version (+cause) of ex-info, but the default repl error message is taken from the cause
     (ex-info message (assoc (or data {}) ::cause e))))
 
 ;;
