@@ -224,7 +224,7 @@
                             (drop-while #(not= (name (first %)) "reitit.core$router"))
                             (drop-while #(= (name (first %)) "reitit.core$router"))
                             next first source-str)
-                  :cljs "unkwown")]
+                  :cljs "unknown")]
     (ex-info (exception-str message source (printer)) (assoc (or data {}) ::exception/cause e))))
 
 (defn de-expound-colors [^String s mappings]
