@@ -53,15 +53,16 @@ For the backend, we can use a custom-expander to expand the routes:
 
 ```clj
 (require '[reitit.ring :as ring])
+(require '[reitit.core :as r])
 
 (defn my-expand [registry]
   (fn [data opts]
-    (or (if (keyword? data)
-          (some-> data
-                  registry
-                  (r/expand opts)
-                  (assoc :name data)))
-        (r/expand data opts))))
+    (if (keyword? data)
+      (some-> data
+              registry
+              (r/expand opts)
+              (assoc :name data))
+      (r/expand data opts))))
 
 ;; the handler functions
 (defn get-kikka [_] {:status 200, :body "get"})
