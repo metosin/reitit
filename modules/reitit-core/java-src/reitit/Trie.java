@@ -211,7 +211,7 @@ public class Trie {
 
     @Override
     public Match match(int i, int max, char[] path) {
-      if (i < max) {
+      if (i <= max) {
         return new Match(params.assoc(parameter, decode(path, i, max)), data);
       }
       return null;
