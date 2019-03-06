@@ -87,6 +87,7 @@
             (is (= ::boo (by-path "/abba/1/boo")))
             (is (= ::baa (by-path "/abba/dabba/boo/baa")))
             (is (= ::boo (by-path "/abba/dabba/boo")))
+            (is (= ::wild (by-path "/olipa/kerran/avaruus/vaan/")))
             (is (= ::wild (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))))
 
         (testing "bracket-params"
@@ -387,5 +388,10 @@
   (let [router (r/router
                  [["/" :root]
                   ["/" {:name :create :method :post}]]
-                 {:conflicts nil})]
-    (is (= :root (-> (r/match-by-path router "/") :data :name)))))
+                 {:conflicts nil})
+        router2 (r/router
+                  [["/*a" :root]
+                   ["/:a/b/c/d" {:name :create :method :post}]]
+                  {:conflicts nil})]
+    (is (= :root (-> (r/match-by-path router "/") :data :name)))
+    (is (= :root (-> (r/match-by-path router2 "/") :data :name)))))

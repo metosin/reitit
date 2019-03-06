@@ -240,7 +240,7 @@
       (let [match (->Match params data)]
         (reify Matcher
           (match [_ i max path]
-            (if (< i max) (assoc-param match key (decode path i max true))))
+            (if (<= i max) (assoc-param match key (decode path i max true))))
           (view [_] [key [data]])
           (depth [_] 1)
           (length [_]))))
