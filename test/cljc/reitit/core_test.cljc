@@ -382,3 +382,10 @@
   (let [router (r/router ["/endpoint" (->Named :kikka)])]
     (is (= [["/endpoint" {:name :kikka}]]
            (r/routes router)))))
+
+(deftest routing-order-test-229
+  (let [router (r/router
+                 [["/" :root]
+                  ["/" {:name :create :method :post}]]
+                 {:conflicts nil})]
+    (is (= :root (-> (r/match-by-path router "/") :data :name)))))

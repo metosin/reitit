@@ -24,7 +24,7 @@
   (static-matcher [this path matcher])
   (wild-matcher [this key end matcher])
   (catch-all-matcher [this key params data])
-  (linear-matcher [this matchers])
+  (linear-matcher [this matchers ordered?])
   (-pretty [this matcher])
   (-path-matcher [this matcher]))
 
@@ -244,8 +244,8 @@
           (view [_] [key [data]])
           (depth [_] 1)
           (length [_]))))
-    (linear-matcher [_ matchers]
-      (let [matchers (vec (reverse (sort-by (juxt depth length) matchers)))
+    (linear-matcher [_ matchers ordered?]
+      (let [matchers (vec (if ordered? matchers (reverse (sort-by (juxt depth length) matchers))))
             size (count matchers)]
         (reify Matcher
           (match [_ i max path]
@@ -275,8 +275,8 @@
          (Trie/wildMatcher key (if end (Character. end)) matcher))
        (catch-all-matcher [_ key params data]
          (Trie/catchAllMatcher key params data))
-       (linear-matcher [_ matchers]
-         (Trie/linearMatcher matchers))
+       (linear-matcher [_ matchers ordered?]
+         (Trie/linearMatcher matchers ordered?))
        (-pretty [_ matcher]
          (-> matcher str read-string eval))
        (-path-matcher [_ matcher]
@@ -328,7 +328,7 @@
                               (wild-matcher compiler pv (ffirst ends) (compile c compiler (conj cp pv)))))))
                       (into (for [[p c] catch-all] (catch-all-matcher compiler (:value p) params (:data c)))))]
      (cond
-       (> (count matchers) 1) (linear-matcher compiler matchers)
+       (> (count matchers) 1) (linear-matcher compiler matchers false)
        (= (count matchers) 1) (first matchers)
        :else (data-matcher compiler {} nil)))))
 

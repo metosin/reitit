@@ -96,7 +96,7 @@
                    [[] {}]
                    compiled-routes)
          lookup (impl/fast-map nl)
-         matcher (trie/linear-matcher compiler pl)
+         matcher (trie/linear-matcher compiler pl true)
          match-by-path (trie/path-matcher matcher compiler)
          routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}

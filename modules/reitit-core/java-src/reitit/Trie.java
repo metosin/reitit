@@ -233,17 +233,19 @@ public class Trie {
     }
   }
 
-  public static LinearMatcher linearMatcher(List<Matcher> childs) {
-    return new LinearMatcher(childs);
+  public static LinearMatcher linearMatcher(List<Matcher> childs, boolean inOrder) {
+    return new LinearMatcher(childs, inOrder);
   }
 
   static final class LinearMatcher implements Matcher {
     private final Matcher[] childs;
     private final int size;
 
-    LinearMatcher(List<Matcher> childs) {
+    LinearMatcher(List<Matcher> childs, boolean inOrder) {
       this.childs = childs.toArray(new Matcher[0]);
-      Arrays.sort(this.childs, Comparator.comparing(Matcher::depth).thenComparing(Matcher::length).reversed());
+      if (!inOrder) {
+        Arrays.sort(this.childs, Comparator.comparing(Matcher::depth).thenComparing(Matcher::length).reversed());
+      }
       this.size = childs.size();
     }
 
@@ -286,7 +288,7 @@ public class Trie {
                                     linearMatcher(
                                             Arrays.asList(
                                                     staticMatcher("login", dataMatcher(null, 1)),
-                                                    staticMatcher("recovery", dataMatcher(null, 2)))))));
+                                                    staticMatcher("recovery", dataMatcher(null, 2))), true))), true);
     System.err.println(matcher);
     System.out.println(lookup(matcher, "/auth/login"));
     System.out.println(lookup(matcher, "/auth/recovery"));
