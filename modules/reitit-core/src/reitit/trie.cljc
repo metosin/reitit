@@ -288,17 +288,19 @@
 ;; Managing Tries
 ;;
 
+(defn- map-parameters [keys]
+  (zipmap keys (repeat nil)))
+
 #?(:clj
    (def record-parameters
      "Memoized function to transform parameters into runtime generated Record."
      (memoize
-       (fn [params]
-         (let [fields (keys params)]
-           (if (some qualified-keyword? fields)
-             params
-             (let [sym (gensym "PathParams")
-                   ctor (symbol (str "map->" sym))]
-               (eval `(do (defrecord ~sym ~(mapv (comp symbol name) fields)) (~ctor {}))))))))))
+       (fn [keys]
+         (if (some qualified-keyword? keys)
+           (map-parameters keys)
+           (let [sym (gensym "PathParams")
+                 ctor (symbol (str "map->" sym))]
+             (eval `(do (defrecord ~sym ~(mapv (comp symbol name) keys)) (~ctor {})))))))))
 
 (defn insert
   "Returns a trie with routes added to it."
@@ -311,9 +313,9 @@
      node routes))
   ([node path data]
    (insert node path data nil))
-  ([node path data {::keys [parameters] :or {parameters identity}}]
+  ([node path data {::keys [parameters] :or {parameters map-parameters}}]
    (let [parts (split-path path)
-         params (parameters (zipmap (->> parts (remove string?) (map :value)) (repeat nil)))]
+         params (parameters (->> parts (remove string?) (map :value)))]
      (-insert (or node (-node {})) (split-path path) path params data))))
 
 (defn compiler

@@ -80,7 +80,7 @@
   | key                          | description |
   | -----------------------------|-------------|
   | `:reitit.trie/trie-compiler` | Optional trie-compiler.
-  | `:reitit.trie/parameters`    | Optional function to transform path-parameters at creation time (default `identity`)."
+  | `:reitit.trie/parameters`    | Optional function to create empty map(-like) path parameters value from sequence of keys."
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
@@ -176,7 +176,7 @@
   | key                          | description |
   | -----------------------------|-------------|
   | `:reitit.trie/trie-compiler` | Optional trie-compiler.
-  | `:reitit.trie/parameters`    | Optional function to transform path-parameters at creation time (default `identity`)."
+  | `:reitit.trie/parameters`    | Optional function to create empty map(-like) path parameters value from sequence of keys."
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
