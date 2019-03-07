@@ -334,6 +334,7 @@
   ;; 277ns (trie-router, no injects, switch-case) - 690ns clojure
   ;; 273ns (trie-router, no injects, direct-data)
   ;; 256ns (trie-router, pre-defined parameters)
+  ;; 237ns (trie-router, single-sweep wild-params)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -365,6 +366,6 @@
   (do
     (require '[clj-async-profiler.core :as prof])
     (prof/profile
-      (dotimes [_ 1000000]
+      (dotimes [_ 10000000]
         (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})))
     (prof/serve-files 8080)))
