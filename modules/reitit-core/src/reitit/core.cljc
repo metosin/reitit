@@ -79,11 +79,11 @@
 
   | key                          | description |
   | -----------------------------|-------------|
-  | `:reitit.core/trie-compiler` | Optional trie-compiler."
+  | `:reitit.trie/trie-compiler` | Optional trie-compiler.
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [compiler (::trie-compiler opts (trie/compiler))
+   (let [compiler (::trie/trie-compiler opts (trie/compiler))
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
@@ -174,11 +174,11 @@
 
   | key                          | description |
   | -----------------------------|-------------|
-  | `:reitit.core/trie-compiler` | Optional trie-compiler."
+  | `:reitit.trie/trie-compiler` | Optional trie-compiler.
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [compiler (::trie-compiler opts (trie/compiler))
+   (let [compiler (::trie/trie-compiler opts (trie/compiler))
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
