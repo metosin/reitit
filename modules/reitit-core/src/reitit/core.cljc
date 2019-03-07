@@ -80,6 +80,7 @@
   | key                          | description |
   | -----------------------------|-------------|
   | `:reitit.trie/trie-compiler` | Optional trie-compiler.
+  | `:reitit.trie/parameters`    | Optional function to transform path-parameters at creation time (default `identity`)."
   ([compiled-routes]
    (linear-router compiled-routes {}))
   ([compiled-routes opts]
@@ -91,7 +92,7 @@
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                       [(conj pl (-> (trie/insert nil p (->Match p data result nil nil)) (trie/compile)))
+                       [(conj pl (-> (trie/insert nil p (->Match p data result nil nil) opts) (trie/compile)))
                         (if name (assoc nl name f) nl)]))
                    [[] {}]
                    compiled-routes)
@@ -175,6 +176,7 @@
   | key                          | description |
   | -----------------------------|-------------|
   | `:reitit.trie/trie-compiler` | Optional trie-compiler.
+  | `:reitit.trie/parameters`    | Optional function to transform path-parameters at creation time (default `identity`)."
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
@@ -186,7 +188,7 @@
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                       [(trie/insert pl p (->Match p data result nil nil))
+                       [(trie/insert pl p (->Match p data result nil nil) opts)
                         (if name (assoc nl name f) nl)]))
                    [nil {}]
                    compiled-routes)

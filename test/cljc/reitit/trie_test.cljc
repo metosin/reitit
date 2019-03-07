@@ -34,4 +34,11 @@
   (is (= (trie/->Match {} {:a 1})
          ((-> (trie/insert nil "" {:a 1})
               (trie/compile)
-              (trie/path-matcher)) ""))))
+              (trie/path-matcher)) "")))
+
+  #?(:clj
+     (let [match ((-> (trie/insert nil "/:a" {:a 1} {::trie/parameters trie/record-parameters})
+                      (trie/compile)
+                      (trie/path-matcher)) "/a")]
+       (is (record? (:params match)))
+       (is (= (trie/->Match {:a "a"} {:a 1}) (update match :params (partial into {})))))))
