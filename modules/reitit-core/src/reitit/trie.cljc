@@ -296,9 +296,9 @@
          (let [fields (keys params)]
            (if (some qualified-keyword? fields)
              params
-             (let [name (gensym "PathParams")
-                   ctor (symbol (str "map->" name))]
-               (eval `(do (defrecord ~name ~(mapv symbol fields)) (~ctor {}))))))))))
+             (let [sym (gensym "PathParams")
+                   ctor (symbol (str "map->" sym))]
+               (eval `(do (defrecord ~sym ~(mapv (comp symbol name) fields)) (~ctor {}))))))))))
 
 (defn insert
   "Returns a trie with routes added to it."
