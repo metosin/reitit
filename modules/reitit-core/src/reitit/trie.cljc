@@ -300,7 +300,8 @@
            (map-parameters keys)
            (let [sym (gensym "PathParams")
                  ctor (symbol (str "map->" sym))]
-             (eval `(do (defrecord ~sym ~(mapv (comp symbol name) keys)) (~ctor {})))))))))
+             (binding [*ns* (find-ns 'user)]
+               (eval `(do (defrecord ~sym ~(mapv (comp symbol name) keys)) (~ctor {}))))))))))
 
 (defn insert
   "Returns a trie with routes added to it."
