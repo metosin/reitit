@@ -12,7 +12,7 @@
      * `"/file-:id/topics"` (free start, ends at slash)
      * `"/file-{name}.html"` (free start & end)
   * backed by a new `:trie-router`, replacing `:segment-router`
-     * [over 40% faster](https://metosin.github.io/reitit/performance.html) on the JVM
+     * [up to 2x faster](https://metosin.github.io/reitit/performance.html) on the JVM
 
 * **BREAKING**: `reitit.spec/validate-spec!` has been renamed to `validate`
 * With `clojure.spec` coercion, values flow through both `st/coerce` & `st/conform` yielding better error messages. Original issue in [compojure-api](https://github.com/metosin/compojure-api/issues/409).
@@ -59,7 +59,7 @@
 
 ### `reitit-frontend`
 
-* **BREAKING**: Frontend controllers redesigned
+* Frontend controllers redesigned
     * Controller `:params` function has been deprecated
     * Controller `:identity` function works the same as `:params`
     * New `:parameters` option can be used to declare which parameters

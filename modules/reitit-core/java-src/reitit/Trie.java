@@ -160,10 +160,14 @@ public class Trie {
 
     @Override
     public Match match(int i, int max, char[] path) {
+      boolean hasPercent = false;
+      boolean hasPlus = false;
       if (i < max && path[i] != end) {
         int stop = max;
         for (int j = i; j < max; j++) {
           final char c = path[j];
+          hasPercent = hasPercent || c == '%';
+          hasPlus = hasPlus || c == '+';
           if (c == end) {
             stop = j;
             break;
@@ -171,7 +175,7 @@ public class Trie {
         }
         final Match m = child.match(stop, max, path);
         if (m != null) {
-          m.params = m.params.assoc(key, decode(path, i, stop));
+          m.params = m.params.assoc(key, decode(new String(path, i, stop - i), hasPercent, hasPlus));
         }
         return m;
       }

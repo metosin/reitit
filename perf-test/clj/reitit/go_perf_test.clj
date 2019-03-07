@@ -2,6 +2,7 @@
   (:require [criterium.core :as cc]
             [reitit.perf-utils :refer :all]
             [reitit.ring :as ring]
+            [reitit.trie :as trie]
             [clojure.string :as str]))
 
 ;;
@@ -295,7 +296,8 @@
 (def app
   (ring/ring-handler
     (ring/router
-      (reduce (partial add h) [] routes))
+      (reduce (partial add h) [] routes)
+      {::trie/parameters trie/record-parameters})
     (ring/create-default-handler)
     {:inject-match? false, :inject-router? false}))
 
@@ -334,6 +336,8 @@
   ;; 277ns (trie-router, no injects, switch-case) - 690ns clojure
   ;; 273ns (trie-router, no injects, direct-data)
   ;; 256ns (trie-router, pre-defined parameters)
+  ;; 237ns (trie-router, single-sweep wild-params)
+  ;; 191ns (trie-router, record parameters)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
     (assert (= {:status 200, :body "/repos/:owner/:repo/stargazers"} (app req)))
@@ -365,6 +369,6 @@
   (do
     (require '[clj-async-profiler.core :as prof])
     (prof/profile
-      (dotimes [_ 1000000]
+      (dotimes [_ 10000000]
         (app {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})))
     (prof/serve-files 8080)))

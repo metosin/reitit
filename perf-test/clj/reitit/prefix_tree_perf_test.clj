@@ -74,7 +74,7 @@
     (trie/compile
       (reduce
         (fn [acc [p d]]
-          (trie/insert acc p d))
+          (trie/insert acc p d {::trie/parameters trie/record-parameters}))
         nil routes))))
 
 (defn bench! []
@@ -117,6 +117,7 @@
   ;; 0.300µs (iterate arrays)
   ;; 0.280µs (list-params)
   ;; 0.096µs (trie)
+  ;; 0.083µs (trie, record-params, faster decode)
   (cc/with-progress-reporting
     (cc/bench
       (trie-matcher "/v1/orgs/1/topics"))))
