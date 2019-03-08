@@ -1,8 +1,12 @@
 # How to contribute
 
-Contributions are welcome.
+Contributions are welcome!
 
-Please file bug reports and feature requests to https://github.com/metosin/reitit/issues.
+* Please file bug reports and feature requests to https://github.com/metosin/reitit/issues
+* For small changes, such as bug fixes or documentation changes, feel free to send a pull request.
+* If you want to make a big change or implement a big new feature, please open an issue to discuss it first.
+
+If you have questions about contributing or about reitit in general, join the [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians Slack](http://clojurians.net/).
 
 ## Environment setup
 
@@ -18,6 +22,8 @@ Please file bug reports and feature requests to https://github.com/metosin/reiti
 * Verify that all tests pass using `./scripts/test.sh clj` and `./scripts/test.sh cljs`.
 * Push your code to your fork of the repository
 * Make a Pull Request
+
+For more deveploment instructions, [see the manual](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/misc/development-instructions).
 
 ## Commit messages
 
