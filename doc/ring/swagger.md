@@ -129,7 +129,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
 ### More complete example
 
 * `clojure.spec` coercion
-* swagger data (`:tags`, `:produces`, `:summary`)
+* swagger data (`:tags`, `:produces`, `:summary`, `:basePath`)
 * swagger-spec served from  `"/swagger.json"`
 * swagger-ui mounted to `"/"`
 * set of middleware for content negotiation, exceptions, multipart etc.
@@ -159,7 +159,8 @@ Whole example project is in [`/examples/ring-swagger`](https://github.com/metosi
     (ring/router
       [["/swagger.json"
         {:get {:no-doc true
-               :swagger {:info {:title "my-api"}}
+               :swagger {:info {:title "my-api"}
+                         :basePath "/"} ;; prefix for all paths
                :handler (swagger/create-swagger-handler)}}]
 
        ["/files"
