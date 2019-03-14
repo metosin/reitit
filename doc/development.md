@@ -25,6 +25,10 @@ gitbook serve
 
 ## To bump up version:
 
+We use [Break Versioning][breakver]. Remember our promise: patch-level bumps never include breaking changes!
+
+[breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
+
 ```bash
 # new version
 ./scripts/set-version "1.0.0"
