@@ -23,6 +23,8 @@
         path (.getPath uri)]
     (if-let [match (or (r/match-by-path router path)
                        (if-let [trailing-slash-handling (:trailing-slash-handling (r/options router))]
+                         ;; TODO: Maybe the original path should be added under some key in match,
+                         ;; so it is easy for user to see if trailing slash "redirect" happened?
                          (if (str/ends-with? path "/")
                            (if (not= trailing-slash-handling :add)
                              (r/match-by-path router (subs path 0 (dec (count path)))))
