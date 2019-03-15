@@ -104,3 +104,89 @@
                  (capture-console
                    (fn []
                      (rf/match-by-name! router ::foo {}))))))))))
+
+
+(deftest trailing-slash-handling-test
+  (testing ":both"
+    (let [router (r/router ["/"
+                            ["" ::frontpage]
+                            ["foo" ::foo]
+                            ["bar/" ::bar]]
+                           {:trailing-slash-handling :both})]
+      (is (= (r/map->Match
+               {:template "/foo"
+                :data {:name ::foo}
+                :path-params {}
+                :query-params {}
+                :path "/foo"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/foo/")
+             (rf/match-by-path router "/foo")))
+
+      (is (= (r/map->Match
+               {:template "/bar/"
+                :data {:name ::bar}
+                :path-params {}
+                :query-params {}
+                :path "/bar/"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/bar/")
+             (rf/match-by-path router "/bar"))) ))
+
+  (testing ":add"
+    (let [router (r/router ["/"
+                            ["" ::frontpage]
+                            ["foo" ::foo]
+                            ["bar/" ::bar]]
+                           {:trailing-slash-handling :add})]
+      (is (= (r/map->Match
+               {:template "/foo"
+                :data {:name ::foo}
+                :path-params {}
+                :query-params {}
+                :path "/foo"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/foo")))
+      (is (nil? (rf/match-by-path router "/foo/")))
+
+      (is (= (r/map->Match
+               {:template "/bar/"
+                :data {:name ::bar}
+                :path-params {}
+                :query-params {}
+                :path "/bar/"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/bar/")
+             (rf/match-by-path router "/bar")))))
+
+  (testing ":remove"
+    (let [router (r/router ["/"
+                            ["" ::frontpage]
+                            ["foo" ::foo]
+                            ["bar/" ::bar]]
+                           {:trailing-slash-handling :remove})]
+      (is (= (r/map->Match
+               {:template "/foo"
+                :data {:name ::foo}
+                :path-params {}
+                :query-params {}
+                :path "/foo"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/foo/")
+             (rf/match-by-path router "/foo")))
+
+      (is (= (r/map->Match
+               {:template "/bar/"
+                :data {:name ::bar}
+                :path-params {}
+                :query-params {}
+                :path "/bar/"
+                :parameters {:query {}
+                             :path {}}})
+             (rf/match-by-path router "/bar/")))
+      (is (nil? (rf/match-by-path router "/bar"))))))

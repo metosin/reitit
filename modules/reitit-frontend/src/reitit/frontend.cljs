@@ -1,5 +1,6 @@
 (ns reitit.frontend
   (:require [clojure.set :as set]
+            [clojure.string :as str]
             [reitit.coercion :as coercion]
             [reitit.coercion :as rc]
             [reitit.core :as r])
@@ -16,10 +17,18 @@
 
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
-  coerced parameters. Return nil if no match found."
+  coerced parameters. Returns nil if no match found."
   [router path]
-  (let [uri (.parse Uri path)]
-    (if-let [match (r/match-by-path router (.getPath uri))]
+  (let [uri (.parse Uri path)
+        path (.getPath uri)]
+    (if-let [match (or (r/match-by-path router path)
+                       (if-let [trailing-slash-handling (:trailing-slash-handling (r/options router))]
+                         (if (str/ends-with? path "/")
+                           (if (not= trailing-slash-handling :add)
+                             (r/match-by-path router (subs path 0 (dec (count path)))))
+                           (if (not= trailing-slash-handling :remove)
+                             (r/match-by-path router (str path "/"))))))]
+      ;; User can update browser location in on-navigate call using replace-state
       (let [q (query-params uri)
             match (assoc match :query-params q)
             ;; Return uncoerced values if coercion is not enabled - so
@@ -40,7 +49,14 @@
 
 (defn router
   "Create a `reitit.core.router` from raw route data and optionally an options map.
-  Enables request coercion. See [[reitit.core/router]] for details on options."
+  Enables request coercion. See [[reitit.core/router]] for details on options.
+
+  Additional options:
+
+  | key          | description |
+  | -------------|-------------|
+  | :trailing-slash-handling | TODO |
+  "
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
