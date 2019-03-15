@@ -6,13 +6,15 @@
 
 (defonce history (atom nil))
 
-;; Doc-strings from reitit.frontend.history
-;; remember to update both!
+;; Doc-strings from reitit.frontend.history remember to update both!
+;; Differences:
+;; This one automatically removes previous event listeners.
 
 (defn start!
   "This registers event listeners on HTML5 history and hashchange events.
-  When using with development workflow like Figwheel, rememeber to
-  remove listeners using stop! call before calling start! again.
+
+  Automatically removes previous event listeners so it is safe to call this repeatedly, for example when using
+  Figwheel or similar development workflow.
 
   Parameters:
   - router         The Reitit router.
