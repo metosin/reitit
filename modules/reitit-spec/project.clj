@@ -1,4 +1,4 @@
-(defproject metosin/reitit-spec "0.2.13"
+(defproject metosin/reitit-spec "0.3.0"
   :description "Reitit: clojure.spec coercion"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

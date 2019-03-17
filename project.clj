@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.2.13"
+(defproject metosin/reitit-parent "0.3.0"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -11,20 +11,20 @@
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.2.13"]
-                         [metosin/reitit-core "0.2.13"]
-                         [metosin/reitit-dev "0.2.13"]
-                         [metosin/reitit-spec "0.2.13"]
-                         [metosin/reitit-schema "0.2.13"]
-                         [metosin/reitit-ring "0.2.13"]
-                         [metosin/reitit-middleware "0.2.13"]
-                         [metosin/reitit-http "0.2.13"]
-                         [metosin/reitit-interceptors "0.2.13"]
-                         [metosin/reitit-swagger "0.2.13"]
-                         [metosin/reitit-swagger-ui "0.2.13"]
-                         [metosin/reitit-frontend "0.2.13"]
-                         [metosin/reitit-sieppari "0.2.13"]
-                         [metosin/reitit-pedestal "0.2.13"]
+  :managed-dependencies [[metosin/reitit "0.3.0"]
+                         [metosin/reitit-core "0.3.0"]
+                         [metosin/reitit-dev "0.3.0"]
+                         [metosin/reitit-spec "0.3.0"]
+                         [metosin/reitit-schema "0.3.0"]
+                         [metosin/reitit-ring "0.3.0"]
+                         [metosin/reitit-middleware "0.3.0"]
+                         [metosin/reitit-http "0.3.0"]
+                         [metosin/reitit-interceptors "0.3.0"]
+                         [metosin/reitit-swagger "0.3.0"]
+                         [metosin/reitit-swagger-ui "0.3.0"]
+                         [metosin/reitit-frontend "0.3.0"]
+                         [metosin/reitit-sieppari "0.3.0"]
+                         [metosin/reitit-pedestal "0.3.0"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.9.0"]
                          [metosin/schema-tools "0.11.0"]
