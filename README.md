@@ -152,10 +152,11 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 ## Special thanks
 
 * Existing Clojure(Script) routing libs, expecially to
-[Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [Compojure](https://github.com/weavejester/compojure) and
+[Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [calfpath](https://github.com/ikitommi/calfpath), [Compojure](https://github.com/weavejester/compojure) and
 [Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
 * [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
 * [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the validation part.
+* [httprouter](https://github.com/julienschmidt/httprouter) for ideas and a good library to benchmark against
 
 ## License
 
