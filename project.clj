@@ -10,7 +10,8 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8" "--release" "8"]
+  ;; TODO: need to verify that the code actually workd with Java1.8, see #242
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :managed-dependencies [[metosin/reitit "0.3.1"]
                          [metosin/reitit-core "0.3.1"]
                          [metosin/reitit-dev "0.3.1"]
