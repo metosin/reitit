@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.1 (2019-03-18)
+
+* Recompiled with Java8 as target, fixes [#241](https://github.com/metosin/reitit/issues/241).
+
 ## 0.3.0 (2019-03-17)
 
 ### `reitit.core`
