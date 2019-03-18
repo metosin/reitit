@@ -10,7 +10,6 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :managed-dependencies [[metosin/reitit "0.3.0"]
                          [metosin/reitit-core "0.3.0"]
                          [metosin/reitit-dev "0.3.0"]
@@ -25,6 +24,7 @@
                          [metosin/reitit-frontend "0.3.0"]
                          [metosin/reitit-sieppari "0.3.0"]
                          [metosin/reitit-pedestal "0.3.0"]
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8" "--release" "8"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.9.0"]
                          [metosin/schema-tools "0.11.0"]
