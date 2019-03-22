@@ -68,40 +68,55 @@
 (defn- swagger-path [path]
   (-> path trie/normalize (str/replace #"\{\*" "{")))
 
-(defn create-swagger-handler []
-  "Create a ring handler to emit swagger spec. Collects all routes from router which have
-  an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
+(defn swagger-spec
+
+  "Return a map representative of the OpenAPI/swagger 2.0 for
+  `compiled-routes`, merging the top level `swagger-data`.
+
+  Usage:
+    (swagger-spec {:info {:title \"The Bestest API\"}} compiled-routes)"
+
+  [swagger-data compiled-routes]
+  (let [->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
+        ids (->set (:id swagger-data ::default))
+        strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
+        strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
+        swagger (->> (strip-endpoint-keys swagger-data)
+                     (merge {:swagger "2.0"
+                             :x-id ids}))
+        accept-route (fn [route]
+                       (-> route second :swagger :id (or ::default) ->set (set/intersection ids) seq))
+        transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
+                                         middleware :middleware
+                                         interceptors :interceptors}]]
+                             (if (and data (not no-doc))
+                               [method
+                                (meta-merge
+                                 (apply meta-merge (keep (comp :swagger :data) middleware))
+                                 (apply meta-merge (keep (comp :swagger :data) interceptors))
+                                 (if coercion
+                                   (coercion/get-apidocs coercion :swagger data))
+                                 (select-keys data [:tags :summary :description])
+                                 (strip-top-level-keys swagger))]))
+        transform-path (fn [[p _ c]]
+                         (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
+                           [(swagger-path p) endpoint]))
+        map-in-order #(->> % (apply concat) (apply array-map))
+        paths (->> compiled-routes (filter accept-route) (map transform-path) map-in-order)]
+
+    (meta-merge swagger {:paths paths})))
+
+(defn create-swagger-handler
+  "Create a ring handler to emit swagger spec. Collects all routes from
+  router which have an intersecting `[:swagger :id]` and which are not
+  marked with `:no-doc` route data."
+  []
   (fn create-swagger
     ([{:keys [::r/router ::r/match :request-method]}]
-     (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
-           ->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
-           ids (->set id)
-           strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
-           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
-           swagger (->> (strip-endpoint-keys swagger)
-                        (merge {:swagger "2.0"
-                                :x-id ids}))
-           accept-route (fn [route]
-                          (-> route second :swagger :id (or ::default) ->set (set/intersection ids) seq))
-           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
-                                            middleware :middleware
-                                            interceptors :interceptors}]]
-                                (if (and data (not no-doc))
-                                  [method
-                                   (meta-merge
-                                    (apply meta-merge (keep (comp :swagger :data) middleware))
-                                    (apply meta-merge (keep (comp :swagger :data) interceptors))
-                                    (if coercion
-                                      (coercion/get-apidocs coercion :swagger data))
-                                    (select-keys data [:tags :summary :description])
-                                    (strip-top-level-keys swagger))]))
-           transform-path (fn [[p _ c]]
-                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                              [(swagger-path p) endpoint]))]
-       (let [map-in-order #(->> % (apply concat) (apply array-map))
-             paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
-         {:status 200
-          :body (meta-merge swagger {:paths paths})})))
+     (let [swagger-data (-> match :result request-method :data :swagger)
+           compiled-routes (r/compiled-routes router)]
+       {:status 200
+        :body (swagger-spec swagger-data compiled-routes)}))
     ([req res raise]
      (try
        (res (create-swagger req))
