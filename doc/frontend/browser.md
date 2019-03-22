@@ -25,3 +25,14 @@ all the calls. Wrapper `reitit.frontend.easy` is provided which manages
 a router instance and passes the instance to all calls. This should
 allow easy use in most applications, as browser anyway can only have single
 event handler for page change events.
+
+## History manipulation
+
+Reitit doesn't include functions to manipulate the history stack, i.e.
+go back or forwards, but calling History API functions directly should work:
+
+```
+(.go js/window.history -1)
+;; or
+(.back js/window.history)
+```
