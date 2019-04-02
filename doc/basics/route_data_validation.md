@@ -1,6 +1,6 @@
 # Route Data Validation
 
-Route data can be anything, so it's easy to do go wrong. Accidentally adding a `:role` key instead of `:roles` might hinder the whole routing app without any authorization in place.
+Route data can be anything, so it's easy to go wrong. Accidentally adding a `:role` key instead of `:roles` might hinder the whole routing app without any authorization in place.
 
 To fail fast, we could use the custom `:coerce` and `:compile` hooks to apply data validation and throw exceptions on first sighted problem.
 
