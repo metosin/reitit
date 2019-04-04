@@ -6,6 +6,29 @@
             [reitit.http])
   (:import (reitit.interceptor Executor)))
 
+(defn- arity [f]
+  (->> (class f)
+       .getDeclaredMethods
+       (filter #(= "invoke" (.getName %)))
+       first
+       .getParameterTypes
+       alength))
+
+(defn- error-with-arity-1? [{error-fn :error}]
+  (and error-fn (= 1 (arity error-fn))))
+
+(defn- error-arity-2->1 [error]
+  (fn [context ex]
+    (let [{ex :error :as context} (error (assoc context :error ex))]
+      (if ex
+        (-> context
+            (assoc ::chain/error ex)
+            (dissoc :error))
+        context))))
+
+(defn wrap-error-arity-2->1 [interceptor]
+  (update interceptor :error error-arity-2->1))
+
 (def pedestal-executor
   (reify
     Executor
@@ -13,7 +36,13 @@
       (->> interceptors
            (map (fn [{:keys [::interceptor/handler] :as interceptor}]
                   (or handler interceptor)))
-           (map interceptor/interceptor)))
+           (map (fn [interceptor]
+                  (if (interceptor/interceptor? interceptor)
+                    interceptor
+                    (interceptor/interceptor
+                     (if (error-with-arity-1? interceptor) 
+                       (wrap-error-arity-2->1 interceptor)
+                       interceptor)))))))
     (enqueue [_ context interceptors]
       (chain/enqueue context interceptors))))
 
