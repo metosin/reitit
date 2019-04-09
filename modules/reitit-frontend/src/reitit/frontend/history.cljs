@@ -84,7 +84,7 @@
                            (not (.-ctrlKey e))
                            (not (.-metaKey e))
                            (not (.-shiftKey e))
-                           (not (contains? #{"_blank" "self"} (.getAttribute el "target")))
+                           (not (contains? #{"_blank" "_self"} (.getAttribute el "target")))
                            ;; Left button
                            (= 0 (.-button e))
                            ;; isContentEditable property is inherited from parents,
