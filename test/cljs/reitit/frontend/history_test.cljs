@@ -127,3 +127,41 @@
                                             (done))
                                       (do (is false "extra event")))))
                                 {:use-fragment false})]))))
+
+(deftest html5-history-link-click-test
+  (when browser
+    (gevents/removeAll js/window goog.events.EventType.POPSTATE)
+    (gevents/removeAll js/window goog.events.EventType.HASHCHANGE)
+    (gevents/removeAll js/document goog.events.EventType.CLICK)
+
+    ;; Will fail with "Some of your tests did a full page reload!"
+    ;; if link events are not handled
+
+    (async done
+      (let [clicks (atom nil)
+            click-next (fn []
+                         (let [target (first @clicks)]
+                           (swap! clicks rest)
+                           (.click target)))
+            shadow-element (js/document.createElement "DIV")
+            shadow-root (.attachShadow shadow-element #js {:mode "open"})
+            history (rfh/start! router (fn [_ history]
+                                         (when @clicks
+                                           (if (seq @clicks)
+                                             (click-next)
+                                             (do
+                                               (rfh/stop! history)
+                                               (done)))))
+                                {:use-fragment false})
+            create-link #(doto
+                           (js/document.createElement "A")
+                           (.setAttribute "href" (rfh/href history ::foo)))
+            document-link (create-link)
+            shadow-link (create-link)]
+        (.appendChild js/document.body document-link)
+
+        (.appendChild js/document.body shadow-element)
+        (.appendChild shadow-root shadow-link)
+
+        (reset! clicks [document-link shadow-link])
+        (click-next)))))
