@@ -60,8 +60,8 @@
           (recur (.-parentNode el)))))))
 
 (defn- event-target [event]
-  ;; Read event's target from composed path to get shadow dom working,
-  ;; fallback to target property if not available
+  "Read event's target from composed path to get shadow dom working,
+   fallback to target property if not available"
   (let [original-event (.-event_ event)]
     (if (exists? (.-composedPath original-event))
       (first (.composedPath original-event))
