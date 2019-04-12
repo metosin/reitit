@@ -27,16 +27,16 @@
                          [metosin/reitit-sieppari "0.3.1"]
                          [metosin/reitit-pedestal "0.3.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.9.0"]
+                         [metosin/spec-tools "0.9.1"]
                          [metosin/schema-tools "0.11.0"]
-                         [metosin/muuntaja "0.6.3"]
+                         [metosin/muuntaja "0.6.4"]
                          [metosin/jsonista "0.2.2"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.7.2"]
-                         [lambdaisland/deep-diff "0.0-25"]
+                         [lambdaisland/deep-diff "0.0-47"]
                          [ring/ring-core "1.7.1"]
 
                          [io.pedestal/pedestal.service "0.5.5"]]
@@ -45,7 +45,7 @@
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
-            [lein-cloverage "1.0.13"]
+            [lein-cloverage "1.1.1"]
             [lein-codox "0.10.6"]
             [metosin/bat-test "0.4.2"]]
 
@@ -101,9 +101,9 @@
 
                                   [org.clojure/core.async "0.4.490"]
                                   [manifold "0.1.8"]
-                                  [funcool/promesa "2.0.0"]
+                                  [funcool/promesa "2.0.1"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.3.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.3.1"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
@@ -119,7 +119,7 @@
                                    [calfpath "0.7.2"]
                                    [org.clojure/core.async "0.4.490"]
                                    [manifold "0.1.8"]
-                                   [funcool/promesa "2.0.0"]
+                                   [funcool/promesa "2.0.1"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.4.6"]

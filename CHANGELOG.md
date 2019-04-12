@@ -12,13 +12,25 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+* Updated dependencies:
+
+```clj
+[metosin/spec-tools "0.9.1"] is available but we use "0.9.0"
+[metosin/muuntaja "0.6.4"] is available but we use "0.6.3"
+[lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
+```
+
+### `reitit.pedestal`
+
+* Automatically coerce Sieppari-style 1-arity `:error` handlers into Pedestal-style 2-arity `:error` handlers. Thanks to [Mathieu MARCHANDISE](https://github.com/vielmath).
+
 ## 0.3.1 (2019-03-18)
 
 * Recompiled with Java8 as target, fixes [#241](https://github.com/metosin/reitit/issues/241).
 
 ## 0.3.0 (2019-03-17)
 
-### `reitit.core`
+### `reitit-core`
 
 * welcome new wildcard routing!
   * optional bracket-syntax with parameters
