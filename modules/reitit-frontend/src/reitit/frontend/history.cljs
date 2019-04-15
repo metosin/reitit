@@ -78,6 +78,9 @@
           (if (exists? js/location)
             (.getDomain (.parse Uri js/location)))
 
+          ignore-anchor-click-fn (or (:ignore-anchor-click this)
+                                     (constantly true))
+
           ;; Prevent document load when clicking a elements, if the href points to URL that is part
           ;; of the routing tree."
           ignore-anchor-click
@@ -99,6 +102,7 @@
                            ;; isContentEditable property is inherited from parents,
                            ;; so if the anchor is inside contenteditable div, the property will be true.
                            (not (.-isContentEditable el))
+                           (ignore-anchor-click-fn e el)
                            (reitit/match-by-path router (.getPath uri)))
                   (.preventDefault e)
                   (let [path (str (.getPath uri)
@@ -134,15 +138,23 @@
   - on-navigate    Function to be called when route changes. Takes two parameters, ´match´ and ´history´ object.
 
   Options:
-  - :use-fragment  (default true) If true, onhashchange and location hash are used to store current route."
+  - :use-fragment  (default true) If true, onhashchange and location hash are used to store current route.
+
+  Options (Html5History):
+  - :ignore-anchor-click  Function (event, anchor element) to check if Reitit
+                          should handle click events on the anchor element. By default
+                          hrefs matching the route tree are handled by Reitit."
   ([router on-navigate]
    (start! router on-navigate nil))
   ([router
     on-navigate
     {:keys [use-fragment]
-     :or {use-fragment true}}]
-   (let [opts {:router router
-               :on-navigate on-navigate}]
+     :or {use-fragment true}
+     :as opts}]
+   (let [opts (-> opts
+                  (dissoc :use-fragment)
+                  (assoc :router router
+                         :on-navigate on-navigate))]
      (-init (if use-fragment
               (map->FragmentHistory opts)
               (map->Html5History opts))))))

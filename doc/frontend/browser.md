@@ -18,6 +18,29 @@ request to the server. This means the URL will look normal, but the downside is
 that the server must respond to all routes with correct file (`index.html`).
 Check examples for simple Ring handler example.
 
+### Anchor click handling
+
+HTML5 History router will handle click events on anchors where the href
+matches the route tree (and other [rules](../../modules/reitit-frontend/src/reitit/frontend/history.cljs#L84-L98)).
+If you have need to control this logic, for example to handle some
+anchor clicks where the href matches route tree normally (i.e. browser load)
+you can provide `:ignore-anchor-click` function to add your own logic to
+event handling:
+
+```clj
+(rfe/start!
+  router
+  {:use-fragment false
+   :ignore-anchor-click (fn [e el]
+                          (not= "false" (gobj/get (.-dataset el) "reititHandleClick")))})
+
+;; Use data-reitit-handle-click to disable Reitit anchor handling
+[:a
+ {:href (rfe/href ::about)
+  :data-reitit-handle-click false}
+ "About"]
+```
+
 ## Easy
 
 Reitit frontend routers require storing the state somewhere and passing it to
