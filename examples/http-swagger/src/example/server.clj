@@ -9,8 +9,10 @@
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
+            [reitit.http.spec :as spec]
             [reitit.http.interceptors.dev :as dev]
             [reitit.interceptor.sieppari :as sieppari]
+            [reitit.dev.pretty :as pretty]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as client]
             [muuntaja.core :as m]
@@ -110,9 +112,13 @@
                              :body {:total (- x y)}})}}]]]
 
       {;;:reitit.interceptor/transform dev/print-context-diffs
+       :validate spec/validate
+       :exception pretty/exception
        :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
-              :interceptors [;; query-params & form-params
+              :interceptors [;; swagger feature
+                             swagger/swagger-feature
+                             ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
                              (muuntaja/format-negotiate-interceptor)

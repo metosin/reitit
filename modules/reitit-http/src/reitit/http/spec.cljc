@@ -22,5 +22,5 @@
   [routes {:keys [spec] :or {spec ::data}}]
   (when-let [problems (rrs/validate-route-data routes :interceptors spec)]
     (exception/fail!
-      ::invalid-route-data
+      ::rs/invalid-route-data
       {:problems problems})))

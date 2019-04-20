@@ -42,5 +42,5 @@
   [routes {:keys [spec] :or {spec ::data}}]
   (when-let [problems (validate-route-data routes :middleware spec)]
     (exception/fail!
-      ::invalid-route-data
+      ::rs/invalid-route-data
       {:problems problems})))
