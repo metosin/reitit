@@ -13,6 +13,7 @@
             [reitit.http.interceptors.dev :as dev]
             [reitit.interceptor.sieppari :as sieppari]
             [reitit.dev.pretty :as pretty]
+            [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as client]
             [muuntaja.core :as m]
@@ -74,7 +75,7 @@
                               "https://randomuser.me/api/"
                               {:query-params {:seed seed, :results results}})
                             :body
-                            (partial m/decode m/instance "application/json")
+                            (partial m/decode "application/json")
                             :results
                             (fn [results]
                               {:status 200
@@ -112,7 +113,7 @@
                              :body {:total (- x y)}})}}]]]
 
       {;;:reitit.interceptor/transform dev/print-context-diffs
-       ;;:wrap-spec reitit.dev.pretty/closed-keys
+       :wrap-spec spell/closed-keys
        :validate spec/validate
        :exception pretty/exception
        :data {:coercion spec-coercion/coercion
