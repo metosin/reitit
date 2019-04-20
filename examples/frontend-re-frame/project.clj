@@ -13,7 +13,11 @@
   :min-lein-version "2.5.3"
   :source-paths ["src/clj" "src/cljs"]
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
-  :figwheel {:css-dirs ["resources/public/css"]}
+  :figwheel
+  {:css-dirs     ["resources/public/css"]
+   :server-port  3449
+   :nrepl-port   7002
+   :ring-handler backend.server/handler}
 
   :profiles
   {:dev
