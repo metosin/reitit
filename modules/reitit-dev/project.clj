@@ -9,5 +9,6 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-core]
+                 [com.bhauman/spell-spec]
                  [expound]
                  [fipp]])

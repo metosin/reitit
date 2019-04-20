@@ -37,6 +37,7 @@
                          [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.7.2"]
                          [lambdaisland/deep-diff "0.0-47"]
+                         [com.bhauman/spell-spec "0.1.1"]
                          [ring/ring-core "1.7.1"]
 
                          [io.pedestal/pedestal.service "0.5.5"]]
@@ -80,6 +81,7 @@
                                   [metosin/jsonista]
                                   [lambdaisland/deep-diff]
                                   [meta-merge]
+                                  [com.bhauman/spell-spec]
                                   [expound]
                                   [fipp]
 

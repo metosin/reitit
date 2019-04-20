@@ -30,6 +30,9 @@
 
 (defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
   (let [[top childs] (group-keys data)
+        childs (cond-> childs
+                       (and (not (:options childs)) default-options-handler)
+                       (assoc :options {:no-doc true, :handler default-options-handler}))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
@@ -40,12 +43,7 @@
                       (fn [acc method]
                         (cond-> acc
                                 any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods
-                        {:options
-                         (if default-options-handler
-                           (->endpoint path (assoc data
-                                              :handler default-options-handler
-                                              :no-doc true) :options nil))})
+                      (map->Methods {})
                       http-methods))]
     (if-not (seq childs)
       (->methods true top)

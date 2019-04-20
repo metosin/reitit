@@ -112,6 +112,7 @@
                              :body {:total (- x y)}})}}]]]
 
       {;;:reitit.interceptor/transform dev/print-context-diffs
+       ;;:wrap-spec reitit.dev.pretty/closed-keys
        :validate spec/validate
        :exception pretty/exception
        :data {:coercion spec-coercion/coercion

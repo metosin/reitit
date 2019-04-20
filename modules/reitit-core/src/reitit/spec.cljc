@@ -39,7 +39,8 @@
 
 (s/def ::name keyword?)
 (s/def ::handler fn?)
-(s/def ::default-data (s/keys :opt-un [::name ::handler]))
+(s/def ::no-doc boolean?)
+(s/def ::default-data (s/keys :opt-un [::name ::handler ::no-doc]))
 
 ;;
 ;; router
@@ -75,6 +76,8 @@
 ;; coercion
 ;;
 
+(s/def :reitit.core.coercion/coercion any?)
+
 (s/def :reitit.core.coercion/model any?)
 
 (s/def :reitit.core.coercion/query :reitit.core.coercion/model)
@@ -90,7 +93,8 @@
                    :reitit.core.coercion/path]))
 
 (s/def ::parameters
-  (s/keys :opt-un [:reitit.core.coercion/parameters]))
+  (s/keys :opt-un [:reitit.core.coercion/coercion
+                   :reitit.core.coercion/parameters]))
 
 (s/def :reitit.core.coercion/status
   (s/or :number number? :default #{:default}))
@@ -103,7 +107,8 @@
   (s/map-of :reitit.core.coercion/status :reitit.core.coercion/response))
 
 (s/def ::responses
-  (s/keys :opt-un [:reitit.core.coercion/responses]))
+  (s/keys :opt-un [:reitit.core.coercion/coercion
+                   :reitit.core.coercion/responses]))
 
 ;;
 ;; Route data validator
@@ -111,14 +116,14 @@
 
 (defrecord Problem [path scope data spec problems])
 
-(defn validate-route-data [routes spec]
+(defn validate-route-data [routes wrap-spec spec]
   (some->> (for [[p d _] routes]
-             (when-let [problems (and spec (s/explain-data spec d))]
+             (when-let [problems (and spec (s/explain-data (wrap-spec spec) d))]
                (->Problem p nil d spec problems)))
            (keep identity) (seq) (vec)))
 
-(defn validate [routes {:keys [spec] :or {spec ::default-data}}]
-  (when-let [problems (validate-route-data routes spec)]
+(defn validate [routes {:keys [spec wrap-spec] :or {spec ::default-data, wrap-spec identity}}]
+  (when-let [problems (validate-route-data routes wrap-spec spec)]
     (exception/fail!
       ::invalid-route-data
       {:problems problems})))
