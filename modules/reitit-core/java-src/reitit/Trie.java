@@ -38,20 +38,35 @@ public class Trie {
     return decode(new String(chars, begin, end - begin), hasPercent, hasPlus);
   }
 
-  public static class Match {
-    public IPersistentMap params;
+  public static final class Match {
+    final private Object[] params;
     public final Object data;
+    private int i = 0;
 
-    public Match(IPersistentMap params, Object data) {
-      this.params = params;
+    public Match(Integer size, Object data) {
+      this.params = new Object[size];
       this.data = data;
+    }
+
+    public void assoc(Keyword key, Object value) {
+      params[i] = key;
+      params[i + 1] = value;
+      i += 2;
+    }
+
+    public IPersistentMap params() {
+      return new PersistentArrayMap(params);
+    }
+
+    Match copy() {
+      return new Match(params.length, data);
     }
 
     @Override
     public String toString() {
       Map<Object, Object> m = new HashMap<>();
       m.put(Keyword.intern("data"), data);
-      m.put(Keyword.intern("params"), params);
+      m.put(Keyword.intern("params"), params());
       return m.toString();
     }
   }
@@ -116,13 +131,13 @@ public class Trie {
     private final Match match;
 
     DataMatcher(IPersistentMap params, Object data) {
-      this.match = new Match(params, data);
+      this.match = new Match(params.count() * 2, data);
     }
 
     @Override
     public Match match(int i, int max, char[] path) {
       if (i == max) {
-        return match;
+        return match.copy();
       }
       return null;
     }
@@ -175,7 +190,7 @@ public class Trie {
         }
         final Match m = child.match(stop, max, path);
         if (m != null) {
-          m.params = m.params.assoc(key, decode(new String(path, i, stop - i), hasPercent, hasPlus));
+          m.assoc(key, decode(new String(path, i, stop - i), hasPercent, hasPlus));
         }
         return m;
       }
@@ -204,19 +219,18 @@ public class Trie {
 
   static final class CatchAllMatcher implements Matcher {
     private final Keyword parameter;
-    private final IPersistentMap params;
-    private final Object data;
+    private final Match match;
 
     CatchAllMatcher(Keyword parameter, IPersistentMap params, Object data) {
+      this.match = new Match(params.count() * 2, data);
       this.parameter = parameter;
-      this.params = params;
-      this.data = data;
     }
 
     @Override
     public Match match(int i, int max, char[] path) {
       if (i <= max) {
-        return new Match(params.assoc(parameter, decode(path, i, max)), data);
+        match.copy().assoc(parameter, decode(path, i, max));
+        return match;
       }
       return null;
     }
@@ -233,7 +247,7 @@ public class Trie {
 
     @Override
     public String toString() {
-      return "[" + parameter + " " + new DataMatcher(null, data) + "]";
+      return "[" + parameter + " " + new DataMatcher(null, match.data) + "]";
     }
   }
 
