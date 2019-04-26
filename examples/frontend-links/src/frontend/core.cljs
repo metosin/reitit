@@ -31,8 +31,12 @@
 (defn Redirect
   "Component that only causes a redirect side-effect."
   [props]
-  (redirect! props)
-  nil)
+  (r/create-class
+   {:component-did-mount  (fn [this] (redirect! (r/props this)))
+    :component-did-update (fn [this [_ prev-props]]
+                            (if (not= (r/props this) prev-props)
+                              (redirect! (r/props this))))
+    :render (fn [this] nil)}))
 
 (defn item-page [match]
   (let [{:keys [path query]} (:parameters match)

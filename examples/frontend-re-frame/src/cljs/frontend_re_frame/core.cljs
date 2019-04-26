@@ -25,7 +25,9 @@
 (re-frame/reg-event-db
  ::navigated
  (fn [db [_ new-match]]
-   (assoc db :current-route new-match)))
+   (let [old-match   (:current-route db)
+         controllers (rfc/apply-controllers (:controllers old-match) new-match)]
+     (assoc db :current-route (assoc new-match :controllers controllers)))))
 
 ;;; Subscriptions ;;;
 
@@ -99,11 +101,8 @@
        :stop  (fn [& params] (js/console.log "Leaving sub-page 2"))}]}]])
 
 (defn on-navigate [new-match]
-  (let [old-match (re-frame/subscribe [::current-route])]
-    (when new-match
-      (let [cs (rfc/apply-controllers (:controllers @old-match) new-match)
-            m  (assoc new-match :controllers cs)]
-        (re-frame/dispatch [::navigated m])))))
+  (when new-match
+    (re-frame/dispatch [::navigated new-match])))
 
 (def router
   (rf/router
@@ -118,16 +117,15 @@
    {:use-fragment true}))
 
 (defn nav [{:keys [router current-route]}]
-  (into
-   [:ul]
+  [:ul
    (for [route-name (r/route-names router)
          :let       [route (r/match-by-name router route-name)
                      text (-> route :data :link-text)]]
-     [:li
+     [:li {:key route-name}
       (when (= route-name (-> current-route :data :name))
         "> ")
       ;; Create a normal links that user can click
-      [:a {:href (href route-name)} text]])))
+      [:a {:href (href route-name)} text]])])
 
 (defn router-component [{:keys [router]}]
   (let [current-route @(re-frame/subscribe [::current-route])]
