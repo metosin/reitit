@@ -31,8 +31,10 @@ event handling:
 (rfe/start!
   router
   {:use-fragment false
-   :ignore-anchor-click (fn [e el]
-                          (not= "false" (gobj/get (.-dataset el) "reititHandleClick")))})
+   :ignore-anchor-click? (fn [router e el uri]
+                           ;; Add additional check on top of the default checks
+                           (and (rfh/ignore-anchor-click? router e el uri)
+                                (not= "false" (gobj/get (.-dataset el) "reititHandleClick"))))})
 
 ;; Use data-reitit-handle-click to disable Reitit anchor handling
 [:a
