@@ -75,8 +75,8 @@
     (rfe/href to path-params query-params)
     (let [match  (rf/match-by-path router to)
           route  (-> match :data :name)
-          params (not-empty (or path-params (:path-params match)))
-          query  (not-empty (or query-params (:query-params match)))]
+          params (or path-params (:path-params match))
+          query  (or query-params (:query-params match))]
       (if match
         (rfe/href route params query)
         to))))
