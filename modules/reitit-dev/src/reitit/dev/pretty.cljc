@@ -230,9 +230,6 @@
                   :cljs "unknown")]
     (ex-info (exception-str message source (printer)) (assoc (or data {}) ::exception/cause e))))
 
-;; FIXME
-(def closed-keys spec-tools.spell/closed-keys)
-
 (defn de-expound-colors [^String s mappings]
   (let [s' (reduce
              (fn [s [from to]]

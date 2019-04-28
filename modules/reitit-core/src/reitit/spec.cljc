@@ -116,14 +116,14 @@
 
 (defrecord Problem [path scope data spec problems])
 
-(defn validate-route-data [routes wrap-spec spec]
+(defn validate-route-data [routes wrap spec]
   (some->> (for [[p d _] routes]
-             (when-let [problems (and spec (s/explain-data (wrap-spec spec) d))]
+             (when-let [problems (and spec (s/explain-data (wrap spec) d))]
                (->Problem p nil d spec problems)))
            (keep identity) (seq) (vec)))
 
-(defn validate [routes {:keys [spec wrap-spec] :or {spec ::default-data, wrap-spec identity}}]
-  (when-let [problems (validate-route-data routes wrap-spec spec)]
+(defn validate [routes {:keys [spec ::wrap] :or {spec ::default-data, wrap identity}}]
+  (when-let [problems (validate-route-data routes wrap spec)]
     (exception/fail!
       ::invalid-route-data
       {:problems problems})))

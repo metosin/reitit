@@ -35,21 +35,21 @@
        :invalid non-specs}))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
-(defn validate-route-data [routes key wrap-spec spec]
+(defn validate-route-data [routes key wrap spec]
   (->> (for [[p _ c] routes
              [method {:keys [data] :as endpoint}] c
              :when endpoint
              :let [target (key endpoint)
                    component-specs (seq (keep :spec target))
                    specs (keep identity (into [spec] component-specs))
-                   spec (wrap-spec (merge-specs specs))]]
+                   spec (wrap (merge-specs specs))]]
          (when-let [problems (and spec (s/explain-data spec data))]
            (rs/->Problem p method data spec problems)))
        (keep identity) (seq)))
 
 (defn validate
-  [routes {:keys [spec wrap-spec] :or {spec ::data, wrap-spec identity}}]
-  (when-let [problems (validate-route-data routes :middleware wrap-spec spec)]
+  [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
+  (when-let [problems (validate-route-data routes :middleware wrap spec)]
     (exception/fail!
       ::rs/invalid-route-data
       {:problems problems})))

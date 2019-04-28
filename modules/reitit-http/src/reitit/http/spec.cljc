@@ -19,8 +19,8 @@
 ;;
 
 (defn validate
-  [routes {:keys [spec wrap-spec] :or {spec ::data, wrap-spec identity}}]
-  (when-let [problems (rrs/validate-route-data routes :interceptors wrap-spec spec)]
+  [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
+  (when-let [problems (rrs/validate-route-data routes :interceptors wrap spec)]
     (exception/fail!
       ::rs/invalid-route-data
       {:problems problems})))
