@@ -20,14 +20,8 @@
 (s/def ::patch map?)
 
 
-(s/def ::endpoint
-  (s/keys :req-un [::rs/handler]
-          :opt-un [::rs/name ::rs/no-doc ::middleware]))
-
 (s/def ::data
-  (s/merge
-    ::endpoint
-    (s/map-of #{:get :head :post :put :delete :connect :options :trace :patch} map?)))
+  (s/keys :opt-un [::rs/handler ::rs/name ::rs/no-doc ::middleware]))
 
 ;;
 ;; Validator

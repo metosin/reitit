@@ -16,7 +16,7 @@
 (defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) default-options-handler)
+                       (and (not (:options childs)) (not (:handler top)) default-options-handler)
                        (assoc :options {:no-doc true, :handler default-options-handler}))
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
