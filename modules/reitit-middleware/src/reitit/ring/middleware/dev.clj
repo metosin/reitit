@@ -9,9 +9,9 @@
       (assoc :width 70)
       (update :color-scheme merge {:middleware [:blue]})))
 
-(defn diff-doc [name previous current]
+(defn diff-doc [stage name previous current]
   [:group
-   [:span "--- Middleware " (if name (color/document printer :middleware (str name " "))) "---" :break :break]
+   [:span "--- " (str stage) (if name (color/document printer :middleware (str " " name " "))) "---" :break :break]
    [:nest (printer/format-doc (if previous (ddiff/diff previous current) current) printer)]
    :break])
 
@@ -19,10 +19,17 @@
   (dissoc request ::r/match ::r/router ::original ::previous))
 
 (defn printed-request [name {:keys [::original ::previous] :as request}]
-  (printer/print-doc (diff-doc name (polish previous) (polish request)) printer)
+  (printer/print-doc (diff-doc :request name (polish previous) (polish request)) printer)
   (-> request
       (update ::original (fnil identity request))
       (assoc ::previous request)))
+
+(defn printed-response [name {:keys [::original ::previous] :as response}]
+  (printer/print-doc (diff-doc :response name (polish previous) (polish response)) printer)
+  (-> response
+      (update ::original (fnil identity response))
+      (assoc ::previous response)
+      (cond-> (nil? name) (dissoc ::original ::previous))))
 
 (defn print-diff-middleware
   ([]
@@ -32,12 +39,13 @@
     :wrap (fn [handler]
             (fn
               ([request]
-               (handler (printed-request name request)))
+               (printed-response name (handler (printed-request name request))))
               ([request respond raise]
-               (handler (printed-request name request) respond raise))))}))
+               (handler (printed-request name request) (comp respond (partial printed-response name)) raise))))}))
 
 (defn print-request-diffs
-  "A middleware chain transformer that adds a request-diff printer between all middleware"
+  "A middleware chain transformer that adds a request & response diff
+  printer between all middleware."
   [chain]
   (reduce
     (fn [chain mw]
