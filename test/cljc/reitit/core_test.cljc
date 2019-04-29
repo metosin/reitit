@@ -354,6 +354,10 @@
            (-> router
                (r/match-by-name! ::route {:a "olipa", :b "kerran"})
                (r/match->path))))
+    (is (= "/olipa/kerran"
+           (-> router
+               (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+               (r/match->path {}))))
     (is (= "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
            (-> router
                (r/match-by-name! ::route {:a "olipa", :b "kerran"})

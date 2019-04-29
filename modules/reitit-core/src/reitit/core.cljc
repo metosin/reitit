@@ -67,7 +67,7 @@
   ([match]
    (match->path match nil))
   ([match query-params]
-   (some-> match :path (cond-> query-params (str "?" (impl/query-string query-params))))))
+   (some-> match :path (cond-> (seq query-params) (str "?" (impl/query-string query-params))))))
 
 ;;
 ;; Different routers
