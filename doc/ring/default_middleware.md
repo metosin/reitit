@@ -10,7 +10,7 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 * [Exception Handling](#exception-handling)
 * [Content Negotiation](#content-negotiation)
 * [Multipart Request Handling](#multipart-request-handling)
-* [Inspecting Requests](#inspecting-requests)
+* [Inspecting Middleware Chain](#inspecting-middleware-chain)
 
 ## Parameters Handling
 
@@ -226,9 +226,9 @@ Expected route data:
 * `multipart/multipart-middleware` a preconfigured middleware for multipart handling
 * `multipart/create-multipart-middleware` to generate with custom configuration
 
-## Inspecting Requests
+## Inspecting Middleware Chain
 
-`reitit.ring.middleware.dev/print-request-diffs` is a [middleware chain transforming function](transforming_middleware_chain.md). It prints a request diff between each middleware. To use it, add the following router option:
+`reitit.ring.middleware.dev/print-request-diffs` is a [middleware chain transforming function](transforming_middleware_chain.md). It prints a request and response diff between each middleware. To use it, add the following router option:
 
 ```clj
 :reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs

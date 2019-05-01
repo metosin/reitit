@@ -26,6 +26,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * Automatically coerce Sieppari-style 1-arity `:error` handlers into Pedestal-style 2-arity `:error` handlers. Thanks to [Mathieu MARCHANDISE](https://github.com/vielmath).
 
+### `reitit-middleware`
+
+* `reitit.ring.middleware.dev/print-request-diffs` prints also response diffs.
+
+<img src="https://user-images.githubusercontent.com/567532/56895987-3e54ea80-6a93-11e9-80ee-9ba6f8896db6.png">
+
 ## 0.3.1 (2019-03-18)
 
 * Recompiled with Java8 as target, fixes [#241](https://github.com/metosin/reitit/issues/241).
