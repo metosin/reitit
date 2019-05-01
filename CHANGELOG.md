@@ -22,6 +22,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
 
+### `reitit-core`
+
+* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
+
 ### `reitit.pedestal`
 
 * Automatically coerce Sieppari-style 1-arity `:error` handlers into Pedestal-style 2-arity `:error` handlers. Thanks to [Mathieu MARCHANDISE](https://github.com/vielmath).
