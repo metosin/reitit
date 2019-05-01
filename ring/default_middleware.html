@@ -770,7 +770,7 @@
 <li><a href="#exception-handling">Exception Handling</a></li>
 <li><a href="#content-negotiation">Content Negotiation</a></li>
 <li><a href="#multipart-request-handling">Multipart Request Handling</a></li>
-<li><a href="#inspecting-requests">Inspecting Requests</a></li>
+<li><a href="#inspecting-middleware-chain">Inspecting Middleware Chain</a></li>
 </ul>
 <h2 id="parameters-handling">Parameters Handling</h2>
 <p><code>reitit.ring.middleware.parameters/parameters-middleware</code> to capture query- and form-params. Wraps
@@ -995,8 +995,8 @@ Server: Jetty(9.2.21.v20170120)
 <li><code>multipart/multipart-middleware</code> a preconfigured middleware for multipart handling</li>
 <li><code>multipart/create-multipart-middleware</code> to generate with custom configuration</li>
 </ul>
-<h2 id="inspecting-requests">Inspecting Requests</h2>
-<p><code>reitit.ring.middleware.dev/print-request-diffs</code> is a <a href="transforming_middleware_chain.html">middleware chain transforming function</a>. It prints a request diff between each middleware. To use it, add the following router option:</p>
+<h2 id="inspecting-middleware-chain">Inspecting Middleware Chain</h2>
+<p><code>reitit.ring.middleware.dev/print-request-diffs</code> is a <a href="transforming_middleware_chain.html">middleware chain transforming function</a>. It prints a request and response diff between each middleware. To use it, add the following router option:</p>
 <pre><code class="lang-clj">:reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs
 </code></pre>
 <p>Partial sample output:</p>
@@ -1046,7 +1046,7 @@ Server: Jetty(9.2.21.v20170120)
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Default Middleware","level":"4.10","depth":1,"next":{"title":"Ring Coercion","level":"4.11","depth":1,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Middleware Registry","level":"4.9","depth":1,"path":"ring/middleware_registry.md","ref":"ring/middleware_registry.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/default_middleware.md","mtime":"2019-05-01T19:18:59.065Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-01T19:19:20.893Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Default Middleware","level":"4.10","depth":1,"next":{"title":"Ring Coercion","level":"4.11","depth":1,"path":"ring/coercion.md","ref":"ring/coercion.md","articles":[]},"previous":{"title":"Middleware Registry","level":"4.9","depth":1,"path":"ring/middleware_registry.md","ref":"ring/middleware_registry.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/default_middleware.md","mtime":"2019-05-01T19:24:47.401Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-01T19:25:16.365Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
