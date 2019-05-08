@@ -30,7 +30,7 @@ Setting the default-handler as a second argument to `ring-handler`:
 ; {:status 404, :body ""}
 ```
 
-To get more correct http error responses, `ring/create-default-handler` can be used. It differentiates `:not-found` (no route matched), `:method-not-accepted` (no method matched) and `:not-acceptable` (handler returned `nil`).
+To get more correct http error responses, `ring/create-default-handler` can be used. It differentiates `:not-found` (no route matched), `:method-not-allowed` (no method matched) and `:not-acceptable` (handler returned `nil`).
 
 With defaults:
 
