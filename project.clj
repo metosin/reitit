@@ -27,14 +27,14 @@
                          [metosin/reitit-sieppari "0.3.1"]
                          [metosin/reitit-pedestal "0.3.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.9.2-alpha1"]
+                         [metosin/spec-tools "0.9.2"]
                          [metosin/schema-tools "0.11.0"]
                          [metosin/muuntaja "0.6.4"]
                          [metosin/jsonista "0.2.2"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
-                         [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
+                         [fipp "0.6.18" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.7.2"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.1"]
@@ -94,7 +94,7 @@
                                   [metosin/sieppari]
                                   [metosin/jsonista "0.2.2"]
 
-                                  [criterium "0.4.4"]
+                                  [criterium "0.4.5"]
                                   [org.clojure/test.check "0.9.0"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [com.gfredericks/test.chuck "0.2.9"]
@@ -106,7 +106,7 @@
                                   [funcool/promesa "2.0.1"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "0.3.1"]
-                                  [ring-cors "0.1.12"]
+                                  [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
@@ -128,7 +128,7 @@
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
-                                   [bidi "2.1.5"]]}
+                                   [bidi "2.1.6"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"

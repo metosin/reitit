@@ -17,8 +17,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Updated dependencies:
 
 ```clj
-[metosin/spec-tools "0.9.2-alpha1"] is available but we use "0.9.0"
+[metosin/spec-tools "0.9.2"] is available but we use "0.9.0"
 [metosin/muuntaja "0.6.4"] is available but we use "0.6.3"
+[fipp "0.6.18"] is available but we use "0.6.17"
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
 
