@@ -9,8 +9,11 @@
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
+            [reitit.http.spec :as spec]
             [reitit.http.interceptors.dev :as dev]
             [reitit.interceptor.sieppari :as sieppari]
+            [reitit.dev.pretty :as pretty]
+            [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as client]
             [muuntaja.core :as m]
@@ -72,7 +75,7 @@
                               "https://randomuser.me/api/"
                               {:query-params {:seed seed, :results results}})
                             :body
-                            (partial m/decode m/instance "application/json")
+                            (partial m/decode "application/json")
                             :results
                             (fn [results]
                               {:status 200
@@ -109,10 +112,15 @@
                             {:status 200
                              :body {:total (- x y)}})}}]]]
 
-      {;;:reitit.interceptor/transform dev/print-context-diffs
+      {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
+       :validate spec/validate ;; enable spec validation for route data
+       :reitit.spec/wrap spell/closed ;; strict top-level validation (alpha)
+       :exception pretty/exception
        :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
-              :interceptors [;; query-params & form-params
+              :interceptors [;; swagger feature
+                             swagger/swagger-feature
+                             ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
                              (muuntaja/format-negotiate-interceptor)

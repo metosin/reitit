@@ -17,10 +17,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Updated dependencies:
 
 ```clj
-[metosin/spec-tools "0.9.1"] is available but we use "0.9.0"
+[metosin/spec-tools "0.9.2-alpha1"] is available but we use "0.9.0"
 [metosin/muuntaja "0.6.4"] is available but we use "0.6.3"
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
+
+### `reitit-core`
+
+* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
 
 ### `reitit.pedestal`
 

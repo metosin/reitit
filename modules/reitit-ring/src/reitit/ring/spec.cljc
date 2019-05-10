@@ -9,10 +9,19 @@
 ;;
 
 (s/def ::middleware (s/coll-of #(satisfies? middleware/IntoMiddleware %)))
+(s/def ::get map?)
+(s/def ::head map?)
+(s/def ::post map?)
+(s/def ::put map?)
+(s/def ::delete map?)
+(s/def ::connect map?)
+(s/def ::options map?)
+(s/def ::trace map?)
+(s/def ::patch map?)
+
 
 (s/def ::data
-  (s/keys :req-un [::rs/handler]
-          :opt-un [::rs/name ::middleware]))
+  (s/keys :opt-un [::rs/handler ::rs/name ::rs/no-doc ::middleware]))
 
 ;;
 ;; Validator
@@ -26,21 +35,21 @@
        :invalid non-specs}))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
-(defn validate-route-data [routes key spec]
+(defn validate-route-data [routes key wrap spec]
   (->> (for [[p _ c] routes
              [method {:keys [data] :as endpoint}] c
              :when endpoint
              :let [target (key endpoint)
                    component-specs (seq (keep :spec target))
                    specs (keep identity (into [spec] component-specs))
-                   spec (merge-specs specs)]]
+                   spec (wrap (merge-specs specs))]]
          (when-let [problems (and spec (s/explain-data spec data))]
            (rs/->Problem p method data spec problems)))
        (keep identity) (seq)))
 
 (defn validate
-  [routes {:keys [spec] :or {spec ::data}}]
-  (when-let [problems (validate-route-data routes :middleware spec)]
+  [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
+  (when-let [problems (validate-route-data routes :middleware wrap spec)]
     (exception/fail!
-      ::invalid-route-data
+      ::rs/invalid-route-data
       {:problems problems})))

@@ -21,13 +21,13 @@
   (testing "with default spec validates :name, :handler and :middleware"
     (is (thrown-with-msg?
           ExceptionInfo
-          #":reitit.ring.spec/invalid-route-data"
+          #"Invalid route data"
           (ring/router
             ["/api" {:handler "identity"}]
             {:validate rrs/validate})))
     (is (thrown-with-msg?
           ExceptionInfo
-          #":reitit.ring.spec/invalid-route-data"
+          #"Invalid route data"
           (ring/router
             ["/api" {:handler identity
                      :name "kikka"}]
@@ -36,7 +36,7 @@
   (testing "all endpoints are validated"
     (is (thrown-with-msg?
           ExceptionInfo
-          #":reitit.ring.spec/invalid-route-data"
+          #"Invalid route data"
           (ring/router
             ["/api" {:patch {:handler "identity"}}]
             {:validate rrs/validate}))))
@@ -69,7 +69,7 @@
                                             (handler request)))}]}})))
     (is (thrown-with-msg?
           ExceptionInfo
-          #":reitit.ring.spec/invalid-route-data"
+          #"Invalid route data"
           (ring/router
             ["/api" {:get {:handler identity
                            :roles #{:adminz}}}]
@@ -113,7 +113,7 @@
 
   (is (thrown-with-msg?
         ExceptionInfo
-        #":reitit.ring.spec/invalid-route-data"
+        #"Invalid route data"
         (ring/router
           ["/api"
            ["/plus/:e"

@@ -27,7 +27,7 @@
                          [metosin/reitit-sieppari "0.3.1"]
                          [metosin/reitit-pedestal "0.3.1"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.9.1"]
+                         [metosin/spec-tools "0.9.2-alpha1"]
                          [metosin/schema-tools "0.11.0"]
                          [metosin/muuntaja "0.6.4"]
                          [metosin/jsonista "0.2.2"]
@@ -37,6 +37,7 @@
                          [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.7.2"]
                          [lambdaisland/deep-diff "0.0-47"]
+                         [com.bhauman/spell-spec "0.1.1"]
                          [ring/ring-core "1.7.1"]
 
                          [io.pedestal/pedestal.service "0.5.5"]]
@@ -69,7 +70,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.0"]
+                   :dependencies [[org.clojure/clojure "1.10.1-beta2"]
                                   [org.clojure/clojurescript "1.10.520"]
 
                                   ;; modules dependencies
@@ -80,6 +81,7 @@
                                   [metosin/jsonista]
                                   [lambdaisland/deep-diff]
                                   [meta-merge]
+                                  [com.bhauman/spell-spec]
                                   [expound]
                                   [fipp]
 

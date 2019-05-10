@@ -291,8 +291,8 @@ public class Trie {
                             staticMatcher("/auth/",
                                     linearMatcher(
                                             Arrays.asList(
-                                                    staticMatcher("login", dataMatcher(null, 1)),
-                                                    staticMatcher("recovery", dataMatcher(null, 2))), true))), true);
+                                                    staticMatcher("login", dataMatcher(PersistentArrayMap.EMPTY, 1)),
+                                                    staticMatcher("recovery", dataMatcher(PersistentArrayMap.EMPTY, 2))), true))), true);
     System.err.println(matcher);
     System.out.println(lookup(matcher, "/auth/login"));
     System.out.println(lookup(matcher, "/auth/recovery"));

@@ -495,11 +495,11 @@
        (fn [{:keys [::r/router]}]
          (is router))
        {:executor sieppari/executor})
-      {}))
+     {}))
   (testing "3-arity"
     ((http/ring-handler
        (http/router [])
        (fn [{:keys [::r/router]}]
          (is router))
        {:executor sieppari/executor})
-      {} ::respond ::raise)))
+     {} ::respond ::raise)))

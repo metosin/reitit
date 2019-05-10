@@ -570,10 +570,10 @@
        (ring/router [])
        (fn [{:keys [::r/router]}]
          (is router)))
-      {}))
+     {}))
   (testing "3-arity"
     ((ring/ring-handler
        (ring/router [])
        (fn [{:keys [::r/router]} _ _]
          (is router)))
-      {} ::respond ::raise)))
+     {} ::respond ::raise)))
