@@ -139,7 +139,8 @@
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
-         :config {:validatorUrl nil}})
+         :config {:validatorUrl nil
+                  :operationsSorter "alpha"}})
       (ring/create-default-handler))
     {:executor sieppari/executor}))
 
