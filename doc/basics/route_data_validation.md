@@ -20,7 +20,7 @@ A Router with invalid route data:
 ; #object[reitit.core$...]
 ```
 
-Fails fast with `clojure.spec` validation turned on:
+Failing fast with `clojure.spec` validation turned on:
 
 ```clj
 (require '[reitit.spec :as rs])
@@ -40,22 +40,36 @@ Fails fast with `clojure.spec` validation turned on:
 
 ```
 
+### Pretty errors
+
+Turning on [Pretty Errors](pretty_errors.md) will give much nicer error messages:
+
+```clj
+(require '[reitit.dev.pretty :as pretty])
+
+(r/router
+  ["/api" {:handler "identity"}]
+  {:validate rs/validate
+   :exception pretty/exception})
+```
+
+![Pretty error](../images/pretty-error.png)
+
 ### Customizing spec validation
 
 `rs/validate` reads the following router options:
 
-  | key            | description |
-  | ---------------|-------------|
-  | `:spec`        | the spec to verify the route data (default `::rs/default-data`)
-  | `::rs/explain` | custom explain function (default `clojure.spec.alpha/explain-str`)
+  | key                 | description |
+  | --------------------|-------------|
+  | `:spec`             | the spec to verify the route data (default `::rs/default-data`)
+  | `:reitit.spec/wrap` | function of `spec => spec` to wrap all route specs
 
 **NOTE**: `clojure.spec` implicitly validates all values with fully-qualified keys if specs exist with the same name.
 
-Below is an example of using [expound](https://github.com/bhb/expound) to pretty-print route data problems.
+Invalid spec value:
 
 ```clj
 (require '[clojure.spec.alpha :as s])
-(require '[expound.alpha :as e])
 
 (s/def ::role #{:admin :manager})
 (s/def ::roles (s/coll-of ::role :into #{}))
@@ -63,67 +77,45 @@ Below is an example of using [expound](https://github.com/bhb/expound) to pretty
 (r/router
   ["/api" {:handler identity
            ::roles #{:adminz}}]
-  {::rs/explain e/expound-str
-   :validate rs/validate})
-; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
-;
-; -- On route -----------------------
-;
-; "/api"
-;
-; -- Spec failed --------------------
-;
-; {:handler ..., :user/roles #{:adminz}}
-;                              ^^^^^^^
-;
-; should be one of: `:admin`,`:manager`
-;
-; -- Relevant specs -------
-;
-; :user/role:
-; #{:admin :manager}
-; :user/roles:
-; (clojure.spec.alpha/coll-of :user/role :into #{})
-; :reitit.spec/default-data:
-; (clojure.spec.alpha/keys
-;   :opt-un
-;   [:reitit.spec/name :reitit.spec/handler])
-;
-; -------------------------
-; Detected 1 error
-;
-; {:problems (#reitit.spec.Problem{:path "/api", :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"], :user/roles #{:adminz}}, :spec :reitit.spec/default-data, :problems #:clojure.spec.alpha{:problems ({:path [:user/roles], :pred #{:admin :manager}, :val :adminz, :via [:reitit.spec/default-data :user/roles :user/role], :in [:user/roles 0]}), :spec :reitit.spec/default-data, :value {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"], :user/roles #{:adminz}}}})}, compiling: ...
+  {:validate rs/validate
+  :exception pretty/exception})
 ```
 
-Explicitly requiring a `::roles` key in a route data:
+![Pretty error](../images/invalid_roles.png)
+
+## Closed Specs
+
+To fail-fast on non-defined and misspelled keys on route data, we can close the specs using `:reitit.spec/wrap` options with value of `spec-tools.spell/closed` that closed the top-level specs.
+
+Requiring a`:description` and validating using closed specs:
+
+```clj
+(require '[spec-tools.spell :as spell])
+
+(s/def ::description string?)
+
+(r/router
+  ["/api" {:summary "kikka"}]
+  {:validate rs/validate
+   :spec (s/merge ::rs/default-data
+                  (s/keys :req-un [::description]))
+   ::rs/wrap spell/closed
+   :exception pretty/exception})
+```
+
+![Pretty error](../images/closed-spec1.png)
+
+It catches also typing errors:
 
 ```clj
 (r/router
-  ["/api" {:handler identity}]
-  {:spec (s/merge (s/keys :req [::roles]) ::rs/default-data)
-   ::rs/explain e/expound-str
-   :validate rs/validate})
-; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
-;
-; -- On route -----------------------
-;
-; "/api"
-;
-; -- Spec failed --------------------
-;
-; {:handler
-;  #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}
-;
-; should contain key: `:user/roles`
-;
-; |         key |                                   spec |
-; |-------------+----------------------------------------|
-; | :user/roles | (coll-of #{:admin :manager} :into #{}) |
-;
-;
-;
-; -------------------------
-; Detected 1 error
-;
-; {:problems (#reitit.spec.Problem{:path "/api", :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :problems #:clojure.spec.alpha{:problems ({:path [], :pred (clojure.core/fn [%] (clojure.core/contains? % :user/roles)), :val {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}, :via [], :in []}), :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b "clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b"], :value {:handler #object[clojure.core$identity 0x15b59b0e "clojure.core$identity@15b59b0e"]}}})}, compiling:(/Users/tommi/projects/metosin/reitit/test/cljc/reitit/spec_test.cljc:151:1)
+  ["/api" {:descriptionz "kikka"}]
+  {:validate rs/validate
+   :spec (s/merge ::rs/default-data
+                  (s/keys :req-un [::description]))
+   ::rs/wrap spell/closed
+   :exception pretty/exception})
 ```
+
+![Pretty error](../images/closed-spec2.png)
+
