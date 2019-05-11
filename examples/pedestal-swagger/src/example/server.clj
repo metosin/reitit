@@ -1,20 +1,20 @@
 (ns example.server
   (:require [io.pedestal.http :as server]
-            [reitit.pedestal :as pedestal]
             [reitit.ring :as ring]
             [reitit.http :as http]
+            [reitit.coercion.spec]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.http.coercion :as coercion]
-            [reitit.coercion.spec :as spec-coercion]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
             [reitit.http.interceptors.dev :as dev]
-            [reitit.dev.pretty :as pretty]
-            [spec-tools.spell :as spell]
             [reitit.http.spec :as spec]
+            [spec-tools.spell :as spell]
+            [io.pedestal.http :as server]
+            [reitit.pedestal :as pedestal]
             [clojure.core.async :as a]
             [clojure.java.io :as io]
             [muuntaja.core :as m]))
@@ -82,9 +82,9 @@
 
       {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
        ;;:validate spec/validate ;; enable spec validation for route data
-       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation (alpha)
+       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
-       :data {:coercion spec-coercion/coercion
+       :data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
               :interceptors [;; swagger feature
                              swagger/swagger-feature
