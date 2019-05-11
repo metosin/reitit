@@ -1,16 +1,20 @@
 (ns example.server
   (:require [io.pedestal.http :as server]
-            [reitit.pedestal :as pedestal]
             [reitit.ring :as ring]
             [reitit.http :as http]
+            [reitit.coercion.spec]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.http.coercion :as coercion]
-            [reitit.coercion.spec :as spec-coercion]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
+            [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
             [reitit.http.interceptors.dev :as dev]
+            [reitit.http.spec :as spec]
+            [spec-tools.spell :as spell]
+            [io.pedestal.http :as server]
+            [reitit.pedestal :as pedestal]
             [clojure.core.async :as a]
             [clojure.java.io :as io]
             [muuntaja.core :as m]))
@@ -76,15 +80,22 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {;;:reitit.interceptor/transform dev/print-context-diffs
-       :data {:coercion spec-coercion/coercion
+      {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
+       ;;:validate spec/validate ;; enable spec validation for route data
+       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
+       :exception pretty/exception
+       :data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
-              :interceptors [;; query-params & form-params
+              :interceptors [;; swagger feature
+                             swagger/swagger-feature
+                             ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
                              (muuntaja/format-negotiate-interceptor)
                              ;; encoding response body
                              (muuntaja/format-response-interceptor)
+                             ;; exception handling
+                             (exception/exception-interceptor)
                              ;; decoding request body
                              (muuntaja/format-request-interceptor)
                              ;; coercing response bodys
@@ -98,7 +109,8 @@
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
-         :config {:validatorUrl nil}})
+         :config {:validatorUrl nil
+                  :operationsSorter "alpha"}})
       (ring/create-resource-handler)
       (ring/create-default-handler))))
 
