@@ -774,7 +774,7 @@
   [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:handler</span> <span class="hljs-string">&quot;identity&quot;</span>}])
 <span class="hljs-comment">; #object[reitit.core$...]</span>
 </code></pre>
-<p>Fails fast with <code>clojure.spec</code> validation turned on:</p>
+<p>Failing fast with <code>clojure.spec</code> validation turned on:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.spec <span class="hljs-symbol">:as</span> rs])
 
 (<span class="hljs-name">r/router</span>
@@ -790,6 +790,16 @@
 <span class="hljs-comment">;</span>
 <span class="hljs-comment">; {:problems (#reitit.spec.Problem{:path &quot;/api&quot;, :scope nil, :data {:handler &quot;identity&quot;}, :spec :reitit.spec/default-data, :problems #:clojure.spec.alpha{:problems ({:path [:handler], :pred clojure.core/fn?, :val &quot;identity&quot;, :via [:reitit.spec/default-data :reitit.spec/handler], :in [:handler]}), :spec :reitit.spec/default-data, :value {:handler &quot;identity&quot;}}})}, compiling: ...</span>
 </code></pre>
+<h3 id="pretty-errors">Pretty errors</h3>
+<p>Turning on <a href="pretty_errors.md">Pretty Errors</a> will give much nicer error messages:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.dev.pretty <span class="hljs-symbol">:as</span> pretty])
+
+(<span class="hljs-name">r/router</span>
+  [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:handler</span> <span class="hljs-string">&quot;identity&quot;</span>}]
+  {<span class="hljs-symbol">:validate</span> rs/validate
+   <span class="hljs-symbol">:exception</span> pretty/exception})
+</code></pre>
+<p><img src="../images/pretty-error.png" alt="Pretty error"></p>
 <h3 id="customizing-spec-validation">Customizing spec validation</h3>
 <p><code>rs/validate</code> reads the following router options:</p>
 <table>
@@ -805,15 +815,14 @@
 <td>the spec to verify the route data (default <code>::rs/default-data</code>)</td>
 </tr>
 <tr>
-<td><code>::rs/explain</code></td>
-<td>custom explain function (default <code>clojure.spec.alpha/explain-str</code>)</td>
+<td><code>:reitit.spec/wrap</code></td>
+<td>function of <code>spec =&gt; spec</code> to wrap all route specs</td>
 </tr>
 </tbody>
 </table>
 <p><strong>NOTE</strong>: <code>clojure.spec</code> implicitly validates all values with fully-qualified keys if specs exist with the same name.</p>
-<p>Below is an example of using <a href="https://github.com/bhb/expound" target="_blank">expound</a> to pretty-print route data problems.</p>
+<p>Invalid spec value:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
-(<span class="hljs-name">require</span> &apos;[expound.alpha <span class="hljs-symbol">:as</span> e])
 
 (<span class="hljs-name">s/def</span> <span class="hljs-symbol">::role</span> #{<span class="hljs-symbol">:admin</span> <span class="hljs-symbol">:manager</span>})
 (<span class="hljs-name">s/def</span> <span class="hljs-symbol">::roles</span> (<span class="hljs-name">s/coll-of</span> <span class="hljs-symbol">::role</span> <span class="hljs-symbol">:into</span> #{}))
@@ -821,67 +830,36 @@
 (<span class="hljs-name">r/router</span>
   [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:handler</span> identity
            <span class="hljs-symbol">::roles</span> #{<span class="hljs-symbol">:adminz</span>}}]
-  {<span class="hljs-symbol">::rs/explain</span> e/expound-str
-   <span class="hljs-symbol">:validate</span> rs/validate})
-<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Invalid route data:</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -- On route -----------------------</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; &quot;/api&quot;</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -- Spec failed --------------------</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; {:handler ..., :user/roles #{:adminz}}</span>
-<span class="hljs-comment">;                              ^^^^^^^</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; should be one of: `:admin`,`:manager`</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -- Relevant specs -------</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; :user/role:</span>
-<span class="hljs-comment">; #{:admin :manager}</span>
-<span class="hljs-comment">; :user/roles:</span>
-<span class="hljs-comment">; (clojure.spec.alpha/coll-of :user/role :into #{})</span>
-<span class="hljs-comment">; :reitit.spec/default-data:</span>
-<span class="hljs-comment">; (clojure.spec.alpha/keys</span>
-<span class="hljs-comment">;   :opt-un</span>
-<span class="hljs-comment">;   [:reitit.spec/name :reitit.spec/handler])</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -------------------------</span>
-<span class="hljs-comment">; Detected 1 error</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; {:problems (#reitit.spec.Problem{:path &quot;/api&quot;, :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;], :user/roles #{:adminz}}, :spec :reitit.spec/default-data, :problems #:clojure.spec.alpha{:problems ({:path [:user/roles], :pred #{:admin :manager}, :val :adminz, :via [:reitit.spec/default-data :user/roles :user/role], :in [:user/roles 0]}), :spec :reitit.spec/default-data, :value {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;], :user/roles #{:adminz}}}})}, compiling: ...</span>
+  {<span class="hljs-symbol">:validate</span> rs/validate
+  <span class="hljs-symbol">:exception</span> pretty/exception})
 </code></pre>
-<p>Explicitly requiring a <code>::roles</code> key in a route data:</p>
+<p><img src="../images/invalid_roles.png" alt="Pretty error"></p>
+<h2 id="closed-specs">Closed Specs</h2>
+<p>To fail-fast on non-defined and misspelled keys on route data, we can close the specs using <code>:reitit.spec/wrap</code> options with value of <code>spec-tools.spell/closed</code> that closed the top-level specs.</p>
+<p>Requiring a<code>:description</code> and validating using closed specs:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[spec-tools.spell <span class="hljs-symbol">:as</span> spell])
+
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::description</span> string?)
+
+(<span class="hljs-name">r/router</span>
+  [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:summary</span> <span class="hljs-string">&quot;kikka&quot;</span>}]
+  {<span class="hljs-symbol">:validate</span> rs/validate
+   <span class="hljs-symbol">:spec</span> (<span class="hljs-name">s/merge</span> <span class="hljs-symbol">::rs/default-data</span>
+                  (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::description</span>]))
+   <span class="hljs-symbol">::rs/wrap</span> spell/closed
+   <span class="hljs-symbol">:exception</span> pretty/exception})
+</code></pre>
+<p><img src="../images/closed-spec1.png" alt="Pretty error"></p>
+<p>It catches also typing errors:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
-  [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:handler</span> identity}]
-  {<span class="hljs-symbol">:spec</span> (<span class="hljs-name">s/merge</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req</span> [<span class="hljs-symbol">::roles</span>]) <span class="hljs-symbol">::rs/default-data</span>)
-   <span class="hljs-symbol">::rs/explain</span> e/expound-str
-   <span class="hljs-symbol">:validate</span> rs/validate})
-<span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Invalid route data:</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -- On route -----------------------</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; &quot;/api&quot;</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -- Spec failed --------------------</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; {:handler</span>
-<span class="hljs-comment">;  #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; should contain key: `:user/roles`</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; |         key |                                   spec |</span>
-<span class="hljs-comment">; |-------------+----------------------------------------|</span>
-<span class="hljs-comment">; | :user/roles | (coll-of #{:admin :manager} :into #{}) |</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; -------------------------</span>
-<span class="hljs-comment">; Detected 1 error</span>
-<span class="hljs-comment">;</span>
-<span class="hljs-comment">; {:problems (#reitit.spec.Problem{:path &quot;/api&quot;, :scope nil, :data {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}, :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b &quot;clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b&quot;], :problems #:clojure.spec.alpha{:problems ({:path [], :pred (clojure.core/fn [%] (clojure.core/contains? % :user/roles)), :val {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}, :via [], :in []}), :spec #object[clojure.spec.alpha$merge_spec_impl$reify__2124 0x7461744b &quot;clojure.spec.alpha$merge_spec_impl$reify__2124@7461744b&quot;], :value {:handler #object[clojure.core$identity 0x15b59b0e &quot;clojure.core$identity@15b59b0e&quot;]}}})}, compiling:(/Users/tommi/projects/metosin/reitit/test/cljc/reitit/spec_test.cljc:151:1)</span>
+  [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:descriptionz</span> <span class="hljs-string">&quot;kikka&quot;</span>}]
+  {<span class="hljs-symbol">:validate</span> rs/validate
+   <span class="hljs-symbol">:spec</span> (<span class="hljs-name">s/merge</span> <span class="hljs-symbol">::rs/default-data</span>
+                  (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::description</span>]))
+   <span class="hljs-symbol">::rs/wrap</span> spell/closed
+   <span class="hljs-symbol">:exception</span> pretty/exception})
 </code></pre>
+<p><img src="../images/closed-spec2.png" alt="Pretty error"></p>
 
                                 
                                 </section>
@@ -925,7 +903,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"2.6","depth":1,"next":{"title":"Route Conflicts","level":"2.7","depth":1,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"2.5","depth":1,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2019-05-11T11:38:09.365Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-11T11:38:29.421Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"2.6","depth":1,"next":{"title":"Route Conflicts","level":"2.7","depth":1,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"2.5","depth":1,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2019-05-11T19:32:14.206Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-11T19:32:38.807Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
