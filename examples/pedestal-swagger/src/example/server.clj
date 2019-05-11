@@ -9,8 +9,12 @@
             [reitit.coercion.spec :as spec-coercion]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
+            [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
             [reitit.http.interceptors.dev :as dev]
+            [reitit.dev.pretty :as pretty]
+            [spec-tools.spell :as spell]
+            [reitit.http.spec :as spec]
             [clojure.core.async :as a]
             [clojure.java.io :as io]
             [muuntaja.core :as m]))
@@ -76,15 +80,22 @@
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
 
-      {;;:reitit.interceptor/transform dev/print-context-diffs
+      {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
+       ;;:validate spec/validate ;; enable spec validation for route data
+       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation (alpha)
+       :exception pretty/exception
        :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
-              :interceptors [;; query-params & form-params
+              :interceptors [;; swagger feature
+                             swagger/swagger-feature
+                             ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
                              (muuntaja/format-negotiate-interceptor)
                              ;; encoding response body
                              (muuntaja/format-response-interceptor)
+                             ;; exception handling
+                             (exception/exception-interceptor)
                              ;; decoding request body
                              (muuntaja/format-request-interceptor)
                              ;; coercing response bodys
