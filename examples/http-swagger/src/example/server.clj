@@ -113,8 +113,8 @@
                              :body {:total (- x y)}})}}]]]
 
       {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
-       :validate spec/validate ;; enable spec validation for route data
-       :reitit.spec/wrap spell/closed ;; strict top-level validation (alpha)
+       ;;:validate spec/validate ;; enable spec validation for route data
+       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation (alpha)
        :exception pretty/exception
        :data {:coercion spec-coercion/coercion
               :muuntaja m/instance
