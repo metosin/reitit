@@ -26,6 +26,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-core`
 
 * new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
+  * Updated swagger-examples to easily enable closed spec validation
+
+### `reitit-frontend`
+
+* add support for html5 links inside Shadow DOM by [Antti Leppänen](https://github.com/fraxu).
+* lot's of React-router examples ported in, thanks to [Valtteri Harmainen](https://github.com/vharmain)
 
 ### `reitit.pedestal`
 
