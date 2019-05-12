@@ -206,6 +206,19 @@
             
         </li>
     
+        <li class="chapter " data-level="2.8" data-path="error_messages.html">
+            
+                <a href="error_messages.html">
+            
+                    
+                    Error Messages
+            
+                </a>
+            
+
+            
+        </li>
+    
 
     
         
@@ -791,7 +804,7 @@
 <span class="hljs-comment">; {:problems (#reitit.spec.Problem{:path &quot;/api&quot;, :scope nil, :data {:handler &quot;identity&quot;}, :spec :reitit.spec/default-data, :problems #:clojure.spec.alpha{:problems ({:path [:handler], :pred clojure.core/fn?, :val &quot;identity&quot;, :via [:reitit.spec/default-data :reitit.spec/handler], :in [:handler]}), :spec :reitit.spec/default-data, :value {:handler &quot;identity&quot;}}})}, compiling: ...</span>
 </code></pre>
 <h3 id="pretty-errors">Pretty errors</h3>
-<p>Turning on <a href="pretty_errors.md">Pretty Errors</a> will give much nicer error messages:</p>
+<p>Turning on <a href="error_messages.html#pretty-errors">Pretty Errors</a> will give much nicer error messages:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.dev.pretty <span class="hljs-symbol">:as</span> pretty])
 
 (<span class="hljs-name">r/router</span>
@@ -833,7 +846,7 @@
   {<span class="hljs-symbol">:validate</span> rs/validate
   <span class="hljs-symbol">:exception</span> pretty/exception})
 </code></pre>
-<p><img src="../images/invalid_roles.png" alt="Pretty error"></p>
+<p><img src="../images/invalid_roles.png" alt="Invalid Role Error"></p>
 <h2 id="closed-specs">Closed Specs</h2>
 <p>To fail-fast on non-defined and misspelled keys on route data, we can close the specs using <code>:reitit.spec/wrap</code> options with value of <code>spec-tools.spell/closed</code> that closed the top-level specs.</p>
 <p>Requiring a<code>:description</code> and validating using closed specs:</p>
@@ -849,7 +862,7 @@
    <span class="hljs-symbol">::rs/wrap</span> spell/closed
    <span class="hljs-symbol">:exception</span> pretty/exception})
 </code></pre>
-<p><img src="../images/closed-spec1.png" alt="Pretty error"></p>
+<p><img src="../images/closed-spec1.png" alt="Closed Spec error"></p>
 <p>It catches also typing errors:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
   [<span class="hljs-string">&quot;/api&quot;</span> {<span class="hljs-symbol">:descriptionz</span> <span class="hljs-string">&quot;kikka&quot;</span>}]
@@ -859,7 +872,7 @@
    <span class="hljs-symbol">::rs/wrap</span> spell/closed
    <span class="hljs-symbol">:exception</span> pretty/exception})
 </code></pre>
-<p><img src="../images/closed-spec2.png" alt="Pretty error"></p>
+<p><img src="../images/closed-spec2.png" alt="Closed Spec error"></p>
 
                                 
                                 </section>
@@ -903,7 +916,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"2.6","depth":1,"next":{"title":"Route Conflicts","level":"2.7","depth":1,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"2.5","depth":1,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2019-05-11T19:32:14.206Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-11T19:32:38.807Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Data Validation","level":"2.6","depth":1,"next":{"title":"Route Conflicts","level":"2.7","depth":1,"path":"basics/route_conflicts.md","ref":"basics/route_conflicts.md","articles":[]},"previous":{"title":"Route Data","level":"2.5","depth":1,"path":"basics/route_data.md","ref":"basics/route_data.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_data_validation.md","mtime":"2019-05-12T18:16:16.848Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-05-12T18:16:41.904Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
