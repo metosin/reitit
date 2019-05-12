@@ -13,6 +13,7 @@
 * [Route Data](basics/route_data.md)
 * [Route Data Validation](basics/route_data_validation.md)
 * [Route Conflicts](basics/route_conflicts.md)
+* [Error Messages](basics/error_messages.md)
 
 ## Coercion
 

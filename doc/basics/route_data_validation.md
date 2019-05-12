@@ -42,7 +42,7 @@ Failing fast with `clojure.spec` validation turned on:
 
 ### Pretty errors
 
-Turning on [Pretty Errors](pretty_errors.md) will give much nicer error messages:
+Turning on [Pretty Errors](error_messages.md#pretty-errors) will give much nicer error messages:
 
 ```clj
 (require '[reitit.dev.pretty :as pretty])
@@ -81,7 +81,7 @@ Invalid spec value:
   :exception pretty/exception})
 ```
 
-![Pretty error](../images/invalid_roles.png)
+![Invalid Role Error](../images/invalid_roles.png)
 
 ## Closed Specs
 
@@ -103,7 +103,7 @@ Requiring a`:description` and validating using closed specs:
    :exception pretty/exception})
 ```
 
-![Pretty error](../images/closed-spec1.png)
+![Closed Spec error](../images/closed-spec1.png)
 
 It catches also typing errors:
 
@@ -117,5 +117,5 @@ It catches also typing errors:
    :exception pretty/exception})
 ```
 
-![Pretty error](../images/closed-spec2.png)
+![Closed Spec error](../images/closed-spec2.png)
 
