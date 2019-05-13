@@ -32,6 +32,25 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
   * Updated swagger-examples to easily enable closed spec validation
 
+```clj
+(require '[reitit.core :as r])
+(require '[reitit.spec :as rs])
+(require '[reitit.dev.pretty :as pretty)
+(require '[spec-tools.spell :as spell])
+(require '[clojure.spec.alpha :as s])
+
+(s/def ::description string?)
+
+(r/router
+  ["/api" {:summary "kikka"}]
+  {:validate rs/validate
+   :spec (s/merge ::rs/default-data (s/keys :req-un [::description]))
+   ::rs/wrap spell/closed
+   :exception pretty/exception})
+```
+
+![closed](./doc/images/closed-spec1.png)
+
 ### `reitit-frontend`
 
 * add support for html5 links inside Shadow DOM by [Antti Leppänen](https://github.com/fraxu).
