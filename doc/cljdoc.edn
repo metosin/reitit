@@ -23,7 +23,7 @@
    ["Route Data" {:file "doc/basics/route_data.md"}]
    ["Route Data Validation" {:file "doc/basics/route_data_validation.md"}]
    ["Route Conflicts" {:file "doc/basics/route_conflicts.md"}]
-   ["Error Messages" [:file "doc/basics/error_messages.md"]]]
+   ["Error Messages" {:file "doc/basics/error_messages.md"}]]
   ["Coercion" {}
    ["Coercion Explained" {:file "doc/coercion/coercion.md"}]
    ["Plumatic Schema" {:file "doc/coercion/schema_coercion.md"}]
