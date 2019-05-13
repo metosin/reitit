@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.3.2-SNAPSHOT
+## 0.3.2 (2019-05-13)
 
 * Updated dependencies:
 
