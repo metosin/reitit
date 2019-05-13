@@ -23,6 +23,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
 
+* Updated guides on
+  * [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html)
+  * [Route-data Validation](https://metosin.github.io/reitit/basics/route_data_validation.html)
+
 ### `reitit-core`
 
 * new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
@@ -31,7 +35,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-frontend`
 
 * add support for html5 links inside Shadow DOM by [Antti Leppänen](https://github.com/fraxu).
-* lot's of React-router examples ported in, thanks to [Valtteri Harmainen](https://github.com/vharmain)
+* lot's of React-router [examples](./examples) ported in, thanks to [Valtteri Harmainen](https://github.com/vharmain)
 
 ### `reitit.pedestal`
 

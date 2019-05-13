@@ -7,6 +7,7 @@
   (:import (reitit.interceptor Executor)
            (java.lang.reflect Method)))
 
+;; TODO: variadic
 (defn- arities [f]
   (->> (class f)
        .getDeclaredMethods
