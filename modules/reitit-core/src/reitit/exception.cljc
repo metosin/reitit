@@ -35,3 +35,6 @@
            (fn [[name vals]]
              (str name "\n-> " (str/join "\n-> " (mapv first vals)) "\n"))
            conflicts)))
+
+(defmethod format-exception :reitit.impl/merge-data [_ _ data]
+  (str "Error merging route-data\n\n" (pr-str data)))

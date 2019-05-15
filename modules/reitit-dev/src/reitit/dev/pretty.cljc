@@ -335,3 +335,27 @@
        problems))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data-validation")
    [:break]])
+
+(defmethod format-exception :reitit.impl/merge-data [_ _ {:keys [path left right exception]}]
+  [:group
+   (text "Error merging route-data:")
+   [:break] [:break]
+   [:group
+    [:span (color :grey "-- On route -----------------------")]
+    [:break]
+    [:break]
+    (text path)
+    [:break]
+    [:break]
+    [:span (color :grey "-- Exception ----------------------")]
+    [:break]
+    [:break]
+    (color :red (ex-message exception))
+    [:break]
+    [:break]
+    (edn left {:margin 3})
+    [:break]
+    (edn right {:margin 3})]
+   [:break]
+   (color :white "https://cljdoc.org/d/metosin/reitit/0.3.1/doc/basics/route-data")
+   [:break]])
