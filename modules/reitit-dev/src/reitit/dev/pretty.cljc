@@ -350,7 +350,7 @@
     [:span (color :grey "-- Exception ----------------------")]
     [:break]
     [:break]
-    (color :red (ex-message exception))
+    (color :red (exception/get-message exception))
     [:break]
     [:break]
     (edn left {:margin 3})
