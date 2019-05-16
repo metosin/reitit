@@ -12,6 +12,43 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.3 (2019-05-16)
+
+* Better error messages on route data merge error:
+
+```clj
+(ns user
+  (:require [reitit.core :as r]
+            [schema.core :as s]
+            [reitit.dev.pretty :as pretty]))
+
+(r/router
+  ["/kikka"
+   {:parameters {:body {:id s/Str}}}
+   ["/kakka"
+    {:parameters {:body [s/Str]}}]]
+  {:exception pretty/exception})
+; -- Router creation failed -------------------------------------------- user:7 --
+; 
+; Error merging route-data:
+; 
+; -- On route -----------------------
+; 
+; /kikka/kakka
+; 
+; -- Exception ----------------------
+; 
+; Don't know how to create ISeq from: java.lang.Class
+; 
+;    {:parameters {:body {:id java.lang.String}}}
+; 
+;    {:parameters {:body [java.lang.String]}}
+; 
+; https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data
+; 
+; --------------------------------------------------------------------------------
+```
+
 ## 0.3.2 (2019-05-13)
 
 * Updated dependencies:
@@ -23,9 +60,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
 
-* Updated guides on
-  * [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html)
-  * [Route-data Validation](https://metosin.github.io/reitit/basics/route_data_validation.html)
+* Updated guides on [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html) & [Route-data Validation](https://metosin.github.io/reitit/basics/route_data_validation.html)
 
 ### `reitit-core`
 
