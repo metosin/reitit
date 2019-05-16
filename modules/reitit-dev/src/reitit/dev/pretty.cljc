@@ -357,5 +357,5 @@
     [:break]
     (edn right {:margin 3})]
    [:break]
-   (color :white "https://cljdoc.org/d/metosin/reitit/0.3.1/doc/basics/route-data")
+   (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data")
    [:break]])
