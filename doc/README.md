@@ -8,6 +8,7 @@
 * Bi-directional routing
 * [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Helpers for [ring](./ring/ring.md), [http](./http/interceptors.md), [pedestal](./http/pedestal.md) & [frontend](./frontend/basics.md)
+* Friendly [Error Messages](./basics/error_messages.md)
 * Extendable
 * Modular
 * [Fast](performance.md)
