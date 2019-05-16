@@ -43,7 +43,11 @@
       ["/api/{ipa"]
 
       #"Invalid route data"
-      ["/api/ipa" {::roles #{:adminz}}])
+      ["/api/ipa" {::roles #{:adminz}}]
+
+      #"Error merging route-data"
+      ["/a" {:body {}}
+       ["/b" {:body [:FAIL]}]])
 
     exception/exception
     pretty/exception))

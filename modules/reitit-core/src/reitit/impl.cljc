@@ -4,7 +4,8 @@
             [clojure.set :as set]
             [meta-merge.core :as mm]
             [reitit.trie :as trie]
-            [reitit.exception :as exception])
+            [reitit.exception :as exception]
+            [reitit.exception :as ex])
   #?(:clj
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
@@ -58,12 +59,15 @@
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
-  (mapv #(update % 1 f) routes))
+  (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [x]
+(defn merge-data [p x]
   (reduce
     (fn [acc [k v]]
-      (mm/meta-merge acc {k v}))
+      (try
+        (mm/meta-merge acc {k v})
+        (catch #?(:clj Exception, :cljs js/Error) e
+          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
     {} x))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
