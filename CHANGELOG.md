@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.4 (2019-05-20)
+
+### `reitit-core`
+
+* Spec problems are [reported correctly in coercion](https://github.com/metosin/reitit/pull/275) by [Kevin W. van Rooijen](https://github.com/kwrooijen).
+
 ## 0.3.3 (2019-05-16)
 
 * Better error messages on route data merge error:
