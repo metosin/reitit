@@ -95,7 +95,9 @@
                  (app valid-request))))
 
         (testing "invalid request"
-          (let [{:keys [status]} (app invalid-request)]
+          (let [{:keys [status body]} (app invalid-request)
+                problems (:problems body)]
+            (is (= 1 (count problems)))
             (is (= 400 status))))
 
         (testing "invalid response"

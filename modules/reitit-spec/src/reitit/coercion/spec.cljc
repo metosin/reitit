@@ -110,7 +110,7 @@
       (into-spec model name))
     (-open-model [_ spec] spec)
     (-encode-error [_ error]
-      (let [problems (::s/problems error)]
+      (let [problems (-> error :problems ::s/problems)]
         (-> error
             (update :spec (comp str s/form))
             (assoc :problems (mapv #(update % :pred stringify-pred) problems)))))
