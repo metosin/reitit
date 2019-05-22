@@ -120,7 +120,7 @@
                              :coercion schema/coercion}})
                    {:executor sieppari/executor}))]
 
-    (testing "withut exception handling"
+    (testing "without exception handling"
       (let [app (create [(rrc/coerce-request-interceptor)
                          (rrc/coerce-response-interceptor)])]
 

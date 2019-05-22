@@ -39,7 +39,7 @@
   | key           | description |
   | --------------|-------------|
   | :parameters   | optional input parameters for a route, in a format defined by the coercion
-  | :responses    | optional descriptions of responess, in a format defined by coercion
+  | :responses    | optional descriptions of responses, in a format defined by coercion
 
   Example:
 

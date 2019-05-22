@@ -4,7 +4,7 @@ Route data can be anything, so it's easy to go wrong. Accidentally adding a `:ro
 
 To fail fast, we could use the custom `:coerce` and `:compile` hooks to apply data validation and throw exceptions on first sighted problem.
 
-But there is a better way. Router has a `:validation` hook to validate the whole route tree after it's successfuly compiled. It expects a 2-arity function `routes opts => ()` that can side-effect in case of validation errors.
+But there is a better way. Router has a `:validation` hook to validate the whole route tree after it's successfully compiled. It expects a 2-arity function `routes opts => ()` that can side-effect in case of validation errors.
 
 ## clojure.spec
 

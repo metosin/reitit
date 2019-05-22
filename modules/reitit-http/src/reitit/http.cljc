@@ -70,7 +70,7 @@
      (r/router data opts))))
 
 (defn routing-interceptor
-  "Creates a Pedestal-style routing interceptor that enqueus the interceptors into context.
+  "Creates a Pedestal-style routing interceptor that enqueues the interceptors into context.
   Takes http-router, default ring-handler and and options map, with the following keys:
 
   | key               | description |

@@ -454,7 +454,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-spec`
 
 * Latest features from [spec-tools](https://github.com/metosin/spec-tools)
-  * Swagger enchancements
+  * Swagger enhancements
   * Better spec coercion via `st/coerce` using spec walking & inference: many simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`) can be transformed without needing spec to be wrapped. Fallbacks to old conformed based approach.
   * [example app](https://github.com/metosin/reitit/blob/master/examples/ring-spec-swagger/src/example/server.clj).
 
@@ -566,7 +566,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.2.0 (2018-09-03)
 
-Sample apps demonstraing the current status of `reitit`:
+Sample apps demonstrating the current status of `reitit`:
 
 * [`reitit-ring` with coercion, swagger and default middleware](https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj)
 * [`reitit-frontend`, the easy way](https://github.com/metosin/reitit/blob/master/examples/frontend/src/frontend/core.cljs)

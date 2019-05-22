@@ -8,7 +8,7 @@
   (is (= #{0 1 2} (#'pedestal/arities (fn ([]) ([_]) ([_ _]))))))
 
 (deftest interceptor-test
-  (testing "wihtout :enter, :leave or :error are stripped"
+  (testing "without :enter, :leave or :error are stripped"
     (is (nil? (pedestal/->interceptor {:name ::kikka}))))
   (testing ":error arities are wrapped"
     (let [has-2-arity-error? (fn [interceptor]

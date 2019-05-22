@@ -33,4 +33,4 @@ And apply the middleware like this:
      wrap-hidden-method]}) ;; our hidden method wrapper
 ```
 (NOTE: This middleware must be placed here and not inside the route data given to `reitit.ring/handler`. 
-This is so that our middleware is applied before reitit matches the request with a spesific handler using the wrong method.)
+This is so that our middleware is applied before reitit matches the request with a specific handler using the wrong method.)

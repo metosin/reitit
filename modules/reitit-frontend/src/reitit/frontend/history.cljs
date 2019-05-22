@@ -83,7 +83,7 @@
           ignore-anchor-click
           (fn ignore-anchor-click
             [e]
-            ;; Returns the next matching anchestor of event target
+            ;; Returns the next matching ancestor of event target
             (when-let [el (closest-by-tag (event-target e) "a")]
               (let [uri (.parse Uri (.-href el))]
                 (when (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
@@ -125,7 +125,7 @@
 
   Returns History object.
 
-  When using with development workflow like Figwheel, rememeber to
+  When using with development workflow like Figwheel, remember to
   remove listeners using stop! call before calling start! again.
 
   Parameters:
