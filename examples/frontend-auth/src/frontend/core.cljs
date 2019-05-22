@@ -140,7 +140,7 @@
     (fn [new-match]
       (swap! state (fn [state]
                      (if new-match
-                       ;; Only run the controllers, which are likely to call authentcated APIs,
+                       ;; Only run the controllers, which are likely to call authenticated APIs,
                        ;; if user has been authenticated.
                        ;; Alternative solution could be to always run controllers,
                        ;; check authentication status in each controller, or check authentication status in API calls.

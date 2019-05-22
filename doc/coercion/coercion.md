@@ -125,7 +125,7 @@ We can use a helper function `reitit.coercion/coerce!` to do the actual coercion
 ; {:path {:company "metosin", :user-id 123}}
 ```
 
-We get the coerced paremeters back. If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo is thrown, with data about the actual error:
+We get the coerced parameters back. If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo is thrown, with data about the actual error:
 
 ```clj
 (coercion/coerce!

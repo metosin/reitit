@@ -2,7 +2,7 @@
 
 Data-driven approach in `reitit` allows us to compose routes, route data, route specs, middleware and interceptors chains. We can compose routers too. This is needed to achieve dynamic routing like in [Compojure](https://github.com/weavejester/compojure).
 
-## Immutatability
+## Immutability
 
 Once a router is created, the routing tree is immutable and cannot be changed. To change the routing, we need to create a new router with changed routes and/or options. For this, the `Router` protocol exposes it's resolved routes via `r/routes` and options via `r/options`.
 
@@ -336,7 +336,7 @@ Can we make the nester routing faster? Sure. We could use the Router `:compile` 
 
 ### When to use nested routers?
 
-Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it's the only choise. For other cases, nested routes are most likely a better option.
+Nesting routers is not trivial and because of that, should be avoided. For dynamic (request-time) route generation, it's the only choice. For other cases, nested routes are most likely a better option.
 
 Let's re-create the previous example with normal route nesting/composition.
 

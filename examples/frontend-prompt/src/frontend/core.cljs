@@ -31,7 +31,7 @@
      ;; key here. See how it's handled in `on-navigate` function.
      :prompt "Are you sure you want to leave?"
      ;; It would be possible to define a function here that resolves
-     ;; wheter prompting is needed or not but we'll keep it simple.
+     ;; whether prompting is needed or not but we'll keep it simple.
      }]])
 
 (def router

@@ -6,7 +6,7 @@ Reitit defines middleware as data:
 
 1. Middleware can be defined as first-class data entries
 2. Middleware can be mounted as a [duct-style](https://github.com/duct-framework/duct/wiki/Configuration) vector (of middleware)
-4. Middleware can be optimized & [compiled](compiling_middleware.md) againt an endpoint
+4. Middleware can be optimized & [compiled](compiling_middleware.md) against an endpoint
 3. Middleware chain can be transformed by the router
 
 ## Middleware as data

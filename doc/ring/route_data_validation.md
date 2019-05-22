@@ -265,7 +265,7 @@ Or even flatten the routes:
        ::rs/explain e/expound-str})))
 ```
 
-The common Middleware can also be pushed to the router, here cleanly separing behavior and data:
+The common Middleware can also be pushed to the router, here cleanly separating behavior and data:
 
 ```clj
 (def app

@@ -6,9 +6,9 @@
 
 [Sieppari](https://github.com/metosin/sieppari) is a new and fast interceptor implementation for Clojure, with pluggable async supporting [core.async](https://github.com/clojure/core.async), [Manifold](https://github.com/ztellman/manifold) and [Promesa](http://funcool.github.io/promesa/latest).
 
-To use Sieppari with `reitit-http`, we need to attach a `reitit.interceptor.sieppari/executor` to a `http-router` to compile and execute the interceptor chains. Reitit and Sieppari share the same interceptor model, so all reitit default interceptors work seamlesly together.
+To use Sieppari with `reitit-http`, we need to attach a `reitit.interceptor.sieppari/executor` to a `http-router` to compile and execute the interceptor chains. Reitit and Sieppari share the same interceptor model, so all reitit default interceptors work seamlessly together.
 
-We can use both syncronous ring and [async-ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) with Sieppari.
+We can use both synchronous ring and [async-ring](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) with Sieppari.
 
 ## Synchronous Ring
 

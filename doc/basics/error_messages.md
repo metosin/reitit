@@ -1,6 +1,6 @@
 # Error Messages
 
-All exceptions thrown in router creation are caught, formatted and rethrown by the `reitit.core/router` function. Exception formatting is done by the excepton formatter defined by the `:exception` router option.
+All exceptions thrown in router creation are caught, formatted and rethrown by the `reitit.core/router` function. Exception formatting is done by the exception formatter defined by the `:exception` router option.
 
 ## Default Errors
 
