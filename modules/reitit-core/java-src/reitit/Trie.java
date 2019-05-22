@@ -113,16 +113,19 @@ public class Trie {
   }
 
   static final class DataMatcher implements Matcher {
-    private final Match match;
+
+    private final IPersistentMap params;
+    private final Object data;
 
     DataMatcher(IPersistentMap params, Object data) {
-      this.match = new Match(params, data);
+      this.params = params;
+      this.data = data;
     }
 
     @Override
     public Match match(int i, int max, char[] path) {
       if (i == max) {
-        return match;
+        return new Match(params, data);
       }
       return null;
     }
@@ -139,7 +142,7 @@ public class Trie {
 
     @Override
     public String toString() {
-      return (match.data != null ? match.data.toString() : "nil");
+      return (data != null ? data.toString() : "nil");
     }
   }
 
