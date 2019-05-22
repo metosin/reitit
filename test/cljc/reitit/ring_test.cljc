@@ -3,7 +3,8 @@
             [clojure.set :as set]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.core :as r])
+            [reitit.core :as r]
+            [reitit.trie :as trie])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -577,3 +578,19 @@
        (fn [{:keys [::r/router]} _ _]
          (is router)))
      {} ::respond ::raise)))
+
+#?(:clj
+   (deftest invalid-path-parameters-parsing-concurrent-requests-277-test
+     (testing "in enough concurrent system, path-parameters can bleed"
+       (doseq [compiler [trie/java-trie-compiler trie/clojure-trie-compiler]]
+         (let [app (ring/ring-handler
+                     (ring/router
+                       ["/:id" (fn [request]
+                                 {:status 200
+                                  :body (-> request :path-params :id)})])
+                     {::trie/trie-compiler compiler})]
+           (dotimes [_ 10]
+             (future
+               (dotimes [n 100000]
+                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
+                   (is (= body (str n))))))))))))
