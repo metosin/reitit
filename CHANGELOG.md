@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.5 (2019-05-22)
+
+### `reitit-core`
+
+* **MAJOR**: Fix bug in Java Trie (since 0.3.0!), [which made invalid path parameter parsing in concurrent requests](https://github.com/metosin/reitit/issues/277). All Trie implementation classes are final from now on.
+
 ## 0.3.4 (2019-05-20)
 
 ### `reitit-core`
