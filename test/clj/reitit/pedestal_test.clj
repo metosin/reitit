@@ -33,11 +33,7 @@
                     {:interceptors [{:name :nop} (exception/exception-interceptor)]}
                     ["/ok" (fn [_] {:status 200, :body "ok"})]
                     ["/fail" (fn [_] (throw (ex-info "kosh" {})))]]))
-        service (-> {:env :dev
-                     :io.pedestal.http/type :jetty
-                     :io.pedestal.http/port 3000
-                     :io.pedestal.http/join? false
-                     :io.pedestal.http/request-logger nil
+        service (-> {:io.pedestal.http/request-logger nil
                      :io.pedestal.http/routes []}
                     (io.pedestal.http/default-interceptors)
                     (pedestal/replace-last-interceptor router)
