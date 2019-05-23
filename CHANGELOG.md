@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.6 (2019-05-23)
+
+* Fixed [a zillion typos](https://github.com/metosin/reitit/pull/281) in docs by [Marcus Spiegel](https://github.com/malesch).
+
+### `reitit-ring`
+
+* Fix on `reitit.ring/create-default-handler` to support overriding just some handlers, fixes [#283](https://github.com/metosin/reitit/issues/283), by [Daniel Sunnerek](https://github.com/kardan).
+
 ## 0.3.5 (2019-05-22)
 
 ### `reitit-core`
