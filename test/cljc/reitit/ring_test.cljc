@@ -161,8 +161,8 @@
 (deftest default-handler-test
   (let [response {:status 200, :body "ok"}
         router (ring/router
-                 [["/ping" {:get (constantly response)}]
-                  ["/pong" (constantly nil)]])
+                [["/ping" {:get (constantly response)}]
+                 ["/pong" (constantly nil)]])
         app (ring/ring-handler router)]
 
     (testing "match"
@@ -188,15 +188,21 @@
 
       (testing "with custom http responses"
         (let [app (ring/ring-handler router (ring/create-default-handler
-                                              {:not-found (constantly {:status -404})
-                                               :method-not-allowed (constantly {:status -405})
-                                               :not-acceptable (constantly {:status -406})}))]
+                                             {:not-found (constantly {:status -404})
+                                              :method-not-allowed (constantly {:status -405})
+                                              :not-acceptable (constantly {:status -406})}))]
           (testing "route doesn't match"
             (is (= -404 (:status (app {:request-method :get, :uri "/"})))))
           (testing "method doesn't match"
             (is (= -405 (:status (app {:request-method :post, :uri "/ping"})))))
           (testing "handler rejects"
-            (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
+            (is (= -406 (:status (app {:request-method :get, :uri "/pong"})))))))
+
+      (testing "with some custom http responses"
+        (let [app (ring/ring-handler router (ring/create-default-handler
+                                             {:not-found (constantly {:status -404})}))]
+          (testing "route doesn't match"
+            (is (= 405 (:status (app {:request-method :post, :uri "/ping"}))))))))))
 
 (deftest default-options-handler-test
   (let [response {:status 200, :body "ok"}]

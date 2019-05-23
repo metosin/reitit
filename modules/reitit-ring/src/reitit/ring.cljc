@@ -143,14 +143,14 @@
   | key                    | description |
   | -----------------------|-------------|
   | `:not-found`           | 404, no routes matches
-  | `:method-not-accepted` | 405, no method matches
+  | `:method-not-allowed`  | 405, no method matches
   | `:not-acceptable`      | 406, handler returned `nil`"
   ([]
-   (create-default-handler
-     {:not-found (constantly {:status 404, :body "", :headers {}})
-      :method-not-allowed (constantly {:status 405, :body "", :headers {}})
-      :not-acceptable (constantly {:status 406, :body "", :headers {}})}))
-  ([{:keys [not-found method-not-allowed not-acceptable]}]
+   (create-default-handler {}))
+  ([{:keys [not-found method-not-allowed not-acceptable]
+     :or {not-found (constantly {:status 404, :body "", :headers {}})
+          method-not-allowed (constantly {:status 405, :body "", :headers {}})
+          not-acceptable (constantly {:status 406, :body "", :headers {}})}}]
    (fn
      ([request]
       (if-let [match (::r/match request)]
