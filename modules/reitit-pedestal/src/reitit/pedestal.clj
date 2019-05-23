@@ -34,7 +34,7 @@
   (cond
     (interceptor/interceptor? interceptor)
     interceptor
-    (seq (select-keys interceptor [:enter :leave :error]))
+    (->> (select-keys interceptor [:enter :leave :error]) (vals) (keep identity) (seq))
     (interceptor/interceptor
       (if (error-without-arity-2? interceptor)
         (wrap-error-arity-2->1 interceptor)

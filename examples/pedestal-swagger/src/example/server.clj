@@ -6,6 +6,7 @@
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.http.coercion :as coercion]
+            [reitit.dev.pretty :as pretty]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
@@ -126,12 +127,12 @@
                                 {:default-src "'self'"
                                  :style-src "'self' 'unsafe-inline'"
                                  :script-src "'self' 'unsafe-inline'"}}}
-      (io.pedestal.http/default-interceptors)
+      (server/default-interceptors)
       ;; use the reitit router
       (pedestal/replace-last-interceptor router)
-      (io.pedestal.http/dev-interceptors)
-      (io.pedestal.http/create-server)
-      (io.pedestal.http/start))
+      (server/dev-interceptors)
+      (server/create-server)
+      (server/start))
   (println "server running in port 3000"))
 
 (comment
