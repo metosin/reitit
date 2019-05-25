@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.7 (2019-05-25)
+
+### `reitit-pedestal`
+
+* Fixed Pedestal Interceptor coercion bug, see [#285](https://github.com/metosin/reitit/issues/285).
+
 ## 0.3.6 (2019-05-23)
 
 * Fixed [a zillion typos](https://github.com/metosin/reitit/pull/281) in docs by [Marcus Spiegel](https://github.com/malesch).
