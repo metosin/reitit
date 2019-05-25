@@ -39,6 +39,7 @@
    ["Data-driven Middleware" {:file "doc/ring/data_driven_middleware.md"}]
    ["Transforming Middleware Chain" {:file "doc/ring/transforming_middleware_chain.md"}]
    ["Middleware Registry" {:file "doc/ring/middleware_registry.md"}]
+   ["Exception Handling with Ring" {:file "doc/ring/exceptions.md"}]
    ["Default Middleware" {:file "doc/ring/default_middleware.md"}]
    ["Pluggable Coercion" {:file "doc/ring/coercion.md"}]
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
