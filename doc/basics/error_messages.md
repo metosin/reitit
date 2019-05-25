@@ -48,3 +48,7 @@ Behind the scenes, both error formatters are backed by a multimethod, so they ar
 ## More examples
 
 See the [validating route data](route_data_validation.md) page.
+
+## Runtime Exception
+
+See [Exception Handling with Ring](../ring/exceptions.md).
