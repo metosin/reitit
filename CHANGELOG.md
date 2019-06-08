@@ -12,6 +12,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased (patch)
+
+* Updated dependencies:
+
+```clj
+[metosin/spec-tools "0.9.3"] is available but we use "0.9.2"
+[metosin/jsonista "0.2.3"] is available but we use "0.2.2"
+```
+
 ## 0.3.7 (2019-05-25)
 
 ### `reitit-pedestal`
