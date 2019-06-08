@@ -2,9 +2,9 @@
   "name": "reitit",
   "private": true,
   "devDependencies": {
-    "karma": "^1.7.1",
+    "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-cli": "^1.0.1",
+    "karma-cli": "^2.0.0",
     "karma-cljs-test": "^0.1.0",
     "karma-junit-reporter": "^1.2.0"
   }
