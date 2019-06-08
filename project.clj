@@ -27,10 +27,10 @@
                          [metosin/reitit-sieppari "0.3.7"]
                          [metosin/reitit-pedestal "0.3.7"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.9.2"]
+                         [metosin/spec-tools "0.9.3"]
                          [metosin/schema-tools "0.11.0"]
                          [metosin/muuntaja "0.6.4"]
-                         [metosin/jsonista "0.2.2"]
+                         [metosin/jsonista "0.2.3"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
@@ -70,7 +70,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.1-beta2"]
+                   :dependencies [[org.clojure/clojure "1.10.1"]
                                   [org.clojure/clojurescript "1.10.520"]
 
                                   ;; modules dependencies
@@ -92,7 +92,7 @@
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/muuntaja]
                                   [metosin/sieppari]
-                                  [metosin/jsonista "0.2.2"]
+                                  [metosin/jsonista]
 
                                   [criterium "0.4.5"]
                                   [org.clojure/test.check "0.9.0"]
