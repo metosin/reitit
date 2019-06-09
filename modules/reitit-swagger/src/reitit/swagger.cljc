@@ -1,6 +1,5 @@
 (ns reitit.swagger
   (:require [reitit.core :as r]
-            [reitit.impl :as impl]
             [meta-merge.core :refer [meta-merge]]
             [clojure.spec.alpha :as s]
             [clojure.set :as set]
@@ -65,8 +64,8 @@
   {:name ::swagger
    :spec ::spec})
 
-(defn- swagger-path [path]
-  (-> path trie/normalize (str/replace #"\{\*" "{")))
+(defn- swagger-path [path opts]
+  (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
 (defn create-swagger-handler []
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
@@ -74,15 +73,14 @@
   (fn create-swagger
     ([{:keys [::r/router ::r/match :request-method]}]
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
-           ->set (fn [x] (if (or (set? x) (sequential? x)) (set x) (conj #{} x)))
-           ids (->set id)
+           ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
            strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
            swagger (->> (strip-endpoint-keys swagger)
                         (merge {:swagger "2.0"
                                 :x-id ids}))
            accept-route (fn [route]
-                          (-> route second :swagger :id (or ::default) ->set (set/intersection ids) seq))
+                          (-> route second :swagger :id (or ::default) (trie/into-set) (set/intersection ids) seq))
            transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
@@ -97,7 +95,7 @@
                                      (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                              [(swagger-path p) endpoint]))]
+                              [(swagger-path p (r/options router)) endpoint]))]
        (let [map-in-order #(->> % (apply concat) (apply array-map))
              paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
          {:status 200

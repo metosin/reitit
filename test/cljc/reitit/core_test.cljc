@@ -292,7 +292,7 @@
       (let [routes (impl/resolve-routes data (r/default-router-options))
             conflicts (-> routes
                           (impl/resolve-routes (r/default-router-options))
-                          (impl/path-conflicting-routes))]
+                          (impl/path-conflicting-routes nil))]
         (if conflicting? (seq conflicts) (nil? conflicts)))
 
       true [["/a"]
@@ -328,7 +328,7 @@
               ["/c" {}] #{["/*d" {}]}}
              (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
                  (impl/resolve-routes (r/default-router-options))
-                 (impl/path-conflicting-routes)))))
+                 (impl/path-conflicting-routes nil)))))
 
     (testing "router with conflicting routes"
       (testing "throws by default"
