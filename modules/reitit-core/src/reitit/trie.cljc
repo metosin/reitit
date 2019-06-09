@@ -57,9 +57,9 @@
     (keyword (subs s 0 i) (subs s (inc i)))
     (keyword s)))
 
-(defn split-path [s {:keys [parameter-syntax] :or {parameter-syntax #{:bracket :colon}}}]
-  (let [bracket? (-> parameter-syntax (into-set) :bracket)
-        colon? (-> parameter-syntax (into-set) :colon)
+(defn split-path [s {:keys [syntax] :or {syntax #{:bracket :colon}}}]
+  (let [bracket? (-> syntax (into-set) :bracket)
+        colon? (-> syntax (into-set) :colon)
         -static (fn [from to] (if-not (= from to) [(subs s from to)]))
         -wild (fn [from to] [(->Wild (-keyword (subs s (inc from) to)))])
         -catch-all (fn [from to] [(->CatchAll (keyword (subs s (inc from) to)))])]

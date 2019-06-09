@@ -21,6 +21,24 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/jsonista "0.2.3"] is available but we use "0.2.2"
 ```
 
+### `reitit-core`
+
+* Add support for explixit selection of router path-parameter `:syntax`, fixes [#276](https://github.com/metosin/reitit/issues/276)
+
+```clj
+(require '[reitit.core :as r])
+
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id]
+      {:syntax :bracket})
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123"},
+;       :path "http://localhost:8080/api/user/123"}
+```
+
 ## 0.3.7 (2019-05-25)
 
 ### `reitit-pedestal`

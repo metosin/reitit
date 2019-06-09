@@ -31,9 +31,9 @@
 
 (deftest split-path-test
   (testing "colon"
-    (doseq [parameter-syntax [:colon #{:colon}]]
+    (doseq [syntax [:colon #{:colon}]]
       (are [path expected]
-        (is (= expected (trie/split-path path {:parameter-syntax parameter-syntax})))
+        (is (= expected (trie/split-path path {:syntax syntax})))
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]
@@ -43,9 +43,9 @@
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/{" (trie/->CatchAll (keyword "valtavan.suuri/avaruus}"))])))
 
   (testing "bracket"
-    (doseq [parameter-syntax [:bracket #{:bracket}]]
+    (doseq [syntax [:bracket #{:bracket}]]
       (are [path expected]
-        (is (= expected (trie/split-path path {:parameter-syntax parameter-syntax})))
+        (is (= expected (trie/split-path path {:syntax syntax})))
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
@@ -55,9 +55,9 @@
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
 
   (testing "both"
-    (doseq [parameter-syntax [#{:bracket :colon}]]
+    (doseq [syntax [#{:bracket :colon}]]
       (are [path expected]
-        (is (= expected (trie/split-path path {:parameter-syntax parameter-syntax})))
+        (is (= expected (trie/split-path path {:syntax syntax})))
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
@@ -67,9 +67,9 @@
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
 
   (testing "nil"
-    (doseq [parameter-syntax [nil]]
+    (doseq [syntax [nil]]
       (are [path expected]
-        (is (= expected (trie/split-path path {:parameter-syntax parameter-syntax})))
+        (is (= expected (trie/split-path path {:syntax syntax})))
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]

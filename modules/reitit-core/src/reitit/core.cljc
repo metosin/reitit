@@ -347,12 +347,13 @@
   Selects implementation based on route details. The following options
   are available:
 
-  | key          | description |
-  | -------------|-------------|
+  | key          | description
+  | -------------|-------------
   | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:data`      | Initial route data (default `{}`)
   | `:spec`      | clojure.spec definition for a route data, see `reitit.spec` on how to use this
+  | `:syntax`    | Path-parameter syntax as keyword or set of keywords (default #{:bracket :colon})
   | `:expand`    | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => result` to compile a route handler
