@@ -2,27 +2,6 @@
   (:require [clojure.test :refer [deftest testing is are]]
             [reitit.impl :as impl]))
 
-(deftest conflicting-route-test
-  (are [c? p1 p2]
-    (is (= c? (impl/conflicting-routes? [p1] [p2])))
-
-    true "/a" "/a"
-    true "/a" "/:a"
-    true "/a/:b" "/:a/b"
-    true "/ab/:b" "/:a/ba"
-    true "/*a" "/:a/ba/ca"
-
-    true "/a" "/{a}"
-    true "/a/{b}" "/{a}/b"
-    true "/ab/{b}" "/{a}/ba"
-    true "/{*a}" "/{a}/ba/ca"
-
-    false "/a" "/:a/b"
-    false "/a" "/:a/b"
-
-    false "/a" "/{a}/b"
-    false "/a" "/{a}/b"))
-
 (deftest strip-nils-test
   (is (= {:a 1, :c false} (impl/strip-nils {:a 1, :b nil, :c false}))))
 
@@ -188,8 +167,7 @@
     "%2B632+905+123+4567" "+632 905 123 4567"))
 
 (deftest parse-test
-  (is (= (impl/map->Route
-           {:path "https://google.com"
-            :path-parts ["https://google.com"]
-            :path-params #{}})
-         (impl/parse "https://google.com"))))
+  (is (= {:path "https://google.com"
+          :path-parts ["https://google.com"]
+          :path-params #{}}
+         (impl/parse "https://google.com" nil))))

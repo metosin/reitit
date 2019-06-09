@@ -88,7 +88,7 @@
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/parse p)
+                     (let [{:keys [path-params] :as route} (impl/parse p opts)
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
@@ -131,7 +131,7 @@
   ([compiled-routes]
    (lookup-router compiled-routes {}))
   ([compiled-routes opts]
-   (when-let [wilds (seq (filter impl/wild-route? compiled-routes))]
+   (when-let [wilds (seq (filter (impl/->wild-route? opts) compiled-routes))]
      (exception/fail!
        (str "can't create :lookup-router with wildcard routes: " wilds)
        {:wilds wilds
@@ -184,7 +184,7 @@
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/parse p)
+                     (let [{:keys [path-params] :as route} (impl/parse p opts)
                            f #(if-let [path (impl/path-for route %)]
                                 (->Match p data result (impl/url-decode-coll %) path)
                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
@@ -227,7 +227,7 @@
   ([compiled-routes]
    (single-static-path-router compiled-routes {}))
   ([compiled-routes opts]
-   (when (or (not= (count compiled-routes) 1) (some impl/wild-route? compiled-routes))
+   (when (or (not= (count compiled-routes) 1) (some (impl/->wild-route? opts) compiled-routes))
      (exception/fail!
        (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
        {:routes compiled-routes}))
@@ -266,7 +266,7 @@
   ([compiled-routes]
    (mixed-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [{wild true, lookup false} (group-by impl/wild-route? compiled-routes)
+   (let [{wild true, lookup false} (group-by (impl/->wild-route? opts) compiled-routes)
          ->static-router (if (= 1 (count lookup)) single-static-path-router lookup-router)
          wildcard-router (trie-router wild opts)
          static-router (->static-router lookup opts)
@@ -301,7 +301,7 @@
   ([compiled-routes]
    (quarantine-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [conflicting-paths (-> compiled-routes impl/path-conflicting-routes impl/conflicting-paths)
+   (let [conflicting-paths (-> compiled-routes (impl/path-conflicting-routes opts) impl/conflicting-paths)
          conflicting? #(contains? conflicting-paths (first %))
          {conflicting true, non-conflicting false} (group-by conflicting? compiled-routes)
          linear-router (linear-router conflicting opts)
@@ -347,12 +347,13 @@
   Selects implementation based on route details. The following options
   are available:
 
-  | key          | description |
-  | -------------|-------------|
+  | key          | description
+  | -------------|-------------
   | `:path`      | Base-path for routes
   | `:routes`    | Initial resolved routes (default `[]`)
   | `:data`      | Initial route data (default `{}`)
   | `:spec`      | clojure.spec definition for a route data, see `reitit.spec` on how to use this
+  | `:syntax`    | Path-parameter syntax as keyword or set of keywords (default #{:bracket :colon})
   | `:expand`    | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
   | `:coerce`    | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
   | `:compile`   | Function of `route opts => result` to compile a route handler
@@ -366,11 +367,11 @@
    (let [{:keys [router] :as opts} (merge (default-router-options) opts)]
      (try
        (let [routes (impl/resolve-routes raw-routes opts)
-             path-conflicting (impl/path-conflicting-routes routes)
+             path-conflicting (impl/path-conflicting-routes routes opts)
              name-conflicting (impl/name-conflicting-routes routes)
              compiled-routes (impl/compile-routes routes opts)
-             wilds? (boolean (some impl/wild-route? compiled-routes))
-             all-wilds? (every? impl/wild-route? compiled-routes)
+             wilds? (boolean (some (impl/->wild-route? opts) compiled-routes))
+             all-wilds? (every? (impl/->wild-route? opts) compiled-routes)
              router (cond
                       router router
                       (and (= 1 (count compiled-routes)) (not wilds?)) single-static-path-router

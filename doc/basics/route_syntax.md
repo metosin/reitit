@@ -4,7 +4,7 @@ Routes are defined as vectors of String path and optional (non-sequential) route
 
 Routes can be wrapped in vectors and lists and `nil` routes are ignored.
 
-Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Since version `0.3.0`, parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. The non-bracket syntax might be deprecated later.
+Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. By default, both syntaxes are supported, see [configuring routers](../advanced/configuring_routers.md) on how to change this.
 
 ### Examples
 
@@ -128,4 +128,24 @@ Routes are just data, so it's easy to create them programmatically:
 ;  (["/get-user" {:get {:interceptors [get-user]}}]
 ;   ["/add-user" {:post {:interceptors [add-user]}}]
 ;   ["/add-order" {:post {:interceptors [add-order]}}])]
+```
+
+### Explicit path-parameter syntax
+
+Router options `:syntax` allows the path-parameter syntax to be explicitely defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
+
+Supporting only `:bracket` syntax:
+
+```clj
+(require '[reitit.core :as r])
+
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id]
+      {:syntax :bracket})
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123"},
+;       :path "http://localhost:8080/api/user/123"}
 ```
