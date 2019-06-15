@@ -12,22 +12,37 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased (patch)
+## 0.3.8 (2019-06-15)
 
 * Updated dependencies:
 
 ```clj
+[metosin/schema-tools "0.12.0"] is available but we use "0.11.0"
 [metosin/spec-tools "0.9.3"] is available but we use "0.9.2"
 [metosin/jsonista "0.2.3"] is available but we use "0.2.2"
 ```
 
 ### `reitit-core`
 
+* Schema coercion supports transformtatins from keywords->clojure, via [schema-tools](https://github.com/metosin/schema-tools).
+
 * Add support for explixit selection of router path-parameter `:syntax`, fixes [#276](https://github.com/metosin/reitit/issues/276)
 
 ```clj
 (require '[reitit.core :as r])
 
+;; default
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id])
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123", :8080 ":8080"},
+;       :path "http://localhost:8080/api/user/123"}
+
+
+;; just bracket-syntax
 (-> (r/router
       ["http://localhost:8080/api/user/{id}" ::user-by-id]
       {:syntax :bracket})

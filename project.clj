@@ -28,7 +28,7 @@
                          [metosin/reitit-pedestal "0.3.7"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.9.3"]
-                         [metosin/schema-tools "0.11.0"]
+                         [metosin/schema-tools "0.12.0"]
                          [metosin/muuntaja "0.6.4"]
                          [metosin/jsonista "0.2.3"]
                          [metosin/sieppari "0.0.0-alpha7"]
@@ -48,7 +48,7 @@
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.1.1"]
             [lein-codox "0.10.7"]
-            [metosin/bat-test "0.4.2"]]
+            [metosin/bat-test "0.4.3"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
 
@@ -96,16 +96,16 @@
 
                                   [criterium "0.4.5"]
                                   [org.clojure/test.check "0.9.0"]
-                                  [org.clojure/tools.namespace "0.2.11"]
+                                  [org.clojure/tools.namespace "0.3.0"]
                                   [com.gfredericks/test.chuck "0.2.9"]
 
                                   [io.pedestal/pedestal.service "0.5.5"]
 
-                                  [org.clojure/core.async "0.4.490"]
+                                  [org.clojure/core.async "0.4.500"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "2.0.1"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.3.1"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.4.0"]
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
@@ -120,7 +120,7 @@
                                    [io.pedestal/pedestal.service "0.5.5"]
                                    [io.pedestal/pedestal.jetty "0.5.5"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "0.4.490"]
+                                   [org.clojure/core.async "0.4.500"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "2.0.1"]
                                    [metosin/sieppari]

@@ -134,6 +134,19 @@ Routes are just data, so it's easy to create them programmatically:
 
 Router options `:syntax` allows the path-parameter syntax to be explicitely defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
 
+With defaults:
+
+```clj
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id])
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123", :8080 ":8080"},
+;       :path "http://localhost:8080/api/user/123"}
+```
+
 Supporting only `:bracket` syntax:
 
 ```clj
