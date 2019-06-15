@@ -10,9 +10,9 @@
                  [ring "1.7.1"]
                  [hiccup "1.0.5"]
                  [org.clojure/clojurescript "1.10.520"]
-                 [metosin/reitit "0.3.7"]
-                 [metosin/reitit-spec "0.3.7"]
-                 [metosin/reitit-frontend "0.3.7"]
+                 [metosin/reitit "0.3.8"]
+                 [metosin/reitit-spec "0.3.8"]
+                 [metosin/reitit-frontend "0.3.8"]
                  ;; Just for pretty printting the match
                  [fipp "0.6.14"]]
 

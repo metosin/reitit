@@ -1,7 +1,7 @@
 # Exception Handling with Ring
 
 ```clj
-[metosin/reitit-middleware "0.3.7"]
+[metosin/reitit-middleware "0.3.8"]
 ```
 
 Exceptions thrown in router creation can be [handled with custom exception handler](../basics/error_messages.md). By default, exceptions thrown at runtime from a handler or a middleware are not caught by the `reitit.ring/ring-handler`. A good practise is a have an top-level exception handler to log and format the errors for clients.
