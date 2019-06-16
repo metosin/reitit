@@ -216,9 +216,17 @@
                      ["/any" (constantly response)]]))]
 
         (testing "endpoint with a non-options handler"
-          (is (= response (app {:request-method :get, :uri "/get"})))
-          (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
-                 (app {:request-method :options, :uri "/get"}))))
+          (let [request {:request-method :options, :uri "/get"}]
+            (is (= response (app {:request-method :get, :uri "/get"})))
+            (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                   (app request)))
+            (testing "3-arity"
+              (let [result (atom nil)
+                    respond (partial reset! result)
+                    raise ::not-called]
+                (app request respond raise)
+                (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                       @result))))))
 
         (testing "endpoint with a options handler"
           (is (= response (app {:request-method :options, :uri "/options"}))))

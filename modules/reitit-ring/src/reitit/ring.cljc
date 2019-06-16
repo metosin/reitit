@@ -54,10 +54,16 @@
         (->methods (:handler top) data)
         childs))))
 
-(defn default-options-handler [request]
-  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
-        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
-    {:status 200, :body "", :headers {"Allow" allow}}))
+(def default-options-handler
+  (let [handle (fn [request]
+                 (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+                       allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+                   {:status 200, :body "", :headers {"Allow" allow}}))]
+    (fn
+      ([request]
+       (handle request))
+      ([request respond _]
+       (respond (handle request))))))
 
 ;;
 ;; public api
