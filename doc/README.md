@@ -40,7 +40,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.3.8"]
+[metosin/reitit "0.3.9"]
 ```
 
 Optionally, the parts can be required separately.

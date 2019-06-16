@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.3.9 (2019-06-16)
+
+### `reitit-ring`
+
+* Added async support for `default-options-handler` on `reitit-ring`, fixes [#293](https://github.com/metosin/reitit/issues/293)
+
 ## 0.3.8 (2019-06-15)
 
 * Updated dependencies:
