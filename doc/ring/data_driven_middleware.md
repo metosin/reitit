@@ -53,7 +53,7 @@ The following produce identical middleware runtime function.
 (require '[reitit.middleware :as middleware])
 
 (def wrap2
-  (middleware/create
+  (middleware/map->Middleware
     {:name ::wrap2
      :description "Middleware that does things."
      :wrap wrap}))
