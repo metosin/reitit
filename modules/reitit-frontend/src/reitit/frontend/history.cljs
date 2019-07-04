@@ -101,8 +101,10 @@
                            (reitit/match-by-path router (.getPath uri)))
                   (.preventDefault e)
                   (let [path (str (.getPath uri)
-                                  (if (seq (.getQuery uri))
-                                    (str "?" (.getQuery uri))))]
+                                  (when (.hasQuery uri)
+                                    (str "?" (.getQuery uri)))
+                                  (when (.hasFragment uri)
+                                    (str "#" (.getFragment uri))))]
                     (.pushState js/window.history nil "" path)
                     (-on-navigate this path))))))]
       (-on-navigate this (-get-path this))
