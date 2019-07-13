@@ -49,7 +49,7 @@
     Executor
     (queue [_ interceptors]
       (->> interceptors
-           (map (fn [{:keys [::interceptor/handler] :as interceptor}]
+           (map (fn [{::interceptor/keys [handler] :as interceptor}]
                   (or handler interceptor)))
            (keep ->interceptor)))
     (enqueue [_ context interceptors]

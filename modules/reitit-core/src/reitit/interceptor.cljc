@@ -33,7 +33,7 @@
 
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
-  (into-interceptor [this data {:keys [::registry] :as opts}]
+  (into-interceptor [this data {::keys [registry] :as opts}]
     (if-let [interceptor (if registry (registry this))]
       (into-interceptor interceptor data opts)
       (throw
@@ -108,7 +108,7 @@
    (chain interceptors nil nil))
   ([interceptors data]
    (chain interceptors data nil))
-  ([interceptors data {:keys [::transform] :or {transform identity} :as opts}]
+  ([interceptors data {::keys [transform] :or {transform identity} :as opts}]
    (let [transform (if (vector? transform) (apply comp (reverse transform)) transform)]
      (->> interceptors
           (keep #(into-interceptor % data opts))
@@ -119,7 +119,7 @@
 (defn compile-result
   ([route opts]
    (compile-result route opts nil))
-  ([[_ {:keys [interceptors handler] :as data}] {:keys [::queue] :as opts} _]
+  ([[_ {:keys [interceptors handler] :as data}] {::keys [queue] :as opts} _]
    (let [chain (chain (into (vec interceptors) [handler]) data opts)]
      (map->Endpoint
        {:interceptors chain

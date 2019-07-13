@@ -19,7 +19,7 @@
   (mw handler (keyword (str name "_" name2 "_" name3))))
 
 (defn handler
-  ([{:keys [::mw]}]
+  ([{::keys [mw]}]
    {:status 200 :body (conj mw :ok)})
   ([request respond _]
    (respond (handler request))))
@@ -119,7 +119,7 @@
           (is (= name (-> (r/match-by-name router name) :data :name))))))))
 
 (defn wrap-enforce-roles [handler]
-  (fn [{:keys [::roles] :as request}]
+  (fn [{::keys [roles] :as request}]
     (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/intersection required roles)))
         {:status 403, :body "forbidden"}
@@ -399,7 +399,7 @@
                                :wrap (fn [handler]
                                        (fn [request]
                                          (handler (update request ::mw (fnil conj []) name))))})
-        handler (fn [{:keys [::mw]}] {:status 200 :body (conj mw :ok)})
+        handler (fn [{::keys [mw]}] {:status 200 :body (conj mw :ok)})
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (ring/ring-handler
@@ -583,13 +583,13 @@
   (testing "1-arity"
     ((ring/ring-handler
        (ring/router [])
-       (fn [{:keys [::r/router]}]
+       (fn [{::r/keys [router]}]
          (is router)))
      {}))
   (testing "3-arity"
     ((ring/ring-handler
        (ring/router [])
-       (fn [{:keys [::r/router]} _ _]
+       (fn [{::r/keys [router]} _ _]
          (is router)))
      {} ::respond ::raise)))
 

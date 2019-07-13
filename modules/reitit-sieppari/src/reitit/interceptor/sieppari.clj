@@ -9,7 +9,7 @@
     (queue [_ interceptors]
       (queue/into-queue
         (map
-          (fn [{:keys [::interceptor/handler] :as interceptor}]
+          (fn [{::interceptor/keys [handler] :as interceptor}]
             (or handler interceptor))
           interceptors)))
     (execute [_ interceptors request]

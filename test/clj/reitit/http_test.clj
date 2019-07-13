@@ -11,7 +11,7 @@
 (defn interceptor [name]
   {:enter (fn [ctx] (update-in ctx [:request ::i] (fnil conj []) name))})
 
-(defn handler [{:keys [::i]}]
+(defn handler [{::keys [i]}]
   {:status 200 :body (conj i :ok)})
 
 (deftest http-router-test
@@ -89,7 +89,7 @@
           (is (= name (-> (r/match-by-name router name) :data :name))))))))
 
 (def enforce-roles-interceptor
-  {:enter (fn [{{:keys [::roles] :as request} :request :as ctx}]
+  {:enter (fn [{{::keys [roles] :as request} :request :as ctx}]
             (let [required (some-> request (http/get-match) :data ::roles)]
               (if (and (seq required) (not (set/intersection required roles)))
                 (-> ctx
@@ -280,7 +280,7 @@
   (let [interceptor (fn [name] {:name name
                                 :enter (fn [ctx]
                                          (update-in ctx [:request ::i] (fnil conj []) name))})
-        handler (fn [{:keys [::i]}] {:status 200 :body (conj i :ok)})
+        handler (fn [{::keys [i]}] {:status 200 :body (conj i :ok)})
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (http/ring-handler
@@ -492,14 +492,14 @@
   (testing "1-arity"
     ((http/ring-handler
        (http/router [])
-       (fn [{:keys [::r/router]}]
+       (fn [{::r/keys [router]}]
          (is router))
        {:executor sieppari/executor})
      {}))
   (testing "3-arity"
     ((http/ring-handler
        (http/router [])
-       (fn [{:keys [::r/router]}]
+       (fn [{::r/keys [router]}]
          (is router))
        {:executor sieppari/executor})
      {} ::respond ::raise)))
