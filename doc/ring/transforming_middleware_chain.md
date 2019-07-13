@@ -12,7 +12,7 @@ There is an extra option in ring-router (actually, in the underlying middleware-
   (fn [request]
     (handler (update request ::acc (fnil conj []) id))))
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 
 (def app

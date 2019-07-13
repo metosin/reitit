@@ -71,7 +71,7 @@
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
   (fn create-swagger
-    ([{:keys [::r/router ::r/match :request-method]}]
+    ([{::r/keys [router match] :keys [request-method]}]
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)

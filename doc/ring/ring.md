@@ -155,7 +155,7 @@ A middleware and a handler:
   (fn [request]
     (handler (update request ::acc (fnil conj []) id))))
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 ```
 

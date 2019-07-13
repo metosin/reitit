@@ -17,7 +17,7 @@
 
   #?(:clj  clojure.lang.Keyword
      :cljs cljs.core.Keyword)
-  (into-middleware [this data {:keys [::registry] :as opts}]
+  (into-middleware [this data {::keys [registry] :as opts}]
     (if-let [middleware (if registry (registry this))]
       (into-middleware middleware data opts)
       (throw
@@ -83,7 +83,7 @@
              (if scope {:scope scope})))))
 
 (defn- expand-and-transform
-  [middleware data {:keys [::transform] :or {transform identity} :as opts}]
+  [middleware data {::keys [transform] :or {transform identity} :as opts}]
   (let [transform (if (vector? transform) (apply comp (reverse transform)) transform)]
     (->> middleware
          (keep #(into-middleware % data opts))

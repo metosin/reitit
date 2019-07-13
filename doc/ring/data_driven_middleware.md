@@ -66,7 +66,7 @@ The following produce identical middleware runtime function.
 ```clj
 (require '[reitit.ring :as ring])
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 
 (def app
