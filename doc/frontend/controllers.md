@@ -18,9 +18,9 @@ controller identity
 
 When you navigate to a route that has a controller, controller identity
 is first resolved by calling `identity` function, or by using `parameters`
-declaration, or if neither is set, the identity is `nil`. Next controller
-is initialized by calling `start` is called with the identity value.
-When you exit that route, `stop` is called with the return value of `params.`
+declaration, or if neither is set, the identity is `nil`. Next, the controller
+is initialized by calling `start` with the controller identity value.
+When you exit that route, `stop` is called with the last controller identity value.
 
 If you navigate to the same route with different match, identity gets
 resolved again. If the identity changes from the previous value, controller
