@@ -3,7 +3,8 @@
             [clojure.set :as set]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.core :as r])
+            [reitit.core :as r]
+            [reitit.trie :as trie])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -18,7 +19,7 @@
   (mw handler (keyword (str name "_" name2 "_" name3))))
 
 (defn handler
-  ([{:keys [::mw]}]
+  ([{::keys [mw]}]
    {:status 200 :body (conj mw :ok)})
   ([request respond _]
    (respond (handler request))))
@@ -118,7 +119,7 @@
           (is (= name (-> (r/match-by-name router name) :data :name))))))))
 
 (defn wrap-enforce-roles [handler]
-  (fn [{:keys [::roles] :as request}]
+  (fn [{::keys [roles] :as request}]
     (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/intersection required roles)))
         {:status 403, :body "forbidden"}
@@ -160,8 +161,8 @@
 (deftest default-handler-test
   (let [response {:status 200, :body "ok"}
         router (ring/router
-                 [["/ping" {:get (constantly response)}]
-                  ["/pong" (constantly nil)]])
+                [["/ping" {:get (constantly response)}]
+                 ["/pong" (constantly nil)]])
         app (ring/ring-handler router)]
 
     (testing "match"
@@ -187,15 +188,21 @@
 
       (testing "with custom http responses"
         (let [app (ring/ring-handler router (ring/create-default-handler
-                                              {:not-found (constantly {:status -404})
-                                               :method-not-allowed (constantly {:status -405})
-                                               :not-acceptable (constantly {:status -406})}))]
+                                             {:not-found (constantly {:status -404})
+                                              :method-not-allowed (constantly {:status -405})
+                                              :not-acceptable (constantly {:status -406})}))]
           (testing "route doesn't match"
             (is (= -404 (:status (app {:request-method :get, :uri "/"})))))
           (testing "method doesn't match"
             (is (= -405 (:status (app {:request-method :post, :uri "/ping"})))))
           (testing "handler rejects"
-            (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
+            (is (= -406 (:status (app {:request-method :get, :uri "/pong"})))))))
+
+      (testing "with some custom http responses"
+        (let [app (ring/ring-handler router (ring/create-default-handler
+                                             {:not-found (constantly {:status -404})}))]
+          (testing "route doesn't match"
+            (is (= 405 (:status (app {:request-method :post, :uri "/ping"}))))))))))
 
 (deftest default-options-handler-test
   (let [response {:status 200, :body "ok"}]
@@ -209,9 +216,17 @@
                      ["/any" (constantly response)]]))]
 
         (testing "endpoint with a non-options handler"
-          (is (= response (app {:request-method :get, :uri "/get"})))
-          (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
-                 (app {:request-method :options, :uri "/get"}))))
+          (let [request {:request-method :options, :uri "/get"}]
+            (is (= response (app {:request-method :get, :uri "/get"})))
+            (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                   (app request)))
+            (testing "3-arity"
+              (let [result (atom nil)
+                    respond (partial reset! result)
+                    raise ::not-called]
+                (app request respond raise)
+                (is (= {:status 200, :body "", :headers {"Allow" "GET,POST,OPTIONS"}}
+                       @result))))))
 
         (testing "endpoint with a options handler"
           (is (= response (app {:request-method :options, :uri "/options"}))))
@@ -384,7 +399,7 @@
                                :wrap (fn [handler]
                                        (fn [request]
                                          (handler (update request ::mw (fnil conj []) name))))})
-        handler (fn [{:keys [::mw]}] {:status 200 :body (conj mw :ok)})
+        handler (fn [{::keys [mw]}] {:status 200 :body (conj mw :ok)})
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (ring/ring-handler
@@ -568,12 +583,28 @@
   (testing "1-arity"
     ((ring/ring-handler
        (ring/router [])
-       (fn [{:keys [::r/router]}]
+       (fn [{::r/keys [router]}]
          (is router)))
-      {}))
+     {}))
   (testing "3-arity"
     ((ring/ring-handler
        (ring/router [])
-       (fn [{:keys [::r/router]} _ _]
+       (fn [{::r/keys [router]} _ _]
          (is router)))
-      {} ::respond ::raise)))
+     {} ::respond ::raise)))
+
+#?(:clj
+   (deftest invalid-path-parameters-parsing-concurrent-requests-277-test
+     (testing "in enough concurrent system, path-parameters can bleed"
+       (doseq [compiler [trie/java-trie-compiler trie/clojure-trie-compiler]]
+         (let [app (ring/ring-handler
+                     (ring/router
+                       ["/:id" (fn [request]
+                                 {:status 200
+                                  :body (-> request :path-params :id)})])
+                     {::trie/trie-compiler compiler})]
+           (dotimes [_ 10]
+             (future
+               (dotimes [n 100000]
+                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
+                   (is (= body (str n))))))))))))

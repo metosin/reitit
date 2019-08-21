@@ -1,7 +1,7 @@
 # Swagger Support
 
 ```
-[metosin/reitit-swagger "0.3.1"]
+[metosin/reitit-swagger "0.3.9"]
 ```
 
 Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema-tools](https://github.com/metosin/schema-tools) and [spec-tools](https://github.com/metosin/spec-tools). Documentation is extracted from route definitions, coercion `:parameters` and `:responses` and from a set of new documentation keys.
@@ -29,7 +29,7 @@ Coercion keys also contribute to the docs:
 | key           | description |
 | --------------|-------------|
 | :parameters   | optional input parameters for a route, in a format defined by the coercion
-| :responses    | optional descriptions of responess, in a format defined by coercion
+| :responses    | optional descriptions of responses, in a format defined by coercion
 
 There is a `reitit.swagger.swagger-feature`, which acts as both a `Middleware` and an `Interceptor` that is not participating in any request processing - it just defines the route data specs for the routes it's mounted to. It is only needed if the [route data validation](route_data_validation.md) is turned on.
 
@@ -44,7 +44,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 [Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger specification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
 
 ```
-[metosin/reitit-swagger-ui "0.3.1"]
+[metosin/reitit-swagger-ui "0.3.9"]
 ```
 
 `reitit.swagger-ui/create-swagger-ui-hander` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:
@@ -55,7 +55,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 | :root            | optional resource root, defaults to `"swagger-ui"`
 | :url             | path to swagger endpoint, defaults to `/swagger.json`
 | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
-| :config          | parameters passed to swaggger-ui as-is. See [the docs](https://github.com/swagger-api/swagger-ui/tree/2.x#parameters)
+| :config          | parameters passed to swagger-ui as-is. See [the docs](https://github.com/swagger-api/swagger-ui/tree/2.x#parameters)
 
 We use swagger-ui from [ring-swagger-ui](https://github.com/metosin/ring-swagger-ui), which can be easily configured from routing application. It stores files `swagger-ui` in the resource classpath.
 

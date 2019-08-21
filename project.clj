@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.3.1"
+(defproject metosin/reitit-parent "0.3.9"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,33 +10,34 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  ;; TODO: need to verify that the code actually workd with Java1.8, see #242
+  ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.3.1"]
-                         [metosin/reitit-core "0.3.1"]
-                         [metosin/reitit-dev "0.3.1"]
-                         [metosin/reitit-spec "0.3.1"]
-                         [metosin/reitit-schema "0.3.1"]
-                         [metosin/reitit-ring "0.3.1"]
-                         [metosin/reitit-middleware "0.3.1"]
-                         [metosin/reitit-http "0.3.1"]
-                         [metosin/reitit-interceptors "0.3.1"]
-                         [metosin/reitit-swagger "0.3.1"]
-                         [metosin/reitit-swagger-ui "0.3.1"]
-                         [metosin/reitit-frontend "0.3.1"]
-                         [metosin/reitit-sieppari "0.3.1"]
-                         [metosin/reitit-pedestal "0.3.1"]
+  :managed-dependencies [[metosin/reitit "0.3.9"]
+                         [metosin/reitit-core "0.3.9"]
+                         [metosin/reitit-dev "0.3.9"]
+                         [metosin/reitit-spec "0.3.9"]
+                         [metosin/reitit-schema "0.3.9"]
+                         [metosin/reitit-ring "0.3.9"]
+                         [metosin/reitit-middleware "0.3.9"]
+                         [metosin/reitit-http "0.3.9"]
+                         [metosin/reitit-interceptors "0.3.9"]
+                         [metosin/reitit-swagger "0.3.9"]
+                         [metosin/reitit-swagger-ui "0.3.9"]
+                         [metosin/reitit-frontend "0.3.9"]
+                         [metosin/reitit-sieppari "0.3.9"]
+                         [metosin/reitit-pedestal "0.3.9"]
                          [metosin/ring-swagger-ui "2.2.10"]
-                         [metosin/spec-tools "0.9.1"]
-                         [metosin/schema-tools "0.11.0"]
+                         [metosin/spec-tools "0.9.3"]
+                         [metosin/schema-tools "0.12.0"]
                          [metosin/muuntaja "0.6.4"]
-                         [metosin/jsonista "0.2.2"]
+                         [metosin/jsonista "0.2.3"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
-                         [fipp "0.6.17" :exclusions [org.clojure/core.rrb-vector]]
+                         [fipp "0.6.18" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.7.2"]
                          [lambdaisland/deep-diff "0.0-47"]
+                         [com.bhauman/spell-spec "0.1.1"]
                          [ring/ring-core "1.7.1"]
 
                          [io.pedestal/pedestal.service "0.5.5"]]
@@ -46,8 +47,8 @@
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.7"]
             [lein-cloverage "1.1.1"]
-            [lein-codox "0.10.6"]
-            [metosin/bat-test "0.4.2"]]
+            [lein-codox "0.10.7"]
+            [metosin/bat-test "0.4.3"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
 
@@ -69,7 +70,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.0"]
+                   :dependencies [[org.clojure/clojure "1.10.1"]
                                   [org.clojure/clojurescript "1.10.520"]
 
                                   ;; modules dependencies
@@ -80,6 +81,7 @@
                                   [metosin/jsonista]
                                   [lambdaisland/deep-diff]
                                   [meta-merge]
+                                  [com.bhauman/spell-spec]
                                   [expound]
                                   [fipp]
 
@@ -90,20 +92,21 @@
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/muuntaja]
                                   [metosin/sieppari]
-                                  [metosin/jsonista "0.2.2"]
+                                  [metosin/jsonista]
 
-                                  [criterium "0.4.4"]
+                                  [criterium "0.4.5"]
                                   [org.clojure/test.check "0.9.0"]
-                                  [org.clojure/tools.namespace "0.2.11"]
+                                  [org.clojure/tools.namespace "0.3.0"]
                                   [com.gfredericks/test.chuck "0.2.9"]
 
                                   [io.pedestal/pedestal.service "0.5.5"]
 
-                                  [org.clojure/core.async "0.4.490"]
+                                  [org.clojure/core.async "0.4.500"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "2.0.1"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.3.1"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.4.0"]
+                                  [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
@@ -117,7 +120,7 @@
                                    [io.pedestal/pedestal.service "0.5.5"]
                                    [io.pedestal/pedestal.jetty "0.5.5"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "0.4.490"]
+                                   [org.clojure/core.async "0.4.500"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "2.0.1"]
                                    [metosin/sieppari]
@@ -125,7 +128,7 @@
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
-                                   [bidi "2.1.5"]]}
+                                   [bidi "2.1.6"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"

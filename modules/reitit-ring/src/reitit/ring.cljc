@@ -28,8 +28,11 @@
               (update acc method expand opts)
               acc)) data http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
+(defn compile-result [[path data] {::keys [default-options-handler] :as opts}]
   (let [[top childs] (group-keys data)
+        childs (cond-> childs
+                       (and (not (:options childs)) (not (:handler top)) default-options-handler)
+                       (assoc :options {:no-doc true, :handler default-options-handler}))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
@@ -40,12 +43,7 @@
                       (fn [acc method]
                         (cond-> acc
                                 any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods
-                        {:options
-                         (if default-options-handler
-                           (->endpoint path (assoc data
-                                              :handler default-options-handler
-                                              :no-doc true) :options nil))})
+                      (map->Methods {})
                       http-methods))]
     (if-not (seq childs)
       (->methods true top)
@@ -56,10 +54,16 @@
         (->methods (:handler top) data)
         childs))))
 
-(defn default-options-handler [request]
-  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
-        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
-    {:status 200, :body "", :headers {"Allow" allow}}))
+(def default-options-handler
+  (let [handle (fn [request]
+                 (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+                       allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+                   {:status 200, :body "", :headers {"Allow" allow}}))]
+    (fn
+      ([request]
+       (handle request))
+      ([request respond _]
+       (respond (handle request))))))
 
 ;;
 ;; public api
@@ -145,14 +149,14 @@
   | key                    | description |
   | -----------------------|-------------|
   | `:not-found`           | 404, no routes matches
-  | `:method-not-accepted` | 405, no method matches
+  | `:method-not-allowed`  | 405, no method matches
   | `:not-acceptable`      | 406, handler returned `nil`"
   ([]
-   (create-default-handler
-     {:not-found (constantly {:status 404, :body "", :headers {}})
-      :method-not-allowed (constantly {:status 405, :body "", :headers {}})
-      :not-acceptable (constantly {:status 406, :body "", :headers {}})}))
-  ([{:keys [not-found method-not-allowed not-acceptable]}]
+   (create-default-handler {}))
+  ([{:keys [not-found method-not-allowed not-acceptable]
+     :or {not-found (constantly {:status 404, :body "", :headers {}})
+          method-not-allowed (constantly {:status 405, :body "", :headers {}})
+          not-acceptable (constantly {:status 406, :body "", :headers {}})}}]
    (fn
      ([request]
       (if-let [match (::r/match request)]

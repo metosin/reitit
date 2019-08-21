@@ -25,7 +25,13 @@
   {:name ::coerce-request
    :spec ::rs/parameters
    :compile (fn [{:keys [coercion parameters]} opts]
-              (if (and coercion parameters)
+              (cond
+                ;; no coercion, skip
+                (not coercion) nil
+                ;; just coercion, don't mount
+                (not parameters) {}
+                ;; mount
+                :else
                 (let [coercers (coercion/request-coercers coercion parameters opts)]
                   (fn [handler]
                     (fn
@@ -43,7 +49,13 @@
   {:name ::coerce-response
    :spec ::rs/responses
    :compile (fn [{:keys [coercion responses]} opts]
-              (if (and coercion responses)
+              (cond
+                ;; no coercion, skip
+                (not coercion) nil
+                ;; just coercion, don't mount
+                (not responses) {}
+                ;; mount
+                :else
                 (let [coercers (coercion/response-coercers coercion responses opts)]
                   (fn [handler]
                     (fn

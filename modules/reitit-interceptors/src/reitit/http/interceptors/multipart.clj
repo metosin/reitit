@@ -11,6 +11,9 @@
 (s/def ::bytes bytes?)
 (s/def ::size int?)
 
+(s/def ::multipart :reitit.core.coercion/model)
+(s/def ::parameters (s/keys :opt-un [::multipart]))
+
 (def temp-file-part
   "Spec for file param created by ring.middleware.multipart-params.temp-file store."
   (st/spec
@@ -41,6 +44,7 @@
    (multipart-interceptor nil))
   ([options]
    {:name ::multipart
+    :spec ::parameters
     :compile (fn [{:keys [parameters coercion]} opts]
                (if-let [multipart (:multipart parameters)]
                  (let [parameter-coercion {:multipart (coercion/->ParameterCoercion

@@ -4,18 +4,19 @@
             [io.pedestal.http :as http]
             [reitit.interceptor]
             [reitit.http])
-  (:import (reitit.interceptor Executor)))
+  (:import (reitit.interceptor Executor)
+           (java.lang.reflect Method)))
 
-(defn- arity [f]
+;; TODO: variadic
+(defn- arities [f]
   (->> (class f)
        .getDeclaredMethods
        (filter #(= "invoke" (.getName %)))
-       first
-       .getParameterTypes
-       alength))
+       (map #(alength (.getParameterTypes ^Method %)))
+       (set)))
 
-(defn- error-with-arity-1? [{error-fn :error}]
-  (and error-fn (= 1 (arity error-fn))))
+(defn- error-without-arity-2? [{error-fn :error}]
+  (and error-fn (not (contains? (arities error-fn) 2))))
 
 (defn- error-arity-2->1 [error]
   (fn [context ex]
@@ -26,23 +27,31 @@
             (dissoc :error))
         context))))
 
-(defn wrap-error-arity-2->1 [interceptor]
+(defn- wrap-error-arity-2->1 [interceptor]
   (update interceptor :error error-arity-2->1))
+
+(defn ->interceptor [interceptor]
+  (cond
+    (interceptor/interceptor? interceptor)
+    interceptor
+    (->> (select-keys interceptor [:enter :leave :error]) (vals) (keep identity) (seq))
+    (interceptor/interceptor
+      (if (error-without-arity-2? interceptor)
+        (wrap-error-arity-2->1 interceptor)
+        interceptor))))
+
+;;
+;; Public API
+;;
 
 (def pedestal-executor
   (reify
     Executor
     (queue [_ interceptors]
       (->> interceptors
-           (map (fn [{:keys [::interceptor/handler] :as interceptor}]
+           (map (fn [{::interceptor/keys [handler] :as interceptor}]
                   (or handler interceptor)))
-           (map (fn [interceptor]
-                  (if (interceptor/interceptor? interceptor)
-                    interceptor
-                    (interceptor/interceptor
-                     (if (error-with-arity-1? interceptor) 
-                       (wrap-error-arity-2->1 interceptor)
-                       interceptor)))))))
+           (keep ->interceptor)))
     (enqueue [_ context interceptors]
       (chain/enqueue context interceptors))))
 

@@ -38,13 +38,17 @@ public class Trie {
     return decode(new String(chars, begin, end - begin), hasPercent, hasPlus);
   }
 
-  public static class Match {
-    public IPersistentMap params;
+  public final static class Match {
+    public final IPersistentMap params;
     public final Object data;
 
     public Match(IPersistentMap params, Object data) {
       this.params = params;
       this.data = data;
+    }
+
+    Match assoc(Object key, Object value) {
+      return new Match(params.assoc(key, value), data);
     }
 
     @Override
@@ -174,10 +178,7 @@ public class Trie {
           }
         }
         final Match m = child.match(stop, max, path);
-        if (m != null) {
-          m.params = m.params.assoc(key, decode(new String(path, i, stop - i), hasPercent, hasPlus));
-        }
-        return m;
+        return m != null ? m.assoc(key, decode(new String(path, i, stop - i), hasPercent, hasPlus)) : null;
       }
       return null;
     }
@@ -216,7 +217,7 @@ public class Trie {
     @Override
     public Match match(int i, int max, char[] path) {
       if (i <= max) {
-        return new Match(params.assoc(parameter, decode(path, i, max)), data);
+        return new Match(params, data).assoc(parameter, decode(path, i, max));
       }
       return null;
     }
@@ -291,8 +292,8 @@ public class Trie {
                             staticMatcher("/auth/",
                                     linearMatcher(
                                             Arrays.asList(
-                                                    staticMatcher("login", dataMatcher(null, 1)),
-                                                    staticMatcher("recovery", dataMatcher(null, 2))), true))), true);
+                                                    staticMatcher("login", dataMatcher(PersistentArrayMap.EMPTY, 1)),
+                                                    staticMatcher("recovery", dataMatcher(PersistentArrayMap.EMPTY, 2))), true))), true);
     System.err.println(matcher);
     System.out.println(lookup(matcher, "/auth/login"));
     System.out.println(lookup(matcher, "/auth/recovery"));

@@ -12,15 +12,15 @@
 (s/def ::interceptors (s/coll-of (partial satisfies? interceptor/IntoInterceptor)))
 
 (s/def ::data
-  (s/keys :opt-un [::rs/handler ::rs/name ::interceptors]))
+  (s/keys :opt-un [::rs/handler ::rs/name ::rs/no-doc ::interceptors]))
 
 ;;
 ;; Validator
 ;;
 
 (defn validate
-  [routes {:keys [spec] :or {spec ::data}}]
-  (when-let [problems (rrs/validate-route-data routes :interceptors spec)]
+  [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
+  (when-let [problems (rrs/validate-route-data routes :interceptors wrap spec)]
     (exception/fail!
-      ::invalid-route-data
+      ::rs/invalid-route-data
       {:problems problems})))

@@ -7,11 +7,14 @@
   ([type data]
    (throw (ex-info (str type) {:type type, :data data}))))
 
+(defn get-message [e]
+  #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)))
+
 (defmulti format-exception (fn [type _ _] type))
 
 (defn exception [e]
   (let [data (ex-data e)
-        message (format-exception (:type data) #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)) (:data data))]
+        message (format-exception (:type data) (get-message e) (:data data))]
     ;; there is a 3-arity version (+cause) of ex-info, but the default repl error message is taken from the cause
     (ex-info message (assoc (or data {}) ::cause e))))
 
@@ -35,3 +38,6 @@
            (fn [[name vals]]
              (str name "\n-> " (str/join "\n-> " (mapv first vals)) "\n"))
            conflicts)))
+
+(defmethod format-exception :reitit.impl/merge-data [_ _ data]
+  (str "Error merging route-data\n\n" (pr-str data)))

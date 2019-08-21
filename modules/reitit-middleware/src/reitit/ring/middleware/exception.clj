@@ -118,17 +118,17 @@
 (defn create-exception-middleware
   "Creates a Middleware that catches all exceptions. Takes a map
   of `identifier => exception request => response` that is used to select
-  the exception handler for the thown/raised exception identifier. Exception
-  idenfier is either a `Keyword` or a Exception Class.
+  the exception handler for the thrown/raised exception identifier. Exception
+  identifier is either a `Keyword` or a Exception Class.
 
   The following handlers special handlers are available:
 
   | key                    | description
   |------------------------|-------------
-  | `::exception/default`  | a default exception handler if nothing else mathced (default [[default-handler]]).
+  | `::exception/default`  | a default exception handler if nothing else matched (default [[default-handler]]).
   | `::exception/wrap`     | a 3-arity handler to wrap the actual handler `handler exception request => response`
 
-  The handler is selected from the options map by exception idenfiter
+  The handler is selected from the options map by exception identifier
   in the following lookup order:
 
   1) `:type` of exception ex-data

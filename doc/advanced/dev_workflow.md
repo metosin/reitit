@@ -1,6 +1,6 @@
-# Dev Worklfow
+# Dev Workflow
 
-Many applications will require the routes to span multiple namespaces. It is quite easy to do so with reitit, but we might hit a problem during developement.
+Many applications will require the routes to span multiple namespaces. It is quite easy to do so with reitit, but we might hit a problem during development.
 
 ## An example
 
@@ -122,7 +122,7 @@ Notice that the name is now correct, without reloading every namespace under the
 
 ## Why is this a crude solution ?
 
-The astute reader will have noticed that we're recompiling the full routing tree on every invocation. While this solution is practical during developement, it goes contrary to the performance goals of reitit. 
+The astute reader will have noticed that we're recompiling the full routing tree on every invocation. While this solution is practical during development, it goes contrary to the performance goals of reitit.
 
 We need a way to only do this once at production time.
 

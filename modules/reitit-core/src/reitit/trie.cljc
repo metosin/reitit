@@ -5,6 +5,12 @@
   #?(:clj (:import [reitit Trie Trie$Match Trie$Matcher]
                    (java.net URLDecoder))))
 
+(defn ^:no-doc into-set [x]
+  (cond
+    (or (set? x) (sequential? x)) (set x)
+    (nil? x) #{}
+    :else (conj #{} x)))
+
 (defrecord Wild [value])
 (defrecord CatchAll [value])
 (defrecord Match [params data])
@@ -51,25 +57,36 @@
     (keyword (subs s 0 i) (subs s (inc i)))
     (keyword s)))
 
-(defn split-path [s]
-  (let [-static (fn [from to] (if-not (= from to) [(subs s from to)]))
+(defn split-path [s {:keys [syntax] :or {syntax #{:bracket :colon}}}]
+  (let [bracket? (-> syntax (into-set) :bracket)
+        colon? (-> syntax (into-set) :colon)
+        -static (fn [from to] (if-not (= from to) [(subs s from to)]))
         -wild (fn [from to] [(->Wild (-keyword (subs s (inc from) to)))])
         -catch-all (fn [from to] [(->CatchAll (keyword (subs s (inc from) to)))])]
     (loop [ss nil, from 0, to 0]
       (if (= to (count s))
         (concat ss (-static from to))
-        (case (get s to)
-          \{ (let [to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
-               (if (= \* (get s (inc to)))
-                 (recur (concat ss (-static from to) (-catch-all (inc to) to')) (long (inc to')) (long (inc to')))
-                 (recur (concat ss (-static from to) (-wild to to')) (long (inc to')) (long (inc to')))))
-          \: (let [to' (or (str/index-of s "/" to) (count s))]
-               (if (= 1 (- to' to))
-                 (recur ss from (inc to))
-                 (recur (concat ss (-static from to) (-wild to to')) (long to') (long to'))))
-          \* (let [to' (count s)]
-               (recur (concat ss (-static from to) (-catch-all to to')) (long to') (long to')))
-          (recur ss from (inc to)))))))
+        (let [c (get s to)]
+          (cond
+
+            (and bracket? (= \{ c))
+            (let [to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
+              (if (= \* (get s (inc to)))
+                (recur (concat ss (-static from to) (-catch-all (inc to) to')) (long (inc to')) (long (inc to')))
+                (recur (concat ss (-static from to) (-wild to to')) (long (inc to')) (long (inc to')))))
+
+            (and colon? (= \: c))
+            (let [to' (or (str/index-of s "/" to) (count s))]
+              (if (= 1 (- to' to))
+                (recur ss from (inc to))
+                (recur (concat ss (-static from to) (-wild to to')) (long to') (long to'))))
+
+            (and colon? (= \* c))
+            (let [to' (count s)]
+              (recur (concat ss (-static from to) (-catch-all to to')) (long to') (long to')))
+
+            :else
+            (recur ss from (inc to))))))))
 
 (defn join-path [xs]
   (reduce
@@ -80,8 +97,8 @@
                (instance? CatchAll x) (str "{*" (-> x :value str (subs 1)) "}"))))
     "" xs))
 
-(defn normalize [s]
-  (-> s (split-path) (join-path)))
+(defn normalize [s opts]
+  (-> s (split-path opts) (join-path)))
 
 ;;
 ;; Conflict Resolution
@@ -115,9 +132,9 @@
       (concat [(subs x i)] xs)
       xs)))
 
-(defn conflicting-paths? [path1 path2]
-  (loop [parts1 (split-path path1)
-         parts2 (split-path path2)]
+(defn conflicting-paths? [path1 path2 opts]
+  (loop [parts1 (split-path path1 opts)
+         parts2 (split-path path2 opts)]
     (let [[[s1 & ss1] [s2 & ss2]] (-slice-start parts1 parts2)]
       (cond
         (= s1 s2 nil) true
@@ -314,10 +331,10 @@
      node routes))
   ([node path data]
    (insert node path data nil))
-  ([node path data {::keys [parameters] :or {parameters map-parameters}}]
-   (let [parts (split-path path)
+  ([node path data {::keys [parameters] :or {parameters map-parameters} :as opts}]
+   (let [parts (split-path path opts)
          params (parameters (->> parts (remove string?) (map :value)))]
-     (-insert (or node (-node {})) (split-path path) path params data))))
+     (-insert (or node (-node {})) (split-path path opts) path params data))))
 
 (defn compiler
   "Returns a default [[TrieCompiler]]."

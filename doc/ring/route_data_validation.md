@@ -155,7 +155,7 @@ Let's reuse the `wrap-enforce-roles` from [Dynamic extensions](dynamic_extension
 (s/def ::roles (s/coll-of ::role :into #{}))
 
 (defn wrap-enforce-roles [handler]
-  (fn [{:keys [::roles] :as request}]
+  (fn [{::keys [roles] :as request}]
     (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/subset? required roles)))
         {:status 403, :body "forbidden"}
@@ -265,7 +265,7 @@ Or even flatten the routes:
        ::rs/explain e/expound-str})))
 ```
 
-The common Middleware can also be pushed to the router, here cleanly separing behavior and data:
+The common Middleware can also be pushed to the router, here cleanly separating behavior and data:
 
 ```clj
 (def app

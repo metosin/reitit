@@ -103,7 +103,7 @@
           ;; Prevent document load when clicking a elements, if the href points to URL that is part
           ;; of the routing tree."
           ignore-anchor-click (fn [e]
-                                ;; Returns the next matching anchestor of event target
+                                ;; Returns the next matching ancestor of event target
                                 (when-let [el (closest-by-tag (event-target e) "a")]
                                   (let [uri (.parse Uri (.-href el))]
                                     (when (ignore-anchor-click-predicate router e el uri)
@@ -133,7 +133,7 @@
 
   Returns History object.
 
-  When using with development workflow like Figwheel, rememeber to
+  When using with development workflow like Figwheel, remember to
   remove listeners using stop! call before calling start! again.
 
   Parameters:

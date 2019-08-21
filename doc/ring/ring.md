@@ -5,7 +5,7 @@
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
 ```clj
-[metosin/reitit-ring "0.3.1"]
+[metosin/reitit-ring "0.3.9"]
 ```
 
 ## `reitit.ring/ring-router`
@@ -155,7 +155,7 @@ A middleware and a handler:
   (fn [request]
     (handler (update request ::acc (fnil conj []) id))))
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 ```
 

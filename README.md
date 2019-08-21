@@ -8,12 +8,13 @@ A fast data-driven router for Clojure(Script).
 * Bi-directional routing
 * [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html), [pedestal](https://metosin.github.io/reitit/http/pedestal.html) & [frontend](https://metosin.github.io/reitit/frontend/basics.html)
+* Friendly [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html)
 * Extendable
 * Modular
 * [Fast](https://metosin.github.io/reitit/performance.html)
 
-Posts:
-* [Reitit, The Ancient Art of Data-Driven](https://www.slideshare.net/mobile/metosin/reitit-clojurenorth-2019-141438093)
+Presentations:
+* [Reitit, The Ancient Art of Data-Driven](https://www.slideshare.net/mobile/metosin/reitit-clojurenorth-2019-141438093), Clojure/North 2019, [video](https://youtu.be/cSntRGAjPiM)
 * [Faster and Friendlier Routing with Reitit 0.3.0](https://www.metosin.fi/blog/faster-and-friendlier-routing-with-reitit030/)
 * [Welcome Reitit 0.2.0!](https://www.metosin.fi/blog/reitit020/)
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
@@ -48,7 +49,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.3.1"]
+[metosin/reitit "0.3.9"]
 ```
 
 Optionally, the parts can be required separately.
@@ -152,8 +153,8 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## Special thanks
 
-* Existing Clojure(Script) routing libs, expecially to
-[Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [calfpath](https://github.com/ikitommi/calfpath), [Compojure](https://github.com/weavejester/compojure) and
+* Existing Clojure(Script) routing libs, especially to
+[Ataraxy](https://github.com/weavejester/ataraxy), [Bide](https://github.com/funcool/bide), [Bidi](https://github.com/juxt/bidi), [calfpath](https://github.com/ikitommi/calfpath), [Compojure](https://github.com/weavejester/compojure), [Keechma](https://keechma.com/) and
 [Pedestal](https://github.com/pedestal/pedestal/tree/master/route).
 * [Compojure-api](https://github.com/metosin/compojure-api), [Kekkonen](https://github.com/metosin/kekkonen), [Ring-swagger](https://github.com/metosin/ring-swagger) and [Yada](https://github.com/juxt/yada) and for ideas, coercion & stuff.
 * [Schema](https://github.com/plumatic/schema) and [clojure.spec](https://clojure.org/about/spec) for the validation part.

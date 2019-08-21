@@ -2,8 +2,7 @@
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.interceptor :as interceptor]
             [reitit.ring :as ring]
-            [reitit.core :as r]
-            [reitit.impl :as impl]))
+            [reitit.core :as r]))
 
 (defrecord Endpoint [data interceptors queue handler path method])
 
@@ -14,8 +13,11 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
+(defn compile-result [[path data] {::keys [default-options-handler] :as opts}]
   (let [[top childs] (ring/group-keys data)
+        childs (cond-> childs
+                       (and (not (:options childs)) (not (:handler top)) default-options-handler)
+                       (assoc :options {:no-doc true, :handler default-options-handler}))
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
@@ -29,12 +31,7 @@
                       (fn [acc method]
                         (cond-> acc
                                 any? (assoc method (->endpoint path data method nil))))
-                      (ring/map->Methods
-                        {:options
-                         (if default-options-handler
-                           (->endpoint path (assoc data
-                                              :handler default-options-handler
-                                              :no-doc true) :options nil))})
+                      (ring/map->Methods {})
                       ring/http-methods))]
     (if-not (seq childs)
       (->methods true top)
@@ -73,7 +70,7 @@
      (r/router data opts))))
 
 (defn routing-interceptor
-  "Creates a Pedestal-style routing interceptor that enqueus the interceptors into context.
+  "Creates a Pedestal-style routing interceptor that enqueues the interceptors into context.
   Takes http-router, default ring-handler and and options map, with the following keys:
 
   | key               | description |

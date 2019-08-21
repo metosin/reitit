@@ -54,6 +54,20 @@
      (println ~@body)
      (cc/quick-bench ~@body)))
 
+(defmacro b! [name & body]
+  `(do
+     (title ~name)
+     (println)
+     (println "\u001B[33m" ~@body "\u001B[0m")
+     (let [{[lower#] :lower-q :as res#} (cc/quick-benchmark (do ~@body) nil)
+           µs# (* 1000000 lower#)
+           ns# (* 1000 µs#)]
+       (println "\u001B[32m\n" (format "%1$10.2fns" ns#) "\u001B[0m")
+       (println "\u001B[32m" (format "%1$10.2fµs" µs#) "\u001B[0m")
+       (println)
+       (cc/report-result res#))
+     (println)))
+
 (defn valid-urls [router]
   (->>
     (for [name (reitit/route-names router)

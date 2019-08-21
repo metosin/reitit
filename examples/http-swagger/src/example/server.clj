@@ -1,16 +1,19 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.http :as http]
+            [reitit.coercion.spec]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.http.coercion :as coercion]
-            [reitit.coercion.spec :as spec-coercion]
+            [reitit.dev.pretty :as pretty]
+            [reitit.interceptor.sieppari :as sieppari]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
             [reitit.http.interceptors.dev :as dev]
-            [reitit.interceptor.sieppari :as sieppari]
+            [reitit.http.spec :as spec]
+            [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as client]
             [muuntaja.core :as m]
@@ -72,7 +75,7 @@
                               "https://randomuser.me/api/"
                               {:query-params {:seed seed, :results results}})
                             :body
-                            (partial m/decode m/instance "application/json")
+                            (partial m/decode "application/json")
                             :results
                             (fn [results]
                               {:status 200
@@ -109,10 +112,15 @@
                             {:status 200
                              :body {:total (- x y)}})}}]]]
 
-      {;;:reitit.interceptor/transform dev/print-context-diffs
-       :data {:coercion spec-coercion/coercion
+      {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
+       ;;:validate spec/validate ;; enable spec validation for route data
+       ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
+       :exception pretty/exception
+       :data {:coercion reitit.coercion.spec/coercion
               :muuntaja m/instance
-              :interceptors [;; query-params & form-params
+              :interceptors [;; swagger feature
+                             swagger/swagger-feature
+                             ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
                              (muuntaja/format-negotiate-interceptor)
@@ -131,7 +139,8 @@
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
-         :config {:validatorUrl nil}})
+         :config {:validatorUrl nil
+                  :operationsSorter "alpha"}})
       (ring/create-default-handler))
     {:executor sieppari/executor}))
 

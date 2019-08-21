@@ -12,7 +12,7 @@ There is an extra option in ring-router (actually, in the underlying middleware-
   (fn [request]
     (handler (update request ::acc (fnil conj []) id))))
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 
 (def app
@@ -59,7 +59,7 @@ There is an extra option in ring-router (actually, in the underlying middleware-
 ### Printing Request Diffs
 
 ```clj
-[metosin/reitit-middleware "0.3.1"]
+[metosin/reitit-middleware "0.3.9"]
 ```
 
 Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the request diffs between each middleware are printed out to the console. To use it, add the following router option:

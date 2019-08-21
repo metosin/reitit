@@ -4,7 +4,7 @@ The [clojure.spec](https://clojure.org/guides/spec) library specifies the struct
 
 ## Warning
 
-`clojure.spec` by itself doesn't support coercion. `reitit` uses [spec-tools](https://github.com/metosin/spec-tools) that adds coercion to spec. Like `clojure.spec`, it's alpha as it leans both on spec walking and `clojure.spec.alpha/conform`, which is concidered a spec internal, that might be changed or removed later.
+`clojure.spec` by itself doesn't support coercion. `reitit` uses [spec-tools](https://github.com/metosin/spec-tools) that adds coercion to spec. Like `clojure.spec`, it's alpha as it leans both on spec walking and `clojure.spec.alpha/conform`, which is considered a spec internal, that might be changed or removed later.
 
 ## Usage
 

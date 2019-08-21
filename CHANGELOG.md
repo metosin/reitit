@@ -12,19 +12,168 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.3.2-SNAPSHOT
+## 0.3.9 (2019-06-16)
+
+### `reitit-ring`
+
+* Added async support for `default-options-handler` on `reitit-ring`, fixes [#293](https://github.com/metosin/reitit/issues/293)
+
+## 0.3.8 (2019-06-15)
 
 * Updated dependencies:
 
 ```clj
-[metosin/spec-tools "0.9.1"] is available but we use "0.9.0"
+[metosin/schema-tools "0.12.0"] is available but we use "0.11.0"
+[metosin/spec-tools "0.9.3"] is available but we use "0.9.2"
+[metosin/jsonista "0.2.3"] is available but we use "0.2.2"
+```
+
+### `reitit-core`
+
+* Schema coercion supports transformtatins from keywords->clojure, via [schema-tools](https://github.com/metosin/schema-tools).
+
+* Add support for explixit selection of router path-parameter `:syntax`, fixes [#276](https://github.com/metosin/reitit/issues/276)
+
+```clj
+(require '[reitit.core :as r])
+
+;; default
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id])
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123", :8080 ":8080"},
+;       :path "http://localhost:8080/api/user/123"}
+
+
+;; just bracket-syntax
+(-> (r/router
+      ["http://localhost:8080/api/user/{id}" ::user-by-id]
+      {:syntax :bracket})
+    (r/match-by-path "http://localhost:8080/api/user/123"))
+;#Match{:template "http://localhost:8080/api/user/{id}",
+;       :data {:name :user/user-by-id},
+;       :result nil,
+;       :path-params {:id "123"},
+;       :path "http://localhost:8080/api/user/123"}
+```
+
+## 0.3.7 (2019-05-25)
+
+### `reitit-pedestal`
+
+* Fixed Pedestal Interceptor coercion bug, see [#285](https://github.com/metosin/reitit/issues/285).
+
+## 0.3.6 (2019-05-23)
+
+* Fixed [a zillion typos](https://github.com/metosin/reitit/pull/281) in docs by [Marcus Spiegel](https://github.com/malesch).
+
+### `reitit-ring`
+
+* Fix on `reitit.ring/create-default-handler` to support overriding just some handlers, fixes [#283](https://github.com/metosin/reitit/issues/283), by [Daniel Sunnerek](https://github.com/kardan).
+
+## 0.3.5 (2019-05-22)
+
+### `reitit-core`
+
+* **MAJOR**: Fix bug in Java Trie (since 0.3.0!), [which made invalid path parameter parsing in concurrent requests](https://github.com/metosin/reitit/issues/277). All Trie implementation classes are final from now on.
+
+## 0.3.4 (2019-05-20)
+
+### `reitit-core`
+
+* Spec problems are [reported correctly in coercion](https://github.com/metosin/reitit/pull/275) by [Kevin W. van Rooijen](https://github.com/kwrooijen).
+
+## 0.3.3 (2019-05-16)
+
+* Better error messages on route data merge error:
+
+```clj
+(ns user
+  (:require [reitit.core :as r]
+            [schema.core :as s]
+            [reitit.dev.pretty :as pretty]))
+
+(r/router
+  ["/kikka"
+   {:parameters {:body {:id s/Str}}}
+   ["/kakka"
+    {:parameters {:body [s/Str]}}]]
+  {:exception pretty/exception})
+; -- Router creation failed -------------------------------------------- user:7 --
+; 
+; Error merging route-data:
+; 
+; -- On route -----------------------
+; 
+; /kikka/kakka
+; 
+; -- Exception ----------------------
+; 
+; Don't know how to create ISeq from: java.lang.Class
+; 
+;    {:parameters {:body {:id java.lang.String}}}
+; 
+;    {:parameters {:body [java.lang.String]}}
+; 
+; https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data
+; 
+; --------------------------------------------------------------------------------
+```
+
+## 0.3.2 (2019-05-13)
+
+* Updated dependencies:
+
+```clj
+[metosin/spec-tools "0.9.2"] is available but we use "0.9.0"
 [metosin/muuntaja "0.6.4"] is available but we use "0.6.3"
+[fipp "0.6.18"] is available but we use "0.6.17"
 [lambdaisland/deep-diff "0.0-47"] is available but we use "0.0-25"
 ```
+
+* Updated guides on [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html) & [Route-data Validation](https://metosin.github.io/reitit/basics/route_data_validation.html)
+
+### `reitit-core`
+
+* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
+  * Updated swagger-examples to easily enable closed spec validation
+
+```clj
+(require '[reitit.core :as r])
+(require '[reitit.spec :as rs])
+(require '[reitit.dev.pretty :as pretty)
+(require '[spec-tools.spell :as spell])
+(require '[clojure.spec.alpha :as s])
+
+(s/def ::description string?)
+
+(r/router
+  ["/api" {:summary "kikka"}]
+  {:validate rs/validate
+   :spec (s/merge ::rs/default-data (s/keys :req-un [::description]))
+   ::rs/wrap spell/closed
+   :exception pretty/exception})
+```
+
+![closed](./doc/images/closed-spec1.png)
+
+### `reitit-frontend`
+
+* add support for html5 links inside Shadow DOM by [Antti Leppänen](https://github.com/fraxu).
+* lot's of React-router [examples](./examples) ported in, thanks to [Valtteri Harmainen](https://github.com/vharmain)
 
 ### `reitit.pedestal`
 
 * Automatically coerce Sieppari-style 1-arity `:error` handlers into Pedestal-style 2-arity `:error` handlers. Thanks to [Mathieu MARCHANDISE](https://github.com/vielmath).
+
+### `reitit-middleware`
+
+* `reitit.ring.middleware.dev/print-request-diffs` prints also response diffs.
+
+<img src="https://user-images.githubusercontent.com/567532/56895987-3e54ea80-6a93-11e9-80ee-9ba6f8896db6.png">
 
 ## 0.3.1 (2019-03-18)
 
@@ -367,7 +516,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-spec`
 
 * Latest features from [spec-tools](https://github.com/metosin/spec-tools)
-  * Swagger enchancements
+  * Swagger enhancements
   * Better spec coercion via `st/coerce` using spec walking & inference: many simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`) can be transformed without needing spec to be wrapped. Fallbacks to old conformed based approach.
   * [example app](https://github.com/metosin/reitit/blob/master/examples/ring-spec-swagger/src/example/server.clj).
 
@@ -390,7 +539,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
   (fn [request]
     (handler (update request ::acc (fnil conj []) id))))
 
-(defn handler [{:keys [::acc]}]
+(defn handler [{::keys [acc]}]
   {:status 200, :body (conj acc :handler)})
 
 (def app
@@ -479,7 +628,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.2.0 (2018-09-03)
 
-Sample apps demonstraing the current status of `reitit`:
+Sample apps demonstrating the current status of `reitit`:
 
 * [`reitit-ring` with coercion, swagger and default middleware](https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj)
 * [`reitit-frontend`, the easy way](https://github.com/metosin/reitit/blob/master/examples/frontend/src/frontend/core.cljs)

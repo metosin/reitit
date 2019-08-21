@@ -12,7 +12,7 @@ Below is an example how to do reverse routing from a ring handler:
   (ring/ring-handler
     (ring/router
       [["/users"
-        {:get (fn [{:keys [::r/router]}]
+        {:get (fn [{::r/keys [router]}]
                 {:status 200
                  :body (for [i (range 10)]
                          {:uri (-> router

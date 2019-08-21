@@ -3,6 +3,9 @@
             [clojure.spec.alpha :as s]
             [reitit.exception :as exception]
             [arrangement.core]
+    ;; spell-spec
+            [spec-tools.spell :as spell]
+            [spell-spec.expound]
     ;; expound
             [expound.ansi]
             [expound.alpha]
@@ -178,7 +181,7 @@
     (if (and (not= 1 line))
       (let [file-name (str/replace file #"(.*?)\.\S[^\.]+" "$1")
             target-name (name target)
-            ns (str (subs target-name 0 (str/index-of target-name (str "user" "$"))) file-name)]
+            ns (str (subs target-name 0 (or (str/index-of target-name (str file-name "$")) 0)) file-name)]
         (str ns ":" line))
       "repl")
     (catch #?(:clj Exception, :cljs js/Error) _
@@ -220,10 +223,10 @@
 (defn exception [e]
   (let [data (-> e ex-data :data)
         message (format-exception (-> e ex-data :type) #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)) data)
-        source #?(:clj (->> e Throwable->map :trace
-                            (drop-while #(not= (name (first %)) "reitit.core$router"))
-                            (drop-while #(= (name (first %)) "reitit.core$router"))
-                            next first source-str)
+        source #?(:clj  (->> e Throwable->map :trace
+                             (drop-while #(not= (name (first %)) "reitit.core$router"))
+                             (drop-while #(= (name (first %)) "reitit.core$router"))
+                             next first source-str)
                   :cljs "unknown")]
     (ex-info (exception-str message source (printer)) (assoc (or data {}) ::exception/cause e))))
 
@@ -316,12 +319,12 @@
    (into
      [:group]
      (map
-       (fn [{:keys [data path spec]}]
+       (fn [{:keys [data path spec scope]}]
          [:group
           [:span (color :grey "-- On route -----------------------")]
           [:break]
           [:break]
-          (text path)
+          (text path) (if scope [:span " " (text scope)])
           [:break]
           [:break]
           (-> (s/explain-data spec data)
@@ -331,4 +334,28 @@
           [:break]])
        problems))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data-validation")
+   [:break]])
+
+(defmethod format-exception :reitit.impl/merge-data [_ _ {:keys [path left right exception]}]
+  [:group
+   (text "Error merging route-data:")
+   [:break] [:break]
+   [:group
+    [:span (color :grey "-- On route -----------------------")]
+    [:break]
+    [:break]
+    (text path)
+    [:break]
+    [:break]
+    [:span (color :grey "-- Exception ----------------------")]
+    [:break]
+    [:break]
+    (color :red (exception/get-message exception))
+    [:break]
+    [:break]
+    (edn left {:margin 3})
+    [:break]
+    (edn right {:margin 3})]
+   [:break]
+   (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data")
    [:break]])

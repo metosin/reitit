@@ -296,8 +296,7 @@
 (def app
   (ring/ring-handler
     (ring/router
-      (reduce (partial add h) [] routes)
-      {::trie/parameters trie/record-parameters})
+      (reduce (partial add h) [] routes))
     (ring/create-default-handler)
     {:inject-match? false, :inject-router? false}))
 
@@ -319,6 +318,7 @@
   ;; 140µs (java-segment-router)
   ;;  60ns (java-segment-router, no injects)
   ;;  55ns (trie-router, no injects)
+  ;;  54µs (trie-router, quick-pam)
   ;;  54ns (trie-router, no injects, optimized)
   (let [req (map->Req {:request-method :get, :uri "/user/repos"})]
     (title "static")
@@ -337,6 +337,7 @@
   ;; 273ns (trie-router, no injects, direct-data)
   ;; 256ns (trie-router, pre-defined parameters)
   ;; 237ns (trie-router, single-sweep wild-params)
+  ;; 226µs (trie-router, quick-pam)
   ;; 191ns (trie-router, record parameters)
   (let [req (map->Req {:request-method :get, :uri "/repos/julienschmidt/httprouter/stargazers"})]
     (title "param")
@@ -354,6 +355,7 @@
   ;;  63µs (trie-router, no injects, switch-case) - 124µs (clojure)
   ;;  63µs (trie-router, no injects, direct-data)
   ;;  54µs (trie-router, non-transient params)
+  ;;  50µs (trie-router, quick-pam)
   ;;  49µs (trie-router, pre-defined parameters)
   (let [requests (mapv route->req routes)]
     (title "all")

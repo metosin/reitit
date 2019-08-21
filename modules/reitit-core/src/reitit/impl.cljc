@@ -4,24 +4,26 @@
             [clojure.set :as set]
             [meta-merge.core :as mm]
             [reitit.trie :as trie]
-            [reitit.exception :as exception])
+            [reitit.exception :as exception]
+            [reitit.exception :as ex])
   #?(:clj
      (:import (java.util.regex Pattern)
               (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
-(defrecord Route [path path-parts path-params])
-
-(defn parse [path]
-  (let [path #?(:clj (.intern ^String (trie/normalize path)) :cljs (trie/normalize path))
-        path-parts (trie/split-path path)
+(defn parse [path opts]
+  (let [path #?(:clj (.intern ^String (trie/normalize path opts)) :cljs (trie/normalize path opts))
+        path-parts (trie/split-path path opts)
         path-params (->> path-parts (remove string?) (map :value) set)]
-    (map->Route {:path-params path-params
-                 :path-parts path-parts
-                 :path path})))
+    {:path-params path-params
+     :path-parts path-parts
+     :path path}))
 
-(defn wild-route? [[path]]
-  (-> path parse :path-params seq boolean))
+(defn wild-path? [path opts]
+  (-> path (parse opts) :path-params seq boolean))
+
+(defn ->wild-route? [opts]
+  (fn [[path]] (-> path (parse opts) :path-params seq boolean)))
 
 (defn maybe-map-values
   "Applies a function to every value of a map, updates the value if not nil.
@@ -58,26 +60,26 @@
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
-  (mapv #(update % 1 f) routes))
+  (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [x]
+(defn merge-data [p x]
   (reduce
     (fn [acc [k v]]
-      (mm/meta-merge acc {k v}))
+      (try
+        (mm/meta-merge acc {k v})
+        (catch #?(:clj Exception, :cljs js/Error) e
+          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
     {} x))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
            coerce (into [] (keep #(coerce % opts)))))
 
-(defn conflicting-routes? [route1 route2]
-  (trie/conflicting-paths? (first route1) (first route2)))
-
-(defn path-conflicting-routes [routes]
+(defn path-conflicting-routes [routes opts]
   (-> (into {}
             (comp (map-indexed (fn [index route]
                                  [route (into #{}
-                                              (filter (partial conflicting-routes? route))
+                                              (filter #(trie/conflicting-paths? (first route) (first %) opts))
                                               (subvec routes (inc index)))]))
                   (filter (comp seq second)))
             routes)
@@ -110,7 +112,7 @@
 (defn uncompile-routes [routes]
   (mapv (comp vec (partial take 2)) routes))
 
-(defn path-for [^Route route path-params]
+(defn path-for [route path-params]
   (if (:path-params route)
     (if-let [parts (reduce
                      (fn [acc part]

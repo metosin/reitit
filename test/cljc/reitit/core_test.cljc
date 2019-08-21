@@ -292,7 +292,7 @@
       (let [routes (impl/resolve-routes data (r/default-router-options))
             conflicts (-> routes
                           (impl/resolve-routes (r/default-router-options))
-                          (impl/path-conflicting-routes))]
+                          (impl/path-conflicting-routes nil))]
         (if conflicting? (seq conflicts) (nil? conflicts)))
 
       true [["/a"]
@@ -328,7 +328,7 @@
               ["/c" {}] #{["/*d" {}]}}
              (-> [["/a"] ["/:b"] ["/c"] ["/*d"]]
                  (impl/resolve-routes (r/default-router-options))
-                 (impl/path-conflicting-routes)))))
+                 (impl/path-conflicting-routes nil)))))
 
     (testing "router with conflicting routes"
       (testing "throws by default"
@@ -354,6 +354,10 @@
            (-> router
                (r/match-by-name! ::route {:a "olipa", :b "kerran"})
                (r/match->path))))
+    (is (= "/olipa/kerran"
+           (-> router
+               (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+               (r/match->path {}))))
     (is (= "/olipa/kerran?iso=p%C3%B6ril%C3%A4inen"
            (-> router
                (r/match-by-name! ::route {:a "olipa", :b "kerran"})
