@@ -146,6 +146,7 @@
 
 (defn start []
   (jetty/run-jetty #'app {:port 3000, :join? false, :async true})
+  ;(aleph/start-server (aleph/wrap-ring-async-handler #'app) {:port 3000})
   (println "server running in port 3000"))
 
 (comment
