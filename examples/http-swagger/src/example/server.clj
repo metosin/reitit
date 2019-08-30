@@ -15,7 +15,7 @@
             [reitit.http.spec :as spec]
             [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
-            [aleph.http :as client]
+            [aleph.http :as aleph]
             [muuntaja.core :as m]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
@@ -71,7 +71,7 @@
                :responses {200 {:body any?}}
                :handler (fn [{{{:keys [seed results]} :query} :parameters}]
                           (d/chain
-                            (client/get
+                            (aleph/get
                               "https://randomuser.me/api/"
                               {:query-params {:seed seed, :results results}})
                             :body
