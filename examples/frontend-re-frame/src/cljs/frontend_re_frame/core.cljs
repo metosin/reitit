@@ -18,7 +18,7 @@
 
 (re-frame/reg-event-fx
  ::navigate
- (fn [db [_ route]]
+ (fn [db [_ & route]]
    ;; See `navigate` effect in routes.cljs
    {::navigate! route}))
 
@@ -59,8 +59,8 @@
 ;; Triggering navigation from events.
 (re-frame/reg-fx
  ::navigate!
- (fn [k params query]
-   (rfe/push-state k params query)))
+ (fn [route]
+   (apply rfe/push-state route)))
 
 ;;; Routes ;;;
 
