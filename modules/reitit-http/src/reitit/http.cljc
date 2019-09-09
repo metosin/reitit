@@ -127,7 +127,7 @@
                          (dissoc :data) ; data is already merged into routes
                          (cond-> (seq interceptors)
                                  (update-in [:data :interceptors] (partial into (vec interceptors)))))
-         router (reitit.http/router (r/routes router) router-opts)
+         router (reitit.http/router (r/routes router) router-opts) ;; will re-compile the interceptors
          enrich-request (ring/create-enrich-request inject-match? inject-router?)
          enrich-default-request (ring/create-enrich-default-request inject-router?)]
      (with-meta
