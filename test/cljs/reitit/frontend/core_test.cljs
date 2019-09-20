@@ -12,10 +12,11 @@
 
 (deftest match-by-path-test
   (testing "simple"
-    (let [router (r/router ["/"
-                            ["" ::frontpage]
-                            ["foo" ::foo]
-                            ["bar" ::bar]])]
+    (let [router (rf/router
+                   ["/"
+                    ["" ::frontpage]
+                    ["foo" ::foo]
+                    ["bar" ::bar]])]
       (is (= (r/map->Match
                {:template "/"
                 :data {:name ::frontpage}
@@ -51,10 +52,11 @@
                      (rf/match-by-name! router ::asd)))))))))
 
   (testing "schema coercion"
-    (let [router (r/router ["/"
-                            [":id" {:name ::foo
-                                    :parameters {:path {:id s/Int}
-                                                 :query {(s/optional-key :mode) s/Keyword}}}]]
+    (let [router (rf/router
+                   ["/"
+                    [":id" {:name ::foo
+                            :parameters {:path {:id s/Int}
+                                         :query {(s/optional-key :mode) s/Keyword}}}]]
                            {:compile rc/compile-request-coercers
                             :data {:coercion rsc/coercion}})]
 
@@ -108,11 +110,12 @@
 
 (deftest trailing-slash-handling-test
   (testing ":both"
-    (let [router (r/router ["/"
-                            ["" ::frontpage]
-                            ["foo" ::foo]
-                            ["bar/" ::bar]]
-                           {:trailing-slash-handling :both})]
+    (let [router (rf/router
+                   ["/"
+                    ["" ::frontpage]
+                    ["foo" ::foo]
+                    ["bar/" ::bar]]
+                            {:trailing-slash-handling :both})]
       (is (= (r/map->Match
                {:template "/foo"
                 :data {:name ::foo}
@@ -136,10 +139,11 @@
              (rf/match-by-path router "/bar"))) ))
 
   (testing ":add"
-    (let [router (r/router ["/"
-                            ["" ::frontpage]
-                            ["foo" ::foo]
-                            ["bar/" ::bar]]
+    (let [router (rf/router
+                   ["/"
+                    ["" ::frontpage]
+                    ["foo" ::foo]
+                    ["bar/" ::bar]]
                            {:trailing-slash-handling :add})]
       (is (= (r/map->Match
                {:template "/foo"
@@ -164,10 +168,11 @@
              (rf/match-by-path router "/bar")))))
 
   (testing ":remove"
-    (let [router (r/router ["/"
-                            ["" ::frontpage]
-                            ["foo" ::foo]
-                            ["bar/" ::bar]]
+    (let [router (rf/router
+                   ["/"
+                    ["" ::frontpage]
+                    ["foo" ::foo]
+                    ["bar/" ::bar]]
                            {:trailing-slash-handling :remove})]
       (is (= (r/map->Match
                {:template "/foo"

@@ -15,21 +15,37 @@
          (map (juxt keyword #(.get q %)))
          (into {}))))
 
+(defn trailing-slash-router [parent method]
+  (if method
+    ^{:type ::r/router}
+    (reify r/Router
+      (router-name [_]
+        :trailing-slash-handler)
+      (routes [_]
+        (r/routes parent))
+      (compiled-routes [_]
+        (r/compiled-routes parent))
+      (options [_]
+        (r/options parent))
+      (route-names [_]
+        (r/route-names parent))
+      (match-by-path [_ path]
+        (or (r/match-by-path parent path)
+            (if (str/ends-with? path "/")
+              (if (not= method :add)
+                (r/match-by-path parent (subs path 0 (dec (count path)))))
+              (if (not= method :remove)
+                (r/match-by-path parent (str path "/"))))))
+      (match-by-name [_ name]
+        (r/match-by-name parent name)))
+    parent))
+
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
   coerced parameters. Returns nil if no match found."
   [router path]
-  (let [uri (.parse Uri path)
-        path (.getPath uri)]
-    (if-let [match (or (r/match-by-path router path)
-                       (if-let [trailing-slash-handling (:trailing-slash-handling (r/options router))]
-                         ;; TODO: Maybe the original path should be added under some key in match,
-                         ;; so it is easy for user to see if trailing slash "redirect" happened?
-                         (if (str/ends-with? path "/")
-                           (if (not= trailing-slash-handling :add)
-                             (r/match-by-path router (subs path 0 (dec (count path)))))
-                           (if (not= trailing-slash-handling :remove)
-                             (r/match-by-path router (str path "/"))))))]
+  (let [uri (.parse Uri path)]
+    (if-let [match (r/match-by-path router (.getPath uri))]
       ;; User can update browser location in on-navigate call using replace-state
       (let [q (query-params uri)
             match (assoc match :query-params q)
@@ -62,7 +78,8 @@
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
-   (r/router raw-routes (merge {:compile rc/compile-request-coercers} opts))))
+   (-> (r/router raw-routes (merge {:compile rc/compile-request-coercers} opts))
+       (trailing-slash-router (:trailing-slash-handling opts)))))
 
 (defn match-by-name!
   "Logs problems using console.warn"
