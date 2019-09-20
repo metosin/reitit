@@ -70,7 +70,7 @@
   (-> request :muuntaja/request :format))
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-(defn request-coercer [coercion type model {:keys [::extract-request-format ::parameter-coercion]
+(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion]
                                             :or {extract-request-format extract-request-format-default
                                                  parameter-coercion default-parameter-coercion}}]
   (if coercion

@@ -4,4 +4,4 @@
                  [ring/ring-jetty-adapter "1.7.1"]
                  [metosin/reitit "0.3.9"]]
   :repl-options {:init-ns example.server}
-  :profiles{:dev {:dependencies [[ring/ring-mock "0.3.2"]]}})
+  :profiles {:dev {:dependencies [[ring/ring-mock "0.3.2"]]}})

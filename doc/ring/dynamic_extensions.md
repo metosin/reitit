@@ -9,7 +9,7 @@ Example middleware to guard routes based on user roles:
 (require '[clojure.set :as set])
 
 (defn wrap-enforce-roles [handler]
-  (fn [{:keys [::roles] :as request}]
+  (fn [{::keys [roles] :as request}]
     (let [required (some-> request (ring/get-match) :data ::roles)]
       (if (and (seq required) (not (set/subset? required roles)))
         {:status 403, :body "forbidden"}

@@ -18,13 +18,13 @@
 (defn polish [request]
   (dissoc request ::r/match ::r/router ::original ::previous))
 
-(defn printed-request [name {:keys [::original ::previous] :as request}]
+(defn printed-request [name {::keys [previous] :as request}]
   (printer/print-doc (diff-doc :request name (polish previous) (polish request)) printer)
   (-> request
       (update ::original (fnil identity request))
       (assoc ::previous request)))
 
-(defn printed-response [name {:keys [::original ::previous] :as response}]
+(defn printed-response [name {::keys [previous] :as response}]
   (printer/print-doc (diff-doc :response name (polish previous) (polish response)) printer)
   (-> response
       (update ::original (fnil identity response))

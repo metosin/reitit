@@ -24,7 +24,7 @@
       (update :request dissoc ::r/match ::r/router)))
 
 (defn- handle [name stage]
-  (fn [{:keys [::original ::previous] :as ctx}]
+  (fn [{::keys [previous] :as ctx}]
     (let [current (polish ctx)
           previous (polish previous)]
       (printer/print-doc (diff-doc stage name previous current) printer)

@@ -13,7 +13,7 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-handler] :as opts}]
+(defn compile-result [[path data] {::keys [default-options-handler] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
                        (and (not (:options childs)) (not (:handler top)) default-options-handler)
@@ -127,7 +127,7 @@
                          (dissoc :data) ; data is already merged into routes
                          (cond-> (seq interceptors)
                                  (update-in [:data :interceptors] (partial into (vec interceptors)))))
-         router (reitit.http/router (r/routes router) router-opts)
+         router (reitit.http/router (r/routes router) router-opts) ;; will re-compile the interceptors
          enrich-request (ring/create-enrich-request inject-match? inject-router?)
          enrich-default-request (ring/create-enrich-default-request inject-router?)]
      (with-meta

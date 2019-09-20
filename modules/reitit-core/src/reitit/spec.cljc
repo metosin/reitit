@@ -123,7 +123,7 @@
                  (->Problem p nil d spec problems)))
              (keep identity) (seq) (vec))))
 
-(defn validate [routes {:keys [spec ::wrap] :or {spec ::default-data, wrap identity}}]
+(defn validate [routes {:keys [spec] ::keys [wrap] :or {spec ::default-data, wrap identity}}]
   (when-let [problems (validate-route-data routes wrap spec)]
     (exception/fail!
       ::invalid-route-data

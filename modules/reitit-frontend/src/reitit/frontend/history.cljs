@@ -67,6 +67,29 @@
       (first (.composedPath original-event))
       (.-target event))))
 
+(defn ignore-anchor-click?
+  "Precicate to check if the anchor click event default action
+  should be ignored. This logic will ignore the event
+  if anchor href matches the route tree, and in this case
+  the page location is updated using History API."
+  [router e el uri]
+  (let [current-domain (if (exists? js/location)
+                         (.getDomain (.parse Uri js/location)))]
+    (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
+             (= current-domain (.getDomain uri)))
+         (not (.-altKey e))
+         (not (.-ctrlKey e))
+         (not (.-metaKey e))
+         (not (.-shiftKey e))
+         (or (not (.hasAttribute el "target"))
+             (contains? #{"" "_self"} (.getAttribute el "target")))
+         ;; Left button
+         (= 0 (.-button e))
+         ;; isContentEditable property is inherited from parents,
+         ;; so if the anchor is inside contenteditable div, the property will be true.
+         (not (.-isContentEditable el))
+         (reitit/match-by-path router (.getPath uri)))))
+
 (defrecord Html5History [on-navigate router listen-key click-listen-key]
   History
   (-init [this]
@@ -74,39 +97,24 @@
           (fn [e]
             (-on-navigate this (-get-path this)))
 
-          current-domain
-          (if (exists? js/location)
-            (.getDomain (.parse Uri js/location)))
+          ignore-anchor-click-predicate (or (:ignore-anchor-click? this)
+                                            ignore-anchor-click?)
 
           ;; Prevent document load when clicking a elements, if the href points to URL that is part
           ;; of the routing tree."
-          ignore-anchor-click
-          (fn ignore-anchor-click
-            [e]
-            ;; Returns the next matching ancestor of event target
-            (when-let [el (closest-by-tag (event-target e) "a")]
-              (let [uri (.parse Uri (.-href el))]
-                (when (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
-                               (= current-domain (.getDomain uri)))
-                           (not (.-altKey e))
-                           (not (.-ctrlKey e))
-                           (not (.-metaKey e))
-                           (not (.-shiftKey e))
-                           (not (contains? #{"_blank" "self"} (.getAttribute el "target")))
-                           ;; Left button
-                           (= 0 (.-button e))
-                           ;; isContentEditable property is inherited from parents,
-                           ;; so if the anchor is inside contenteditable div, the property will be true.
-                           (not (.-isContentEditable el))
-                           (reitit/match-by-path router (.getPath uri)))
-                  (.preventDefault e)
-                  (let [path (str (.getPath uri)
-                                  (when (.hasQuery uri)
-                                    (str "?" (.getQuery uri)))
-                                  (when (.hasFragment uri)
-                                    (str "#" (.getFragment uri))))]
-                    (.pushState js/window.history nil "" path)
-                    (-on-navigate this path))))))]
+          ignore-anchor-click (fn [e]
+                                ;; Returns the next matching ancestor of event target
+                                (when-let [el (closest-by-tag (event-target e) "a")]
+                                  (let [uri (.parse Uri (.-href el))]
+                                    (when (ignore-anchor-click-predicate router e el uri)
+                                      (.preventDefault e)
+                                      (let [path (str (.getPath uri)
+                                                      (when (.hasQuery uri)
+                                                        (str "?" (.getQuery uri)))
+                                                      (when (.hasFragment uri)
+                                                        (str "#" (.getFragment uri))))]
+                                        (.pushState js/window.history nil "" path)
+                                        (-on-navigate this path))))))]
       (-on-navigate this (-get-path this))
       (assoc this
              :listen-key (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
@@ -135,15 +143,24 @@
   - on-navigate    Function to be called when route changes. Takes two parameters, ´match´ and ´history´ object.
 
   Options:
-  - :use-fragment  (default true) If true, onhashchange and location hash are used to store current route."
+  - :use-fragment  (default true) If true, onhashchange and location hash are used to store current route.
+
+  Options (Html5History):
+  - :ignore-anchor-click?  Function (router, event, anchor element, uri) which will be called to
+                           check if the anchor click event should be ignored.
+                           To extend built-in check, you can call `reitit.frontend.history/ignore-anchor-click?`
+                           function, which will ignore clicks if the href matches route tree."
   ([router on-navigate]
    (start! router on-navigate nil))
   ([router
     on-navigate
     {:keys [use-fragment]
-     :or {use-fragment true}}]
-   (let [opts {:router router
-               :on-navigate on-navigate}]
+     :or {use-fragment true}
+     :as opts}]
+   (let [opts (-> opts
+                  (dissoc :use-fragment)
+                  (assoc :router router
+                         :on-navigate on-navigate))]
      (-init (if use-fragment
               (map->FragmentHistory opts)
               (map->Html5History opts))))))
