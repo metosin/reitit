@@ -787,6 +787,27 @@ server will always know which file to return (<code>index.html</code>).</p>
 request to the server. This means the URL will look normal, but the downside is
 that the server must respond to all routes with correct file (<code>index.html</code>).
 Check examples for simple Ring handler example.</p>
+<h3 id="anchor-click-handling">Anchor click handling</h3>
+<p>HTML5 History router will handle click events on anchors where the href
+matches the route tree (and other <a href="../../modules/reitit-frontend/src/reitit/frontend/history.cljs#L84-L98">rules</a>).
+If you have need to control this logic, for example to handle some
+anchor clicks where the href matches route tree normally (i.e. browser load)
+you can provide <code>:ignore-anchor-click?</code> function to add your own logic to
+event handling:</p>
+<pre><code class="lang-clj">(<span class="hljs-name">rfe/start!</span>
+  router
+  {<span class="hljs-symbol">:use-fragment</span> <span class="hljs-literal">false</span>
+   <span class="hljs-symbol">:ignore-anchor-click?</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [router e el uri]
+                           <span class="hljs-comment">;; Add additional check on top of the default checks</span>
+                           (<span class="hljs-name"><span class="hljs-builtin-name">and</span></span> (<span class="hljs-name">rfh/ignore-anchor-click?</span> router e el uri)
+                                (<span class="hljs-name"><span class="hljs-builtin-name">not=</span></span> <span class="hljs-string">&quot;false&quot;</span> (<span class="hljs-name">gobj/get</span> (<span class="hljs-name">.-dataset</span> el) <span class="hljs-string">&quot;reititHandleClick&quot;</span>))))})
+
+<span class="hljs-comment">;; Use data-reitit-handle-click to disable Reitit anchor handling</span>
+[<span class="hljs-symbol">:a</span>
+ {<span class="hljs-symbol">:href</span> (<span class="hljs-name">rfe/href</span> <span class="hljs-symbol">::about</span>)
+  <span class="hljs-symbol">:data-reitit-handle-click</span> <span class="hljs-literal">false</span>}
+ <span class="hljs-string">&quot;About&quot;</span>]
+</code></pre>
 <h2 id="easy">Easy</h2>
 <p>Reitit frontend routers require storing the state somewhere and passing it to
 all the calls. Wrapper <code>reitit.frontend.easy</code> is provided which manages
@@ -842,7 +863,7 @@ go back or forwards, but calling History API functions directly should work:</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Browser integration","level":"6.2","depth":1,"next":{"title":"Controllers","level":"6.3","depth":1,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]},"previous":{"title":"Basics","level":"6.1","depth":1,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"frontend/browser.md","mtime":"2019-09-09T18:15:02.434Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-09-09T18:15:47.520Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Browser integration","level":"6.2","depth":1,"next":{"title":"Controllers","level":"6.3","depth":1,"path":"frontend/controllers.md","ref":"frontend/controllers.md","articles":[]},"previous":{"title":"Basics","level":"6.1","depth":1,"path":"frontend/basics.md","ref":"frontend/basics.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"frontend/browser.md","mtime":"2019-09-20T07:34:29.022Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-09-20T07:34:54.016Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
