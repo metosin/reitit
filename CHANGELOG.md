@@ -12,6 +12,17 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+### `reitit-frontend`
+
+* **Html5History**: Added `:ignore-anchor-click?` option ([#259](https://github.com/metosin/reitit/pull/259))
+    * This option can used to provide custom function which determines if
+      clicks in anchor elements are ignored.
+    * Default logic can be extended by using
+      `reitit.frontend.history/ignore-anchor-click?` in custom function.
+* **Html5History**: Keep URL fragments when handling anchor element clicks ([#300](https://github.com/metosin/reitit/pull/300))
+
 ## 0.3.9 (2019-06-16)
 
 ### `reitit-ring`
