@@ -64,7 +64,7 @@
    fallback to target property if not available"
   (let [original-event (.getBrowserEvent event)]
     (if (exists? (.-composedPath original-event))
-      (first (.composedPath original-event))
+      (aget (.composedPath original-event) 0)
       (.-target event))))
 
 (defn ignore-anchor-click?
