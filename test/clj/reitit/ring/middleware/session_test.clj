@@ -2,7 +2,9 @@
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.ring.middleware.session :as session]
             [ring.middleware.session.memory :as memory]
-            [reitit.ring :as ring]))
+            [reitit.spec :as rs]
+            [reitit.ring :as ring]
+            [reitit.ring.spec :as rrs]))
 
 (defn get-session-id
   "Parse the session-id out of response headers."
@@ -24,37 +26,54 @@
      :session {:counter counter}}))
 
 (deftest session-test
-  (let [store           (atom {})
-        app             (ring/ring-handler
-                         (ring/router
-                          ["/api"
-                           {:session    {:store (memory/memory-store store)}
-                            :middleware [session/session-middleware]}
-                           ["/ping" handler]
-                           ["/pong" handler]]))
-        first-response  (app {:request-method :get
-                              :uri            "/api/ping"})
-        session-id      (get-session-id first-response)
-        second-response (app {:request-method :get
-                              :uri            "/api/pong"
-                              :cookies        {"ring-session" {:value session-id}}})]
-    (is (= (count @store)
-           1))
-    (is (-> @store first second)
-        {:counter 2})))
+  (testing "Custom session store"
+    (let [store           (atom {})
+          app             (ring/ring-handler
+                           (ring/router
+                            ["/api"
+                             {:session    {:store (memory/memory-store store)}
+                              :middleware [session/session-middleware]}
+                             ["/ping" handler]
+                             ["/pong" handler]]))
+          first-response  (app {:request-method :get
+                                :uri            "/api/ping"})
+          session-id      (get-session-id first-response)
+          second-response (app {:request-method :get
+                                :uri            "/api/pong"
+                                :cookies        {"ring-session" {:value session-id}}})]
+      (testing "shared across routes"
+        (is (= (count @store)
+               1))
+        (is (-> @store first second)
+            {:counter 2})))))
 
 (deftest default-session-test
-  (let [app             (ring/ring-handler
-                         (ring/router
-                          ["/api"
-                           {:middleware [session/session-middleware]}
-                           ["/ping" handler]
-                           ["/pong" handler]]))
-        first-response  (app {:request-method :get
-                              :uri            "/api/ping"})
-        session-id      (get-session-id first-response)
-        second-response (app {:request-method :get
-                              :uri            "/api/pong"
-                              :cookies        {"ring-session" {:value session-id}}})]
-    (is (= (inc (get-in first-response [:body :counter]))
-           (get-in second-response [:body :counter])))))
+  (testing "Default session store"
+    (let [app             (ring/ring-handler
+                           (ring/router
+                            ["/api"
+                             {:middleware [session/session-middleware]}
+                             ["/ping" handler]
+                             ["/pong" handler]]))
+          first-response  (app {:request-method :get
+                                :uri            "/api/ping"})
+          session-id      (get-session-id first-response)
+          second-response (app {:request-method :get
+                                :uri            "/api/pong"
+                                :cookies        {"ring-session" {:value session-id}}})]
+      (testing "shared across routes"
+        (is (= (inc (get-in first-response [:body :counter]))
+               (get-in second-response [:body :counter])))))))
+
+(deftest session-spec-test
+  (testing "Session spec"
+    (testing "with invalid session store type"
+      (is
+       (thrown? Exception
+                (ring/ring-handler
+                 (ring/router
+                  ["/api"
+                   {:session    {:store nil}
+                    :middleware [session/session-middleware]
+                    :handler    handler}]
+                  {:validate rrs/validate})))))))

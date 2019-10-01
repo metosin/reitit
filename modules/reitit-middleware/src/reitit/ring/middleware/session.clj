@@ -2,15 +2,21 @@
   (:require
    [clojure.spec.alpha :as s]
    [ring.middleware.session :as session]
+   [ring.middleware.session.store :as session-store]
    [ring.middleware.session.memory :as memory]))
 
+(s/def ::store #(satisfies? session-store/SessionStore %))
+(s/def ::root string?)
+(s/def ::cookie-name string?)
+(s/def ::cookie-attrs map?)
+(s/def ::session (s/keys :opt-un [::store ::root ::cookie-name ::cookie-attrs]))
 (s/def ::spec (s/keys :opt-un [::session]))
 
 (def ^:private store
   "The default shared in-memory session store.
 
-  This is used when no `:session` key is provided to the middleware."
-  (atom {}))
+  This is used when no `:store` key is provided to the middleware."
+  (memory/memory-store (atom {})))
 
 (def session-middleware
   "Middleware for session.
@@ -25,9 +31,9 @@
 
   | key          | description |
   | -------------|-------------|
-  | `:session`   | `ring.middleware.session.store/SessionStore` instance. Use `ring.middleware.session.memory/MemoryStore` by default."
+  | `:session`   | A map of options that passes into the [`ring.middleware.session/wrap-session](http://ring-clojure.github.io/ring/ring.middleware.session.html#var-wrap-session) function`."
   {:name    :session
    :spec    ::spec
-   :compile (fn [{:keys [session]
-                 :or   {session {:store (memory/memory-store store)}}} _]
-              {:wrap #(session/wrap-session % session)})})
+   :compile (fn [{session-opts :session} _]
+              (let [session-opts (merge {:store store} session-opts)]
+                {:wrap #(session/wrap-session % session-opts)}))})
