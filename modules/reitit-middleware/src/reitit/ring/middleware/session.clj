@@ -31,9 +31,10 @@
 
   | key          | description |
   | -------------|-------------|
-  | `:session`   | A map of options that passes into the [`ring.middleware.session/wrap-session](http://ring-clojure.github.io/ring/ring.middleware.session.html#var-wrap-session) function`."
+  | `:session`   | A map of options that passes into the [`ring.middleware.session/wrap-session](http://ring-clojure.github.io/ring/ring.middleware.session.html#var-wrap-session) function`, or an empty map for the default options. The absence of this value will disable the middleware."
   {:name    :session
    :spec    ::spec
    :compile (fn [{session-opts :session} _]
-              (let [session-opts (merge {:store store} session-opts)]
-                {:wrap #(session/wrap-session % session-opts)}))})
+              (if session-opts
+                (let [session-opts (merge {:store store} session-opts)]
+                  {:wrap #(session/wrap-session % session-opts)})))})

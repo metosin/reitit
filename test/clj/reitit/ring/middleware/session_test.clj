@@ -11,11 +11,11 @@
   [request]
   (let [pattern  #"ring-session=([-\w]+);Path=/;HttpOnly"
         parse-fn (partial re-find pattern)]
-    (-> request
-        (get-in [:headers "Set-Cookie"])
-        first
-        parse-fn
-        second)))
+    (some-> request
+            (get-in [:headers "Set-Cookie"])
+            first
+            parse-fn
+            second)))
 
 (defn handler
   "The handler that increments the counter."
@@ -52,7 +52,8 @@
     (let [app             (ring/ring-handler
                            (ring/router
                             ["/api"
-                             {:middleware [session/session-middleware]}
+                             {:middleware [session/session-middleware]
+                              :session    {}}
                              ["/ping" handler]
                              ["/pong" handler]]))
           first-response  (app {:request-method :get
@@ -64,6 +65,18 @@
       (testing "shared across routes"
         (is (= (inc (get-in first-response [:body :counter]))
                (get-in second-response [:body :counter])))))))
+
+(deftest default-session-off-test
+  (testing "Default session middleware"
+    (let [app  (ring/ring-handler
+                (ring/router
+                 ["/api"
+                  {:middleware [session/session-middleware]}
+                  ["/ping" handler]]))
+          resp (app {:request-method :get
+                     :uri            "/api/ping"})]
+      (testing "off by default"
+        (is (nil? (get-session-id resp)))))))
 
 (deftest session-spec-test
   (testing "Session spec"
