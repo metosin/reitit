@@ -14,6 +14,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+* Updated deps:
+
+```clj
+[metosin/spec-tools "0.10.0"] is available but we use "0.9.3"
+[metosin/muuntaja "0.6.5"] is available but we use "0.6.4"
+[metosin/jsonista "0.2.5"] is available but we use "0.2.3"
+[fipp "0.6.21"] is available but we use "0.6.18"
+```
+
 ### `reitit-frontend`
 
 * **Html5History**: Added `:ignore-anchor-click?` option ([#259](https://github.com/metosin/reitit/pull/259))
