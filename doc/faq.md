@@ -144,4 +144,4 @@ Reitit is [much faster](performance.md) than Compojure.
 
 ### How do you pronounce "reitit"?
 
-[Google Translate's does a decent job pronouncing it](https://translate.google.com/#view=home&op=translate&sl=fi&tl=en&text=reitit) (click the speaker icon on the left). The English expression *rate it* is a good approximation.
+[Google Translate does a decent job pronouncing it](https://translate.google.com/#view=home&op=translate&sl=fi&tl=en&text=reitit) (click the speaker icon on the left). The English expression *rate it* is a good approximation.
