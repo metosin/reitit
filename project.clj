@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.3.9"
+(defproject metosin/reitit-parent "0.3.10"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,20 +12,20 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.3.9"]
-                         [metosin/reitit-core "0.3.9"]
-                         [metosin/reitit-dev "0.3.9"]
-                         [metosin/reitit-spec "0.3.9"]
-                         [metosin/reitit-schema "0.3.9"]
-                         [metosin/reitit-ring "0.3.9"]
-                         [metosin/reitit-middleware "0.3.9"]
-                         [metosin/reitit-http "0.3.9"]
-                         [metosin/reitit-interceptors "0.3.9"]
-                         [metosin/reitit-swagger "0.3.9"]
-                         [metosin/reitit-swagger-ui "0.3.9"]
-                         [metosin/reitit-frontend "0.3.9"]
-                         [metosin/reitit-sieppari "0.3.9"]
-                         [metosin/reitit-pedestal "0.3.9"]
+  :managed-dependencies [[metosin/reitit "0.3.10"]
+                         [metosin/reitit-core "0.3.10"]
+                         [metosin/reitit-dev "0.3.10"]
+                         [metosin/reitit-spec "0.3.10"]
+                         [metosin/reitit-schema "0.3.10"]
+                         [metosin/reitit-ring "0.3.10"]
+                         [metosin/reitit-middleware "0.3.10"]
+                         [metosin/reitit-http "0.3.10"]
+                         [metosin/reitit-interceptors "0.3.10"]
+                         [metosin/reitit-swagger "0.3.10"]
+                         [metosin/reitit-swagger-ui "0.3.10"]
+                         [metosin/reitit-frontend "0.3.10"]
+                         [metosin/reitit-sieppari "0.3.10"]
+                         [metosin/reitit-pedestal "0.3.10"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.10.0"]
                          [metosin/schema-tools "0.12.0"]
