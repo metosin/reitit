@@ -22,6 +22,12 @@ Reitit tries to be really, really fast.
 
 Well, it depends. With small route trees, it might not. But, with large (real-life) route trees, difference between the fastest and the slowest tested libs can be two or three orders of magnitude. For busy sites it actually matters if you routing request takes 100 ns or 100 µs. A lot.
 
+### TechEmpower Web Framework Benchmarks
+
+Reitit + [jsonista](https://github.com/metosin/jsonista) + [pohjavirta](https://github.com/metosin/pohjavirta) is one of the fastest JSON api stacks in the tests. See full results [here](https://www.techempower.com/benchmarks/#section=test&runid=42f65a64-69b2-400d-b24e-20ecec9848bc&hw=ph&test=json).
+
+![Tech](images/tfb_json.png)
+
 ### Tests
 
 All perf tests are found in [the repo](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit) and have been run with the following setup:
