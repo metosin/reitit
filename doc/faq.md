@@ -5,6 +5,7 @@
 * [How does Reitit differ from Bidi?](#how-does-reitit-differ-from-bidi)
 * [How does Reitit differ from Pedestal?](#how-does-reitit-differ-from-pedestal)
 * [How does Reitit differ from Compojure?](#how-does-reitit-differ-from-compojure)
+* [How do you pronounce "reitit"?](#how-do-you-pronounce-reitit)
 
 ### Why yet another routing library?
 
@@ -140,3 +141,7 @@ Compojure:
 #### Performance
 
 Reitit is [much faster](performance.md) than Compojure.
+
+### How do you pronounce "reitit"?
+
+[Google Translate does a decent job pronouncing it](https://translate.google.com/#view=home&op=translate&sl=fi&tl=en&text=reitit) (click the speaker icon on the left). The English expression *rate it* is a good approximation.
