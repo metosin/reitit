@@ -77,7 +77,15 @@
              :data {:middleware [{:spec (s/keys :opt-un [::roles])
                                   :wrap (fn [handler]
                                           (fn [request]
-                                            (handler request)))}]}})))))
+                                              (handler request)))}]}}))))
+  (testing "middleware cannot be a list"
+    (is (thrown-with-msg?
+         ExceptionInfo
+         #":reitit.ring.spec/invalid-specs"
+         (ring/router
+          ["/api" {:handler    identity
+                   :middleware '()}]
+          {:validate rrs/validate})))))
 
 (deftest coercion-spec-test
   (is (r/router?
