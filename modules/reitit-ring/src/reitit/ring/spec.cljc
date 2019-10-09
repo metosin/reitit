@@ -8,7 +8,7 @@
 ;; Specs
 ;;
 
-(s/def ::middleware (s/coll-of #(satisfies? middleware/IntoMiddleware %)))
+(s/def ::middleware (s/coll-of #(satisfies? middleware/IntoMiddleware %) :kind vector?))
 (s/def ::get map?)
 (s/def ::head map?)
 (s/def ::post map?)
