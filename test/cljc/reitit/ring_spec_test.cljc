@@ -81,7 +81,7 @@
   (testing "middleware cannot be a list"
     (is (thrown-with-msg?
          ExceptionInfo
-         #":reitit.ring.spec/invalid-specs"
+         #"Invalid route data"
          (ring/router
           ["/api" {:handler    identity
                    :middleware '()}]
