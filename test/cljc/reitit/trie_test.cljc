@@ -26,6 +26,10 @@
     false "/a" "/:a/b"
     false "/a" "/:a/b"
 
+    ;; #320
+    false "/repo/:owner/:repo/contributors" "/repo/:owner/:repo/languages"
+    false "/repo/:owner/:repo/contributors" "/repo/:not-owner/:not-repo/language"
+
     false "/a" "/{a}/b"
     false "/a" "/{a}/b"))
 
