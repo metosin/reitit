@@ -113,4 +113,38 @@
                (:messages
                  (capture-console
                    (fn []
-                     (rf/match-by-name! router ::foo {}))))))))))
+                     (rf/match-by-name! router ::foo {})))))))))
+
+  (testing "intermediate paths"
+    (testing "without conflicting routes"
+      (let [routes     ["/" {:name ::root}
+                        ["foo" {:name ::foo}]
+                        ["bar" {:name ::bar}
+                         ["/baz" {:name ::baz}]]]
+            router     (rf/router routes)
+            match      #(rf/match-by-path router %)
+            expected   (fn [path name] (r/map->Match {:template     path
+                                                      :path         path
+                                                      :data         {:name name}
+                                                      :path-params  {}
+                                                      :query-params {}
+                                                      :parameters   {:query {}
+                                                                     :path  {}}}))]
+        (are [path name]
+          (is (= (expected path name)
+                 (match path)))
+          "/"        ::root
+          "/foo"     ::foo
+          "/bar"     ::bar
+          "/bar/baz" ::baz)))
+
+    (testing "with conflicting routes"
+      (let [routes ["/" {:name ::root}
+                    [""  {:name ::frontpage}]
+                    ["foo" {:name ::foo}]
+                    ["bar" {:name ::bar}
+                     ["/baz" {:name ::baz}]]]]
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"Router contains conflicting route paths"
+              (rf/router routes)))))))
