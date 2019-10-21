@@ -70,3 +70,43 @@ To demonstrate the two approaches, below are response coercion middleware writte
 ```
 
 It has 50% less code, it's much easier to reason about and is much faster.
+
+### Require Keys on Routes at Creation Time
+
+Often it is useful to require a route to provide a specific key.
+
+```clj
+(require '[buddy.auth.accessrules :as accessrules])
+
+(s/def ::authorize
+  (s/or :handler :accessrules/handler :rule :accessrules/rule))
+
+(def authorization-middleware
+  {:name ::authorization
+   :spec (s/keys :req-un [::authorize])
+   :compile
+   (fn [route-data _opts]
+     (when-let [rule (:authorize route-data)]
+       (fn [handler]
+         (accessrules/wrap-access-rules handler {:rules [rule]}))))})
+```
+
+In the example above the `:spec` expresses that each route is required to provide the `:authorize` key. However, in this case the compile function returns `nil` when that key is missing, which means **the middleware will not be mounted, the spec will not be considered, and the compiler will not enforce this requirement as intended**.
+
+If you just want to enforce the spec return a map without `:wrap` or `:compile` keys, e.g. an empty map, `{}`.
+
+
+```clj
+(def authorization-middleware
+  {:name ::authorization
+   :spec (s/keys :req-un [::authorize])
+   :compile
+   (fn [route-data _opts]
+     (if-let [rule (:authorize route-data)]
+       (fn [handler]
+         (accessrules/wrap-access-rules handler {:rules [rule]}))
+       ;; return empty map just to enforce spec
+       {}))})
+```
+
+The middleware (and associated spec) will still be part of the chain, but will not process the request.
