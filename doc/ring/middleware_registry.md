@@ -1,6 +1,6 @@
 # Middleware Registry
 
-The `:middleware` syntax in `reitit-ring` supports also Keywords. Keywords are looked from Middleware Registry, which is a map of `keyword => IntoMiddleware`. Middleware registry should be stored under key `:reitit.middleware/registry` in the router options. If a middleware keyword isn't found in the registry, router creation fails fast with descriptive error message.
+The `:middleware` syntax in `reitit-ring` also supports Keywords. Keywords are looked up from the Middleware Registry, which is a map of `keyword => IntoMiddleware`. Middleware registry should be stored under key `:reitit.middleware/registry` in the router options. If a middleware keyword isn't found in the registry, router creation fails fast with a descriptive error message.
 
 ## Examples 
 
@@ -32,7 +32,7 @@ Works as expected:
 ; {:status 200, :body {:bonus 30}}
 ```
 
-Router creation fails fast if registry doesn't contain the Middleware:
+Router creation fails fast if the registry doesn't contain the middleware:
 
 ```clj
 (def app
@@ -54,9 +54,9 @@ Router creation fails fast if registry doesn't contain the Middleware:
 
 ## When to use the registry?
 
-Middleware as Keywords helps to keep the routes (all but handlers) as literal data (e.g. data that evaluates to itself) enabling the routes to be persisted in external formats like EDN-files and databases. Duct is a good example where the [middleware can be referenced from EDN-files](https://github.com/duct-framework/duct/wiki/Configuration). It should be easy to make Duct configuration a Middleware Registry in `reitit-ring`.
+Middleware as Keywords helps to keep the routes (all but handlers) as literal data (i.e. data that evaluates to itself), enabling the routes to be persisted in external formats like EDN-files and databases. Duct is a good example, where the [middleware can be referenced from EDN-files](https://github.com/duct-framework/duct/wiki/Configuration). It should be easy to make Duct configuration a Middleware Registry in `reitit-ring`.
 
-The bad thing it's an extra indirection, making things more complex and removed the default IDE-support of "goto definition" or "look source".
+On the other hand, it's an extra level of indirection, making things more complex and removing the default IDE support of "go to definition" or "look up source".
 
 ## TODO
 
