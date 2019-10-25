@@ -334,13 +334,15 @@
 ;; Creating Routers
 ;;
 
+
 (defn ^:no-doc default-router-options []
   {:lookup (fn lookup [[_ {:keys [name]}] _] (if name #{name}))
    :expand expand
    :coerce (fn coerce [route _] route)
    :compile (fn compile [[_ {:keys [handler]}] _] handler)
    :exception exception/exception
-   :conflicts (fn throw! [conflicts] (exception/fail! :path-conflicts conflicts))})
+   :conflicts (fn throw! [conflicts] (exception/fail! :path-conflicts conflicts))
+   :endpoint  impl/leaf-endpoint})
 
 (defn router
   "Create a [[Router]] from raw route data and optionally an options map.
@@ -360,7 +362,10 @@
   | `:validate`  | Function of `routes opts => ()` to validate route (data) via side-effects
   | `:conflicts` | Function of `{route #{route}} => ()` to handle conflicting routes
   | `:exception` | Function of `Exception => Exception ` to handle creation time exceptions (default `reitit.exception/exception`)
-  | `:router`    | Function of `routes opts => router` to override the actual router implementation"
+  | `:router`    | Function of `routes opts => router` to override the actual router implementation
+  | `:endpoint`  | Function of `prev-path path expanded-data data children => {:endpoint :inherit}`.
+  |              | Used to transform data for this endpoint and data inherited to child routes.
+  |              | Return falsy or `{:endpoint nil}` to skip path as endpoint and pass data to children."
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]

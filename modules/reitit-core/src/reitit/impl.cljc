@@ -37,7 +37,7 @@
     coll
     coll))
 
-(defn walk [raw-routes {:keys [path data routes expand]
+(defn walk [raw-routes {:keys [path data routes expand endpoint]
                         :or {data [], routes []}
                         :as opts}]
   (letfn
@@ -53,10 +53,15 @@
                                             (sequential? (first maybe-arg)))
                                        (nil? maybe-arg))
                                  [{} args]
-                                 [maybe-arg (rest args)])
-                 macc (into macc (expand data opts))
-                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
-             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
+                                 [maybe-arg (rest args)])]
+             (let [d (endpoint pacc path macc data childs)
+                   data-for-endpoint (when (:endpoint d) (into macc (expand (:endpoint d) opts)))
+                   data-for-children (or (:inherit d) data)
+                   macc (into macc (expand data-for-children opts))]
+               (-> (when data-for-endpoint [[(str pacc path) data-for-endpoint]])
+                   (concat (when (seq childs) (-> (str pacc path)
+                                                  (walk-many macc (keep identity childs))
+                                                  (seq))))))))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
@@ -253,6 +258,12 @@
                 (str/join "&" (map query-parameter (repeat k) v))
                 (query-parameter k v))))
        (str/join "&")))
+
+(defn leaf-endpoint
+  [_ _ _ data childs]
+  (when-not (seq childs)
+    {:endpoint data
+     :inherit  {}}))
 
 (defmacro goog-extend [type base-type ctor & methods]
   `(do
