@@ -265,6 +265,61 @@
     {:endpoint data
      :inherit  {}}))
 
+(defn dissoc-in
+  "Dissociates an entry from a nested associative structure returning a new
+  nested structure. `keys` is a sequence of keys. Any empty maps that result
+  will not be present in the new structure."
+  [m [k & ks]]
+  (if ks
+    (if-let [nextmap (get m k)]
+      (let [newmap (dissoc-in nextmap ks)]
+        (if (seq newmap)
+          (assoc m k newmap)
+          (dissoc m k)))
+      m)
+    (dissoc m k)))
+
+(defn transform-inherited-data
+  [transform-configs data]
+  (let [short-hands {:consume #(dissoc-in %1 %2)
+                     :inherit (fn [d _] d)}]
+    (reduce
+      (fn [acc {:keys [kss transform]}]
+        (let [transform (or (get short-hands transform)
+                            transform)]
+          (reduce (fn [{:keys [inherit endpoint]} ks]
+                    (if (get-in inherit ks)
+                      {:inherit (transform inherit ks) :endpoint data}
+                      {:inherit inherit :endpoint endpoint}))
+                  acc
+                  kss)))
+      {:endpoint nil :inherit data}
+      transform-configs)))
+
+(defn mk-intermediate-endpoint-transform
+  "Make function that returns map for valid endpoints, which are either a leaf path in
+  the route tree, or have route data for one or more of nested key sequences.
+  The returned map will contain data for the current endpoint under `:endpoint` and data to be
+  inherited for children under `:inherit`.
+
+  Provided arg should be a vector of maps with :kss, a seq of seq of keys, and :transform. Expanded route data
+  will be queried with each of the key sequences. If data exists in the key sequence, the provided `:transform` function
+  is called with `(transform data ks)`, so that the result is to be passed to children.
+  Query is repeated for each seq of seq with the same transform, moving on to the next transform.
+  All transforms are performed before passing data to children.
+
+  If none of the key seqs match, then falsy is returned to indicate that the path should
+  not be used as an endpoint.
+
+  Optionally, `:transform` may be specified with keywords `:consume` as short-hand for removing the matching data,
+  or `:inherit` for passing the data as-is to children."
+  [transform-configs]
+  (fn [prev-path path meta data childs]
+    (or (leaf-endpoint prev-path path meta data childs)
+        (and (map? data)
+             (seq childs)
+             (transform-inherited-data transform-configs data)))))
+
 (defmacro goog-extend [type base-type ctor & methods]
   `(do
      (def ~type (fn ~@ctor))
