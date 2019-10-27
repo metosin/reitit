@@ -4,8 +4,6 @@
    [ring.adapter.jetty :as jetty]
    [integrant.core :as ig]))
 
-(defonce server (atom nil))
-
 (def system-config
   {:example/jetty   {:port    3000
                      :join?   false
@@ -24,12 +22,5 @@
    (ring/router
     ["/ping" {:get {:handler (fn [_] {:status 200 :body "pong!"})}}])))
 
-(defn start []
-  (reset! server (ig/init system-config)))
-
-(defn stop []
-  (swap! server ig/halt!))
-
-(comment
-  (start)
-  (stop))
+(defn -main []
+  (ig/init system-config))
