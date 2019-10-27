@@ -4,9 +4,17 @@ A Sample project with ring and reitit.
 
 ## Usage
 
-```clj
-> lein repl
-(start)
+Run Ring server in command line:
+
+```bash
+lein run
+```
+
+Run Ring server in the REPL
+
+```bash
+lein repl
+> (go)
 ```
 
 Go with browser to:
