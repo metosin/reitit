@@ -21,6 +21,9 @@ jobs:
           name: Run tests
           command: ./scripts/test.sh clj
       - run:
+          name: Install curl if missing
+          command: apt update && apt install -y curl
+      - run:
           name: Verify cljdoc.edn
           command: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
       - store_test_results:
@@ -107,13 +110,13 @@ workflows:
   test-and-build-docs:
     jobs:
       - test-clj:
-          image-name: circleci/clojure:openjdk-8-lein
+          image-name: clojure:openjdk-8-lein-2.9.1
       - test-clj:
-          image-name: circleci/clojure:openjdk-11-lein
+          image-name: clojure:openjdk-11-lein-2.9.1
       - test-clj:
-          image-name: circleci/clojure:openjdk-13-lein
+          image-name: clojure:openjdk-13-lein-2.9.1
       - test-clj:
-          image-name: circleci/clojure:openjdk-14-lein
+          image-name: clojure:openjdk-14-lein-2.9.1
       - test-cljs
       # - build-docs:
       #     filters:
