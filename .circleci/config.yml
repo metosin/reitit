@@ -2,8 +2,11 @@ version: 2
 jobs:
   test-clj:
     working_directory: ~/test
+    parameters:
+      image:
+        type: string
     docker:
-      - image: clojure:lein-2.7.1
+      - image: << parameters.image >>
     steps:
       - checkout
       - restore_cache:
@@ -103,7 +106,14 @@ workflows:
   version: 2
   test-and-build-docs:
     jobs:
-      - test-clj
+      - test-clj:
+          image: clojure:openjdk-8-lein-2.9.1
+      - test-clj:
+          image: clojure:openjdk-11-lein-2.9.1
+      - test-clj:
+          image: clojure:openjdk-13-lein-2.9.1
+      - test-clj:
+          image: clojure:openjdk-14-lein-2.9.1
       - test-cljs
       # - build-docs:
       #     filters:
