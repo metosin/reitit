@@ -107,13 +107,13 @@ workflows:
   test-and-build-docs:
     jobs:
       - test-clj:
-          image-name: clojure:openjdk-8-lein-2.9.1
+          image-name: circleci/clojure:openjdk-8-lein
       - test-clj:
-          image-name: clojure:openjdk-11-lein-2.9.1
+          image-name: circleci/clojure:openjdk-11-lein
       - test-clj:
-          image-name: clojure:openjdk-13-lein-2.9.1
+          image-name: circleci/clojure:openjdk-13-lein
       - test-clj:
-          image-name: clojure:openjdk-14-lein-2.9.1
+          image-name: circleci/clojure:openjdk-14-lein
       - test-cljs
       # - build-docs:
       #     filters:
