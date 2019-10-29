@@ -1,0 +1,130 @@
+version: 2.1
+
+jobs:
+  test-clj:
+    working_directory: ~/test
+    parameters:
+      image-name:
+        type: string
+    docker:
+      - image: << parameters.image-name >>
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-clj-{{ checksum "project.clj" }}'
+            - 'v1-clj-'
+            - 'v1-test-'
+      - run:
+          name: Install modules
+          command: ./scripts/lein-modules install
+      - run:
+          name: Run tests
+          command: ./scripts/test.sh clj
+      - run:
+          name: Install curl if missing
+          command: apt update && apt install -y curl
+      - run:
+          name: Verify cljdoc.edn
+          command: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
+      - store_test_results:
+          # path must be a directory under which there a subdirectories that
+          # contain the JUnit XML files.
+          path: ~/test/target/results
+#      - run:
+#          name: Run coverage
+#          command: ./scripts/submit-to-coveralls.sh clj
+      - save_cache:
+          key: 'v1-clj-{{ checksum "project.clj" }}'
+          paths:
+            - ~/.m2
+            - ~/.cljs/.aot_cache
+
+  test-cljs:
+    working_directory: ~/test
+    docker:
+      - image: circleci/clojure:lein-2.8.1-node-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - 'v1-cljs-{{ checksum "project.clj" }}-{{ checksum "package.json" }}'
+            - 'v1-cljs-'
+      - run:
+          name: Install npm dependencies
+          command: npm install
+      - run:
+          name: Install modules
+          command: ./scripts/lein-modules install
+      - run:
+          name: Run tests
+          command: ./scripts/test.sh cljs
+      - store_test_results:
+          path: ~/test/target/results
+      - save_cache:
+          key: 'v1-cljs-{{ checksum "project.clj" }}-{{ checksum "package.json" }}'
+          paths:
+            - ~/.m2
+            - ~/test/node_modules
+
+  build-docs:
+    working_directory: ~/build
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run: rm package.json package-lock.json
+      - restore_cache:
+          keys:
+            - 'v1-gitbook-{{ checksum "book.json" }}'
+            - 'v1-gitbook-'
+      - run:
+          name: "Install GitBook"
+          command: npm install gitbook-cli && ./node_modules/.bin/gitbook install
+      - run:
+          name: "Clone gh-pages"
+          command: git clone --branch gh-pages git@github.com:metosin/reitit.git ~/gh-pages
+      - run:
+          name: Build the documentation
+          command: |
+            ./node_modules/.bin/gitbook build
+            cp -r _book/* ~/gh-pages/
+      - add_ssh_keys:
+          fingerprints:
+            - "2d:eb:be:af:53:33:36:01:40:61:81:9d:76:84:8e:83"
+      - deploy:
+          name: Upload the documentation
+          command: |
+            cd ~/gh-pages
+            git config user.name  "Automatic build"
+            git config user.email "noreply@metosin.fi"
+            git add -A
+            git commit -m "Build book from commit $CIRCLE_SHA1 [skip ci]"
+            git push
+      - save_cache:
+          key: 'v1-gitbook-{{ checksum "book.json" }}'
+          paths:
+            - node_modules
+
+workflows:
+  version: 2
+  test-and-build-docs:
+    jobs:
+      - test-clj:
+          name: jdk8
+          image-name: clojure:openjdk-8-lein-2.9.1
+      - test-clj:
+          name: jdk11
+          image-name: clojure:openjdk-11-lein-2.9.1
+      - test-clj:
+          name: jdk13
+          image-name: clojure:openjdk-13-lein-2.9.1
+      - test-clj:
+          name: jdk14
+          image-name: clojure:openjdk-14-lein-2.9.1
+      - test-cljs
+      - build-docs:
+          filters:
+            branches:
+              only:
+                - master
