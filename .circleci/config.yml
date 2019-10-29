@@ -118,8 +118,8 @@ workflows:
       - test-clj-jdk14:
           image-name: clojure:openjdk-14-lein-2.9.1
       - test-cljs
-      # - build-docs:
-      #     filters:
-      #       branches:
-      #         only:
-      #           - master
+      - build-docs:
+          filters:
+            branches:
+              only:
+                - master
