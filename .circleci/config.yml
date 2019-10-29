@@ -1,4 +1,5 @@
 version: 2.1
+
 jobs:
   test-clj:
     working_directory: ~/test
