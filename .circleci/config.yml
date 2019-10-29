@@ -111,12 +111,16 @@ workflows:
   test-and-build-docs:
     jobs:
       - test-clj:
+          name: jdk8
           image-name: clojure:openjdk-8-lein-2.9.1
       - test-clj:
+          name: jdk11
           image-name: clojure:openjdk-11-lein-2.9.1
       - test-clj:
+          name: jdk13
           image-name: clojure:openjdk-13-lein-2.9.1
       - test-clj:
+          name: jdk14
           image-name: clojure:openjdk-14-lein-2.9.1
       - test-cljs
       - build-docs:
