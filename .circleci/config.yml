@@ -1,9 +1,12 @@
-version: 2
+version: 2.1
 jobs:
   test-clj:
     working_directory: ~/test
+    parameters:
+      image-name:
+        type: string
     docker:
-      - image: clojure:lein-2.7.1
+      - image: << parameters.image-name >>
     steps:
       - checkout
       - restore_cache:
@@ -17,6 +20,9 @@ jobs:
       - run:
           name: Run tests
           command: ./scripts/test.sh clj
+      - run:
+          name: Install curl if missing
+          command: apt update && apt install -y curl
       - run:
           name: Verify cljdoc.edn
           command: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
@@ -103,7 +109,18 @@ workflows:
   version: 2
   test-and-build-docs:
     jobs:
-      - test-clj
+      - test-clj:
+          name: jdk8
+          image-name: clojure:openjdk-8-lein-2.9.1
+      - test-clj:
+          name: jdk11
+          image-name: clojure:openjdk-11-lein-2.9.1
+      - test-clj:
+          name: jdk13
+          image-name: clojure:openjdk-13-lein-2.9.1
+      - test-clj:
+          name: jdk14
+          image-name: clojure:openjdk-14-lein-2.9.1
       - test-cljs
       - build-docs:
           filters:
