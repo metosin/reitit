@@ -337,7 +337,26 @@
               #"Router contains conflicting route paths"
               (r/router
                 [["/a"] ["/a"]]))))
-      (testing "can be configured to ignore"
+      (testing "can be configured to ignore with route data"
+        (are [paths expected]
+          (let [router (r/router paths)]
+            (is (not (nil? router)))
+            (is (= expected (r/router-name router))))
+          [["/a" {:conflicting true}]
+           ["/a" {:conflicting true}]] :quarantine-router
+          [["/a" {:conflicting true}]
+           ["/:b" {:conflicting true}]
+           ["/c" {:conflicting true}]
+           ["/*d" {:conflicting true}]] :quarantine-router)
+        (testing "unmarked path conflicts throw"
+          (are [paths]
+            (is (thrown-with-msg?
+                  ExceptionInfo
+                  #"Router contains conflicting route paths"
+                  (r/router paths)))
+            [["/a"] ["/a" {:conflicting true}]]
+            [["/a" {:conflicting true}] ["/a"]])))
+      (testing "can be configured to ignore with router option"
         (is (not (nil? (r/router [["/a"] ["/a"]] {:conflicts nil})))))))
 
   (testing "name conflicts"

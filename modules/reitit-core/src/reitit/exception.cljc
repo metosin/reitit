@@ -26,11 +26,18 @@
   (str message (if data (str "\n\n" (pr-str data)))))
 
 (defmethod format-exception :path-conflicts [_ _ conflicts]
-  (apply str "Router contains conflicting route paths:\n\n"
-         (mapv
-           (fn [[[path] vals]]
-             (str "   " path "\n-> " (str/join "\n-> " (mapv first vals)) "\n\n"))
-           conflicts)))
+  (letfn [(resolve-str [path route-data]
+            (str (if (:conflicting route-data) "   " "-> ")
+                 path " " (not-empty (select-keys route-data [:conflicting]))))]
+    (apply str "Router contains conflicting route paths:\n\n"
+           (mapv
+             (fn [[[path route-data] vals]]
+               (str (resolve-str path route-data)
+                    "\n"
+                    (str/join "\n" (mapv (fn [[path route-data]]
+                                           (resolve-str path route-data)) vals))
+                    "\n\n"))
+             conflicts))))
 
 (defmethod format-exception :name-conflicts [_ _ conflicts]
   (apply str "Router contains conflicting route names:\n\n"

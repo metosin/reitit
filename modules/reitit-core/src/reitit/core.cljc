@@ -381,7 +381,9 @@
                       :else mixed-router)]
 
          (when-let [conflicts (:conflicts opts)]
-           (when path-conflicting (conflicts path-conflicting)))
+           (when-let [conflict-report (impl/unresolved-conflicts
+                                        path-conflicting)]
+             (conflicts conflict-report)))
 
          (when name-conflicting
            (exception/fail! :name-conflicts name-conflicting))

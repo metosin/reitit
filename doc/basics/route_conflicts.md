@@ -2,7 +2,7 @@
 
 We should fail fast if a router contains conflicting paths or route names. 
 
-When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via `:conflicts` router option.
+When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via `:conflicts` router option or via `:conflicting` route data.
 
 ## Path Conflicts
 
@@ -25,14 +25,14 @@ Creating router with defaults:
 (r/router routes)
 ; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
 ;
-;    /:user-id/orders
+; -> /:user-id/orders
 ; -> /public/*path
 ; -> /bulk/:bulk-id
 ;
-;    /bulk/:bulk-id
+; -> /bulk/:bulk-id
 ; -> /:version/status
 ;
-;    /public/*path
+; -> /public/*path
 ; -> /:version/status
 ;
 ```
@@ -43,29 +43,45 @@ To ignore the conflicts:
 (r/router
   routes
   {:conflicts nil})
-; => #object[reitit.core$linear_router$reify]
+; => #object[reitit.core$quarantine_router$reify
 ```
 
 To just log the conflicts:
 
 ```clj
+(require '[reitit.exception :as exception])
+
 (r/router
   routes
   {:conflicts (fn [conflicts]
-                (println (r/path-conflicts-str conflicts)))})
+                (println (exception/format-exception :path-conflicts nil conflicts)))})
 ; Router contains conflicting route paths:
 ;
-;    /:user-id/orders
+; -> /:user-id/orders
 ; -> /public/*path
 ; -> /bulk/:bulk-id
 ;
-; /bulk/:bulk-id
+; -> /bulk/:bulk-id
 ; -> /:version/status
 ;
-; /public/*path
+; -> /public/*path
 ; -> /:version/status
 ;
-; => #object[reitit.core$linear_router$reify]
+; => #object[reitit.core$quarantine_router$reify]
+```
+
+Alternatively, you can ignore conflicting paths individually via `:conflicting` in route data:
+
+```clj
+(def routes
+  [["/ping"]
+   ["/:user-id/orders" {:conflicting true}]
+   ["/bulk/:bulk-id" {:conflicting true}]
+   ["/public/*path" {:conflicting true}]
+   ["/:version/status" {:conflicting true}]])
+; => #'user/routes
+(r/router routes)
+;  => #object[reitit.core$quarantine_router$reify]
 ```
 
 ## Name conflicts
