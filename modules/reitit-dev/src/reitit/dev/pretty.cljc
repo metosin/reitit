@@ -270,22 +270,29 @@
   [:group
    (text "Router contains conflicting route paths:")
    [:break] [:break]
-   (into
-     [:group]
-     (mapv
-       (fn [[[path] vals]]
-         [:group
-          [:span "   " (text path)]
-          [:break]
-          (into
-            [:group]
-            (map
-              (fn [p] [:span (color :grey "-> " p) [:break]])
-              (mapv first vals)))
-          [:break]])
-       conflicts))
+   (letfn [(path-report [path route-data]
+             [:span (color :grey
+                           (if (:conflicting route-data) "   " "-> ")
+                           path
+                           " ")
+              (edn (not-empty (select-keys route-data [:conflicting])))])]
+     (into
+       [:group]
+       (mapv
+         (fn [[[path route-data] vals]]
+           [:group
+            (path-report path route-data)
+            (into
+              [:group]
+              (map
+                (fn [[path route-data]] (path-report path route-data))
+                vals))
+            [:break]])
+         conflicts)))
    [:span (text "Either fix the conflicting paths or disable the conflict resolution")
-    [:break] (text "by setting a router option: ") [:break] [:break]
+    [:break] (text "by setting route data for conflicting route: ") [:break] [:break]
+    (edn {:conflicting true} {:margin 3})
+    [:break] (text "or by setting a router option: ") [:break] [:break]
     (edn {:conflicts nil} {:margin 3})]
    [:break]
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts")

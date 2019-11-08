@@ -85,6 +85,15 @@
             routes)
       (not-empty)))
 
+(defn unresolved-conflicts [path-conflicting]
+  (-> (into {}
+            (remove (fn [[[_ route-data] conflicts]]
+                      (and (:conflicting route-data)
+                           (every? (comp :conflicting second)
+                                   conflicts)))
+                    path-conflicting))
+      (not-empty)))
+
 (defn conflicting-paths [conflicts]
   (->> (for [[p pc] conflicts]
          (conj (map first pc) (first p)))
