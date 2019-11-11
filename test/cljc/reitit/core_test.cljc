@@ -347,7 +347,19 @@
           [["/a" {:conflicting true}]
            ["/:b" {:conflicting true}]
            ["/c" {:conflicting true}]
-           ["/*d" {:conflicting true}]] :quarantine-router)
+           ["/*d" {:conflicting true}]] :quarantine-router
+          [["/:a"
+            ["/:b" {:conflicting true}]
+            ["/:c" {:conflicting true}]
+            ["/:d"
+             ["/:e" {:conflicting true}]
+             ["/:f" {:conflicting true}]]]] :quarantine-router
+          [["/:a" {:conflicting true}
+            ["/:b"]
+            ["/:c"]
+            ["/:d"
+             ["/:e"]
+             ["/:f"]]]] :quarantine-router)
         (testing "unmarked path conflicts throw"
           (are [paths]
             (is (thrown-with-msg?
