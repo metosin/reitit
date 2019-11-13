@@ -776,7 +776,7 @@
                                 
                                 <h1 id="route-conflicts">Route Conflicts</h1>
 <p>We should fail fast if a router contains conflicting paths or route names. </p>
-<p>When a <code>Router</code> is created via <code>reitit.core/router</code>, both path and route name conflicts are checked automatically. By default, in case of conflict, an <code>ex-info</code> is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via <code>:conflicts</code> router option.</p>
+<p>When a <code>Router</code> is created via <code>reitit.core/router</code>, both path and route name conflicts are checked automatically. By default, in case of conflict, an <code>ex-info</code> is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via <code>:conflicts</code> router option or via <code>:conflicting</code> route data.</p>
 <h2 id="path-conflicts">Path Conflicts</h2>
 <p>Routes with path conflicts:</p>
 <pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
@@ -792,14 +792,14 @@
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span> routes)
 <span class="hljs-comment">; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /:user-id/orders</span>
+<span class="hljs-comment">; -&gt; /:user-id/orders</span>
 <span class="hljs-comment">; -&gt; /public/*path</span>
 <span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /bulk/:bulk-id</span>
+<span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /public/*path</span>
+<span class="hljs-comment">; -&gt; /public/*path</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
 </code></pre>
@@ -807,26 +807,39 @@
 <pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
   routes
   {<span class="hljs-symbol">:conflicts</span> <span class="hljs-literal">nil</span>})
-<span class="hljs-comment">; =&gt; #object[reitit.core$linear_router$reify]</span>
+<span class="hljs-comment">; =&gt; #object[reitit.core$quarantine_router$reify</span>
 </code></pre>
 <p>To just log the conflicts:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">r/router</span>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.exception <span class="hljs-symbol">:as</span> exception])
+
+(<span class="hljs-name">r/router</span>
   routes
   {<span class="hljs-symbol">:conflicts</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [conflicts]
-                (<span class="hljs-name">println</span> (<span class="hljs-name">r/path-conflicts-str</span> conflicts)))})
+                (<span class="hljs-name">println</span> (<span class="hljs-name">exception/format-exception</span> <span class="hljs-symbol">:path-conflicts</span> <span class="hljs-literal">nil</span> conflicts)))})
 <span class="hljs-comment">; Router contains conflicting route paths:</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">;    /:user-id/orders</span>
+<span class="hljs-comment">; -&gt; /:user-id/orders</span>
 <span class="hljs-comment">; -&gt; /public/*path</span>
 <span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">; /bulk/:bulk-id</span>
+<span class="hljs-comment">; -&gt; /bulk/:bulk-id</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">; /public/*path</span>
+<span class="hljs-comment">; -&gt; /public/*path</span>
 <span class="hljs-comment">; -&gt; /:version/status</span>
 <span class="hljs-comment">;</span>
-<span class="hljs-comment">; =&gt; #object[reitit.core$linear_router$reify]</span>
+<span class="hljs-comment">; =&gt; #object[reitit.core$quarantine_router$reify]</span>
+</code></pre>
+<p>Alternatively, you can ignore conflicting paths individually via <code>:conflicting</code> in route data:</p>
+<pre><code class="lang-clj">(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> routes
+  [[<span class="hljs-string">&quot;/ping&quot;</span>]
+   [<span class="hljs-string">&quot;/:user-id/orders&quot;</span> {<span class="hljs-symbol">:conflicting</span> <span class="hljs-literal">true</span>}]
+   [<span class="hljs-string">&quot;/bulk/:bulk-id&quot;</span> {<span class="hljs-symbol">:conflicting</span> <span class="hljs-literal">true</span>}]
+   [<span class="hljs-string">&quot;/public/*path&quot;</span> {<span class="hljs-symbol">:conflicting</span> <span class="hljs-literal">true</span>}]
+   [<span class="hljs-string">&quot;/:version/status&quot;</span> {<span class="hljs-symbol">:conflicting</span> <span class="hljs-literal">true</span>}]])
+<span class="hljs-comment">; =&gt; #&apos;user/routes</span>
+(<span class="hljs-name">r/router</span> routes)
+<span class="hljs-comment">;  =&gt; #object[reitit.core$quarantine_router$reify]</span>
 </code></pre>
 <h2 id="name-conflicts">Name conflicts</h2>
 <p>Routes with name conflicts:</p>
@@ -888,7 +901,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Route Conflicts","level":"2.7","depth":1,"next":{"title":"Error Messages","level":"2.8","depth":1,"path":"basics/error_messages.md","ref":"basics/error_messages.md","articles":[]},"previous":{"title":"Route Data Validation","level":"2.6","depth":1,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_conflicts.md","mtime":"2019-10-30T14:39:10.170Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-10-30T14:40:33.291Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Route Conflicts","level":"2.7","depth":1,"next":{"title":"Error Messages","level":"2.8","depth":1,"path":"basics/error_messages.md","ref":"basics/error_messages.md","articles":[]},"previous":{"title":"Route Data Validation","level":"2.6","depth":1,"path":"basics/route_data_validation.md","ref":"basics/route_data_validation.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"basics/route_conflicts.md","mtime":"2019-11-13T20:49:35.866Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2019-11-13T20:50:14.072Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
