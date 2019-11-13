@@ -90,8 +90,8 @@
             (remove (fn [[[_ route-data] conflicts]]
                       (and (:conflicting route-data)
                            (every? (comp :conflicting second)
-                                   conflicts)))
-                    path-conflicting))
+                                   conflicts))))
+            path-conflicting)
       (not-empty)))
 
 (defn conflicting-paths [conflicts]
