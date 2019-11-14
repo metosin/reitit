@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+### `reitit-core`
+
+* Added ability to mark individual routes as conflicting by using `:conflicting` route data. See [documentation](https://metosin.github.io/reitit/basics/route_conflicts.html). Fixes [#324](https://github.com/metosin/reitit/issues/324)
+
 ## 0.3.10 (2019-10-8)
 
 * Updated deps:
