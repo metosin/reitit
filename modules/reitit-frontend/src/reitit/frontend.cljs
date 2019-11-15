@@ -3,7 +3,14 @@
             [reitit.coercion :as coercion]
             [reitit.coercion :as rc]
             [reitit.core :as r])
-  (:import goog.Uri))
+  (:import goog.Uri
+           goog.Uri.QueryData))
+
+(defn- query-param [^goog.Uri.QueryData q k]
+  (let [vs (.getValues q k)]
+    (if (< (alength vs) 2)
+      (aget vs 0)
+      (vec vs))))
 
 (defn query-params
   "Given goog.Uri, read query parameters into Clojure map."
@@ -11,7 +18,7 @@
   (let [q (.getQueryData uri)]
     (->> q
          (.getKeys)
-         (map (juxt keyword #(.get q %)))
+         (map (juxt keyword #(query-param q %)))
          (into {}))))
 
 (defn match-by-path
