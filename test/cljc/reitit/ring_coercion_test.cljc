@@ -5,6 +5,7 @@
             [reitit.ring :as ring]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
+            [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             #?@(:clj [[muuntaja.middleware]
                       [jsonista.core :as j]]))
@@ -120,6 +121,65 @@
                               :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion schema/coercion}})))]
+
+    (testing "withut exception handling"
+      (let [app (create [rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
+
+        (testing "all good"
+          (is (= {:status 200
+                  :body {:total 15}}
+                 (app valid-request)))
+          (is (= {:status 500
+                  :body {:evil true}}
+                 (app (assoc-in valid-request [:query-params "a"] "666")))))
+
+        (testing "invalid request"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Request coercion failed"
+                (app invalid-request))))
+
+        (testing "invalid response"
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Response coercion failed"
+                (app invalid-request2))))
+
+        (testing "with exception handling"
+          (let [app (create [rrc/coerce-exceptions-middleware
+                             rrc/coerce-request-middleware
+                             rrc/coerce-response-middleware])]
+
+            (testing "all good"
+              (is (= {:status 200
+                      :body {:total 15}}
+                     (app valid-request))))
+
+            (testing "invalid request"
+              (let [{:keys [status]} (app invalid-request)]
+                (is (= 400 status))))
+
+            (testing "invalid response"
+              (let [{:keys [status]} (app invalid-request2)]
+                (is (= 500 status))))))))))
+
+(deftest malli-coercion-test
+  (let [create (fn [middleware]
+                 (ring/ring-handler
+                   (ring/router
+                     ["/api"
+                      ["/plus/:e"
+                       {:get {:parameters {:query [:map [:a int?]]
+                                           :body [:map [:b int?]]
+                                           :form [:map [:c int?]]
+                                           :header [:map [:d int?]]
+                                           :path [:map [:e int?]]}
+                              :responses {200 {:body [:map [:total pos-int?]]}
+                                          500 {:description "fail"}}
+                              :handler handler}}]]
+                     {:data {:middleware middleware
+                             :coercion malli/coercion}})))]
 
     (testing "withut exception handling"
       (let [app (create [rrc/coerce-request-middleware

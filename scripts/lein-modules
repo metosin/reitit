@@ -7,6 +7,7 @@ for ext in \
   reitit-core \
   reitit-dev \
   reitit-spec \
+  reitit-malli \
   reitit-schema \
   reitit-ring \
   reitit-middleware \
