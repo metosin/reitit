@@ -1,7 +1,9 @@
 (ns reitit.coercion.malli
   (:require [reitit.coercion :as coercion]
             [malli.transform :as mt]
-            [malli.core :as m]))
+            [malli.swagger :as swagger]
+            [malli.core :as m]
+            [clojure.set :as set]))
 
 (defrecord Coercer [decoder encoder validator explainer])
 
@@ -17,6 +19,29 @@
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
 
+(defmulti extract-parameter (fn [in _] in))
+
+(defmethod extract-parameter :body [_ schema]
+  (let [swagger-schema (swagger/transform schema {:in :body, :type :parameter})]
+    [{:in "body"
+      :name (:title swagger-schema "")
+      :description (:description swagger-schema "")
+      :required (not= :maybe (m/name schema))
+      :schema swagger-schema}]))
+
+(defmethod extract-parameter :default [in schema]
+  (let [{:keys [properties required]} (swagger/transform schema {:in in, :type :parameter})]
+    (mapv
+      (fn [[k {:keys [type] :as schema}]]
+        (merge
+          {:in (name in)
+           :name k
+           :description (:description schema "")
+           :type type
+           :required (contains? (set required) k)}
+          schema))
+      properties)))
+
 (def default-options
   {:coerce-response? coerce-response?
    :transformers {:body {:default default-transformer
@@ -29,31 +54,30 @@
   (reify coercion/Coercion
     (-get-name [_] :malli)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses]}]
-      ;; TODO: this looks identical to spec, refactor when schema is done.
-      #_(case specification
-          :swagger (swagger/swagger-spec
-                     (merge
-                       (if parameters
-                         {:swagger/parameters
-                          (into
-                            (empty parameters)
-                            (for [[k v] parameters]
-                              [k (coercion/-compile-model this v nil)]))})
-                       (if responses
-                         {:swagger/responses
-                          (into
-                            (empty responses)
-                            (for [[k response] responses]
-                              [k (as-> response $
-                                       (set/rename-keys $ {:body :schema})
-                                       (if (:schema $)
-                                         (update $ :schema #(coercion/-compile-model this % nil))
-                                         $))]))})))
-          (throw
-            (ex-info
-              (str "Can't produce Schema apidocs for " specification)
-              {:type specification, :coercion :schema}))))
+    (-get-apidocs [_ specification {:keys [parameters responses]}]
+      (case specification
+        :swagger (merge
+                   (if parameters
+                     {:parameters
+                      (->> (for [[in schema] parameters
+                                 parameter (extract-parameter in schema)]
+                             parameter)
+                           (into []))})
+                   (if responses
+                     {:responses
+                      (into
+                        (empty responses)
+                        (for [[status response] responses]
+                          [status (as-> response $
+                                        (set/rename-keys $ {:body :schema})
+                                        (update $ :description (fnil identity ""))
+                                        (if (:schema $)
+                                          (update $ :schema swagger/transform {:type :schema})
+                                          $))]))}))
+        (throw
+          (ex-info
+            (str "Can't produce Schema apidocs for " specification)
+            {:type specification, :coercion :schema}))))
     (-compile-model [_ model _] (m/schema model))
     (-open-model [_ schema] schema)
     (-encode-error [_ error] error)
