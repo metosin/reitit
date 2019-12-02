@@ -39,6 +39,16 @@
                              :path {}}})
              (rf/match-by-path router "/foo")))
 
+      (is (= (r/map->Match
+               {:template "/foo"
+                :data {:name ::foo}
+                :path-params {}
+                :query-params {:mode ["foo", "bar"]}
+                :path "/foo"
+                :parameters {:query {:mode ["foo", "bar"]}
+                             :path {}}})
+             (rf/match-by-path router "/foo?mode=foo&mode=bar")))
+
       (is (= "/foo"
              (r/match->path (rf/match-by-name router ::foo))))
 
