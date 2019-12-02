@@ -51,13 +51,11 @@
     {:a 1} "a=1"
     {:a nil} "a="
     {:a :b :c "d"} "a=b&c=d"
-    {:a "b c"} "a=b+c"))
-
-; TODO: support seq values?
-;{:a ["b" "c"]} "a=b&a=c"
-;{:a ["c" "b"]} "a=c&a=b"
-;{:a (seq [1 2])} "a=1&a=2"
-;{:a #{"c" "b"}} "a=b&a=c"
+    {:a "b c"} "a=b+c"
+    {:a ["b" "c"]} "a=b&a=c"
+    {:a ["c" "b"]} "a=c&a=b"
+    {:a (seq [1 2])} "a=1&a=2"
+    {:a #{"c" "b"}} "a=b&a=c"))
 
 ;; test from https://github.com/playframework/playframework -> UriEncodingSpec.scala
 

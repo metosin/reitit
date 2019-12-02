@@ -73,7 +73,7 @@
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
-           coerce (into [] (keep #(coerce % opts)))))
+    coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
   (-> (into {}
@@ -239,14 +239,19 @@
   [params]
   (maybe-map-values #(url-encode (into-string %)) params))
 
+(defn- query-parameter [k v]
+  (str (form-encode (into-string k))
+       "="
+       (form-encode (into-string v))))
+
 (defn query-string
   "shallow transform of query parameters into query string"
   [params]
   (->> params
        (map (fn [[k v]]
-              (str (form-encode (into-string k))
-                   "="
-                   (form-encode (into-string v)))))
+              (if (or (sequential? v) (set? v))
+                (str/join "&" (map query-parameter (repeat k) v))
+                (query-parameter k v))))
        (str/join "&")))
 
 (defmacro goog-extend [type base-type ctor & methods]
