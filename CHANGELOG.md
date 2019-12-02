@@ -17,6 +17,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-core`
 
 * Added ability to mark individual routes as conflicting by using `:conflicting` route data. See [documentation](https://metosin.github.io/reitit/basics/route_conflicts.html). Fixes [#324](https://github.com/metosin/reitit/issues/324)
+* Encode sequential and set values as multi-valued query params (e.g. `{:foo ["bar", "baz"]}` => foo=bar&foo=baz).
+
+### `reitit-frontend`
+
+* Decode multi-valued query params correctly into seqs (e.g. foo=bar&foo=baz => `{:foo ["bar", "baz"]}`).
 
 ## 0.3.10 (2019-10-8)
 
