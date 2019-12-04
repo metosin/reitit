@@ -334,7 +334,6 @@
 ;; Creating Routers
 ;;
 
-
 (defn ^:no-doc default-router-options []
   {:lookup (fn lookup [[_ {:keys [name]}] _] (if name #{name}))
    :expand expand
