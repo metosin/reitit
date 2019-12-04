@@ -5,6 +5,10 @@
             [malli.core :as m]
             [clojure.set :as set]))
 
+;;
+;; coercion
+;;
+
 (defrecord Coercer [decoder encoder validator explainer])
 
 (def string-transformer
@@ -18,6 +22,37 @@
 
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
+
+(defn- -coercer [schema type transformers f]
+  (if schema
+    (let [->coercer (fn [t] (if t (->Coercer (m/decoder schema t)
+                                             (m/encoder schema t)
+                                             (m/validator schema)
+                                             (m/explainer schema))))
+          {:keys [formats default]} (transformers type)
+          default-coercer (->coercer default)
+          format-coercers (->> (for [[f t] formats] [f (->coercer t)]) (into {}))
+          get-coercer (if (seq format-coercers)
+                        (fn [format] (or (get format-coercers format) default-coercer))
+                        (constantly default-coercer))]
+      (if default-coercer
+        (fn [value format]
+          (if-let [coercer (get-coercer format)]
+            (let [transform (f coercer)
+                  validator (:validator coercer)
+                  transformed (transform value)]
+              (if (validator transformed)
+                transformed
+                (let [explainer (:explainer coercer)
+                      errors (explainer transformed)]
+                  (coercion/map->CoercionError
+                    {:schema schema
+                     :errors errors}))))
+            value))))))
+
+;;
+;; swagger
+;;
 
 (defmulti extract-parameter (fn [in _] in))
 
@@ -41,6 +76,10 @@
            :required (contains? (set required) k)}
           schema))
       properties)))
+
+;;
+;; public api
+;;
 
 (def default-options
   {:coerce-response? coerce-response?
@@ -82,32 +121,9 @@
     (-open-model [_ schema] schema)
     (-encode-error [_ error] error)
     (-request-coercer [_ type schema]
-      (if schema
-        (let [->coercer (fn [t] (->Coercer (m/decoder schema t)
-                                           (m/encoder schema t)
-                                           (m/validator schema)
-                                           (m/explainer schema)))
-              {:keys [formats default]} (transformers type)
-              default-coercer (->coercer default)
-              format-coercers (->> (for [[f t] formats] [f (->coercer t)]) (into {}))
-              get-coercer (if (seq format-coercers)
-                            (fn [format] (or (get format-coercers format) default-coercer))
-                            (constantly default-coercer))]
-          (fn [value format]
-            (if-let [coercer (get-coercer format)]
-              (let [decoder (:decoder coercer)
-                    validator (:validator coercer)
-                    decoded (decoder value)]
-                (if (validator decoded)
-                  decoded
-                  (let [explainer (:explainer coercer)
-                        errors (explainer decoded)]
-                    (coercion/map->CoercionError
-                      {:schema schema
-                       :errors errors}))))
-              value)))))
-    (-response-coercer [this schema]
+      (-coercer schema type transformers :decoder))
+    (-response-coercer [_ schema]
       (if (coerce-response? schema)
-        (coercion/-request-coercer this :response schema)))))
+        (-coercer schema :response transformers :encoder)))))
 
 (def coercion (create default-options))

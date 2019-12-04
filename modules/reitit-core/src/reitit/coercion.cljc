@@ -92,7 +92,7 @@
 (defn response-coercer [coercion body {:keys [extract-response-format]
                                        :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (let [coercer (-response-coercer coercion body)]
+    (if-let [coercer (-response-coercer coercion body)]
       (fn [request response]
         (let [format (extract-response-format request response)
               value (:body response)
@@ -130,6 +130,7 @@
 (defn response-coercers [coercion responses opts]
   (->> (for [[status {:keys [body]}] responses :when body]
          [status (response-coercer coercion body opts)])
+       (filter second)
        (into {})))
 
 ;;
