@@ -53,15 +53,15 @@
                                             (sequential? (first maybe-arg)))
                                        (nil? maybe-arg))
                                  [{} args]
-                                 [maybe-arg (rest args)])]
-             (let [d (endpoint pacc path macc data childs)
-                   data-for-endpoint (when (:endpoint d) (into macc (expand (:endpoint d) opts)))
-                   data-for-children (or (:inherit d) data)
-                   macc (into macc (expand data-for-children opts))]
+                                 [maybe-arg (rest args)])
+                 d (endpoint pacc path macc data childs)
+                 data-for-endpoint (when (:endpoint d) (into macc (expand (:endpoint d) opts)))
+                 data-for-children (or (:inherit d) data)
+                 macc (into macc (expand data-for-children opts))]
                (-> (when data-for-endpoint [[(str pacc path) data-for-endpoint]])
                    (concat (when (seq childs) (-> (str pacc path)
                                                   (walk-many macc (keep identity childs))
-                                                  (seq))))))))))]
+                                                  (seq)))))))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
