@@ -2,8 +2,7 @@
   (:require [reitit.coercion :as coercion]
             [reitit.ring :as ring]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [ring.util.http-response :as http-response])
+            [clojure.string :as str])
   (:import (java.time Instant)
            (java.io PrintWriter)))
 
@@ -99,7 +98,7 @@
 (def default-handlers
   {::default default-handler
    ::ring/response http-response-handler
-   ::http-response/response http-response-handler
+   :ring.util.http-response/response http-response-handler
    :muuntaja/decode request-parsing-handler
    ::coercion/request-coercion (create-coercion-handler 400)
    ::coercion/response-coercion (create-coercion-handler 500)})
