@@ -23,6 +23,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * Decode multi-valued query params correctly into seqs (e.g. foo=bar&foo=baz => `{:foo ["bar", "baz"]}`).
 
+### `reitit-middleware`
+
+* Added support for [metosin/ring-http-response](https://github.com/metosin/ring-http-response) to exception middleware. ([#342](https://github.com/metosin/reitit/pull/342) by [Matt Russell](https://github.com/mgrbyte))
+
 ## 0.3.10 (2019-10-8)
 
 * Updated deps:
