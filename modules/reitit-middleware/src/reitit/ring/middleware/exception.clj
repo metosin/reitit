@@ -98,6 +98,7 @@
 (def default-handlers
   {::default default-handler
    ::ring/response http-response-handler
+   :ring.util.http-response/response http-response-handler
    :muuntaja/decode request-parsing-handler
    ::coercion/request-coercion (create-coercion-handler 400)
    ::coercion/response-coercion (create-coercion-handler 500)})

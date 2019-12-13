@@ -6,7 +6,8 @@
             [clojure.spec.alpha :as s]
             [reitit.coercion.spec]
             [reitit.ring.coercion]
-            [muuntaja.core :as m])
+            [muuntaja.core :as m]
+            [ring.util.http-response :as http-response])
   (:import (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
@@ -20,6 +21,9 @@
                (ring/router
                  [["/defaults"
                    {:handler f}]
+                  ["/http-response"
+                   {:handler (fn [req]
+                               (http-response/unauthorized! "Unauthorized"))}]
                   ["/coercion"
                    {:middleware [reitit.ring.coercion/coerce-request-middleware
                                  reitit.ring.coercion/coerce-response-middleware]
@@ -55,6 +59,13 @@
       (let [response {:status 200, :body "ok"}
             app (create (fn [_] (throw (ex-info "fail" {:type ::ring/response, :response response}))))]
         (is (= response (app {:request-method :get, :uri "/defaults"})))))
+
+    (testing "::ring.util.http-response/response"
+      (let [response {:status 401 :body "Unauthorized" :headers {}}
+            app (create (fn [_] (throw (ex-info "Unauthorized!" {:type ::http-response/response
+                                                                 :response response}))))]
+        (is (= response (app {:request-method :post, :uri "/http-response"})))))
+
 
     (testing ":muuntaja/decode"
       (let [app (create (fn [_] (m/decode m/instance "application/json" "{:so \"invalid\"}")))]

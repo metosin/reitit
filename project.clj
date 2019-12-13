@@ -89,6 +89,7 @@
 
                                   [ring "1.7.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
+                                  [metosin/ring-http-response "0.9.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
                                   [metosin/muuntaja]
                                   [metosin/sieppari]
