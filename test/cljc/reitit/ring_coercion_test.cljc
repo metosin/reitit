@@ -17,22 +17,44 @@
                  {:keys [b]} :body
                  {:keys [c]} :form
                  {:keys [d]} :header
-                 {:keys [e]} :path} :parameters}]
+                 {:keys [e]} :path :as parameters} :parameters}]
+  ;; extra keys are stripped off
+  (assert (every? #{0 1} (map (comp count val) parameters)))
+
   (if (= 666 a)
     {:status 500
      :body {:evil true}}
     {:status 200
-     :body {:total (+ a b c d e)}}))
+     :body {:total (+ (or a 101) b c d e)}}))
 
-(def valid-request
+(def valid-request1
   {:uri "/api/plus/5"
    :request-method :get
+   :muuntaja/request {:format "application/json"}
    :query-params {"a" "1"}
    :body-params {:b 2}
    :form-params {:c 3}
    :headers {"d" "4"}})
 
-(def invalid-request
+(def valid-request2
+  {:uri "/api/plus/5"
+   :request-method :get
+   :muuntaja/request {:format "application/json"}
+   :query-params {}
+   :body-params {:b 2}
+   :form-params {:c 3}
+   :headers {"d" "4"}})
+
+(def valid-request3
+  {:uri "/api/plus/5"
+   :request-method :get
+   :muuntaja/request {:format "application/edn"}
+   :query-params {"a" "1", "EXTRA" "VALUE"}
+   :body-params {:b 2, :EXTRA "VALUE"}
+   :form-params {:c 3, :EXTRA "VALUE"}
+   :headers {"d" "4", "EXTRA" "VALUE"}})
+
+(def invalid-request1
   {:uri "/api/plus/5"
    :request-method :get})
 
@@ -68,16 +90,22 @@
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request)))
+                 (app valid-request1)))
+          (is (= {:status 200
+                  :body {:total 115}}
+                 (app valid-request2)))
+          (is (= {:status 200
+                  :body {:total 15}}
+                 (app valid-request3)))
           (is (= {:status 500
                   :body {:evil true}}
-                 (app (assoc-in valid-request [:query-params "a"] "666")))))
+                 (app (assoc-in valid-request1 [:query-params "a"] "666")))))
 
         (testing "invalid request"
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Request coercion failed"
-                (app invalid-request))))
+                (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
@@ -93,10 +121,10 @@
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request))))
+                 (app valid-request1))))
 
         (testing "invalid request"
-          (let [{:keys [status body]} (app invalid-request)
+          (let [{:keys [status body]} (app invalid-request1)
                 problems (:problems body)]
             (is (= 1 (count problems)))
             (is (= 400 status))))
@@ -111,7 +139,7 @@
                    (ring/router
                      ["/api"
                       ["/plus/:e"
-                       {:get {:parameters {:query {:a s/Int}
+                       {:get {:parameters {:query {(s/optional-key :a) s/Int}
                                            :body {:b s/Int}
                                            :form {:c s/Int}
                                            :header {:d s/Int}
@@ -129,16 +157,23 @@
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request)))
+                 (app valid-request1)))
+          (is (= {:status 200
+                  :body {:total 115}}
+                 (app valid-request2)))
           (is (= {:status 500
                   :body {:evil true}}
-                 (app (assoc-in valid-request [:query-params "a"] "666")))))
+                 (app (assoc-in valid-request1 [:query-params "a"] "666")))))
 
         (testing "invalid request"
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Request coercion failed"
-                (app invalid-request))))
+                (app invalid-request1)))
+          (is (thrown-with-msg?
+                ExceptionInfo
+                #"Request coercion failed"
+                (app valid-request3))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
@@ -154,10 +189,10 @@
             (testing "all good"
               (is (= {:status 200
                       :body {:total 15}}
-                     (app valid-request))))
+                     (app valid-request1))))
 
             (testing "invalid request"
-              (let [{:keys [status]} (app invalid-request)]
+              (let [{:keys [status]} (app invalid-request1)]
                 (is (= 400 status))))
 
             (testing "invalid response"
@@ -170,7 +205,7 @@
                    (ring/router
                      ["/api"
                       ["/plus/:e"
-                       {:get {:parameters {:query [:map [:a int?]]
+                       {:get {:parameters {:query [:map [:a {:optional true} int?]]
                                            :body [:map [:b int?]]
                                            :form [:map [:c int?]]
                                            :header [:map [:d int?]]
@@ -188,16 +223,22 @@
         (testing "all good"
           (is (= {:status 200
                   :body {:total 15}}
-                 (app valid-request)))
+                 (app valid-request1)))
+          (is (= {:status 200
+                  :body {:total 115}}
+                 (app valid-request2)))
+          (is (= {:status 200
+                  :body {:total 15}}
+                 (app valid-request3)))
           (is (= {:status 500
                   :body {:evil true}}
-                 (app (assoc-in valid-request [:query-params "a"] "666")))))
+                 (app (assoc-in valid-request1 [:query-params "a"] "666")))))
 
         (testing "invalid request"
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Request coercion failed"
-                (app invalid-request))))
+                (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
@@ -213,10 +254,10 @@
             (testing "all good"
               (is (= {:status 200
                       :body {:total 15}}
-                     (app valid-request))))
+                     (app valid-request1))))
 
             (testing "invalid request"
-              (let [{:keys [status]} (app invalid-request)]
+              (let [{:keys [status]} (app invalid-request1)]
                 (is (= 400 status))))
 
             (testing "invalid response"
@@ -249,11 +290,11 @@
        (testing "json coercion"
          (let [e2e #(-> (request "application/json" (ByteArrayInputStream. (j/write-value-as-bytes %)))
                         (app) :body (slurp) (j/read-value (j/object-mapper {:decode-key-fn true})))]
-           (is (= data-json (e2e data-edn)))
-           (is (= data-json (e2e data-json)))))
+           (is (= data-json (e2e (assoc data-edn :EXTRA "VALUE"))))
+           (is (= data-json (e2e (assoc data-json :EXTRA "VALUE"))))))
 
        (testing "edn coercion"
          (let [e2e #(-> (request "application/edn" (pr-str %))
                         (app) :body slurp (read-string))]
-           (is (= data-edn (e2e data-edn)))
+           (is (= data-edn (e2e (assoc data-edn :EXTRA "VALUE"))))
            (is (thrown? ExceptionInfo (e2e data-json))))))))
