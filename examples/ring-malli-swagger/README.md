@@ -1,4 +1,4 @@
-# reitit-ring, clojure.spec, swagger
+# reitit-ring, malli, swagger
 
 ## Usage
 
@@ -20,4 +20,4 @@ http GET :3000/swagger.json
 
 ## License
 
-Copyright © 2017-2018 Metosin Oy
+Copyright © 2017-2019 Metosin Oy

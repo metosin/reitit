@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
-            [reitit.coercion.spec]
+            [reitit.coercion.malli]
+            [reitit.ring.malli]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as coercion]
@@ -30,8 +31,8 @@
 
         ["/upload"
          {:post {:summary "upload a file"
-                 :parameters {:multipart {:file multipart/temp-file-part}}
-                 :responses {200 {:body {:name string?, :size int?}}}
+                 :parameters {:multipart [:map [:file reitit.ring.malli/temp-file-part]]}
+                 :responses {200 {:body [:map [:name string?] [:size int?]]}}
                  :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                             {:status 200
                              :body {:name (:filename file)
@@ -52,14 +53,14 @@
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
-                :parameters {:query {:x int?, :y int?}}
-                :responses {200 {:body {:total int?}}}
+                :parameters {:query [:map [:x int?] [:y int?]]}
+                :responses {200 {:body [:map [:total int?]]}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
                             :body {:total (+ x y)}})}
           :post {:summary "plus with spec body parameters"
-                 :parameters {:body {:x int?, :y int?}}
-                 :responses {200 {:body {:total int?}}}
+                 :parameters {:body [:map [:x int?] [:y int?]]}
+                 :responses {200 {:body [:map [:total int?]]}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
                              :body {:total (+ x y)}})}}]]]
@@ -68,7 +69,7 @@
        ;;:validate spec/validate ;; enable spec validation for route data
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
-       :data {:coercion reitit.coercion.spec/coercion
+       :data {:coercion reitit.coercion.malli/coercion
               :muuntaja m/instance
               :middleware [;; swagger feature
                            swagger/swagger-feature
