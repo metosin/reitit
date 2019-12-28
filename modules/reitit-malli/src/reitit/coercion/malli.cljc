@@ -26,6 +26,7 @@
 (def default-transformer
   mt/strip-extra-keys-transformer)
 
+;; TODO: are these needed?
 (defmulti coerce-response? identity :default ::default)
 (defmethod coerce-response? ::default [_] true)
 
@@ -37,7 +38,7 @@
                                              (m/explainer schema opts))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
-          format-coercers (some->> (for [[f t] formats] [f (->coercer t)]) (keep second) (seq) (into {}))
+          format-coercers (some->> (for [[f t] formats] [f (->coercer t)]) (filter second) (seq) (into {}))
           get-coercer (cond format-coercers (fn [format] (or (get format-coercers format) default-coercer))
                             default-coercer (constantly default-coercer))]
       (if get-coercer
@@ -152,7 +153,7 @@
                  (show? :schema) (update :schema edn/write-string opts)
                  (show? :errors) (-> (me/with-error-messages opts)
                                      (update :errors (partial map #(update % :schema edn/write-string opts))))
-                 true (select-keys error-keys)))
+                 (seq error-keys) (select-keys error-keys)))
        (-request-coercer [_ type schema]
          (-coercer schema type transformers :decode options))
        (-response-coercer [_ schema]

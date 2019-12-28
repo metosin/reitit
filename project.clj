@@ -33,7 +33,7 @@
                          [metosin/muuntaja "0.6.5"]
                          [metosin/jsonista "0.2.5"]
                          [metosin/sieppari "0.0.0-alpha7"]
-                         [metosin/malli "0.0.1-SNAPSHOT"]
+                         [metosin/malli "0.0.1-20191228.073043-6"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.21" :exclusions [org.clojure/core.rrb-vector]]

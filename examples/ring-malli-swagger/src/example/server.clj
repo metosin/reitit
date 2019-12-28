@@ -70,7 +70,7 @@
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
        :data {:coercion (reitit.coercion.malli/create
-                          {:error-keys #{:type :coercion :in :humanized #_:schema #_:value #_:transformed #_:errors}})
+                          {:error-keys #{#_:type :coercion :in :humanized :schema :value #_:transformed #_:errors}})
               :muuntaja m/instance
               :middleware [;; swagger feature
                            swagger/swagger-feature
