@@ -12,12 +12,20 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
+## 0.4.0-SNAPSHOT
 
 ### `reitit-core`
 
 * Added ability to mark individual routes as conflicting by using `:conflicting` route data. See [documentation](https://metosin.github.io/reitit/basics/route_conflicts.html). Fixes [#324](https://github.com/metosin/reitit/issues/324)
 * Encode sequential and set values as multi-valued query params (e.g. `{:foo ["bar", "baz"]}` => foo=bar&foo=baz).
+
+### `reitit-malli`
+
+* Welcome [malli](https://github.com/metosin/malli)-based coercion! See [example project](./examples/ring-malli-swagger).
+
+### `reitit-spec`
+
+* `:body` coercion defaults to `spec-tools.core/strip-extra-keys-transformer`, so effectively all non-specced `s/keys` keys are stripped also for non-JSON formats.
 
 ### `reitit-frontend`
 
