@@ -36,6 +36,7 @@ To enable parameter coercion, the following things need to be done:
 
 Reitit ships with the following coercion modules:
 
+* `reitit.coercion.malli/coercion` for [malli](https://github.com/metosin/malli)
 * `reitit.coercion.schema/coercion` for [plumatic schema](https://github.com/plumatic/schema)
 * `reitit.coercion.spec/coercion` for both [clojure.spec](https://clojure.org/about/spec) and [data-specs](https://github.com/metosin/spec-tools#data-specs)
 
