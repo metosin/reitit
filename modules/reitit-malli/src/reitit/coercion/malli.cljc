@@ -16,15 +16,19 @@
 (def string-transformer
   (mt/transformer
     mt/strip-extra-keys-transformer
-    mt/string-transformer))
+    mt/string-transformer
+    mt/default-value-transformer))
 
 (def json-transformer
   (mt/transformer
     mt/strip-extra-keys-transformer
-    mt/json-transformer))
+    mt/json-transformer
+    mt/default-value-transformer))
 
 (def default-transformer
-  mt/strip-extra-keys-transformer)
+  (mt/transformer
+    mt/strip-extra-keys-transformer
+    mt/default-value-transformer))
 
 ;; TODO: are these needed?
 (defmulti coerce-response? identity :default ::default)
@@ -107,7 +111,7 @@
                   :response {:default default-transformer
                              :formats {"application/json" json-transformer}}}
    ;; set of keys to include in error messages
-   :error-keys #{:type :coercion :in #_:schema #_:value :errors :humanized #_:transformed}
+   :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
    ;; malli options
    :options nil})
 

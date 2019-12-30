@@ -207,7 +207,7 @@
                       ["/plus/:e"
                        {:get {:parameters {:query [:map [:a {:optional true} int?]]
                                            :body [:map [:b int?]]
-                                           :form [:map [:c int?]]
+                                           :form [:map [:c [int? {:default 3}]]]
                                            :header [:map [:d int?]]
                                            :path [:map [:e int?]]}
                               :responses {200 {:body [:map [:total pos-int?]]}
@@ -230,6 +230,10 @@
           (is (= {:status 200
                   :body {:total 15}}
                  (app valid-request3)))
+          (testing "default values work"
+            (is (= {:status 200
+                    :body {:total 15}}
+                   (app (update valid-request3 :form-params dissoc :c)))))
           (is (= {:status 500
                   :body {:evil true}}
                  (app (assoc-in valid-request1 [:query-params "a"] "666")))))
