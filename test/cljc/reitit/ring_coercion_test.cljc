@@ -179,40 +179,39 @@
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Response coercion failed"
-                (app invalid-request2))))
+                (app invalid-request2))))))
 
-        (testing "with exception handling"
-          (let [app (create [rrc/coerce-exceptions-middleware
-                             rrc/coerce-request-middleware
-                             rrc/coerce-response-middleware])]
+    (testing "with exception handling"
+      (let [app (create [rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
 
-            (testing "all good"
-              (is (= {:status 200
-                      :body {:total 15}}
-                     (app valid-request1))))
+        (testing "all good"
+          (is (= {:status 200
+                  :body {:total 15}}
+                 (app valid-request1))))
 
-            (testing "invalid request"
-              (let [{:keys [status]} (app invalid-request1)]
-                (is (= 400 status))))
+        (testing "invalid request"
+          (let [{:keys [status]} (app invalid-request1)]
+            (is (= 400 status))))
 
-            (testing "invalid response"
-              (let [{:keys [status]} (app invalid-request2)]
-                (is (= 500 status))))))))))
+        (testing "invalid response"
+          (let [{:keys [status]} (app invalid-request2)]
+            (is (= 500 status))))))))
 
 (deftest malli-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
                    (ring/router
                      ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query [:map [:a {:optional true} int?]]
-                                           :body [:map [:b int?]]
-                                           :form [:map [:c [int? {:default 3}]]]
-                                           :header [:map [:d int?]]
-                                           :path [:map [:e int?]]}
-                              :responses {200 {:body [:map [:total pos-int?]]}
-                                          500 {:description "fail"}}
-                              :handler handler}}]]
+                      ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
+                                                      :body [:map [:b int?]]
+                                                      :form [:map [:c [int? {:default 3}]]]
+                                                      :header [:map [:d int?]]
+                                                      :path [:map [:e int?]]}
+                                         :responses {200 {:body [:map [:total pos-int?]]}
+                                                     500 {:description "fail"}}
+                                         :handler handler}}]]
                      {:data {:middleware middleware
                              :coercion malli/coercion}})))]
 
@@ -248,25 +247,25 @@
           (is (thrown-with-msg?
                 ExceptionInfo
                 #"Response coercion failed"
-                (app invalid-request2))))
+                (app invalid-request2))))))
 
-        (testing "with exception handling"
-          (let [app (create [rrc/coerce-exceptions-middleware
-                             rrc/coerce-request-middleware
-                             rrc/coerce-response-middleware])]
+    (testing "with exception handling"
+      (let [app (create [rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware])]
 
-            (testing "all good"
-              (is (= {:status 200
-                      :body {:total 15}}
-                     (app valid-request1))))
+        (testing "all good"
+          (is (= {:status 200
+                  :body {:total 15}}
+                 (app valid-request1))))
 
-            (testing "invalid request"
-              (let [{:keys [status]} (app invalid-request1)]
-                (is (= 400 status))))
+        (testing "invalid request"
+          (let [{:keys [status]} (app invalid-request1)]
+            (is (= 400 status))))
 
-            (testing "invalid response"
-              (let [{:keys [status]} (app invalid-request2)]
-                (is (= 500 status))))))))))
+        (testing "invalid response"
+          (let [{:keys [status]} (app invalid-request2)]
+            (is (= 500 status))))))))
 
 #?(:clj
    (deftest muuntaja-test
