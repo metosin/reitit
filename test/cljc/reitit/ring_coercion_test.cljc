@@ -265,7 +265,72 @@
 
         (testing "invalid response"
           (let [{:keys [status]} (app invalid-request2)]
-            (is (= 500 status))))))))
+            (is (= 500 status))))))
+
+    (testing "open & closed schemas"
+      (let [endpoint (fn [schema]
+                       {:get {:parameters {:body schema}
+                              :responses {200 {:body schema}}
+                              :handler (fn [{{:keys [body]} :parameters}]
+                                         {:status 200, :body (assoc body :response true)})}})
+            ->app (fn [options]
+                    (ring/ring-handler
+                      (ring/router
+                        ["/api"
+                         ["/default" (endpoint [:map [:x int?]])]
+                         ["/closed" (endpoint [:map {:closed true} [:x int?]])]
+                         ["/open" (endpoint [:map {:closed false} [:x int?]])]]
+                        {:data {:middleware [rrc/coerce-exceptions-middleware
+                                             rrc/coerce-request-middleware
+                                             rrc/coerce-response-middleware]
+                                :coercion (malli/create options)}})))
+            ->request (fn [uri] {:uri (str "/api/" uri)
+                                 :request-method :get
+                                 :muuntaja/request {:format "application/json"}
+                                 :body-params {:x 1, :request true}})]
+
+        (testing "with defaults"
+          (let [app (->app nil)]
+
+            (testing "default: keys are stripped"
+              (is (= {:status 200, :body {:x 1}}
+                     (app (->request "default")))))
+
+            (testing "closed: keys are stripped"
+              (is (= {:status 200, :body {:x 1}}
+                     (app (->request "closed")))))
+
+            (testing "open: keys are NOT stripped"
+              (is (= {:status 200, :body {:x 1, :request true, :response true}}
+                     (app (->request "open")))))))
+
+        (testing "when schemas are not closed"
+          (let [app (->app {:compile identity})]
+
+            (testing "default: keys are stripped"
+              (is (= {:status 200, :body {:x 1}}
+                     (app (->request "default")))))
+
+            (testing "closed: keys are stripped"
+              (is (= {:status 200, :body {:x 1}}
+                     (app (->request "closed")))))
+
+            (testing "open: keys are NOT stripped"
+              (is (= {:status 200, :body {:x 1, :request true, :response true}}
+                     (app (->request "open")))))))
+
+        (testing "when schemas are not closed and extra keys are not stripped"
+          (let [app (->app {:compile identity, :strip-extra-keys false})]
+            (testing "default: keys are NOT stripped"
+              (is (= {:status 200, :body {:x 1, :request true, :response true}}
+                     (app (->request "default")))))
+
+            (testing "closed: FAILS for extra keys"
+              (is (= 400 (:status (app (->request "closed"))))))
+
+            (testing "open: keys are NOT stripped"
+              (is (= {:status 200, :body {:x 1, :request true, :response true}}
+                     (app (->request "open")))))))))))
 
 #?(:clj
    (deftest muuntaja-test
