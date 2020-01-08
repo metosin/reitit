@@ -21,7 +21,7 @@
 
 #?(:clj
    (defmethod print-method ::coercion [coercion ^Writer w]
-     (.write w (str "<<" (-get-name coercion) ">>"))))
+     (.write w (str "#Coercion{:name " (-get-name coercion) "}"))))
 
 (defrecord CoercionError [])
 
@@ -137,7 +137,7 @@
 ;; api-docs
 ;;
 
-(defn get-apidocs [this specification data]
+(defn get-apidocs [coercion specification data]
   (let [swagger-parameter {:query :query
                            :body :body
                            :form :formData
@@ -153,7 +153,7 @@
                              (map (fn [[k v]] [(swagger-parameter k) v]))
                              (filter first)
                              (into {}))))
-                    (-get-apidocs this specification)))))
+                    (-get-apidocs coercion specification)))))
 
 ;;
 ;; integration

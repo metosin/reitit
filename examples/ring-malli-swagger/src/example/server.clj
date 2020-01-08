@@ -15,7 +15,8 @@
     ;       [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [malli.util :as mu]))
 
 (def app
   (ring/ring-handler
@@ -70,7 +71,16 @@
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
        :data {:coercion (reitit.coercion.malli/create
-                          {:error-keys #{#_:type :coercion :in :humanized :schema :value #_:transformed #_:errors}})
+                          {;; set of keys to include in error messages
+                           :error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
+                           ;; schema identity function (default: close all map schemas)
+                           :compile mu/closed-schema
+                           ;; strip-extra-keys (effects only predefined transformers)
+                           :strip-extra-keys true
+                           ;; add/set default values
+                           :default-values true
+                           ;; malli options
+                           :options nil})
               :muuntaja m/instance
               :middleware [;; swagger feature
                            swagger/swagger-feature

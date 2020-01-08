@@ -109,11 +109,11 @@
                   :response {:default default-transformer-provider}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
-   ;; schema identity function
+   ;; schema identity function (default: close all map schemas)
    :compile mu/closed-schema
-   ;; strip-extra-keys (effects only default transformers!)
+   ;; strip-extra-keys (effects only predefined transformers)
    :strip-extra-keys true
-   ;; add default values
+   ;; add/set default values
    :default-values true
    ;; malli options
    :options nil})
