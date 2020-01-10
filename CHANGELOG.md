@@ -33,6 +33,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * **BREAKING**: Decode multi-valued query params correctly into seqs (e.g. `foo=bar&foo=baz` ↦ `{:foo ["bar", "baz"]}`).
   * Previously you'd get only the first value. (e.g. `foo=bar&foo=baz` ↦ `{:foo "bar"}`)
+  
+### `reitit-ring`
+
+* **BREAKING**: New validation rule: `:middleware` must be a vector, not a list. Fixes [#296](https://github.com/metosin/reitit/issues/296). ([#319](https://github.com/metosin/reitit/pull/319) by [Daw-Ran Liou](https://github.com/dawran6))
 
 ### `reitit-middleware`
 
