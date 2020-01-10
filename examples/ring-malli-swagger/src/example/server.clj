@@ -24,7 +24,9 @@
       [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"
-                                :description "with reitit-ring"}}
+                                :description "with [malli](https://github.com/metosin/malli) and reitit-ring"}
+                         :tags [{:name "files", :description "file api"}
+                                {:name "math", :description "math api"}]}
                :handler (swagger/create-swagger-handler)}}]
 
        ["/files"
