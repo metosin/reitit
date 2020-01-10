@@ -1,13 +1,12 @@
 # reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/reitit)](https://cljdoc.xyz/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
 
-
 A fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
 * Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
 * First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
 * Bi-directional routing
-* [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
 * Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html), [pedestal](https://metosin.github.io/reitit/http/pedestal.html) & [frontend](https://metosin.github.io/reitit/frontend/basics.html)
 * Friendly [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html)
 * Extendable
@@ -32,6 +31,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
 * `reitit-middleware` - [common middleware](https://metosin.github.io/reitit/ring/default_middleware.html)
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
+* `reitit-malli` [malli](https://github.com/metosin/malli) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)

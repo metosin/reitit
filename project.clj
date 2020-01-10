@@ -16,6 +16,7 @@
                          [metosin/reitit-core "0.3.10"]
                          [metosin/reitit-dev "0.3.10"]
                          [metosin/reitit-spec "0.3.10"]
+                         [metosin/reitit-malli "0.3.10"]
                          [metosin/reitit-schema "0.3.10"]
                          [metosin/reitit-ring "0.3.10"]
                          [metosin/reitit-middleware "0.3.10"]
@@ -32,6 +33,7 @@
                          [metosin/muuntaja "0.6.6"]
                          [metosin/jsonista "0.2.5"]
                          [metosin/sieppari "0.0.0-alpha7"]
+                         [metosin/malli "0.0.1-20200108.194558-11"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.22" :exclusions [org.clojure/core.rrb-vector]]
@@ -60,6 +62,7 @@
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
                                   "modules/reitit-interceptors/src"
+                                  "modules/reitit-malli/src"
                                   "modules/reitit-spec/src"
                                   "modules/reitit-schema/src"
                                   "modules/reitit-swagger/src"
@@ -79,6 +82,7 @@
                                   [metosin/muuntaja]
                                   [metosin/sieppari]
                                   [metosin/jsonista]
+                                  [metosin/malli]
                                   [lambdaisland/deep-diff]
                                   [meta-merge]
                                   [com.bhauman/spell-spec]
@@ -91,9 +95,6 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
-                                  [metosin/muuntaja]
-                                  [metosin/sieppari]
-                                  [metosin/jsonista]
 
                                   [criterium "0.4.5"]
                                   [org.clojure/test.check "0.10.0"]

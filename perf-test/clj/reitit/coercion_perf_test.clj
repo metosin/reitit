@@ -6,11 +6,11 @@
             [spec-tools.core :as st]
             [muuntaja.middleware :as mm]
             [muuntaja.core :as m]
-            [muuntaja.format.jsonista :as jsonista-format]
             [jsonista.core :as j]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
             [reitit.coercion.schema :as schema]
+            [reitit.coercion.malli :as malli]
             [reitit.coercion :as coercion]
             [reitit.ring :as ring]))
 
@@ -173,15 +173,14 @@
 
 (defn json-perf-test []
   (title "json")
-  (let [m (m/create (jsonista-format/with-json-format m/default-options))
-        app (ring/ring-handler
+  (let [app (ring/ring-handler
               (ring/router
                 ["/plus" {:post {:handler (fn [request]
                                             (let [body (:body-params request)
                                                   x (:x body)
                                                   y (:y body)]
                                               {:status 200, :body {:result (+ x y)}}))}}]
-                {:data {:middleware [[mm/wrap-format m]]}}))
+                {:data {:middleware [mm/wrap-format]}}))
         request {:request-method :post
                  :uri "/plus"
                  :headers {"content-type" "application/json"}
@@ -196,15 +195,14 @@
 
 (defn schema-json-perf-test []
   (title "schema-json")
-  (let [m (m/create (jsonista-format/with-json-format m/default-options))
-        app (ring/ring-handler
+  (let [app (ring/ring-handler
               (ring/router
                 ["/plus" {:post {:responses {200 {:body {:result Long}}}
                                  :parameters {:body {:x Long, :y Long}}
                                  :handler (fn [request]
                                             (let [body (-> request :parameters :body)]
                                               {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
-                {:data {:middleware [[mm/wrap-format m]
+                {:data {:middleware [mm/wrap-format
                                      rrc/coerce-request-middleware
                                      rrc/coerce-response-middleware]
                         :coercion schema/coercion}}))
@@ -234,6 +232,7 @@
                         :coercion schema/coercion}}))
         request {:request-method :post
                  :uri "/plus"
+                 :muuntaja/request {:format "application/json"}
                  :body-params {:x 1, :y 2}}
         call (fn [] (-> request app :body))]
     (assert (= {:result 3} (call)))
@@ -241,6 +240,7 @@
     ;; 0.23µs (no coercion)
     ;; 12.8µs
     ;;  1.9µs (cached coercers)
+    ;;  2.5µs (real json)
     (cc/quick-bench
       (call))))
 
@@ -258,11 +258,13 @@
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"
+                 :muuntaja/request {:format "application/json"}
                  :body-params {:x 1, :y 2}}
         call (fn [] (-> request app :body))]
     (assert (= {:result 3} (call)))
 
     ;;  6.0µs
+    ;; 30.0µs (real json)
     (cc/quick-bench
       (call))))
 
@@ -287,17 +289,45 @@
                         :coercion spec/coercion}}))
         request {:request-method :post
                  :uri "/plus"
+                 :muuntaja/request {:format "application/json"}
                  :body-params {:x 1, :y 2}}
         call (fn [] (-> request app :body))]
     (assert (= {:result 3} (call)))
 
     ;;  3.2µs
+    ;; 13.0µs (real json)
+    (cc/quick-bench
+      (call))))
+
+(defn malli-perf-test []
+  (title "malli")
+  (let [app (ring/ring-handler
+              (ring/router
+                ["/plus" {:post {:responses {200 {:body [:map [:result int?]]}}
+                                 :parameters {:body [:map [:x int?] [:y int?]]}
+                                 :handler (fn [request]
+                                            (let [body (-> request :parameters :body)]
+                                              {:status 200, :body {:result (+ (:x body) (:y body))}}))}}]
+                {:data {:middleware [rrc/coerce-request-middleware
+                                     rrc/coerce-response-middleware]
+                        :coercion malli/coercion}}))
+        request {:request-method :post
+                 :uri "/plus"
+                 :muuntaja/request {:format "application/json"}
+                 :body-params {:x 1, :y 2}}
+        call (fn [] (-> request app :body))]
+    (assert (= {:result 3} (call)))
+
+    ;;  1.2µs (real json)
     (cc/quick-bench
       (call))))
 
 (comment
   (json-perf-test)
   (schema-json-perf-test)
-  (schema-perf-test)
-  (data-spec-perf-test)
-  (spec-perf-test))
+
+  (do
+    (schema-perf-test)
+    (data-spec-perf-test)
+    (spec-perf-test)
+    (malli-perf-test)))

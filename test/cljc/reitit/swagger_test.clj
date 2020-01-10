@@ -5,9 +5,11 @@
             [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
+            [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [schema.core :refer [Int]]
-            [muuntaja.core :as m]))
+            [muuntaja.core :as m]
+            [spec-tools.data-spec :as ds]))
 
 (def app
   (ring/ring-handler
@@ -33,11 +35,34 @@
                                 {:keys [z]} :path} :parameters}]
                            {:status 200, :body {:total (+ x y z)}})}
           :post {:summary "plus with body"
-                 :parameters {:body [int?]
+                 :parameters {:body (ds/maybe [int?])
                               :path {:z int?}}
                  :swagger {:responses {400 {:schema {:type "string"}
                                             :description "kosh"}}}
                  :responses {200 {:body {:total int?}}
+                             500 {:description "fail"}}
+                 :handler (fn [{{{:keys [z]} :path
+                                 xs :body} :parameters}]
+                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+
+       ["/malli" {:coercion malli/coercion}
+        ["/plus/*z"
+         {:get {:summary "plus"
+                :parameters {:query [:map [:x int?] [:y int?]]
+                             :path [:map [:z int?]]}
+                :swagger {:responses {400 {:schema {:type "string"}
+                                           :description "kosh"}}}
+                :responses {200 {:body [:map [:total int?]]}
+                            500 {:description "fail"}}
+                :handler (fn [{{{:keys [x y]} :query
+                                {:keys [z]} :path} :parameters}]
+                           {:status 200, :body {:total (+ x y z)}})}
+          :post {:summary "plus with body"
+                 :parameters {:body [:maybe [:vector int?]]
+                              :path [:map [:z int?]]}
+                 :swagger {:responses {400 {:schema {:type "string"}
+                                            :description "kosh"}}}
+                 :responses {200 {:body [:map [:total int?]]}
                              500 {:description "fail"}}
                  :handler (fn [{{{:keys [z]} :path
                                  xs :body} :parameters}]
@@ -115,6 +140,56 @@
                                                                            :description "kosh"}
                                                                       500 {:description "fail"}}
                                                           :summary "plus"}}
+                            "/api/malli/plus/{z}" {:get {:parameters [{:description ""
+                                                                       :format "int64"
+                                                                       :in "query"
+                                                                       :name :x
+                                                                       :required true
+                                                                       :type "integer"}
+                                                                      {:description ""
+                                                                       :format "int64"
+                                                                       :in "query"
+                                                                       :name :y
+                                                                       :required true
+                                                                       :type "integer"}
+                                                                      {:in "path"
+                                                                       :name :z
+                                                                       :description ""
+                                                                       :type "integer"
+                                                                       :required true
+                                                                       :format "int64"}]
+                                                         :responses {200 {:description ""
+                                                                          :schema {:properties {:total {:format "int64"
+                                                                                                        :type "integer"}}
+                                                                                   :required [:total]
+                                                                                   :type "object"}}
+                                                                     400 {:schema {:type "string"}
+                                                                          :description "kosh"}
+                                                                     500 {:description "fail"}}
+                                                         :summary "plus"}
+                                                   :post {:parameters [{:in "body",
+                                                                        :name "",
+                                                                        :description "",
+                                                                        :required false,
+                                                                        :schema {:type "array",
+                                                                                 :items {:type "integer",
+                                                                                         :format "int64"}
+                                                                                 :x-nullable true}}
+                                                                       {:in "path"
+                                                                        :name :z
+                                                                        :description ""
+                                                                        :type "integer"
+                                                                        :required true
+                                                                        :format "int64"}]
+                                                          :responses {200 {:description ""
+                                                                           :schema {:properties {:total {:format "int64"
+                                                                                                         :type "integer"}}
+                                                                                    :required [:total]
+                                                                                    :type "object"}}
+                                                                      400 {:schema {:type "string"}
+                                                                           :description "kosh"}
+                                                                      500 {:description "fail"}}
+                                                          :summary "plus with body"}}
                             "/api/spec/plus/{z}" {:get {:parameters [{:description ""
                                                                       :format "int64"
                                                                       :in "query"
@@ -145,10 +220,11 @@
                                                   :post {:parameters [{:in "body",
                                                                        :name "",
                                                                        :description "",
-                                                                       :required true,
+                                                                       :required false,
                                                                        :schema {:type "array",
                                                                                 :items {:type "integer",
-                                                                                        :format "int64"}}}
+                                                                                        :format "int64"}
+                                                                                :x-nullable true}}
                                                                       {:in "path"
                                                                        :name "z"
                                                                        :description ""

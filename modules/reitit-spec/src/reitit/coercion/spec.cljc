@@ -19,6 +19,9 @@
     st/strip-extra-keys-transformer
     st/json-transformer))
 
+(def strip-extra-keys-transformer
+  st/strip-extra-keys-transformer)
+
 (def no-op-transformer
   (reify
     st/Transformer
@@ -72,7 +75,7 @@
 
 (def default-options
   {:coerce-response? coerce-response?
-   :transformers {:body {:default no-op-transformer
+   :transformers {:body {:default strip-extra-keys-transformer
                          :formats {"application/json" json-transformer}}
                   :string {:default string-transformer}
                   :response {:default no-op-transformer}}})
