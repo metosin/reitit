@@ -3,7 +3,7 @@
 [Pedestal](http://pedestal.io/) is a backend web framework for Clojure. `reitit-pedestal` provides an alternative routing engine for Pedestal.
 
 ```clj
-[metosin/reitit-pedestal "0.3.10"]
+[metosin/reitit-pedestal "0.4.0-SNAPSHOT"]
 ```
 
 Why should one use reitit instead of the Pedestal [default routing](http://pedestal.io/reference/routing-quick-reference)?
@@ -26,8 +26,8 @@ A minimalistic example on how to to swap the default-router with a reitit router
 ```clj
 ; [io.pedestal/pedestal.service "0.5.5"]
 ; [io.pedestal/pedestal.jetty "0.5.5"]
-; [metosin/reitit-pedestal "0.3.10"]
-; [metosin/reitit "0.3.10"]
+; [metosin/reitit-pedestal "0.4.0-SNAPSHOT"]
+; [metosin/reitit "0.4.0-SNAPSHOT"]
 
 (require '[io.pedestal.http :as server])
 (require '[reitit.pedestal :as pedestal])
