@@ -27,7 +27,7 @@
                          [metosin/reitit-frontend "0.3.10"]
                          [metosin/reitit-sieppari "0.3.10"]
                          [metosin/reitit-pedestal "0.3.10"]
-                         [metosin/ring-swagger-ui "2.2.10"]
+                         [metosin/ring-swagger-ui "3.24.3"]
                          [metosin/spec-tools "0.10.0"]
                          [metosin/schema-tools "0.12.1"]
                          [metosin/muuntaja "0.6.6"]
