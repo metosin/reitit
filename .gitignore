@@ -12,3 +12,4 @@ pom.xml.asc
 /node_modules
 /_book
 figwheel_server.log
+/.idea
