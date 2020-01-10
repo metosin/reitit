@@ -31,11 +31,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ### `reitit-malli`
 
-* Welcome [malli](https://github.com/metosin/malli)-based coercion! See [example project](./examples/ring-malli-swagger).
+* Alpha of [malli](https://github.com/metosin/malli)-based coercion! See [example project](./examples/ring-malli-swagger).
 
 ### `reitit-spec`
 
-* `:body` coercion defaults to `spec-tools.core/strip-extra-keys-transformer`, so effectively all non-specced `s/keys` keys are stripped also for non-JSON formats.
+* **BREAKING**: `:body` coercion defaults to `spec-tools.core/strip-extra-keys-transformer`, so effectively all non-specced `s/keys` keys are stripped also for non-JSON formats.
 
 ### `reitit-frontend`
 
