@@ -28,17 +28,17 @@
                          [metosin/reitit-pedestal "0.3.10"]
                          [metosin/ring-swagger-ui "2.2.10"]
                          [metosin/spec-tools "0.10.0"]
-                         [metosin/schema-tools "0.12.0"]
-                         [metosin/muuntaja "0.6.5"]
+                         [metosin/schema-tools "0.12.1"]
+                         [metosin/muuntaja "0.6.6"]
                          [metosin/jsonista "0.2.5"]
                          [metosin/sieppari "0.0.0-alpha7"]
 
                          [meta-merge "1.0.0"]
-                         [fipp "0.6.21" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.7.2"]
+                         [fipp "0.6.22" :exclusions [org.clojure/core.rrb-vector]]
+                         [expound "0.8.4"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.1"]
-                         [ring/ring-core "1.7.1"]
+                         [ring/ring-core "1.8.0"]
 
                          [io.pedestal/pedestal.service "0.5.7"]]
 
@@ -71,7 +71,7 @@
                    :java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.10.1"]
-                                  [org.clojure/clojurescript "1.10.520"]
+                                  [org.clojure/clojurescript "1.10.597"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools]
@@ -87,7 +87,7 @@
 
                                   [orchestra "2019.02.06-1"]
 
-                                  [ring "1.7.1"]
+                                  [ring "1.8.0"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
                                   [metosin/ring-swagger-ui "2.2.10"]
@@ -102,7 +102,7 @@
 
                                   [io.pedestal/pedestal.service "0.5.7"]
 
-                                  [org.clojure/core.async "0.4.500"]
+                                  [org.clojure/core.async "0.6.532"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "4.0.2"]
 
@@ -121,7 +121,7 @@
                                    [io.pedestal/pedestal.service "0.5.7"]
                                    [io.pedestal/pedestal.jetty "0.5.7"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "0.4.500"]
+                                   [org.clojure/core.async "0.6.532"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "4.0.2"]
                                    [metosin/sieppari]

@@ -14,6 +14,16 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+* Updated deps:
+
+```
+[metosin/muuntaja "0.6.6"] is available but we use "0.6.5"
+[fipp "0.6.22"] is available but we use "0.6.21"
+[expound "0.8.4"] is available but we use "0.7.2"
+[ring/ring-core "1.8.0"] is available but we use "1.7.1"
+[metosin/schema-tools "0.12.1"] is available but we use "0.12.0"
+```
+
 ### `reitit-core`
 
 * Added ability to mark individual routes as conflicting by using `:conflicting` route data. See [documentation](https://metosin.github.io/reitit/basics/route_conflicts.html). Fixes [#324](https://github.com/metosin/reitit/issues/324)
