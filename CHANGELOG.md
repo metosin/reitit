@@ -26,7 +26,13 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.4.1 (2020-01-14)
 
-* bundle `reitit-malli` into `reitit` module.
+### `reitit`
+
+* Updated deps:
+
+```
+[metosin/reitit-malli "0.4.1"]
+```
 
 ## 0.4.0 (2020-01-14)
 
