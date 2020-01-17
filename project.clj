@@ -35,6 +35,9 @@
                          [metosin/sieppari "0.0.0-alpha7"]
                          [metosin/malli "0.0.1-20200108.194558-11"]
 
+                         ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
+                         [com.fasterxml.jackson.core/jackson-core "2.10.0"]
+
                          [meta-merge "1.0.0"]
                          [fipp "0.6.22" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.8.4"]

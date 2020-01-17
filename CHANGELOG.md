@@ -12,11 +12,23 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.4.1
+## 0.4.2 (2020-01-17)
+
+### `reitit`
+
+* Updated deps:
+
+```
+[com.fasterxml.jackson.core/jackson-core "2.10.0"]
+```
+
+* See https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
+
+## 0.4.1 (2020-01-14)
 
 * bundle `reitit-malli` into `reitit` module.
 
-## 0.4.0
+## 0.4.0 (2020-01-14)
 
 * Updated deps:
 
