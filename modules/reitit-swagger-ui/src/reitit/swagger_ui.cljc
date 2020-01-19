@@ -13,7 +13,7 @@
      | :parameter       | optional name of the wildcard parameter, defaults to unnamed keyword `:`
      | :root            | optional resource root, defaults to `\"swagger-ui\"`
      | :url             | path to swagger endpoint, defaults to `/swagger.json`
-     | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :path            | optional path to mount the handler to. Works only if mounted outside of a router and it should always start with /
      | :config          | parameters passed to swaggger-ui as-is.
 
      See https://github.com/swagger-api/swagger-ui/tree/2.x#parameters
@@ -36,6 +36,7 @@
       (let [config-json (fn [{:keys [url config]}] (j/write-value-as-string (merge config {:url url})))
             conf-js (fn [opts] (str "window.API_CONF = " (config-json opts) ";"))
             options (as-> options $
+                          (update $ :path (fn [path] (if-not (str/starts-with? path "/") (str "/" path) path)))
                           (update $ :root (fnil identity "swagger-ui"))
                           (update $ :url (fnil identity "/swagger.json"))
                           (assoc $ :paths {"/conf.js" {:headers {"Content-Type" "application/javascript"}
