@@ -32,7 +32,7 @@
                          [metosin/schema-tools "0.12.1"]
                          [metosin/muuntaja "0.6.6"]
                          [metosin/jsonista "0.2.5"]
-                         [metosin/sieppari "0.0.0-alpha7"]
+                         [metosin/sieppari "0.0.0-alpha8"]
                          [metosin/malli "0.0.1-20200108.194558-11"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
