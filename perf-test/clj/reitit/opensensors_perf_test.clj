@@ -10,6 +10,8 @@
             [compojure.core :refer [routes context ANY]]
             [calfpath.core :as cp]
             [calfpath.route :as cr]
+            [janus.route :as janus]
+            [janus.ring :as janus.ring]
 
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
@@ -309,6 +311,91 @@
       (ANY "/topics/:topic" [] {:name :test/route47} handler)
       (ANY "/topics" [] {:name :test/route50} handler))))
 
+(def opensensors-janus-routes
+  (janus/router
+   ['root
+    {:v1 ["v1" handler
+          [[:public ["public" handler
+                     [[:topics ["topics" handler {:test/route4 [true handler]}]]
+                      [:users ["users" handler {:test/route16 [true handler]}]]
+                      [:orgs ["orgs" handler {:test/route18 [true handler]}]]]]]
+           [:users ["users" handler
+                    {:test/route36 [true handler
+                                    [[:orgs ["orgs" handler {:test/route5 [true handler]}]]
+                                     [:test/route7 ["invitations" handler]]
+                                     [:test/route9 ["topics" handler]]
+                                     [:bookmarks ["bookmarks" handler {:test/route10 ["followers" handler]}]]
+                                     [:test/route15 ["devices" handler
+                                                     [[:test/route35 [true handler]]
+                                                      [:client-id [true handler
+                                                                   {:test/route49 ["reset-password" handler]}]]]]]
+                                     [:test/route22 ["device-errors" handler]]
+                                     [:test/route24 ["usage-stats" handler]]
+                                     [:claim-device ["claim-device" handler {:test/route26 [true handler]}]]
+                                     [:test/route31 ["owned-orgs" handler]]
+                                     [:bookmark ["bookmark" handler {:test/route33 [true handler]}]]
+                                     [:test/route52 ["orgs" handler]]
+                                     [:test/route43 ["api-key" handler]]
+                                     [:test/route56 ["bookmarks" handler]]]]}]]
+           [:search ["search" handler
+                     {:topics ["topics" handler {:test/route6 [true handler]}]}]]
+           [:test/route55 ["orgs" handler
+                           [[:test/route42 [true handler
+                                            [[:test/route37 ["devices" handler
+                                                             [[:test/route13 [true handler]]]]]
+                                             [:test/route12 ["usage-stats" handler]]
+                                             [:test/route19 ["invitations" handler]]
+                                             [:test/route38 ["members" handler
+                                                             [[:test/route34 [true handler]]]]]
+                                             [:test/route17 ["errors" handler]]
+                                             [:confirm-membership ["confirm-membership" handler
+                                                                   {:test/route46 [true handler]}]]
+                                             [:test/route57 ["topics" handler]]]]]]]]
+           [:messages ["messages" handler
+                       [[:user ["user" handler {:test/route14 [true handler]}]]
+                        [:device ["device" handler {:test/route30 [true handler]}]]
+                        [:topic ["topic" handler {:test/route48 [true handler]}]]]]]
+           [:test/route54 ["topics" handler
+                           [[:test/route32 [true handler]]]]]
+           [:test/route41 ["whoami" handler]]
+           [:test/route51 ["login" handler]]]]
+     :v2 ["v2" handler
+          [[:test/route1 ["whoami" handler]]
+           [:users ["users" handler
+                    {:test/route45 [true handler
+                                    [[:test/route2 ["datasets" handler]]
+                                     [:test/route25 ["devices" handler]]
+                                     [:test/route54 ["topics" handler
+                                                     [[:test/route29 ["bulk" handler]]]]]]]}]]
+           [:public ["public" handler
+                     [[:projects ["projects" handler
+                                  {:test/route27 [true handler
+                                                  [[:test/route3 ["datasets" handler]]]]}]]
+                      [:datasets ["datasets" handler
+                                  {:test/route28 [true handler]}]]
+                      [:messages ["messages" handler
+                                  {:dataset ["dataset" handler
+                                             {:test/route53 [true handler]}]}]]]]]
+           [:datasets ["datasets" handler
+                       {:test/route11 [true handler]}]]
+           [:test/route23 ["login" handler]]
+           [:orgs ["orgs" handler
+                   {:org-id [true handler
+                             {:test/route40 ["topics" handler]}]}]]
+           [:test/route44 ["schemas" handler]]
+           [:topics ["topics" handler
+                     {:test/route47 [true handler]}]]
+           [:test/route50 ["topics" handler]]]]}]))
+
+(comment
+  (janus/identify opensensors-janus-routes "/v2/public/messages/dataset/987")
+  (-> opensensors-janus-routes
+      (janus/identify "/v2/public/messages/dataset/987")
+      (janus/dispatch* "/v2/public/messages/dataset/987"))
+  ((-> (janus.ring/make-dispatcher)
+       (janus.ring/wrap-identify opensensors-janus-routes))
+   {:uri "/v2/public/messages/dataset/987"}))
+
 (def opensensors-pedestal-routes
   (map-tree/router
     (table/table-routes
@@ -562,6 +649,7 @@
         ataraxy-f (partial ataraxy/matches opensensors-ataraxy-routes)
         compojure-f opensensors-compojure-routes
         pedestal-f (partial pedestal/find-route opensensors-pedestal-routes)
+        janus-f (-> (janus.ring/make-dispatcher) (janus.ring/wrap-identify opensensors-janus-routes))
         b! (partial bench!! routes (fn [path] {:request-method :get, :uri path, :path-info path}) true)]
 
     ;;  2538ns
@@ -621,7 +709,9 @@
     (b! "bidi" bidi-f)
 
     ;; 19688ns
-    (b! "ataraxy" ataraxy-f)))
+    (b! "ataraxy" ataraxy-f)
+
+    (b! "janus" janus-f)))
 
 (comment
   (bench-rest!))

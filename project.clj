@@ -133,7 +133,8 @@
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
-                                   [bidi "2.1.6"]]}
+                                   [bidi "2.1.6"]
+                                   [janus "1.3.0"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"
