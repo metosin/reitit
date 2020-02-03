@@ -711,6 +711,7 @@
     ;; 19688ns
     (b! "ataraxy" ataraxy-f)
 
+    ;; 7550ns
     (b! "janus" janus-f)))
 
 (comment
