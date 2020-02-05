@@ -135,7 +135,7 @@
                       (if parameters
                         {:parameters
                          (->> (for [[in schema] parameters
-                                    parameter (extract-parameter in (compile schema))]
+                                    parameter (extract-parameter in (compile schema options))]
                                 parameter)
                               (into []))})
                       (if responses
@@ -148,14 +148,14 @@
                                            (update $ :description (fnil identity ""))
                                            (if (:schema $)
                                              (-> $
-                                                 (update :schema compile)
+                                                 (update :schema compile options)
                                                  (update :schema swagger/transform {:type :schema}))
                                              $))]))}))
            (throw
              (ex-info
                (str "Can't produce Schema apidocs for " specification)
                {:type specification, :coercion :schema}))))
-       (-compile-model [_ model _] (compile model))
+       (-compile-model [_ model _] (compile model options))
        (-open-model [_ schema] schema)
        (-encode-error [_ error]
          (cond-> error
@@ -165,9 +165,9 @@
                                      (update :errors (partial map #(update % :schema edn/write-string opts))))
                  (seq error-keys) (select-keys error-keys)))
        (-request-coercer [_ type schema]
-         (-coercer (compile schema) type transformers :decode nil options))
+         (-coercer (compile schema options) type transformers :decode nil options))
        (-response-coercer [_ schema]
-         (let [schema (compile schema)
+         (let [schema (compile schema options)
                encoder (-coercer schema :body transformers :encode nil options)]
            (-coercer schema :response transformers :encode encoder options)))))))
 
