@@ -63,6 +63,8 @@ Webjars also hosts a [version](https://github.com/webjars/swagger-ui) of the swa
 
 **NOTE**: Currently, swagger-ui module is just for Clojure. ClojureScript-support welcome as a PR!
 
+**NOTE:** If you want to use swagger-ui 2.x you can do so by explicitly downgrading `metosin/ring-swagger-ui` to `2.2.10`.
+
 ## Examples
 
 ### Simple example
