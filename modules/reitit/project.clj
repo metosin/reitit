@@ -1,4 +1,4 @@
-(defproject metosin/reitit "0.3.10"
+(defproject metosin/reitit "0.4.2"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,6 +12,7 @@
   :dependencies [[metosin/reitit-core]
                  [metosin/reitit-dev]
                  [metosin/reitit-spec]
+                 [metosin/reitit-malli]
                  [metosin/reitit-schema]
                  [metosin/reitit-ring]
                  [metosin/reitit-middleware]
@@ -20,4 +21,7 @@
                  [metosin/reitit-swagger]
                  [metosin/reitit-swagger-ui]
                  [metosin/reitit-frontend]
-                 [metosin/reitit-sieppari]])
+                 [metosin/reitit-sieppari]
+
+                 ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
+                 [com.fasterxml.jackson.core/jackson-core]])

@@ -22,7 +22,7 @@
 (defprotocol Matcher
   (match [this i max path])
   (view [this])
-  (depth [this])
+  (depth ^long [this])
   (length [this]))
 
 (defprotocol TrieCompiler
@@ -53,7 +53,7 @@
         :else (recur (inc i))))))
 
 (defn- -keyword [s]
-  (if-let [i (str/index-of s "/")]
+  (if-let [^long i (str/index-of s "/")]
     (keyword (subs s 0 i) (subs s (inc i)))
     (keyword s)))
 
@@ -61,8 +61,8 @@
   (let [bracket? (-> syntax (into-set) :bracket)
         colon? (-> syntax (into-set) :colon)
         -static (fn [from to] (if-not (= from to) [(subs s from to)]))
-        -wild (fn [from to] [(->Wild (-keyword (subs s (inc from) to)))])
-        -catch-all (fn [from to] [(->CatchAll (keyword (subs s (inc from) to)))])]
+        -wild (fn [^long from to] [(->Wild (-keyword (subs s (inc from) to)))])
+        -catch-all (fn [^long from to] [(->CatchAll (keyword (subs s (inc from) to)))])]
     (loop [ss nil, from 0, to 0]
       (if (= to (count s))
         (concat ss (-static from to))
@@ -70,13 +70,13 @@
           (cond
 
             (and bracket? (= \{ c))
-            (let [to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
+            (let [^long to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
               (if (= \* (get s (inc to)))
                 (recur (concat ss (-static from to) (-catch-all (inc to) to')) (long (inc to')) (long (inc to')))
                 (recur (concat ss (-static from to) (-wild to to')) (long (inc to')) (long (inc to')))))
 
             (and colon? (= \: c))
-            (let [to' (or (str/index-of s "/" to) (count s))]
+            (let [^long to' (or (str/index-of s "/" to) (count s))]
               (if (= 1 (- to' to))
                 (recur ss from (inc to))
                 (recur (concat ss (-static from to) (-wild to to')) (long to') (long to'))))
@@ -115,7 +115,7 @@
                    (and (string? cp) (not= (count cp) (count p))) [(subs p (count cp))]
                    (and (string? p) (not cp)) (-split p)))
         -postcut (fn [[p :as pps]]
-                   (let [i (and p (str/index-of p "/"))]
+                   (let [^long i (and p (str/index-of p "/"))]
                      (if (and i (pos? i))
                        (concat [(subs p 0 i) (subs p i)] (rest pps))
                        pps)))
@@ -128,7 +128,7 @@
 
 (defn- -slice-end [x xs]
   (let [i (if (string? x) (str/index-of x "/"))]
-    (if (and (number? i) (pos? i))
+    (if (and (number? i) (pos? ^long i))
       (concat [(subs x i)] xs)
       xs)))
 
@@ -227,11 +227,11 @@
       (let [size (count path)]
         (reify Matcher
           (match [_ i max p]
-            (if-not (< max (+ i size))
+            (if-not (< ^long max (+ ^long i size))
               (loop [j 0]
                 (if (= j size)
-                  (match matcher (+ i size) max p)
-                  (if (= (get p (+ i j)) (get path j))
+                  (match matcher (+ ^long i size) max p)
+                  (if (= (get p (+ ^long i j)) (get path j))
                     (recur (inc j)))))))
           (view [_] [path (view matcher)])
           (depth [_] (inc (depth matcher)))
@@ -239,8 +239,8 @@
     (wild-matcher [_ key end matcher]
       (reify Matcher
         (match [_ i max path]
-          (if (and (< i max) (not= (get path i) end))
-            (loop [percent? false, j i]
+          (if (and (< ^long i ^long max) (not= (get path i) end))
+            (loop [percent? false, j ^long i]
               (if (= max j)
                 (if-let [match (match matcher max max path)]
                   (assoc-param match key (decode path i max percent?)))
@@ -257,7 +257,7 @@
       (let [match (->Match params data)]
         (reify Matcher
           (match [_ i max path]
-            (if (<= i max) (assoc-param match key (decode path i max true))))
+            (if (<= ^long i ^long max) (assoc-param match key (decode path i max true))))
           (view [_] [key [data]])
           (depth [_] 1)
           (length [_]))))
@@ -271,7 +271,7 @@
                 (or (match (get matchers j) i max path)
                     (recur (inc j))))))
           (view [_] (mapv view matchers))
-          (depth [_] (inc (apply max 0 (map depth matchers))))
+          (depth [_] (inc ^long (apply max 0 (map depth matchers))))
           (length [_]))))
     (-pretty [_ matcher]
       (view matcher))
