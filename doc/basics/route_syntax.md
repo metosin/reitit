@@ -74,7 +74,7 @@ Reitit does not apply any encoding to your paths. If you need that, you must enc
 
 ### Wildcards
 
-Normal path-parameters (`:id`) can start anywhere in the path string, but have to end either to slash `/` (currently hardcoded) or to en end of path string:
+Normal path-parameters (`:id`) can start anywhere in the path string, but have to end either to slash `/` (currently hardcoded) or to an end of path string:
 
 ```clj
 [["/api/:version"]
