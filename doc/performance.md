@@ -110,7 +110,7 @@ The reitit routing perf is measured to get an internal baseline to optimize agai
 
 ### Looking out of the box
 
-A quick poke to [the fast routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that reitit is less 50% slower than the fastest routers in Go. Which is kinda awesome.
+A quick poke to [the fast routers in Go](https://github.com/julienschmidt/go-http-routing-benchmark) indicates that reitit is less than 50% slower than the fastest routers in Go. Which is kinda awesome.
 
 ### Faster!
 
