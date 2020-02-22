@@ -1,5 +1,5 @@
 (ns reitit.ring-test
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.test :refer [deftest testing is are]]
             [clojure.set :as set]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
@@ -116,7 +116,43 @@
 
       (testing "all named routes can be matched"
         (doseq [name (r/route-names router)]
-          (is (= name (-> (r/match-by-name router name) :data :name))))))))
+          (is (= name (-> (r/match-by-name router name) :data :name)))))))
+
+  (testing "intermediate paths"
+    (testing "without conflicts"
+      (let [routes ["/"       {:get {:handler handler} :name ::root}
+                    ["foo"    {:name ::foo}] ;; Inherits handler from above
+                    ["bar"    {:get {:handler handler} :name ::bar}
+                     ["/baz"  {:get {:handler handler} :name ::baz}]]
+                    ["bang" {}
+                     ["/bang"]]
+                    ["ping"   {:name ::ping}
+                     ["/pong" {:get {:handler handler} :name ::pong}]]]
+            router (ring/router routes)
+            match  #(r/match-by-path router %)]
+        (are [path name]
+          (is (= name (-> (match path) :data :name)))
+          "/" ::root
+          "/foo" ::foo
+          "/bar" ::bar
+          "/bar/baz" ::baz
+          "/ping" ::ping
+          "/ping/pong" ::pong)
+        (is (nil? (match "/bang")))
+        (is (-> (match "/bang/bang") :data :get :handler))))
+
+    (testing "with conflicts"
+      (let [routes ["/"       {:get {:handler handler} :name ::root}
+                    [""       {:name ::other-root}] ;; Conflicts with ::root path
+                    ["foo"    {:name ::foo}]
+                    ["bar"    {:get {:handler handler} :name ::bar}
+                     ["/baz"  {:get {:handler handler} :name ::baz}]]
+                    ["ping"   {:name ::ping}
+                     ["/pong" {:get {:handler handler} :name ::pong}]]]]
+        (is (thrown-with-msg?
+              ExceptionInfo
+              #"Router contains conflicting route paths"
+              (ring/router routes)))))))
 
 (defn wrap-enforce-roles [handler]
   (fn [{::keys [roles] :as request}]
