@@ -9,9 +9,9 @@ Example middleware to guard routes based on user roles:
 (require '[clojure.set :as set])
 
 (defn wrap-enforce-roles [handler]
-  (fn [{::keys [roles] :as request}]
+  (fn [{:keys [my-roles] :as request}]
     (let [required (some-> request (ring/get-match) :data ::roles)]
-      (if (and (seq required) (not (set/subset? required roles)))
+      (if (and (seq required) (not (set/subset? required my-roles)))
         {:status 403, :body "forbidden"}
         (handler request)))))
 ```
@@ -48,7 +48,7 @@ Anonymous access to guarded route:
 Authorized access to guarded route:
 
 ```clj
-(app {:request-method :get, :uri "/api/admin/ping", ::roles #{:admin}})
+(app {:request-method :get, :uri "/api/admin/ping", :my-roles #{:admin}})
 ; {:status 200, :body "ok"}
 ```
 
