@@ -305,7 +305,7 @@
                      (app (->request "open")))))))
 
         (testing "when schemas are not closed"
-          (let [app (->app {:compile identity})]
+          (let [app (->app {:compile (fn [v _] v)})]
 
             (testing "default: keys are stripped"
               (is (= {:status 200, :body {:x 1}}
@@ -320,7 +320,7 @@
                      (app (->request "open")))))))
 
         (testing "when schemas are not closed and extra keys are not stripped"
-          (let [app (->app {:compile identity, :strip-extra-keys false})]
+          (let [app (->app {:compile (fn [v _] v) :strip-extra-keys false})]
             (testing "default: keys are NOT stripped"
               (is (= {:status 200, :body {:x 1, :request true, :response true}}
                      (app (->request "default")))))
