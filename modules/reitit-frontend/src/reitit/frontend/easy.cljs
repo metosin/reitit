@@ -21,11 +21,23 @@
   - on-navigate    Function to be called when route changes. Takes two parameters, ´match´ and ´history´ object.
 
   Options:
-  - :use-fragment  (default true) If true, onhashchange and location hash are used to store the token."
+  - :use-fragment  (default true) If true, onhashchange and location hash are used to store current route.
+
+  Options (Html5History):
+  - :ignore-anchor-click?  Function (router, event, anchor element, uri) which will be called to
+                           check if the anchor click event should be ignored.
+                           To extend built-in check, you can call `reitit.frontend.history/ignore-anchor-click?`
+                           function, which will ignore clicks if the href matches route tree."
   [router on-navigate opts]
-  (swap! history (fn [old-history]
-                   (rfh/stop! old-history)
-                   (rfh/start! router on-navigate opts))))
+  ;; Stop and set to nil.
+  (swap! history rfh/stop!)
+  ; ;; Store the reference to History object in navigate callback, before calling user
+  ; ;; callback, so that user function can call rfe functions.
+  (rfh/start! router (fn rfe-on-navigate [m this]
+                       (when (nil? @history)
+                         (reset! history this))
+                       (on-navigate m this))
+    opts))
 
 (defn href
   ([k]
