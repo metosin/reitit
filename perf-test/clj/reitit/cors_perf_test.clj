@@ -1,5 +1,5 @@
 (ns reitit.cors-perf-test
-  (:require [reitit.perf-utils :refer :all]
+  (:require [reitit.perf-utils :refer [b!]]
             [ring.middleware.cors :as cors]))
 
 ;;

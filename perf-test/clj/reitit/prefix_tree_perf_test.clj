@@ -1,6 +1,5 @@
 (ns reitit.prefix-tree-perf-test
-  (:require [clojure.test :refer :all]
-            [io.pedestal.http.route.prefix-tree :as p]
+  (:require [io.pedestal.http.route.prefix-tree :as p]
             [reitit.trie :as trie]
             [criterium.core :as cc]))
 

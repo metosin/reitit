@@ -9,9 +9,10 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
-            [reitit.ring.middleware.dev :as dev]
-            [reitit.ring.spec :as spec]
-            [spec-tools.spell :as spell]
+            ;; Uncomment to use
+            ; [reitit.ring.middleware.dev :as dev]
+            ; [reitit.ring.spec :as spec]
+            ; [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]

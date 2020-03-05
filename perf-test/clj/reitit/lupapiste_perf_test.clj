@@ -1,6 +1,5 @@
 (ns reitit.lupapiste-perf-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.perf-utils :refer :all]
+  (:require [reitit.perf-utils :refer [bench!! handler valid-urls]]
             [reitit.core :as reitit]
             [reitit.ring :as ring]
 

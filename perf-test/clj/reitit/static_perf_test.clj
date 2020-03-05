@@ -1,7 +1,7 @@
 (ns reitit.static-perf-test
-  (:require [reitit.perf-utils :refer :all]
-            [immutant.web :as web]
+  (:require [immutant.web :as web]
             [reitit.ring :as ring]
+            [reitit.ring.mime :as reitit-mime]
             [clojure.java.io :as io]
             [criterium.core :as cc]
             [ring.util.response]
@@ -48,8 +48,7 @@
       (ring.middleware.defaults/wrap-defaults ring.middleware.defaults/site-defaults)))
 
 (comment
-  (def server (web/run #'app {:port 3000, :dispatch? false, :server {:always-set-keep-alive false}}))
-  (routing-test))
+  (def server (web/run #'app1 {:port 3000, :dispatch? false, :server {:always-set-keep-alive false}})))
 
 (defn bench-resources []
 
@@ -104,4 +103,4 @@
 
     ;; 106ns
     (cc/quick-bench
-      (reitit.ring.mime/ext-mime-type name reitit.ring.mime/default-mime-types))))
+      (reitit-mime/ext-mime-type name reitit-mime/default-mime-types))))

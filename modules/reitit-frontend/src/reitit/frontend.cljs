@@ -1,12 +1,11 @@
 (ns reitit.frontend
   (:require [clojure.set :as set]
             [reitit.coercion :as coercion]
-            [reitit.coercion :as rc]
             [reitit.core :as r])
   (:import goog.Uri
            goog.Uri.QueryData))
 
-(defn- query-param [^goog.Uri.QueryData q k]
+(defn- query-param [^QueryData q k]
   (let [vs (.getValues q k)]
     (if (< (alength vs) 2)
       (aget vs 0)
@@ -14,7 +13,7 @@
 
 (defn query-params
   "Given goog.Uri, read query parameters into Clojure map."
-  [^goog.Uri uri]
+  [^Uri uri]
   (let [q (.getQueryData uri)]
     (->> q
          (.getKeys)
@@ -51,7 +50,7 @@
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
-   (r/router raw-routes (merge {:compile rc/compile-request-coercers} opts))))
+   (r/router raw-routes (merge {:compile coercion/compile-request-coercers} opts))))
 
 (defn match-by-name!
   "Logs problems using console.warn"

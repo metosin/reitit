@@ -1,13 +1,11 @@
 (ns frontend-re-frame.core
-  (:require
-   [re-frame.core :as re-frame]
-   [reagent.core :as reagent]
-   [reitit.core :as r]
-   [reitit.coercion :as rc]
-   [reitit.coercion.spec :as rss]
-   [reitit.frontend :as rf]
-   [reitit.frontend.controllers :as rfc]
-   [reitit.frontend.easy :as rfe]))
+  (:require [re-frame.core :as re-frame]
+            [reagent.core :as reagent]
+            [reitit.core :as r]
+            [reitit.coercion.spec :as rss]
+            [reitit.frontend :as rf]
+            [reitit.frontend.controllers :as rfc]
+            [reitit.frontend.easy :as rfe]))
 
 ;;; Events ;;;
 

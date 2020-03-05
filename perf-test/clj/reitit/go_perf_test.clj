@@ -1,8 +1,7 @@
 (ns reitit.go-perf-test
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [suite title]]
             [reitit.ring :as ring]
-            [reitit.trie :as trie]
             [clojure.string :as str]))
 
 ;;

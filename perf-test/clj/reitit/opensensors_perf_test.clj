@@ -16,7 +16,6 @@
             [io.pedestal.http.route.definition.table :as table]
             [io.pedestal.http.route.map-tree :as map-tree]
             [io.pedestal.http.route.router :as pedestal]
-            [reitit.core :as r]
             [criterium.core :as cc]))
 
 ;;
@@ -592,10 +591,6 @@
          ["/v1/orgs/:org-id/members/invitation-data/:user-id" :get (constantly "") :route-name :test/route39]]))
     {:path-info "/v1/orgs/0/members/invitation-data/1" :request-method :get})
 
-  (require '[io.pedestal.http.route.definition.table :as table])
-  (require '[io.pedestal.http.route.map-tree :as map-tree])
-  (require '[io.pedestal.http.route.router :as pedestal])
-
   (pedestal/find-route
     (map-tree/router
       (table/table-routes
@@ -640,7 +635,7 @@
         router (reitit/router routes)
         reitit-f #(reitit/match-by-path router (:uri %))
         reitit-ring-f (ring/ring-handler (ring/router opensensors-routes))
-        reitit-ring-linear-f (ring/ring-handler (ring/router opensensors-routes {:router r/linear-router}))
+        reitit-ring-linear-f (ring/ring-handler (ring/router opensensors-routes {:router reitit/linear-router}))
         reitit-ring-fast-f (ring/ring-handler (ring/router opensensors-routes) nil {:inject-router? false, :inject-match? false})
         bidi-f #(bidi/match-route opensensors-bidi-routes (:uri %))
         calfpath-macros-f opensensors-calfpath-macro-handler
@@ -727,7 +722,7 @@
   ;; 293ns (pre-defined parameters)
   (let [app (ring/ring-handler (ring/router opensensors-routes) {:inject-match? false, :inject-router? false})
         request {:uri "/v1/users/1/devices/1", :request-method :get}]
-    (doseq [[p r] (-> app (ring/get-router) (r/routes))]
+    (doseq [[p r] (-> app (ring/get-router) (reitit/routes))]
       (when-not (app {:uri p, :request-method :get})
         (println "FAIL:" p)))
     (println (app request))

@@ -43,9 +43,9 @@
                 (let [coercers (coercion/response-coercers coercion responses opts)]
                   {:leave (fn [ctx]
                             (let [request (:request ctx)
-                                  response (:response ctx)]
-                              (let [response (coercion/coerce-response coercers request response)]
-                                (assoc ctx :response response))))})))})
+                                  response (:response ctx)
+                                  response (coercion/coerce-response coercers request response)]
+                              (assoc ctx :response response)))})))})
 
 (defn coerce-exceptions-interceptor
   "Interceptor for handling coercion exceptions.

@@ -1,11 +1,9 @@
 (ns reitit.coercion-perf-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+  (:require [criterium.core :as cc]
+            [reitit.perf-utils :refer [bench! suite title]]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
             [muuntaja.middleware :as mm]
-            [muuntaja.core :as m]
             [jsonista.core :as j]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec :as spec]
@@ -91,7 +89,7 @@
 
 (comment
   (doseq [coercion [nil (->NoOpCoercion) spec/coercion]]
-    (suite (str (if coercion (protocol/get-name coercion))))
+    (suite (str (if coercion (coercion/-get-name coercion))))
     (let [routes ["/api"
                   ["/ping" {:parameters {:body {:x int?, :y int?}}
                             :responses {200 {:body {:total pos-int?}}}

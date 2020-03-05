@@ -1,11 +1,9 @@
 (ns frontend.core
   (:require [fipp.edn :as fedn]
             [reagent.core :as r]
-            [reitit.coercion :as rc]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
-            [reitit.frontend.easy :as rfe]
-            [spec-tools.data-spec :as ds]))
+            [reitit.frontend.easy :as rfe]))
 
 ;; Implementing conditional prompt on navigation with Reitit frontend.
 

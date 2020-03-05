@@ -1,5 +1,5 @@
 (ns example.server-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [example.server :refer [app]]
             [ring.mock.request :refer [request json-body]]))
 
