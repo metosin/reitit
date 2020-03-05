@@ -2,7 +2,7 @@
 
 Ring route validation works [just like with core router](../basics/route_data_validation.md), with few differences:
 
-* `reitit.ring.spec/validate` should be used instead of `reitit.spec/validate` - to support validating all endpoints (`:get`, `:post` etc.)
+* `reitit.ring.validate.spec/validate` should be used instead of `reitit.spec/validate` - to support validating all endpoints (`:get`, `:post` etc.)
 * With `clojure.spec` validation, Middleware can contribute to route spec via `:specs` key. The effective route data spec is router spec merged with middleware specs.
 
 ## Example
@@ -12,7 +12,7 @@ A simple app with spec-validation turned on:
 ```clj
 (require '[clojure.spec.alpha :as s])
 (require '[reitit.ring :as ring])
-(require '[reitit.ring.spec :as rrs])
+(require '[reitit.ring.validate.spec :as rrs])
 (require '[reitit.spec :as rs])
 (require '[expound.alpha :as e])
 

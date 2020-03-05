@@ -9,16 +9,17 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
+            [reitit.ring.spec :as ring-spec]
             ;; Uncomment to use
             ; [reitit.ring.middleware.dev :as dev]
-            ; [reitit.ring.spec :as spec]
+            ; [reitit.ring.validate.spec :as spec]
             ; [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]
             [clojure.java.io :as io]))
 
-(s/def ::file multipart/temp-file-part)
+(s/def ::file ring-spec/temp-file-part)
 (s/def ::file-params (s/keys :req-un [::file]))
 
 (s/def ::name string?)

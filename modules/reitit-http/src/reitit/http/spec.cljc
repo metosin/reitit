@@ -1,6 +1,6 @@
 (ns reitit.http.spec
   (:require [clojure.spec.alpha :as s]
-            [reitit.ring.spec :as rrs]
+            [reitit.ring.validate.spec :as rrs]
             [reitit.interceptor :as interceptor]
             [reitit.exception :as exception]
             [reitit.spec :as rs]))

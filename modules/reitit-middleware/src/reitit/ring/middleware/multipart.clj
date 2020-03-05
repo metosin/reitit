@@ -1,28 +1,7 @@
 (ns reitit.ring.middleware.multipart
   (:refer-clojure :exclude [compile])
   (:require [reitit.coercion :as coercion]
-            [ring.middleware.multipart-params :as multipart-params]
-            [clojure.spec.alpha :as s]
-            [spec-tools.core :as st])
-  (:import (java.io File)))
-
-(s/def ::filename string?)
-(s/def ::content-type string?)
-(s/def ::tempfile (partial instance? File))
-(s/def ::bytes bytes?)
-(s/def ::size int?)
-
-(def temp-file-part
-  "Spec for file param created by ring.middleware.multipart-params.temp-file store."
-  (st/spec
-    {:spec (s/keys :req-un [::filename ::content-type ::tempfile ::size])
-     :swagger/type "file"}))
-
-(def bytes-part
-  "Spec for file param created by ring.middleware.multipart-params.byte-array store."
-  (st/spec
-    {:spec (s/keys :req-un [::filename ::content-type ::bytes])
-     :swagger/type "file"}))
+            [ring.middleware.multipart-params :as multipart-params]))
 
 (defn- coerced-request [request coercers]
   (if-let [coerced (if coercers (coercion/coerce-request coercers request))]
