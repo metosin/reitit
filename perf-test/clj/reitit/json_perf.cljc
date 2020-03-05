@@ -1,6 +1,6 @@
 (ns reitit.json-perf
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [title]]
 
     ;; aleph
             [aleph.http :as http]

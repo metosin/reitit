@@ -2,7 +2,6 @@
   "Provides integration to hash-change or HTML5 History
   events."
   (:require [reitit.core :as reitit]
-            [reitit.core :as r]
             [reitit.frontend :as rf]
             [goog.events :as gevents])
   (:import goog.Uri))
@@ -59,9 +58,10 @@
           el
           (recur (.-parentNode el)))))))
 
-(defn- event-target [event]
+(defn- event-target
   "Read event's target from composed path to get shadow dom working,
-   fallback to target property if not available"
+  fallback to target property if not available"
+  [event]
   (let [original-event (.getBrowserEvent event)]
     (if (exists? (.-composedPath original-event))
       (aget (.composedPath original-event) 0)
@@ -176,7 +176,7 @@
    (href history k params nil))
   ([history k params query]
    (let [match (rf/match-by-name! (:router history) k params)]
-     (-href history (r/match->path match query)))))
+     (-href history (reitit/match->path match query)))))
 
 (defn push-state
   "Sets the new route, leaving previous route in history."
@@ -186,7 +186,7 @@
    (push-state history k params nil))
   ([history k params query]
    (let [match (rf/match-by-name! (:router history) k params)
-         path (r/match->path match query)]
+         path (reitit/match->path match query)]
      ;; pushState and replaceState don't trigger popstate event so call on-navigate manually
      (.pushState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
@@ -199,6 +199,6 @@
    (replace-state history k params nil))
   ([history k params query]
    (let [match (rf/match-by-name! (:router history) k params)
-         path (r/match->path match query)]
+         path (reitit/match->path match query)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))

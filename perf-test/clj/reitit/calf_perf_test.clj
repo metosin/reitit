@@ -1,9 +1,7 @@
 (ns reitit.calf-perf-test
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
             [ring.util.codec]
             [reitit.impl]
-            [clojure.edn :as edn]
             [reitit.ring :as ring]
             [reitit.core :as r]))
 
@@ -24,11 +22,10 @@
 
 
 (defn test! [f input]
-  (do
-    (println "\u001B[33m")
-    (println (pr-str input) "=>" (pr-str (f input)))
-    (println "\u001B[0m")
-    (cc/quick-bench (f input))))
+  (println "\u001B[33m")
+  (println (pr-str input) "=>" (pr-str (f input)))
+  (println "\u001B[0m")
+  (cc/quick-bench (f input)))
 
 (defn h11 [id type] {:status 200
                      :headers {"Content-Type" "text/plain"}

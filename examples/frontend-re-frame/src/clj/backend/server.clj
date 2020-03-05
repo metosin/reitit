@@ -1,6 +1,5 @@
 (ns backend.server
-  (:require [clojure.java.io :as io]
-            [ring.util.response :as resp]
+  (:require [ring.util.response :as resp]
             [ring.middleware.content-type :as content-type]))
 
 (def handler

@@ -1,8 +1,7 @@
 (ns reitit.impl-perf-test
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [suite]]
             [ring.util.codec]
-            [reitit.impl]
             [reitit.impl :as impl])
   (:import (java.net URLDecoder URLEncoder)))
 
@@ -23,11 +22,10 @@
 
 
 (defn test! [f input]
-  (do
-    (println "\u001B[33m")
-    (println (pr-str input) "=>" (pr-str (f input)))
-    (println "\u001B[0m")
-    (cc/quick-bench (f input))))
+  (println "\u001B[33m")
+  (println (pr-str input) "=>" (pr-str (f input)))
+  (println "\u001B[0m")
+  (cc/quick-bench (f input)))
 
 (defn url-decode-naive [s]
   (URLDecoder/decode
@@ -190,5 +188,4 @@
   (url-encode!)
   (form-decode!)
   (form-encode!)
-  (url-encode-coll!)
-  (split!))
+  (url-encode-coll!))

@@ -4,7 +4,6 @@
             [reitit.exception :as exception]
             [arrangement.core]
     ;; spell-spec
-            [spec-tools.spell :as spell]
             [spell-spec.expound]
     ;; expound
             [expound.ansi]

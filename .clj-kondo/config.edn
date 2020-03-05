@@ -1,0 +1,6 @@
+{;;:skip-comments true
+ :lint-as {potemkin/def-derived-map clojure.core/defrecord}
+ :linters {:if {:level :off}
+           :unused-binding {:level :off}
+           :unused-referred-var {:exclude {clojure.test [deftest testing is are]
+                                           cljs.test [deftest testing is are]}}}}

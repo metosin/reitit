@@ -4,11 +4,9 @@
             [clojure.set :as set]
             [meta-merge.core :as mm]
             [reitit.trie :as trie]
-            [reitit.exception :as exception]
             [reitit.exception :as ex])
   #?(:clj
-     (:import (java.util.regex Pattern)
-              (java.util HashMap Map)
+     (:import (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
 (defn parse [path opts]
@@ -138,7 +136,7 @@
   (when-not (every? #(contains? path-params %) required)
     (let [defined (-> path-params keys set)
           missing (set/difference required defined)]
-      (exception/fail!
+      (ex/fail!
         (str "missing path-params for route " template " -> " missing)
         {:path-params path-params, :required required}))))
 

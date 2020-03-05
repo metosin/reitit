@@ -2,7 +2,6 @@
   (:require [clojure.string :as string]
             [fipp.edn :as fedn]
             [reagent.core :as r]
-            [reitit.coercion :as rc]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]

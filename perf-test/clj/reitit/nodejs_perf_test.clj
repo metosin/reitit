@@ -1,5 +1,5 @@
 (ns reitit.nodejs-perf-test
-  (:require [reitit.perf-utils :refer :all]
+  (:require [reitit.perf-utils :refer [title]]
             [immutant.web :as web]
             [reitit.ring :as ring]))
 

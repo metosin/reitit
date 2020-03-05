@@ -11,9 +11,10 @@
             [reitit.http.interceptors.muuntaja :as muuntaja]
             [reitit.http.interceptors.exception :as exception]
             [reitit.http.interceptors.multipart :as multipart]
-            [reitit.http.interceptors.dev :as dev]
-            [reitit.http.spec :as spec]
-            [spec-tools.spell :as spell]
+            ;; Uncomment to use
+            ; [reitit.http.interceptors.dev :as dev]
+            ; [reitit.http.spec :as spec]
+            ; [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [aleph.http :as aleph]
             [muuntaja.core :as m]

@@ -2,7 +2,6 @@
   (:require [reagent.core :as r]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
-            [reitit.coercion :as rc]
             [reitit.coercion.spec :as rss]
             [spec-tools.data-spec :as ds]
             [fipp.edn :as fedn]))

@@ -1,6 +1,6 @@
 (ns reitit.json-size-perf
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [title]]
             [reitit.ring :as ring]
             [muuntaja.middleware :as mm]
             [reitit.coercion.spec]

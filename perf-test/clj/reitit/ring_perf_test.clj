@@ -1,6 +1,5 @@
 (ns reitit.ring-perf-test
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
             [reitit.ring :as ring]))
 
 ;;

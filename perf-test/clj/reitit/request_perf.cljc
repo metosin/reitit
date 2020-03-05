@@ -1,6 +1,6 @@
 (ns reitit.request-perf
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [title]]
             [potemkin :as p]))
 
 (set! *warn-on-reflection* true)
@@ -25,8 +25,7 @@
   (-request-method [this])
   (-path-params [this]))
 
-(p/def-derived-map
-  ZeroCopyRequest
+(p/def-derived-map ZeroCopyRequest
   [raw]
   :uri (-uri raw)
   :request-method (-request-method raw)
@@ -41,6 +40,8 @@
   {:uri (-uri raw)
    :request-method (-request-method raw)
    :path-params (-path-params raw)})
+
+(defrecord RecordRequest [uri request-method path-params])
 
 (defn record-request [raw]
   (->RecordRequest (-uri raw) (-request-method raw) (-path-params raw)))

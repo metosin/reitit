@@ -1,7 +1,7 @@
 (ns reitit.bide-perf-test
   (:require [criterium.core :as cc]
             [reitit.core :as reitit]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [suite title]]
 
             [bidi.bidi :as bidi]
             [ataraxy.core :as ataraxy]

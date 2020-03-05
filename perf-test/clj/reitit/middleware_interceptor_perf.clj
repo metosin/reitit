@@ -1,6 +1,6 @@
 (ns reitit.middleware-interceptor-perf
   (:require [criterium.core :as cc]
-            [reitit.perf-utils :refer :all]
+            [reitit.perf-utils :refer [title]]
             [reitit.middleware :as middleware]
             [reitit.interceptor :as interceptor]
 

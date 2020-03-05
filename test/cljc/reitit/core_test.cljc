@@ -1,9 +1,9 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as r #?@(:cljs [:refer [Match Router]])]
+            [reitit.core :as r #?@(:cljs [:refer [Router]])]
             [reitit.impl :as impl])
   #?(:clj
-     (:import (reitit.core Match Router)
+     (:import (reitit.core Router)
               (clojure.lang ExceptionInfo))))
 
 (deftest reitit-test
@@ -241,10 +241,10 @@
             (is (= 2 @compile-times))))))
 
     (testing "default compile"
-      (let [router (r/router ["/ping" (constantly "ok")])]
-        (let [{:keys [result]} (r/match-by-path router "/ping")]
-          (is result)
-          (is (= "ok" (result)))))))
+      (let [router (r/router ["/ping" (constantly "ok")])
+            {:keys [result]} (r/match-by-path router "/ping")]
+        (is result)
+        (is (= "ok" (result))))))
 
   (testing "custom router"
     (let [router (r/router ["/ping"] {:router (fn [_ _]

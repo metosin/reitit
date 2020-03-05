@@ -3,7 +3,6 @@
               [reitit.frontend :as rf]
               [reitit.frontend.easy :as rfe]
               [reitit.frontend.controllers :as rfc]
-              [reitit.coercion :as rc]
               [reitit.coercion.schema :as rsc]
               [schema.core :as s]
               [fipp.edn :as fedn]))

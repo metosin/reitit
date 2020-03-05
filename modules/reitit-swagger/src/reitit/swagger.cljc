@@ -67,9 +67,10 @@
 (defn- swagger-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
-(defn create-swagger-handler []
+(defn create-swagger-handler
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
+  []
   (fn create-swagger
     ([{::r/keys [router match] :keys [request-method]}]
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
@@ -95,11 +96,11 @@
                                      (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
-                              [(swagger-path p (r/options router)) endpoint]))]
-       (let [map-in-order #(->> % (apply concat) (apply array-map))
-             paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
-         {:status 200
-          :body (meta-merge swagger {:paths paths})})))
+                              [(swagger-path p (r/options router)) endpoint]))
+           map-in-order #(->> % (apply concat) (apply array-map))
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
+       {:status 200
+        :body (meta-merge swagger {:paths paths})}))
     ([req res raise]
      (try
        (res (create-swagger req))
