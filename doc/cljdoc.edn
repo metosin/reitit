@@ -41,6 +41,7 @@
    ["Middleware Registry" {:file "doc/ring/middleware_registry.md"}]
    ["Exception Handling with Ring" {:file "doc/ring/exceptions.md"}]
    ["Default Middleware" {:file "doc/ring/default_middleware.md"}]
+   ["Content Negotiation" {:file "doc/ring/content_negotiation.md"}]
    ["Pluggable Coercion" {:file "doc/ring/coercion.md"}]
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
