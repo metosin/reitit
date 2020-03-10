@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Reverse-routing · GitBook</title>
+        <title>Exception Handling with Ring · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -61,10 +61,10 @@
     <link rel="shortcut icon" href="../gitbook/images/favicon.ico" type="image/x-icon">
 
     
-    <link rel="next" href="default_handler.html" />
+    <link rel="next" href="default_middleware.html" />
     
     
-    <link rel="prev" href="ring.html" />
+    <link rel="prev" href="middleware_registry.html" />
     
 
     </head>
@@ -298,7 +298,7 @@
             
         </li>
     
-        <li class="chapter active" data-level="4.2" data-path="reverse_routing.html">
+        <li class="chapter " data-level="4.2" data-path="reverse_routing.html">
             
                 <a href="reverse_routing.html">
             
@@ -402,7 +402,7 @@
             
         </li>
     
-        <li class="chapter " data-level="4.10" data-path="exceptions.html">
+        <li class="chapter active" data-level="4.10" data-path="exceptions.html">
             
                 <a href="exceptions.html">
             
@@ -785,7 +785,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href=".." >Reverse-routing</a>
+        <a href=".." >Exception Handling with Ring</a>
     </h1>
 </div>
 
@@ -800,39 +800,122 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="reverse-routing-with-ring">Reverse routing with Ring</h1>
-<p>Both the <code>router</code> and the <code>match</code> are injected into Ring Request (as <code>::r/router</code> and <code>::r/match</code>) by the <code>reitit.ring/ring-handler</code> and with that, available to middleware and endpoints. To convert a <code>Match</code> into a path, one can use <code>r/match-&gt;path</code>, which optionally takes a map of query-parameters too.</p>
-<p>Below is an example how to do reverse routing from a ring handler:</p>
-<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.core <span class="hljs-symbol">:as</span> r])
-(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
+                                <h1 id="exception-handling-with-ring">Exception Handling with Ring</h1>
+<pre><code class="lang-clj">[metosin/reitit-middleware <span class="hljs-string">&quot;0.4.2&quot;</span>]
+</code></pre>
+<p>Exceptions thrown in router creation can be <a href="../basics/error_messages.html">handled with custom exception handler</a>. By default, exceptions thrown at runtime from a handler or a middleware are not caught by the <code>reitit.ring/ring-handler</code>. A good practise is a have an top-level exception handler to log and format the errors for clients.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring.middleware.exception <span class="hljs-symbol">:as</span> exception])
+</code></pre>
+<h3 id="exceptionexception-middleware"><code>exception/exception-middleware</code></h3>
+<p>A preconfigured middleware using <code>exception/default-handlers</code>. Catches:</p>
+<ul>
+<li>Request &amp; response <a href="coercion.html">Coercion</a> exceptions</li>
+<li><a href="https://github.com/metosin/muuntaja" target="_blank">Muuntaja</a> decode exceptions</li>
+<li>Exceptions with <code>:type</code> of <code>:reitit.ring/response</code>, returning <code>:response</code> key from <code>ex-data</code>.</li>
+<li>Safely all other exceptions</li>
+</ul>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[reitit.ring <span class="hljs-symbol">:as</span> ring])
 
 (<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
   (<span class="hljs-name">ring/ring-handler</span>
     (<span class="hljs-name">ring/router</span>
-      [[<span class="hljs-string">&quot;/users&quot;</span>
-        {<span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [{<span class="hljs-symbol">::r/keys</span> [router]}]
-                {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>
-                 <span class="hljs-symbol">:body</span> (<span class="hljs-name"><span class="hljs-builtin-name">for</span></span> [i (<span class="hljs-name"><span class="hljs-builtin-name">range</span></span> <span class="hljs-number">10</span>)]
-                         {<span class="hljs-symbol">:uri</span> (<span class="hljs-name"><span class="hljs-builtin-name">-&gt;</span></span> router
-                                   (<span class="hljs-name">r/match-by-name</span> <span class="hljs-symbol">::user</span> {<span class="hljs-symbol">:id</span> i})
-                                   <span class="hljs-comment">;; with extra query-params</span>
-                                   (<span class="hljs-name">r/match-&gt;path</span> {<span class="hljs-symbol">:iso</span> <span class="hljs-string">&quot;m&#xF6;ly&quot;</span>}))})})}]
-       [<span class="hljs-string">&quot;/users/:id&quot;</span>
-        {<span class="hljs-symbol">:name</span> <span class="hljs-symbol">::user</span>
-         <span class="hljs-symbol">:get</span> (<span class="hljs-name"><span class="hljs-builtin-name">constantly</span></span> {<span class="hljs-symbol">:status</span> <span class="hljs-number">200</span>, <span class="hljs-symbol">:body</span> <span class="hljs-string">&quot;user...&quot;</span>})}]])))
+      [<span class="hljs-string">&quot;/fail&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_] (<span class="hljs-name"><span class="hljs-builtin-name">throw</span></span> (<span class="hljs-name">Exception.</span> <span class="hljs-string">&quot;fail&quot;</span>)))]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [exception/exception-middleware]}})))
 
-(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/users&quot;</span>})
-<span class="hljs-comment">; {:status 200,</span>
-<span class="hljs-comment">;  :body ({:uri &quot;/users/0?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/1?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/2?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/3?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/4?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/5?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/6?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/7?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/8?iso=m%C3%B6ly&quot;}</span>
-<span class="hljs-comment">;         {:uri &quot;/users/9?iso=m%C3%B6ly&quot;})}</span>
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/fail&quot;</span>})
+<span class="hljs-comment">;{:status 500</span>
+<span class="hljs-comment">; :body {:type &quot;exception&quot;</span>
+<span class="hljs-comment">;        :class &quot;java.lang.Exception&quot;}}</span>
+</code></pre>
+<h3 id="exceptioncreate-exception-middleware"><code>exception/create-exception-middleware</code></h3>
+<p>Creates the exception-middleware with custom options. Takes a map of <code>identifier =&gt; exception request =&gt; response</code> that is used to select the exception handler for the thrown/raised exception identifier. Exception identifier is either a <code>Keyword</code> or a Exception Class.</p>
+<p>The following handlers are available by default:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:reitit.ring/response</code></td>
+<td>value in ex-data key <code>:response</code> will be returned</td>
+</tr>
+<tr>
+<td><code>:muuntaja/decode</code></td>
+<td>handle Muuntaja decoding exceptions</td>
+</tr>
+<tr>
+<td><code>:reitit.coercion/request-coercion</code></td>
+<td>request coercion errors (http 400 response)</td>
+</tr>
+<tr>
+<td><code>:reitit.coercion/response-coercion</code></td>
+<td>response coercion errors (http 500 response)</td>
+</tr>
+<tr>
+<td><code>::exception/default</code></td>
+<td>a default exception handler if nothing else matched (default <code>exception/default-handler</code>).</td>
+</tr>
+<tr>
+<td><code>::exception/wrap</code></td>
+<td>a 3-arity handler to wrap the actual handler <code>handler exception request =&gt; response</code> (no default).</td>
+</tr>
+</tbody>
+</table>
+<p>The handler is selected from the options map by exception identifier in the following lookup order:</p>
+<p>1) <code>:type</code> of exception ex-data
+2) Class of exception
+3) <code>:type</code> ancestors of exception ex-data
+4) Super Classes of exception
+5) The ::default handler</p>
+<pre><code class="lang-clj"><span class="hljs-comment">;; type hierarchy</span>
+(<span class="hljs-name">derive</span> <span class="hljs-symbol">::error</span> <span class="hljs-symbol">::exception</span>)
+(<span class="hljs-name">derive</span> <span class="hljs-symbol">::failure</span> <span class="hljs-symbol">::exception</span>)
+(<span class="hljs-name">derive</span> <span class="hljs-symbol">::horror</span> <span class="hljs-symbol">::exception</span>)
+
+(<span class="hljs-name"><span class="hljs-builtin-name">defn</span></span> handler [message exception request]
+  {<span class="hljs-symbol">:status</span> <span class="hljs-number">500</span>
+   <span class="hljs-symbol">:body</span> {<span class="hljs-symbol">:message</span> message
+          <span class="hljs-symbol">:exception</span> (<span class="hljs-name">.getClass</span> exception)
+          <span class="hljs-symbol">:data</span> (<span class="hljs-name">ex-data</span> exception)
+          <span class="hljs-symbol">:uri</span> (<span class="hljs-symbol">:uri</span> request)}})
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> exception-middleware
+  (<span class="hljs-name">exception/create-exception-middleware</span>
+    (<span class="hljs-name"><span class="hljs-builtin-name">merge</span></span>
+      exception/default-handlers
+      {<span class="hljs-comment">;; ex-data with :type ::error</span>
+       <span class="hljs-symbol">::error</span> (<span class="hljs-name"><span class="hljs-builtin-name">partial</span></span> handler <span class="hljs-string">&quot;error&quot;</span>)
+
+       <span class="hljs-comment">;; ex-data with ::exception or ::failure</span>
+       <span class="hljs-symbol">::exception</span> (<span class="hljs-name"><span class="hljs-builtin-name">partial</span></span> handler <span class="hljs-string">&quot;exception&quot;</span>)
+
+       <span class="hljs-comment">;; SQLException and all it&apos;s child classes</span>
+       java.sql.SQLException (<span class="hljs-name"><span class="hljs-builtin-name">partial</span></span> handler <span class="hljs-string">&quot;sql-exception&quot;</span>)
+
+       <span class="hljs-comment">;; override the default handler</span>
+       <span class="hljs-symbol">::exception/default</span> (<span class="hljs-name"><span class="hljs-builtin-name">partial</span></span> handler <span class="hljs-string">&quot;default&quot;</span>)
+
+       <span class="hljs-comment">;; print stack-traces for all exceptions</span>
+       <span class="hljs-symbol">::exception/wrap</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [handler e request]
+                          (<span class="hljs-name">println</span> <span class="hljs-string">&quot;ERROR&quot;</span> (<span class="hljs-name">pr-str</span> (<span class="hljs-symbol">:uri</span> request)))
+                          (<span class="hljs-name">handler</span> e request))})))
+
+(<span class="hljs-name"><span class="hljs-builtin-name">def</span></span> app
+  (<span class="hljs-name">ring/ring-handler</span>
+    (<span class="hljs-name">ring/router</span>
+      [<span class="hljs-string">&quot;/fail&quot;</span> (<span class="hljs-name"><span class="hljs-builtin-name">fn</span></span> [_] (<span class="hljs-name"><span class="hljs-builtin-name">throw</span></span> (<span class="hljs-name">ex-info</span> <span class="hljs-string">&quot;fail&quot;</span> {<span class="hljs-symbol">:type</span> <span class="hljs-symbol">::failue</span>})))]
+      {<span class="hljs-symbol">:data</span> {<span class="hljs-symbol">:middleware</span> [exception-middleware]}})))
+
+(<span class="hljs-name">app</span> {<span class="hljs-symbol">:request-method</span> <span class="hljs-symbol">:get</span>, <span class="hljs-symbol">:uri</span> <span class="hljs-string">&quot;/fail&quot;</span>})
+<span class="hljs-comment">; ERROR &quot;/fail&quot;</span>
+<span class="hljs-comment">; =&gt; {:status 500,</span>
+<span class="hljs-comment">;     :body {:message &quot;default&quot;</span>
+<span class="hljs-comment">;            :exception clojure.lang.ExceptionInfo</span>
+<span class="hljs-comment">;            :data {:type :user/failue}</span>
+<span class="hljs-comment">;            :uri &quot;/fail&quot;}}</span>
 </code></pre>
 
                                 
@@ -861,12 +944,12 @@
 
             
                 
-                <a href="ring.html" class="navigation navigation-prev " aria-label="Previous page: Ring-router">
+                <a href="middleware_registry.html" class="navigation navigation-prev " aria-label="Previous page: Middleware Registry">
                     <i class="fa fa-angle-left"></i>
                 </a>
                 
                 
-                <a href="default_handler.html" class="navigation navigation-next " aria-label="Next page: Default handler">
+                <a href="default_middleware.html" class="navigation navigation-next " aria-label="Next page: Default Middleware">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -877,7 +960,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Reverse-routing","level":"4.2","depth":1,"next":{"title":"Default handler","level":"4.3","depth":1,"path":"ring/default_handler.md","ref":"ring/default_handler.md","articles":[]},"previous":{"title":"Ring-router","level":"4.1","depth":1,"path":"ring/ring.md","ref":"ring/ring.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/reverse_routing.md","mtime":"2020-03-10T15:01:10.714Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-03-10T15:01:47.961Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Exception Handling with Ring","level":"4.10","depth":1,"next":{"title":"Default Middleware","level":"4.11","depth":1,"path":"ring/default_middleware.md","ref":"ring/default_middleware.md","articles":[]},"previous":{"title":"Middleware Registry","level":"4.9","depth":1,"path":"ring/middleware_registry.md","ref":"ring/middleware_registry.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"ring/exceptions.md","mtime":"2020-03-10T15:01:10.714Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-03-10T15:01:47.961Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
