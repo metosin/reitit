@@ -29,7 +29,7 @@
   | --------------|-------------|
   | :swagger      | map of any swagger-data. Must have `:id` (keyword or sequence of keywords) to identify the api
   | :no-doc       | optional boolean to exclude endpoint from api docs
-  | :tags         | optional set of strings of keywords tags for an endpoint api docs
+  | :tags         | optional set of string or keyword tags for an endpoint api docs
   | :summary      | optional short string summary of an endpoint
   | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
 
