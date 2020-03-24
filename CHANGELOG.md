@@ -12,6 +12,23 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+### `reitit-ring`
+
+- **BREAKING:** `reitit.ring.spec` namespace has been renamed to `reitit.ring.validate.spec`
+
+### `reitit-spec`
+
+- **BREAKING:** Added `reitit.ring.spec` namespace with specs for multipart parameter coercion.
+**This replaces old `reitit.ring.spec` namespace with different namespace.**
+
+### `reitit-middleware`
+
+- **BREAKING:** `temp-file-part`, `bytes-part` and related specs have been removed from
+`reitit.ring.middleware.multipart` namespace and been moved to `reitit.ring.spec`
+namespace.
+
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`

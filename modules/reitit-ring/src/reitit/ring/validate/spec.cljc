@@ -1,4 +1,4 @@
-(ns reitit.ring.spec
+(ns reitit.ring.validate.spec
   (:require [clojure.spec.alpha :as s]
             [reitit.middleware :as middleware]
             [reitit.spec :as rs]

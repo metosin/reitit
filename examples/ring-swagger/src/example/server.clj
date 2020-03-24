@@ -9,9 +9,10 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
+            [reitit.ring.spec :as ring-spec]
             ;; Uncomment to use
             ; [reitit.ring.middleware.dev :as dev]
-            ; [reitit.ring.spec :as spec]
+            ; [reitit.ring.validate.spec :as spec]
             ; [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
@@ -31,7 +32,7 @@
 
         ["/upload"
          {:post {:summary "upload a file"
-                 :parameters {:multipart {:file multipart/temp-file-part}}
+                 :parameters {:multipart {:file ring-spec/temp-file-part}}
                  :responses {200 {:body {:name string?, :size int?}}}
                  :handler (fn [{{{:keys [file]} :multipart} :parameters}]
                             {:status 200

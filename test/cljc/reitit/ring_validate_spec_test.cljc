@@ -1,7 +1,7 @@
-(ns reitit.ring-spec-test
+(ns reitit.ring-validate-spec-test
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.ring :as ring]
-            [reitit.ring.spec :as rrs]
+            [reitit.ring.validate.spec :as rrs]
             [reitit.ring.coercion :as rrc]
             [reitit.coercion.spec]
             [clojure.spec.alpha :as s]
@@ -51,7 +51,7 @@
     (testing "predicates are not allowed"
       (is (thrown-with-msg?
             ExceptionInfo
-            #":reitit.ring.spec/invalid-specs"
+            #":reitit.ring.validate.spec/invalid-specs"
             (ring/router
               ["/api" {:handler "identity"}]
               {:spec any?
