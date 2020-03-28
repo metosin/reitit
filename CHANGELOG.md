@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+### `reitit-frontend`
+
+* `reitit.frontend.easy` state is setup before user `on-navigate` callback
+is called the first time, so that `rfe/push-state` and such can be called
+([#315](https://github.com/metosin/reitit/issues/315))
+
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`

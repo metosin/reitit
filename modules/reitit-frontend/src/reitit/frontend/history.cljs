@@ -33,7 +33,8 @@
              :hashchange-listener (gevents/listen js/window goog.events.EventType.HASHCHANGE handler false))))
   (-stop [this]
     (gevents/unlistenByKey popstate-listener)
-    (gevents/unlistenByKey hashchange-listener))
+    (gevents/unlistenByKey hashchange-listener)
+    nil)
   (-on-navigate [this path]
     (reset! last-fragment path)
     (on-navigate (rf/match-by-path router path) this))
@@ -123,7 +124,8 @@
     (on-navigate (rf/match-by-path router path) this))
   (-stop [this]
     (gevents/unlistenByKey listen-key)
-    (gevents/unlistenByKey click-listen-key))
+    (gevents/unlistenByKey click-listen-key)
+    nil)
   (-get-path [this]
     (str (.. js/window -location -pathname)
          (.. js/window -location -search)))

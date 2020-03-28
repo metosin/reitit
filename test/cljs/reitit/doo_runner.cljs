@@ -9,7 +9,8 @@
             reitit.exception-test
             reitit.frontend.core-test
             reitit.frontend.history-test
-            reitit.frontend.controllers-test))
+            reitit.frontend.controllers-test
+            reitit.frontend.easy-test))
 
 (enable-console-print!)
 
@@ -22,4 +23,5 @@
            'reitit.exception-test
            'reitit.frontend.core-test
            'reitit.frontend.history-test
-           'reitit.frontend.controllers-test)
+           'reitit.frontend.controllers-test
+           'reitit.frontend.easy-test)
