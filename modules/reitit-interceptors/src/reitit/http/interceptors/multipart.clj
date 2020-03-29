@@ -1,5 +1,6 @@
 (ns reitit.http.interceptors.multipart
   (:require [reitit.coercion :as coercion]
+            [reitit.spec]
             [ring.middleware.multipart-params :as multipart-params]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st])
