@@ -1,4 +1,4 @@
-# reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/reitit)](https://cljdoc.xyz/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
+# reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
 
 A fast data-driven router for Clojure(Script).
 
