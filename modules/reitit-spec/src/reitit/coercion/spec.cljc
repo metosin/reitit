@@ -76,7 +76,8 @@
 (def default-options
   {:coerce-response? coerce-response?
    :transformers {:body {:default strip-extra-keys-transformer
-                         :formats {"application/json" json-transformer}}
+                         :formats {"application/json"                  json-transformer
+                                   "application/x-www-form-urlencoded" string-transformer}}
                   :string {:default string-transformer}
                   :response {:default no-op-transformer}}})
 
