@@ -20,6 +20,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 is called the first time, so that `rfe/push-state` and such can be called
 ([#315](https://github.com/metosin/reitit/issues/315))
 
+### `reitit-malli`
+
+* Update malli to latest version:
+
+```clj
+[metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
+```
+
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`

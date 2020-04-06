@@ -330,7 +330,46 @@
 
             (testing "open: keys are NOT stripped"
               (is (= {:status 200, :body {:x 1, :request true, :response true}}
-                     (app (->request "open")))))))))))
+                     (app (->request "open")))))))))
+
+    (testing "sequence schemas"
+      (let [app (ring/ring-handler
+                  (ring/router
+                    ["/ping" {:get {:parameters {:body [:vector [:map [:message string?]]]}
+                                    :responses {200 {:body [:vector [:map [:pong string?]]]}
+                                                501 {:body [:vector [:map [:error string?]]]}}
+                                    :handler (fn [{{[{:keys [message]}] :body} :parameters :as req}]
+                                               (condp = message
+                                                 "ping" {:status 200
+                                                         :body [{:pong message}]}
+                                                 "fail" {:status 501
+                                                         :body [{:error "fail"}]}
+                                                 {:status 200
+                                                  :body {:invalid "response"}}))}}]
+                    {:data {:middleware [rrc/coerce-exceptions-middleware
+                                         rrc/coerce-request-middleware
+                                         rrc/coerce-response-middleware]
+                            :coercion malli/coercion}}))
+            ->request (fn [body]
+                        {:uri "/ping"
+                         :request-method :get
+                         :muuntaja/request {:format "application/json"}
+                         :body-params body})]
+
+        (testing "succesfull request"
+          (let [{:keys [status body]} (app (->request [{:message "ping"}]))]
+            (is (= 200 status))
+            (is (= [{:pong "ping"}] body)))
+
+          (testing "succesfull failure"
+            (let [{:keys [status body]} (app (->request [{:message "fail"}]))]
+              (is (= 501 status))
+              (is (= [{:error "fail"}] body))))
+
+          (testing "failed response"
+            (let [{:keys [status body]} (app (->request [{:message "kosh"}]))]
+              (is (= 500 status))
+              (is (= :reitit.coercion/response-coercion (:type body))))))))))
 
 #?(:clj
    (deftest muuntaja-test
