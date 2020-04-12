@@ -28,11 +28,11 @@
               (update acc method expand opts)
               acc)) data http-methods)])
 
-(defn compile-result [[path data] {::keys [default-options-handler] :as opts}]
+(defn compile-result [[path data] {::keys [default-options-resource] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-handler)
-                       (assoc :options {:no-doc true, :handler default-options-handler}))
+                       (and (not (:options childs)) (not (:handler top)) default-options-resource)
+                       (assoc :options default-options-resource))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
@@ -65,6 +65,10 @@
       ([request respond _]
        (respond (handle request))))))
 
+(def default-options-resource
+  {:no-doc  true
+   :handler default-options-handler})
+
 ;;
 ;; public api
 ;;
@@ -74,11 +78,11 @@
   support for http-methods and Middleware. See documentation on [[reitit.core/router]] for
   available options. In addition, the following options are available:
 
-  | key                                    | description
-  | ---------------------------------------|-------------
-  | `:reitit.middleware/transform`         | Function or vector of functions of type `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity)
-  | `:reitit.middleware/registry`          | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
-  | `:reitit.ring/default-options-handler` | Default handler for `:options` method in endpoints (default: default-options-handler)
+  | key                                     | description
+  | ----------------------------------------|-------------
+  | `:reitit.middleware/transform`          | Function or vector of functions of type `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity)
+  | `:reitit.middleware/registry`           | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
+  | `:reitit.ring/default-options-resource` | Default resource for `:options` method in endpoints (default: default-options-resource)
 
   Example:
 
@@ -91,9 +95,10 @@
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (merge {:coerce coerce-handler
-                      :compile compile-result
-                      ::default-options-handler default-options-handler} opts)]
+   (let [opts (merge {:coerce                    coerce-handler
+                      :compile                   compile-result
+                      ::default-options-resource default-options-resource}
+                     opts)]
      (r/router data opts))))
 
 (defn routes

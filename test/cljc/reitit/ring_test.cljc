@@ -241,7 +241,7 @@
                     [["/get" {:get (constantly response)}]
                      ["/options" {:options (constantly response)}]
                      ["/any" (constantly response)]]
-                    {::ring/default-options-handler nil}))]
+                    {::ring/default-options-resource nil}))]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
