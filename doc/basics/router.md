@@ -83,7 +83,7 @@ As routes are defined as plain data, it's easy to merge multiple route trees int
 (def admin-routes
   ["/admin"
    ["/ping" ::ping]
-   ["/users" ::users]]) 
+   ["/db" ::db]])
 
 (r/router
   [admin-routes
