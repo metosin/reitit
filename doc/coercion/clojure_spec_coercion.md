@@ -120,3 +120,65 @@ By default, reitit uses custom transformers that also strip out extra keys from 
 ; {:skus [{:id :123}]
 ;  :photos [{:id "123"}]}
 ```
+
+## Defining Optional Keys
+
+Going back to the previous example.
+
+Suppose you want the `::my-json-api` to have optional `remarks` as string and each `photo` to have an optional `height` and `width` as integer.
+The `s/keys` accepts `:opt-un` to support optional keys.
+
+```clj
+(require '[clojure.spec.alpha :as s])
+(require '[spec-tools.core :as st])
+
+(s/def :sku/id keyword?)
+(s/def ::sku (s/keys :req-un [:sku/id]))
+(s/def ::skus (s/coll-of ::sku :into []))
+(s/def ::remarks string?)  ;; define remarks as string
+
+(s/def :photo/id int?)
+(s/def :photo/height int?) ;; define height as int
+(s/def :photo/width int?)  ;; define width as int
+(s/def ::photo (s/keys :req-un [:photo/id]
+                       :opt-un [:photo/height :photo/width])) ;; height and width are in :opt-un
+(s/def ::photos (s/coll-of ::photo :into []))
+
+(s/def ::my-json-api (s/keys :req-un [::skus ::photos]
+                             :opt-un [::remarks])) ;; remarks is in the :opt-un
+```
+
+Apply a string->edn coercion to the data:
+
+```clj
+;; Omit optional keys
+(st/coerce
+  ::my-json-api
+  {:skus [{:id "123"}]
+   :photos [{:id "123"}]}
+  st/string-transformer)
+;;{:skus [{:id :123}],
+;; :photos [{:id 123}]}
+
+
+;; coerce the optional keys if present
+
+(st/coerce
+  ::my-json-api
+  {:skus [{:id "123"}]
+   :photos [{:id "123" :height "100" :width "100"}]
+   :remarks "some remarks"}
+  st/string-transformer)
+
+;; {:skus [{:id :123}]
+;;  :photos [{:id 123 :height 100 :width 100}]
+;;  :remarks "some remarks"}
+
+(st/coerce
+  ::my-json-api
+  {:skus [{:id "123"}]
+   :photos [{:id "123" :height "100"}]}
+  st/string-transformer)
+;; {:skus [{:id :123}],
+;;  :photos [{:id 123, :height 100}]}
+```
