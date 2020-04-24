@@ -893,6 +893,60 @@
 <span class="hljs-comment">; {:skus [{:id :123}]</span>
 <span class="hljs-comment">;  :photos [{:id &quot;123&quot;}]}</span>
 </code></pre>
+<h2 id="defining-optional-keys">Defining Optional Keys</h2>
+<p>Going back to the previous example.</p>
+<p>Suppose you want the <code>::my-json-api</code> to have optional <code>remarks</code> as string and each <code>photo</code> to have an optional <code>height</code> and <code>width</code> as integer.
+The <code>s/keys</code> accepts <code>:opt-un</code> to support optional keys.</p>
+<pre><code class="lang-clj">(<span class="hljs-name">require</span> &apos;[clojure.spec.alpha <span class="hljs-symbol">:as</span> s])
+(<span class="hljs-name">require</span> &apos;[spec-tools.core <span class="hljs-symbol">:as</span> st])
+
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">:sku/id</span> keyword?)
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::sku</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">:sku/id</span>]))
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::skus</span> (<span class="hljs-name">s/coll-of</span> <span class="hljs-symbol">::sku</span> <span class="hljs-symbol">:into</span> []))
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::remarks</span> string?)  <span class="hljs-comment">;; define remarks as string</span>
+
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">:photo/id</span> int?)
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">:photo/height</span> int?) <span class="hljs-comment">;; define height as int</span>
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">:photo/width</span> int?)  <span class="hljs-comment">;; define width as int</span>
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::photo</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">:photo/id</span>]
+                       <span class="hljs-symbol">:opt-un</span> [<span class="hljs-symbol">:photo/height</span> <span class="hljs-symbol">:photo/width</span>])) <span class="hljs-comment">;; height and width are in :opt-un</span>
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::photos</span> (<span class="hljs-name">s/coll-of</span> <span class="hljs-symbol">::photo</span> <span class="hljs-symbol">:into</span> []))
+
+(<span class="hljs-name">s/def</span> <span class="hljs-symbol">::my-json-api</span> (<span class="hljs-name">s/keys</span> <span class="hljs-symbol">:req-un</span> [<span class="hljs-symbol">::skus</span> <span class="hljs-symbol">::photos</span>]
+                             <span class="hljs-symbol">:opt-un</span> [<span class="hljs-symbol">::remarks</span>])) <span class="hljs-comment">;; remarks is in the :opt-un</span>
+</code></pre>
+<p>Apply a string-&gt;edn coercion to the data:</p>
+<pre><code class="lang-clj"><span class="hljs-comment">;; Omit optional keys</span>
+(<span class="hljs-name">st/coerce</span>
+  <span class="hljs-symbol">::my-json-api</span>
+  {<span class="hljs-symbol">:skus</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span>}]
+   <span class="hljs-symbol">:photos</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span>}]}
+  st/string-transformer)
+<span class="hljs-comment">;;{:skus [{:id :123}],</span>
+<span class="hljs-comment">;; :photos [{:id 123}]}</span>
+
+
+<span class="hljs-comment">;; coerce the optional keys if present</span>
+
+(<span class="hljs-name">st/coerce</span>
+  <span class="hljs-symbol">::my-json-api</span>
+  {<span class="hljs-symbol">:skus</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span>}]
+   <span class="hljs-symbol">:photos</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-symbol">:height</span> <span class="hljs-string">&quot;100&quot;</span> <span class="hljs-symbol">:width</span> <span class="hljs-string">&quot;100&quot;</span>}]
+   <span class="hljs-symbol">:remarks</span> <span class="hljs-string">&quot;some remarks&quot;</span>}
+  st/string-transformer)
+
+<span class="hljs-comment">;; {:skus [{:id :123}]</span>
+<span class="hljs-comment">;;  :photos [{:id 123 :height 100 :width 100}]</span>
+<span class="hljs-comment">;;  :remarks &quot;some remarks&quot;}</span>
+
+(<span class="hljs-name">st/coerce</span>
+  <span class="hljs-symbol">::my-json-api</span>
+  {<span class="hljs-symbol">:skus</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span>}]
+   <span class="hljs-symbol">:photos</span> [{<span class="hljs-symbol">:id</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-symbol">:height</span> <span class="hljs-string">&quot;100&quot;</span>}]}
+  st/string-transformer)
+<span class="hljs-comment">;; {:skus [{:id :123}],</span>
+<span class="hljs-comment">;;  :photos [{:id 123, :height 100}]}</span>
+</code></pre>
 
                                 
                                 </section>
@@ -936,7 +990,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"3.3","depth":1,"next":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"3.2","depth":1,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2020-04-19T06:15:04.934Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-19T06:15:47.809Z"},"basePath":"..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Clojure.spec","level":"3.3","depth":1,"next":{"title":"Data-specs","level":"3.4","depth":1,"path":"coercion/data_spec_coercion.md","ref":"coercion/data_spec_coercion.md","articles":[]},"previous":{"title":"Plumatic Schema","level":"3.2","depth":1,"path":"coercion/schema_coercion.md","ref":"coercion/schema_coercion.md","articles":[]},"dir":"ltr"},"config":{"plugins":["hints","editlink","github","highlight"],"root":"doc","styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"github":{"url":"https://github.com/metosin/reitit"},"editlink":{"label":"Edit This Page","multilingual":false,"base":"https://github.com/metosin/reitit/tree/master/doc"},"search":{},"hints":{"danger":"fa fa-exclamation-circle","info":"fa fa-info-circle","tip":"fa fa-mortar-board","working":"fa fa-wrench"},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"gitbook":"*"},"file":{"path":"coercion/clojure_spec_coercion.md","mtime":"2020-04-24T11:15:54.614Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-04-24T11:16:24.971Z"},"basePath":"..","book":{"language":""}});
         });
     </script>
 </div>
