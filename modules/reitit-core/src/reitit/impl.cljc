@@ -179,7 +179,7 @@
                (URLDecoder/decode
                  (if (.contains ^String s "+")
                    (.replace ^String s "+" "%2B")
-                   s)
+                   ^String s)
                  "UTF-8"))
        :cljs (js/decodeURIComponent s))))
 
