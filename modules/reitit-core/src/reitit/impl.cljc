@@ -71,7 +71,7 @@
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
-    coerce (into [] (keep #(coerce % opts)))))
+           coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
   (-> (into {}
