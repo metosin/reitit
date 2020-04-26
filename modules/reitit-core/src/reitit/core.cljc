@@ -364,10 +364,10 @@
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]
-   (let [{:keys [router] :as opts} (merge (default-router-options) opts)]
+   (let [{:keys [router conflicts] :as opts} (merge (default-router-options) opts)]
      (try
        (let [routes (impl/resolve-routes raw-routes opts)
-             path-conflicting (impl/path-conflicting-routes routes opts)
+             path-conflicting (if-not (and router (not conflicts)) (impl/path-conflicting-routes routes opts))
              name-conflicting (impl/name-conflicting-routes routes)
              compiled-routes (impl/compile-routes routes opts)
              wilds? (boolean (some (impl/->wild-route? opts) compiled-routes))
@@ -380,10 +380,8 @@
                       all-wilds? trie-router
                       :else mixed-router)]
 
-         (when-let [conflicts (:conflicts opts)]
-           (when-let [conflict-report (impl/unresolved-conflicts
-                                        path-conflicting)]
-             (conflicts conflict-report)))
+         (when-let [conflict-report (and conflicts (impl/unresolved-conflicts path-conflicting))]
+           (conflicts conflict-report))
 
          (when name-conflicting
            (exception/fail! :name-conflicts name-conflicting))
