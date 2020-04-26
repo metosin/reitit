@@ -1,5 +1,5 @@
 (ns reitit.router-creation-perf-test
-  (:require [reitit.perf-utils :refer [bench!]]
+  (:require [reitit.perf-utils :refer [bench! suite]]
             [reitit.core :as r]
             [clojure.string :as str])
   (:import (java.util Random)))
@@ -32,12 +32,25 @@
   (let [rnd (random 1)]
     (mapv (fn [n] [(route rnd) (keyword (str "route" n))]) (range 100))))
 
+(conj hundred-routes (last hundred-routes))
+
+
 (defn bench-routers []
+
+  (suite "non-conflicting")
+
   ;; 104ms
   (bench! "default" (r/router hundred-routes))
 
   ;; 7ms
-  (bench! "linear" (r/router hundred-routes {:router r/linear-router, :conflicts nil})))
+  (bench! "linear" (r/router hundred-routes {:router r/linear-router, :conflicts nil}))
+
+  (suite "conflicting")
+  (let [routes (conj hundred-routes [(first (last hundred-routes)) ::route])]
+
+    ;; 205ms
+    ;; 105ms (cache path-conflicts)
+    (bench! "default" (r/router routes {:conflicts nil}))))
 
 (comment
   (bench-routers))

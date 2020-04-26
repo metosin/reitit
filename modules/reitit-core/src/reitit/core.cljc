@@ -301,7 +301,7 @@
   ([compiled-routes]
    (quarantine-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [conflicting-paths (-> compiled-routes (impl/path-conflicting-routes opts) impl/conflicting-paths)
+   (let [conflicting-paths (impl/conflicting-paths (or (::path-conflicting opts) (impl/path-conflicting-routes compiled-routes opts)))
          conflicting? #(contains? conflicting-paths (first %))
          {conflicting true, non-conflicting false} (group-by conflicting? compiled-routes)
          linear-router (linear-router conflicting opts)
@@ -389,7 +389,7 @@
          (when-let [validate (:validate opts)]
            (validate compiled-routes opts))
 
-         (router compiled-routes opts))
+         (router compiled-routes (assoc opts ::path-conflicting path-conflicting)))
 
        (catch #?(:clj Exception, :cljs js/Error) e
          (throw ((get opts :exception identity) e)))))))
