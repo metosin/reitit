@@ -71,17 +71,18 @@
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
-    coerce (into [] (keep #(coerce % opts)))))
+           coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
-  (-> (into {}
-            (comp (map-indexed (fn [index route]
-                                 [route (into #{}
-                                              (filter #(trie/conflicting-paths? (first route) (first %) opts))
-                                              (subvec routes (inc index)))]))
-                  (filter (comp seq second)))
-            routes)
-      (not-empty)))
+  (let [parts-and-routes (mapv (fn [[s :as r]] [(trie/split-path s opts) r]) routes)]
+    (-> (into {} (comp (map-indexed (fn [index [p r]]
+                                      [r (reduce
+                                           (fn [acc [p' r']]
+                                             (if (trie/conflicting-parts? p p')
+                                               (conj acc r') acc))
+                                           #{} (subvec parts-and-routes (inc index)))]))
+                       (filter (comp seq second))) parts-and-routes)
+        (not-empty))))
 
 (defn unresolved-conflicts [path-conflicting]
   (-> (into {}
@@ -179,7 +180,7 @@
                (URLDecoder/decode
                  (if (.contains ^String s "+")
                    (.replace ^String s "+" "%2B")
-                   s)
+                   ^String s)
                  "UTF-8"))
        :cljs (js/decodeURIComponent s))))
 
