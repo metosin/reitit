@@ -40,6 +40,7 @@
   (suite "non-conflicting")
 
   ;; 104ms
+  ;;  11ms (reuse parts in conflict resolution)
   (bench! "default" (r/router hundred-routes))
 
   ;; 7ms
@@ -50,6 +51,7 @@
 
     ;; 205ms
     ;; 105ms (cache path-conflicts)
+    ;;  13ms (reuse parts in conflict resolution)
     (bench! "default" (r/router routes {:conflicts nil}))))
 
 (comment

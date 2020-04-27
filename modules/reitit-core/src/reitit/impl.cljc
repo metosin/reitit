@@ -74,14 +74,15 @@
            coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
-  (-> (into {}
-            (comp (map-indexed (fn [index route]
-                                 [route (into #{}
-                                              (filter #(trie/conflicting-paths? (first route) (first %) opts))
-                                              (subvec routes (inc index)))]))
-                  (filter (comp seq second)))
-            routes)
-      (not-empty)))
+  (let [parts-and-routes (mapv (fn [[s :as r]] [(trie/split-path s opts) r]) routes)]
+    (-> (into {} (comp (map-indexed (fn [index [p r]]
+                                      [r (reduce
+                                           (fn [acc [p' r']]
+                                             (if (trie/conflicting-parts? p p')
+                                               (conj acc r') acc))
+                                           #{} (subvec parts-and-routes (inc index)))]))
+                       (filter (comp seq second))) parts-and-routes)
+        (not-empty))))
 
 (defn unresolved-conflicts [path-conflicting]
   (-> (into {}

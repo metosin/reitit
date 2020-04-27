@@ -132,17 +132,18 @@
       (concat [(subs x i)] xs)
       xs)))
 
+(defn conflicting-parts? [parts1 parts2]
+  (let [[[s1 & ss1] [s2 & ss2]] (-slice-start parts1 parts2)]
+    (cond
+      (= s1 s2 nil) true
+      (or (nil? s1) (nil? s2)) false
+      (or (catch-all? s1) (catch-all? s2)) true
+      (or (wild? s1) (wild? s2)) (recur (-slice-end s1 ss1) (-slice-end s2 ss2))
+      (not= s1 s2) false
+      :else (recur ss1 ss2))))
+
 (defn conflicting-paths? [path1 path2 opts]
-  (loop [parts1 (split-path path1 opts)
-         parts2 (split-path path2 opts)]
-    (let [[[s1 & ss1] [s2 & ss2]] (-slice-start parts1 parts2)]
-      (cond
-        (= s1 s2 nil) true
-        (or (nil? s1) (nil? s2)) false
-        (or (catch-all? s1) (catch-all? s2)) true
-        (or (wild? s1) (wild? s2)) (recur (-slice-end s1 ss1) (-slice-end s2 ss2))
-        (not= s1 s2) false
-        :else (recur ss1 ss2)))))
+  (conflicting-parts? (split-path path1 opts) (split-path path2 opts)))
 
 ;;
 ;; Creating Tries
