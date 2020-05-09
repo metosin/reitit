@@ -11,7 +11,7 @@
 (defn- arities [f]
   (->> (class f)
        .getDeclaredMethods
-       (filter #(= "invoke" (.getName %)))
+       (filter (fn [^Method m] (= "invoke" (.getName m))))
        (map #(alength (.getParameterTypes ^Method %)))
        (set)))
 
