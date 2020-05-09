@@ -30,6 +30,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 ### `reitit-ring`
 
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
+* `reitit.ring/create-file-handler` to serve files from classpah, fixes [#395](https://github.com/metosin/reitit/issues/395)
 
 ## 0.4.2 (2020-01-17)
 
