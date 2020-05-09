@@ -14,19 +14,18 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+* Updated deps:
+
+```clj
+[metosin/sieppari "0.0.0-alpha9"] is available but we use "0.0.0-alpha8"
+[metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
+```
+
 ### `reitit-frontend`
 
 * `reitit.frontend.easy` state is setup before user `on-navigate` callback
 is called the first time, so that `rfe/push-state` and such can be called
 ([#315](https://github.com/metosin/reitit/issues/315))
-
-### `reitit-malli`
-
-* Update malli to latest version:
-
-```clj
-[metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
-```
 
 ### `reitit-ring`
 
