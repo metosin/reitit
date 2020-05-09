@@ -15,7 +15,7 @@ By default, all wildcard and catch-all parameters are parsed into strings:
 Match with the parsed `:path-params` as strings:
 
 ```clj
-(r/match-by-path r "/metosin/users/123")
+(r/match-by-path router "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view},
 ;        :result nil,
@@ -63,7 +63,7 @@ Example with Schema path-parameters:
 A Match:
 
 ```clj
-(r/match-by-path r "/metosin/users/123")
+(r/match-by-path router "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
 ;               :coercion <<:schema>>
@@ -103,7 +103,7 @@ There is a helper function `reitit.coercion/compile-request-coercers` just for t
 Routing again:
 
 ```clj
-(r/match-by-path r "/metosin/users/123")
+(r/match-by-path router "/metosin/users/123")
 ; #Match{:template "/:company/users/:user-id",
 ;        :data {:name :user/user-view,
 ;               :coercion <<:schema>>
