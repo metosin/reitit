@@ -28,6 +28,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [ring/ring-core "1.8.1"] is available but we use "1.8.0"
 ```
 
+### `reitit-core`
+
+* Route conflict resolution and thus, router creation is now an order of magnitude faster.
+* Forcing router to be `reitit.core/linear-router` and disabling route conflict resolution totally bypasses route conflict resolution. For cases when router creating speed matters over routing performance:
+
+```clj
+(r/router ...zillions-of-routes... {:router r/linear-router, :conflicts nil})
+```
+
 ### `reitit-frontend`
 
 * `reitit.frontend.easy` state is setup before user `on-navigate` callback
