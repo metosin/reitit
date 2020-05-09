@@ -108,7 +108,7 @@
 (defn routes
   "Create a ring handler by combining several handlers into one."
   [& handlers]
-  (let [single-arity (apply some-fn handlers)]
+  (let [single-arity (apply some-fn (keep identity handlers))]
     (fn
       ([request]
        (single-arity request))
