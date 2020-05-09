@@ -48,6 +48,14 @@ is called the first time, so that `rfe/push-state` and such can be called
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
 * `reitit.ring/create-file-handler` to serve files from classpah, fixes [#395](https://github.com/metosin/reitit/issues/395)
 
+### `reitit-sieppari`
+
+* changes from Sieppari:
+  * fixed performance regression bugs, order of magnitude faster dispatching
+  * **BREAKING**: Out-of-the-box support for `core.async` and `manifold` are dropped, to use them, one needs to explicitely require the following side-effecting namespaces:
+    * `sieppari.async.core-async` for core.async
+    * `sieppari.async.manifold` for manifold
+
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`
