@@ -205,6 +205,10 @@
             (is (= 405 (:status (app {:request-method :post, :uri "/ping"}))))))))))
 
 (deftest default-options-handler-test
+  (testing "Assertion fails when using deprecated options-handler"
+    (is (thrown? java.lang.AssertionError (ring/router [] {::ring/default-options-handler (fn [_] )})))))
+
+(deftest default-options-endpoint-test
   (let [response {:status 200, :body "ok"}]
 
     (testing "with defaults"
@@ -241,7 +245,7 @@
                     [["/get" {:get (constantly response)}]
                      ["/options" {:options (constantly response)}]
                      ["/any" (constantly response)]]
-                    {::ring/default-options-handler nil}))]
+                    {::ring/default-options-endpoint nil}))]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
