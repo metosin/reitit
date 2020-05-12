@@ -88,7 +88,7 @@
                                   [metosin/malli]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
-                                  [com.bhauman/spell-spec "0.1.1"]
+                                  [com.bhauman/spell-spec "0.1.2"]
                                   [expound "0.8.4"]
                                   [fipp "0.6.23"]
 
@@ -106,7 +106,7 @@
 
                                   [io.pedestal/pedestal.service "0.5.7"]
 
-                                  [org.clojure/core.async "1.1.587"]
+                                  [org.clojure/core.async "1.2.603"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "5.1.0"]
 
@@ -125,7 +125,7 @@
                                    [io.pedestal/pedestal.service "0.5.7"]
                                    [io.pedestal/pedestal.jetty "0.5.7"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "1.1.587"]
+                                   [org.clojure/core.async "1.2.603"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "5.1.0"]
                                    [metosin/sieppari]
