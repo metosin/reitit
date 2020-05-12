@@ -95,8 +95,8 @@
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (merge {:coerce                    coerce-handler
-                      :compile                   compile-result
+   (let [opts (merge {:coerce coerce-handler
+                      :compile compile-result
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
      (r/router data opts))))
