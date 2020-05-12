@@ -27,33 +27,33 @@
                          [metosin/reitit-frontend "0.4.2"]
                          [metosin/reitit-sieppari "0.4.2"]
                          [metosin/reitit-pedestal "0.4.2"]
-                         [metosin/ring-swagger-ui "3.24.3"]
-                         [metosin/spec-tools "0.10.0"]
-                         [metosin/schema-tools "0.12.1"]
-                         [metosin/muuntaja "0.6.6"]
-                         [metosin/jsonista "0.2.5"]
-                         [metosin/sieppari "0.0.0-alpha8"]
+                         [metosin/ring-swagger-ui "3.25.0"]
+                         [metosin/spec-tools "0.10.2"]
+                         [metosin/schema-tools "0.12.2"]
+                         [metosin/muuntaja "0.6.7"]
+                         [metosin/jsonista "0.2.6"]
+                         [metosin/sieppari "0.0.0-alpha9"]
                          [metosin/malli "0.0.1-20200404.091302-14"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.10.0"]
+                         [com.fasterxml.jackson.core/jackson-core "2.11.0"]
 
                          [meta-merge "1.0.0"]
-                         [fipp "0.6.22" :exclusions [org.clojure/core.rrb-vector]]
+                         [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.8.4"]
                          [lambdaisland/deep-diff "0.0-47"]
-                         [com.bhauman/spell-spec "0.1.1"]
-                         [ring/ring-core "1.8.0"]
+                         [com.bhauman/spell-spec "0.1.2"]
+                         [ring/ring-core "1.8.1"]
 
                          [io.pedestal/pedestal.service "0.5.7"]]
 
-  :plugins [[jonase/eastwood "0.3.6"]
+  :plugins [[jonase/eastwood "0.3.11"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
-            [lein-cljsbuild "1.1.7"]
+            [lein-cljsbuild "1.1.8"]
             [lein-cloverage "1.1.2"]
             [lein-codox "0.10.7"]
-            [metosin/bat-test "0.4.3"]]
+            [metosin/bat-test "0.4.4"]]
 
   :profiles {:dev {:jvm-opts ^:replace ["-server"]
 
@@ -80,37 +80,37 @@
                                   [org.clojure/clojurescript "1.10.597"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools]
-                                  [metosin/spec-tools]
-                                  [metosin/muuntaja]
+                                  [metosin/schema-tools "0.12.2"]
+                                  [metosin/spec-tools "0.10.2"]
+                                  [metosin/muuntaja "0.6.7"]
                                   [metosin/sieppari]
-                                  [metosin/jsonista]
+                                  [metosin/jsonista "0.2.6"]
                                   [metosin/malli]
-                                  [lambdaisland/deep-diff]
-                                  [meta-merge]
-                                  [com.bhauman/spell-spec]
-                                  [expound]
-                                  [fipp]
+                                  [lambdaisland/deep-diff "0.0-47"]
+                                  [meta-merge "1.0.0"]
+                                  [com.bhauman/spell-spec "0.1.1"]
+                                  [expound "0.8.4"]
+                                  [fipp "0.6.23"]
 
                                   [orchestra "2019.02.06-1"]
 
-                                  [ring "1.8.0"]
+                                  [ring "1.8.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
-                                  [metosin/ring-swagger-ui "2.2.10"]
+                                  [metosin/ring-swagger-ui "3.25.0"]
 
                                   [criterium "0.4.5"]
-                                  [org.clojure/test.check "0.10.0"]
-                                  [org.clojure/tools.namespace "0.3.1"]
+                                  [org.clojure/test.check "1.0.0"]
+                                  [org.clojure/tools.namespace "1.0.0"]
                                   [com.gfredericks/test.chuck "0.2.10"]
 
                                   [io.pedestal/pedestal.service "0.5.7"]
 
-                                  [org.clojure/core.async "0.6.532"]
+                                  [org.clojure/core.async "1.1.587"]
                                   [manifold "0.1.8"]
-                                  [funcool/promesa "4.0.2"]
+                                  [funcool/promesa "5.1.0"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.4.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.4.1"]
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
@@ -125,16 +125,16 @@
                                    [io.pedestal/pedestal.service "0.5.7"]
                                    [io.pedestal/pedestal.jetty "0.5.7"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "0.6.532"]
+                                   [org.clojure/core.async "1.1.587"]
                                    [manifold "0.1.8"]
-                                   [funcool/promesa "4.0.2"]
+                                   [funcool/promesa "5.1.0"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.4.6"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ataraxy "0.4.2"]
                                    [bidi "2.1.6"]
-                                   [janus "1.3.0"]]}
+                                   [janus "1.3.2"]]}
              :analyze {:jvm-opts ^:replace ["-server"
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"

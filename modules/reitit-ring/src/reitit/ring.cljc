@@ -1,12 +1,12 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.middleware :as middleware]
+            [reitit.exception :as ex]
             [reitit.core :as r]
             [reitit.impl :as impl]
             #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
-            [clojure.string :as str]
-            [reitit.exception :as ex]))
+            [clojure.string :as str]))
 
 (declare get-match)
 (declare get-router)
@@ -108,7 +108,7 @@
 (defn routes
   "Create a ring handler by combining several handlers into one."
   [& handlers]
-  (let [single-arity (apply some-fn handlers)]
+  (let [single-arity (apply some-fn (keep identity handlers))]
     (fn
       ([request]
        (single-arity request))
@@ -189,6 +189,48 @@
    ;; TODO: ring.middleware.not-modified/wrap-not-modified
    ;; TODO: ring.middleware.head/wrap-head
    ;; TODO: handle etags
+   (defn -create-file-or-resource-handler
+     [response-fn {:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
+                   :or {parameter (keyword "")
+                        root "public"
+                        index-files ["index.html"]
+                        paths (constantly nil)
+                        not-found-handler (constantly {:status 404, :body "", :headers {}})}}]
+     (let [options {:root root
+                    :loader loader
+                    :index-files? false
+                    :allow-symlinks? allow-symlinks?}
+           path-size (count path)
+           create (fn [handler]
+                    (fn
+                      ([request] (handler request))
+                      ([request respond _] (respond (handler request)))))
+           join-paths (fn [& paths]
+                        (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
+           response (fn [path]
+                           (if-let [response (or (paths (join-paths "/" path))
+                                                 (response-fn path options))]
+                             (response/content-type response (mime-type/ext-mime-type path))))
+           path-or-index-response (fn [path uri]
+                                    (or (response path)
+                                        (loop [[file & files] index-files]
+                                          (if file
+                                            (if (response (join-paths path file))
+                                              (response/redirect (join-paths uri file))
+                                              (recur files))))))
+           handler (if path
+                     (fn [request]
+                       (let [uri (:uri request)]
+                         (if-let [path (if (>= (count uri) path-size) (subs uri path-size))]
+                           (path-or-index-response path uri))))
+                     (fn [request]
+                       (let [uri (:uri request)
+                             path (-> request :path-params parameter)]
+                         (or (path-or-index-response path uri)
+                             (not-found-handler request)))))]
+       (create handler))))
+
+#?(:clj
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
@@ -202,42 +244,25 @@
      | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-resource-handler nil))
-     ([{:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
-        :or {parameter (keyword "")
-             root "public"
-             index-files ["index.html"]
-             paths (constantly nil)
-             not-found-handler (constantly {:status 404, :body "", :headers {}})}}]
-      (let [options {:root root, :loader loader, :allow-symlinks? allow-symlinks?}
-            path-size (count path)
-            create (fn [handler]
-                     (fn
-                       ([request] (handler request))
-                       ([request respond _] (respond (handler request)))))
-            join-paths (fn [& paths]
-                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
-            resource-response (fn [path]
-                                (if-let [response (or (paths (join-paths "/" path))
-                                                      (response/resource-response path options))]
-                                  (response/content-type response (mime-type/ext-mime-type path))))
-            path-or-index-response (fn [path uri]
-                                     (or (resource-response path)
-                                         (loop [[file & files] index-files]
-                                           (if file
-                                             (if (resource-response (join-paths path file))
-                                               (response/redirect (join-paths uri file))
-                                               (recur files))))))
-            handler (if path
-                      (fn [request]
-                        (let [uri (:uri request)]
-                          (if-let [path (if (>= (count uri) path-size) (subs uri path-size))]
-                            (path-or-index-response path uri))))
-                      (fn [request]
-                        (let [uri (:uri request)
-                              path (-> request :path-params parameter)]
-                          (or (path-or-index-response path uri)
-                              (not-found-handler request)))))]
-        (create handler)))))
+     ([opts]
+      (-create-file-or-resource-handler response/resource-response opts))))
+
+#?(:clj
+   (defn create-file-handler
+     "A ring handler for serving file resources, configured via options:
+
+     | key                | description |
+     | -------------------|-------------|
+     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root              | optional resource root, defaults to `\"public\"`
+     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :loader            | optional class loader to resolve the resources
+     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
+     ([]
+      (create-file-handler nil))
+     ([opts]
+      (-create-file-or-resource-handler response/file-response opts))))
 
 (defn create-enrich-request [inject-match? inject-router?]
   (cond

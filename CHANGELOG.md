@@ -14,18 +14,68 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+* Updated deps:
+
+```clj
+[metosin/sieppari "0.0.0-alpha9"] is available but we use "0.0.0-alpha8"
+[metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
+[metosin/ring-swagger-ui "3.25.0"] is available but we use "3.24.3"
+[metosin/spec-tools "0.10.2"] is available but we use "0.10.0"
+[metosin/schema-tools "0.12.2"] is available but we use "0.12.1"
+[metosin/muuntaja "0.6.7"] is available but we use "0.6.6"
+[metosin/jsonista "0.2.6"] is available but we use "0.2.5"
+[com.bhauman/spell-spec "0.1.2"] is available but we use "0.1.1"
+[fipp "0.6.23"] is available but we use "0.6.22"
+[ring/ring-core "1.8.1"] is available but we use "1.8.0"
+```
+
+### `reitit-core`
+
+* Route conflict resolution and thus, router creation is now an order of magnitude faster.
+* Forcing router to be `reitit.core/linear-router` and disabling route conflict resolution totally bypasses route conflict resolution. For cases when router creating speed matters over routing performance:
+
+```clj
+(r/router ...zillions-of-routes... {:router r/linear-router, :conflicts nil})
+```
+
 ### `reitit-frontend`
 
 * `reitit.frontend.easy` state is setup before user `on-navigate` callback
 is called the first time, so that `rfe/push-state` and such can be called
 ([#315](https://github.com/metosin/reitit/issues/315))
 
-### `reitit-malli`
+### `reitit-ring`
 
-* Update malli to latest version:
+* `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
+* `reitit.ring/create-file-handler` to serve files from filesystem, fixes [#395](https://github.com/metosin/reitit/issues/395)
+* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated 
+  * fails with router creation time error
+  * use `:reitit.ring/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
+
+### `reitit-http`
+
+* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated 
+  * fails with router creation time error
+  * use `:reitit.http/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
+
+### `reitit-spec`
+
+* lots of bug fixes, see [spec-tools changelog](https://github.com/metosin/spec-tools/blob/master/CHANGELOG.md#0102-2020-05-05)
+
+### `reitit-sieppari`
+
+* changes from Sieppari:
+  * fixed performance regression bugs, order of magnitude faster dispatching
+  * **BREAKING**: Out-of-the-box support for `core.async` and `manifold` are dropped, to use them, one needs to explicitely require the following side-effecting namespaces:
+    * `sieppari.async.core-async` for core.async
+    * `sieppari.async.manifold` for manifold
+
+### `reitit-swagger`
+
+* default to the new swagger-ui (3.25.0), to get old back add a dependency to:
 
 ```clj
-[metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
+[metosin/ring-swagger-ui "2.2.10"]
 ```
 
 ## 0.4.2 (2020-01-17)
