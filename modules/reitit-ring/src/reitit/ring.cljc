@@ -28,11 +28,11 @@
               (update acc method expand opts)
               acc)) data http-methods)])
 
-(defn compile-result [[path data] {::keys [default-options-resource] :as opts}]
+(defn compile-result [[path data] {::keys [default-options-endpoint] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-resource)
-                       (assoc :options default-options-resource))
+                       (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
+                       (assoc :options default-options-endpoint))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
@@ -65,7 +65,7 @@
       ([request respond _]
        (respond (handle request))))))
 
-(def default-options-resource
+(def default-options-endpoint
   {:no-doc  true
    :handler default-options-handler})
 
@@ -82,7 +82,7 @@
   | ----------------------------------------|-------------
   | `:reitit.middleware/transform`          | Function or vector of functions of type `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity)
   | `:reitit.middleware/registry`           | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
-  | `:reitit.ring/default-options-resource` | Default resource for `:options` method in endpoints (default: default-options-resource)
+  | `:reitit.ring/default-options-endpoint` | Default resource for `:options` method in endpoints (default: default-options-endpoint)
 
   Example:
 
@@ -97,7 +97,7 @@
   ([data opts]
    (let [opts (merge {:coerce                    coerce-handler
                       :compile                   compile-result
-                      ::default-options-resource default-options-resource}
+                      ::default-options-endpoint default-options-endpoint}
                      opts)]
      (r/router data opts))))
 
