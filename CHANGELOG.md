@@ -61,6 +61,17 @@ is called the first time, so that `rfe/push-state` and such can be called
     * `sieppari.async.core-async` for core.async
     * `sieppari.async.manifold` for manifold
 
+### `reitit-swagger`
+
+* default to the new swagger-ui (3.25.0), to get old back add a dependency to:
+
+```clj
+[metosin/ring-swagger-ui "2.2.10"]
+```
+
+### `reitit-sieppari`
+
+
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`
