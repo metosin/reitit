@@ -78,9 +78,6 @@ is called the first time, so that `rfe/push-state` and such can be called
 [metosin/ring-swagger-ui "2.2.10"]
 ```
 
-### `reitit-sieppari`
-
-
 ## 0.4.2 (2020-01-17)
 
 ### `reitit`
