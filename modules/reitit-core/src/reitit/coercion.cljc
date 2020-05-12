@@ -41,7 +41,9 @@
    :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
 
-(defn ^:no-doc request-coercion-failed! [result coercion value in request]
+;; TODO: Fold this into `request-coercion-failed-join-errors!` in 1.0.0 when
+;;       switching to the new response format.
+(defn ^:no-doc request-coercion-failed-fail-fast! [result coercion value in request]
   (throw
     (ex-info
       (str "Request coercion failed: " (pr-str result))
@@ -53,7 +55,27 @@
          :in [:request in]
          :request request}))))
 
-(defn ^:no-doc response-coercion-failed! [result coercion value request response]
+(defn ^:no-doc merge-coercion-errors
+  "Coalesces a list of coercion errors on the form `{:in <>}`"
+  [errors]
+  (->> errors
+       (map (fn [{in :in :as data}]
+              {in (merge (into {} (:error data)) (dissoc data :in :error))}))
+       (apply merge)))
+
+(defn ^:no-doc request-coercion-failed-join-errors!
+  [errors request]
+  (let [result (merge-coercion-errors errors)]
+    (throw
+     (ex-info
+      (str "Request coercion failed: " (pr-str result))
+      (assoc result
+             :type ::request-coercion
+             :request request)))))
+
+;; TODO: Fold this into `response-coercion-failed-join-errors!` in 1.0.0 when
+;;       switching to the new response format.
+(defn ^:no-doc response-coercion-failed-fail-fast! [result coercion value request response]
   (throw
     (ex-info
       (str "Response coercion failed: " (pr-str result))
@@ -66,13 +88,27 @@
          :request request
          :response response}))))
 
+(defn ^:no-doc response-coercion-failed-join-errors!
+  [errors request response]
+  (let [result (merge-coercion-errors errors)]
+    (throw
+     (ex-info
+      (str "Response coercion failed: " (pr-str result))
+      (assoc result
+             :type ::response-coercion
+             :request request
+             :response response)))))
+
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion]
+(defn request-coercer [coercion type model {::keys [extract-request-format
+                                                    parameter-coercion
+                                                    coerce-all-on-error?]
                                             :or {extract-request-format extract-request-format-default
-                                                 parameter-coercion default-parameter-coercion}}]
+                                                 parameter-coercion default-parameter-coercion
+                                                 coerce-all-on-error? false}}]
   (if coercion
     (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
@@ -83,14 +119,20 @@
                 format (extract-request-format request)
                 result (coercer value format)]
             (if (error? result)
-              (request-coercion-failed! result coercion value in request)
-              result)))))))
+              (if coerce-all-on-error?
+                [nil {:error result
+                      :in (if (= in :body-params) :body in)
+                      :coercion coercion
+                      :value value}]
+                (request-coercion-failed-fail-fast! result coercion value in request))
+              [result])))))))
 
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
 
-(defn response-coercer [coercion body {:keys [extract-response-format]
-                                       :or {extract-response-format extract-response-format-default}}]
+(defn response-coercer [coercion body {::keys [extract-response-format coerce-all-on-error?]
+                                       :or {extract-response-format extract-response-format-default
+                                            coerce-all-on-error? false}}]
   (if coercion
     (if-let [coercer (-response-coercer coercion body)]
       (fn [request response]
@@ -98,27 +140,45 @@
               value (:body response)
               result (coercer value format)]
           (if (error? result)
-            (response-coercion-failed! result coercion value request response)
-            result))))))
+            (if coerce-all-on-error?
+              [nil {:error result
+                    :in :body
+                    :coercion coercion
+                    :value value}]
+              (response-coercion-failed-fail-fast! result coercion value request response))
+            [result]))))))
+
+(defn encode-single-error [data]
+  (-encode-error (:coercion data) (update data :coercion -get-name)))
 
 (defn encode-error [data]
-  (-> data
-      (dissoc :request :response)
-      (update :coercion -get-name)
-      (->> (-encode-error (:coercion data)))))
+  (if (not-any? #(contains? data %)
+                [:body :form-params :query-params :headers :path-params])
+    (encode-single-error (dissoc data :request :response))
+    (let [errors (->> (dissoc data :request :response :type)
+                      (map (fn [[k v]] [k (encode-single-error v)])))]
+      (into (select-keys data [:type]) errors))))
 
 (defn coerce-request [coercers request]
-  (reduce-kv
-    (fn [acc k coercer]
-      (impl/fast-assoc acc k (coercer request)))
-    {}
-    coercers))
+  (let [[result errors] (reduce-kv
+                         (fn [[acc errors] k coercer]
+                           (let [[result error] (coercer request)]
+                             (if error
+                               [acc (conj errors error)]
+                               [(impl/fast-assoc acc k result) errors])))
+                         [{}]
+                         coercers)]
+    (when errors
+      (request-coercion-failed-join-errors! errors request))
+    result))
 
 (defn coerce-response [coercers request response]
   (if response
     (if-let [coercer (or (coercers (:status response)) (coercers :default))]
-      (impl/fast-assoc response :body (coercer request response))
-      response)))
+      (let [[result error] (coercer request response)]
+        (if error
+          (response-coercion-failed-join-errors! [error] request response)
+          (impl/fast-assoc response :body result))))))
 
 (defn request-coercers [coercion parameters opts]
   (->> (for [[k v] parameters
