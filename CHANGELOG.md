@@ -24,6 +24,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/schema-tools "0.12.2"] is available but we use "0.12.1"
 [metosin/muuntaja "0.6.7"] is available but we use "0.6.6"
 [metosin/jsonista "0.2.6"] is available but we use "0.2.5"
+[com.bhauman/spell-spec "0.1.2"] is available but we use "0.1.1"
 [fipp "0.6.23"] is available but we use "0.6.22"
 [ring/ring-core "1.8.1"] is available but we use "1.8.0"
 ```
@@ -46,7 +47,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 ### `reitit-ring`
 
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
-* `reitit.ring/create-file-handler` to serve files from classpah, fixes [#395](https://github.com/metosin/reitit/issues/395)
+* `reitit.ring/create-file-handler` to serve files from filesystem, fixes [#395](https://github.com/metosin/reitit/issues/395)
 
 ### `reitit-spec`
 

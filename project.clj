@@ -42,7 +42,7 @@
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
                          [expound "0.8.4"]
                          [lambdaisland/deep-diff "0.0-47"]
-                         [com.bhauman/spell-spec "0.1.1"]
+                         [com.bhauman/spell-spec "0.1.2"]
                          [ring/ring-core "1.8.1"]
 
                          [io.pedestal/pedestal.service "0.5.7"]]
