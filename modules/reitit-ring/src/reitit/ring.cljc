@@ -66,7 +66,7 @@
        (respond (handle request))))))
 
 (def default-options-endpoint
-  {:no-doc  true
+  {:no-doc true
    :handler default-options-handler})
 
 ;;
@@ -82,7 +82,7 @@
   | ----------------------------------------|-------------
   | `:reitit.middleware/transform`          | Function or vector of functions of type `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity)
   | `:reitit.middleware/registry`           | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
-  | `:reitit.ring/default-options-endpoint` | Default resource for `:options` method in endpoints (default: default-options-endpoint)
+  | `:reitit.ring/default-options-endpoint` | Default endpoint for `:options` method in endpoints (default: default-options-endpoint)
 
   Example:
 
@@ -100,9 +100,8 @@
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
      (assert (not (contains? opts ::default-options-handler))
-             (str
-              "Option `:reitit.ring/default-options-handler` is deprecated."
-              " Use `:reitit.ring/default-options-endpoint` instead."))
+             (str "Option `" ::default-options-handler "` is deprecated."
+                  " Use `:" ::default-options-endpoint "` instead."))
      (r/router data opts))))
 
 (defn routes
