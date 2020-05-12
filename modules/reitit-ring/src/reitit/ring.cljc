@@ -1,12 +1,12 @@
 (ns reitit.ring
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.middleware :as middleware]
+            [reitit.exception :as ex]
             [reitit.core :as r]
             [reitit.impl :as impl]
             #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
-            [clojure.string :as str]
-            [reitit.exception :as ex]))
+            [clojure.string :as str]))
 
 (declare get-match)
 (declare get-router)

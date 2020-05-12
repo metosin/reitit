@@ -6,7 +6,8 @@
             [reitit.interceptor.sieppari :as sieppari]
             [reitit.http :as http]
             [reitit.ring :as ring]
-            [reitit.core :as r]))
+            [reitit.core :as r])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn interceptor [name]
   {:enter (fn [ctx] (update-in ctx [:request ::i] (fnil conj []) name))})
@@ -170,6 +171,10 @@
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
 (deftest default-options-handler-test
+  (testing "Assertion fails when using deprecated options-handler"
+    (is (thrown? ExceptionInfo (ring/router [] {::ring/default-options-handler (fn [_])})))))
+
+(deftest default-options-handler-test
   (let [response {:status 200, :body "ok"}]
 
     (testing "with defaults"
@@ -199,7 +204,7 @@
                     [["/get" {:get (constantly response)}]
                      ["/options" {:options (constantly response)}]
                      ["/any" (constantly response)]]
-                    {::http/default-options-handler nil})
+                    {::http/default-options-endpoint nil})
                   {:executor sieppari/executor})]
 
         (testing "endpoint with a non-options handler"

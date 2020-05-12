@@ -48,6 +48,15 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
 * `reitit.ring/create-file-handler` to serve files from filesystem, fixes [#395](https://github.com/metosin/reitit/issues/395)
+* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated 
+  * fails with router creation time error
+  * use `:reitit.ring/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
+
+### `reitit-http`
+
+* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated 
+  * fails with router creation time error
+  * use `:reitit.http/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
 
 ### `reitit-spec`
 

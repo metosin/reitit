@@ -1,6 +1,7 @@
 (ns reitit.http
   (:require [meta-merge.core :refer [meta-merge]]
             [reitit.interceptor :as interceptor]
+            [reitit.exception :as ex]
             [reitit.ring :as ring]
             [reitit.core :as r]))
 
@@ -13,11 +14,11 @@
               (update acc method expand opts)
               acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {::keys [default-options-handler] :as opts}]
+(defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-handler)
-                       (assoc :options {:no-doc true, :handler default-options-handler}))
+                       (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
+                       (assoc :options (expand default-options-endpoint opts)))
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
@@ -47,11 +48,11 @@
   support for http-methods and Interceptors. See documentation on [[reitit.core/router]]
   for available options. In addition, the following options are available:
 
-  | key                                    | description
-  | ---------------------------------------|-------------
-  | `:reitit.interceptor/transform`        | Function or vector of functions of type `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity)
-  | `:reitit.interceptor/registry`         | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptors
-  | `:reitit.http/default-options-handler` | Default handler for `:options` method in endpoints (default: reitit.ring/default-options-handler)
+  | key                                     | description
+  | ----------------------------------------|-------------
+  | `:reitit.interceptor/transform`         | Function or vector of functions of type `[Interceptor] => [Interceptor]` to transform the expanded Interceptors (default: identity)
+  | `:reitit.interceptor/registry`          | Map of `keyword => IntoInterceptor` to replace keyword references into Interceptors
+  | `:reitit.http/default-options-endpoint` | Default endpoint for `:options` method in endpoints (default: reitit.ring/default-options-endpoint)
 
   Example:
 
@@ -66,7 +67,10 @@
   ([data opts]
    (let [opts (merge {:coerce coerce-handler
                       :compile compile-result
-                      ::default-options-handler ring/default-options-handler} opts)]
+                      ::default-options-endpoint ring/default-options-endpoint} opts)]
+     (when (contains? opts ::default-options-handler)
+       (ex/fail! (str "Option :reitit.http/default-options-handler is deprecated."
+                      " Use :reitit.http/default-options-endpoint instead.")))
      (r/router data opts))))
 
 (defn routing-interceptor

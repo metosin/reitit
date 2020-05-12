@@ -14,11 +14,11 @@ Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Co
  
  It accepts the following options:
 
-| key                                    | description |
-| ---------------------------------------|-------------|
-| `:reitit.middleware/transform`         | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
-| `:reitit.middleware/registry`          | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
-| `:reitit.ring/default-options-handler` | Default handler for `:options` method in endpoints (default: default-options-handler)
+| key                                     | description |
+| ----------------------------------------|-------------|
+| `:reitit.middleware/transform`          | Function of `[Middleware] => [Middleware]` to transform the expanded Middleware (default: identity).
+| `:reitit.middleware/registry`           | Map of `keyword => IntoMiddleware` to replace keyword references into Middleware
+| `:reitit.ring/default-options-endpoint` | Default endpoint for `:options` method (default: default-options-endpoint)
 
 Example router:
 
