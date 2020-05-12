@@ -206,7 +206,7 @@
 
 (deftest default-options-handler-test
   (testing "Assertion fails when using deprecated options-handler"
-    (is (thrown? java.lang.AssertionError (ring/router [] {::ring/default-options-handler (fn [_] )})))))
+    (is (thrown? java.lang.AssertionError (ring/router [] {::ring/default-options-handler (fn [_])})))))
 
 (deftest default-options-endpoint-test
   (let [response {:status 200, :body "ok"}]
@@ -238,6 +238,21 @@
         (testing "endpoint with top-level handler"
           (is (= response (app {:request-method :get, :uri "/any"})))
           (is (= response (app {:request-method :options, :uri "/any"}))))))
+
+    (testing "custom endpoint works (and expands automatically)"
+      (doseq [endpoint [{:handler (constantly {:status 200, :body "ok"})}
+                        (constantly {:status 200, :body "ok"})]]
+        (let [response {:status 200, :body "ok"}
+              app (ring/ring-handler
+                    (ring/router
+                      ["/get" {:get (constantly response)
+                               :post (constantly response)}]
+                      {::ring/default-options-endpoint endpoint}))]
+
+          (testing "endpoint with a non-options handler"
+            (let [request {:request-method :options, :uri "/get"}]
+              (is (= response (app {:request-method :get, :uri "/get"})))
+              (is (= {:status 200, :body "ok"} (app request))))))))
 
     (testing "disabled via options"
       (let [app (ring/ring-handler

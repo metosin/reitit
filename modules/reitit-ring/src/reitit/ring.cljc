@@ -28,11 +28,11 @@
               (update acc method expand opts)
               acc)) data http-methods)])
 
-(defn compile-result [[path data] {::keys [default-options-endpoint] :as opts}]
+(defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
                        (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
-                       (assoc :options default-options-endpoint))
+                       (assoc :options (expand default-options-endpoint opts)))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
