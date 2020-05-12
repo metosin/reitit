@@ -100,7 +100,9 @@
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
      (assert (not (contains? opts ::default-options-handler))
-             "Option `::default-options-handler` is deprecated. Use `::default-options-endpoint` instead.")
+             (str
+              "Option `:reitit.ring/default-options-handler` is deprecated."
+              " Use `:reitit.ring/default-options-endpoint` instead."))
      (r/router data opts))))
 
 (defn routes
