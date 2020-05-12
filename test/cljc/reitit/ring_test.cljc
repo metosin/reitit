@@ -206,7 +206,7 @@
 
 (deftest default-options-handler-test
   (testing "Assertion fails when using deprecated options-handler"
-    (is (thrown? java.lang.AssertionError (ring/router [] {::ring/default-options-handler (fn [_])})))))
+    (is (thrown? ExceptionInfo (ring/router [] {::ring/default-options-handler (fn [_])})))))
 
 (deftest default-options-endpoint-test
   (let [response {:status 200, :body "ok"}]

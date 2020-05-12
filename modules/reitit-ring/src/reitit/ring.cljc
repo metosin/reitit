@@ -5,7 +5,8 @@
             [reitit.impl :as impl]
             #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [reitit.exception :as ex]))
 
 (declare get-match)
 (declare get-router)
@@ -99,9 +100,9 @@
                       :compile compile-result
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
-     (assert (not (contains? opts ::default-options-handler))
-             (str "Option `" ::default-options-handler "` is deprecated."
-                  " Use `:" ::default-options-endpoint "` instead."))
+     (when (contains? opts ::default-options-handler)
+       (ex/fail! (str "Option :reitit.ring/default-options-handler is deprecated."
+                      " Use :reitit.ring/default-options-endpoint instead.")))
      (r/router data opts))))
 
 (defn routes
