@@ -37,6 +37,7 @@
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.11.0"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.11.0"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]

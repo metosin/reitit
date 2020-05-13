@@ -24,4 +24,5 @@
                  [metosin/reitit-sieppari]
 
                  ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                 [com.fasterxml.jackson.core/jackson-core]])
+                 [com.fasterxml.jackson.core/jackson-core]
+                 [com.fasterxml.jackson.core/jackson-databind]])
