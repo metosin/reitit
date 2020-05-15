@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.4.2"
+(defproject metosin/reitit-parent "0.5.0-SNAPSHOT"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
