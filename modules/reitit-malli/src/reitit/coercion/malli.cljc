@@ -80,7 +80,7 @@
 (defmethod extract-parameter :body [_ schema options]
   (let [swagger-schema (swagger/transform schema (merge options {:in :body, :type :parameter}))]
     [{:in "body"
-      :name (:title swagger-schema "")
+      :name (:title swagger-schema "body")
       :description (:description swagger-schema "")
       :required (not= :maybe (m/name schema))
       :schema swagger-schema}]))

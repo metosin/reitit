@@ -67,6 +67,10 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * lots of bug fixes, see [spec-tools changelog](https://github.com/metosin/spec-tools/blob/master/CHANGELOG.md#0102-2020-05-05)
 
+###  `reitit-malli`
+
+* Swagger body-parameters don't use empty default, fixes [#399](https://github.com/metosin/reitit/issues/399)
+
 ### `reitit-sieppari`
 
 * changes from Sieppari:
