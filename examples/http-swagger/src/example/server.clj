@@ -21,6 +21,7 @@
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
+            [sieppari.async.manifold]
             [manifold.deferred :as d]))
 
 (s/def ::x int?)

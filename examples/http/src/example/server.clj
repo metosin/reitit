@@ -2,6 +2,8 @@
   (:require [reitit.http :as http]
             [reitit.ring :as ring]
             [reitit.interceptor.sieppari]
+            [sieppari.async.core-async] ;; needed for core.async
+            [sieppari.async.manifold]   ;; needed for manifold
             [ring.adapter.jetty :as jetty]
             [muuntaja.interceptor]
             [clojure.core.async :as a]
