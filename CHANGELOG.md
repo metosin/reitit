@@ -24,7 +24,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```clj
 [metosin/sieppari "0.0.0-alpha10"] is available but we use "0.0.0-alpha8"
 [metosin/malli "0.0.1-20200404.091302-14"] is available but we use "0.0.1-20200305.102752-13"
-[metosin/ring-swagger-ui "3.25.0"] is available but we use "3.24.3"
+[metosin/ring-swagger-ui "3.25.3"] is available but we use "2.2.10"
 [metosin/spec-tools "0.10.2"] is available but we use "0.10.0"
 [metosin/schema-tools "0.12.2"] is available but we use "0.12.1"
 [metosin/muuntaja "0.6.7"] is available but we use "0.6.6"
