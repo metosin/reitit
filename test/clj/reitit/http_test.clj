@@ -294,24 +294,24 @@
                 {:executor sieppari/executor})]
       (let [respond (promise)]
         (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
-        (is (= response @respond))))))
+        (is (= response (deref respond 100 ::timeout)))))))
 
 (defrecord MyAsyncContext [])
 
 (deftest unknown-async-test
   (testing "works if registered"
-    (require '[sieppari.async.core-async])
     (let [response {:status 200, :body "ok"}
           app (http/ring-handler
                 (http/router
                   ["/ping" {:get {:interceptors [{:enter map->MyAsyncContext}]
                                   :handler (fn [_] response)}}])
                 (ring/create-default-handler)
-                {:executor sieppari/executor})]
-      (let [raise (promise)]
-        (app {:request-method :get, :uri "/ping"} ::irrelevant raise)
-        (let [response' @raise]
-          (is (instance? ExceptionInfo response')))))))
+                {:executor sieppari/executor})
+          respond (promise)
+          raise (promise)]
+      (app {:request-method :get, :uri "/ping"} respond raise)
+      (let [raised (deref raise 100 ::timeout)]
+        (is (instance? ExceptionInfo raised))))))
 
 (deftest interceptor-transform-test
   (let [interceptor (fn [name] {:name name

@@ -148,7 +148,7 @@
                                                                     500 {:description "fail"}}
                                                         :summary "plus"}
                                                   :post {:parameters [{:in "body",
-                                                                       :name "",
+                                                                       :name "body",
                                                                        :description "",
                                                                        :required false,
                                                                        :schema {:type "array",
