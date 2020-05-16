@@ -27,12 +27,12 @@
                          [metosin/reitit-frontend "0.4.2"]
                          [metosin/reitit-sieppari "0.4.2"]
                          [metosin/reitit-pedestal "0.4.2"]
-                         [metosin/ring-swagger-ui "3.25.0"]
-                         [metosin/spec-tools "0.10.2"]
+                         [metosin/ring-swagger-ui "3.25.3"]
+                         [metosin/spec-tools "0.10.3"]
                          [metosin/schema-tools "0.12.2"]
                          [metosin/muuntaja "0.6.7"]
                          [metosin/jsonista "0.2.6"]
-                         [metosin/sieppari "0.0.0-alpha9"]
+                         [metosin/sieppari "0.0.0-alpha10"]
                          [metosin/malli "0.0.1-20200404.091302-14"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
@@ -82,7 +82,7 @@
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.12.2"]
-                                  [metosin/spec-tools "0.10.2"]
+                                  [metosin/spec-tools "0.10.3"]
                                   [metosin/muuntaja "0.6.7"]
                                   [metosin/sieppari]
                                   [metosin/jsonista "0.2.6"]
@@ -98,7 +98,7 @@
                                   [ring "1.8.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
-                                  [metosin/ring-swagger-ui "3.25.0"]
+                                  [metosin/ring-swagger-ui "3.25.3"]
 
                                   [criterium "0.4.5"]
                                   [org.clojure/test.check "1.0.0"]

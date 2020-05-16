@@ -6,7 +6,8 @@
             [reitit.interceptor.sieppari :as sieppari]
             [reitit.http :as http]
             [reitit.ring :as ring]
-            [reitit.core :as r])
+            [reitit.core :as r]
+            [clojure.core.async :as a])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn interceptor [name]
@@ -280,6 +281,37 @@
               (app {:request-method :get, :uri "/pong"} respond raise)
               (is (= 406 (:status (respond))))
               (is (= ::nil (raise))))))))))
+
+(deftest core-async-test
+  (testing "works if registered"
+    (require '[sieppari.async.core-async])
+    (let [response {:status 200, :body "ok"}
+          app (http/ring-handler
+                (http/router
+                  ["/ping" {:get {:interceptors [{:enter #(a/go %)}]
+                                  :handler (fn [_] (a/go response))}}])
+                (ring/create-default-handler)
+                {:executor sieppari/executor})]
+      (let [respond (promise)]
+        (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
+        (is (= response (deref respond 100 ::timeout)))))))
+
+(defrecord MyAsyncContext [])
+
+(deftest unknown-async-test
+  (testing "works if registered"
+    (let [response {:status 200, :body "ok"}
+          app (http/ring-handler
+                (http/router
+                  ["/ping" {:get {:interceptors [{:enter map->MyAsyncContext}]
+                                  :handler (fn [_] response)}}])
+                (ring/create-default-handler)
+                {:executor sieppari/executor})
+          respond (promise)
+          raise (promise)]
+      (app {:request-method :get, :uri "/ping"} respond raise)
+      (let [raised (deref raise 100 ::timeout)]
+        (is (instance? ExceptionInfo raised))))))
 
 (deftest interceptor-transform-test
   (let [interceptor (fn [name] {:name name

@@ -21,6 +21,7 @@
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [spec-tools.core :as st]
+            [sieppari.async.manifold]
             [manifold.deferred :as d]))
 
 (s/def ::x int?)
@@ -59,6 +60,7 @@
         ["/download"
          {:get {:summary "downloads a file"
                 :swagger {:produces ["image/png"]}
+                :responses {200 {:description "image"}}
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
