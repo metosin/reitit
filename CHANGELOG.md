@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.5.0-SNAPSHOT
+## 0.5.0 (2020-05-17)
 
 * **NOTE** Due to [issues with Jackson versioning](https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111), you might get errors after updating as [Cheshire still uses older version](https://github.com/dakrone/cheshire/pull/164) as is most likely as a transitive dependency via 3rd party libs. To resolve issues (with Leiningen), you can either:
   1. move `[metosin/reitit "0.5.0"]` as the first dependency (Lein will pick up the latest versions from there)

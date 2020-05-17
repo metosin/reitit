@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.5.0-SNAPSHOT"
+(defproject metosin/reitit-parent "0.5.0"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,21 +12,21 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.4.2"]
-                         [metosin/reitit-core "0.4.2"]
-                         [metosin/reitit-dev "0.4.2"]
-                         [metosin/reitit-spec "0.4.2"]
-                         [metosin/reitit-malli "0.4.2"]
-                         [metosin/reitit-schema "0.4.2"]
-                         [metosin/reitit-ring "0.4.2"]
-                         [metosin/reitit-middleware "0.4.2"]
-                         [metosin/reitit-http "0.4.2"]
-                         [metosin/reitit-interceptors "0.4.2"]
-                         [metosin/reitit-swagger "0.4.2"]
-                         [metosin/reitit-swagger-ui "0.4.2"]
-                         [metosin/reitit-frontend "0.4.2"]
-                         [metosin/reitit-sieppari "0.4.2"]
-                         [metosin/reitit-pedestal "0.4.2"]
+  :managed-dependencies [[metosin/reitit "0.5.0"]
+                         [metosin/reitit-core "0.5.0"]
+                         [metosin/reitit-dev "0.5.0"]
+                         [metosin/reitit-spec "0.5.0"]
+                         [metosin/reitit-malli "0.5.0"]
+                         [metosin/reitit-schema "0.5.0"]
+                         [metosin/reitit-ring "0.5.0"]
+                         [metosin/reitit-middleware "0.5.0"]
+                         [metosin/reitit-http "0.5.0"]
+                         [metosin/reitit-interceptors "0.5.0"]
+                         [metosin/reitit-swagger "0.5.0"]
+                         [metosin/reitit-swagger-ui "0.5.0"]
+                         [metosin/reitit-frontend "0.5.0"]
+                         [metosin/reitit-sieppari "0.5.0"]
+                         [metosin/reitit-pedestal "0.5.0"]
                          [metosin/ring-swagger-ui "3.25.3"]
                          [metosin/spec-tools "0.10.3"]
                          [metosin/schema-tools "0.12.2"]
