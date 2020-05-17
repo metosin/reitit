@@ -15,9 +15,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## 0.5.0-SNAPSHOT
 
 * **NOTE** Due to [issues with Jackson versioning](https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111/20), you might get errors after updating as [Cheshire still uses older version](https://github.com/dakrone/cheshire/pull/164) as is most likely as a transitive dependency via 3rd party libs. To resolve issues (with Leiningen), you can either:
-  a) move `[metosin/reitit "0.5.0"]` as the first dependency (Lein will pick up the latest versions from there)
-  b) add `[metosin/jsonista "0.2.5"]` as the first dependency
-  c) add explicit dependencies to `[com.fasterxml.jackson.core/jackson-core "2.11.0"]` and `[com.fasterxml.jackson.core/jackson-databind "2.11.0"]` directly
+  1. move `[metosin/reitit "0.5.0"]` as the first dependency (Lein will pick up the latest versions from there)
+  2. add `[metosin/jsonista "0.2.5"]` as the first dependency
+  3. add explicit dependencies to `[com.fasterxml.jackson.core/jackson-core "2.11.0"]` and `[com.fasterxml.jackson.core/jackson-databind "2.11.0"]` directly
 
 * Updated deps:
 
@@ -81,7 +81,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 ### `reitit-swagger`
 
-* default to the new swagger-ui (3.25.0), to get old back add a dependency to:
+* default to the new swagger-ui (3.25.3), to get old back add a dependency to:
 
 ```clj
 [metosin/ring-swagger-ui "2.2.10"]

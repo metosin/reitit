@@ -31,7 +31,12 @@
               (constantly nil)
               nil
               (constantly 123))
-            ::irrelevant)))))
+            ::irrelevant))))
+  (testing "can return nil"
+    (is (= nil
+           (ring/routes
+             nil
+             nil)))))
 
 (deftest ring-router-test
 
