@@ -14,7 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.0-SNAPSHOT
 
-* **NOTE** Due to [issues with Jackson versioning](https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111/20), you might get errors after updating as [Cheshire still uses older version](https://github.com/dakrone/cheshire/pull/164) as is most likely as a transitive dependency via 3rd party libs. To resolve issues (with Leiningen), you can either:
+* **NOTE** Due to [issues with Jackson versioning](https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111), you might get errors after updating as [Cheshire still uses older version](https://github.com/dakrone/cheshire/pull/164) as is most likely as a transitive dependency via 3rd party libs. To resolve issues (with Leiningen), you can either:
   1. move `[metosin/reitit "0.5.0"]` as the first dependency (Lein will pick up the latest versions from there)
   2. add `[metosin/jsonista "0.2.5"]` as the first dependency
   3. add explicit dependencies to `[com.fasterxml.jackson.core/jackson-core "2.11.0"]` and `[com.fasterxml.jackson.core/jackson-databind "2.11.0"]` directly
