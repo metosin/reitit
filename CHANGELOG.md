@@ -12,11 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.5.1-SNAPSHOT
+## 0.5.1 (2020-05-18)
 
 ```clj
 [metosin/sieppari "0.0.0-alpha13"] is available but we use "0.0.0-alpha10"
 ```
+
+* new sieppari NOT to include all it's dev dependencies, fixes [#402](https://github.com/metosin/reitit/issues/402)
+* re-compile with Java8
 
 ## 0.5.0 (2020-05-17)
 
