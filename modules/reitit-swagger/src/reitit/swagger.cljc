@@ -92,6 +92,7 @@
                                      (apply meta-merge (keep (comp :swagger :data) interceptors))
                                      (if coercion
                                        (coercion/get-apidocs coercion :swagger data))
+                                     (when-not (:responses data) {:responses {:default {:description ""}}})
                                      (select-keys data [:tags :summary :description])
                                      (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
