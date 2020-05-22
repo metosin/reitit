@@ -76,7 +76,7 @@ at the top-level to show responses for all endpoints.
 * two routes
 * swagger-spec served from  `"/swagger.json"`
 * swagger-ui mounted to `"/api-docs"`
-* note that for real-world use, you need a [content-negation middleware][muuntaja] -
+* note that for real-world use, you need a [content-negotiation middleware][muuntaja] -
   see the next example
 
 [muuntaja]: ../ring/default_middleware.md#content-negotiation
