@@ -208,6 +208,13 @@
                    (ring/router
                      ["/api"
 
+                      ["/custom" {:summary "just validation"
+                                  :coercion (reitit.coercion.malli/create {:transformers {}})
+                                  :post {:parameters {:body [:map [:x int?]]}
+                                         :responses {200 {:body [:map [:x int?]]}}
+                                         :handler (fn [req]
+                                                    {:status 200
+                                                     :body (-> req :parameters :body)})}}]
                       ["/or" {:post {:summary "accepts either of two map schemas"
                                      :parameters {:body or-maps-schema}
                                      :responses {200 {:body [:map [:msg string?]]}}
@@ -264,6 +271,12 @@
       (let [app (create [rrc/coerce-exceptions-middleware
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware])]
+
+        (testing "just validation"
+          (is (= 400 (:status (app {:uri "/api/custom"
+                                    :request-method :post
+                                    :muuntaja/request {:format "application/edn"}
+                                    :body-params 123})))))
 
         (testing "or #407"
           (is (= {:status 200
