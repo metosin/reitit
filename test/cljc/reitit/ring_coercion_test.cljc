@@ -199,11 +199,22 @@
           (let [{:keys [status]} (app invalid-request2)]
             (is (= 500 status))))))))
 
+(def or-maps-schema
+  [:or [:map [:x int?]] [:map [:y int?]]])
+
 (deftest malli-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
                    (ring/router
                      ["/api"
+
+                      ["/or" {:post {:summary "accepts either of two map schemas"
+                                     :parameters {:body or-maps-schema}
+                                     :responses {200 {:body [:map [:msg string?]]}}
+                                     :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                                {:status 200
+                                                 :body {:msg (if x "you sent x" "you sent y")}})}}]
+
                       ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
                                                       :body [:map [:b int?]]
                                                       :form [:map [:c [int? {:default 3}]]]
@@ -253,6 +264,13 @@
       (let [app (create [rrc/coerce-exceptions-middleware
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware])]
+
+        (testing "or #407"
+          (is (= {:status 200
+                  :body {:msg "you sent x"}}
+                 (app {:uri "/api/or"
+                       :request-method :post
+                       :body-params {:x 1}}))))
 
         (testing "all good"
           (is (= {:status 200
