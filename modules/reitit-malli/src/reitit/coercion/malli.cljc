@@ -13,7 +13,11 @@
 ;; coercion
 ;;
 
-(defrecord Coercer [decoder encoder validator explainer])
+(defprotocol Coercer
+  (-decode [this value])
+  (-encode [this value])
+  (-validate [this value])
+  (-explain [this value]))
 
 (defprotocol TransformationProvider
   (-transformer [this options]))
@@ -32,10 +36,16 @@
 
 (defn- -coercer [schema type transformers f encoder opts]
   (if schema
-    (let [->coercer (fn [t] (if t (->Coercer (m/decoder schema opts t)
-                                             (m/encoder schema opts t)
-                                             (m/validator schema opts)
-                                             (m/explainer schema opts))))
+    (let [->coercer (fn [t]
+                      (let [decoder (if t (m/decoder schema opts t) (constantly true))
+                            encoder (if t (m/encoder schema opts t) (constantly true))
+                            validator (m/validator schema opts)
+                            explainer (m/explainer schema opts)]
+                        (reify Coercer
+                          (-decode [_ value] (decoder value))
+                          (-encode [_ value] (encoder value))
+                          (-validate [_ value] (validator value))
+                          (-explain [_ value] (explainer value)))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
           encode (or encoder (fn [value _format] value))
@@ -44,29 +54,23 @@
                             default-coercer (constantly default-coercer))]
       (if get-coercer
         (if (= f :decode)
-          ;; decode -> validate
+          ;; decode: decode -> validate
           (fn [value format]
             (if-let [coercer (get-coercer format)]
-              (let [decoder (:decoder coercer)
-                    validator (:validator coercer)
-                    transformed (decoder value)]
-                (if (validator transformed)
+              (let [transformed (-decode coercer value)]
+                (if (-validate coercer transformed)
                   transformed
-                  (let [explainer (:explainer coercer)
-                        error (explainer transformed)]
+                  (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
                       (assoc error :transformed transformed)))))
               value))
-          ;; decode -> validate -> encode
+          ;; encode: decode -> validate -> encode
           (fn [value format]
             (if-let [coercer (get-coercer format)]
-              (let [decoder (:decoder coercer)
-                    validator (:validator coercer)
-                    transformed (decoder value)]
-                (if (validator transformed)
+              (let [transformed (-decode coercer value)]
+                (if (-validate coercer transformed)
                   (encode transformed format)
-                  (let [explainer (:explainer coercer)
-                        error (explainer transformed)]
+                  (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
                       (assoc error :transformed transformed)))))
               value)))))))
