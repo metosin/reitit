@@ -25,9 +25,13 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
   * `:validate` - boolean to indicate whether validation is enabled (true)
   * `:enabled` - boolean to indicate whether coercion (and validation) is enabled (true)
 
-###  `reitit-middleware`
+###  `reitit-ring`
 
 * Coercion middleware will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
+
+###  `reitit-http`
+
+* Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
 ## 0.5.1 (2020-05-18)
 

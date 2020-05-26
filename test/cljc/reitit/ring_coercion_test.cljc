@@ -14,15 +14,12 @@
      (:import (clojure.lang ExceptionInfo)
               (java.io ByteArrayInputStream))))
 
-(defn middleware-name [{:keys [wrap name]}]
-  (or name (-> wrap str symbol)))
-
 (defn mounted-middleware [app path method]
   (->> app
        (ring/get-router)
        (r/compiled-routes)
        (filter (comp (partial = path) first))
-       (first) (last) method :middleware (filter :wrap) (mapv middleware-name)))
+       (first) (last) method :middleware (filter :wrap) (mapv :name)))
 
 (defn handler [{{{:keys [a]} :query
                  {:keys [b]} :body

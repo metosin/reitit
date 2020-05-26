@@ -18,12 +18,13 @@
                 (not parameters) {}
                 ;; mount
                 :else
-                (let [coercers (coercion/request-coercers coercion parameters opts)]
+                (if-let [coercers (coercion/request-coercers coercion parameters opts)]
                   {:enter (fn [ctx]
                             (let [request (:request ctx)
                                   coerced (coercion/coerce-request coercers request)
                                   request (impl/fast-assoc request :parameters coerced)]
-                              (assoc ctx :request request)))})))})
+                              (assoc ctx :request request)))}
+                  {})))})
 
 (defn coerce-response-interceptor
   "Interceptor for pluggable response coercion.
@@ -40,12 +41,13 @@
                 (not responses) {}
                 ;; mount
                 :else
-                (let [coercers (coercion/response-coercers coercion responses opts)]
+                (if-let [coercers (coercion/response-coercers coercion responses opts)]
                   {:leave (fn [ctx]
                             (let [request (:request ctx)
                                   response (:response ctx)
                                   response (coercion/coerce-response coercers request response)]
-                              (assoc ctx :response response)))})))})
+                              (assoc ctx :response response)))}
+                  {})))})
 
 (defn coerce-exceptions-interceptor
   "Interceptor for handling coercion exceptions.
