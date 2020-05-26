@@ -27,6 +27,9 @@
         ["/plus/:z"
          {:patch {:summary "patch"
                   :handler (constantly {:status 200})}
+          :options {:summary "options"
+                    :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
+                    :handler (constantly {:status 200})}
           :get {:summary "plus"
                 :parameters {:query {:x int?, :y int?}
                              :path {:z int?}}
@@ -125,6 +128,9 @@
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
                                                           :responses {:default {:description ""}}}
+                                                  :options {:parameters []
+                                                            :summary "options"
+                                                            :responses {200 {:description "200"}}}
                                                   :get {:parameters [{:in "query"
                                                                       :name "x"
                                                                       :description ""
