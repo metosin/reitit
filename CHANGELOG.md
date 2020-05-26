@@ -25,11 +25,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
   * `:validate` - boolean to indicate whether validation is enabled (true)
   * `:enabled` - boolean to indicate whether coercion (and validation) is enabled (true)
 
-###  `reitit-ring`
+### `reitit-swagger`
+
+* If no `:responses` are defined for an endpoint, add `{:responses {:default {:description ""}}}` to make swagger spec valid, fixes [#403](https://github.com/metosin/reitit/issues/403) by [胡雨軒 Петр](https://github.com/piotr-yuxuan).
+
+### `reitit-ring`
 
 * Coercion middleware will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
-###  `reitit-http`
+### `reitit-http`
 
 * Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
