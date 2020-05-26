@@ -43,3 +43,29 @@ Failing coercion:
 (match-by-path-and-coerce! "/metosin/users/ikitommi")
 ; => ExceptionInfo Request coercion failed...
 ```
+
+## Configuring coercion
+
+Using `create` with options to create the coercion instead of `coercion`:
+
+```clj
+(reitit.coercion.malli/create
+  {:transformers {:body {:default default-transformer-provider
+                         :formats {"application/json" json-transformer-provider}}
+                  :string {:default string-transformer-provider}
+                  :response {:default default-transformer-provider}}
+   ;; set of keys to include in error messages
+   :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   ;; schema identity function (default: close all map schemas)
+   :compile mu/closed-schema
+   ;; validate request & response
+   :validate true
+   ;; top-level short-circuit to disable request & response coercion
+   :enabled true
+   ;; strip-extra-keys (effects only predefined transformers)
+   :strip-extra-keys true
+   ;; add/set default values
+   :default-values true
+   ;; malli options
+   :options nil})
+```

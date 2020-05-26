@@ -12,6 +12,27 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+```clj
+[metosin/malli "0.0.1-20200525.162645-15"] is available but we use "0.0.1-20200404.091302-14"
+```
+
+###  `reitit-malli`
+
+* Fixed coercion with `:and` and `:or`, fixes [#407](https://github.com/metosin/reitit/issues/407).
+* New options to `reitit.coercion.malli/create`:
+  * `:validate` - boolean to indicate whether validation is enabled (true)
+  * `:enabled` - boolean to indicate whether coercion (and validation) is enabled (true)
+
+###  `reitit-ring`
+
+* Coercion middleware will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
+
+###  `reitit-http`
+
+* Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
+
 ## 0.5.1 (2020-05-18)
 
 ```clj

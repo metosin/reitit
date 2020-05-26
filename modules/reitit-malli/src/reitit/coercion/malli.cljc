@@ -13,7 +13,11 @@
 ;; coercion
 ;;
 
-(defrecord Coercer [decoder encoder validator explainer])
+(defprotocol Coercer
+  (-decode [this value])
+  (-encode [this value])
+  (-validate [this value])
+  (-explain [this value]))
 
 (defprotocol TransformationProvider
   (-transformer [this options]))
@@ -30,43 +34,43 @@
 (def json-transformer-provider (-provider (mt/json-transformer)))
 (def default-transformer-provider (-provider nil))
 
-(defn- -coercer [schema type transformers f encoder opts]
+(defn- -coercer [schema type transformers f encoder {:keys [validate enabled options]}]
   (if schema
-    (let [->coercer (fn [t] (if t (->Coercer (m/decoder schema opts t)
-                                             (m/encoder schema opts t)
-                                             (m/validator schema opts)
-                                             (m/explainer schema opts))))
+    (let [->coercer (fn [t]
+                      (let [decoder (if t (m/decoder schema options t) identity)
+                            encoder (if t (m/encoder schema options t) identity)
+                            validator (if validate (m/validator schema options) (constantly true))
+                            explainer (m/explainer schema options)]
+                        (reify Coercer
+                          (-decode [_ value] (decoder value))
+                          (-encode [_ value] (encoder value))
+                          (-validate [_ value] (validator value))
+                          (-explain [_ value] (explainer value)))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
           encode (or encoder (fn [value _format] value))
           format-coercers (some->> (for [[f t] formats] [f (->coercer t)]) (filter second) (seq) (into {}))
           get-coercer (cond format-coercers (fn [format] (or (get format-coercers format) default-coercer))
                             default-coercer (constantly default-coercer))]
-      (if get-coercer
+      (if (and enabled get-coercer)
         (if (= f :decode)
-          ;; decode -> validate
+          ;; decode: decode -> validate
           (fn [value format]
             (if-let [coercer (get-coercer format)]
-              (let [decoder (:decoder coercer)
-                    validator (:validator coercer)
-                    transformed (decoder value)]
-                (if (validator transformed)
+              (let [transformed (-decode coercer value)]
+                (if (-validate coercer transformed)
                   transformed
-                  (let [explainer (:explainer coercer)
-                        error (explainer transformed)]
+                  (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
                       (assoc error :transformed transformed)))))
               value))
-          ;; decode -> validate -> encode
+          ;; encode: decode -> validate -> encode
           (fn [value format]
             (if-let [coercer (get-coercer format)]
-              (let [decoder (:decoder coercer)
-                    validator (:validator coercer)
-                    transformed (decoder value)]
-                (if (validator transformed)
+              (let [transformed (-decode coercer value)]
+                (if (-validate coercer transformed)
                   (encode transformed format)
-                  (let [explainer (:explainer coercer)
-                        error (explainer transformed)]
+                  (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
                       (assoc error :transformed transformed)))))
               value)))))))
@@ -111,6 +115,10 @@
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
    ;; schema identity function (default: close all map schemas)
    :compile mu/closed-schema
+   ;; validate request & response
+   :validate true
+   ;; top-level short-circuit to disable request & response coercion
+   :enabled true
    ;; strip-extra-keys (effects only predefined transformers)
    :strip-extra-keys true
    ;; add/set default values
@@ -165,10 +173,10 @@
                                      (update :errors (partial map #(update % :schema edn/write-string opts))))
                  (seq error-keys) (select-keys error-keys)))
        (-request-coercer [_ type schema]
-         (-coercer (compile schema options) type transformers :decode nil options))
+         (-coercer (compile schema options) type transformers :decode nil opts))
        (-response-coercer [_ schema]
          (let [schema (compile schema options)
-               encoder (-coercer schema :body transformers :encode nil options)]
-           (-coercer schema :response transformers :encode encoder options)))))))
+               encoder (-coercer schema :body transformers :encode nil opts)]
+           (-coercer schema :response transformers :encode encoder opts)))))))
 
 (def coercion (create default-options))

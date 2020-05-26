@@ -8,10 +8,18 @@
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             #?@(:clj [[muuntaja.middleware]
-                      [jsonista.core :as j]]))
+                      [jsonista.core :as j]])
+            [reitit.core :as r])
   #?(:clj
      (:import (clojure.lang ExceptionInfo)
               (java.io ByteArrayInputStream))))
+
+(defn mounted-middleware [app path method]
+  (->> app
+       (ring/get-router)
+       (r/compiled-routes)
+       (filter (comp (partial = path) first))
+       (first) (last) method :middleware (filter :wrap) (mapv :name)))
 
 (defn handler [{{{:keys [a]} :query
                  {:keys [b]} :body
@@ -204,6 +212,38 @@
                  (ring/ring-handler
                    (ring/router
                      ["/api"
+
+                      ["/validate" {:summary "just validation"
+                                    :coercion (reitit.coercion.malli/create {:transformers {}})
+                                    :post {:parameters {:body [:map [:x int?]]}
+                                           :responses {200 {:body [:map [:x int?]]}}
+                                           :handler (fn [req]
+                                                      {:status 200
+                                                       :body (-> req :parameters :body)})}}]
+
+                      ["/no-op" {:summary "no-operation"
+                                 :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
+                                 :post {:parameters {:body [:map [:x int?]]}
+                                        :responses {200 {:body [:map [:x int?]]}}
+                                        :handler (fn [req]
+                                                   {:status 200
+                                                    :body (-> req :parameters :body)})}}]
+
+                      ["/skip" {:summary "skip"
+                                :coercion (reitit.coercion.malli/create {:enabled false})
+                                :post {:parameters {:body [:map [:x int?]]}
+                                       :responses {200 {:body [:map [:x int?]]}}
+                                       :handler (fn [req]
+                                                  {:status 200
+                                                   :body (-> req :parameters :body)})}}]
+
+                      ["/or" {:post {:summary "accepts either of two map schemas"
+                                     :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
+                                     :responses {200 {:body [:map [:msg string?]]}}
+                                     :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                                {:status 200
+                                                 :body {:msg (if x "you sent x" "you sent y")}})}}]
+
                       ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
                                                       :body [:map [:b int?]]
                                                       :form [:map [:c [int? {:default 3}]]]
@@ -253,6 +293,41 @@
       (let [app (create [rrc/coerce-exceptions-middleware
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware])]
+
+        (testing "just validation"
+          (is (= 400 (:status (app {:uri "/api/validate"
+                                    :request-method :post
+                                    :muuntaja/request {:format "application/edn"}
+                                    :body-params 123}))))
+          (is (= [:reitit.ring.coercion/coerce-exceptions
+                  :reitit.ring.coercion/coerce-request
+                  :reitit.ring.coercion/coerce-response]
+                 (mounted-middleware app "/api/validate" :post))))
+
+        (testing "no tranformation & validation"
+          (is (= 123 (:body (app {:uri "/api/no-op"
+                                  :request-method :post
+                                  :muuntaja/request {:format "application/edn"}
+                                  :body-params 123}))))
+          (is (= [:reitit.ring.coercion/coerce-exceptions
+                  :reitit.ring.coercion/coerce-request
+                  :reitit.ring.coercion/coerce-response]
+                 (mounted-middleware app "/api/no-op" :post))))
+
+        (testing "skipping coercion"
+          (is (= nil (:body (app {:uri "/api/skip"
+                                  :request-method :post
+                                  :muuntaja/request {:format "application/edn"}
+                                  :body-params 123}))))
+          (is (= [:reitit.ring.coercion/coerce-exceptions]
+                 (mounted-middleware app "/api/skip" :post))))
+
+        (testing "or #407"
+          (is (= {:status 200
+                  :body {:msg "you sent x"}}
+                 (app {:uri "/api/or"
+                       :request-method :post
+                       :body-params {:x 1}}))))
 
         (testing "all good"
           (is (= {:status 200

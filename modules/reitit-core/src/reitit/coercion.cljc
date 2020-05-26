@@ -76,15 +76,15 @@
   (if coercion
     (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
-            model (if open? (-open-model coercion model) model)
-            coercer (-request-coercer coercion style model)]
-        (fn [request]
-          (let [value (transform request)
-                format (extract-request-format request)
-                result (coercer value format)]
-            (if (error? result)
-              (request-coercion-failed! result coercion value in request)
-              result)))))))
+            model (if open? (-open-model coercion model) model)]
+        (if-let [coercer (-request-coercer coercion style model)]
+          (fn [request]
+            (let [value (transform request)
+                  format (extract-request-format request)
+                  result (coercer value format)]
+              (if (error? result)
+                (request-coercion-failed! result coercion value in request)
+                result))))))))
 
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
@@ -111,8 +111,7 @@
   (reduce-kv
     (fn [acc k coercer]
       (impl/fast-assoc acc k (coercer request)))
-    {}
-    coercers))
+    {} coercers))
 
 (defn coerce-response [coercers request response]
   (if response
@@ -121,17 +120,19 @@
       response)))
 
 (defn request-coercers [coercion parameters opts]
-  (->> (for [[k v] parameters
-             :when v]
-         [k (request-coercer coercion k v opts)])
-       (filter second)
-       (into {})))
+  (some->> (for [[k v] parameters
+                 :when v]
+             [k (request-coercer coercion k v opts)])
+           (filter second)
+           (seq)
+           (into {})))
 
 (defn response-coercers [coercion responses opts]
-  (->> (for [[status {:keys [body]}] responses :when body]
-         [status (response-coercer coercion body opts)])
-       (filter second)
-       (into {})))
+  (some->> (for [[status {:keys [body]}] responses :when body]
+             [status (response-coercer coercion body opts)])
+           (filter second)
+           (seq)
+           (into {})))
 
 ;;
 ;; api-docs
