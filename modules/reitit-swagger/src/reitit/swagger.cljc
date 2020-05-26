@@ -82,12 +82,14 @@
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :swagger :id (or ::default) (trie/into-set) (set/intersection ids) seq))
+           base-swagger-spec {:responses ^:displace {:default {:description ""}}}
            transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
                                 (if (and data (not no-doc))
                                   [method
                                    (meta-merge
+                                     base-swagger-spec
                                      (apply meta-merge (keep (comp :swagger :data) middleware))
                                      (apply meta-merge (keep (comp :swagger :data) interceptors))
                                      (if coercion

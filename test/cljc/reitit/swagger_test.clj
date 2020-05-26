@@ -25,7 +25,9 @@
 
        ["/spec" {:coercion spec/coercion}
         ["/plus/:z"
-         {:get {:summary "plus"
+         {:patch {:summary "patch"
+                  :handler (constantly {:status 200})}
+          :get {:summary "plus"
                 :parameters {:query {:x int?, :y int?}
                              :path {:z int?}}
                 :swagger {:responses {400 {:schema {:type "string"}
@@ -120,7 +122,10 @@
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
-                    :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
+                    :paths {"/api/spec/plus/{z}" {:patch {:parameters []
+                                                          :summary "patch"
+                                                          :responses {:default {:description ""}}}
+                                                  :get {:parameters [{:in "query"
                                                                       :name "x"
                                                                       :description ""
                                                                       :required true
@@ -312,7 +317,7 @@
     (is (= ["/common/ping" "/one/ping" "/two/ping" "/two/deep/ping"]
            (spec-paths app "/one-two/swagger.json")))))
 
-(deftest swagger-ui-congif-test
+(deftest swagger-ui-config-test
   (let [app (swagger-ui/create-swagger-ui-handler
               {:path "/"
                :config {:jsonEditor true}})]
