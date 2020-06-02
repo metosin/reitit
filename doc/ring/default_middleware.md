@@ -23,6 +23,10 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 
 See [Exception Handling with Ring](exceptions.md).
 
+## Content Negotiation
+
+See [Content Negotiation](content_negotiation.md).
+
 ## Multipart Request Handling
 
 Wrapper for [Ring Multipart Middleware](https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/middleware/multipart_params.clj). Emits swagger `:consumes` definitions automatically.
