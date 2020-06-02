@@ -8,7 +8,7 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 
 * [Parameter Handling](#parameters-handling)
 * [Exception Handling](#exception-handling)
-* [Content Negotiation](content_negotiation.md)
+* [Content Negotiation](#content-negotiation)
 * [Multipart Request Handling](#multipart-request-handling)
 * [Inspecting Middleware Chain](#inspecting-middleware-chain)
 
@@ -22,6 +22,10 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 ## Exception Handling
 
 See [Exception Handling with Ring](exceptions.md).
+
+## Content Negotiation
+
+See [Content Negotiation](content_negotiation.md).
 
 ## Multipart Request Handling
 
