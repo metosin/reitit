@@ -86,7 +86,7 @@
     [{:in "body"
       :name (:title swagger-schema "body")
       :description (:description swagger-schema "")
-      :required (not= :maybe (m/name schema))
+      :required (not= :maybe (m/type schema))
       :schema swagger-schema}]))
 
 (defmethod extract-parameter :default [in schema options]
