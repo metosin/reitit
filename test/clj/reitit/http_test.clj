@@ -171,7 +171,7 @@
           (testing "handler rejects"
             (is (= -406 (:status (app {:request-method :get, :uri "/pong"}))))))))))
 
-(deftest default-options-handler-test
+(deftest deprecated-default-options-handler-test
   (testing "Assertion fails when using deprecated options-handler"
     (is (thrown? ExceptionInfo (ring/router [] {::ring/default-options-handler (fn [_])})))))
 
