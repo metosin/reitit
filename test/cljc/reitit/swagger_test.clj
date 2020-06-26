@@ -7,7 +7,6 @@
             [reitit.coercion.spec :as spec]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
-            [schema.core :refer [Int]]
             [muuntaja.core :as m]
             [spec-tools.data-spec :as ds]
             [schema.core :as s]))
@@ -77,11 +76,11 @@
        ["/schema" {:coercion schema/coercion}
         ["/plus/*z"
          {:get {:summary "plus"
-                :parameters {:query {:x Int, :y Int}
-                             :path {:z Int}}
+                :parameters {:query {:x s/Int, :y s/Int}
+                             :path {:z s/Int}}
                 :swagger {:responses {400 {:schema {:type "string"}
                                            :description "kosh"}}}
-                :responses {200 {:body {:total Int}}
+                :responses {200 {:body {:total s/Int}}
                             500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
                                 {:keys [z]} :path} :parameters}]
