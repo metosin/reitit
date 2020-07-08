@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest testing is]]
             [reitit.http.interceptors.parameters :as parameters]
             [reitit.http :as http]
-            [reitit.interceptor.sieppari :as sieppari]))
+            [reitit.interceptor.sieppari :as sieppari]
+            [reitit.swagger :as swagger]))
 
 (deftest parameters-test
   (let [app (http/ring-handler
@@ -15,3 +16,23 @@
            (app {:request-method :get
                  :uri "/ping"
                  :query-string "kikka=kukka"})))))
+
+(deftest parameters-swagger-test
+  (let [app (http/ring-handler
+              (http/router
+                [["/form-params" {:post {:parameters {:form {:x string?}}
+                                         :handler identity}}]
+                 ["/body-params" {:post {:parameters {:body {:x string?}}
+                                        :handler identity}}]
+                 ["/swagger.json" {:get {:no-doc true
+                                        :handler (swagger/create-swagger-handler)}}]]
+                {:data {:interceptors [(parameters/parameters-interceptor)]}})
+             　{:executor sieppari/executor})
+        spec (fn [path]
+               (-> {:request-method :get :uri "/swagger.json"}
+                   app
+                   (get-in [:body :paths path :post])))]
+    (testing "with form parameters"
+      (is (= ["application/x-www-form-urlencoded"] (:consumes (spec "/form-params")))))
+    (testing "with body parameters"
+      (is (= nil (:consumes (spec "/body-params")))))))
