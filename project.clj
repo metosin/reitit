@@ -33,7 +33,7 @@
                          [metosin/muuntaja "0.6.7"]
                          [metosin/jsonista "0.2.6"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.0.1-20200611.164211-16"]
+                         [metosin/malli "0.0.1-20200709.163702-18"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.11.0"]
