@@ -41,12 +41,12 @@
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.8.4"]
+                         [expound "0.8.5"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
                          [ring/ring-core "1.8.1"]
 
-                         [io.pedestal/pedestal.service "0.5.7"]]
+                         [io.pedestal/pedestal.service "0.5.8"]]
 
   :plugins [[jonase/eastwood "0.3.11"]
             ;[lein-virgil "0.1.7"]
@@ -90,7 +90,7 @@
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
-                                  [expound "0.8.4"]
+                                  [expound "0.8.5"]
                                   [fipp "0.6.23"]
 
                                   [orchestra "2019.02.06-1"]
@@ -100,12 +100,12 @@
                                   [metosin/ring-http-response "0.9.1"]
                                   [metosin/ring-swagger-ui "3.25.3"]
 
-                                  [criterium "0.4.5"]
+                                  [criterium "0.4.6"]
                                   [org.clojure/test.check "1.0.0"]
                                   [org.clojure/tools.namespace "1.0.0"]
                                   [com.gfredericks/test.chuck "0.2.10"]
 
-                                  [io.pedestal/pedestal.service "0.5.7"]
+                                  [io.pedestal/pedestal.service "0.5.8"]
 
                                   [org.clojure/core.async "1.2.603"]
                                   [manifold "0.1.8"]
@@ -123,8 +123,8 @@
                     :dependencies [[compojure "1.6.1"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.5.7"]
-                                   [io.pedestal/pedestal.jetty "0.5.7"]
+                                   [io.pedestal/pedestal.service "0.5.8"]
+                                   [io.pedestal/pedestal.jetty "0.5.8"]
                                    [calfpath "0.7.2"]
                                    [org.clojure/core.async "1.2.603"]
                                    [manifold "0.1.8"]
