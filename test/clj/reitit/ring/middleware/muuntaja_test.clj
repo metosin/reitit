@@ -34,19 +34,24 @@
                  ["/just-edn"
                   {:muuntaja just-edn
                    :get identity}]
+                 ["/form-params"
+                  {:post {:parameters {:form {:x string?}}
+                          :handler identity}}]
                  ["/swagger.json"
                   {:get {:no-doc true
                          :handler (swagger/create-swagger-handler)}}]]
                 {:data {:muuntaja m/instance
                         :middleware [muuntaja/format-middleware]}}))
-        spec (fn [path]
+        spec (fn [method path]
                (let [path (keyword path)]
                  (-> {:request-method :get :uri "/swagger.json"}
                      (app) :body
                      (->> (m/decode m/instance "application/json"))
-                     :paths path :get)))
-        produces (comp set :produces spec)
-        consumes (comp set :consumes spec)]
+                     :paths path method)))
+        produces (comp set :produces (partial spec :get))
+        consumes (comp set :consumes (partial spec :get))
+        post-produces (comp set :produces (partial spec :post))
+        post-consumes (comp set :consumes (partial spec :post))]
 
     (testing "with defaults"
       (let [path "/defaults"]
@@ -82,7 +87,12 @@
       (let [path "/just-edn"]
         (is (= #{"application/edn"}
                (produces path)
-               (consumes path)))))))
+               (consumes path)))))
+    (testing "form parameters swagger-data"
+      (let [path "/form-params"]
+        (is (= #{}
+               (post-produces path)
+               (post-consumes path)))))))
 
 (deftest muuntaja-swagger-parts-test
   (let [app (ring/ring-handler
@@ -100,16 +110,34 @@
                                 muuntaja/format-response-middleware
                                 muuntaja/format-request-middleware]
                    :get identity}]
+                 ["/form-request"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-request-middleware]
+                   :post {:parameters {:form {:x string?}}
+                          :handler identity}}]
+                 ["/form-response"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-response-middleware]
+                   :post {:parameters {:form {:x string?}}
+                          :handler identity}}]
+                 ["/form-with-both"
+                  {:middleware [muuntaja/format-negotiate-middleware
+                                muuntaja/format-response-middleware
+                                muuntaja/format-request-middleware]
+                   :post {:parameters {:form {:x string?}}
+                          :handler identity}}]
 
                  ["/swagger.json"
                   {:get {:no-doc true
                          :handler (swagger/create-swagger-handler)}}]]
                 {:data {:muuntaja m/instance}}))
-        spec (fn [path]
+        spec (fn [method path]
                (-> {:request-method :get :uri "/swagger.json"}
-                   (app) :body :paths (get path) :get))
-        produces (comp :produces spec)
-        consumes (comp :consumes spec)]
+                   (app) :body :paths (get path) method))
+        produces (comp :produces (partial spec :get))
+        consumes (comp :consumes (partial spec :get))
+        post-produces (comp :produces (partial spec :post))
+        post-consumes (comp :consumes (partial spec :post))]
 
     (testing "just request formatting"
       (let [path "/request"]
@@ -129,7 +157,7 @@
                (produces path)))
         (is (nil? (consumes path)))))
 
-    (testing "just response formatting"
+    (testing "request and response formatting"
       (let [path "/both"]
         (is (= #{"application/json"
                  "application/transit+msgpack"
@@ -140,4 +168,16 @@
                  "application/transit+msgpack"
                  "application/transit+json"
                  "application/edn"}
-               (consumes path)))))))
+               (consumes path)))))
+    (testing "just request formatting for form params"
+      (let [path "/form-request"]
+        (is (nil? (post-produces path)))
+        (is (nil? (post-consumes path)))))
+    (testing "just response formatting for form params"
+      (let [path "/form-response"]
+        (is (nil? (post-produces path)))
+        (is (nil? (post-consumes path)))))
+    (testing "just request formatting for form params"
+      (let [path "/form-with-both"]
+        (is (nil? (post-produces path)))
+        (is (nil? (post-consumes path)))))))
