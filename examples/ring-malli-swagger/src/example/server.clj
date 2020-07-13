@@ -18,6 +18,19 @@
             [clojure.java.io :as io]
             [malli.util :as mu]))
 
+(def sample-request
+  [:map {:registry {::age [:and int? [:> 18]]}}
+   [:age ::age]])
+
+(malli.core/accept
+  (malli.core/schema sample-request)
+  (malli.core/schema-visitor identity))
+
+(defn handle [request]
+  (prn (:parameters request))
+  {:status 200
+   :body {:status "ok"}})
+
 (def app
   (ring/ring-handler
     (ring/router
@@ -53,6 +66,12 @@
 
        ["/math"
         {:swagger {:tags ["math"]}}
+
+        ["/api/v1/overview"
+         {:swagger {:tags ["Overview"]}
+          :post {:summary "get an overview data"
+                 :parameters {:body sample-request}
+                 :handler handle}}]
 
         ["/plus"
          {:get {:summary "plus with malli query parameters"

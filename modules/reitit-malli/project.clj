@@ -1,4 +1,4 @@
-(defproject metosin/reitit-malli "0.5.3"
+(defproject metosin/reitit-malli "0.5.4"
   :description "Reitit: Malli coercion"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
