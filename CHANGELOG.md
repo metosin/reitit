@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.5 (2020-07-15)
+
+* recompile with Java8
+
+```clj
+[metosin/malli "0.0.1-20200715.082439-21"] is available but we use "0.0.1-20200713.080243-20"
+```
+
 ## 0.5.4 (2020-07-13)
 
 ```clj
