@@ -4,25 +4,25 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [ring-server "0.5.0"]
-                 [reagent "0.8.1"]
-                 [ring "1.7.1"]
+                 [reagent "0.10.0"]
+                 [ring "1.8.1"]
                  [hiccup "1.0.5"]
-                 [org.clojure/clojurescript "1.10.439"]
+                 [org.clojure/clojurescript "1.10.773"]
                  [metosin/reitit "0.5.5"]
                  [metosin/reitit-spec "0.5.5"]
                  [metosin/reitit-frontend "0.5.5"]
                  ;; Just for pretty printting the match
-                 [fipp "0.6.14"]]
+                 [fipp "0.6.23"]]
 
-  :plugins [[lein-cljsbuild "1.1.7"]
-            [lein-figwheel "0.5.18"]]
+  :plugins [[lein-cljsbuild "1.1.8"]
+            [lein-figwheel "0.5.20"]]
 
   :source-paths []
   :resource-paths ["resources" "target/cljsbuild"]
 
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]]}}
+  :profiles {:dev {:dependencies [[binaryage/devtools "1.0.2"]]}}
 
   :cljsbuild
   {:builds
