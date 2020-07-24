@@ -1,6 +1,6 @@
 # Interceptors
 
-Reitit also support for [interceptors](http://pedestal.io/reference/interceptors) as an alternative to using middleware. Basic interceptor handling is implemented in `reitit.interceptor` package.  There is no interceptor executor shipped, but you can use libraries like [Pedestal Interceptor](https://github.com/pedestal/pedestal/tree/master/interceptor) or [Sieppari](https://github.com/metosin/sieppari) to execute the chains.
+Reitit has also support for [interceptors](http://pedestal.io/reference/interceptors) as an alternative to using middleware. Basic interceptor handling is implemented in `reitit.interceptor` package.  There is no interceptor executor shipped, but you can use libraries like [Pedestal Interceptor](https://github.com/pedestal/pedestal/tree/master/interceptor) or [Sieppari](https://github.com/metosin/sieppari) to execute the chains.
 
 ## Reitit-http
 
@@ -8,11 +8,11 @@ Reitit also support for [interceptors](http://pedestal.io/reference/interceptors
 [metosin/reitit-http "0.5.5"]
 ```
 
-An module for http-routing using interceptors instead of middleware. Builds on top of the [`reitit-ring`](../ring/ring.md) module having all the same features.
+A module for http-routing using interceptors instead of middleware. Builds on top of the [`reitit-ring`](../ring/ring.md) module having all the same features.
 
 The differences:
 
-* `:interceptors` key in used in route data instead of `:middleware`
+* `:interceptors` key used in route data instead of `:middleware`
 * `reitit.http/http-router` requires an extra option `:executor` of type `reitit.interceptor/Executor` to execute the interceptor chain
    * optionally, a routing interceptor can be used - it enqueues the matched interceptors into the context. See `reitit.http/routing-interceptor` for details.
 
