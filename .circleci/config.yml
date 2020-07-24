@@ -123,8 +123,9 @@ workflows:
           name: jdk14
           image-name: clojure:openjdk-14-lein-2.9.1
       - test-cljs
-      - build-docs:
-          filters:
-            branches:
-              only:
-                - master
+# build-docs is disabled because it's broken; see https://github.com/metosin/reitit/issues/426
+#      - build-docs:
+#          filters:
+#            branches:
+#              only:
+#                - master
