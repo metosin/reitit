@@ -10,4 +10,4 @@ Go with browser to http://localhost:3449
 
 ## License
 
-Copyright © 2018 Metosin Oy
+Copyright © Metosin Oy and collaborators
