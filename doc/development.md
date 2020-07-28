@@ -15,13 +15,8 @@
 
 ## Documentation
 
-The documentation is built with [gitbook](https://toolchain.gitbook.com). To preview your changes locally:
-
-```bash
-npm install -g gitbook-cli
-gitbook install
-gitbook serve
-```
+The documentation lives under `doc` and it is hosted on [cljdoc](https://cljdoc.org). See their
+documentation for [library authors](https://github.com/cljdoc/cljdoc/blob/master/doc/userguide/for-library-authors.adoc)
 
 ## To bump up version:
 

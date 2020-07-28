@@ -2,16 +2,16 @@
 
 A fast data-driven router for Clojure(Script).
 
-* Simple data-driven [route syntax](https://metosin.github.io/reitit/basics/route_syntax.html)
-* Route [conflict resolution](https://metosin.github.io/reitit/basics/route_conflicts.html)
-* First-class [route data](https://metosin.github.io/reitit/basics/route_data.html)
+* Simple data-driven [route syntax](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-syntax/)
+* Route [conflict resolution](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts/)
+* First-class [route data](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data/)
 * Bi-directional routing
-* [Pluggable coercion](https://metosin.github.io/reitit/coercion/coercion.html) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](https://metosin.github.io/reitit/ring/ring.html), [http](https://metosin.github.io/reitit/http/interceptors.html), [pedestal](https://metosin.github.io/reitit/http/pedestal.html) & [frontend](https://metosin.github.io/reitit/frontend/basics.html)
-* Friendly [Error Messages](https://metosin.github.io/reitit/basics/error_messages.html)
+* [Pluggable coercion](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/coercion/coercion/) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* Helpers for [ring](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring/), [http](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/interceptors/), [pedestal](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/pedestal/) & [frontend](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/)
+* Friendly [Error Messages](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/error-messages/)
 * Extendable
 * Modular
-* [Fast](https://metosin.github.io/reitit/performance.html)
+* [Fast](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/performance/)
 
 Presentations:
 * [Reitit, The Ancient Art of Data-Driven](https://www.slideshare.net/mobile/metosin/reitit-clojurenorth-2019-141438093), Clojure/North 2019, [video](https://youtu.be/cSntRGAjPiM)
@@ -20,7 +20,7 @@ Presentations:
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
 
-## [Full Documentation](https://metosin.github.io/reitit/)
+## [Full Documentation](https://cljdoc.org/d/metosin/reitit/CURRENT)
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
 
@@ -28,16 +28,16 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
-* `reitit-ring` - a [ring router](https://metosin.github.io/reitit/ring/ring.html)
-* `reitit-middleware` - [common middleware](https://metosin.github.io/reitit/ring/default_middleware.html)
+* `reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring/)
+* `reitit-middleware` - [common middleware](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/default-middleware/)
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-malli` [malli](https://github.com/metosin/malli) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
-* `reitit-frontend` Tools for [frontend routing]((https://metosin.github.io/reitit/frontend/basics.html))
+* `reitit-frontend` Tools for [frontend routing]((https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/))
 * `reitit-http` http-routing with Interceptors
-* `reitit-interceptors` - [common interceptors](https://metosin.github.io/reitit/http/default_interceptors.html)
+* `reitit-interceptors` - [common interceptors](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/default-interceptors/)
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
 * `reitit-dev` - development utilities
 
@@ -146,7 +146,7 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 
 ## More info
 
-[Check out the full documentation!](https://metosin.github.io/reitit/)
+[Check out the full documentation!](https://cljdoc.org/d/metosin/reitit/CURRENT/)
 
 Join [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
 
