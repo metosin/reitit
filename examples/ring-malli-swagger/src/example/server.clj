@@ -22,10 +22,6 @@
   [:map {:registry {::age [:and int? [:> 18]]}}
    [:age ::age]])
 
-(malli.core/walk
-  (malli.core/schema sample-request)
-  (malli.core/schema-walker identity))
-
 (defn handle [request]
   (prn (:parameters request))
   {:status 200
