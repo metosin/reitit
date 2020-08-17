@@ -91,12 +91,13 @@
          (not (.-isContentEditable el))
          (reitit/match-by-path router (.getPath uri)))))
 
-(defrecord Html5History [on-navigate router listen-key click-listen-key]
+(defrecord Html5History [on-navigate router listen-key click-listen-key last-path]
   History
   (-init [this]
-    (let [handler
-          (fn [e]
-            (-on-navigate this (-get-path this)))
+    (let [last-path (atom nil)
+          this (assoc this :last-path last-path)
+          handler (fn [e]
+                    (-on-navigate this (-get-path this)))
 
           ignore-anchor-click-predicate (or (:ignore-anchor-click? this)
                                             ignore-anchor-click?)
@@ -114,13 +115,15 @@
                                                         (str "?" (.getQuery uri)))
                                                       (when (.hasFragment uri)
                                                         (str "#" (.getFragment uri))))]
-                                        (.pushState js/window.history nil "" path)
-                                        (-on-navigate this path))))))]
+                                        (when (not= @last-path path)
+                                          (.pushState js/window.history nil "" path)
+                                          (-on-navigate this path)))))))]
       (-on-navigate this (-get-path this))
       (assoc this
              :listen-key (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
              :click-listen-key (gevents/listen js/document goog.events.EventType.CLICK ignore-anchor-click))))
   (-on-navigate [this path]
+    (reset! last-path path)
     (on-navigate (rf/match-by-path router path) this))
   (-stop [this]
     (gevents/unlistenByKey listen-key)
