@@ -46,7 +46,7 @@
         "/"
         fragment)))
   (-href [this path]
-    (if path
+    (when path
       (str "#" path))))
 
 (defn- closest-by-tag [el tag]
@@ -54,7 +54,7 @@
   ;; for XML or XHTML it would be in the original case.
   (let [tag (.toUpperCase tag)]
     (loop [el el]
-      (if el
+      (when el
         (if (= tag (.-nodeName el))
           el
           (recur (.-parentNode el)))))))
@@ -74,7 +74,7 @@
   if anchor href matches the route tree, and in this case
   the page location is updated using History API."
   [router e el uri]
-  (let [current-domain (if (exists? js/location)
+  (let [current-domain (when (exists? js/location)
                          (.getDomain (.parse Uri js/location)))]
     (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
              (= current-domain (.getDomain uri)))
@@ -96,8 +96,7 @@
   (-init [this]
     (let [last-path (atom nil)
           this (assoc this :last-path last-path)
-          handler (fn [e]
-                    (-on-navigate this (-get-path this)))
+          handler (fn [_] (-on-navigate this (-get-path this)))
 
           ignore-anchor-click-predicate (or (:ignore-anchor-click? this)
                                             ignore-anchor-click?)
@@ -171,8 +170,7 @@
               (map->Html5History opts))))))
 
 (defn stop! [history]
-  (if history
-    (-stop history)))
+  (when history (-stop history)))
 
 (defn href
   ([history k]
