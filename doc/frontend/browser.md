@@ -30,6 +30,7 @@ event handling:
 ```clj
 (rfe/start!
   router
+  on-navigate-fn
   {:use-fragment false
    :ignore-anchor-click? (fn [router e el uri]
                            ;; Add additional check on top of the default checks
