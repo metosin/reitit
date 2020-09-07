@@ -10,7 +10,7 @@ history events
 
 ## Core functions
 
-`reitit.frontend` provides few useful functions wrapping core functions:
+`reitit.frontend` provides some useful functions wrapping core functions:
 
 `match-by-path` version which parses a URI using JavaScript, including
 query-string, and also [coerces the parameters](../coercion/coercion.md).
