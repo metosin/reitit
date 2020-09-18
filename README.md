@@ -144,6 +144,9 @@ Invalid request:
 
 All examples are in https://github.com/metosin/reitit/tree/master/examples
 
+## External resources
+* Simple web application using Ring/Reitit and Integrant: https://github.com/PrestanceDesign/usermanager-reitit-integrant-example
+
 ## More info
 
 [Check out the full documentation!](https://cljdoc.org/d/metosin/reitit/CURRENT/)
