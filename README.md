@@ -149,6 +149,8 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 * A simple [ClojureScript](https://clojurescript.org/) frontend and Clojure backend using Reitit, [JUXT Clip](https://github.com/juxt/clip), [next.jdbc](https://github.com/seancorfield/next-jdbc) and other bits and bobs...
   * [startrek](https://git.sr.ht/~dharrigan/startrek)
   * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
+* https://www.learnreitit.com/
+* Lipas, liikuntapalvelut: https://github.com/lipas-liikuntapaikat/lipas
 
 ## More info
 
