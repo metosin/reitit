@@ -147,8 +147,8 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 ## External resources
 * Simple web application using Ring/Reitit and Integrant: https://github.com/PrestanceDesign/usermanager-reitit-integrant-example
 * A simple [ClojureScript](https://clojurescript.org/) frontend and Clojure backend using Reitit, [JUXT Clip](https://github.com/juxt/clip), [next.jdbc](https://github.com/seancorfield/next-jdbc) and other bits and bobs...
- * [startrek](https://git.sr.ht/~dharrigan/startrek)
- * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
+  * [startrek](https://git.sr.ht/~dharrigan/startrek)
+  * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
 
 ## More info
 
