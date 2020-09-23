@@ -9,32 +9,27 @@
 
 ;;; Events ;;;
 
-(re-frame/reg-event-db
- ::initialize-db
- (fn [db _]
-   (if db
-     db
-     {:current-route nil})))
+(re-frame/reg-event-db ::initialize-db
+  (fn [db _]
+    (if db
+      db
+      {:current-route nil})))
 
-(re-frame/reg-event-fx
- ::navigate
- (fn [db [_ & route]]
-   ;; See `navigate` effect in routes.cljs
-   {::navigate! route}))
+(re-frame/reg-event-fx ::navigate
+  (fn [db [_ & route]]
+    {::navigate! route}))
 
-(re-frame/reg-event-db
- ::navigated
- (fn [db [_ new-match]]
-   (let [old-match   (:current-route db)
-         controllers (rfc/apply-controllers (:controllers old-match) new-match)]
-     (assoc db :current-route (assoc new-match :controllers controllers)))))
+(re-frame/reg-event-db ::navigated
+  (fn [db [_ new-match]]
+    (let [old-match   (:current-route db)
+          controllers (rfc/apply-controllers (:controllers old-match) new-match)]
+      (assoc db :current-route (assoc new-match :controllers controllers)))))
 
 ;;; Subscriptions ;;;
 
-(re-frame/reg-sub
- ::current-route
- (fn [db]
-   (:current-route db)))
+(re-frame/reg-sub ::current-route
+  (fn [db]
+    (:current-route db)))
 
 ;;; Views ;;;
 
@@ -57,10 +52,10 @@
 ;;; Effects ;;;
 
 ;; Triggering navigation from events.
-(re-frame/reg-fx
- ::navigate!
- (fn [route]
-   (apply rfe/push-state route)))
+
+(re-frame/reg-fx ::navigate!
+  (fn [route]
+    (apply rfe/push-state route)))
 
 ;;; Routes ;;;
 
@@ -106,15 +101,15 @@
 
 (def router
   (rf/router
-   routes
-   {:data {:coercion rss/coercion}}))
+    routes
+    {:data {:coercion rss/coercion}}))
 
 (defn init-routes! []
   (js/console.log "initializing routes")
   (rfe/start!
-   router
-   on-navigate
-   {:use-fragment true}))
+    router
+    on-navigate
+    {:use-fragment true}))
 
 (defn nav [{:keys [router current-route]}]
   [:ul
