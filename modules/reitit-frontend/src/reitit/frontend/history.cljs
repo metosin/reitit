@@ -26,11 +26,14 @@
                     (let [path (-get-path this)]
                       (when (or (= goog.events.EventType.POPSTATE (.-type e))
                                 (not= @last-fragment path))
-                        (-on-navigate this path))))]
+                        (-on-navigate this path))))
+          ;; rfe start! uses first on-navigate call to store the
+          ;; instance so it has to see the instance with listeners.
+          this (assoc this
+                      :popstate-listener (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
+                      :hashchange-listener (gevents/listen js/window goog.events.EventType.HASHCHANGE handler false))]
       (-on-navigate this (-get-path this))
-      (assoc this
-             :popstate-listener (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
-             :hashchange-listener (gevents/listen js/window goog.events.EventType.HASHCHANGE handler false))))
+      this))
   (-stop [this]
     (gevents/unlistenByKey popstate-listener)
     (gevents/unlistenByKey hashchange-listener)
@@ -115,11 +118,12 @@
                                                       (when (.hasFragment uri)
                                                         (str "#" (.getFragment uri))))]
                                         (.pushState js/window.history nil "" path)
-                                        (-on-navigate this path))))))]
+                                        (-on-navigate this path))))))
+          this (assoc this
+                      :listen-key (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
+                      :click-listen-key (gevents/listen js/document goog.events.EventType.CLICK ignore-anchor-click))]
       (-on-navigate this (-get-path this))
-      (assoc this
-             :listen-key (gevents/listen js/window goog.events.EventType.POPSTATE handler false)
-             :click-listen-key (gevents/listen js/document goog.events.EventType.CLICK ignore-anchor-click))))
+      this))
   (-on-navigate [this path]
     (on-navigate (rf/match-by-path router path) this))
   (-stop [this]
