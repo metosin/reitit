@@ -11,8 +11,10 @@
 
 (re-frame/reg-event-db
  ::initialize-db
- (fn [_ _]
-   {:current-route nil}))
+ (fn [db _]
+   (if db
+     db
+     {:current-route nil})))
 
 (re-frame/reg-event-fx
  ::navigate
@@ -141,13 +143,12 @@
     (enable-console-print!)
     (println "dev mode")))
 
-(defn mount-root []
+(defn init []
   (re-frame/clear-subscription-cache!)
+  (re-frame/dispatch-sync [::initialize-db])
+  (dev-setup)
   (init-routes!) ;; Reset routes on figwheel reload
   (reagent/render [router-component {:router router}]
                   (.getElementById js/document "app")))
 
-(defn ^:export init []
-  (re-frame/dispatch-sync [::initialize-db])
-  (dev-setup)
-  (mount-root))
+(init)
