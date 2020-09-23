@@ -15,9 +15,9 @@
       db
       {:current-route nil})))
 
-(re-frame/reg-event-fx ::navigate
+(re-frame/reg-event-fx ::push-state
   (fn [db [_ & route]]
-    {::navigate! route}))
+    {:push-state route}))
 
 (re-frame/reg-event-db ::navigated
   (fn [db [_ new-match]]
@@ -38,7 +38,7 @@
    [:h1 "This is home page"]
    [:button
     ;; Dispatch navigate event that triggers a (side)effect.
-    {:on-click #(re-frame/dispatch [::navigate ::sub-page2])}
+    {:on-click #(re-frame/dispatch [::push-state ::sub-page2])}
     "Go to sub-page 2"]])
 
 (defn sub-page1 []
@@ -53,7 +53,7 @@
 
 ;; Triggering navigation from events.
 
-(re-frame/reg-fx ::navigate!
+(re-frame/reg-fx :push-state
   (fn [route]
     (apply rfe/push-state route)))
 
