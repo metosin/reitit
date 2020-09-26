@@ -12,6 +12,30 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* updated deps:
+
+```clj
+[metosin/malli "0.0.1-20200924.063109-27"] is available but we use "0.0.1-20200715.082439-21"
+[metosin/spec-tools "0.10.4"] is available but we use "0.10.3"
+[metosin/jsonista "0.2.7"] is available but we use "0.2.6"
+[com.fasterxml.jackson.core/jackson-core "2.11.2"] is available but we use "2.11.0"
+[com.fasterxml.jackson.core/jackson-databind "2.11.2"] is available but we use "2.11.0"
+```
+
+### `reitit-malli`
+
+* `:map-of` keys in JSON are correctly decoded using string-decoders 
+* new `:encode-error` option in coercion:
+
+```clj
+(def coercion 
+  (reitit.coercion.malli/create 
+    {:encode-error (fn [error] {:errors (:humanized error)})}))
+; results in... => {:status 400, :body {:errors {:x ["missing required key"]}}}
+```
+
 ## 0.5.5 (2020-07-15)
 
 * recompile with Java8

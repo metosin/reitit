@@ -255,7 +255,7 @@
                      {:data {:middleware middleware
                              :coercion malli/coercion}})))]
 
-    (testing "withut exception handling"
+    (testing "without exception handling"
       (let [app (create [rrc/coerce-request-middleware
                          rrc/coerce-response-middleware])]
 
@@ -393,6 +393,11 @@
             (testing "open: keys are NOT stripped"
               (is (= {:status 200, :body {:x 1, :request true, :response true}}
                      (app (->request "open")))))))
+
+        (testing "encoding errors"
+          (let [app (->app {:encode-error (fn [error] {:errors (:humanized error)})})]
+            (is (= {:status 400, :body {:errors {:x ["missing required key"]}}}
+                    (app (assoc (->request "closed") :body-params {}))))))
 
         (testing "when schemas are not closed and extra keys are not stripped"
           (let [app (->app {:compile (fn [v _] v) :strip-extra-keys false})]

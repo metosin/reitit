@@ -123,6 +123,8 @@
    :strip-extra-keys true
    ;; add/set default values
    :default-values true
+   ;; encode-error
+   :encode-error nil
    ;; malli options
    :options nil})
 
@@ -130,7 +132,7 @@
   ([]
    (create nil))
   ([opts]
-   (let [{:keys [transformers compile options error-keys] :as opts} (merge default-options opts)
+   (let [{:keys [transformers compile options error-keys encode-error] :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
          transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)]
      ^{:type ::coercion/coercion}
@@ -171,7 +173,8 @@
                  (show? :schema) (update :schema edn/write-string opts)
                  (show? :errors) (-> (me/with-error-messages opts)
                                      (update :errors (partial map #(update % :schema edn/write-string opts))))
-                 (seq error-keys) (select-keys error-keys)))
+                 (seq error-keys) (select-keys error-keys)
+                 encode-error (encode-error)))
        (-request-coercer [_ type schema]
          (-coercer (compile schema options) type transformers :decode nil opts))
        (-response-coercer [_ schema]
