@@ -13,3 +13,4 @@ pom.xml.asc
 /_book
 figwheel_server.log
 /.idea
+.clj-kondo

@@ -28,16 +28,16 @@
                          [metosin/reitit-sieppari "0.5.5"]
                          [metosin/reitit-pedestal "0.5.5"]
                          [metosin/ring-swagger-ui "3.25.3"]
-                         [metosin/spec-tools "0.10.3"]
+                         [metosin/spec-tools "0.10.4"]
                          [metosin/schema-tools "0.12.2"]
                          [metosin/muuntaja "0.6.7"]
-                         [metosin/jsonista "0.2.6"]
+                         [metosin/jsonista "0.2.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.0.1-20200715.082439-21"]
+                         [metosin/malli "0.0.1-20200924.063109-27"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.11.0"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.11.0"]
+                         [com.fasterxml.jackson.core/jackson-core "2.11.2"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.11.2"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
@@ -52,7 +52,7 @@
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
-            [lein-cloverage "1.1.2"]
+            [lein-cloverage "1.2.1"]
             [lein-codox "0.10.7"]
             [metosin/bat-test "0.4.4"]]
 
@@ -82,10 +82,10 @@
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.12.2"]
-                                  [metosin/spec-tools "0.10.3"]
+                                  [metosin/spec-tools "0.10.4"]
                                   [metosin/muuntaja "0.6.7"]
                                   [metosin/sieppari]
-                                  [metosin/jsonista "0.2.6"]
+                                  [metosin/jsonista "0.2.7"]
                                   [metosin/malli]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
@@ -93,7 +93,7 @@
                                   [expound "0.8.5"]
                                   [fipp "0.6.23"]
 
-                                  [orchestra "2019.02.06-1"]
+                                  [orchestra "2020.09.18-1"]
 
                                   [ring "1.8.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
@@ -101,13 +101,13 @@
                                   [metosin/ring-swagger-ui "3.25.3"]
 
                                   [criterium "0.4.6"]
-                                  [org.clojure/test.check "1.0.0"]
+                                  [org.clojure/test.check "1.1.0"]
                                   [org.clojure/tools.namespace "1.0.0"]
                                   [com.gfredericks/test.chuck "0.2.10"]
 
                                   [io.pedestal/pedestal.service "0.5.8"]
 
-                                  [org.clojure/core.async "1.2.603"]
+                                  [org.clojure/core.async "1.3.610"]
                                   [manifold "0.1.8"]
                                   [funcool/promesa "5.1.0"]
 
@@ -120,13 +120,13 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[compojure "1.6.1"]
+                    :dependencies [[compojure "1.6.2"]
                                    [ring/ring-defaults "0.3.2"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.5.8"]
                                    [io.pedestal/pedestal.jetty "0.5.8"]
                                    [calfpath "0.7.2"]
-                                   [org.clojure/core.async "1.2.603"]
+                                   [org.clojure/core.async "1.3.610"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "5.1.0"]
                                    [metosin/sieppari]
