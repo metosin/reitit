@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+### `reitit-frontend`
+
+- `reitit.frontend.easy/start!` now correctly removes old event listeners
+when called repeatedly (e.g. with hot code reload workflow)
+([#438](https://github.com/metosin/reitit/pull/438))
+
 ## 0.5.6 (2020-09-26)
 
 * updated deps:
