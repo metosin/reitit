@@ -11,6 +11,10 @@
   :params       - a merged map of all types of parameter"
   []
   {:name ::parameters
+   :compile (fn [{:keys [parameters]} _]
+              (if (and (some? (:form parameters)) (nil? (:body parameters)))
+                {:data {:swagger {:consumes ["application/x-www-form-urlencoded"]}}}
+                {}))
    :enter (fn [ctx]
             (let [request (:request ctx)]
               (assoc ctx :request (params/params-request request))))})

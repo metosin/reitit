@@ -10,4 +10,8 @@
   :form-params  - a map of parameters from the body
   :params       - a merged map of all types of parameter"
   {:name ::parameters
+   :compile (fn [{:keys [parameters]} _]
+              (if (and (some? (:form parameters)) (nil? (:body parameters)))
+                {:data {:swagger {:consumes ["application/x-www-form-urlencoded"]}}}
+                {}))
    :wrap params/wrap-params})
