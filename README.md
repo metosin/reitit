@@ -6,12 +6,12 @@ A fast data-driven router for Clojure(Script).
 * Route [conflict resolution](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts/)
 * First-class [route data](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data/)
 * Bi-directional routing
-* [Pluggable coercion](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/coercion/coercion/) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring/), [http](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/interceptors/), [pedestal](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/pedestal/) & [frontend](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/)
+* [Pluggable coercion](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/coercion/coercion-explained) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* Helpers for [ring](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring-router), [http](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/interceptors/), [pedestal](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/pedestal/) & [frontend](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/)
 * Friendly [Error Messages](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/error-messages/)
 * Extendable
 * Modular
-* [Fast](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/performance/)
+* [Fast](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/misc/performance)
 
 Presentations:
 * [Reitit, The Ancient Art of Data-Driven](https://www.slideshare.net/mobile/metosin/reitit-clojurenorth-2019-141438093), Clojure/North 2019, [video](https://youtu.be/cSntRGAjPiM)
