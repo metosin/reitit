@@ -151,6 +151,7 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
   * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
 * https://www.learnreitit.com/
 * Lipas, liikuntapalvelut: https://github.com/lipas-liikuntapaikat/lipas
+* Implementation of the Todo-Backend API spec, using Clojure, Ring/Reitit and next-jdbc: https://github.com/PrestanceDesign/todo-backend-clojure-reitit
 
 ## More info
 
