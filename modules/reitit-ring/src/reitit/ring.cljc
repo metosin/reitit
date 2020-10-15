@@ -208,9 +208,9 @@
            join-paths (fn [& paths]
                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
            response (fn [path]
-                           (if-let [response (or (paths (join-paths "/" path))
-                                                 (response-fn path options))]
-                             (response/content-type response (mime-type/ext-mime-type path))))
+                      (if-let [response (or (paths (join-paths "/" path))
+                                            (response-fn path options))]
+                        (response/content-type response (mime-type/ext-mime-type path))))
            path-or-index-response (fn [path uri]
                                     (or (response path)
                                         (loop [[file & files] index-files]
@@ -221,8 +221,8 @@
            handler (if path
                      (fn [request]
                        (let [uri (:uri request)]
-                         (if-let [path (if (>= (count uri) path-size) (subs uri path-size))]
-                           (path-or-index-response path uri))))
+                         (if (.startsWith uri path)
+                           (path-or-index-response (subs uri path-size) uri))))
                      (fn [request]
                        (let [uri (:uri request)
                              path (-> request :path-params parameter)]
