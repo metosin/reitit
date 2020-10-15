@@ -12,13 +12,22 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
+## UNRELEASED
 
 ### `reitit-frontend`
 
 - `reitit.frontend.easy/start!` now correctly removes old event listeners
 when called repeatedly (e.g. with hot code reload workflow)
 ([#438](https://github.com/metosin/reitit/pull/438))
+* updated deps:
+
+```clj
+[metosin/malli "0.1.0"] is available but we use "0.0.1-20200924.063109-27"
+[com.fasterxml.jackson.core/jackson-core "2.11.3"] is available but we use "2.11.2"
+[com.fasterxml.jackson.core/jackson-databind "2.11.3"] is available but we use "2.11.2"
+[expound "0.8.6"] is available but we use "0.8.5"
+[ring/ring-core "1.8.2"] is available but we use "1.8.1"
+```
 
 ## 0.5.6 (2020-09-26)
 

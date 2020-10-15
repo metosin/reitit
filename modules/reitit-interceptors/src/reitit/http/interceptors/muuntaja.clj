@@ -9,6 +9,16 @@
 (defn- displace [x] (with-meta x {:displace true}))
 (defn- stripped [x] (select-keys x [:enter :leave :error]))
 
+(defn- publish-swagger-data? [{:keys [form body]}]
+  (not (and (some? form)
+            (nil? body))))
+
+(defn- swagger-data [parameters muuntaja]
+  (if (publish-swagger-data? parameters)
+    {:data {:swagger {:produces (displace (m/encodes muuntaja))
+                      :consumes (displace (m/decodes muuntaja))}}}
+    {}))
+
 (defn format-interceptor
   "Interceptor for content-negotiation, request and response formatting.
 
@@ -22,6 +32,8 @@
   Encodes the response body using the `:muuntaja/response` key in request if the response
   doesn't have `Content-Type` header already set.
 
+  Swagger-data will be omitted when `:form`, but no `:body`, parameters are defined.
+
   Optionally takes a default muuntaja instance as argument.
 
   | key          | description |
@@ -32,12 +44,11 @@
   ([default-muuntaja]
    {:name ::format
     :spec ::spec
-    :compile (fn [{:keys [muuntaja]} _]
+    :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
                    (stripped (muuntaja.interceptor/format-interceptor muuntaja))
-                   {:data {:swagger {:produces (displace (m/encodes muuntaja))
-                                     :consumes (displace (m/decodes muuntaja))}}})))}))
+                   (swagger-data parameters muuntaja))))}))
 
 (defn format-negotiate-interceptor
   "Interceptor for content-negotiation.
@@ -66,6 +77,8 @@
   Decodes the request body into `:body-params` using the `:muuntaja/request` key in request
   if the `:body-params` doesn't already exist.
 
+  Swagger-data will be omitted when `:form`, but no `:body`, parameters are defined.
+
   Optionally takes a default muuntaja instance as argument.
 
   | key          | description |
@@ -76,17 +89,20 @@
   ([default-muuntaja]
    {:name ::format-request
     :spec ::spec
-    :compile (fn [{:keys [muuntaja]} _]
+    :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
                    (stripped (muuntaja.interceptor/format-request-interceptor muuntaja))
-                   {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}})))}))
+                   (when (publish-swagger-data? parameters)
+                     {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}}))))}))
 
 (defn format-response-interceptor
   "Interceptor for response formatting.
 
   Encodes the response body using the `:muuntaja/response` key in request if the response
   doesn't have `Content-Type` header already set.
+
+  Swagger-data will be omitted when `:form`, but no `:body`, parameters are defined.
 
   Optionally takes a default muuntaja instance as argument.
 
@@ -98,8 +114,9 @@
   ([default-muuntaja]
    {:name ::format-response
     :spec ::spec
-    :compile (fn [{:keys [muuntaja]} _]
+    :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
                    (stripped (muuntaja.interceptor/format-response-interceptor muuntaja))
-                   {:data {:swagger {:produces (displace (m/encodes muuntaja))}}})))}))
+                   (when (publish-swagger-data? parameters)
+                     {:data {:swagger {:produces (displace (m/encodes muuntaja))}}}))))}))

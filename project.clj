@@ -33,18 +33,18 @@
                          [metosin/muuntaja "0.6.7"]
                          [metosin/jsonista "0.2.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.0.1-20200924.063109-27"]
+                         [metosin/malli "0.1.0"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.11.2"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.11.2"]
+                         [com.fasterxml.jackson.core/jackson-core "2.11.3"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.8.5"]
+                         [expound "0.8.6"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
-                         [ring/ring-core "1.8.1"]
+                         [ring/ring-core "1.8.2"]
 
                          [io.pedestal/pedestal.service "0.5.8"]]
 
@@ -84,18 +84,18 @@
                                   [metosin/schema-tools "0.12.2"]
                                   [metosin/spec-tools "0.10.4"]
                                   [metosin/muuntaja "0.6.7"]
-                                  [metosin/sieppari]
+                                  [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.2.7"]
-                                  [metosin/malli]
+                                  [metosin/malli "0.1.0"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
-                                  [expound "0.8.5"]
+                                  [expound "0.8.6"]
                                   [fipp "0.6.23"]
 
                                   [orchestra "2020.09.18-1"]
 
-                                  [ring "1.8.1"]
+                                  [ring "1.8.2"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
                                   [metosin/ring-swagger-ui "3.25.3"]
@@ -109,7 +109,7 @@
 
                                   [org.clojure/core.async "1.3.610"]
                                   [manifold "0.1.8"]
-                                  [funcool/promesa "5.1.0"]
+                                  [funcool/promesa "6.0.0"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "0.4.1"]
                                   [ring-cors "0.1.13"]
@@ -128,7 +128,7 @@
                                    [calfpath "0.7.2"]
                                    [org.clojure/core.async "1.3.610"]
                                    [manifold "0.1.8"]
-                                   [funcool/promesa "5.1.0"]
+                                   [funcool/promesa "6.0.0"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.4.6"]
