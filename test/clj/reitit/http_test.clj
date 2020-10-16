@@ -491,6 +491,8 @@
 
             (testing "not found"
               (let [response (app (request "/not-found"))]
+                (is (= 404 (:status response))))
+              (let [response (app {:uri "/XXXXX/hello.json" :request-method :get})]
                 (is (= 404 (:status response)))))
 
             (testing "3-arity"
