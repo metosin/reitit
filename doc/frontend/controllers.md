@@ -77,9 +77,9 @@ route data is merged. Consider this route tree:
 ```cljs
 ["/" {:controllers [{:start (fn [_] (js/console.log "root start"))}]}
  ["/item/:id"
-  {:controllers [{:params (fn [match] (get-in match [:path-params :id]))
-                  :start  (fn [item-id] (js/console.log "item start" item-id))
-                  :stop   (fn [item-id] (js/console.log "item stop" item-id))}]}]]
+  {:controllers [{:parameters {:path [:id]}
+                  :start (fn [parameters] (js/console.log "item start" (-> parameters :path :id)))
+                  :stop  (fn [parameters] (js/console.log "item stop" (-> parameters :path :id)))}]}]]
 
 ```
 
