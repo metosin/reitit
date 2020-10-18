@@ -10,14 +10,7 @@
 (defn- stripped [x] (select-keys x [:enter :leave :error]))
 
 (defn- publish-swagger-data? [{:keys [form body]}]
-  (not (and (some? form)
-            (nil? body))))
-
-(defn- swagger-data [parameters muuntaja]
-  (if (publish-swagger-data? parameters)
-    {:data {:swagger {:produces (displace (m/encodes muuntaja))
-                      :consumes (displace (m/decodes muuntaja))}}}
-    {}))
+  (not (and (some? form) (nil? body))))
 
 (defn format-interceptor
   "Interceptor for content-negotiation, request and response formatting.
@@ -48,7 +41,9 @@
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
                    (stripped (muuntaja.interceptor/format-interceptor muuntaja))
-                   (swagger-data parameters muuntaja))))}))
+                   (if (publish-swagger-data? parameters)
+                     {:data {:swagger {:produces (displace (m/encodes muuntaja))
+                                       :consumes (displace (m/decodes muuntaja))}}}))))}))
 
 (defn format-negotiate-interceptor
   "Interceptor for content-negotiation.

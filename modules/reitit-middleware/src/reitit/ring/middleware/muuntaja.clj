@@ -9,14 +9,7 @@
 (defn- displace [x] (with-meta x {:displace true}))
 
 (defn- publish-swagger-data? [{:keys [form body]}]
-  (not (and (some? form)
-            (nil? body))))
-
-(defn- swagger-data [parameters muuntaja]
-  (if (publish-swagger-data? parameters)
-    {:data {:swagger {:produces (displace (m/encodes muuntaja))
-                      :consumes (displace (m/decodes muuntaja))}}}
-    {}))
+  (not (and (some? form) (nil? body))))
 
 (def format-middleware
   "Middleware for content-negotiation, request and response formatting.
@@ -41,7 +34,9 @@
    :compile (fn [{:keys [muuntaja parameters]} _]
               (if muuntaja
                 (merge
-                  (swagger-data parameters muuntaja)
+                  (if (publish-swagger-data? parameters)
+                    {:data {:swagger {:produces (displace (m/encodes muuntaja))
+                                      :consumes (displace (m/decodes muuntaja))}}})
                   {:wrap #(muuntaja.middleware/wrap-format % muuntaja)})))})
 
 (def format-negotiate-middleware

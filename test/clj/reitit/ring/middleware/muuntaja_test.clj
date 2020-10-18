@@ -88,6 +88,7 @@
         (is (= #{"application/edn"}
                (produces path)
                (consumes path)))))
+
     (testing "form parameters swagger-data"
       (let [path "/form-params"]
         (is (= #{}
