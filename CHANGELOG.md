@@ -12,17 +12,20 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.5.8 (2020-10-19)
-
-* Add `:conflicting` to route data spec [#444](https://github.com/metosin/reitit/pull/444).
-
-## 0.5.7 (2020-10-18)
+## 0.5.9 (2020-10-19)
 
 ### `reitit-frontend`
 
 - `reitit.frontend.easy/start!` now correctly removes old event listeners
 when called repeatedly (e.g. with hot code reload workflow)
 ([#438](https://github.com/metosin/reitit/pull/438))
+
+## 0.5.8 (2020-10-19)
+
+* Add `:conflicting` to route data spec [#444](https://github.com/metosin/reitit/pull/444).
+
+## 0.5.7 (2020-10-18)
+
 * updated deps:
 
 ```clj
