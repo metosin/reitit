@@ -40,7 +40,9 @@
 (s/def ::name keyword?)
 (s/def ::handler fn?)
 (s/def ::no-doc boolean?)
-(s/def ::default-data (s/keys :opt-un [::name ::handler ::no-doc]))
+(s/def ::conflicting boolean?)
+(s/def ::default-data
+  (s/keys :opt-un [::name ::handler ::no-doc ::conflicting]))
 
 ;;
 ;; router
