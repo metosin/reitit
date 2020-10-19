@@ -27,6 +27,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ### `reitit-ring`
 
 * Fix resource handler path matching [#443](https://github.com/metosin/reitit/pull/443)
+* Automatically publish Swagger `:consumes` for `:form` params, fixes [#217](https://github.com/metosin/reitit/issues/217).
 
 ## 0.5.6 (2020-09-26)
 
