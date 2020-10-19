@@ -9,30 +9,27 @@
 
 ;;; Events ;;;
 
-(re-frame/reg-event-db
- ::initialize-db
- (fn [_ _]
-   {:current-route nil}))
+(re-frame/reg-event-db ::initialize-db
+  (fn [db _]
+    (if db
+      db
+      {:current-route nil})))
 
-(re-frame/reg-event-fx
- ::navigate
- (fn [db [_ & route]]
-   ;; See `navigate` effect in routes.cljs
-   {::navigate! route}))
+(re-frame/reg-event-fx ::push-state
+  (fn [db [_ & route]]
+    {:push-state route}))
 
-(re-frame/reg-event-db
- ::navigated
- (fn [db [_ new-match]]
-   (let [old-match   (:current-route db)
-         controllers (rfc/apply-controllers (:controllers old-match) new-match)]
-     (assoc db :current-route (assoc new-match :controllers controllers)))))
+(re-frame/reg-event-db ::navigated
+  (fn [db [_ new-match]]
+    (let [old-match   (:current-route db)
+          controllers (rfc/apply-controllers (:controllers old-match) new-match)]
+      (assoc db :current-route (assoc new-match :controllers controllers)))))
 
 ;;; Subscriptions ;;;
 
-(re-frame/reg-sub
- ::current-route
- (fn [db]
-   (:current-route db)))
+(re-frame/reg-sub ::current-route
+  (fn [db]
+    (:current-route db)))
 
 ;;; Views ;;;
 
@@ -41,7 +38,7 @@
    [:h1 "This is home page"]
    [:button
     ;; Dispatch navigate event that triggers a (side)effect.
-    {:on-click #(re-frame/dispatch [::navigate ::sub-page2])}
+    {:on-click #(re-frame/dispatch [::push-state ::sub-page2])}
     "Go to sub-page 2"]])
 
 (defn sub-page1 []
@@ -55,10 +52,10 @@
 ;;; Effects ;;;
 
 ;; Triggering navigation from events.
-(re-frame/reg-fx
- ::navigate!
- (fn [route]
-   (apply rfe/push-state route)))
+
+(re-frame/reg-fx :push-state
+  (fn [route]
+    (apply rfe/push-state route)))
 
 ;;; Routes ;;;
 
@@ -104,15 +101,15 @@
 
 (def router
   (rf/router
-   routes
-   {:data {:coercion rss/coercion}}))
+    routes
+    {:data {:coercion rss/coercion}}))
 
 (defn init-routes! []
   (js/console.log "initializing routes")
   (rfe/start!
-   router
-   on-navigate
-   {:use-fragment true}))
+    router
+    on-navigate
+    {:use-fragment true}))
 
 (defn nav [{:keys [router current-route]}]
   [:ul
@@ -141,13 +138,12 @@
     (enable-console-print!)
     (println "dev mode")))
 
-(defn mount-root []
+(defn init []
   (re-frame/clear-subscription-cache!)
+  (re-frame/dispatch-sync [::initialize-db])
+  (dev-setup)
   (init-routes!) ;; Reset routes on figwheel reload
   (reagent/render [router-component {:router router}]
                   (.getElementById js/document "app")))
 
-(defn ^:export init []
-  (re-frame/dispatch-sync [::initialize-db])
-  (dev-setup)
-  (mount-root))
+(init)

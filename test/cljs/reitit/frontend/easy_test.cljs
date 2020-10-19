@@ -12,6 +12,8 @@
                        ["foo" ::foo]
                        ["bar/:id" ::bar]]))
 
+;; TODO: Only tests fragment history, also test HTML5?
+
 (deftest easy-history-routing-test
   (when browser
     (gevents/removeAll js/window goog.events.EventType.POPSTATE)
@@ -24,7 +26,8 @@
                     (fn on-navigate [match history]
                       (let [url (rfh/-get-path history)]
                         (case (swap! n inc)
-                          1 (do (is (= "/" url)
+                          1 (do (is (some? (:popstate-listener history)))
+                                (is (= "/" url)
                                     "start at root")
                                 (rfe/push-state ::foo))
                           2 (do (is (= "/foo" url)
@@ -41,7 +44,24 @@
                                 (.back js/window.history))
                           6 (do (is (= "/" url)
                                     "go back after replace state")
-                                (rfh/stop! @rfe/history)
-                                (done))
-                          (is false "extra event"))))
+
+                                ;; Reset to ensure old event listeners aren't called
+                                (rfe/start! router
+                                            (fn on-navigate [match history]
+                                              (let [url (rfh/-get-path history)]
+                                                (case (swap! n inc)
+                                                  7 (do (is (= "/" url)
+                                                            "start at root")
+                                                        (rfe/push-state ::foo))
+                                                  8 (do (is (= "/foo" url)
+                                                            "push-state")
+                                                        (rfh/stop! @rfe/history)
+                                                        (done))
+                                                  (do
+                                                    (is false (str "extra event 2" {:n @n, :url url}))
+                                                    (done)))))
+                                            {:use-fragment true}))
+                          (do
+                            (is false (str "extra event 1" {:n @n, :url url}))
+                            (done)))))
                     {:use-fragment true})))))

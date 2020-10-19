@@ -33,7 +33,7 @@
   {:builds
    [{:id           "dev"
      :source-paths ["src/cljs"]
-     :figwheel     {:on-jsload "frontend-re-frame.core/mount-root"}
+     :figwheel     true
      :compiler     {:main                 frontend-re-frame.core
                     :output-to            "resources/public/js/compiled/app.js"
                     :output-dir           "resources/public/js/compiled/out"

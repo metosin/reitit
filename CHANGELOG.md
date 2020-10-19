@@ -18,6 +18,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.7 (2020-10-18)
 
+### `reitit-frontend`
+
+- `reitit.frontend.easy/start!` now correctly removes old event listeners
+when called repeatedly (e.g. with hot code reload workflow)
+([#438](https://github.com/metosin/reitit/pull/438))
 * updated deps:
 
 ```clj
