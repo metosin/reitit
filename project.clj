@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.5.9"
+(defproject metosin/reitit-parent "0.5.10"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,28 +12,28 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.5.9"]
-                         [metosin/reitit-core "0.5.9"]
-                         [metosin/reitit-dev "0.5.9"]
-                         [metosin/reitit-spec "0.5.9"]
-                         [metosin/reitit-malli "0.5.9"]
-                         [metosin/reitit-schema "0.5.9"]
-                         [metosin/reitit-ring "0.5.9"]
-                         [metosin/reitit-middleware "0.5.9"]
-                         [metosin/reitit-http "0.5.9"]
-                         [metosin/reitit-interceptors "0.5.9"]
-                         [metosin/reitit-swagger "0.5.9"]
-                         [metosin/reitit-swagger-ui "0.5.9"]
-                         [metosin/reitit-frontend "0.5.9"]
-                         [metosin/reitit-sieppari "0.5.9"]
-                         [metosin/reitit-pedestal "0.5.9"]
+  :managed-dependencies [[metosin/reitit "0.5.10"]
+                         [metosin/reitit-core "0.5.10"]
+                         [metosin/reitit-dev "0.5.10"]
+                         [metosin/reitit-spec "0.5.10"]
+                         [metosin/reitit-malli "0.5.10"]
+                         [metosin/reitit-schema "0.5.10"]
+                         [metosin/reitit-ring "0.5.10"]
+                         [metosin/reitit-middleware "0.5.10"]
+                         [metosin/reitit-http "0.5.10"]
+                         [metosin/reitit-interceptors "0.5.10"]
+                         [metosin/reitit-swagger "0.5.10"]
+                         [metosin/reitit-swagger-ui "0.5.10"]
+                         [metosin/reitit-frontend "0.5.10"]
+                         [metosin/reitit-sieppari "0.5.10"]
+                         [metosin/reitit-pedestal "0.5.10"]
                          [metosin/ring-swagger-ui "3.25.3"]
                          [metosin/spec-tools "0.10.4"]
                          [metosin/schema-tools "0.12.2"]
                          [metosin/muuntaja "0.6.7"]
                          [metosin/jsonista "0.2.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.2.0"]
+                         [metosin/malli "0.2.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.11.3"]
@@ -86,7 +86,7 @@
                                   [metosin/muuntaja "0.6.7"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.2.7"]
-                                  [metosin/malli "0.2.0"]
+                                  [metosin/malli "0.2.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
