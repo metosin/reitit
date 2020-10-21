@@ -12,6 +12,18 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.10 (2020-10-22)
+
+* updated deps:
+
+```clj
+[metosin/malli "0.2.1] is available but we use "0.2.0"
+```
+
+### `reitit-malli`
+
+* fix [#445](https://github.com/metosin/reitit/issues/445): Malli response coercion failing for `[:sequential string?]` if the response body is an empty vector
+
 ## 0.5.9 (2020-10-19)
 
 ### `reitit-frontend`
