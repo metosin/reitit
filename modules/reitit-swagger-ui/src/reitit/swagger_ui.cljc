@@ -14,7 +14,7 @@
      | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
      | :config          | parameters passed to swaggger-ui as-is.
 
-     See https://github.com/swagger-api/swagger-ui/tree/2.x#parameters
+     See https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
      for all available :config options
 
      Examples:
