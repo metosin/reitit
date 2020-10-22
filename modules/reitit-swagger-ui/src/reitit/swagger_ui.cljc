@@ -15,19 +15,17 @@
      | :config          | parameters passed to swaggger-ui as-is.
 
      See https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
-     for all available :config options
+     for all available :config options.
 
      Examples:
+     ```
+     (swagger-ui/create-swagger-ui-handler)
 
-        ;; with defaults
-        (create-swagger-ui-handler)
-
-        ;; with path and url set, swagger validator disabled, jsonEditor enabled
-        (swagger-ui/create-swagger-ui-handler
-          {:path \"/\"
-           :url \"/api/swagger.json\"
-           :config {:validatorUrl nil
-                    :jsonEditor true})"
+     (swagger-ui/create-swagger-ui-handler
+       {:path \"/swagger-ui\"
+        :url \"/api/swagger.json\"
+        :config {:validatorUrl nil}})
+     ```"
      ([]
       (create-swagger-ui-handler nil))
      ([options]
