@@ -21,6 +21,7 @@
 * [Plumatic Schema](coercion/schema_coercion.md)
 * [Clojure.spec](coercion/clojure_spec_coercion.md)
 * [Data-specs](coercion/data_spec_coercion.md)
+* [Malli](coercion/malli_coercion.md)
 
 ## Ring
 
