@@ -12,9 +12,11 @@
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
 (s/def ::summary string?)
 (s/def ::description string?)
+(s/def ::operationId string?)
+(s/def ::operationIds (s/coll-of ::operationId :distinct true))
 
 (s/def ::swagger (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description]))
+(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description ::operationId]))
 
 (def swagger-feature
   "Feature for handling swagger-documentation for routes.
@@ -75,13 +77,14 @@
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
-           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
+           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description :operationId)
            swagger (->> (strip-endpoint-keys swagger)
                         (merge {:swagger "2.0"
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :swagger :id (or ::default) (trie/into-set) (set/intersection ids) seq))
            base-swagger-spec {:responses ^:displace {:default {:description ""}}}
+           oid-acc (atom [])
            transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
@@ -94,12 +97,20 @@
                                      (if coercion
                                        (coercion/get-apidocs coercion :swagger data))
                                      (select-keys data [:tags :summary :description])
+                                     (let [oid (select-keys data [:operationId])
+                                           oid-val (:operationId oid)
+                                           _ (when (not (nil? oid-val))
+                                               (reset! oid-acc (conj @oid-acc oid-val)))]
+                                       oid)
                                      (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
-           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
+           _ (when (not (s/valid? ::operationIds @oid-acc))
+               (throw (ex-info (s/explain-str ::operationIds @oid-acc) {:operation-ids @oid-acc
+                                                                        :error "operationIds are not distinct"})))]
        {:status 200
         :body (meta-merge swagger {:paths paths})}))
     ([req res raise]
