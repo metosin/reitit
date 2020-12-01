@@ -51,4 +51,4 @@ See the [validating route data](route_data_validation.md) page.
 
 ## Runtime Exception
 
-See [Exception Handling with Ring](exceptions.md).
+See [Exception Handling with Ring](../ring/exceptions.md).
