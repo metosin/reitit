@@ -221,7 +221,7 @@
            handler (if path
                      (fn [request]
                        (let [uri (:uri request)]
-                         (if (.startsWith uri path)
+                         (if (str/starts-with? uri path)
                            (path-or-index-response (subs uri path-size) uri))))
                      (fn [request]
                        (let [uri (:uri request)
