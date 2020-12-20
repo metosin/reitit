@@ -8,9 +8,10 @@ We can do this with middleware in reitit like this:
 ```clj
 (defn- hidden-method
   [request]
-  (keyword 
-    (or (get-in request [:form-params "_method"])         ;; look for "_method" field in :form-params
-        (get-in request [:multipart-params "_method"])))) ;; or in :multipart-params
+  (some-> (or (get-in request [:form-params "_method"])         ;; look for "_method" field in :form-params
+              (get-in request [:multipart-params "_method"]))   ;; or in :multipart-params
+          clojure.string/lower-case
+          keyword))
 
 (def wrap-hidden-method
   {:name ::wrap-hidden-method
