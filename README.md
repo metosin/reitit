@@ -98,7 +98,7 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
                        :handler (fn [{{{:keys [x y]} :query} :parameters}]
                                   {:status 200
                                    :body {:total (+ x y)}})}}]]
-      ;; router data effecting all routes
+      ;; router data affecting all routes
       {:data {:coercion reitit.coercion.spec/coercion
               :middleware [rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
