@@ -12,6 +12,17 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.11 (2020-12-27)
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.36.0"] is available but we use "3.25.3"
+[metosin/jsonista "0.3.0"] is available but we use "0.2.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.0"] is available but we use "2.11.2"
+[com.fasterxml.jackson.core/jackson-databind "2.12.0"] is available but we use "2.11.2"
+```
+
 ## 0.5.10 (2020-10-22)
 
 * updated deps:

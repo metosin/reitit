@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.5.10"
+(defproject metosin/reitit-parent "0.5.11"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,43 +12,43 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.5.10"]
-                         [metosin/reitit-core "0.5.10"]
-                         [metosin/reitit-dev "0.5.10"]
-                         [metosin/reitit-spec "0.5.10"]
-                         [metosin/reitit-malli "0.5.10"]
-                         [metosin/reitit-schema "0.5.10"]
-                         [metosin/reitit-ring "0.5.10"]
-                         [metosin/reitit-middleware "0.5.10"]
-                         [metosin/reitit-http "0.5.10"]
-                         [metosin/reitit-interceptors "0.5.10"]
-                         [metosin/reitit-swagger "0.5.10"]
-                         [metosin/reitit-swagger-ui "0.5.10"]
-                         [metosin/reitit-frontend "0.5.10"]
-                         [metosin/reitit-sieppari "0.5.10"]
-                         [metosin/reitit-pedestal "0.5.10"]
-                         [metosin/ring-swagger-ui "3.25.3"]
+  :managed-dependencies [[metosin/reitit "0.5.11"]
+                         [metosin/reitit-core "0.5.11"]
+                         [metosin/reitit-dev "0.5.11"]
+                         [metosin/reitit-spec "0.5.11"]
+                         [metosin/reitit-malli "0.5.11"]
+                         [metosin/reitit-schema "0.5.11"]
+                         [metosin/reitit-ring "0.5.11"]
+                         [metosin/reitit-middleware "0.5.11"]
+                         [metosin/reitit-http "0.5.11"]
+                         [metosin/reitit-interceptors "0.5.11"]
+                         [metosin/reitit-swagger "0.5.11"]
+                         [metosin/reitit-swagger-ui "0.5.11"]
+                         [metosin/reitit-frontend "0.5.11"]
+                         [metosin/reitit-sieppari "0.5.11"]
+                         [metosin/reitit-pedestal "0.5.11"]
+                         [metosin/ring-swagger-ui "3.36.0"]
                          [metosin/spec-tools "0.10.4"]
                          [metosin/schema-tools "0.12.2"]
                          [metosin/muuntaja "0.6.7"]
-                         [metosin/jsonista "0.2.7"]
+                         [metosin/jsonista "0.3.0"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.2.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.11.3"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
+                         [com.fasterxml.jackson.core/jackson-core "2.12.0"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.12.0"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.8.6"]
+                         [expound "0.8.7"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
                          [ring/ring-core "1.8.2"]
 
                          [io.pedestal/pedestal.service "0.5.8"]]
 
-  :plugins [[jonase/eastwood "0.3.11"]
+  :plugins [[jonase/eastwood "0.3.12"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
@@ -90,7 +90,7 @@
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
-                                  [expound "0.8.6"]
+                                  [expound "0.8.7"]
                                   [fipp "0.6.23"]
 
                                   [orchestra "2020.09.18-1"]
@@ -98,11 +98,11 @@
                                   [ring "1.8.2"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.1"]
-                                  [metosin/ring-swagger-ui "3.25.3"]
+                                  [metosin/ring-swagger-ui "3.36.0"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.0"]
-                                  [org.clojure/tools.namespace "1.0.0"]
+                                  [org.clojure/tools.namespace "1.1.0"]
                                   [com.gfredericks/test.chuck "0.2.10"]
 
                                   [io.pedestal/pedestal.service "0.5.8"]
@@ -111,7 +111,7 @@
                                   [manifold "0.1.8"]
                                   [funcool/promesa "6.0.0"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.4.1"]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.5.0"]
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
@@ -125,7 +125,7 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.5.8"]
                                    [io.pedestal/pedestal.jetty "0.5.8"]
-                                   [calfpath "0.7.2"]
+                                   [calfpath "0.8.0"]
                                    [org.clojure/core.async "1.3.610"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "6.0.0"]
