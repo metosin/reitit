@@ -1,6 +1,6 @@
 # Different Routers
 
-Reitit ships with several different implementations for the `Router` protocol, originally based on the [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation. `router` function selects the most suitable implementation by inspecting the expanded routes. The implementation can be set manually using `:router` option, see [configuring routers](advanced/configuring_routers.md).
+Reitit ships with several different implementations for the `Router` protocol, originally based on the [Pedestal](https://github.com/pedestal/pedestal/tree/master/route) implementation. `router` function selects the most suitable implementation by inspecting the expanded routes. The implementation can be set manually using `:router` option, see [configuring routers](configuring_routers.md).
 
 | router                        | description |
 | ------------------------------|-------------|
