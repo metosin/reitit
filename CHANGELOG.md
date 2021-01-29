@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+* Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
+
 ## 0.5.11 (2020-12-27)
 
 * updated deps:
