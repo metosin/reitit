@@ -167,7 +167,7 @@
                 (instance? CatchAll path)
                 (assoc-in node [:catch-all path] (-node {:params params, :data data}))
 
-                (str/blank? path)
+                (empty? path)
                 (-insert node ps fp params data)
 
                 :else
@@ -439,7 +439,9 @@
      ["/v1/topics" 54]
      ["/v1/orgs" 55]
      ["/v1/users/:user-id/bookmarks" 56]
-     ["/v1/orgs/:org-id/topics" 57]]
+     ["/v1/orgs/:org-id/topics" 57]
+     ["/command1 {arg1} {arg2}" ::cmd1]
+     ["/command2 {arg1} {arg2} {arg3}" ::cmd2]]
     (insert)
     (compile)
     (pretty)))
