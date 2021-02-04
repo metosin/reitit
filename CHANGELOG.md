@@ -12,10 +12,6 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
-
-* Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
-
 ## 0.5.12 (2021-02-01)
 
 * updated deps:
@@ -30,7 +26,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [com.fasterxml.jackson.core/jackson-databind "2.12.1"] is available but we use "2.12.0"
 ```
 
-* Using Reitit for chat pattern matching, fixes [#411](https://github.com/metosin/reitit/issues/411)
+* Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
 
 ## 0.5.11 (2020-12-27)
 
