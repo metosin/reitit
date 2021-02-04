@@ -28,16 +28,16 @@
                          [metosin/reitit-sieppari "0.5.11"]
                          [metosin/reitit-pedestal "0.5.11"]
                          [metosin/ring-swagger-ui "3.36.0"]
-                         [metosin/spec-tools "0.10.4"]
+                         [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.12.2"]
                          [metosin/muuntaja "0.6.7"]
-                         [metosin/jsonista "0.3.0"]
+                         [metosin/jsonista "0.3.1"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.2.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.12.0"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.12.0"]
+                         [com.fasterxml.jackson.core/jackson-core "2.12.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.12.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
@@ -77,15 +77,15 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.1"]
-                                  [org.clojure/clojurescript "1.10.597"]
+                   :dependencies [[org.clojure/clojure "1.10.2"]
+                                  [org.clojure/clojurescript "1.10.773"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.12.2"]
-                                  [metosin/spec-tools "0.10.4"]
+                                  [metosin/spec-tools "0.10.5"]
                                   [metosin/muuntaja "0.6.7"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.2.7"]
+                                  [metosin/jsonista "0.3.1"]
                                   [metosin/malli "0.2.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
@@ -93,7 +93,7 @@
                                   [expound "0.8.7"]
                                   [fipp "0.6.23"]
 
-                                  [orchestra "2020.09.18-1"]
+                                  [orchestra "2021.01.01-1"]
 
                                   [ring "1.8.2"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
