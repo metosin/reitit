@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.5.11"
+(defproject metosin/reitit-parent "0.5.12"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -12,25 +12,25 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.5.11"]
-                         [metosin/reitit-core "0.5.11"]
-                         [metosin/reitit-dev "0.5.11"]
-                         [metosin/reitit-spec "0.5.11"]
-                         [metosin/reitit-malli "0.5.11"]
-                         [metosin/reitit-schema "0.5.11"]
-                         [metosin/reitit-ring "0.5.11"]
-                         [metosin/reitit-middleware "0.5.11"]
-                         [metosin/reitit-http "0.5.11"]
-                         [metosin/reitit-interceptors "0.5.11"]
-                         [metosin/reitit-swagger "0.5.11"]
-                         [metosin/reitit-swagger-ui "0.5.11"]
-                         [metosin/reitit-frontend "0.5.11"]
-                         [metosin/reitit-sieppari "0.5.11"]
-                         [metosin/reitit-pedestal "0.5.11"]
+  :managed-dependencies [[metosin/reitit "0.5.12"]
+                         [metosin/reitit-core "0.5.12"]
+                         [metosin/reitit-dev "0.5.12"]
+                         [metosin/reitit-spec "0.5.12"]
+                         [metosin/reitit-malli "0.5.12"]
+                         [metosin/reitit-schema "0.5.12"]
+                         [metosin/reitit-ring "0.5.12"]
+                         [metosin/reitit-middleware "0.5.12"]
+                         [metosin/reitit-http "0.5.12"]
+                         [metosin/reitit-interceptors "0.5.12"]
+                         [metosin/reitit-swagger "0.5.12"]
+                         [metosin/reitit-swagger-ui "0.5.12"]
+                         [metosin/reitit-frontend "0.5.12"]
+                         [metosin/reitit-sieppari "0.5.12"]
+                         [metosin/reitit-pedestal "0.5.12"]
                          [metosin/ring-swagger-ui "3.36.0"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.12.2"]
-                         [metosin/muuntaja "0.6.7"]
+                         [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.1"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.2.1"]
@@ -44,15 +44,15 @@
                          [expound "0.8.7"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
-                         [ring/ring-core "1.8.2"]
+                         [ring/ring-core "1.9.0"]
 
                          [io.pedestal/pedestal.service "0.5.8"]]
 
-  :plugins [[jonase/eastwood "0.3.12"]
+  :plugins [[jonase/eastwood "0.3.13"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
-            [lein-cloverage "1.2.1"]
+            [lein-cloverage "1.2.2"]
             [lein-codox "0.10.7"]
             [metosin/bat-test "0.4.4"]]
 
@@ -83,7 +83,7 @@
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.12.2"]
                                   [metosin/spec-tools "0.10.5"]
-                                  [metosin/muuntaja "0.6.7"]
+                                  [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.1"]
                                   [metosin/malli "0.2.1"]
@@ -95,9 +95,9 @@
 
                                   [orchestra "2021.01.01-1"]
 
-                                  [ring "1.8.2"]
+                                  [ring "1.9.0"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/ring-http-response "0.9.1"]
+                                  [metosin/ring-http-response "0.9.2"]
                                   [metosin/ring-swagger-ui "3.36.0"]
 
                                   [criterium "0.4.6"]
@@ -125,7 +125,7 @@
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.5.8"]
                                    [io.pedestal/pedestal.jetty "0.5.8"]
-                                   [calfpath "0.8.0"]
+                                   [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.3.610"]
                                    [manifold "0.1.8"]
                                    [funcool/promesa "6.0.0"]

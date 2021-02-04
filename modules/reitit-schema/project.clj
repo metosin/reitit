@@ -1,4 +1,4 @@
-(defproject metosin/reitit-schema "0.5.11"
+(defproject metosin/reitit-schema "0.5.12"
   :description "Reitit: Plumatic Schema coercion"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

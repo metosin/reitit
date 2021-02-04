@@ -50,7 +50,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.5.11"]
+[metosin/reitit "0.5.12"]
 ```
 
 Optionally, the parts can be required separately.
@@ -172,6 +172,6 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## License
 
-Copyright © 2017-2020 [Metosin Oy](http://www.metosin.fi)
+Copyright © 2017-2021 [Metosin Oy](http://www.metosin.fi)
 
 Distributed under the Eclipse Public License, the same as Clojure.

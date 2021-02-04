@@ -16,6 +16,22 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
 
+## 0.5.12 (2021-02-01)
+
+* updated deps:
+
+```
+[metosin/spec-tools "0.10.5"] is available but we use "0.10.4"
+[metosin/jsonista "0.3.1"] is available but we use "0.3.0"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[ring/ring-core "1.9.0"] is available but we use "1.8.2"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.1"] is available but we use "2.12.0"
+[com.fasterxml.jackson.core/jackson-databind "2.12.1"] is available but we use "2.12.0"
+```
+
+* Using Reitit for chat pattern matching, fixes [#411](https://github.com/metosin/reitit/issues/411)
+
 ## 0.5.11 (2020-12-27)
 
 * updated deps:
