@@ -547,7 +547,7 @@
                (let [app (ring/ring-handler
                            (ring/router [])
                            (ring/routes
-                             (create {:path "/"})
+                             (create {:path "/" :not-found-handler (fn [x] {:status 404 :body "resource-handler"})})
                              (ring/create-default-handler)))]
                  (testing test
                    (testing "different file-types"
@@ -568,7 +568,8 @@
 
                    (testing "not found"
                      (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                       (is (= 404 (:status response)))
+                       (is (= "resource-handler" (:body response)))))
 
                    (testing "3-arity"
                      (let [result (atom nil)
@@ -583,7 +584,7 @@
                (let [app (ring/ring-handler
                            (ring/router [])
                            (ring/routes
-                             (create {:path "/files"})
+                             (create {:path "/files" :not-found-handler (fn [x] {:status 404 :body "resource-handler"})})
                              (ring/create-default-handler)))
                      request #(request (str "/files" %))
                      redirect #(redirect (str "/files" %))]
@@ -605,8 +606,12 @@
                        (is (= (redirect "/docs/index.html") response))))
 
                    (testing "not found"
-                     (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                     (let [response (app {:uri "/not-found" :request-method :get})]
+                       (is (= 404 (:status response)))
+                       (is (= "" (:body response))))
+                     (let [response (app {:uri "/files/not-found" :request-method :get})]
+                       (is (= 404 (:status response)))
+                       (is (= "resource-handler" (:body response)))))
 
                    (testing "3-arity"
                      (let [result (atom nil)
