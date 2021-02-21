@@ -13,7 +13,7 @@
                                  :coercion reitit.coercion.malli/coercion
                                  :parameters {:path [:map
                                                      [:company string?]
-                                                     [:user-id int?]]}]
+                                                     [:user-id int?]]}}]
     {:compile coercion/compile-request-coercers}))
 
 (defn match-by-path-and-coerce! [path]
