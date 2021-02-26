@@ -14,6 +14,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+### `reitit-ring`
+
 * Make reitit.ring/create-resource-handler's `:not-found-handler` work when used outside of a router. [#464](https://github.com/metosin/reitit/issues/464). PR [#471](https://github.com/metosin/reitit/pull/471) by Kari Marttila and Metosin Maintenance Mob.
 
 ## 0.5.12 (2021-02-01)
