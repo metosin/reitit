@@ -169,3 +169,34 @@
           :path-parts ["https://google.com"]
           :path-params #{}}
          (impl/parse "https://google.com" nil))))
+
+(deftest merge-data-test
+  (is (= {:view 'b
+          :controllers [1 2]}
+         (impl/merge-data "/"
+                          [[:view 'a]
+                           [:controllers [1]]
+                           [:view 'b]
+                           [:controllers [2]]])))
+
+  (is (= {:view 'b
+          :controllers [2]}
+         (impl/merge-data "/"
+                          [[:view 'a]
+                           [:controllers [1]]
+                           [:view 'b]
+                           [:controllers ^:replace [2]]])))
+
+  (is (= [:map
+          [:a 'string?]
+          [:b 'int?]]
+         (-> (impl/merge-data "/"
+                              [[:parameters {:path [:map [:a 'string?]]}]
+                               [:parameters {:path [:map [:b 'int?]]}]])
+             :parameters
+             :path
+             ;; Merge returns schmea object, convert back to form for comparison
+             malli.core/form)))
+
+  ;; TODO: Also test and support Schema and spec merging
+  )
