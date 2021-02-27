@@ -29,11 +29,11 @@
                          [metosin/reitit-pedestal "0.5.12"]
                          [metosin/ring-swagger-ui "3.36.0"]
                          [metosin/spec-tools "0.10.5"]
-                         [metosin/schema-tools "0.12.2"]
+                         [metosin/schema-tools "0.12.3"]
                          [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.1"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.2.1"]
+                         [metosin/malli "0.3.0-SNAPSHOT"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.12.1"]
@@ -41,14 +41,14 @@
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.8.7"]
+                         [expound "0.8.9"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
-                         [ring/ring-core "1.9.0"]
+                         [ring/ring-core "1.9.1"]
 
                          [io.pedestal/pedestal.service "0.5.8"]]
 
-  :plugins [[jonase/eastwood "0.3.13"]
+  :plugins [[jonase/eastwood "0.3.14"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
@@ -81,7 +81,7 @@
                                   [org.clojure/clojurescript "1.10.773"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.12.2"]
+                                  [metosin/schema-tools "0.12.3"]
                                   [metosin/spec-tools "0.10.5"]
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
@@ -90,12 +90,12 @@
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
-                                  [expound "0.8.7"]
+                                  [expound "0.8.9"]
                                   [fipp "0.6.23"]
 
                                   [orchestra "2021.01.01-1"]
 
-                                  [ring "1.9.0"]
+                                  [ring "1.9.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.2"]
                                   [metosin/ring-swagger-ui "3.36.0"]

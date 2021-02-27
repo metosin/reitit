@@ -14,6 +14,17 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## Unreleased
 
+* updated deps:
+
+```clj
+[metosin/malli "0.3.0_SNAPSHOT"] is available but we use "0.2.1"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[ring/ring-core "1.9.1"] is available but we use "1.9.0"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[expound "0.8.9"] is available but we use "0.8.7"
+[ring "1.9.1"] is available but we use "1.9.0"
+```
+
 ### `reitit-ring`
 
 * Make reitit.ring/create-resource-handler's `:not-found-handler` work when used outside of a router. [#464](https://github.com/metosin/reitit/issues/464). PR [#471](https://github.com/metosin/reitit/pull/471) by Kari Marttila and Metosin Maintenance Mob.
