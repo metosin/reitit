@@ -17,7 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * updated deps:
 
 ```clj
-[metosin/malli "0.3.0_SNAPSHOT"] is available but we use "0.2.1"
+[metosin/malli "0.3.0"] is available but we use "0.2.1"
 [metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
 [ring/ring-core "1.9.1"] is available but we use "1.9.0"
 [metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
