@@ -618,6 +618,46 @@
                      (is (get-in @result [:headers "Last-Modified"]))
                      (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))))))
 
+
+#?(:clj
+  (deftest file-resource-handler-not-found-test
+    (let [redirect (fn [uri] {:status 302, :body "", :headers {"Location" uri}})
+          request (fn [uri] {:uri uri, :request-method :get})
+          not-found-handler (fn [_] {:status 404, :body "not-found-handler"})]
+
+       (doseq [[name create] [["resource-handler" ring/create-resource-handler]
+                              ["file-handler" #(ring/create-file-handler (assoc % :root "dev-resources/public"))]]]
+         (testing (str "for " name)
+           (testing "inside a router"
+             (let [create-app (fn [handler]
+                                (ring/ring-handler
+                                 (ring/router
+                                  ["/files/*" handler])))]
+               (testing "not-found-handler not set"
+                 (let [app (create-app (create nil))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "" (:body (app (request "/files/not-found")))))))
+
+               (testing "not-found-handler set"
+                 (let [app (create-app (create {:not-found-handler not-found-handler}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "not-found-handler" (:body (app (request "/files/not-found")))))))))
+
+           (testing "outside a router"
+             (let [create-app (fn [handler]
+                                (ring/ring-handler
+                                 (ring/router [])
+                                 handler))]
+               (testing "not-found-handler not set"
+                 (let [app (create-app (create {:path "/files"}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (nil? (app (request "/files/not-found"))))))
+
+               (testing "not-found-handler set"
+                 (let [app (create-app (create {:path "/files" :not-found-handler not-found-handler}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "not-found-handler" (:body (app (request "/files/not-found"))))))))))))))
+
 (deftest router-available-in-default-branch
   (testing "1-arity"
     ((ring/ring-handler

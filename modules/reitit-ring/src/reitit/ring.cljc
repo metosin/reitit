@@ -195,7 +195,9 @@
                         root "public"
                         index-files ["index.html"]
                         paths (constantly nil)
-                        not-found-handler (constantly {:status 404, :body "", :headers {}})}}]
+                        not-found-handler (if path
+                                            (constantly nil)
+                                            (constantly {:status 404, :body "", :headers {}}))}}]
      (let [options {:root root
                     :loader loader
                     :index-files? false
@@ -239,7 +241,7 @@
      | -------------------|-------------|
      | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
      | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader            | optional class loader to resolve the resources
      | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
      | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
@@ -256,7 +258,7 @@
      | -------------------|-------------|
      | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
      | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
+     | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader            | optional class loader to resolve the resources
      | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
      | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
