@@ -12,7 +12,7 @@
      | :root            | optional resource root, defaults to `\"swagger-ui\"`
      | :url             | path to swagger endpoint, defaults to `/swagger.json`
      | :path            | optional path to mount the handler to. Works only if mounted outside of a router.
-     | :config          | parameters passed to swaggger-ui as-is.
+     | :config          | parameters passed to swagger-ui as-is.
 
      See https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md
      for all available :config options.
