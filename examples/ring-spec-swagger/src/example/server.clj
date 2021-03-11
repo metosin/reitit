@@ -13,7 +13,7 @@
             ; [reitit.ring.middleware.dev :as dev]
             ; [reitit.ring.spec :as spec]
             ; [spec-tools.spell :as spell]
-            [spec-tools.data-spec :as ds]
+            [spec-tools.core :as st]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]
@@ -28,7 +28,7 @@
 
 ;; Use data-specs to provide extra JSON-Schema properties:
 ;; https://github.com/metosin/spec-tools/blob/master/docs/04_json_schema.md#annotated-specs
-(s/def ::x (ds/spec {:spec int?
+(s/def ::x (st/spec {:spec int?
                      :name "X parameter"
                      :description "Description for X parameter"
                      :json-schema/default 42}))
