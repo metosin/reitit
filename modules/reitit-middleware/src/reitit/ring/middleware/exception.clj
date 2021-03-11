@@ -4,7 +4,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str])
   (:import (java.time Instant)
-           (java.io PrintWriter)))
+           (java.io Writer PrintWriter)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))
@@ -55,7 +55,7 @@
          (catch Throwable e
            (on-exception handlers e request respond raise)))))))
 
-(defn print! [^PrintWriter writer & more]
+(defn print! [^Writer writer & more]
   (.write writer (str (str/join " " more) "\n")))
 
 ;;
@@ -88,7 +88,7 @@
 
 (defn wrap-log-to-console [handler ^Throwable e {:keys [uri request-method] :as req}]
   (print! *out* (Instant/now) request-method (pr-str uri) "=>" (.getMessage e))
-  (.printStackTrace e ^PrintWriter *out*)
+  (.printStackTrace e (PrintWriter. ^Writer *out*))
   (handler e req))
 
 ;;

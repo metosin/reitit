@@ -80,7 +80,8 @@
                            ;; encoding response body
                            muuntaja/format-response-middleware
                            ;; exception handling
-                           exception/exception-middleware
+                           (exception/create-exception-middleware
+                             {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
                            ;; decoding request body
                            muuntaja/format-request-middleware
                            ;; coercing response bodys
