@@ -109,6 +109,6 @@ When router is created, the following steps are done:
 * route arguments are expanded (via `:expand` option)
 * routes are coerced (via `:coerce` options)
 * route tree is compiled (via `:compile` options)
-* [route conflicts](advanced/route_conflicts.md) are resolved (via `:conflicts` options)
+* [route conflicts](route_conflicts.md) are resolved (via `:conflicts` options)
 * optionally, route data is validated (via `:validate` options)
 * [router implementation](../advanced/different_routers.md) is automatically selected (or forced via `:router` options) and created
