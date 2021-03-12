@@ -49,7 +49,6 @@ Failing coercion:
 Using `create` with options to create the coercion instead of `coercion`:
 
 ```clj
-
 (require '[malli.util :as mu])
 
 (reitit.coercion.malli/create
