@@ -49,11 +49,13 @@ Failing coercion:
 Using `create` with options to create the coercion instead of `coercion`:
 
 ```clj
+(require '[malli.util :as mu])
+
 (reitit.coercion.malli/create
-  {:transformers {:body {:default default-transformer-provider
-                         :formats {"application/json" json-transformer-provider}}
-                  :string {:default string-transformer-provider}
-                  :response {:default default-transformer-provider}}
+  {:transformers {:body {:default reitit.coercion.malli/default-transformer-provider
+                         :formats {"application/json" reitit.coercion.malli/json-transformer-provider}}
+                  :string {:default reitit.coercion.malli/string-transformer-provider}
+                  :response {:default reitit.coercion.malli/default-transformer-provider}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
    ;; schema identity function (default: close all map schemas)
