@@ -6,7 +6,7 @@
 * Route [conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
-* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema), [clojure.spec](https://clojure.org/about/spec), [malli](https://github.com/metosin/malli))
 * Helpers for [ring](./ring/ring.md), [http](./http/interceptors.md), [pedestal](./http/pedestal.md) & [frontend](./frontend/basics.md)
 * Friendly [Error Messages](./basics/error_messages.md)
 * Extendable
