@@ -85,24 +85,29 @@ Optionally, the parts can be required separately.
 A Ring routing app with input & output coercion using [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs).
 
 ```clj
+(require '[muuntaja.core :as m])
 (require '[reitit.ring :as ring])
 (require '[reitit.coercion.spec])
 (require '[reitit.ring.coercion :as rrc])
+(require '[reitit.ring.middleware.muuntaja :as muuntaja])
+(require '[reitit.ring.middleware.parameters :as parameters])
 
 (def app
   (ring/ring-handler
     (ring/router
       ["/api"
        ["/math" {:get {:parameters {:query {:x int?, :y int?}}
-                       :responses {200 {:body {:total pos-int?}}}
-                       :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                                  {:status 200
-                                   :body {:total (+ x y)}})}}]]
+                       :responses  {200 {:body {:total int?}}}
+                       :handler    (fn [{{{:keys [x y]} :query} :parameters}]
+                                     {:status 200
+                                      :body   {:total (+ x y)}})}}]]
       ;; router data affecting all routes
-      {:data {:coercion reitit.coercion.spec/coercion
-              :middleware [rrc/coerce-exceptions-middleware
+      {:data {:coercion   reitit.coercion.spec/coercion
+              :muuntaja   m/instance
+              :middleware [parameters/parameters-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
+                           rrc/coerce-response-middleware
+                           muuntaja/format-response-middleware]}})))
 ```
 
 Valid request:
