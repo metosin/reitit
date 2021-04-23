@@ -13,7 +13,6 @@
 (s/def ::summary string?)
 (s/def ::description string?)
 (s/def ::operationId string?)
-(s/def ::operationIds (s/coll-of ::operationId :distinct true))
 
 (s/def ::swagger (s/keys :opt-un [::id]))
 (s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description ::operationId]))
@@ -84,7 +83,6 @@
            accept-route (fn [route]
                           (-> route second :swagger :id (or ::default) (trie/into-set) (set/intersection ids) seq))
            base-swagger-spec {:responses ^:displace {:default {:description ""}}}
-           oid-acc (atom [])
            transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
@@ -96,21 +94,13 @@
                                      (apply meta-merge (keep (comp :swagger :data) interceptors))
                                      (if coercion
                                        (coercion/get-apidocs coercion :swagger data))
-                                     (select-keys data [:tags :summary :description])
-                                     (let [oid (select-keys data [:operationId])
-                                           oid-val (:operationId oid)
-                                           _ (when (not (nil? oid-val))
-                                               (reset! oid-acc (conj @oid-acc oid-val)))]
-                                       oid)
+                                     (select-keys data [:tags :summary :description :operationId])
                                      (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
-           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
-           _ (when (not (s/valid? ::operationIds @oid-acc))
-               (throw (ex-info (s/explain-str ::operationIds @oid-acc) {:operation-ids @oid-acc
-                                                                        :error "operationIds are not distinct"})))]
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
        {:status 200
         :body (meta-merge swagger {:paths paths})}))
     ([req res raise]

@@ -103,32 +103,6 @@
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})))
 
-(def failing-app
-  (ring/ring-handler
-    (ring/router
-      ["/api"
-       {:swagger {:id ::math}}
-
-       ["/swagger.json"
-        {:get {:no-doc true
-               :swagger {:info {:title "my-api"}}
-               :handler (swagger/create-swagger-handler)}}]
-
-       ["/spec" {:coercion spec/coercion}
-        ["/plus/:z"
-         {:patch {:summary "patch"
-                  :operationId "Patch"
-                  :handler (constantly {:status 200})}
-          :options {:summary "options"
-                    :operationId "Patch"
-                    :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
-                    :handler (constantly {:status 200})}}]]]
-
-      {:data {:middleware [swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
-
 (require '[fipp.edn])
 (deftest swagger-test
   (testing "endpoints work"
@@ -147,9 +121,6 @@
                    :uri "/api/schema/plus/3"
                    :query-params {:x "2", :y "1"}})))))
 
-  (testing "failing swagger-spec"
-    (is (thrown? clojure.lang.ExceptionInfo (:body (failing-app {:request-method :get
-                                                                 :uri "/api/swagger.json"})))))
   (testing "swagger-spec"
     (let [spec (:body (app {:request-method :get
                             :uri "/api/swagger.json"}))
