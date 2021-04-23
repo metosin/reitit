@@ -1,4 +1,4 @@
-(defproject metosin/reitit-interceptors "0.5.12"
+(defproject metosin/reitit-interceptors "0.5.13"
   :description "Reitit, common interceptors bundled"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
