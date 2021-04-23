@@ -49,4 +49,5 @@ git push
 git push --tags
 ```
 
-Remember to update the changelog as well!
+* Remembor to update the changelog!
+* Announce the release at least on #reitit in Clojurians.
