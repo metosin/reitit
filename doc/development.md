@@ -31,11 +31,22 @@ java -version
 
 # new version
 ./scripts/set-version "1.0.0"
-./scripts/lein-modules install
+
+# create a release commit and a tag
+git add -u 
+git commit -m "Release 1.0.0"
+git tag 1.0.0
 
 # works
+./scripts/lein-modules install
 lein test
 
 # deploy to clojars
 ./scripts/lein-modules do clean, deploy clojars
+
+# push the commit and the tag
+git push
+git push --tags
 ```
+
+Remember to update the changelog as well!
