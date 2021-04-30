@@ -134,5 +134,5 @@ If you inspect `m/default-options` it's only a map, therefore you can compose yo
   (m/create
    (-> m/default-options
        (assoc-in [:formats "application/json" :decoder-opts :bigdecimals] true)
-       (assoc-in [:formats "application/json" :encoder-opts :data-format] "yyyy-MM-dd"))))
+       (assoc-in [:formats "application/json" :encoder-opts :date-format] "yyyy-MM-dd"))))
 ```
