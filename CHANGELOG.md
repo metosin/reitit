@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+### `reitit-ring`
+
+* Make `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` handle properly. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
+
 ## 0.5.13 (2021-04-23)
 
 * updated deps:
