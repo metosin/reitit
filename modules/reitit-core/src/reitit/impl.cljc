@@ -4,7 +4,9 @@
             [clojure.set :as set]
             [meta-merge.core :as mm]
             [reitit.trie :as trie]
-            [reitit.exception :as ex])
+            [reitit.exception :as ex]
+            ;; FIXME: Can't be used directly, should be option enabled by malli coercion
+            malli.util)
   #?(:clj
      (:import (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
@@ -64,7 +66,11 @@
   (reduce
     (fn [acc [k v]]
       (try
-        (mm/meta-merge acc {k v})
+        (case k
+          ;; TODO: Make this enabled from malli coercion
+          ;; TODO: Schema & spec
+          :parameters (assoc acc :parameters (merge-with malli.util/merge (:parameters acc) v))
+          (mm/meta-merge acc {k v}))
         (catch #?(:clj Exception, :cljs js/Error) e
           (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
     {} x))
