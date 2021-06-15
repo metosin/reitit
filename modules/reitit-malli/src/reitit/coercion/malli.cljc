@@ -132,7 +132,8 @@
   ([]
    (create nil))
   ([opts]
-   (let [{:keys [transformers compile options error-keys encode-error] :as opts} (merge default-options opts)
+   (let [{:keys [transformers compile options error-keys encode-error humanize-opts]
+          :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
          transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)]
      ^{:type ::coercion/coercion}
@@ -169,7 +170,8 @@
        (-open-model [_ schema] schema)
        (-encode-error [_ error]
          (cond-> error
-                 (show? :humanized) (assoc :humanized (me/humanize error {:wrap :message}))
+                 (show? :humanized) (assoc :humanized (me/humanize error (cond-> {:wrap :message}
+                                                                                 humanize-opts (merge humanize-opts))))
                  (show? :schema) (update :schema edn/write-string opts)
                  (show? :errors) (-> (me/with-error-messages opts)
                                      (update :errors (partial map #(update % :schema edn/write-string opts))))
