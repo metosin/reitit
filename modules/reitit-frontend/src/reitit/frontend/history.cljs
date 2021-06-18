@@ -50,7 +50,7 @@
         fragment)))
   (-href [this path]
     (if path
-      (str "#" path))))
+      (str  (.. js/window -location -pathname) "#" path))))
 
 (defn- closest-by-tag [el tag]
   ;; nodeName is upper case for HTML always,
