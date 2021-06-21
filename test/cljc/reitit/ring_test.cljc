@@ -471,9 +471,9 @@
 
              (testing "from root"
                (let [app (ring/ring-handler
-                           (ring/router
-                             ["/*" (create nil)])
-                           (ring/create-default-handler))]
+                          (ring/router
+                           ["/*" (create nil)])
+                          (ring/create-default-handler))]
                  (testing "different file-types"
                    (let [response (app (request "/hello.json"))]
                      (is (= "application/json" (get-in response [:headers "Content-Type"])))
@@ -483,6 +483,11 @@
                      (is (= "text/xml" (get-in response [:headers "Content-Type"])))
                      (is (get-in response [:headers "Last-Modified"]))
                      (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
@@ -519,6 +524,11 @@
                      (is (= "text/xml" (get-in response [:headers "Content-Type"])))
                      (is (get-in response [:headers "Last-Modified"]))
                      (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
@@ -557,6 +567,11 @@
                      (is (get-in response [:headers "Last-Modified"]))
                      (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
+
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
                      (is (= (redirect "/docs/index.html") response)))
@@ -594,6 +609,11 @@
                      (is (= "text/xml" (get-in response [:headers "Content-Type"])))
                      (is (get-in response [:headers "Last-Modified"]))
                      (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]

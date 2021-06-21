@@ -222,12 +222,12 @@
                                               (recur files))))))
            handler (if path
                      (fn [request]
-                       (let [uri (:uri request)]
+                       (let [uri (impl/url-decode (:uri request))]
                          (if (str/starts-with? uri path)
                            (or (path-or-index-response (subs uri path-size) uri)
                                (not-found-handler request)))))
                      (fn [request]
-                       (let [uri (:uri request)
+                       (let [uri (impl/url-decode (:uri request))
                              path (-> request :path-params parameter)]
                          (or (path-or-index-response path uri)
                              (not-found-handler request)))))]
