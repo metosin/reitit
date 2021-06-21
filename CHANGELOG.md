@@ -16,7 +16,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ### `reitit-ring`
 
-* Make `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` handle properly. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
+* Fixes `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` to support URL-escaped characters. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
 
 ## 0.5.13 (2021-04-23)
 
