@@ -89,7 +89,8 @@
         default-interceptors (->> interceptors
                                   (map #(interceptor/into-interceptor % nil (r/options router))))
         default-queue (interceptor/queue executor default-interceptors)
-        enrich-request (ring/create-enrich-request inject-match? inject-router?)]
+        enrich-request (ring/create-enrich-request inject-match? inject-router?)
+        enrich-default-request (ring/create-enrich-default-request inject-router?)]
     {:name ::router
      :enter (fn [{:keys [request] :as context}]
               (if-let [match (r/match-by-path router (:uri request))]
@@ -101,7 +102,9 @@
                       context (assoc context :request request)
                       queue (interceptor/queue executor (concat default-interceptors interceptors))]
                   (interceptor/enqueue executor context queue))
-                (interceptor/enqueue executor context default-queue)))
+                (let [request (enrich-default-request request router)
+                      context (assoc context :request request)]
+                  (interceptor/enqueue executor context default-queue))))
      :leave (fn [context]
               (if-not (:response context)
                 (assoc context :response (default-handler (:request context)))
