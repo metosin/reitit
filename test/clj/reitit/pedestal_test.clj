@@ -41,3 +41,25 @@
                     (:io.pedestal.http/service-fn))]
     (is (= "ok" (:body (io.pedestal.test/response-for service :get "/ok"))))
     (is (= 500 (:status (io.pedestal.test/response-for service :get "/fail"))))))
+
+(deftest pedestal-inject-router-test
+  (let [check-router (fn [r] (when-not (:reitit.core/router r)
+                               (throw (ex-info "Missing :reitit.core/router!" {}))))
+        interceptor {:name ::needs-router
+                     :enter (fn [{:as context :keys [request]}]
+                              (check-router request)
+                              context)}
+        router (pedestal/routing-interceptor
+                (http/router
+                 [""
+                  ["/ok" (fn [r] (check-router r) {:status 200, :body "ok"})]])
+                nil
+                {:interceptors [interceptor]})
+        service (-> {:io.pedestal.http/request-logger nil
+                     :io.pedestal.http/routes []}
+                    (io.pedestal.http/default-interceptors)
+                    (pedestal/replace-last-interceptor router)
+                    (io.pedestal.http/create-servlet)
+                    (:io.pedestal.http/service-fn))]
+    (is (= "ok" (:body (io.pedestal.test/response-for service :get "/ok"))))
+    (is (= "Not Found" (:body (io.pedestal.test/response-for service :get "/not-existing"))))))
