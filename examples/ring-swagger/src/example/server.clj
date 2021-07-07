@@ -11,8 +11,6 @@
             [reitit.ring.middleware.parameters :as parameters]
             ;; Uncomment to use
             ; [reitit.ring.middleware.dev :as dev]
-            ; [reitit.ring.spec :as spec]
-            ; [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]))
@@ -53,13 +51,15 @@
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
-                :parameters {:query {:x int?, :y int?}}
+                :parameters {:query {:x int?
+                                     :y int?}}
                 :responses {200 {:body {:total int?}}}
                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
                            {:status 200
                             :body {:total (+ x y)}})}
           :post {:summary "plus with spec body parameters"
-                 :parameters {:body {:x int?, :y int?}}
+                 :parameters {:body {:x int?
+                                     :y int?}}
                  :responses {200 {:body {:total int?}}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
@@ -80,7 +80,8 @@
                            ;; encoding response body
                            muuntaja/format-response-middleware
                            ;; exception handling
-                           exception/exception-middleware
+                           (exception/create-exception-middleware
+                             {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
                            ;; decoding request body
                            muuntaja/format-request-middleware
                            ;; coercing response bodys
