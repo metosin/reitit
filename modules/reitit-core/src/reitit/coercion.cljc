@@ -164,7 +164,7 @@
   "A router :compile implementation which reads the `:parameters`
   and `:coercion` data to create compiled coercers into Match under
   `:result. A pre-requisite to use [[coerce!]]."
-  [[_ {:keys [parameters coercion]}] opts]
+  [[_ {:keys [parameters coercion] :as match}] opts]
   (if (and parameters coercion)
     (request-coercers coercion parameters opts)))
 
