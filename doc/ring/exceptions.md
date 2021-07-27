@@ -4,7 +4,7 @@
 [metosin/reitit-middleware "0.5.13"]
 ```
 
-Exceptions thrown in router creation can be [handled with custom exception handler](../basics/error_messages.md). By default, exceptions thrown at runtime from a handler or a middleware are not caught by the `reitit.ring/ring-handler`. A good practise is a have an top-level exception handler to log and format the errors for clients.
+Exceptions thrown in router creation can be [handled with custom exception handler](../basics/error_messages.md). By default, exceptions thrown at runtime from a handler or a middleware are not caught by the `reitit.ring/ring-handler`. A good practice is to have a top-level exception handler to log and format errors for clients.
 
 ```clj
 (require '[reitit.ring.middleware.exception :as exception])
@@ -36,7 +36,7 @@ A preconfigured middleware using `exception/default-handlers`. Catches:
 
 ### `exception/create-exception-middleware`
 
-Creates the exception-middleware with custom options. Takes a map of `identifier => exception request => response` that is used to select the exception handler for the thrown/raised exception identifier. Exception identifier is either a `Keyword` or a Exception Class.
+Creates the exception-middleware with custom options. Takes a map of `identifier => exception request => response` that is used to select the exception handler for the thrown/raised exception identifier. Exception identifier is either a `Keyword` or an Exception Class.
 
 The following handlers are available by default:
 
@@ -55,7 +55,7 @@ The handler is selected from the options map by exception identifier in the foll
 2) Class of exception
 3) `:type` ancestors of exception ex-data
 4) Super Classes of exception
-5) The ::default handler
+5) The `::default` handler
 
 ```clj
 ;; type hierarchy
@@ -94,7 +94,7 @@ The handler is selected from the options map by exception identifier in the foll
 (def app
   (ring/ring-handler
     (ring/router
-      ["/fail" (fn [_] (throw (ex-info "fail" {:type ::failue})))]
+      ["/fail" (fn [_] (throw (ex-info "fail" {:type ::failure})))]
       {:data {:middleware [exception-middleware]}})))
 
 (app {:request-method :get, :uri "/fail"})
@@ -102,6 +102,6 @@ The handler is selected from the options map by exception identifier in the foll
 ; => {:status 500,
 ;     :body {:message "default"
 ;            :exception clojure.lang.ExceptionInfo
-;            :data {:type :user/failue}
+;            :data {:type :user/failure}
 ;            :uri "/fail"}}
 ```
