@@ -1,6 +1,6 @@
 # Default handler
 
-By default, if no routes match, `nil` is returned, which is not valid response in Ring:
+By default, if no routes match, `nil` is returned, which is not a valid response in Ring:
 
 ```clj
 (require '[reitit.ring :as ring])
