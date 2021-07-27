@@ -12,6 +12,21 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.46.0"] is available but we use "3.36.0"
+[metosin/jsonista "0.3.3"] is available but we use "0.3.1"
+[metosin/malli "0.5.1"] is available but we use "0.3.0"
+[com.fasterxml.jackson.core/jackson-core "2.12.4"] is available but we use "2.12.1"
+[com.fasterxml.jackson.core/jackson-databind "2.12.4"] is available but we use "2.12.1"
+[fipp "0.6.24"] is available but we use "0.6.23"
+[ring/ring-core "1.9.4"] is available but we use "1.9.1"
+[io.pedestal/pedestal.service "0.5.9"] is available but we use "0.5.8"
+```
+
 ## 0.5.13 (2021-04-23)
 
 * updated deps:
