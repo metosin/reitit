@@ -39,7 +39,7 @@ Responses are defined in route data under `:responses` key. It's value should be
 
 Below is an example with [Plumatic Schema](https://github.com/plumatic/schema). It defines schemas for `:query`, `:body` and `:path` parameters and for http 200 response `:body`.
 
-Handler can access the coerced parameters can be read under `:parameters` key in the request.
+Handlers can access the coerced parameters via the `:parameters` key in the request.
 
 ```clj
 (require '[reitit.coercion.schema])
@@ -71,7 +71,7 @@ Defining a coercion for a route data doesn't do anything, as it's just data. We 
 
 ### Full example
 
-Here's an full example for applying coercion with Reitit, Ring and Schema:
+Here is a full example for applying coercion with Reitit, Ring and Schema:
 
 ```clj
 (require '[reitit.ring.coercion :as rrc])
@@ -150,7 +150,7 @@ Invalid response:
 
 ## Pretty printing spec errors
 
-Spec problems are exposed as-is into request & response coercion errors, enabling pretty-printers like [expound](https://github.com/bhb/expound) to be used:
+Spec problems are exposed as is in request & response coercion errors. Pretty-printers like [expound](https://github.com/bhb/expound) can be enabled like this:
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -216,7 +216,7 @@ Spec problems are exposed as-is into request & response coercion errors, enablin
 
 ### Optimizations
 
-The coercion middleware are [compiled against a route](compiling_middleware.md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
+The coercion middlewares are [compiled against a route](compiling_middleware.md). In the middleware compilation step the actual coercer implementations are constructed for the defined models. Also, the middleware doesn't mount itself if a route doesn't have `:coercion` and `:parameters` or `:responses` defined.
 
 We can query the compiled middleware chain for the routes:
 
