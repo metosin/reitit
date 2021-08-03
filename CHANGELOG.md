@@ -27,6 +27,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [io.pedestal/pedestal.service "0.5.9"] is available but we use "0.5.8"
 ```
 
+### `reitit-ring`
+
+* Fixes `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` to support URL-escaped characters. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
+
 ### `reitit-malli`
 
 * FIX: Malli response coercision seems to do nothing at all [#498](https://github.com/metosin/reitit/pull/501)
