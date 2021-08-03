@@ -34,7 +34,7 @@
 (def json-transformer-provider (-provider (mt/json-transformer)))
 (def default-transformer-provider (-provider nil))
 
-(defn- -coercer [schema type transformers f encoder {:keys [validate enabled options]}]
+(defn- -coercer [schema type transformers f {:keys [validate enabled options]}]
   (if schema
     (let [->coercer (fn [t]
                       (let [decoder (if t (m/decoder schema options t) identity)
@@ -48,7 +48,6 @@
                           (-explain [_ value] (explainer value)))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
-          encode (or encoder (fn [value _format] value))
           format-coercers (some->> (for [[f t] formats] [f (->coercer t)]) (filter second) (seq) (into {}))
           get-coercer (cond format-coercers (fn [format] (or (get format-coercers format) default-coercer))
                             default-coercer (constantly default-coercer))]
@@ -66,14 +65,14 @@
               value))
           ;; encode: decode -> validate -> encode
           (fn [value format]
-            (if-let [coercer (get-coercer format)]
-              (let [transformed (-decode coercer value)]
+            (let [transformed (-decode default-coercer value)]
+              (if-let [coercer (get-coercer format)]
                 (if (-validate coercer transformed)
-                  (encode transformed format)
+                  (-encode coercer transformed)
                   (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
-                      (assoc error :transformed transformed)))))
-              value)))))))
+                      (assoc error :transformed transformed))))
+                value))))))))
 
 ;;
 ;; swagger
@@ -106,11 +105,13 @@
 ;; public api
 ;;
 
+;; TODO: this is much too compöex
 (def default-options
   {:transformers {:body {:default default-transformer-provider
                          :formats {"application/json" json-transformer-provider}}
                   :string {:default string-transformer-provider}
-                  :response {:default default-transformer-provider}}
+                  :response {:default default-transformer-provider
+                             :formats {"application/json" json-transformer-provider}}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
    ;; schema identity function (default: close all map schemas)
@@ -176,10 +177,8 @@
                  (seq error-keys) (select-keys error-keys)
                  encode-error (encode-error)))
        (-request-coercer [_ type schema]
-         (-coercer (compile schema options) type transformers :decode nil opts))
+         (-coercer (compile schema options) type transformers :decode opts))
        (-response-coercer [_ schema]
-         (let [schema (compile schema options)
-               encoder (-coercer schema :body transformers :encode nil opts)]
-           (-coercer schema :response transformers :encode encoder opts)))))))
+         (-coercer (compile schema options) :response transformers :encode opts))))))
 
 (def coercion (create default-options))
