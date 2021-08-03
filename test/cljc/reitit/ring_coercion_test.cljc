@@ -397,7 +397,7 @@
         (testing "encoding errors"
           (let [app (->app {:encode-error (fn [error] {:errors (:humanized error)})})]
             (is (= {:status 400, :body {:errors {:x ["missing required key"]}}}
-                    (app (assoc (->request "closed") :body-params {}))))))
+                   (app (assoc (->request "closed") :body-params {}))))))
 
         (testing "when schemas are not closed and extra keys are not stripped"
           (let [app (->app {:compile (fn [v _] v) :strip-extra-keys false})]
@@ -449,7 +449,35 @@
           (testing "failed response"
             (let [{:keys [status body]} (app (->request [{:message "kosh"}]))]
               (is (= 500 status))
-              (is (= :reitit.coercion/response-coercion (:type body))))))))))
+              (is (= :reitit.coercion/response-coercion (:type body))))))))
+
+    (testing "encoding responses"
+      (let [->app (fn [total-schema]
+                    (ring/ring-handler
+                      (ring/router
+                        ["/total" {:get {:parameters {:query [:map [:x :int]]}
+                                         :responses {200 {:body [:map [:total total-schema]]}}
+                                         :handler (fn [{{{:keys [x]} :query} :parameters}]
+                                                    {:status 200
+                                                     :body {:total (* x x)}})}}]
+                        {:data {:middleware [rrc/coerce-request-middleware
+                                             rrc/coerce-response-middleware]
+                                :coercion malli/coercion}})))
+            call (fn [accept total-schema]
+                   ((->app total-schema) {:uri "/total"
+                                          :request-method :get
+                                          :muuntaja/request {:format "application/json"}
+                                          :muuntaja/response {:format accept}
+                                          :query-params {"x" "2"}}))]
+
+        (testing "no encoding"
+          (is (= {:status 200, :body {:total +4}} (call "application/json" :int))))
+
+        (testing "json encoding"
+          (is (= {:status 200, :body {:total -4}} (call "application/json" [:int {:encode/json -}]))))
+
+        (testing "edn encoding (nada)"
+          (is (= {:status 200, :body {:total +4}} (call "application/edn" [:int {:encode/json -}]))))))))
 
 #?(:clj
    (deftest muuntaja-test

@@ -157,6 +157,7 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 * https://www.learnreitit.com/
 * Lipas, liikuntapalvelut: https://github.com/lipas-liikuntapaikat/lipas
 * Implementation of the Todo-Backend API spec, using Clojure, Ring/Reitit and next-jdbc: https://github.com/PrestanceDesign/todo-backend-clojure-reitit
+* Ping CRM, a single page app written in Clojure Ring, Reitit, Integrant and next.jdbc: https://github.com/prestancedesign/clojure-inertia-pingcrm-demo
 
 ## More info
 
