@@ -27,6 +27,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [io.pedestal/pedestal.service "0.5.9"] is available but we use "0.5.8"
 ```
 
+### `reitit-malli`
+
+* FIX: Malli response coercision seems to do nothing at all [#498](https://github.com/metosin/reitit/pull/501)
+
 ## 0.5.13 (2021-04-23)
 
 * updated deps:

@@ -207,24 +207,6 @@
           (let [{:keys [status]} (app invalid-request2)]
             (is (= 500 status))))))))
 
-(let [app (ring/ring-handler
-            (ring/router
-              ["/plus" {:get {:parameters {:query [:map [:x :int]]}
-                              :responses {200 {:body [:map
-                                                      [:total [:int {:encode/json str
-                                                                     :min 0}]]]}}
-                              :handler (fn [{{{:keys [x]} :query} :parameters}]
-                                         {:status 200
-                                          :body {:total (* x x)}})}}]
-              {:data {:middleware [rrc/coerce-request-middleware
-                                   rrc/coerce-response-middleware]
-                      :coercion malli/coercion}}))]
-  (app {:uri "/plus"
-        :request-method :get
-        :muuntaja/request {:format "application/json"}
-        :muuntaja/response {:format "application/json"}
-        :query-params {"x" "2"}}))
-
 (deftest malli-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
