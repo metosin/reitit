@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.15 (2021-08-05)
+
+* recompiled with Java8
+
 ## 0.5.14 (2021-08-03)
 
 * updated deps:
