@@ -1,5 +1,5 @@
 (ns reitit.coercion
-  (:require [clojure.walk :as walk]
+  (:require [#?(:clj reitit.walk :cljs clojure.walk) :as walk]
             [reitit.impl :as impl])
   #?(:clj
      (:import (java.io Writer))))
