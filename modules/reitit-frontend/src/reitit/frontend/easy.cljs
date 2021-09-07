@@ -10,7 +10,8 @@
 ;; Differences:
 ;; This one automatically removes previous event listeners.
 
-(defn start!
+(defn ^{:see-also ["reitit.frontend.history/start!"]}
+  start!
   "This registers event listeners on HTML5 history and hashchange events.
 
   Automatically removes previous event listeners so it is safe to call this repeatedly, for example when using
@@ -39,28 +40,57 @@
                        (on-navigate m this))
     opts))
 
-(defn href
-  ([k]
-   (rfh/href @history k nil nil))
-  ([k params]
-   (rfh/href @history k params nil))
-  ([k params query]
-   (rfh/href @history k params query)))
+(defn
+  ^{:see-also ["reitit.frontend.history/href"]}
+  href
+  "Generate link href for the given route and parameters
 
-(defn push-state
-  "Sets the new route, leaving previous route in history."
-  ([k]
-   (rfh/push-state @history k nil nil))
-  ([k params]
-   (rfh/push-state @history k params nil))
-  ([k params query]
-   (rfh/push-state @history k params query)))
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first."
+  ([name]
+   (rfh/href @history name nil nil))
+  ([name path-params]
+   (rfh/href @history name path-params nil))
+  ([name path-params query-params]
+   (rfh/href @history name path-params query-params)))
 
-(defn replace-state
-  "Replaces current route. I.e. current route is not left on history."
-  ([k]
-   (rfh/replace-state @history k nil nil))
-  ([k params]
-   (rfh/replace-state @history k params nil))
-  ([k params query]
-   (rfh/replace-state @history k params query)))
+(defn
+  ^{:see-also ["reitit.frontend.history/push-state"]}
+  push-state
+  "Creates url using the given route and parameters, pushes those to
+  history stack with pushState and triggers on-navigate callback on the
+  history handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
+  ([name]
+   (rfh/push-state @history name nil nil))
+  ([name path-params]
+   (rfh/push-state @history name path-params nil))
+  ([name path-params query-params]
+   (rfh/push-state @history name path-params query-params)))
+
+(defn
+  ^{:see-also ["reitit.frontend.history/replace-state"]}
+  replace-state
+  "Creates url using the given route and parameters, replaces latest entry on
+  history stack with replaceState and triggers on-navigate callback on the
+  history handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
+  ([name]
+   (rfh/replace-state @history name nil nil))
+  ([name path-params]
+   (rfh/replace-state @history name path-params nil))
+  ([name path-params query-params]
+   (rfh/replace-state @history name path-params query-params)))

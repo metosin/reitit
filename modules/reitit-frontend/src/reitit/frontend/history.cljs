@@ -171,40 +171,67 @@
               (map->FragmentHistory opts)
               (map->Html5History opts))))))
 
-(defn stop! [history]
+(defn stop!
+  "Stops the given history handler, removing the event handlers."
+  [history]
   (if history
     (-stop history)))
 
 (defn href
-  ([history k]
-   (href history k nil))
-  ([history k params]
-   (href history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)]
-     (-href history (reitit/match->path match query)))))
+  "Generate link href for the given route and parameters
 
-(defn push-state
-  "Sets the new route, leaving previous route in history."
-  ([history k]
-   (push-state history k nil nil))
-  ([history k params]
-   (push-state history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)
-         path (reitit/match->path match query)]
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first."
+  ([history name]
+   (href history name nil))
+  ([history name path-params]
+   (href history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)]
+     (-href history (reitit/match->path match query-params)))))
+
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  push-state
+  "Creates url using the given route and parameters, pushes those to
+  history stack with pushState and triggers on-navigate callback on the
+  history handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
+  ([history name]
+   (push-state history name nil nil))
+  ([history name path-params]
+   (push-state history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)
+         path (reitit/match->path match query-params)]
      ;; pushState and replaceState don't trigger popstate event so call on-navigate manually
      (.pushState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
 
 (defn replace-state
-  "Replaces current route. I.e. current route is not left on history."
-  ([history k]
-   (replace-state history k nil nil))
-  ([history k params]
-   (replace-state history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)
-         path (reitit/match->path match query)]
+  "Creates url using the given route and parameters, replaces latest entry on
+  history stack with replaceState and triggers on-navigate callback on the
+  history handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
+  ([history name]
+   (replace-state history name nil nil))
+  ([history name path-params]
+   (replace-state history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)
+         path (reitit/match->path match query-params)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
