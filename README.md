@@ -20,6 +20,8 @@ Presentations:
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
 
+**Status:** [stable](https://github.com/metosin/open-source#project-lifecycle-model)
+
 ## [Full Documentation](https://cljdoc.org/d/metosin/reitit/CURRENT)
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
