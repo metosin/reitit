@@ -121,6 +121,7 @@
                               :foo/bar "ei/toista/kertaa"}]
                      (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
               (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
+              (is (= [nil nil] (by-path "/files/file-..html")))
               (is (= [::loru {:eskon "viitan", :saum "aa"}] (by-path "/viitan/aa/pium\u2215paum")))
               (is (= [nil nil] (by-path "/ei/osu/pium/paum")))
               (is (= [::emoji {:🌈 "brackets"}] (by-path "/brackets🤔/🎈")))
