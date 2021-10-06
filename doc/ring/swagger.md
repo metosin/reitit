@@ -47,7 +47,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 [metosin/reitit-swagger-ui "0.5.15"]
 ```
 
-`reitit.swagger-ui/create-swagger-ui-hander` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:
+`reitit.swagger-ui/create-swagger-ui-handler` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:
 
 | key              | description |
 | -----------------|-------------|
