@@ -67,8 +67,8 @@ The compiled route tree:
 
 ```clj
 (r/routes router)
-; [["/api/ping" {:name :user/ping} nil]
-;  ["/api/user/:id" {:name :user/user} nil]]
+; [["/api/ping" {:name :user/ping}]
+;  ["/api/user/:id" {:name :user/user}]]
 ```
 
 ### Composing
