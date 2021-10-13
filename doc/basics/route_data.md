@@ -79,7 +79,7 @@ Resolved route tree:
 ;                :name :user/ping}]
 ;  ["/api/admin/users" {:interceptors [::api]
 ;                       :roles #{:admin}
-;                       :name ::users} nil]
+;                       :name ::users}]
 ;  ["/api/admin/db" {:interceptors [::api ::db]
 ;                    :roles #{:db-admin}}]]
 ```
