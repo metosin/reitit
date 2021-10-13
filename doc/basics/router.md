@@ -63,14 +63,6 @@ Route names:
 ; [:user/ping :user/user]
 ```
 
-The compiled route tree:
-
-```clj
-(r/routes router)
-; [["/api/ping" {:name :user/ping}]
-;  ["/api/user/:id" {:name :user/user}]]
-```
-
 ### Composing
 
 As routes are defined as plain data, it's easy to merge multiple route trees into a single router
