@@ -43,7 +43,10 @@
 (defn
   ^{:see-also ["reitit.frontend.history/href"]}
   href
-  "Generate link href for the given route and parameters
+  "Generate a URL for a route defined by name, with given path-params and query-params.
+
+  The URL is formatted using Reitit frontend history handler, so using it with
+  anchor element href will correctly trigger route change event.
 
   Note: currently collections in query-parameters are encoded as field-value
   pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
@@ -58,11 +61,13 @@
 (defn
   ^{:see-also ["reitit.frontend.history/push-state"]}
   push-state
-  "Creates url using the given route and parameters, pushes those to
-  history stack with pushState and triggers on-navigate callback on the
-  history handler.
+  "Updates the browser location and pushes new entry to the history stack using
+  URL built from a route defined by name, with given path-params and
+  query-params.
 
-  Note: currently collections in query-parameters are encoded as field-value
+  Will also trigger on-navigate callback on Reitit frontend History handler.
+
+  Note: currently collections in query parameters are encoded as field-value
   pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
   differently, convert the collections to strings first.
 
@@ -78,9 +83,11 @@
 (defn
   ^{:see-also ["reitit.frontend.history/replace-state"]}
   replace-state
-  "Creates url using the given route and parameters, replaces latest entry on
-  history stack with replaceState and triggers on-navigate callback on the
-  history handler.
+  "Updates the browser location and replaces latest entry in the history stack
+  using URL built from a route defined by name, with given path-params and
+  query-params.
+
+  Will also trigger on-navigate callback on Reitit frontend History handler.
 
   Note: currently collections in query-parameters are encoded as field-value
   pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
