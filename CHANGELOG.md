@@ -12,11 +12,21 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.15...master)**
+
+* Improved Reitit-frontend function docstrings
+
 ## 0.5.15 (2021-08-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.14...0.5.15)**
 
 * recompiled with Java8
 
 ## 0.5.14 (2021-08-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.13...0.5.14)**
 
 * updated deps:
 
@@ -45,6 +55,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.13 (2021-04-23)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.12...0.5.13)**
+
 * updated deps:
 
 ```clj
@@ -62,6 +74,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.12 (2021-02-01)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.11...0.5.12)**
+
 * updated deps:
 
 ```
@@ -78,6 +92,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.11 (2020-12-27)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.10...0.5.11)**
+
 * updated deps:
 
 ```clj
@@ -88,6 +104,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```
 
 ## 0.5.10 (2020-10-22)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.9...0.5.10)**
 
 * updated deps:
 
@@ -101,6 +119,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.9 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.8...0.5.9)**
+
 ### `reitit-frontend`
 
 - `reitit.frontend.easy/start!` now correctly removes old event listeners
@@ -109,9 +129,13 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.8 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.7...0.5.8)**
+
 * Add `:conflicting` to route data spec [#444](https://github.com/metosin/reitit/pull/444).
 
 ## 0.5.7 (2020-10-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.6...0.5.7)**
 
 * updated deps:
 
@@ -129,6 +153,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 * Automatically publish Swagger `:consumes` for `:form` params, fixes [#217](https://github.com/metosin/reitit/issues/217).
 
 ## 0.5.6 (2020-09-26)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.5...0.5.6)**
 
 * updated deps:
 
@@ -154,6 +180,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.5 (2020-07-15)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.4...0.5.5)**
+
 * recompile with Java8
 
 ```clj
@@ -162,17 +190,23 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.4 (2020-07-13)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.3...0.5.4)**
+
 ```clj
 [metosin/malli "0.0.1-20200713.080243-20"] is available but we use "0.0.1-20200709.163702-18"
 ```
 
 ## 0.5.3 (2020-07-09)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.2...0.5.3)**
+
 ```clj
 [metosin/malli "0.0.1-20200709.163702-18"] is available but we use "0.0.1-20200525.162645-15"
 ```
 
 ## 0.5.2 (2020-05-27)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.1...0.5.2)**
 
 ```clj
 [metosin/malli "0.0.1-20200525.162645-15"] is available but we use "0.0.1-20200404.091302-14"
@@ -198,6 +232,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 * Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
 ## 0.5.1 (2020-05-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.0...0.5.1)**
 
 ```clj
 [metosin/sieppari "0.0.0-alpha13"] is available but we use "0.0.0-alpha10"
