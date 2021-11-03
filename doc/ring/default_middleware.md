@@ -17,7 +17,7 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 `reitit.ring.middleware.parameters/parameters-middleware` to capture query- and form-params. Wraps
 `ring.middleware.params/wrap-params`.
 
-**NOTE**: will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.
+**NOTE**: This middleware will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.  cf. https://github.com/metosin/reitit/issues/134
 
 ## Exception Handling
 
