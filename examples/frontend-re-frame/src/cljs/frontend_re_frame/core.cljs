@@ -7,6 +7,14 @@
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]))
 
+;;; Effects ;;;
+
+;; Triggering navigation from events.
+
+(re-frame/reg-fx :push-state
+  (fn [route]
+    (apply rfe/push-state route)))
+
 ;;; Events ;;;
 
 (re-frame/reg-event-db ::initialize-db
@@ -16,7 +24,7 @@
       {:current-route nil})))
 
 (re-frame/reg-event-fx ::push-state
-  (fn [db [_ & route]]
+  (fn [_ [_ & route]]
     {:push-state route}))
 
 (re-frame/reg-event-db ::navigated
@@ -48,14 +56,6 @@
 (defn sub-page2 []
   [:div
    [:h1 "This is sub-page 2"]])
-
-;;; Effects ;;;
-
-;; Triggering navigation from events.
-
-(re-frame/reg-fx :push-state
-  (fn [route]
-    (apply rfe/push-state route)))
 
 ;;; Routes ;;;
 
