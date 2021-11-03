@@ -94,3 +94,8 @@
    (rfh/replace-state @history name path-params nil))
   ([name path-params query-params]
    (rfh/replace-state @history name path-params query-params)))
+
+(defn
+  update-query
+  ([f & args]
+   ))

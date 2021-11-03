@@ -3,8 +3,9 @@
   events."
   (:require [reitit.core :as reitit]
             [reitit.frontend :as rf]
-            [goog.events :as gevents])
-  (:import goog.Uri))
+            [goog.events :as gevents]
+            goog.Uri
+            goog.Uri.QueryData))
 
 (defprotocol History
   (-init [this] "Create event listeners")
@@ -78,7 +79,7 @@
   the page location is updated using History API."
   [router e el uri]
   (let [current-domain (if (exists? js/location)
-                         (.getDomain (.parse Uri js/location)))]
+                         (.getDomain (.parse goog.Uri js/location)))]
     (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
              (= current-domain (.getDomain uri)))
          (not (.-altKey e))
@@ -109,7 +110,7 @@
           ignore-anchor-click (fn [e]
                                 ;; Returns the next matching ancestor of event target
                                 (when-let [el (closest-by-tag (event-target e) "a")]
-                                  (let [uri (.parse Uri (.-href el))]
+                                  (let [uri (.parse goog.Uri (.-href el))]
                                     (when (ignore-anchor-click-predicate router e el uri)
                                       (.preventDefault e)
                                       (let [path (str (.getPath uri)
@@ -235,3 +236,22 @@
          path (reitit/match->path match query-params)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
+
+(defn
+  update-query
+  "Parses query-string part of current URL into Clojure map,
+  and applies given function to that to create new query-string map,
+  and encodes those to create new URL, "
+  [history method f & args]
+  ;; FIXME: Better way?
+  (assert (#{:replace :push} method))
+  (let [f (case method
+            :replace (.-replaceState js/window.history)
+            :push (.-pushState js/window.history))
+        ^goog.Uri uri (goog.Uri/parse (-get-path history))
+        query (rf/query-params uri)
+        new-query (apply f query args)]
+    (.setQueryData uri (goog.Uri.QueryData/createFromMap (clj->js new-query)))
+    ;; TODO: Not sure if this "/" handling is required, history -get-path maybe handles this?
+    (f (str (when (empty? (.getPath uri)) "/")
+            (.toString uri)))))
