@@ -108,8 +108,8 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
               :muuntaja   m/instance
               :middleware [parameters/parameters-middleware
                            rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware
-                           muuntaja/format-response-middleware]}})))
+                           muuntaja/format-response-middleware
+                           rrc/coerce-response-middleware]}})))
 ```
 
 Valid request:
