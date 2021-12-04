@@ -252,15 +252,3 @@
                 (str/join "&" (map query-parameter (repeat k) v))
                 (query-parameter k v))))
        (str/join "&")))
-
-(defmacro goog-extend [type base-type ctor & methods]
-  `(do
-     (def ~type (fn ~@ctor))
-
-     (goog/inherits ~type ~base-type)
-
-     ~@(map
-         (fn [method]
-           `(set! (.. ~type -prototype ~(symbol (str "-" (first method))))
-                  (fn ~@(rest method))))
-         methods)))
