@@ -8,7 +8,7 @@
             [malli.core :as m]
             [clojure.set :as set]
             [clojure.walk :as walk]
-            [meta-merge.core :as mm]))
+            [reitit.impl :as impl]))
 
 ;;
 ;; coercion
@@ -181,9 +181,10 @@
          (-coercer (compile schema options) type transformers :decode opts))
        (-response-coercer [_ schema]
          (-coercer (compile schema options) :response transformers :encode opts))
+       impl/RouteDataMerge
        (-route-data-merge [_ acc k v]
          (case k
            :parameters (assoc acc :parameters (merge-with mu/merge (:parameters acc) v))
-           (mm/meta-merge acc {k v})))))))
+           (impl/default-route-data-merge acc k v)))))))
 
 (def coercion (create default-options))

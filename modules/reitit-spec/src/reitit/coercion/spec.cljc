@@ -137,6 +137,7 @@
     (-response-coercer [this spec]
       (if (coerce-response? spec)
         (coercion/-request-coercer this :response spec)))
+    impl/RouteDataMerge
     (-route-data-merge [this acc k v]
       (impl/default-route-data-merge acc k v))))
 

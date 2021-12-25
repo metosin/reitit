@@ -96,6 +96,7 @@
     (-response-coercer [this schema]
       (if (coerce-response? schema)
         (coercion/-request-coercer this :response schema)))
+    impl/RouteDataMerge
     (-route-data-merge [this acc k v]
       (impl/default-route-data-merge acc k v))))
 

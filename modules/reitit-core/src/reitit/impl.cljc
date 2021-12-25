@@ -9,6 +9,9 @@
      (:import (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
 
+(defprotocol RouteDataMerge
+  (-route-data-merge [this acc k v]))
+
 (defn parse [path opts]
   (let [path #?(:clj (.intern ^String (trie/normalize path opts)) :cljs (trie/normalize path opts))
         path-parts (trie/split-path path opts)
@@ -67,13 +70,15 @@
   (let [;; Find last the effective :coercion value
         ;; for the route, and then use the cocercion
         ;; instance for route data merge implementation.
+        ;; TODO: other options/keys should also be able to control
+        ;; merge?
         coercion (->> x
                       reverse
                       (some (fn [[k v]]
                               (when (= :coercion k)
                                 v))))
         route-data-merge (if coercion
-                           #((resolve 'reitit.coercion/-route-data-merge) coercion %1 %2 %3)
+                           #(-route-data-merge coercion %1 %2 %3)
                            default-route-data-merge)]
     (reduce
       (fn [acc [k v]]
@@ -85,8 +90,7 @@
       x)))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
-  (cond->> (->> (walk raw-routes opts)
-                (map-data merge-data))
+  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
            coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]

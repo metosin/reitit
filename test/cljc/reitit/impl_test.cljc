@@ -190,25 +190,27 @@
                            [:view 'b]
                            [:controllers ^:replace [2]]])))
 
-  (is (= {:a schema/Str
-          :b schema/Str}
-         (-> (impl/merge-data "/"
-                              [[:parameters {:path {:a schema/Str}}]
-                               [:parameters {:path {:b schema/Str}}]])
-             :parameters
-             :path)))
+  (testing "Schema - regular merge"
+    (is (= {:a schema/Str
+            :b schema/Str}
+           (-> (impl/merge-data "/"
+                                [[:parameters {:path {:a schema/Str}}]
+                                 [:parameters {:path {:b schema/Str}}]])
+               :parameters
+               :path))))
 
-  (is (= [:map
-          [:a 'string?]
-          [:b 'int?]]
-         (-> (impl/merge-data "/"
-                              [[:coercion rcm/coercion]
-                               [:parameters {:path [:map [:a 'string?]]}]
-                               [:parameters {:path [:map [:b 'int?]]}]])
-             :parameters
-             :path
-             ;; Merge returns schema object, convert back to form for comparison
-             malli.core/form)))
+  (testing "Malli schema merge - mu/merge"
+    (is (= [:map
+            [:a 'string?]
+            [:b 'int?]]
+           (-> (impl/merge-data "/"
+                                [[:coercion rcm/coercion]
+                                 [:parameters {:path [:map [:a 'string?]]}]
+                                 [:parameters {:path [:map [:b 'int?]]}]])
+               :parameters
+               :path
+               ;; Merge returns schema object, convert back to form for comparison
+               malli.core/form))))
 
-  ;; TODO: Also test and support Schema and spec merging
+  ;; TODO: Spec
   )
