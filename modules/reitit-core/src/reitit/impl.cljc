@@ -63,18 +63,30 @@
 (defn default-route-data-merge [acc k v]
   (mm/meta-merge acc {k v}))
 
-(defn merge-data [route-data-merge p x]
-  (reduce
-    (fn [acc [k v]]
-      (try
-        (route-data-merge acc k v)
-        (catch #?(:clj Exception, :cljs js/Error) e
-          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
-    {} x))
+(defn merge-data [p x]
+  (let [;; Find last the effective :coercion value
+        ;; for the route, and then use the cocercion
+        ;; instance for route data merge implementation.
+        coercion (->> x
+                      reverse
+                      (some (fn [[k v]]
+                              (when (= :coercion k)
+                                v))))
+        route-data-merge (if coercion
+                           #((resolve 'reitit.coercion/-route-data-merge) coercion %1 %2 %3)
+                           default-route-data-merge)]
+    (reduce
+      (fn [acc [k v]]
+        (try
+          (route-data-merge acc k v)
+          (catch #?(:clj Exception, :cljs js/Error) e
+            (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
+      {}
+      x)))
 
-(defn resolve-routes [raw-routes {:keys [coerce _merge] :as opts}]
+(defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts)
-                (map-data (partial merge-data (or (:merge opts) default-route-data-merge))))
+                (map-data merge-data))
            coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]

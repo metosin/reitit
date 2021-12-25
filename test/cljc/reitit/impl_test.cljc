@@ -176,8 +176,7 @@
 (deftest merge-data-test
   (is (= {:view 'b
           :controllers [1 2]}
-         (impl/merge-data impl/default-route-data-merge
-                          "/"
+         (impl/merge-data "/"
                           [[:view 'a]
                            [:controllers [1]]
                            [:view 'b]
@@ -185,8 +184,7 @@
 
   (is (= {:view 'b
           :controllers [2]}
-         (impl/merge-data impl/default-route-data-merge
-                          "/"
+         (impl/merge-data "/"
                           [[:view 'a]
                            [:controllers [1]]
                            [:view 'b]
@@ -194,8 +192,7 @@
 
   (is (= {:a schema/Str
           :b schema/Str}
-         (-> (impl/merge-data rcm/route-data-merge
-                              "/"
+         (-> (impl/merge-data "/"
                               [[:parameters {:path {:a schema/Str}}]
                                [:parameters {:path {:b schema/Str}}]])
              :parameters
@@ -204,9 +201,9 @@
   (is (= [:map
           [:a 'string?]
           [:b 'int?]]
-         (-> (impl/merge-data rcm/route-data-merge
-                              "/"
-                              [[:parameters {:path [:map [:a 'string?]]}]
+         (-> (impl/merge-data "/"
+                              [[:coercion rcm/coercion]
+                               [:parameters {:path [:map [:a 'string?]]}]
                                [:parameters {:path [:map [:b 'int?]]}]])
              :parameters
              :path

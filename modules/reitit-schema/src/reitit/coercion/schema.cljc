@@ -7,7 +7,8 @@
             [schema-tools.coerce :as stc]
             [schema-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]
-            [clojure.set :as set]))
+            [clojure.set :as set]
+            [reitit.impl :as impl]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)
@@ -94,6 +95,8 @@
             value))))
     (-response-coercer [this schema]
       (if (coerce-response? schema)
-        (coercion/-request-coercer this :response schema)))))
+        (coercion/-request-coercer this :response schema)))
+    (-route-data-merge [this acc k v]
+      (impl/default-route-data-merge acc k v))))
 
 (def coercion (create default-options))

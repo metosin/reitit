@@ -4,6 +4,7 @@
             [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
             [spec-tools.swagger.core :as swagger]
             [reitit.coercion :as coercion]
+            [reitit.impl :as impl]
             [clojure.set :as set])
   #?(:clj
      (:import (spec_tools.core Spec)
@@ -135,6 +136,8 @@
             value))))
     (-response-coercer [this spec]
       (if (coerce-response? spec)
-        (coercion/-request-coercer this :response spec)))))
+        (coercion/-request-coercer this :response spec)))
+    (-route-data-merge [this acc k v]
+      (impl/default-route-data-merge acc k v))))
 
 (def coercion (create default-options))

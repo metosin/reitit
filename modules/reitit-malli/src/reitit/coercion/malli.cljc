@@ -180,11 +180,10 @@
        (-request-coercer [_ type schema]
          (-coercer (compile schema options) type transformers :decode opts))
        (-response-coercer [_ schema]
-         (-coercer (compile schema options) :response transformers :encode opts))))))
+         (-coercer (compile schema options) :response transformers :encode opts))
+       (-route-data-merge [_ acc k v]
+         (case k
+           :parameters (assoc acc :parameters (merge-with mu/merge (:parameters acc) v))
+           (mm/meta-merge acc {k v})))))))
 
 (def coercion (create default-options))
-
-(defn route-data-merge [acc k v]
-  (case k
-    :parameters (assoc acc :parameters (merge-with mu/merge (:parameters acc) v))
-    (mm/meta-merge acc {k v})))
