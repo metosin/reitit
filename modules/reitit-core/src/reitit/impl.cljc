@@ -4,9 +4,7 @@
             [clojure.set :as set]
             [meta-merge.core :as mm]
             [reitit.trie :as trie]
-            [reitit.exception :as ex]
-            ;; FIXME: Can't be used directly, should be option enabled by malli coercion
-            malli.util)
+            [reitit.exception :as ex])
   #?(:clj
      (:import (java.util HashMap Map)
               (java.net URLEncoder URLDecoder))))
@@ -62,21 +60,21 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [p x]
+(defn default-route-data-merge [acc k v]
+  (mm/meta-merge acc {k v}))
+
+(defn merge-data [route-data-merge p x]
   (reduce
     (fn [acc [k v]]
       (try
-        (case k
-          ;; TODO: Make this enabled from malli coercion
-          ;; TODO: Schema & spec
-          :parameters (assoc acc :parameters (merge-with malli.util/merge (:parameters acc) v))
-          (mm/meta-merge acc {k v}))
+        (route-data-merge acc k v)
         (catch #?(:clj Exception, :cljs js/Error) e
           (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
     {} x))
 
-(defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
-  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
+(defn resolve-routes [raw-routes {:keys [coerce _merge] :as opts}]
+  (cond->> (->> (walk raw-routes opts)
+                (map-data (partial merge-data (or (:merge opts) default-route-data-merge))))
            coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]

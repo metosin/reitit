@@ -7,7 +7,8 @@
             [malli.swagger :as swagger]
             [malli.core :as m]
             [clojure.set :as set]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk]
+            [meta-merge.core :as mm]))
 
 ;;
 ;; coercion
@@ -182,3 +183,8 @@
          (-coercer (compile schema options) :response transformers :encode opts))))))
 
 (def coercion (create default-options))
+
+(defn route-data-merge [acc k v]
+  (case k
+    :parameters (assoc acc :parameters (merge-with mu/merge (:parameters acc) v))
+    (mm/meta-merge acc {k v})))

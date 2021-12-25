@@ -360,7 +360,8 @@
   | `:validate`  | Function of `routes opts => ()` to validate route (data) via side-effects
   | `:conflicts` | Function of `{route #{route}} => ()` to handle conflicting routes
   | `:exception` | Function of `Exception => Exception ` to handle creation time exceptions (default `reitit.exception/exception`)
-  | `:router`    | Function of `routes opts => router` to override the actual router implementation"
+  | `:router`    | Function of `routes opts => router` to override the actual router implementation
+  | `:merge`     | Function of `route-data key value` to add new kv pair to route-data map. Default uses merge-merge."
   ([raw-routes]
    (router raw-routes {}))
   ([raw-routes opts]

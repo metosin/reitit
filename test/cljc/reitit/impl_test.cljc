@@ -1,6 +1,9 @@
 (ns reitit.impl-test
   (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+            [reitit.coercion.malli :as rcm]
+            [malli.core :as m]
+            [schema.core :as schema]))
 
 (deftest strip-nils-test
   (is (= {:a 1, :c false} (impl/strip-nils {:a 1, :b nil, :c false}))))
@@ -173,7 +176,8 @@
 (deftest merge-data-test
   (is (= {:view 'b
           :controllers [1 2]}
-         (impl/merge-data "/"
+         (impl/merge-data impl/default-route-data-merge
+                          "/"
                           [[:view 'a]
                            [:controllers [1]]
                            [:view 'b]
@@ -181,21 +185,32 @@
 
   (is (= {:view 'b
           :controllers [2]}
-         (impl/merge-data "/"
+         (impl/merge-data impl/default-route-data-merge
+                          "/"
                           [[:view 'a]
                            [:controllers [1]]
                            [:view 'b]
                            [:controllers ^:replace [2]]])))
 
+  (is (= {:a schema/Str
+          :b schema/Str}
+         (-> (impl/merge-data rcm/route-data-merge
+                              "/"
+                              [[:parameters {:path {:a schema/Str}}]
+                               [:parameters {:path {:b schema/Str}}]])
+             :parameters
+             :path)))
+
   (is (= [:map
           [:a 'string?]
           [:b 'int?]]
-         (-> (impl/merge-data "/"
+         (-> (impl/merge-data rcm/route-data-merge
+                              "/"
                               [[:parameters {:path [:map [:a 'string?]]}]
                                [:parameters {:path [:map [:b 'int?]]}]])
              :parameters
              :path
-             ;; Merge returns schmea object, convert back to form for comparison
+             ;; Merge returns schema object, convert back to form for comparison
              malli.core/form)))
 
   ;; TODO: Also test and support Schema and spec merging
