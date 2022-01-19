@@ -17,6 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 **[compare](https://github.com/metosin/reitit/compare/0.5.15...master)**
 
 * Improved Reitit-frontend function docstrings
+* Allow multimethods to be interpreted as interceptors
 
 ## 0.5.15 (2021-08-05)
 

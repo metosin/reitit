@@ -31,6 +31,11 @@
 (defn handler [request]
   (conj request :ok))
 
+(defmulti multimethod-handler (fn [request] (get request :type)))
+
+(defmethod multimethod-handler :default [request]
+  (conj request :multi-ok))
+
 (defn create
   ([interceptors]
    (create interceptors nil))
@@ -210,11 +215,11 @@
           i5 {:compile (fn [{:keys [mount?]} _]
                          (when mount?
                            (interceptor ::i5)))}
-          chain1 (interceptor/chain [i1 i2 i3 i4 i5 handler] {:mount? true})
-          chain2 (interceptor/chain [i1 i2 i3 i4 i5 handler] {:mount? false})
+          chain1 (interceptor/chain [i1 i2 i3 i4 i5 handler multimethod-handler] {:mount? true})
+          chain2 (interceptor/chain [i1 i2 i3 i4 i5 handler multimethod-handler] {:mount? false})
           chain3 (interceptor/chain [i1 i2 i3 i4 i5] {:mount? false})]
-      (is (= [::enter_i1 ::enter_i3 ::enter_i4 ::enter_i5 :ok ::leave_i5 ::leave_i4 ::leave_i3 ::leave_i1] (execute chain1 ctx)))
-      (is (= [::enter_i1 ::enter_i3 ::enter_i4 :ok ::leave_i4 ::leave_i3 ::leave_i1] (execute chain2 ctx)))
+      (is (= [::enter_i1 ::enter_i3 ::enter_i4 ::enter_i5 :ok :multi-ok ::leave_i5 ::leave_i4 ::leave_i3 ::leave_i1] (execute chain1 ctx)))
+      (is (= [::enter_i1 ::enter_i3 ::enter_i4 :ok :multi-ok ::leave_i4 ::leave_i3 ::leave_i1] (execute chain2 ctx)))
       (is (= [::leave_i4 ::leave_i3 ::leave_i1] (execute chain3 ctx))))))
 
 (deftest interceptor-transform-test
