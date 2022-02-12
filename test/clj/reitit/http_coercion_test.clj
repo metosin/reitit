@@ -74,20 +74,20 @@
 (deftest spec-coercion-test
   (let [create (fn [interceptors]
                  (http/ring-handler
-                   (http/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {:a int?}
-                                           :body {:b int?}
-                                           :form {:c int?}
-                                           :header {:d int?}
-                                           :path {:e int?}}
-                              :responses {200 {:body {:total pos-int?}}
-                                          500 {:description "fail"}}
-                              :handler handler}}]]
-                     {:data {:interceptors interceptors
-                             :coercion spec/coercion}})
-                   {:executor sieppari/executor}))]
+                  (http/router
+                   ["/api"
+                    ["/plus/:e"
+                     {:get {:parameters {:query {:a int?}
+                                         :body {:b int?}
+                                         :form {:c int?}
+                                         :header {:d int?}
+                                         :path {:e int?}}
+                            :responses {200 {:body {:total pos-int?}}
+                                        500 {:description "fail"}}
+                            :handler handler}}]]
+                   {:data {:interceptors interceptors
+                           :coercion spec/coercion}})
+                  {:executor sieppari/executor}))]
 
     (testing "without exception handling"
       (let [app (create [(rrc/coerce-request-interceptor)
@@ -103,15 +103,15 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))))
 
     (testing "with exception handling"
       (let [app (create [(rrc/coerce-exceptions-interceptor)
@@ -134,20 +134,20 @@
 (deftest schema-coercion-test
   (let [create (fn [middleware]
                  (http/ring-handler
-                   (http/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {:a s/Int}
-                                           :body {:b s/Int}
-                                           :form {:c s/Int}
-                                           :header {:d s/Int}
-                                           :path {:e s/Int}}
-                              :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}
-                                          500 {:description "fail"}}
-                              :handler handler}}]]
-                     {:data {:interceptors middleware
-                             :coercion schema/coercion}})
-                   {:executor sieppari/executor}))]
+                  (http/router
+                   ["/api"
+                    ["/plus/:e"
+                     {:get {:parameters {:query {:a s/Int}
+                                         :body {:b s/Int}
+                                         :form {:c s/Int}
+                                         :header {:d s/Int}
+                                         :path {:e s/Int}}
+                            :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}
+                                        500 {:description "fail"}}
+                            :handler handler}}]]
+                   {:data {:interceptors middleware
+                           :coercion schema/coercion}})
+                  {:executor sieppari/executor}))]
 
     (testing "without exception handling"
       (let [app (create [(rrc/coerce-request-interceptor)
@@ -163,15 +163,15 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))
 
         (testing "with exception handling"
           (let [app (create [(rrc/coerce-exceptions-interceptor)
@@ -194,51 +194,51 @@
 (deftest malli-coercion-test
   (let [create (fn [interceptors]
                  (http/ring-handler
-                   (http/router
-                     ["/api"
+                  (http/router
+                   ["/api"
 
-                      ["/validate" {:summary "just validation"
-                                    :coercion (reitit.coercion.malli/create {:transformers {}})
-                                    :post {:parameters {:body [:map [:x int?]]}
-                                           :responses {200 {:body [:map [:x int?]]}}
-                                           :handler (fn [req]
-                                                      {:status 200
-                                                       :body (-> req :parameters :body)})}}]
+                    ["/validate" {:summary "just validation"
+                                  :coercion (reitit.coercion.malli/create {:transformers {}})
+                                  :post {:parameters {:body [:map [:x int?]]}
+                                         :responses {200 {:body [:map [:x int?]]}}
+                                         :handler (fn [req]
+                                                    {:status 200
+                                                     :body (-> req :parameters :body)})}}]
 
-                      ["/no-op" {:summary "no-operation"
-                                 :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
-                                 :post {:parameters {:body [:map [:x int?]]}
-                                        :responses {200 {:body [:map [:x int?]]}}
-                                        :handler (fn [req]
-                                                   {:status 200
-                                                    :body (-> req :parameters :body)})}}]
+                    ["/no-op" {:summary "no-operation"
+                               :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
+                               :post {:parameters {:body [:map [:x int?]]}
+                                      :responses {200 {:body [:map [:x int?]]}}
+                                      :handler (fn [req]
+                                                 {:status 200
+                                                  :body (-> req :parameters :body)})}}]
 
-                      ["/skip" {:summary "skip"
-                                :coercion (reitit.coercion.malli/create {:enabled false})
-                                :post {:parameters {:body [:map [:x int?]]}
-                                       :responses {200 {:body [:map [:x int?]]}}
-                                       :handler (fn [req]
-                                                  {:status 200
-                                                   :body (-> req :parameters :body)})}}]
-
-                      ["/or" {:post {:summary "accepts either of two map schemas"
-                                     :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
-                                     :responses {200 {:body [:map [:msg string?]]}}
-                                     :handler (fn [{{{:keys [x]} :body} :parameters}]
+                    ["/skip" {:summary "skip"
+                              :coercion (reitit.coercion.malli/create {:enabled false})
+                              :post {:parameters {:body [:map [:x int?]]}
+                                     :responses {200 {:body [:map [:x int?]]}}
+                                     :handler (fn [req]
                                                 {:status 200
-                                                 :body {:msg (if x "you sent x" "you sent y")}})}}]
+                                                 :body (-> req :parameters :body)})}}]
 
-                      ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
-                                                      :body [:map [:b int?]]
-                                                      :form [:map [:c [int? {:default 3}]]]
-                                                      :header [:map [:d int?]]
-                                                      :path [:map [:e int?]]}
-                                         :responses {200 {:body [:map [:total pos-int?]]}
-                                                     500 {:description "fail"}}
-                                         :handler handler}}]]
-                     {:data {:interceptors interceptors
-                             :coercion malli/coercion}})
-                   {:executor sieppari/executor}))]
+                    ["/or" {:post {:summary "accepts either of two map schemas"
+                                   :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
+                                   :responses {200 {:body [:map [:msg string?]]}}
+                                   :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                              {:status 200
+                                               :body {:msg (if x "you sent x" "you sent y")}})}}]
+
+                    ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
+                                                    :body [:map [:b int?]]
+                                                    :form [:map [:c [int? {:default 3}]]]
+                                                    :header [:map [:d int?]]
+                                                    :path [:map [:e int?]]}
+                                       :responses {200 {:body [:map [:total pos-int?]]}
+                                                   500 {:description "fail"}}
+                                       :handler handler}}]]
+                   {:data {:interceptors interceptors
+                           :coercion malli/coercion}})
+                  {:executor sieppari/executor}))]
 
     (testing "withut exception handling"
       (let [app (create [(rrc/coerce-request-interceptor)
@@ -249,8 +249,8 @@
                   :body {:total 15}}
                  (app valid-request1)))
           #_(is (= {:status 200
-                  :body {:total 115}}
-                 (app valid-request2)))
+                    :body {:total 115}}
+                   (app valid-request2)))
           (is (= {:status 200
                   :body {:total 15}}
                  (app valid-request3)))
@@ -264,15 +264,15 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))))
 
     (testing "with exception handling"
       (let [app (create [(rrc/coerce-exceptions-interceptor)
@@ -339,16 +339,16 @@
                                          {:status 200, :body (assoc body :response true)})}})
             ->app (fn [options]
                     (http/ring-handler
-                      (http/router
-                        ["/api"
-                         ["/default" (endpoint [:map [:x int?]])]
-                         ["/closed" (endpoint [:map {:closed true} [:x int?]])]
-                         ["/open" (endpoint [:map {:closed false} [:x int?]])]]
-                        {:data {:interceptors [(rrc/coerce-exceptions-interceptor)
-                                               (rrc/coerce-request-interceptor)
-                                               (rrc/coerce-response-interceptor)]
-                                :coercion (malli/create options)}})
-                      {:executor sieppari/executor}))
+                     (http/router
+                      ["/api"
+                       ["/default" (endpoint [:map [:x int?]])]
+                       ["/closed" (endpoint [:map {:closed true} [:x int?]])]
+                       ["/open" (endpoint [:map {:closed false} [:x int?]])]]
+                      {:data {:interceptors [(rrc/coerce-exceptions-interceptor)
+                                             (rrc/coerce-request-interceptor)
+                                             (rrc/coerce-response-interceptor)]
+                              :coercion (malli/create options)}})
+                     {:executor sieppari/executor}))
             ->request (fn [uri] {:uri (str "/api/" uri)
                                  :request-method :get
                                  :muuntaja/request {:format "application/json"}
@@ -399,23 +399,23 @@
 
     (testing "sequence schemas"
       (let [app (http/ring-handler
-                  (http/router
-                    ["/ping" {:get {:parameters {:body [:vector [:map [:message string?]]]}
-                                    :responses {200 {:body [:vector [:map [:pong string?]]]}
-                                                501 {:body [:vector [:map [:error string?]]]}}
-                                    :handler (fn [{{[{:keys [message]}] :body} :parameters :as req}]
-                                               (condp = message
-                                                 "ping" {:status 200
-                                                         :body [{:pong message}]}
-                                                 "fail" {:status 501
-                                                         :body [{:error "fail"}]}
-                                                 {:status 200
-                                                  :body {:invalid "response"}}))}}]
-                    {:data {:interceptors [(rrc/coerce-exceptions-interceptor)
-                                           (rrc/coerce-request-interceptor)
-                                           (rrc/coerce-response-interceptor)]
-                            :coercion malli/coercion}})
-                  {:executor sieppari/executor})
+                 (http/router
+                  ["/ping" {:get {:parameters {:body [:vector [:map [:message string?]]]}
+                                  :responses {200 {:body [:vector [:map [:pong string?]]]}
+                                              501 {:body [:vector [:map [:error string?]]]}}
+                                  :handler (fn [{{[{:keys [message]}] :body} :parameters :as req}]
+                                             (condp = message
+                                               "ping" {:status 200
+                                                       :body [{:pong message}]}
+                                               "fail" {:status 501
+                                                       :body [{:error "fail"}]}
+                                               {:status 200
+                                                :body {:invalid "response"}}))}}]
+                  {:data {:interceptors [(rrc/coerce-exceptions-interceptor)
+                                         (rrc/coerce-request-interceptor)
+                                         (rrc/coerce-response-interceptor)]
+                          :coercion malli/coercion}})
+                 {:executor sieppari/executor})
             ->request (fn [body]
                         {:uri "/ping"
                          :request-method :get
@@ -439,19 +439,19 @@
 
 (deftest muuntaja-test
   (let [app (http/ring-handler
-              (http/router
-                ["/api"
-                 ["/plus"
-                  {:post {:parameters {:body {:int int?, :keyword keyword?}}
-                          :responses {200 {:body {:int int?, :keyword keyword?}}}
-                          :handler (fn [{{:keys [body]} :parameters}]
-                                     {:status 200
-                                      :body body})}}]]
-                {:data {:interceptors [(muuntaja.interceptor/format-interceptor)
-                                       (rrc/coerce-response-interceptor)
-                                       (rrc/coerce-request-interceptor)]
-                        :coercion spec/coercion}})
-              {:executor sieppari/executor})
+             (http/router
+              ["/api"
+               ["/plus"
+                {:post {:parameters {:body {:int int?, :keyword keyword?}}
+                        :responses {200 {:body {:int int?, :keyword keyword?}}}
+                        :handler (fn [{{:keys [body]} :parameters}]
+                                   {:status 200
+                                    :body body})}}]]
+              {:data {:interceptors [(muuntaja.interceptor/format-interceptor)
+                                     (rrc/coerce-response-interceptor)
+                                     (rrc/coerce-request-interceptor)]
+                      :coercion spec/coercion}})
+             {:executor sieppari/executor})
         request (fn [content-type body]
                   (-> {:request-method :post
                        :headers {"content-type" content-type, "accept" content-type}

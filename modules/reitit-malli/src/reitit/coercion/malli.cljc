@@ -26,9 +26,9 @@
   (reify TransformationProvider
     (-transformer [_ {:keys [strip-extra-keys default-values]}]
       (mt/transformer
-        (if strip-extra-keys (mt/strip-extra-keys-transformer))
-        transformer
-        (if default-values (mt/default-value-transformer))))))
+       (if strip-extra-keys (mt/strip-extra-keys-transformer))
+       transformer
+       (if default-values (mt/default-value-transformer))))))
 
 (def string-transformer-provider (-provider (mt/string-transformer)))
 (def json-transformer-provider (-provider (mt/json-transformer)))
@@ -61,7 +61,7 @@
                   transformed
                   (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
-                      (assoc error :transformed transformed)))))
+                     (assoc error :transformed transformed)))))
               value))
           ;; encode: decode -> validate -> encode
           (fn [value format]
@@ -71,7 +71,7 @@
                   (-encode coercer transformed)
                   (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
-                      (assoc error :transformed transformed))))
+                     (assoc error :transformed transformed))))
                 value))))))))
 
 ;;
@@ -91,15 +91,15 @@
 (defmethod extract-parameter :default [in schema options]
   (let [{:keys [properties required]} (swagger/transform schema (merge options {:in in, :type :parameter}))]
     (mapv
-      (fn [[k {:keys [type] :as schema}]]
-        (merge
-          {:in (name in)
-           :name k
-           :description (:description schema "")
-           :type type
-           :required (contains? (set required) k)}
-          schema))
-      properties)))
+     (fn [[k {:keys [type] :as schema}]]
+       (merge
+        {:in (name in)
+         :name k
+         :description (:description schema "")
+         :type type
+         :required (contains? (set required) k)}
+        schema))
+     properties)))
 
 ;;
 ;; public api
@@ -143,39 +143,39 @@
        (-get-apidocs [_ specification {:keys [parameters responses]}]
          (case specification
            :swagger (merge
-                      (if parameters
-                        {:parameters
-                         (->> (for [[in schema] parameters
-                                    parameter (extract-parameter in (compile schema options) options)]
-                                parameter)
-                              (into []))})
-                      (if responses
-                        {:responses
-                         (into
-                           (empty responses)
-                           (for [[status response] responses]
-                             [status (as-> response $
-                                           (set/rename-keys $ {:body :schema})
-                                           (update $ :description (fnil identity ""))
-                                           (if (:schema $)
-                                             (-> $
-                                                 (update :schema compile options)
-                                                 (update :schema swagger/transform {:type :schema}))
-                                             $))]))}))
+                     (if parameters
+                       {:parameters
+                        (->> (for [[in schema] parameters
+                                   parameter (extract-parameter in (compile schema options) options)]
+                               parameter)
+                             (into []))})
+                     (if responses
+                       {:responses
+                        (into
+                         (empty responses)
+                         (for [[status response] responses]
+                           [status (as-> response $
+                                     (set/rename-keys $ {:body :schema})
+                                     (update $ :description (fnil identity ""))
+                                     (if (:schema $)
+                                       (-> $
+                                           (update :schema compile options)
+                                           (update :schema swagger/transform {:type :schema}))
+                                       $))]))}))
            (throw
-             (ex-info
-               (str "Can't produce Schema apidocs for " specification)
-               {:type specification, :coercion :schema}))))
+            (ex-info
+             (str "Can't produce Schema apidocs for " specification)
+             {:type specification, :coercion :schema}))))
        (-compile-model [_ model _] (compile model options))
        (-open-model [_ schema] schema)
        (-encode-error [_ error]
          (cond-> error
-                 (show? :humanized) (assoc :humanized (me/humanize error {:wrap :message}))
-                 (show? :schema) (update :schema edn/write-string opts)
-                 (show? :errors) (-> (me/with-error-messages opts)
-                                     (update :errors (partial map #(update % :schema edn/write-string opts))))
-                 (seq error-keys) (select-keys error-keys)
-                 encode-error (encode-error)))
+           (show? :humanized) (assoc :humanized (me/humanize error {:wrap :message}))
+           (show? :schema) (update :schema edn/write-string opts)
+           (show? :errors) (-> (me/with-error-messages opts)
+                               (update :errors (partial map #(update % :schema edn/write-string opts))))
+           (seq error-keys) (select-keys error-keys)
+           encode-error (encode-error)))
        (-request-coercer [_ type schema]
          (-coercer (compile schema options) type transformers :decode opts))
        (-response-coercer [_ schema]

@@ -15,10 +15,10 @@
    (create middleware nil))
   ([middleware opts]
    (middleware/chain
-     middleware
-     handler
-     :data
-     opts)))
+    middleware
+    handler
+    :data
+    opts)))
 
 (deftest expand-middleware-test
 
@@ -61,9 +61,9 @@
 
         (testing "missing keyword"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Middleware :wrap not found in registry"
-                (create [:wrap]))))
+               ExceptionInfo
+               #"Middleware :wrap not found in registry"
+               (create [:wrap]))))
 
         (testing "existing keyword, compiling to nil"
           (let [app (create [:wrap] {::middleware/registry {:wrap {:compile (constantly nil)}}})]
@@ -142,9 +142,9 @@
         (testing "too deeply compiled Middleware fails"
           (binding [middleware/*max-compile-depth* 2]
             (is (thrown?
-                  ExceptionInfo
-                  #"Too deep Middleware compilation"
-                  (create [[(middleware/map->Middleware mw3) :value]])))))
+                 ExceptionInfo
+                 #"Too deep Middleware compilation"
+                 (create [[(middleware/map->Middleware mw3) :value]])))))
 
         (testing "nil unmounts the middleware"
           (let [app (create [{:compile (constantly nil)}
@@ -162,9 +162,9 @@
 
   (testing "all paths should have a handler"
     (is (thrown-with-msg?
-          ExceptionInfo
-          #"path \"/ping\" doesn't have a :handler defined"
-          (middleware/router ["/ping"]))))
+         ExceptionInfo
+         #"path \"/ping\" doesn't have a :handler defined"
+         (middleware/router ["/ping"]))))
 
   (testing "middleware-handler"
     (let [mw (fn [handler value]
@@ -173,11 +173,11 @@
           api-mw #(mw % :api)
           handler #(conj % :ok)
           router (middleware/router
-                   [["/ping" handler]
-                    ["/api" {:middleware [api-mw]}
-                     ["/ping" handler]
-                     ["/admin" {:middleware [[mw :admin]]}
-                      ["/ping" handler]]]])
+                  [["/ping" handler]
+                   ["/api" {:middleware [api-mw]}
+                    ["/ping" handler]
+                    ["/admin" {:middleware [[mw :admin]]}
+                     ["/ping" handler]]]])
           app (create-app router)]
 
       (testing "not found"
@@ -197,9 +197,9 @@
               mw2 {:name ::mw2, :compile (constantly nil)}
               mw3 {:name ::mw3, :wrap #(mw % ::mw3)}
               router (middleware/router
-                       ["/api" {:name ::api
-                                :middleware [mw1 mw2 mw3 mw2]
-                                :handler handler}])
+                      ["/api" {:name ::api
+                               :middleware [mw1 mw2 mw3 mw2]
+                               :handler handler}])
               app (create-app router)]
 
           (is (= [::mw1 ::mw3 :ok ::mw3 ::mw1] (app "/api")))
@@ -241,12 +241,12 @@
         debug-mw {:name ::debug, :wrap #(wrap % ::debug)}
         create (fn [options]
                  (create-app
-                   (middleware/router
-                     ["/ping" {:middleware [{:name ::olipa, :wrap #(wrap % ::olipa)}
-                                            {:name ::kerran, :wrap #(wrap % ::kerran)}
-                                            {:name ::avaruus, :wrap #(wrap % ::avaruus)}]
-                               :handler #(conj % :ok)}]
-                     options)))]
+                  (middleware/router
+                   ["/ping" {:middleware [{:name ::olipa, :wrap #(wrap % ::olipa)}
+                                          {:name ::kerran, :wrap #(wrap % ::kerran)}
+                                          {:name ::avaruus, :wrap #(wrap % ::avaruus)}]
+                             :handler #(conj % :ok)}]
+                   options)))]
 
     (testing "by default, all middleware are applied in order"
       (let [app (create nil)]

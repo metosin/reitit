@@ -10,8 +10,8 @@
                       ::coercion/response-coercion 500
                       nil)]
       (respond
-        {:status status
-         :body (coercion/encode-error data)})
+       {:status status
+        :body (coercion/encode-error data)})
       (raise e))))
 
 ;;

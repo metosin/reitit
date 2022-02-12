@@ -28,11 +28,11 @@
 
 (deftest pedestal-e2e-test
   (let [router (pedestal/routing-interceptor
-                 (http/router
-                   [""
-                    {:interceptors [{:name :nop} (exception/exception-interceptor)]}
-                    ["/ok" (fn [_] {:status 200, :body "ok"})]
-                    ["/fail" (fn [_] (throw (ex-info "kosh" {})))]]))
+                (http/router
+                 [""
+                  {:interceptors [{:name :nop} (exception/exception-interceptor)]}
+                  ["/ok" (fn [_] {:status 200, :body "ok"})]
+                  ["/fail" (fn [_] (throw (ex-info "kosh" {})))]]))
         service (-> {:io.pedestal.http/request-logger nil
                      :io.pedestal.http/routes []}
                     (io.pedestal.http/default-interceptors)

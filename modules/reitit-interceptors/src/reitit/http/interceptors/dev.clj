@@ -36,16 +36,16 @@
   [stages {:keys [enter leave error name] :as interceptor}]
   (if (->> (select-keys interceptor stages) (vals) (keep identity) (seq))
     (cond-> {:name ::diff}
-            (and enter (stages :enter)) (assoc :enter (handle name :enter))
-            (and leave (stages :leave)) (assoc :leave (handle name :leave))
-            (and error (stages :error)) (assoc :error (handle name :error)))))
+      (and enter (stages :enter)) (assoc :enter (handle name :enter))
+      (and leave (stages :leave)) (assoc :leave (handle name :leave))
+      (and error (stages :error)) (assoc :error (handle name :error)))))
 
 (defn print-context-diffs
   "A interceptor chain transformer that adds a context diff printer between all interceptors"
   [interceptors]
   (reduce
-    (fn [chain interceptor]
-      (into chain (keep identity [(diff-interceptor #{:leave :error} interceptor)
-                                  interceptor
-                                  (diff-interceptor #{:enter} interceptor)])))
-    [(diff-interceptor #{:enter :leave :error} {:enter identity})] interceptors))
+   (fn [chain interceptor]
+     (into chain (keep identity [(diff-interceptor #{:leave :error} interceptor)
+                                 interceptor
+                                 (diff-interceptor #{:enter} interceptor)])))
+   [(diff-interceptor #{:enter :leave :error} {:enter identity})] interceptors))

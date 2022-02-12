@@ -40,10 +40,10 @@
     :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
-                   (stripped (muuntaja.interceptor/format-interceptor muuntaja))
-                   (if (publish-swagger-data? parameters)
-                     {:data {:swagger {:produces (displace (m/encodes muuntaja))
-                                       :consumes (displace (m/decodes muuntaja))}}}))))}))
+                  (stripped (muuntaja.interceptor/format-interceptor muuntaja))
+                  (if (publish-swagger-data? parameters)
+                    {:data {:swagger {:produces (displace (m/encodes muuntaja))
+                                      :consumes (displace (m/decodes muuntaja))}}}))))}))
 
 (defn format-negotiate-interceptor
   "Interceptor for content-negotiation.
@@ -87,9 +87,9 @@
     :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
-                   (stripped (muuntaja.interceptor/format-request-interceptor muuntaja))
-                   (when (publish-swagger-data? parameters)
-                     {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}}))))}))
+                  (stripped (muuntaja.interceptor/format-request-interceptor muuntaja))
+                  (when (publish-swagger-data? parameters)
+                    {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}}))))}))
 
 (defn format-response-interceptor
   "Interceptor for response formatting.
@@ -112,6 +112,6 @@
     :compile (fn [{:keys [muuntaja parameters]} _]
                (if-let [muuntaja (or muuntaja default-muuntaja)]
                  (merge
-                   (stripped (muuntaja.interceptor/format-response-interceptor muuntaja))
-                   (when (publish-swagger-data? parameters)
-                     {:data {:swagger {:produces (displace (m/encodes muuntaja))}}}))))}))
+                  (stripped (muuntaja.interceptor/format-response-interceptor muuntaja))
+                  (when (publish-swagger-data? parameters)
+                    {:data {:swagger {:produces (displace (m/encodes muuntaja))}}}))))}))

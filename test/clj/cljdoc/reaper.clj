@@ -11,11 +11,10 @@
                           wrap (if (pos? (count indent)) vector identity)]
                       (wrap [name {:file (str "doc/" file)}])))
                   (reduce
-                    (fn [acc data]
-                      (if (vector? (first data))
-                        (update-in acc [(dec (count acc)) 2] (fnil into []) data)
-                        (conj acc data))
-                      ) [])
+                   (fn [acc data]
+                     (if (vector? (first data))
+                       (update-in acc [(dec (count acc)) 2] (fnil into []) data)
+                       (conj acc data))) [])
                   ;; third sweep to flatten chids...
                   (mapv (fn [[n o c]] (if c (into [n o] c) [n o]))))
         data {:cljdoc/include-namespaces-from-dependencies ['metosin/reitit

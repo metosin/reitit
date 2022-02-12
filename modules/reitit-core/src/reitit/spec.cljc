@@ -16,9 +16,9 @@
 
 (s/def ::raw-route
   (s/nilable
-    (s/cat :path ::path
-           :arg (s/? ::arg)
-           :childs (s/* (s/and (s/nilable ::raw-routes))))))
+   (s/cat :path ::path
+          :arg (s/? ::arg)
+          :childs (s/* (s/and (s/nilable ::raw-routes))))))
 
 (s/def ::raw-routes
   (s/or :route ::raw-route
@@ -60,19 +60,19 @@
 
 (s/def ::opts
   (s/nilable
-    (s/keys :opt-un [:reitit.router/path
-                     :reitit.router/routes
-                     :reitit.router/data
-                     :reitit.router/expand
-                     :reitit.router/coerce
-                     :reitit.router/compile
-                     :reitit.router/conflicts
-                     :reitit.router/router])))
+   (s/keys :opt-un [:reitit.router/path
+                    :reitit.router/routes
+                    :reitit.router/data
+                    :reitit.router/expand
+                    :reitit.router/coerce
+                    :reitit.router/compile
+                    :reitit.router/conflicts
+                    :reitit.router/router])))
 
 (s/fdef r/router
-        :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
-                    :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
-        :ret ::router)
+  :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
+              :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
+  :ret ::router)
 
 ;;
 ;; coercion
@@ -128,15 +128,15 @@
 (defn validate [routes {:keys [spec] ::keys [wrap] :or {spec ::default-data, wrap identity}}]
   (when-let [problems (validate-route-data routes wrap spec)]
     (exception/fail!
-      ::invalid-route-data
-      {:problems problems})))
+     ::invalid-route-data
+     {:problems problems})))
 
 (defmethod exception/format-exception :reitit.spec/invalid-route-data [_ _ {:keys [problems]}]
   (apply str "Invalid route data:\n\n"
          (mapv
-           (fn [{:keys [path scope data spec]}]
-             (str "-- On route -----------------------\n\n"
-                  (pr-str path) (if scope (str " " (pr-str scope))) "\n\n"
-                  (pr-str data) "\n\n"
-                  (s/explain-str spec data) "\n"))
-           problems)))
+          (fn [{:keys [path scope data spec]}]
+            (str "-- On route -----------------------\n\n"
+                 (pr-str path) (if scope (str " " (pr-str scope))) "\n\n"
+                 (pr-str data) "\n\n"
+                 (s/explain-str spec data) "\n"))
+          problems)))

@@ -28,33 +28,33 @@
   Also works on vectors. Maintains key for maps, order for vectors."
   [f coll]
   (reduce-kv
-    (fn [coll k v]
-      (if-some [v' (f v)]
-        (assoc coll k v')
-        coll))
-    coll
-    coll))
+   (fn [coll k v]
+     (if-some [v' (f v)]
+       (assoc coll k v')
+       coll))
+   coll
+   coll))
 
 (defn walk [raw-routes {:keys [path data routes expand]
                         :or {data [], routes []}
                         :as opts}]
   (letfn
-    [(walk-many [p m r]
-       (reduce #(into %1 (walk-one p m %2)) [] r))
-     (walk-one [pacc macc routes]
-       (if (vector? (first routes))
-         (walk-many pacc macc routes)
-         (when (string? (first routes))
-           (let [[path & [maybe-arg :as args]] routes
-                 [data childs] (if (or (vector? maybe-arg)
-                                       (and (sequential? maybe-arg)
-                                            (sequential? (first maybe-arg)))
-                                       (nil? maybe-arg))
-                                 [{} args]
-                                 [maybe-arg (rest args)])
-                 macc (into macc (expand data opts))
-                 child-routes (walk-many (str pacc path) macc (keep identity childs))]
-             (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
+   [(walk-many [p m r]
+      (reduce #(into %1 (walk-one p m %2)) [] r))
+    (walk-one [pacc macc routes]
+      (if (vector? (first routes))
+        (walk-many pacc macc routes)
+        (when (string? (first routes))
+          (let [[path & [maybe-arg :as args]] routes
+                [data childs] (if (or (vector? maybe-arg)
+                                      (and (sequential? maybe-arg)
+                                           (sequential? (first maybe-arg)))
+                                      (nil? maybe-arg))
+                                [{} args]
+                                [maybe-arg (rest args)])
+                macc (into macc (expand data opts))
+                child-routes (walk-many (str pacc path) macc (keep identity childs))]
+            (if (seq childs) (seq child-routes) [[(str pacc path) macc]])))))]
     (walk-one path (mapv identity data) raw-routes)))
 
 (defn map-data [f routes]
@@ -62,25 +62,25 @@
 
 (defn merge-data [p x]
   (reduce
-    (fn [acc [k v]]
-      (try
-        (mm/meta-merge acc {k v})
-        (catch #?(:clj Exception, :cljs js/Error) e
-          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
-    {} x))
+   (fn [acc [k v]]
+     (try
+       (mm/meta-merge acc {k v})
+       (catch #?(:clj Exception, :cljs js/Error) e
+         (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
+   {} x))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
   (cond->> (->> (walk raw-routes opts) (map-data merge-data))
-           coerce (into [] (keep #(coerce % opts)))))
+    coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
   (let [parts-and-routes (mapv (fn [[s :as r]] [(trie/split-path s opts) r]) routes)]
     (-> (into {} (comp (map-indexed (fn [index [p r]]
                                       [r (reduce
-                                           (fn [acc [p' r']]
-                                             (if (trie/conflicting-parts? p p')
-                                               (conj acc r') acc))
-                                           #{} (subvec parts-and-routes (inc index)))]))
+                                          (fn [acc [p' r']]
+                                            (if (trie/conflicting-parts? p p')
+                                              (conj acc r') acc))
+                                          #{} (subvec parts-and-routes (inc index)))]))
                        (filter (comp seq second))) parts-and-routes)
         (not-empty))))
 
@@ -123,13 +123,13 @@
 (defn path-for [route path-params]
   (if (:path-params route)
     (if-let [parts (reduce
-                     (fn [acc part]
-                       (if (string? part)
-                         (conj acc part)
-                         (if-let [p (get path-params (:value part))]
-                           (conj acc p)
-                           (reduced nil))))
-                     [] (:path-parts route))]
+                    (fn [acc part]
+                      (if (string? part)
+                        (conj acc part)
+                        (if-let [p (get path-params (:value part))]
+                          (conj acc p)
+                          (reduced nil))))
+                    [] (:path-parts route))]
       (apply str parts))
     (:path route)))
 
@@ -138,8 +138,8 @@
     (let [defined (-> path-params keys set)
           missing (set/difference required defined)]
       (ex/fail!
-        (str "missing path-params for route " template " -> " missing)
-        {:path-params path-params, :required required}))))
+       (str "missing path-params for route " template " -> " missing)
+       {:path-params path-params, :required required}))))
 
 (defn fast-assoc
   #?@(:clj  [[^clojure.lang.Associative a k v] (.assoc a k v)]
@@ -178,10 +178,10 @@
   (if s
     #?(:clj  (if (.contains ^String s "%")
                (URLDecoder/decode
-                 (if (.contains ^String s "+")
-                   (.replace ^String s "+" "%2B")
-                   ^String s)
-                 "UTF-8"))
+                (if (.contains ^String s "+")
+                  (.replace ^String s "+" "%2B")
+                  ^String s)
+                "UTF-8"))
        :cljs (js/decodeURIComponent s))))
 
 (defn url-decode [s]

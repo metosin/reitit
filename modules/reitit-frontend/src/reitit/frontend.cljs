@@ -64,11 +64,11 @@
          (let [defined (-> path-params keys set)
                missing (set/difference (:required match) defined)]
            (js/console.warn
-             "missing path-params for route" name
-             {:template (:template match)
-              :missing missing
-              :path-params path-params
-              :required (:required match)})
+            "missing path-params for route" name
+            {:template (:template match)
+             :missing missing
+             :path-params path-params
+             :required (:required match)})
            nil))
        match)
      (do (js/console.warn "missing route" name)

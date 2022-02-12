@@ -31,10 +31,10 @@
      ([options]
       (let [config-json (fn [{:keys [url config]}] (j/write-value-as-string (merge config {:url url})))
             options (as-> options $
-                          (update $ :root (fnil identity "swagger-ui"))
-                          (update $ :url (fnil identity "/swagger.json"))
-                          (assoc $ :paths {"/config.json" {:headers {"Content-Type" "application/json"}
-                                                           :status 200
-                                                           :body (config-json $)}}))]
+                      (update $ :root (fnil identity "swagger-ui"))
+                      (update $ :url (fnil identity "/swagger.json"))
+                      (assoc $ :paths {"/config.json" {:headers {"Content-Type" "application/json"}
+                                                       :status 200
+                                                       :body (config-json $)}}))]
         (ring/routes
-          (ring/create-resource-handler options))))))
+         (ring/create-resource-handler options))))))

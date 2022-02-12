@@ -25,11 +25,11 @@
         error-handler (or (get handlers type)
                           (get handlers ex-class)
                           (some
-                            (partial get handlers)
-                            (descendants type))
+                           (partial get handlers)
+                           (descendants type))
                           (some
-                            (partial get handlers)
-                            (super-classes ex-class))
+                           (partial get handlers)
+                           (super-classes ex-class))
                           (get handlers ::default))]
     (if-let [wrap (get handlers ::wrap)]
       (wrap error-handler error request)

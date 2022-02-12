@@ -38,7 +38,7 @@
                        (when (nil? @history)
                          (reset! history this))
                        (on-navigate m this))
-    opts))
+              opts))
 
 (defn
   ^{:see-also ["reitit.frontend.history/href"]}

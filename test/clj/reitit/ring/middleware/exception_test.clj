@@ -18,25 +18,25 @@
              (create f nil))
             ([f wrap]
              (ring/ring-handler
-               (ring/router
-                 [["/defaults"
-                   {:handler f}]
-                  ["/http-response"
-                   {:handler (fn [req]
-                               (http-response/unauthorized! "Unauthorized"))}]
-                  ["/coercion"
-                   {:middleware [reitit.ring.coercion/coerce-request-middleware
-                                 reitit.ring.coercion/coerce-response-middleware]
-                    :coercion reitit.coercion.spec/coercion
-                    :parameters {:query {:x int?, :y int?}}
-                    :responses {200 {:body {:total pos-int?}}}
-                    :handler f}]]
-                 {:data {:middleware [(exception/create-exception-middleware
-                                        (merge
-                                          exception/default-handlers
-                                          {::kikka (constantly {:status 400, :body "kikka"})
-                                           SQLException (constantly {:status 400, :body "sql"})
-                                           ::exception/wrap wrap}))]}}))))]
+              (ring/router
+               [["/defaults"
+                 {:handler f}]
+                ["/http-response"
+                 {:handler (fn [req]
+                             (http-response/unauthorized! "Unauthorized"))}]
+                ["/coercion"
+                 {:middleware [reitit.ring.coercion/coerce-request-middleware
+                               reitit.ring.coercion/coerce-response-middleware]
+                  :coercion reitit.coercion.spec/coercion
+                  :parameters {:query {:x int?, :y int?}}
+                  :responses {200 {:body {:total pos-int?}}}
+                  :handler f}]]
+               {:data {:middleware [(exception/create-exception-middleware
+                                     (merge
+                                      exception/default-handlers
+                                      {::kikka (constantly {:status 400, :body "kikka"})
+                                       SQLException (constantly {:status 400, :body "sql"})
+                                       ::exception/wrap wrap}))]}}))))]
 
     (testing "normal calls work ok"
       (let [response {:status 200, :body "ok"}
@@ -65,7 +65,6 @@
             app (create (fn [_] (throw (ex-info "Unauthorized!" {:type ::http-response/response
                                                                  :response response}))))]
         (is (= response (app {:request-method :post, :uri "/http-response"})))))
-
 
     (testing ":muuntaja/decode"
       (let [app (create (fn [_] (m/decode m/instance "application/json" "{:so \"invalid\"}")))]
@@ -130,21 +129,21 @@
 
 (deftest spec-coercion-exception-test
   (let [app (ring/ring-handler
-              (ring/router
-                ["/plus"
-                 {:get
-                  {:parameters {:query {:x int?, :y int?}}
-                   :responses {200 {:body {:total pos-int?}}}
-                   :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                              {:status 200, :body {:total (+ x y)}})}}]
-                {:data {:coercion reitit.coercion.spec/coercion
-                        :middleware [(exception/create-exception-middleware
-                                       (merge
-                                         exception/default-handlers
-                                         {::coercion/request-coercion (fn [e _] {:status 400, :body (ex-data e)})
-                                          ::coercion/response-coercion (fn [e _] {:status 500, :body (ex-data e)})}))
-                                     reitit.ring.coercion/coerce-request-middleware
-                                     reitit.ring.coercion/coerce-response-middleware]}}))]
+             (ring/router
+              ["/plus"
+               {:get
+                {:parameters {:query {:x int?, :y int?}}
+                 :responses {200 {:body {:total pos-int?}}}
+                 :handler (fn [{{{:keys [x y]} :query} :parameters}]
+                            {:status 200, :body {:total (+ x y)}})}}]
+              {:data {:coercion reitit.coercion.spec/coercion
+                      :middleware [(exception/create-exception-middleware
+                                    (merge
+                                     exception/default-handlers
+                                     {::coercion/request-coercion (fn [e _] {:status 400, :body (ex-data e)})
+                                      ::coercion/response-coercion (fn [e _] {:status 500, :body (ex-data e)})}))
+                                   reitit.ring.coercion/coerce-request-middleware
+                                   reitit.ring.coercion/coerce-response-middleware]}}))]
     (testing "success"
       (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "2"}})]
         (is (= 200 status))

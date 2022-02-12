@@ -17,12 +17,12 @@
   (are [exception]
     (are [error routes]
       (is (thrown-with-msg?
-            ExceptionInfo
-            error
-            (r/router
-              routes
-              {:validate rs/validate
-               :exception exception})))
+           ExceptionInfo
+           error
+           (r/router
+            routes
+            {:validate rs/validate
+             :exception exception})))
 
       #"Router contains conflicting route paths"
       [["/:a/1"]

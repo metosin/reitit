@@ -17,23 +17,23 @@
              (create f nil))
             ([f wrap]
              (http/ring-handler
-               (http/router
-                 [["/defaults"
-                   {:handler f}]
-                  ["/coercion"
-                   {:interceptors [(reitit.http.coercion/coerce-request-interceptor)
-                                   (reitit.http.coercion/coerce-response-interceptor)]
-                    :coercion reitit.coercion.spec/coercion
-                    :parameters {:query {:x int?, :y int?}}
-                    :responses {200 {:body {:total pos-int?}}}
-                    :handler f}]]
-                 {:data {:interceptors [(exception/exception-interceptor
-                                          (merge
-                                            exception/default-handlers
-                                            {::kikka (constantly {:status 400, :body "kikka"})
-                                             SQLException (constantly {:status 400, :body "sql"})
-                                             ::exception/wrap wrap}))]}})
-               {:executor sieppari/executor})))]
+              (http/router
+               [["/defaults"
+                 {:handler f}]
+                ["/coercion"
+                 {:interceptors [(reitit.http.coercion/coerce-request-interceptor)
+                                 (reitit.http.coercion/coerce-response-interceptor)]
+                  :coercion reitit.coercion.spec/coercion
+                  :parameters {:query {:x int?, :y int?}}
+                  :responses {200 {:body {:total pos-int?}}}
+                  :handler f}]]
+               {:data {:interceptors [(exception/exception-interceptor
+                                       (merge
+                                        exception/default-handlers
+                                        {::kikka (constantly {:status 400, :body "kikka"})
+                                         SQLException (constantly {:status 400, :body "sql"})
+                                         ::exception/wrap wrap}))]}})
+              {:executor sieppari/executor})))]
 
     (testing "normal calls work ok"
       (let [response {:status 200, :body "ok"}

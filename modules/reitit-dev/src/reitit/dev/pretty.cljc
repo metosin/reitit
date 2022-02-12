@@ -152,13 +152,13 @@
    (printer nil))
   ([options]
    (map->EdnPrinter
-     (merge
-       {:width 80
-        :symbols {}
-        :print-length *print-length*
-        :print-level *print-level*
-        :print-meta *print-meta*}
-       options))))
+    (merge
+     {:width 80
+      :symbols {}
+      :print-length *print-length*
+      :print-level *print-level*
+      :print-meta *print-meta*}
+     options))))
 
 (defn pprint
   ([x] (pprint x {}))
@@ -209,13 +209,13 @@
 (defn exception-str [message source printer]
   (with-out-str
     (print-doc
-      [:group
-       (title "Router creation failed" source printer)
-       [:break] [:break]
-       message
-       [:break]
-       (footer printer)]
-      printer)))
+     [:group
+      (title "Router creation failed" source printer)
+      [:break] [:break]
+      message
+      [:break]
+      (footer printer)]
+     printer)))
 
 (defmulti format-exception (fn [type _ _] type))
 
@@ -231,11 +231,11 @@
 
 (defn de-expound-colors [^String s mappings]
   (let [s' (reduce
-             (fn [s [from to]]
-               (.replace ^String s
-                         ^String (expound.ansi/esc [from])
-                         ^String (-start (colors to))))
-             s mappings)]
+            (fn [s [from to]]
+              (.replace ^String s
+                        ^String (expound.ansi/esc [from])
+                        ^String (-start (colors to))))
+            s mappings)]
     (.replace ^String s'
               ^String (expound.ansi/esc [:none])
               (str (expound.ansi/esc [:none]) (-start (colors :text))))))
@@ -254,9 +254,9 @@
 
 (def expound-printer
   (expound.alpha/custom-printer
-    {:theme :figwheel-theme
-     :show-valid-values? false
-     :print-specs? false}))
+   {:theme :figwheel-theme
+    :show-valid-values? false
+    :print-specs? false}))
 
 ;;
 ;; Formatters
@@ -276,18 +276,18 @@
                            " ")
               (edn (not-empty (select-keys route-data [:conflicting])))])]
      (into
-       [:group]
-       (mapv
-         (fn [[[path route-data] vals]]
-           [:group
-            (path-report path route-data)
-            (into
-              [:group]
-              (map
-                (fn [[path route-data]] (path-report path route-data))
-                vals))
-            [:break]])
-         conflicts)))
+      [:group]
+      (mapv
+       (fn [[[path route-data] vals]]
+         [:group
+          (path-report path route-data)
+          (into
+           [:group]
+           (map
+            (fn [[path route-data]] (path-report path route-data))
+            vals))
+          [:break]])
+       conflicts)))
    [:span (text "Either fix the conflicting paths or disable the conflict resolution")
     [:break] (text "by setting route data for conflicting route: ") [:break] [:break]
     (edn {:conflicting true} {:margin 3})
@@ -302,19 +302,19 @@
    (text "Router contains conflicting route names:")
    [:break] [:break]
    (into
-     [:group]
-     (mapv
-       (fn [[name vals]]
-         [:group
-          [:span (text name)]
-          [:break]
-          (into
-            [:group]
-            (map
-              (fn [p] [:span (color :grey "-> " p) [:break]])
-              (mapv first vals)))
-          [:break]])
-       conflicts))
+    [:group]
+    (mapv
+     (fn [[name vals]]
+       [:group
+        [:span (text name)]
+        [:break]
+        (into
+         [:group]
+         (map
+          (fn [p] [:span (color :grey "-> " p) [:break]])
+          (mapv first vals)))
+        [:break]])
+     conflicts))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts")
    [:break]])
 
@@ -323,22 +323,22 @@
    (text "Invalid route data:")
    [:break] [:break]
    (into
-     [:group]
-     (map
-       (fn [{:keys [data path spec scope]}]
-         [:group
-          [:span (color :grey "-- On route -----------------------")]
-          [:break]
-          [:break]
-          (text path) (if scope [:span " " (text scope)])
-          [:break]
-          [:break]
-          (-> (s/explain-data spec data)
-              (expound-printer)
-              (with-out-str)
-              (fippify))
-          [:break]])
-       problems))
+    [:group]
+    (map
+     (fn [{:keys [data path spec scope]}]
+       [:group
+        [:span (color :grey "-- On route -----------------------")]
+        [:break]
+        [:break]
+        (text path) (if scope [:span " " (text scope)])
+        [:break]
+        [:break]
+        (-> (s/explain-data spec data)
+            (expound-printer)
+            (with-out-str)
+            (fippify))
+        [:break]])
+     problems))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data-validation")
    [:break]])
 
