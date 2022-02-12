@@ -1,9 +1,11 @@
 (ns reitit.frontend
-  (:require [clojure.set :as set]
-            [reitit.coercion :as coercion]
-            [reitit.core :as r])
-  (:import goog.Uri
-           goog.Uri.QueryData))
+  (:require
+   [clojure.set :as set]
+   [reitit.coercion :as coercion]
+   [reitit.core :as r])
+  (:import
+   goog.Uri
+   goog.Uri.QueryData))
 
 (defn- query-param [^QueryData q k]
   (let [vs (.getValues q k)]

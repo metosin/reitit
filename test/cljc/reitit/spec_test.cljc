@@ -1,11 +1,13 @@
 (ns reitit.spec-test
-  (:require [clojure.test :refer [deftest testing is are use-fixtures]]
-            [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
-            [clojure.spec.alpha :as s]
-            [reitit.core :as r]
-            [reitit.spec :as rs])
+  (:require
+   [#?(:clj clojure.spec.test.alpha :cljs cljs.spec.test.alpha) :as stest]
+   [clojure.spec.alpha :as s]
+   [clojure.test :refer [are deftest is testing use-fixtures]]
+   [reitit.core :as r]
+   [reitit.spec :as rs])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo))))
+     (:import
+      (clojure.lang ExceptionInfo))))
 
 (defn instrument-all [f]
   (try

@@ -1,18 +1,20 @@
 (ns reitit.ring-coercion-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [schema.core :as s]
-            [spec-tools.data-spec :as ds]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as rrc]
-            [reitit.coercion.spec :as spec]
-            [reitit.coercion.malli :as malli]
-            [reitit.coercion.schema :as schema]
-            #?@(:clj [[muuntaja.middleware]
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   #?@(:clj [[muuntaja.middleware]
                       [jsonista.core :as j]])
-            [reitit.core :as r])
+   [reitit.coercion.malli :as malli]
+   [reitit.coercion.schema :as schema]
+   [reitit.coercion.spec :as spec]
+   [reitit.core :as r]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
+   [schema.core :as s]
+   [spec-tools.data-spec :as ds])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo)
-              (java.io ByteArrayInputStream))))
+     (:import
+      (clojure.lang ExceptionInfo)
+      (java.io ByteArrayInputStream))))
 
 (defn mounted-middleware [app path method]
   (->> app

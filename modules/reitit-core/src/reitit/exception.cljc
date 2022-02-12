@@ -1,5 +1,6 @@
 (ns reitit.exception
-  (:require [clojure.string :as str]))
+  (:require
+   [clojure.string :as str]))
 
 (defn fail!
   ([type]

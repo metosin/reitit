@@ -1,9 +1,10 @@
 (ns reitit.http
-  (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.interceptor :as interceptor]
-            [reitit.exception :as ex]
-            [reitit.ring :as ring]
-            [reitit.core :as r]))
+  (:require
+   [meta-merge.core :refer [meta-merge]]
+   [reitit.core :as r]
+   [reitit.exception :as ex]
+   [reitit.interceptor :as interceptor]
+   [reitit.ring :as ring]))
 
 (defrecord Endpoint [data interceptors queue handler path method])
 

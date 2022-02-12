@@ -1,7 +1,8 @@
 (ns cljdoc.reaper
-  (:require [clojure.java.io :as io]
-            [clojure.pprint :as pprint]
-            [clojure.string :as str]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.pprint :as pprint]
+   [clojure.string :as str]))
 
 (defn reap! []
   (let [docs (->> (for [line (-> (io/file "./doc/SUMMARY.md") (slurp) (str/split #"\n"))

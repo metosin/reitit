@@ -1,10 +1,12 @@
 (ns reitit.http.interceptors.multipart
-  (:require [reitit.coercion :as coercion]
-            [reitit.spec]
-            [ring.middleware.multipart-params :as multipart-params]
-            [clojure.spec.alpha :as s]
-            [spec-tools.core :as st])
-  (:import (java.io File)))
+  (:require
+   [clojure.spec.alpha :as s]
+   [reitit.coercion :as coercion]
+   [reitit.spec]
+   [ring.middleware.multipart-params :as multipart-params]
+   [spec-tools.core :as st])
+  (:import
+   (java.io File)))
 
 (s/def ::filename string?)
 (s/def ::content-type string?)

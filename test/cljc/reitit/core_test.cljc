@@ -1,10 +1,12 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as r #?@(:cljs [:refer [Router]])]
-            [reitit.impl :as impl])
+  (:require
+   [clojure.test :refer [are deftest is testing]]
+   [reitit.core :as r #?@(:cljs [:refer [Router]])]
+   [reitit.impl :as impl])
   #?(:clj
-     (:import (reitit.core Router)
-              (clojure.lang ExceptionInfo))))
+     (:import
+      (clojure.lang ExceptionInfo)
+      (reitit.core Router))))
 
 (deftest reitit-test
 

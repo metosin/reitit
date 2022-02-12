@@ -1,9 +1,10 @@
 (ns reitit.http.interceptors.parameters-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.http.interceptors.parameters :as parameters]
-            [reitit.http :as http]
-            [reitit.interceptor.sieppari :as sieppari]
-            [reitit.swagger :as swagger]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [reitit.http :as http]
+   [reitit.http.interceptors.parameters :as parameters]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.swagger :as swagger]))
 
 (deftest parameters-test
   (let [app (http/ring-handler

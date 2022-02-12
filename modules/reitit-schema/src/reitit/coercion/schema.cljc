@@ -1,13 +1,14 @@
 (ns reitit.coercion.schema
-  (:require [clojure.walk :as walk]
-            [schema.core :as s]
-            [schema-tools.core :as st]
-            [schema.coerce :as sc]
-            [schema.utils :as su]
-            [schema-tools.coerce :as stc]
-            [schema-tools.swagger.core :as swagger]
-            [reitit.coercion :as coercion]
-            [clojure.set :as set]))
+  (:require
+   [clojure.set :as set]
+   [clojure.walk :as walk]
+   [reitit.coercion :as coercion]
+   [schema-tools.coerce :as stc]
+   [schema-tools.core :as st]
+   [schema-tools.swagger.core :as swagger]
+   [schema.coerce :as sc]
+   [schema.core :as s]
+   [schema.utils :as su]))
 
 (def string-coercion-matcher
   stc/string-coercion-matcher)

@@ -1,13 +1,14 @@
 (ns reitit.coercion.malli
-  (:require [reitit.coercion :as coercion]
-            [malli.transform :as mt]
-            [malli.edn :as edn]
-            [malli.error :as me]
-            [malli.util :as mu]
-            [malli.swagger :as swagger]
-            [malli.core :as m]
-            [clojure.set :as set]
-            [clojure.walk :as walk]))
+  (:require
+   [clojure.set :as set]
+   [clojure.walk :as walk]
+   [malli.core :as m]
+   [malli.edn :as edn]
+   [malli.error :as me]
+   [malli.swagger :as swagger]
+   [malli.transform :as mt]
+   [malli.util :as mu]
+   [reitit.coercion :as coercion]))
 
 ;;
 ;; coercion

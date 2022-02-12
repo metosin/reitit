@@ -1,8 +1,9 @@
 (ns reitit.http.interceptors.dev
-  (:require [lambdaisland.deep-diff :as ddiff]
-            [lambdaisland.deep-diff.printer :as printer]
-            [puget.color :as color]
-            [reitit.core :as r]))
+  (:require
+   [lambdaisland.deep-diff :as ddiff]
+   [lambdaisland.deep-diff.printer :as printer]
+   [puget.color :as color]
+   [reitit.core :as r]))
 
 (def printer
   (-> (printer/puget-printer)

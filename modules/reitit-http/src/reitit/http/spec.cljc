@@ -1,9 +1,10 @@
 (ns reitit.http.spec
-  (:require [clojure.spec.alpha :as s]
-            [reitit.ring.spec :as rrs]
-            [reitit.interceptor :as interceptor]
-            [reitit.exception :as exception]
-            [reitit.spec :as rs]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [reitit.exception :as exception]
+   [reitit.interceptor :as interceptor]
+   [reitit.ring.spec :as rrs]
+   [reitit.spec :as rs]))
 
 ;;
 ;; Specs

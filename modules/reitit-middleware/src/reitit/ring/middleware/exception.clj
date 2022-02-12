@@ -1,10 +1,12 @@
 (ns reitit.ring.middleware.exception
-  (:require [reitit.coercion :as coercion]
-            [reitit.ring :as ring]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str])
-  (:import (java.time Instant)
-           (java.io Writer PrintWriter)))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [reitit.coercion :as coercion]
+   [reitit.ring :as ring])
+  (:import
+   (java.io Writer PrintWriter)
+   (java.time Instant)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))

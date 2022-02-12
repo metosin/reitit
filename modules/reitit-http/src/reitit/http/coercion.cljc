@@ -1,7 +1,8 @@
 (ns reitit.http.coercion
-  (:require [reitit.coercion :as coercion]
-            [reitit.spec :as rs]
-            [reitit.impl :as impl]))
+  (:require
+   [reitit.coercion :as coercion]
+   [reitit.impl :as impl]
+   [reitit.spec :as rs]))
 
 (defn coerce-request-interceptor
   "Interceptor for pluggable request coercion.

@@ -1,13 +1,15 @@
 (ns reitit.http.interceptors.exception-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.ring :as ring]
-            [reitit.http :as http]
-            [reitit.http.interceptors.exception :as exception]
-            [reitit.interceptor.sieppari :as sieppari]
-            [reitit.coercion.spec]
-            [reitit.http.coercion]
-            [muuntaja.core :as m])
-  (:import (java.sql SQLException SQLWarning)))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [muuntaja.core :as m]
+   [reitit.coercion.spec]
+   [reitit.http :as http]
+   [reitit.http.coercion]
+   [reitit.http.interceptors.exception :as exception]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.ring :as ring])
+  (:import
+   (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
 

@@ -1,7 +1,8 @@
 (ns reitit.interceptor.sieppari
-  (:require [reitit.interceptor :as interceptor]
-            [sieppari.queue :as queue]
-            [sieppari.core :as sieppari]))
+  (:require
+   [reitit.interceptor :as interceptor]
+   [sieppari.core :as sieppari]
+   [sieppari.queue :as queue]))
 
 (def executor
   (reify

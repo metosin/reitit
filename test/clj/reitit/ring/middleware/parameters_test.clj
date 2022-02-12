@@ -1,8 +1,9 @@
 (ns reitit.ring.middleware.parameters-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.ring.middleware.parameters :as parameters]
-            [reitit.ring :as ring]
-            [reitit.swagger :as swagger]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [reitit.ring :as ring]
+   [reitit.ring.middleware.parameters :as parameters]
+   [reitit.swagger :as swagger]))
 
 (deftest parameters-test
   (let [app (ring/ring-handler

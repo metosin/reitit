@@ -1,8 +1,9 @@
 (ns reitit.spec
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
-            [reitit.exception :as exception]
-            [reitit.core :as r]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.gen.alpha :as gen]
+   [reitit.core :as r]
+   [reitit.exception :as exception]))
 
 ;;
 ;; routes

@@ -1,11 +1,13 @@
 (ns reitit.pedestal
-  (:require [io.pedestal.interceptor.chain :as chain]
-            [io.pedestal.interceptor :as interceptor]
-            [io.pedestal.http :as http]
-            [reitit.interceptor]
-            [reitit.http])
-  (:import (reitit.interceptor Executor)
-           (java.lang.reflect Method)))
+  (:require
+   [io.pedestal.http :as http]
+   [io.pedestal.interceptor :as interceptor]
+   [io.pedestal.interceptor.chain :as chain]
+   [reitit.http]
+   [reitit.interceptor])
+  (:import
+   (java.lang.reflect Method)
+   (reitit.interceptor Executor)))
 
 ;; TODO: variadic
 (defn- arities [f]

@@ -1,14 +1,16 @@
 (ns reitit.ring.middleware.exception-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.ring :as ring]
-            [reitit.ring.middleware.exception :as exception]
-            [reitit.coercion :as coercion]
-            [clojure.spec.alpha :as s]
-            [reitit.coercion.spec]
-            [reitit.ring.coercion]
-            [muuntaja.core :as m]
-            [ring.util.http-response :as http-response])
-  (:import (java.sql SQLException SQLWarning)))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.test :refer [deftest is testing]]
+   [muuntaja.core :as m]
+   [reitit.coercion :as coercion]
+   [reitit.coercion.spec]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion]
+   [reitit.ring.middleware.exception :as exception]
+   [ring.util.http-response :as http-response])
+  (:import
+   (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
 

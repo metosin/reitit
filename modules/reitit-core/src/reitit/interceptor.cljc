@@ -1,9 +1,10 @@
 (ns reitit.interceptor
-  (:require [meta-merge.core :refer [meta-merge]]
-            [clojure.pprint :as pprint]
-            [reitit.core :as r]
-            [reitit.impl :as impl]
-            [reitit.exception :as exception]))
+  (:require
+   [clojure.pprint :as pprint]
+   [meta-merge.core :refer [meta-merge]]
+   [reitit.core :as r]
+   [reitit.exception :as exception]
+   [reitit.impl :as impl]))
 
 (defprotocol IntoInterceptor
   (into-interceptor [this data opts]))

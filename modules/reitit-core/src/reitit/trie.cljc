@@ -1,9 +1,11 @@
 (ns reitit.trie
   (:refer-clojure :exclude [compile])
-  (:require [clojure.string :as str]
-            [reitit.exception :as ex])
-  #?(:clj (:import [reitit Trie Trie$Match Trie$Matcher]
-                   (java.net URLDecoder))))
+  (:require
+   [clojure.string :as str]
+   [reitit.exception :as ex])
+  #?(:clj (:import
+           (java.net URLDecoder)
+           [reitit Trie Trie$Match Trie$Matcher])))
 
 (defn ^:no-doc into-set [x]
   (cond

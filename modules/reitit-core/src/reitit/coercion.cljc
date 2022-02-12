@@ -1,8 +1,10 @@
 (ns reitit.coercion
-  (:require [clojure.walk :as walk]
-            [reitit.impl :as impl])
+  (:require
+   [clojure.walk :as walk]
+   [reitit.impl :as impl])
   #?(:clj
-     (:import (java.io Writer))))
+     (:import
+      (java.io Writer))))
 
 ;;
 ;; Protocol

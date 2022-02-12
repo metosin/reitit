@@ -1,10 +1,12 @@
 (ns reitit.http.interceptors.exception
-  (:require [reitit.coercion :as coercion]
-            [reitit.ring :as ring]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str])
-  (:import (java.time Instant)
-           (java.io PrintWriter Writer)))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [reitit.coercion :as coercion]
+   [reitit.ring :as ring])
+  (:import
+   (java.io PrintWriter Writer)
+   (java.time Instant)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))

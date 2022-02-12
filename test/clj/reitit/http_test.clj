@@ -1,14 +1,16 @@
 (ns reitit.http-test
   "just Clojure before Sieppari is ported into cljs"
-  (:require [clojure.test :refer [deftest testing is]]
-            [clojure.set :as set]
-            [reitit.interceptor :as interceptor]
-            [reitit.interceptor.sieppari :as sieppari]
-            [reitit.http :as http]
-            [reitit.ring :as ring]
-            [reitit.core :as r]
-            [clojure.core.async :as a])
-  (:import (clojure.lang ExceptionInfo)))
+  (:require
+   [clojure.core.async :as a]
+   [clojure.set :as set]
+   [clojure.test :refer [deftest is testing]]
+   [reitit.core :as r]
+   [reitit.http :as http]
+   [reitit.interceptor :as interceptor]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.ring :as ring])
+  (:import
+   (clojure.lang ExceptionInfo)))
 
 (defn interceptor [name]
   {:enter (fn [ctx] (update-in ctx [:request ::i] (fnil conj []) name))})
