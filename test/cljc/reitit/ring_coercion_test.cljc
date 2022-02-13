@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    #?@(:clj [[muuntaja.middleware]
-                      [jsonista.core :as j]])
+             [jsonista.core :as j]])
    [reitit.coercion.malli :as malli]
    [reitit.coercion.schema :as schema]
    [reitit.coercion.spec :as spec]
@@ -10,7 +10,8 @@
    [reitit.ring :as ring]
    [reitit.ring.coercion :as rrc]
    [schema.core :as s]
-   [spec-tools.data-spec :as ds])
+   [spec-tools.data-spec :as ds]
+   [malli.experimental.lite :as l])
   #?(:clj
      (:import
       (clojure.lang ExceptionInfo)
@@ -210,139 +211,185 @@
             (is (= 500 status))))))))
 
 (deftest malli-coercion-test
-  (let [create (fn [middleware]
+  (let [create (fn [middleware routes]
                  (ring/ring-handler
                   (ring/router
-                   ["/api"
-
-                    ["/validate" {:summary "just validation"
-                                  :coercion (reitit.coercion.malli/create {:transformers {}})
-                                  :post {:parameters {:body [:map [:x int?]]}
-                                         :responses {200 {:body [:map [:x int?]]}}
-                                         :handler (fn [req]
-                                                    {:status 200
-                                                     :body (-> req :parameters :body)})}}]
-
-                    ["/no-op" {:summary "no-operation"
-                               :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
-                               :post {:parameters {:body [:map [:x int?]]}
-                                      :responses {200 {:body [:map [:x int?]]}}
-                                      :handler (fn [req]
-                                                 {:status 200
-                                                  :body (-> req :parameters :body)})}}]
-
-                    ["/skip" {:summary "skip"
-                              :coercion (reitit.coercion.malli/create {:enabled false})
-                              :post {:parameters {:body [:map [:x int?]]}
-                                     :responses {200 {:body [:map [:x int?]]}}
-                                     :handler (fn [req]
-                                                {:status 200
-                                                 :body (-> req :parameters :body)})}}]
-
-                    ["/or" {:post {:summary "accepts either of two map schemas"
-                                   :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
-                                   :responses {200 {:body [:map [:msg string?]]}}
-                                   :handler (fn [{{{:keys [x]} :body} :parameters}]
-                                              {:status 200
-                                               :body {:msg (if x "you sent x" "you sent y")}})}}]
-
-                    ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
-                                                    :body [:map [:b int?]]
-                                                    :form [:map [:c [int? {:default 3}]]]
-                                                    :header [:map [:d int?]]
-                                                    :path [:map [:e int?]]}
-                                       :responses {200 {:body [:map [:total pos-int?]]}
-                                                   500 {:description "fail"}}
-                                       :handler handler}}]]
+                   routes
                    {:data {:middleware middleware
                            :coercion malli/coercion}})))]
 
-    (testing "without exception handling"
-      (let [app (create [rrc/coerce-request-middleware
-                         rrc/coerce-response-middleware])]
+    (doseq [{:keys [style routes]} [{:style "malli"
+                                     :routes ["/api"
+                                              ["/validate" {:summary "just validation"
+                                                            :coercion (reitit.coercion.malli/create {:transformers {}})
+                                                            :post {:parameters {:body [:map [:x int?]]}
+                                                                   :responses {200 {:body [:map [:x int?]]}}
+                                                                   :handler (fn [req]
+                                                                              {:status 200
+                                                                               :body (-> req :parameters :body)})}}]
 
-        (testing "all good"
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request1)))
-          (is (= {:status 200
-                  :body {:total 115}}
-                 (app valid-request2)))
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request3)))
-          (testing "default values work"
-            (is (= {:status 200
-                    :body {:total 15}}
-                   (app (update valid-request3 :form-params dissoc :c)))))
-          (is (= {:status 500
-                  :body {:evil true}}
-                 (app (assoc-in valid-request1 [:query-params "a"] "666")))))
+                                              ["/no-op" {:summary "no-operation"
+                                                         :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
+                                                         :post {:parameters {:body [:map [:x int?]]}
+                                                                :responses {200 {:body [:map [:x int?]]}}
+                                                                :handler (fn [req]
+                                                                           {:status 200
+                                                                            :body (-> req :parameters :body)})}}]
 
-        (testing "invalid request"
-          (is (thrown-with-msg?
-               ExceptionInfo
-               #"Request coercion failed"
-               (app invalid-request1))))
+                                              ["/skip" {:summary "skip"
+                                                        :coercion (reitit.coercion.malli/create {:enabled false})
+                                                        :post {:parameters {:body [:map [:x int?]]}
+                                                               :responses {200 {:body [:map [:x int?]]}}
+                                                               :handler (fn [req]
+                                                                          {:status 200
+                                                                           :body (-> req :parameters :body)})}}]
 
-        (testing "invalid response"
-          (is (thrown-with-msg?
-               ExceptionInfo
-               #"Response coercion failed"
-               (app invalid-request2))))))
+                                              ["/or" {:post {:summary "accepts either of two map schemas"
+                                                             :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
+                                                             :responses {200 {:body [:map [:msg string?]]}}
+                                                             :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                                                        {:status 200
+                                                                         :body {:msg (if x "you sent x" "you sent y")}})}}]
 
-    (testing "with exception handling"
-      (let [app (create [rrc/coerce-exceptions-middleware
-                         rrc/coerce-request-middleware
-                         rrc/coerce-response-middleware])]
+                                              ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
+                                                                              :body [:map [:b int?]]
+                                                                              :form [:map [:c [int? {:default 3}]]]
+                                                                              :header [:map [:d int?]]
+                                                                              :path [:map [:e int?]]}
+                                                                 :responses {200 {:body [:map [:total pos-int?]]}
+                                                                             500 {:description "fail"}}
+                                                                 :handler handler}}]]}
+                                    {:style "lite"
+                                     :routes ["/api"
 
-        (testing "just validation"
-          (is (= 400 (:status (app {:uri "/api/validate"
-                                    :request-method :post
-                                    :muuntaja/request {:format "application/edn"}
-                                    :body-params 123}))))
-          (is (= [:reitit.ring.coercion/coerce-exceptions
-                  :reitit.ring.coercion/coerce-request
-                  :reitit.ring.coercion/coerce-response]
-                 (mounted-middleware app "/api/validate" :post))))
+                                              ["/validate" {:summary "just validation"
+                                                            :coercion (reitit.coercion.malli/create {:transformers {}})
+                                                            :post {:parameters {:body {:x int?}}
+                                                                   :responses {200 {:body {:x int?}}}
+                                                                   :handler (fn [req]
+                                                                              {:status 200
+                                                                               :body (-> req :parameters :body)})}}]
 
-        (testing "no tranformation & validation"
-          (is (= 123 (:body (app {:uri "/api/no-op"
-                                  :request-method :post
-                                  :muuntaja/request {:format "application/edn"}
-                                  :body-params 123}))))
-          (is (= [:reitit.ring.coercion/coerce-exceptions
-                  :reitit.ring.coercion/coerce-request
-                  :reitit.ring.coercion/coerce-response]
-                 (mounted-middleware app "/api/no-op" :post))))
+                                              ["/no-op" {:summary "no-operation"
+                                                         :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
+                                                         :post {:parameters {:body {:x int?}}
+                                                                :responses {200 {:body {:x int?}}}
+                                                                :handler (fn [req]
+                                                                           {:status 200
+                                                                            :body (-> req :parameters :body)})}}]
 
-        (testing "skipping coercion"
-          (is (= nil (:body (app {:uri "/api/skip"
-                                  :request-method :post
-                                  :muuntaja/request {:format "application/edn"}
-                                  :body-params 123}))))
-          (is (= [:reitit.ring.coercion/coerce-exceptions]
-                 (mounted-middleware app "/api/skip" :post))))
+                                              ["/skip" {:summary "skip"
+                                                        :coercion (reitit.coercion.malli/create {:enabled false})
+                                                        :post {:parameters {:body {:x int?}}
+                                                               :responses {200 {:body {:x int?}}}
+                                                               :handler (fn [req]
+                                                                          {:status 200
+                                                                           :body (-> req :parameters :body)})}}]
 
-        (testing "or #407"
-          (is (= {:status 200
-                  :body {:msg "you sent x"}}
-                 (app {:uri "/api/or"
-                       :request-method :post
-                       :body-params {:x 1}}))))
+                                              ["/or" {:post {:summary "accepts either of two map schemas"
+                                                             :parameters {:body (l/or {:x int?} {:y int?})}
+                                                             :responses {200 {:body {:msg string?}}}
+                                                             :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                                                        {:status 200
+                                                                         :body {:msg (if x "you sent x" "you sent y")}})}}]
 
-        (testing "all good"
-          (is (= {:status 200
-                  :body {:total 15}}
-                 (app valid-request1))))
+                                              ["/plus/:e" {:get {:parameters {:query {:a (l/optional int?)}
+                                                                              :body {:b int?}
+                                                                              :form {:c [int? {:default 3}]}
+                                                                              :header {:d int?}
+                                                                              :path {:e int?}}
+                                                                 :responses {200 {:body {:total pos-int?}}
+                                                                             500 {:description "fail"}}
+                                                                 :handler handler}}]]}]]
 
-        (testing "invalid request"
-          (let [{:keys [status]} (app invalid-request1)]
-            (is (= 400 status))))
+      (testing (str "malli with style " style)
 
-        (testing "invalid response"
-          (let [{:keys [status]} (app invalid-request2)]
-            (is (= 500 status))))))
+        (testing "without exception handling"
+          (let [app (create [rrc/coerce-request-middleware
+                             rrc/coerce-response-middleware] routes)]
+
+            (testing "all good"
+              (is (= {:status 200
+                      :body {:total 15}}
+                     (app valid-request1)))
+              (is (= {:status 200
+                      :body {:total 115}}
+                     (app valid-request2)))
+              (is (= {:status 200
+                      :body {:total 15}}
+                     (app valid-request3)))
+              (testing "default values work"
+                (is (= {:status 200
+                        :body {:total 15}}
+                       (app (update valid-request3 :form-params dissoc :c)))))
+              (is (= {:status 500
+                      :body {:evil true}}
+                     (app (assoc-in valid-request1 [:query-params "a"] "666")))))
+
+            (testing "invalid request"
+              (is (thrown-with-msg?
+                   ExceptionInfo
+                   #"Request coercion failed"
+                   (app invalid-request1))))
+
+            (testing "invalid response"
+              (is (thrown-with-msg?
+                   ExceptionInfo
+                   #"Response coercion failed"
+                   (app invalid-request2))))))
+
+        (testing "with exception handling"
+          (let [app (create [rrc/coerce-exceptions-middleware
+                             rrc/coerce-request-middleware
+                             rrc/coerce-response-middleware] routes)]
+
+            (testing "just validation"
+              (is (= 400 (:status (app {:uri "/api/validate"
+                                        :request-method :post
+                                        :muuntaja/request {:format "application/edn"}
+                                        :body-params 123}))))
+              (is (= [:reitit.ring.coercion/coerce-exceptions
+                      :reitit.ring.coercion/coerce-request
+                      :reitit.ring.coercion/coerce-response]
+                     (mounted-middleware app "/api/validate" :post))))
+
+            (testing "no tranformation & validation"
+              (is (= 123 (:body (app {:uri "/api/no-op"
+                                      :request-method :post
+                                      :muuntaja/request {:format "application/edn"}
+                                      :body-params 123}))))
+              (is (= [:reitit.ring.coercion/coerce-exceptions
+                      :reitit.ring.coercion/coerce-request
+                      :reitit.ring.coercion/coerce-response]
+                     (mounted-middleware app "/api/no-op" :post))))
+
+            (testing "skipping coercion"
+              (is (= nil (:body (app {:uri "/api/skip"
+                                      :request-method :post
+                                      :muuntaja/request {:format "application/edn"}
+                                      :body-params 123}))))
+              (is (= [:reitit.ring.coercion/coerce-exceptions]
+                     (mounted-middleware app "/api/skip" :post))))
+
+            (testing "or #407"
+              (is (= {:status 200
+                      :body {:msg "you sent x"}}
+                     (app {:uri "/api/or"
+                           :request-method :post
+                           :body-params {:x 1}}))))
+
+            (testing "all good"
+              (is (= {:status 200
+                      :body {:total 15}}
+                     (app valid-request1))))
+
+            (testing "invalid request"
+              (let [{:keys [status]} (app invalid-request1)]
+                (is (= 400 status))))
+
+            (testing "invalid response"
+              (let [{:keys [status]} (app invalid-request2)]
+                (is (= 500 status))))))))
 
     (testing "open & closed schemas"
       (let [endpoint (fn [schema]

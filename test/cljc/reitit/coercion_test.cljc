@@ -7,7 +7,8 @@
    [reitit.coercion.spec]
    [reitit.core :as r]
    [schema.core :as s]
-   [spec-tools.data-spec :as ds])
+   [spec-tools.data-spec :as ds]
+   [malli.experimental.lite :as l])
   #?(:clj
      (:import
       (clojure.lang ExceptionInfo))))
@@ -23,6 +24,12 @@
                                                 :query [:maybe [:map [:int int?]
                                                                 [:ints [:vector int?]]
                                                                 [:map [:map-of int? int?]]]]}}]]
+            ["/malli-lite" {:coercion reitit.coercion.malli/coercion}
+             ["/:number/:keyword" {:parameters {:path {:number int?
+                                                       :keyword keyword?}
+                                                :query (l/maybe {:int int?
+                                                                 :ints (l/vector int?)
+                                                                 :map (l/map-of int? int?)})}}]]
             ["/spec" {:coercion reitit.coercion.spec/coercion}
              ["/:number/:keyword" {:parameters {:path {:number int?
                                                        :keyword keyword?}
@@ -54,6 +61,18 @@
                  (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"], "map" {:1 "1", "2" "2"}}))))))
       (testing "throws with invalid input"
         (let [m (r/match-by-path r "/malli/kikka/abba")]
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))))
+
+    (testing "malli-lite coercion"
+      (testing "succeeds"
+        (let [m (r/match-by-path r "/malli-lite/1/abba")]
+          (is (= {:path {:keyword :abba, :number 1}, :query nil}
+                 (coercion/coerce! m))))
+        (let [m (r/match-by-path r "/malli-lite/1/abba")]
+          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1, 2, 3], :map {1 1, 2 2}}}
+                 (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"], "map" {:1 "1", "2" "2"}}))))))
+      (testing "throws with invalid input"
+        (let [m (r/match-by-path r "/malli-lite/kikka/abba")]
           (is (thrown? ExceptionInfo (coercion/coerce! m))))))
 
     ;; TODO: :map-of fails with string-keys

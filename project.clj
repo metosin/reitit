@@ -86,7 +86,7 @@
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.5"]
-                                  [metosin/malli "0.8.1"]
+                                  [metosin/malli "0.8.2-SNAPSHOT"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]

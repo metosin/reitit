@@ -3,6 +3,7 @@
    [clojure.set :as set]
    [clojure.walk :as walk]
    [malli.core :as m]
+   [malli.experimental.lite :as l]
    [malli.edn :as edn]
    [malli.error :as me]
    [malli.swagger :as swagger]
@@ -115,6 +116,8 @@
                              :formats {"application/json" json-transformer-provider}}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   ;; support lite syntax?
+   :lite true
    ;; schema identity function (default: close all map schemas)
    :compile mu/closed-schema
    ;; validate request & response
@@ -134,9 +137,11 @@
   ([]
    (create nil))
   ([opts]
-   (let [{:keys [transformers compile options error-keys encode-error] :as opts} (merge default-options opts)
+   (let [{:keys [transformers lite compile options error-keys encode-error] :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
-         transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)]
+         transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)
+         compile (if lite (fn [schema options] (compile (binding [l/*options* options] (l/schema schema)) options))
+                          compile)]
      ^{:type ::coercion/coercion}
      (reify coercion/Coercion
        (-get-name [_] :malli)
