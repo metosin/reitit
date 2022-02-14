@@ -1,4 +1,4 @@
-(defproject metosin/reitit-swagger-ui "0.5.15"
+(defproject metosin/reitit-swagger-ui "0.5.16-SNAPSHOT"
   :description "Reitit: Swagger-ui support"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
