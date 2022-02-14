@@ -33,7 +33,7 @@
                          [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.5"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.8.1"]
+                         [metosin/malli "0.8.2"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.13.1"]
@@ -86,7 +86,7 @@
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.5"]
-                                  [metosin/malli "0.8.2-SNAPSHOT"]
+                                  [metosin/malli "0.8.2"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]

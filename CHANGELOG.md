@@ -35,7 +35,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```clj
 [metosin/ring-swagger-ui "4.3.0"] is available but we use "3.46.0"
 [metosin/jsonista "0.3.5"] is available but we use "0.3.3"
-[metosin/malli "0.8.1"] is available but we use "0.5.1"
+[metosin/malli "0.8.2"] is available but we use "0.5.1"
 [com.fasterxml.jackson.core/jackson-core "2.13.1"] is available but we use "2.12.4"
 [com.fasterxml.jackson.core/jackson-databind "2.13.1"] is available but we use "2.12.4"
 [fipp "0.6.25"] is available but we use "0.6.24"
