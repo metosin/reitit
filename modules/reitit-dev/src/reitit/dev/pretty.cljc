@@ -11,7 +11,7 @@
    [fipp.visit]
    [reitit.exception :as exception]
    [spell-spec.expound] ;; expound
-))
+   ))
 
 ;;
 ;; colors
