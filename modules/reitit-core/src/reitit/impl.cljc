@@ -1,15 +1,13 @@
 (ns ^:no-doc reitit.impl
   #?(:cljs (:require-macros [reitit.impl]))
-  (:require
-   [clojure.set :as set]
-   [clojure.string :as str]
-   [meta-merge.core :as mm]
-   [reitit.exception :as ex]
-   [reitit.trie :as trie])
+  (:require [clojure.set :as set]
+            [clojure.string :as str]
+            [meta-merge.core :as mm]
+            [reitit.exception :as ex]
+            [reitit.trie :as trie])
   #?(:clj
-     (:import
-      (java.net URLEncoder URLDecoder)
-      (java.util HashMap Map))))
+     (:import (java.net URLEncoder URLDecoder)
+              (java.util HashMap Map))))
 
 (defn parse [path opts]
   (let [path #?(:clj (.intern ^String (trie/normalize path opts)) :cljs (trie/normalize path opts))

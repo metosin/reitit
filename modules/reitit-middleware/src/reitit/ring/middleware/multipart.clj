@@ -1,12 +1,10 @@
 (ns reitit.ring.middleware.multipart
   (:refer-clojure :exclude [compile])
-  (:require
-   [clojure.spec.alpha :as s]
-   [reitit.coercion :as coercion]
-   [ring.middleware.multipart-params :as multipart-params]
-   [spec-tools.core :as st])
-  (:import
-   (java.io File)))
+  (:require [clojure.spec.alpha :as s]
+            [reitit.coercion :as coercion]
+            [ring.middleware.multipart-params :as multipart-params]
+            [spec-tools.core :as st])
+  (:import (java.io File)))
 
 (s/def ::filename string?)
 (s/def ::content-type string?)

@@ -1,14 +1,12 @@
 (ns reitit.ring-test
-  (:require
-   [clojure.set :as set]
-   [clojure.test :refer [deftest is testing]]
-   [reitit.core :as r]
-   [reitit.middleware :as middleware]
-   [reitit.ring :as ring]
-   [reitit.trie :as trie])
+  (:require [clojure.set :as set]
+            [clojure.test :refer [deftest is testing]]
+            [reitit.core :as r]
+            [reitit.middleware :as middleware]
+            [reitit.ring :as ring]
+            [reitit.trie :as trie])
   #?(:clj
-     (:import
-      (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (defn mw [handler name]
   (fn

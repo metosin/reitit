@@ -1,7 +1,6 @@
 (ns reitit.impl-test
-  (:require
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.impl :as impl]))
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.impl :as impl]))
 
 (deftest strip-nils-test
   (is (= {:a 1, :c false} (impl/strip-nils {:a 1, :b nil, :c false}))))

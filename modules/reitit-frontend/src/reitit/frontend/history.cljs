@@ -1,12 +1,10 @@
 (ns reitit.frontend.history
   "Provides integration to hash-change or HTML5 History
   events."
-  (:require
-   [goog.events :as gevents]
-   [reitit.core :as reitit]
-   [reitit.frontend :as rf])
-  (:import
-   goog.Uri))
+  (:require [goog.events :as gevents]
+            [reitit.core :as reitit]
+            [reitit.frontend :as rf])
+  (:import goog.Uri))
 
 (defprotocol History
   (-init [this] "Create event listeners")

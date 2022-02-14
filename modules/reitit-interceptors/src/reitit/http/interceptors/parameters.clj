@@ -1,6 +1,5 @@
 (ns reitit.http.interceptors.parameters
-  (:require
-   [ring.middleware.params :as params]))
+  (:require [ring.middleware.params :as params]))
 
 (defn parameters-interceptor
   "Interceptor to parse urlencoded parameters from the query string and form

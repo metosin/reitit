@@ -1,7 +1,6 @@
 (ns reitit.trie-test
-  (:require
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.trie :as trie]))
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.trie :as trie]))
 
 (deftest into-set-test
   (is (= #{} (trie/into-set nil)))

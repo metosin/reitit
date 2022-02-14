@@ -1,8 +1,7 @@
 (ns reitit.core
-  (:require
-   [reitit.exception :as exception]
-   [reitit.impl :as impl]
-   [reitit.trie :as trie]))
+  (:require [reitit.exception :as exception]
+            [reitit.impl :as impl]
+            [reitit.trie :as trie]))
 
 ;;
 ;; Expand

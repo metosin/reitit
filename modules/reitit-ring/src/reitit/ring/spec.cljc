@@ -1,9 +1,8 @@
 (ns reitit.ring.spec
-  (:require
-   [clojure.spec.alpha :as s]
-   [reitit.exception :as exception]
-   [reitit.middleware :as middleware]
-   [reitit.spec :as rs]))
+  (:require [clojure.spec.alpha :as s]
+            [reitit.exception :as exception]
+            [reitit.middleware :as middleware]
+            [reitit.spec :as rs]))
 
 ;;
 ;; Specs

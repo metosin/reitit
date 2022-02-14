@@ -1,17 +1,16 @@
 (ns reitit.dev.pretty
-  (:require
-   [arrangement.core] ;; spell-spec
-   [clojure.spec.alpha :as s]
-   [clojure.string :as str]
-   [expound.alpha] ;; fipp
-   [expound.ansi]
-   [fipp.edn]
-   [fipp.ednize]
-   [fipp.engine]
-   [fipp.visit]
-   [reitit.exception :as exception]
-   [spell-spec.expound] ;; expound
-   ))
+  (:require [arrangement.core] ;; spell-spec
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [expound.alpha] ;; fipp
+            [expound.ansi]
+            [fipp.edn]
+            [fipp.ednize]
+            [fipp.engine]
+            [fipp.visit]
+            [reitit.exception :as exception]
+            [spell-spec.expound] ;; expound
+))
 
 ;;
 ;; colors

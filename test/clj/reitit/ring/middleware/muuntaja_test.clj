@@ -1,10 +1,9 @@
 (ns reitit.ring.middleware.muuntaja-test
-  (:require
-   [clojure.test :refer [deftest is testing]]
-   [muuntaja.core :as m]
-   [reitit.ring :as ring]
-   [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.swagger :as swagger]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [muuntaja.core :as m]
+            [reitit.ring :as ring]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.swagger :as swagger]))
 
 (deftest muuntaja-test
   (let [data {:kikka "kukka"}

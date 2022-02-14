@@ -1,10 +1,9 @@
 (ns reitit.middleware
-  (:require
-   [clojure.pprint :as pprint]
-   [meta-merge.core :refer [meta-merge]]
-   [reitit.core :as r]
-   [reitit.exception :as exception]
-   [reitit.impl :as impl]))
+  (:require [clojure.pprint :as pprint]
+            [meta-merge.core :refer [meta-merge]]
+            [reitit.core :as r]
+            [reitit.exception :as exception]
+            [reitit.impl :as impl]))
 
 (defprotocol IntoMiddleware
   (into-middleware [this data opts]))

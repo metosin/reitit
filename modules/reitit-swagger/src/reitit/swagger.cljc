@@ -1,12 +1,11 @@
 (ns reitit.swagger
-  (:require
-   [clojure.set :as set]
-   [clojure.spec.alpha :as s]
-   [clojure.string :as str]
-   [meta-merge.core :refer [meta-merge]]
-   [reitit.coercion :as coercion]
-   [reitit.core :as r]
-   [reitit.trie :as trie]))
+  (:require [clojure.set :as set]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [meta-merge.core :refer [meta-merge]]
+            [reitit.coercion :as coercion]
+            [reitit.core :as r]
+            [reitit.trie :as trie]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)

@@ -1,11 +1,10 @@
 (ns reitit.http.interceptors.muuntaja-test
-  (:require
-   [clojure.test :refer [deftest is testing]]
-   [muuntaja.core :as m]
-   [reitit.http :as http]
-   [reitit.http.interceptors.muuntaja :as muuntaja]
-   [reitit.interceptor.sieppari :as sieppari]
-   [reitit.swagger :as swagger]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [muuntaja.core :as m]
+            [reitit.http :as http]
+            [reitit.http.interceptors.muuntaja :as muuntaja]
+            [reitit.interceptor.sieppari :as sieppari]
+            [reitit.swagger :as swagger]))
 
 (deftest muuntaja-test
   (let [data {:kikka "kukka"}

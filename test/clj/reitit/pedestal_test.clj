@@ -1,11 +1,10 @@
 (ns reitit.pedestal-test
-  (:require
-   [clojure.test :refer [deftest is testing]]
-   [io.pedestal.http]
-   [io.pedestal.test]
-   [reitit.http :as http]
-   [reitit.http.interceptors.exception :as exception]
-   [reitit.pedestal :as pedestal]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [io.pedestal.http]
+            [io.pedestal.test]
+            [reitit.http :as http]
+            [reitit.http.interceptors.exception :as exception]
+            [reitit.pedestal :as pedestal]))
 
 (deftest arities-test
   (is (= #{0} (#'pedestal/arities (fn []))))

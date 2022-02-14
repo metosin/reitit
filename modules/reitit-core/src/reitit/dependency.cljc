@@ -1,7 +1,6 @@
 (ns reitit.dependency
   "Dependency resolution for middleware/interceptors."
-  (:require
-   [reitit.exception :as exception]))
+  (:require [reitit.exception :as exception]))
 
 (defn- providers
   "Map from provision key to provider. `get-provides` should return the provision keys of a dependent."
