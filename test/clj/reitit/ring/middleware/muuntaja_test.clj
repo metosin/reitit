@@ -1,17 +1,18 @@
 (ns reitit.ring.middleware.muuntaja-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.ring :as ring]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.swagger :as swagger]
-            [muuntaja.core :as m]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [muuntaja.core :as m]
+   [reitit.ring :as ring]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.swagger :as swagger]))
 
 (deftest muuntaja-test
   (let [data {:kikka "kukka"}
         app (ring/ring-handler
-              (ring/router
-                ["/ping" {:get (constantly {:status 200, :body data})}]
-                {:data {:muuntaja m/instance
-                        :middleware [muuntaja/format-middleware]}}))]
+             (ring/router
+              ["/ping" {:get (constantly {:status 200, :body data})}]
+              {:data {:muuntaja m/instance
+                      :middleware [muuntaja/format-middleware]}}))]
     (is (= data (->> {:request-method :get, :uri "/ping"}
                      (app)
                      :body
@@ -22,26 +23,26 @@
         no-edn-decode (m/create (-> m/default-options (update-in [:formats "application/edn"] dissoc :decoder)))
         just-edn (m/create (-> m/default-options (m/select-formats ["application/edn"])))
         app (ring/ring-handler
-              (ring/router
-                [["/defaults"
-                  {:get identity}]
-                 ["/explicit-defaults"
-                  {:muuntaja with-defaults
-                   :get identity}]
-                 ["/no-edn-decode"
-                  {:muuntaja no-edn-decode
-                   :get identity}]
-                 ["/just-edn"
-                  {:muuntaja just-edn
-                   :get identity}]
-                 ["/form-params"
-                  {:post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]
-                {:data {:muuntaja m/instance
-                        :middleware [muuntaja/format-middleware]}}))
+             (ring/router
+              [["/defaults"
+                {:get identity}]
+               ["/explicit-defaults"
+                {:muuntaja with-defaults
+                 :get identity}]
+               ["/no-edn-decode"
+                {:muuntaja no-edn-decode
+                 :get identity}]
+               ["/just-edn"
+                {:muuntaja just-edn
+                 :get identity}]
+               ["/form-params"
+                {:post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]
+              {:data {:muuntaja m/instance
+                      :middleware [muuntaja/format-middleware]}}))
         spec (fn [method path]
                (let [path (keyword path)]
                  (-> {:request-method :get :uri "/swagger.json"}
@@ -97,41 +98,41 @@
 
 (deftest muuntaja-swagger-parts-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/request"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-request-middleware]
-                   :get identity}]
-                 ["/response"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-response-middleware]
-                   :get identity}]
-                 ["/both"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-response-middleware
-                                muuntaja/format-request-middleware]
-                   :get identity}]
-                 ["/form-request"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-request-middleware]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/form-response"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-response-middleware]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/form-with-both"
-                  {:middleware [muuntaja/format-negotiate-middleware
-                                muuntaja/format-response-middleware
-                                muuntaja/format-request-middleware]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
+             (ring/router
+              [["/request"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-request-middleware]
+                 :get identity}]
+               ["/response"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-response-middleware]
+                 :get identity}]
+               ["/both"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-response-middleware
+                              muuntaja/format-request-middleware]
+                 :get identity}]
+               ["/form-request"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-request-middleware]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/form-response"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-response-middleware]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/form-with-both"
+                {:middleware [muuntaja/format-negotiate-middleware
+                              muuntaja/format-response-middleware
+                              muuntaja/format-request-middleware]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
 
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]
-                {:data {:muuntaja m/instance}}))
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]
+              {:data {:muuntaja m/instance}}))
         spec (fn [method path]
                (-> {:request-method :get :uri "/swagger.json"}
                    (app) :body :paths (get path) method))

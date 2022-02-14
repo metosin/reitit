@@ -1,23 +1,25 @@
 (ns reitit.coercion.spec
-  (:require [clojure.spec.alpha :as s]
-            [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
-            [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
-            [spec-tools.swagger.core :as swagger]
-            [reitit.coercion :as coercion]
-            [clojure.set :as set])
+  (:require
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [reitit.coercion :as coercion]
+   [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
+   [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
+   [spec-tools.swagger.core :as swagger])
   #?(:clj
-     (:import (spec_tools.core Spec)
-              (spec_tools.data_spec Maybe))))
+     (:import
+      (spec_tools.core Spec)
+      (spec_tools.data_spec Maybe))))
 
 (def string-transformer
   (st/type-transformer
-    st/strip-extra-keys-transformer
-    st/string-transformer))
+   st/strip-extra-keys-transformer
+   st/string-transformer))
 
 (def json-transformer
   (st/type-transformer
-    st/strip-extra-keys-transformer
-    st/json-transformer))
+   st/strip-extra-keys-transformer
+   st/json-transformer))
 
 (def strip-extra-keys-transformer
   st/strip-extra-keys-transformer)
@@ -88,27 +90,27 @@
     (-get-apidocs [this specification {:keys [parameters responses]}]
       (case specification
         :swagger (swagger/swagger-spec
-                   (merge
-                     (if parameters
-                       {::swagger/parameters
-                        (into
-                          (empty parameters)
-                          (for [[k v] parameters]
-                            [k (coercion/-compile-model this v nil)]))})
-                     (if responses
-                       {::swagger/responses
-                        (into
-                          (empty responses)
-                          (for [[k response] responses]
-                            [k (as-> response $
-                                     (set/rename-keys $ {:body :schema})
-                                     (if (:schema $)
-                                       (update $ :schema #(coercion/-compile-model this % nil))
-                                       $))]))})))
+                  (merge
+                   (if parameters
+                     {::swagger/parameters
+                      (into
+                       (empty parameters)
+                       (for [[k v] parameters]
+                         [k (coercion/-compile-model this v nil)]))})
+                   (if responses
+                     {::swagger/responses
+                      (into
+                       (empty responses)
+                       (for [[k response] responses]
+                         [k (as-> response $
+                              (set/rename-keys $ {:body :schema})
+                              (if (:schema $)
+                                (update $ :schema #(coercion/-compile-model this % nil))
+                                $))]))})))
         (throw
-          (ex-info
-            (str "Can't produce Spec apidocs for " specification)
-            {:specification specification, :coercion :spec}))))
+         (ex-info
+          (str "Can't produce Spec apidocs for " specification)
+          {:specification specification, :coercion :spec}))))
     (-compile-model [_ model name]
       (into-spec model name))
     (-open-model [_ spec] spec)
@@ -129,8 +131,8 @@
                   (if (s/invalid? transformed)
                     (let [problems (st/explain-data spec coerced transformer)]
                       (coercion/map->CoercionError
-                        {:spec spec
-                         :problems problems}))
+                       {:spec spec
+                        :problems problems}))
                     (s/unform spec transformed)))))
             value))))
     (-response-coercer [this spec]

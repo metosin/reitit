@@ -1,7 +1,8 @@
 (ns reitit.core
-  (:require [reitit.impl :as impl]
-            [reitit.exception :as exception]
-            [reitit.trie :as trie]))
+  (:require
+   [reitit.exception :as exception]
+   [reitit.impl :as impl]
+   [reitit.trie :as trie]))
 
 ;;
 ;; Expand
@@ -61,7 +62,7 @@
      (if-not (partial-match? match)
        match
        (impl/throw-on-missing-path-params
-         (:template match) (:required match) path-params)))))
+        (:template match) (:required match) path-params)))))
 
 (defn match->path
   ([match]
@@ -87,15 +88,15 @@
    (let [compiler (::trie/trie-compiler opts (trie/compiler))
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/parse p opts)
-                           f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result (impl/url-decode-coll %) path)
-                                (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                       [(conj pl (-> (trie/insert nil p (->Match p data result nil nil) opts) (trie/compile)))
-                        (if name (assoc nl name f) nl)]))
-                   [[] {}]
-                   compiled-routes)
+                  (fn [[pl nl] [p {:keys [name] :as data} result]]
+                    (let [{:keys [path-params] :as route} (impl/parse p opts)
+                          f #(if-let [path (impl/path-for route %)]
+                               (->Match p data result (impl/url-decode-coll %) path)
+                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                      [(conj pl (-> (trie/insert nil p (->Match p data result nil nil) opts) (trie/compile)))
+                       (if name (assoc nl name f) nl)]))
+                  [[] {}]
+                  compiled-routes)
          lookup (impl/fast-map nl)
          matcher (trie/linear-matcher compiler pl true)
          match-by-path (trie/path-matcher matcher compiler)
@@ -133,18 +134,18 @@
   ([compiled-routes opts]
    (when-let [wilds (seq (filter (impl/->wild-route? opts) compiled-routes))]
      (exception/fail!
-       (str "can't create :lookup-router with wildcard routes: " wilds)
-       {:wilds wilds
-        :routes compiled-routes}))
+      (str "can't create :lookup-router with wildcard routes: " wilds)
+      {:wilds wilds
+       :routes compiled-routes}))
    (let [names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     [(assoc pl p (->Match p data result {} p))
-                      (if name
-                        (assoc nl name #(->Match p data result % p))
-                        nl)])
-                   [{} {}]
-                   compiled-routes)
+                  (fn [[pl nl] [p {:keys [name] :as data} result]]
+                    [(assoc pl p (->Match p data result {} p))
+                     (if name
+                       (assoc nl name #(->Match p data result % p))
+                       nl)])
+                  [{} {}]
+                  compiled-routes)
          data (impl/fast-map pl)
          lookup (impl/fast-map nl)
          routes (impl/uncompile-routes compiled-routes)]
@@ -183,15 +184,15 @@
    (let [compiler (::trie/trie-compiler opts (trie/compiler))
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
-                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                     (let [{:keys [path-params] :as route} (impl/parse p opts)
-                           f #(if-let [path (impl/path-for route %)]
-                                (->Match p data result (impl/url-decode-coll %) path)
-                                (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                       [(trie/insert pl p (->Match p data result nil nil) opts)
-                        (if name (assoc nl name f) nl)]))
-                   [nil {}]
-                   compiled-routes)
+                  (fn [[pl nl] [p {:keys [name] :as data} result]]
+                    (let [{:keys [path-params] :as route} (impl/parse p opts)
+                          f #(if-let [path (impl/path-for route %)]
+                               (->Match p data result (impl/url-decode-coll %) path)
+                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                      [(trie/insert pl p (->Match p data result nil nil) opts)
+                       (if name (assoc nl name f) nl)]))
+                  [nil {}]
+                  compiled-routes)
          matcher (trie/compile pl compiler)
          match-by-path (trie/path-matcher matcher compiler)
          lookup (impl/fast-map nl)
@@ -229,8 +230,8 @@
   ([compiled-routes opts]
    (when (or (not= (count compiled-routes) 1) (some (impl/->wild-route? opts) compiled-routes))
      (exception/fail!
-       (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
-       {:routes compiled-routes}))
+      (str ":single-static-path-router requires exactly 1 static route: " compiled-routes)
+      {:routes compiled-routes}))
    (let [[n :as names] (impl/find-names compiled-routes opts)
          [[p data result]] compiled-routes
          p #?(:clj (.intern ^String p) :cljs p)

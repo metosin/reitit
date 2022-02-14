@@ -1,19 +1,20 @@
 (ns reitit.http.interceptors.muuntaja-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.http :as http]
-            [reitit.http.interceptors.muuntaja :as muuntaja]
-            [reitit.swagger :as swagger]
-            [reitit.interceptor.sieppari :as sieppari]
-            [muuntaja.core :as m]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [muuntaja.core :as m]
+   [reitit.http :as http]
+   [reitit.http.interceptors.muuntaja :as muuntaja]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.swagger :as swagger]))
 
 (deftest muuntaja-test
   (let [data {:kikka "kukka"}
         app (http/ring-handler
-              (http/router
-                ["/ping" {:get (constantly {:status 200, :body data})}]
-                {:data {:muuntaja m/instance
-                        :interceptors [(muuntaja/format-interceptor)]}})
-              {:executor sieppari/executor})]
+             (http/router
+              ["/ping" {:get (constantly {:status 200, :body data})}]
+              {:data {:muuntaja m/instance
+                      :interceptors [(muuntaja/format-interceptor)]}})
+             {:executor sieppari/executor})]
     (is (= data (->> {:request-method :get, :uri "/ping"}
                      (app)
                      :body
@@ -24,27 +25,27 @@
         no-edn-decode (m/create (-> m/default-options (update-in [:formats "application/edn"] dissoc :decoder)))
         just-edn (m/create (-> m/default-options (m/select-formats ["application/edn"])))
         app (http/ring-handler
-              (http/router
-                [["/defaults"
-                  {:get identity}]
-                 ["/explicit-defaults"
-                  {:muuntaja with-defaults
-                   :get identity}]
-                 ["/no-edn-decode"
-                  {:muuntaja no-edn-decode
-                   :get identity}]
-                 ["/just-edn"
-                  {:muuntaja just-edn
-                   :get identity}]
-                 ["/form-params"
-                  {:post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]
-                {:data {:muuntaja m/instance
-                        :interceptors [(muuntaja/format-interceptor)]}})
-              {:executor sieppari/executor})
+             (http/router
+              [["/defaults"
+                {:get identity}]
+               ["/explicit-defaults"
+                {:muuntaja with-defaults
+                 :get identity}]
+               ["/no-edn-decode"
+                {:muuntaja no-edn-decode
+                 :get identity}]
+               ["/just-edn"
+                {:muuntaja just-edn
+                 :get identity}]
+               ["/form-params"
+                {:post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]
+              {:data {:muuntaja m/instance
+                      :interceptors [(muuntaja/format-interceptor)]}})
+             {:executor sieppari/executor})
         spec (fn [method path]
                (let [path (keyword path)]
                  (-> {:request-method :get :uri "/swagger.json"}
@@ -99,42 +100,42 @@
 
 (deftest muuntaja-swagger-parts-test
   (let [app (http/ring-handler
-              (http/router
-                [["/request"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
-                                  (muuntaja/format-request-interceptor)]
-                   :get identity}]
-                 ["/response"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
-                                  (muuntaja/format-response-interceptor)]
-                   :get identity}]
-                 ["/both"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
-                                  (muuntaja/format-response-interceptor)
-                                  (muuntaja/format-request-interceptor)]
-                   :get identity}]
-                 ["/form-request"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
+             (http/router
+              [["/request"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
                                 (muuntaja/format-request-interceptor)]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/form-response"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
+                 :get identity}]
+               ["/response"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
                                 (muuntaja/format-response-interceptor)]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
-                 ["/form-with-both"
-                  {:interceptors [(muuntaja/format-negotiate-interceptor)
+                 :get identity}]
+               ["/both"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
                                 (muuntaja/format-response-interceptor)
                                 (muuntaja/format-request-interceptor)]
-                   :post {:parameters {:form {:x string?}}
-                          :handler identity}}]
+                 :get identity}]
+               ["/form-request"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
+                                (muuntaja/format-request-interceptor)]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/form-response"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
+                                (muuntaja/format-response-interceptor)]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
+               ["/form-with-both"
+                {:interceptors [(muuntaja/format-negotiate-interceptor)
+                                (muuntaja/format-response-interceptor)
+                                (muuntaja/format-request-interceptor)]
+                 :post {:parameters {:form {:x string?}}
+                        :handler identity}}]
 
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]
-                {:data {:muuntaja m/instance}})
-              {:executor sieppari/executor})
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]
+              {:data {:muuntaja m/instance}})
+             {:executor sieppari/executor})
         spec (fn [method path]
                (-> {:request-method :get :uri "/swagger.json"}
                    (app) :body :paths (get path) method))

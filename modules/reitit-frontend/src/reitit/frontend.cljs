@@ -1,9 +1,11 @@
 (ns reitit.frontend
-  (:require [clojure.set :as set]
-            [reitit.coercion :as coercion]
-            [reitit.core :as r])
-  (:import goog.Uri
-           goog.Uri.QueryData))
+  (:require
+   [clojure.set :as set]
+   [reitit.coercion :as coercion]
+   [reitit.core :as r])
+  (:import
+   goog.Uri
+   goog.Uri.QueryData))
 
 (defn- query-param [^QueryData q k]
   (let [vs (.getValues q k)]
@@ -64,11 +66,11 @@
          (let [defined (-> path-params keys set)
                missing (set/difference (:required match) defined)]
            (js/console.warn
-             "missing path-params for route" name
-             {:template (:template match)
-              :missing missing
-              :path-params path-params
-              :required (:required match)})
+            "missing path-params for route" name
+            {:template (:template match)
+             :missing missing
+             :path-params path-params
+             :required (:required match)})
            nil))
        match)
      (do (js/console.warn "missing route" name)

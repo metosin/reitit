@@ -1,105 +1,106 @@
 (ns reitit.swagger-test
-  (:require [clojure.test :refer [deftest is testing]]
-            [reitit.ring :as ring]
-            [reitit.swagger :as swagger]
-            [reitit.swagger-ui :as swagger-ui]
-            [reitit.ring.coercion :as rrc]
-            [reitit.coercion.spec :as spec]
-            [reitit.coercion.malli :as malli]
-            [reitit.coercion.schema :as schema]
-            [muuntaja.core :as m]
-            [spec-tools.data-spec :as ds]
-            [schema.core :as s]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [muuntaja.core :as m]
+   [reitit.coercion.malli :as malli]
+   [reitit.coercion.schema :as schema]
+   [reitit.coercion.spec :as spec]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
+   [reitit.swagger :as swagger]
+   [reitit.swagger-ui :as swagger-ui]
+   [schema.core :as s]
+   [spec-tools.data-spec :as ds]))
 
 (def app
   (ring/ring-handler
-    (ring/router
-      ["/api"
-       {:swagger {:id ::math}}
+   (ring/router
+    ["/api"
+     {:swagger {:id ::math}}
 
-       ["/swagger.json"
-        {:get {:no-doc true
-               :swagger {:info {:title "my-api"}}
-               :handler (swagger/create-swagger-handler)}}]
+     ["/swagger.json"
+      {:get {:no-doc true
+             :swagger {:info {:title "my-api"}}
+             :handler (swagger/create-swagger-handler)}}]
 
-       ["/spec" {:coercion spec/coercion}
-        ["/plus/:z"
-         {:patch {:summary "patch"
+     ["/spec" {:coercion spec/coercion}
+      ["/plus/:z"
+       {:patch {:summary "patch"
+                :handler (constantly {:status 200})}
+        :options {:summary "options"
+                  :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
                   :handler (constantly {:status 200})}
-          :options {:summary "options"
-                    :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
-                    :handler (constantly {:status 200})}
-          :get {:summary "plus"
-                :parameters {:query {:x int?, :y int?}
-                             :path {:z int?}}
-                :swagger {:responses {400 {:schema {:type "string"}
-                                           :description "kosh"}}}
-                :responses {200 {:body {:total int?}}
-                            500 {:description "fail"}}
-                :handler (fn [{{{:keys [x y]} :query
-                                {:keys [z]} :path} :parameters}]
-                           {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary "plus with body"
-                 :parameters {:body (ds/maybe [int?])
-                              :path {:z int?}}
-                 :swagger {:responses {400 {:schema {:type "string"}
-                                            :description "kosh"}}}
-                 :responses {200 {:body {:total int?}}
-                             500 {:description "fail"}}
-                 :handler (fn [{{{:keys [z]} :path
-                                 xs :body} :parameters}]
-                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+        :get {:summary "plus"
+              :parameters {:query {:x int?, :y int?}
+                           :path {:z int?}}
+              :swagger {:responses {400 {:schema {:type "string"}
+                                         :description "kosh"}}}
+              :responses {200 {:body {:total int?}}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body (ds/maybe [int?])
+                            :path {:z int?}}
+               :swagger {:responses {400 {:schema {:type "string"}
+                                          :description "kosh"}}}
+               :responses {200 {:body {:total int?}}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
-       ["/malli" {:coercion malli/coercion}
-        ["/plus/*z"
-         {:get {:summary "plus"
-                :parameters {:query [:map [:x int?] [:y int?]]
-                             :path [:map [:z int?]]}
-                :swagger {:responses {400 {:schema {:type "string"}
-                                           :description "kosh"}}}
-                :responses {200 {:body [:map [:total int?]]}
-                            500 {:description "fail"}}
-                :handler (fn [{{{:keys [x y]} :query
-                                {:keys [z]} :path} :parameters}]
-                           {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary "plus with body"
-                 :parameters {:body [:maybe [:vector int?]]
-                              :path [:map [:z int?]]}
-                 :swagger {:responses {400 {:schema {:type "string"}
-                                            :description "kosh"}}}
-                 :responses {200 {:body [:map [:total int?]]}
-                             500 {:description "fail"}}
-                 :handler (fn [{{{:keys [z]} :path
-                                 xs :body} :parameters}]
-                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+     ["/malli" {:coercion malli/coercion}
+      ["/plus/*z"
+       {:get {:summary "plus"
+              :parameters {:query [:map [:x int?] [:y int?]]
+                           :path [:map [:z int?]]}
+              :swagger {:responses {400 {:schema {:type "string"}
+                                         :description "kosh"}}}
+              :responses {200 {:body [:map [:total int?]]}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body [:maybe [:vector int?]]
+                            :path [:map [:z int?]]}
+               :swagger {:responses {400 {:schema {:type "string"}
+                                          :description "kosh"}}}
+               :responses {200 {:body [:map [:total int?]]}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
-       ["/schema" {:coercion schema/coercion}
-        ["/plus/*z"
-         {:get {:summary "plus"
-                :parameters {:query {:x s/Int, :y s/Int}
-                             :path {:z s/Int}}
-                :swagger {:responses {400 {:schema {:type "string"}
-                                           :description "kosh"}}}
-                :responses {200 {:body {:total s/Int}}
-                            500 {:description "fail"}}
-                :handler (fn [{{{:keys [x y]} :query
-                                {:keys [z]} :path} :parameters}]
-                           {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary "plus with body"
-                 :parameters {:body (s/maybe [s/Int])
-                              :path {:z s/Int}}
-                 :swagger {:responses {400 {:schema {:type "string"}
-                                            :description "kosh"}}}
-                 :responses {200 {:body {:total s/Int}}
-                             500 {:description "fail"}}
-                 :handler (fn [{{{:keys [z]} :path
-                                 xs :body} :parameters}]
-                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
+     ["/schema" {:coercion schema/coercion}
+      ["/plus/*z"
+       {:get {:summary "plus"
+              :parameters {:query {:x s/Int, :y s/Int}
+                           :path {:z s/Int}}
+              :swagger {:responses {400 {:schema {:type "string"}
+                                         :description "kosh"}}}
+              :responses {200 {:body {:total s/Int}}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body (s/maybe [s/Int])
+                            :path {:z s/Int}}
+               :swagger {:responses {400 {:schema {:type "string"}
+                                          :description "kosh"}}}
+               :responses {200 {:body {:total s/Int}}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
 
-      {:data {:middleware [swagger/swagger-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
+    {:data {:middleware [swagger/swagger-feature
+                         rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}})))
 
 (require '[fipp.edn])
 (deftest swagger-test
@@ -300,21 +301,21 @@
                     {:get {:no-doc true
                            :handler (swagger/create-swagger-handler)}}]
         app (ring/ring-handler
-              (ring/router
-                [["/common" {:swagger {:id #{::one ::two}}}
-                  ping-route]
+             (ring/router
+              [["/common" {:swagger {:id #{::one ::two}}}
+                ping-route]
 
-                 ["/one" {:swagger {:id ::one}}
-                  ping-route
-                  spec-route]
+               ["/one" {:swagger {:id ::one}}
+                ping-route
+                spec-route]
 
-                 ["/two" {:swagger {:id ::two}}
-                  ping-route
-                  spec-route
-                  ["/deep" {:swagger {:id ::one}}
-                   ping-route]]
-                 ["/one-two" {:swagger {:id #{::one ::two}}}
-                  spec-route]]))]
+               ["/two" {:swagger {:id ::two}}
+                ping-route
+                spec-route
+                ["/deep" {:swagger {:id ::one}}
+                 ping-route]]
+               ["/one-two" {:swagger {:id #{::one ::two}}}
+                spec-route]]))]
     (is (= ["/common/ping" "/one/ping" "/two/deep/ping"]
            (spec-paths app "/one/swagger.json")))
     (is (= ["/common/ping" "/two/ping"]
@@ -324,8 +325,8 @@
 
 (deftest swagger-ui-config-test
   (let [app (swagger-ui/create-swagger-ui-handler
-              {:path "/"
-               :config {:jsonEditor true}})]
+             {:path "/"
+              :config {:jsonEditor true}})]
     (is (= 302 (:status (app {:request-method :get, :uri "/"}))))
     (is (= 200 (:status (app {:request-method :get, :uri "/index.html"}))))
     (is (= {:jsonEditor true, :url "/swagger.json"}
@@ -334,12 +335,12 @@
 
 (deftest without-swagger-id-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/ping"
-                  {:get (constantly "ping")}]
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]))]
+             (ring/router
+              [["/ping"
+                {:get (constantly "ping")}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]))]
     (is (= ["/ping"] (spec-paths app "/swagger.json")))
     (is (= #{::swagger/default}
            (-> {:request-method :get :uri "/swagger.json"}
@@ -347,14 +348,14 @@
 
 (deftest with-options-endpoint-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/ping"
-                  {:options (constantly "options")}]
-                 ["/pong"
-                  (constantly "options")]
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]))]
+             (ring/router
+              [["/ping"
+                {:options (constantly "options")}]
+               ["/pong"
+                (constantly "options")]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]))]
     (is (= ["/ping" "/pong"] (spec-paths app "/swagger.json")))
     (is (= #{::swagger/default}
            (-> {:request-method :get :uri "/swagger.json"}
@@ -362,18 +363,18 @@
 
 (deftest all-parameter-types-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/parameters"
-                  {:post {:coercion spec/coercion
-                          :parameters {:query {:q string?}
-                                       :body {:b string?}
-                                       :form {:f string?}
-                                       :header {:h string?}
-                                       :path {:p string?}}
-                          :handler identity}}]
-                 ["/swagger.json"
-                  {:get {:no-doc true
-                         :handler (swagger/create-swagger-handler)}}]]))
+             (ring/router
+              [["/parameters"
+                {:post {:coercion spec/coercion
+                        :parameters {:query {:q string?}
+                                     :body {:b string?}
+                                     :form {:f string?}
+                                     :header {:h string?}
+                                     :path {:p string?}}
+                        :handler identity}}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]))
         spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
     (is (= ["query" "body" "formData" "header" "path"]
            (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))

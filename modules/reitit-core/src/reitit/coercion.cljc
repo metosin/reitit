@@ -1,8 +1,10 @@
 (ns reitit.coercion
-  (:require [clojure.walk :as walk]
-            [reitit.impl :as impl])
+  (:require
+   [clojure.walk :as walk]
+   [reitit.impl :as impl])
   #?(:clj
-     (:import (java.io Writer))))
+     (:import
+      (java.io Writer))))
 
 ;;
 ;; Protocol
@@ -43,28 +45,28 @@
 
 (defn ^:no-doc request-coercion-failed! [result coercion value in request]
   (throw
-    (ex-info
-      (str "Request coercion failed: " (pr-str result))
-      (merge
-        (into {} result)
-        {:type ::request-coercion
-         :coercion coercion
-         :value value
-         :in [:request in]
-         :request request}))))
+   (ex-info
+    (str "Request coercion failed: " (pr-str result))
+    (merge
+     (into {} result)
+     {:type ::request-coercion
+      :coercion coercion
+      :value value
+      :in [:request in]
+      :request request}))))
 
 (defn ^:no-doc response-coercion-failed! [result coercion value request response]
   (throw
-    (ex-info
-      (str "Response coercion failed: " (pr-str result))
-      (merge
-        (into {} result)
-        {:type ::response-coercion
-         :coercion coercion
-         :value value
-         :in [:response :body]
-         :request request
-         :response response}))))
+   (ex-info
+    (str "Response coercion failed: " (pr-str result))
+    (merge
+     (into {} result)
+     {:type ::response-coercion
+      :coercion coercion
+      :value value
+      :in [:response :body]
+      :request request
+      :response response}))))
 
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
@@ -109,9 +111,9 @@
 
 (defn coerce-request [coercers request]
   (reduce-kv
-    (fn [acc k coercer]
-      (impl/fast-assoc acc k (coercer request)))
-    {} coercers))
+   (fn [acc k coercer]
+     (impl/fast-assoc acc k (coercer request)))
+   {} coercers))
 
 (defn coerce-response [coercers request response]
   (if response
@@ -147,13 +149,13 @@
                            :multipart :formData}]
     (case specification
       :swagger (->> (update
-                      data
-                      :parameters
-                      (fn [parameters]
-                        (->> parameters
-                             (map (fn [[k v]] [(swagger-parameter k) v]))
-                             (filter first)
-                             (into {}))))
+                     data
+                     :parameters
+                     (fn [parameters]
+                       (->> parameters
+                            (map (fn [[k v]] [(swagger-parameter k) v]))
+                            (filter first)
+                            (into {}))))
                     (-get-apidocs coercion specification)))))
 
 ;;

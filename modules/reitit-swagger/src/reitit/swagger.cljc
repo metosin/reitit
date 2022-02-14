@@ -1,11 +1,12 @@
 (ns reitit.swagger
-  (:require [reitit.core :as r]
-            [meta-merge.core :refer [meta-merge]]
-            [clojure.spec.alpha :as s]
-            [clojure.set :as set]
-            [clojure.string :as str]
-            [reitit.coercion :as coercion]
-            [reitit.trie :as trie]))
+  (:require
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [meta-merge.core :refer [meta-merge]]
+   [reitit.coercion :as coercion]
+   [reitit.core :as r]
+   [reitit.trie :as trie]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
@@ -88,13 +89,13 @@
                                 (if (and data (not no-doc))
                                   [method
                                    (meta-merge
-                                     base-swagger-spec
-                                     (apply meta-merge (keep (comp :swagger :data) middleware))
-                                     (apply meta-merge (keep (comp :swagger :data) interceptors))
-                                     (if coercion
-                                       (coercion/get-apidocs coercion :swagger data))
-                                     (select-keys data [:tags :summary :description])
-                                     (strip-top-level-keys swagger))]))
+                                    base-swagger-spec
+                                    (apply meta-merge (keep (comp :swagger :data) middleware))
+                                    (apply meta-merge (keep (comp :swagger :data) interceptors))
+                                    (if coercion
+                                      (coercion/get-apidocs coercion :swagger data))
+                                    (select-keys data [:tags :summary :description])
+                                    (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))

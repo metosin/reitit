@@ -1,12 +1,13 @@
 (ns reitit.ring
-  (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.middleware :as middleware]
-            [reitit.exception :as ex]
-            [reitit.core :as r]
-            [reitit.impl :as impl]
-            #?@(:clj [[ring.util.mime-type :as mime-type]
+  (:require
+   [clojure.string :as str]
+   [meta-merge.core :refer [meta-merge]]
+   #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
-            [clojure.string :as str]))
+   [reitit.core :as r]
+   [reitit.exception :as ex]
+   [reitit.impl :as impl]
+   [reitit.middleware :as middleware]))
 
 (declare get-match)
 (declare get-router)
@@ -17,23 +18,23 @@
 
 (defn ^:no-wiki group-keys [data]
   (reduce-kv
-    (fn [[top childs] k v]
-      (if (http-methods k)
-        [top (assoc childs k v)]
-        [(assoc top k v) childs])) [{} {}] data))
+   (fn [[top childs] k v]
+     (if (http-methods k)
+       [top (assoc childs k v)]
+       [(assoc top k v) childs])) [{} {}] data))
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
-          (fn [acc method]
-            (if (contains? acc method)
-              (update acc method expand opts)
-              acc)) data http-methods)])
+         (fn [acc method]
+           (if (contains? acc method)
+             (update acc method expand opts)
+             acc)) data http-methods)])
 
 (defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
-                       (assoc :options (expand default-options-endpoint opts)))
+                 (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
+                 (assoc :options (expand default-options-endpoint opts)))
         ->endpoint (fn [p d m s]
                      (-> (middleware/compile-result [p d] opts s)
                          (map->Endpoint)
@@ -41,19 +42,19 @@
                          (assoc :method m)))
         ->methods (fn [any? data]
                     (reduce
-                      (fn [acc method]
-                        (cond-> acc
-                                any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods {})
-                      http-methods))]
+                     (fn [acc method]
+                       (cond-> acc
+                         any? (assoc method (->endpoint path data method nil))))
+                     (map->Methods {})
+                     http-methods))]
     (if-not (seq childs)
       (->methods true top)
       (reduce-kv
-        (fn [acc method data]
-          (let [data (meta-merge top data)]
-            (assoc acc method (->endpoint path data method method))))
-        (->methods (:handler top) data)
-        childs))))
+       (fn [acc method data]
+         (let [data (meta-merge top data)]
+           (assoc acc method (->endpoint path data method method))))
+       (->methods (:handler top) data)
+       childs))))
 
 (def default-options-handler
   (let [handle (fn [request]
@@ -318,26 +319,26 @@
          enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
        (wrap
-         (fn
-           ([request]
-            (if-let [match (r/match-by-path router (:uri request))]
-              (let [method (:request-method request)
-                    path-params (:path-params match)
-                    result (:result match)
-                    handler (-> result method :handler (or default-handler))
-                    request (enrich-request request path-params match router)]
-                (or (handler request) (default-handler request)))
-              (default-handler (enrich-default-request request router))))
-           ([request respond raise]
-            (if-let [match (r/match-by-path router (:uri request))]
-              (let [method (:request-method request)
-                    path-params (:path-params match)
-                    result (:result match)
-                    handler (-> result method :handler (or default-handler))
-                    request (enrich-request request path-params match router)]
-                ((routes handler default-handler) request respond raise))
-              (default-handler (enrich-default-request request router) respond raise))
-            nil)))
+        (fn
+          ([request]
+           (if-let [match (r/match-by-path router (:uri request))]
+             (let [method (:request-method request)
+                   path-params (:path-params match)
+                   result (:result match)
+                   handler (-> result method :handler (or default-handler))
+                   request (enrich-request request path-params match router)]
+               (or (handler request) (default-handler request)))
+             (default-handler (enrich-default-request request router))))
+          ([request respond raise]
+           (if-let [match (r/match-by-path router (:uri request))]
+             (let [method (:request-method request)
+                   path-params (:path-params match)
+                   result (:result match)
+                   handler (-> result method :handler (or default-handler))
+                   request (enrich-request request path-params match router)]
+               ((routes handler default-handler) request respond raise))
+             (default-handler (enrich-default-request request router) respond raise))
+           nil)))
        {::r/router router}))))
 
 (defn get-router [handler]

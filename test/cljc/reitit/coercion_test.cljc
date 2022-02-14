@@ -1,34 +1,36 @@
 (ns reitit.coercion-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [schema.core :as s]
-            [spec-tools.data-spec :as ds]
-            [reitit.core :as r]
-            [reitit.coercion :as coercion]
-            [reitit.coercion.spec]
-            [reitit.coercion.malli]
-            [reitit.coercion.schema])
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [reitit.coercion :as coercion]
+   [reitit.coercion.malli]
+   [reitit.coercion.schema]
+   [reitit.coercion.spec]
+   [reitit.core :as r]
+   [schema.core :as s]
+   [spec-tools.data-spec :as ds])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo))))
+     (:import
+      (clojure.lang ExceptionInfo))))
 
 (deftest coercion-test
   (let [r (r/router
-            [["/schema" {:coercion reitit.coercion.schema/coercion}
-              ["/:number/:keyword" {:parameters {:path {:number s/Int
-                                                        :keyword s/Keyword}
-                                                 :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]
-             ["/malli" {:coercion reitit.coercion.malli/coercion}
-              ["/:number/:keyword" {:parameters {:path [:map [:number int?] [:keyword keyword?]]
-                                                 :query [:maybe [:map [:int int?]
-                                                                 [:ints [:vector int?]]
-                                                                 [:map [:map-of int? int?]]]]}}]]
-             ["/spec" {:coercion reitit.coercion.spec/coercion}
-              ["/:number/:keyword" {:parameters {:path {:number int?
-                                                        :keyword keyword?}
-                                                 :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]
-             ["/none"
-              ["/:number/:keyword" {:parameters {:path {:number int?
-                                                        :keyword keyword?}}}]]]
-            {:compile coercion/compile-request-coercers})]
+           [["/schema" {:coercion reitit.coercion.schema/coercion}
+             ["/:number/:keyword" {:parameters {:path {:number s/Int
+                                                       :keyword s/Keyword}
+                                                :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]
+            ["/malli" {:coercion reitit.coercion.malli/coercion}
+             ["/:number/:keyword" {:parameters {:path [:map [:number int?] [:keyword keyword?]]
+                                                :query [:maybe [:map [:int int?]
+                                                                [:ints [:vector int?]]
+                                                                [:map [:map-of int? int?]]]]}}]]
+            ["/spec" {:coercion reitit.coercion.spec/coercion}
+             ["/:number/:keyword" {:parameters {:path {:number int?
+                                                       :keyword keyword?}
+                                                :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]
+            ["/none"
+             ["/:number/:keyword" {:parameters {:path {:number int?
+                                                       :keyword keyword?}}}]]]
+           {:compile coercion/compile-request-coercers})]
 
     (testing "schema-coercion"
       (testing "succeeds"
@@ -80,10 +82,10 @@
 
 (deftest data-spec-example-test
   (let [router (r/router
-                 ["/:company/users/:user-id" {:name ::user-view
-                                              :coercion reitit.coercion.spec/coercion
-                                              :parameters {:path {:company string?
-                                                                  :user-id int?}}}]
-                 {:compile coercion/compile-request-coercers})]
+                ["/:company/users/:user-id" {:name ::user-view
+                                             :coercion reitit.coercion.spec/coercion
+                                             :parameters {:path {:company string?
+                                                                 :user-id int?}}}]
+                {:compile coercion/compile-request-coercers})]
     (is (= {:path {:user-id 123, :company "metosin"}}
            (:parameters (match-by-path-and-coerce! router "/metosin/users/123"))))))

@@ -1,8 +1,9 @@
 (ns reitit.ring.spec
-  (:require [clojure.spec.alpha :as s]
-            [reitit.middleware :as middleware]
-            [reitit.spec :as rs]
-            [reitit.exception :as exception]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [reitit.exception :as exception]
+   [reitit.middleware :as middleware]
+   [reitit.spec :as rs]))
 
 ;;
 ;; Specs
@@ -19,7 +20,6 @@
 (s/def ::trace map?)
 (s/def ::patch map?)
 
-
 (s/def ::data
   (s/keys :opt-un [::rs/handler ::rs/name ::rs/no-doc ::middleware]))
 
@@ -30,9 +30,9 @@
 (defn merge-specs [specs]
   (when-let [non-specs (seq (remove #(or (s/spec? %) (s/get-spec %)) specs))]
     (exception/fail!
-      ::invalid-specs
-      {:specs specs
-       :invalid non-specs}))
+     ::invalid-specs
+     {:specs specs
+      :invalid non-specs}))
   (s/merge-spec-impl (vec specs) (vec specs) nil))
 
 (defn validate-route-data [routes key wrap spec]
@@ -51,5 +51,5 @@
   [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
   (when-let [problems (validate-route-data routes :middleware wrap spec)]
     (exception/fail!
-      ::rs/invalid-route-data
-      {:problems problems})))
+     ::rs/invalid-route-data
+     {:problems problems})))

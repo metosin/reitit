@@ -1,18 +1,20 @@
 (ns reitit.ring-coercion-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [schema.core :as s]
-            [spec-tools.data-spec :as ds]
-            [reitit.ring :as ring]
-            [reitit.ring.coercion :as rrc]
-            [reitit.coercion.spec :as spec]
-            [reitit.coercion.malli :as malli]
-            [reitit.coercion.schema :as schema]
-            #?@(:clj [[muuntaja.middleware]
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   #?@(:clj [[muuntaja.middleware]
                       [jsonista.core :as j]])
-            [reitit.core :as r])
+   [reitit.coercion.malli :as malli]
+   [reitit.coercion.schema :as schema]
+   [reitit.coercion.spec :as spec]
+   [reitit.core :as r]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
+   [schema.core :as s]
+   [spec-tools.data-spec :as ds])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo)
-              (java.io ByteArrayInputStream))))
+     (:import
+      (clojure.lang ExceptionInfo)
+      (java.io ByteArrayInputStream))))
 
 (defn mounted-middleware [app path method]
   (->> app
@@ -77,19 +79,19 @@
 (deftest spec-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
-                   (ring/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {(ds/opt :a) int?}
-                                           :body {:b int?}
-                                           :form {:c int?}
-                                           :header {:d int?}
-                                           :path {:e int?}}
-                              :responses {200 {:body {:total pos-int?}}
-                                          500 {:description "fail"}}
-                              :handler handler}}]]
-                     {:data {:middleware middleware
-                             :coercion spec/coercion}})))]
+                  (ring/router
+                   ["/api"
+                    ["/plus/:e"
+                     {:get {:parameters {:query {(ds/opt :a) int?}
+                                         :body {:b int?}
+                                         :form {:c int?}
+                                         :header {:d int?}
+                                         :path {:e int?}}
+                            :responses {200 {:body {:total pos-int?}}
+                                        500 {:description "fail"}}
+                            :handler handler}}]]
+                   {:data {:middleware middleware
+                           :coercion spec/coercion}})))]
 
     (testing "without exception handling"
       (let [app (create [rrc/coerce-request-middleware
@@ -111,15 +113,15 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))))
 
     (testing "with exception handling"
       (let [app (create [rrc/coerce-exceptions-middleware
@@ -144,19 +146,19 @@
 (deftest schema-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
-                   (ring/router
-                     ["/api"
-                      ["/plus/:e"
-                       {:get {:parameters {:query {(s/optional-key :a) s/Int}
-                                           :body {:b s/Int}
-                                           :form {:c s/Int}
-                                           :header {:d s/Int}
-                                           :path {:e s/Int}}
-                              :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}
-                                          500 {:description "fail"}}
-                              :handler handler}}]]
-                     {:data {:middleware middleware
-                             :coercion schema/coercion}})))]
+                  (ring/router
+                   ["/api"
+                    ["/plus/:e"
+                     {:get {:parameters {:query {(s/optional-key :a) s/Int}
+                                         :body {:b s/Int}
+                                         :form {:c s/Int}
+                                         :header {:d s/Int}
+                                         :path {:e s/Int}}
+                            :responses {200 {:body {:total (s/constrained s/Int pos? 'positive)}}
+                                        500 {:description "fail"}}
+                            :handler handler}}]]
+                   {:data {:middleware middleware
+                           :coercion schema/coercion}})))]
 
     (testing "withut exception handling"
       (let [app (create [rrc/coerce-request-middleware
@@ -175,19 +177,19 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1)))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1)))
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app valid-request3))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app valid-request3))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))))
 
     (testing "with exception handling"
       (let [app (create [rrc/coerce-exceptions-middleware
@@ -210,50 +212,50 @@
 (deftest malli-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
-                   (ring/router
-                     ["/api"
+                  (ring/router
+                   ["/api"
 
-                      ["/validate" {:summary "just validation"
-                                    :coercion (reitit.coercion.malli/create {:transformers {}})
-                                    :post {:parameters {:body [:map [:x int?]]}
-                                           :responses {200 {:body [:map [:x int?]]}}
-                                           :handler (fn [req]
-                                                      {:status 200
-                                                       :body (-> req :parameters :body)})}}]
+                    ["/validate" {:summary "just validation"
+                                  :coercion (reitit.coercion.malli/create {:transformers {}})
+                                  :post {:parameters {:body [:map [:x int?]]}
+                                         :responses {200 {:body [:map [:x int?]]}}
+                                         :handler (fn [req]
+                                                    {:status 200
+                                                     :body (-> req :parameters :body)})}}]
 
-                      ["/no-op" {:summary "no-operation"
-                                 :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
-                                 :post {:parameters {:body [:map [:x int?]]}
-                                        :responses {200 {:body [:map [:x int?]]}}
-                                        :handler (fn [req]
-                                                   {:status 200
-                                                    :body (-> req :parameters :body)})}}]
+                    ["/no-op" {:summary "no-operation"
+                               :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
+                               :post {:parameters {:body [:map [:x int?]]}
+                                      :responses {200 {:body [:map [:x int?]]}}
+                                      :handler (fn [req]
+                                                 {:status 200
+                                                  :body (-> req :parameters :body)})}}]
 
-                      ["/skip" {:summary "skip"
-                                :coercion (reitit.coercion.malli/create {:enabled false})
-                                :post {:parameters {:body [:map [:x int?]]}
-                                       :responses {200 {:body [:map [:x int?]]}}
-                                       :handler (fn [req]
-                                                  {:status 200
-                                                   :body (-> req :parameters :body)})}}]
-
-                      ["/or" {:post {:summary "accepts either of two map schemas"
-                                     :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
-                                     :responses {200 {:body [:map [:msg string?]]}}
-                                     :handler (fn [{{{:keys [x]} :body} :parameters}]
+                    ["/skip" {:summary "skip"
+                              :coercion (reitit.coercion.malli/create {:enabled false})
+                              :post {:parameters {:body [:map [:x int?]]}
+                                     :responses {200 {:body [:map [:x int?]]}}
+                                     :handler (fn [req]
                                                 {:status 200
-                                                 :body {:msg (if x "you sent x" "you sent y")}})}}]
+                                                 :body (-> req :parameters :body)})}}]
 
-                      ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
-                                                      :body [:map [:b int?]]
-                                                      :form [:map [:c [int? {:default 3}]]]
-                                                      :header [:map [:d int?]]
-                                                      :path [:map [:e int?]]}
-                                         :responses {200 {:body [:map [:total pos-int?]]}
-                                                     500 {:description "fail"}}
-                                         :handler handler}}]]
-                     {:data {:middleware middleware
-                             :coercion malli/coercion}})))]
+                    ["/or" {:post {:summary "accepts either of two map schemas"
+                                   :parameters {:body [:or [:map [:x int?]] [:map [:y int?]]]}
+                                   :responses {200 {:body [:map [:msg string?]]}}
+                                   :handler (fn [{{{:keys [x]} :body} :parameters}]
+                                              {:status 200
+                                               :body {:msg (if x "you sent x" "you sent y")}})}}]
+
+                    ["/plus/:e" {:get {:parameters {:query [:map [:a {:optional true} int?]]
+                                                    :body [:map [:b int?]]
+                                                    :form [:map [:c [int? {:default 3}]]]
+                                                    :header [:map [:d int?]]
+                                                    :path [:map [:e int?]]}
+                                       :responses {200 {:body [:map [:total pos-int?]]}
+                                                   500 {:description "fail"}}
+                                       :handler handler}}]]
+                   {:data {:middleware middleware
+                           :coercion malli/coercion}})))]
 
     (testing "without exception handling"
       (let [app (create [rrc/coerce-request-middleware
@@ -279,15 +281,15 @@
 
         (testing "invalid request"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Request coercion failed"
-                (app invalid-request1))))
+               ExceptionInfo
+               #"Request coercion failed"
+               (app invalid-request1))))
 
         (testing "invalid response"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Response coercion failed"
-                (app invalid-request2))))))
+               ExceptionInfo
+               #"Response coercion failed"
+               (app invalid-request2))))))
 
     (testing "with exception handling"
       (let [app (create [rrc/coerce-exceptions-middleware
@@ -350,15 +352,15 @@
                                          {:status 200, :body (assoc body :response true)})}})
             ->app (fn [options]
                     (ring/ring-handler
-                      (ring/router
-                        ["/api"
-                         ["/default" (endpoint [:map [:x int?]])]
-                         ["/closed" (endpoint [:map {:closed true} [:x int?]])]
-                         ["/open" (endpoint [:map {:closed false} [:x int?]])]]
-                        {:data {:middleware [rrc/coerce-exceptions-middleware
-                                             rrc/coerce-request-middleware
-                                             rrc/coerce-response-middleware]
-                                :coercion (malli/create options)}})))
+                     (ring/router
+                      ["/api"
+                       ["/default" (endpoint [:map [:x int?]])]
+                       ["/closed" (endpoint [:map {:closed true} [:x int?]])]
+                       ["/open" (endpoint [:map {:closed false} [:x int?]])]]
+                      {:data {:middleware [rrc/coerce-exceptions-middleware
+                                           rrc/coerce-request-middleware
+                                           rrc/coerce-response-middleware]
+                              :coercion (malli/create options)}})))
             ->request (fn [uri] {:uri (str "/api/" uri)
                                  :request-method :get
                                  :muuntaja/request {:format "application/json"}
@@ -414,22 +416,22 @@
 
     (testing "sequence schemas"
       (let [app (ring/ring-handler
-                  (ring/router
-                    ["/ping" {:get {:parameters {:body [:vector [:map [:message string?]]]}
-                                    :responses {200 {:body [:vector [:map [:pong string?]]]}
-                                                501 {:body [:vector [:map [:error string?]]]}}
-                                    :handler (fn [{{[{:keys [message]}] :body} :parameters :as req}]
-                                               (condp = message
-                                                 "ping" {:status 200
-                                                         :body [{:pong message}]}
-                                                 "fail" {:status 501
-                                                         :body [{:error "fail"}]}
-                                                 {:status 200
-                                                  :body {:invalid "response"}}))}}]
-                    {:data {:middleware [rrc/coerce-exceptions-middleware
-                                         rrc/coerce-request-middleware
-                                         rrc/coerce-response-middleware]
-                            :coercion malli/coercion}}))
+                 (ring/router
+                  ["/ping" {:get {:parameters {:body [:vector [:map [:message string?]]]}
+                                  :responses {200 {:body [:vector [:map [:pong string?]]]}
+                                              501 {:body [:vector [:map [:error string?]]]}}
+                                  :handler (fn [{{[{:keys [message]}] :body} :parameters :as req}]
+                                             (condp = message
+                                               "ping" {:status 200
+                                                       :body [{:pong message}]}
+                                               "fail" {:status 501
+                                                       :body [{:error "fail"}]}
+                                               {:status 200
+                                                :body {:invalid "response"}}))}}]
+                  {:data {:middleware [rrc/coerce-exceptions-middleware
+                                       rrc/coerce-request-middleware
+                                       rrc/coerce-response-middleware]
+                          :coercion malli/coercion}}))
             ->request (fn [body]
                         {:uri "/ping"
                          :request-method :get
@@ -454,15 +456,15 @@
     (testing "encoding responses"
       (let [->app (fn [total-schema]
                     (ring/ring-handler
-                      (ring/router
-                        ["/total" {:get {:parameters {:query [:map [:x :int]]}
-                                         :responses {200 {:body [:map [:total total-schema]]}}
-                                         :handler (fn [{{{:keys [x]} :query} :parameters}]
-                                                    {:status 200
-                                                     :body {:total (* x x)}})}}]
-                        {:data {:middleware [rrc/coerce-request-middleware
-                                             rrc/coerce-response-middleware]
-                                :coercion malli/coercion}})))
+                     (ring/router
+                      ["/total" {:get {:parameters {:query [:map [:x :int]]}
+                                       :responses {200 {:body [:map [:total total-schema]]}}
+                                       :handler (fn [{{{:keys [x]} :query} :parameters}]
+                                                  {:status 200
+                                                   :body {:total (* x x)}})}}]
+                      {:data {:middleware [rrc/coerce-request-middleware
+                                           rrc/coerce-response-middleware]
+                              :coercion malli/coercion}})))
             call (fn [accept total-schema]
                    ((->app total-schema) {:uri "/total"
                                           :request-method :get
@@ -482,18 +484,18 @@
 #?(:clj
    (deftest muuntaja-test
      (let [app (ring/ring-handler
-                 (ring/router
-                   ["/api"
-                    ["/plus"
-                     {:post {:parameters {:body {:int int?, :keyword keyword?}}
-                             :responses {200 {:body {:int int?, :keyword keyword?}}}
-                             :handler (fn [{{:keys [body]} :parameters}]
-                                        {:status 200
-                                         :body body})}}]]
-                   {:data {:middleware [muuntaja.middleware/wrap-format
-                                        rrc/coerce-request-middleware
-                                        rrc/coerce-response-middleware]
-                           :coercion spec/coercion}}))
+                (ring/router
+                 ["/api"
+                  ["/plus"
+                   {:post {:parameters {:body {:int int?, :keyword keyword?}}
+                           :responses {200 {:body {:int int?, :keyword keyword?}}}
+                           :handler (fn [{{:keys [body]} :parameters}]
+                                      {:status 200
+                                       :body body})}}]]
+                 {:data {:middleware [muuntaja.middleware/wrap-format
+                                      rrc/coerce-request-middleware
+                                      rrc/coerce-response-middleware]
+                         :coercion spec/coercion}}))
            request (fn [content-type body]
                      (-> {:request-method :post
                           :headers {"content-type" content-type, "accept" content-type}

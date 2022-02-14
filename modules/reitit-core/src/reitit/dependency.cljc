@@ -1,6 +1,7 @@
 (ns reitit.dependency
   "Dependency resolution for middleware/interceptors."
-  (:require [reitit.exception :as exception]))
+  (:require
+   [reitit.exception :as exception]))
 
 (defn- providers
   "Map from provision key to provider. `get-provides` should return the provision keys of a dependent."
@@ -10,8 +11,8 @@
                   (map (fn [provide]
                          (when (contains? acc provide)
                            (exception/fail!
-                             (str "multiple providers for: " provide)
-                             {::multiple-providers provide}))
+                            (str "multiple providers for: " provide)
+                            {::multiple-providers provide}))
                          [provide dependent]))
                   (get-provides dependent)))
           {} nodes))
@@ -22,8 +23,8 @@
   (if (contains? providers k)
     (get providers k)
     (exception/fail!
-      (str "provider missing for dependency: " k)
-      {::missing-provider k})))
+     (str "provider missing for dependency: " k)
+     {::missing-provider k})))
 
 (defn post-order
   "Put `nodes` in post-order. Can also be described as a reverse topological sort.

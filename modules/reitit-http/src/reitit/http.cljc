@@ -1,24 +1,25 @@
 (ns reitit.http
-  (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.interceptor :as interceptor]
-            [reitit.exception :as ex]
-            [reitit.ring :as ring]
-            [reitit.core :as r]))
+  (:require
+   [meta-merge.core :refer [meta-merge]]
+   [reitit.core :as r]
+   [reitit.exception :as ex]
+   [reitit.interceptor :as interceptor]
+   [reitit.ring :as ring]))
 
 (defrecord Endpoint [data interceptors queue handler path method])
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
-          (fn [acc method]
-            (if (contains? acc method)
-              (update acc method expand opts)
-              acc)) data ring/http-methods)])
+         (fn [acc method]
+           (if (contains? acc method)
+             (update acc method expand opts)
+             acc)) data ring/http-methods)])
 
 (defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
-                       (assoc :options (expand default-options-endpoint opts)))
+                 (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
+                 (assoc :options (expand default-options-endpoint opts)))
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
@@ -29,19 +30,19 @@
                            (assoc :method m))))
         ->methods (fn [any? data]
                     (reduce
-                      (fn [acc method]
-                        (cond-> acc
-                                any? (assoc method (->endpoint path data method nil))))
-                      (ring/map->Methods {})
-                      ring/http-methods))]
+                     (fn [acc method]
+                       (cond-> acc
+                         any? (assoc method (->endpoint path data method nil))))
+                     (ring/map->Methods {})
+                     ring/http-methods))]
     (if-not (seq childs)
       (->methods true top)
       (reduce-kv
-        (fn [acc method data]
-          (let [data (meta-merge top data)]
-            (assoc acc method (->endpoint path data method method))))
-        (->methods (:handler top) data)
-        childs))))
+       (fn [acc method data]
+         (let [data (meta-merge top data)]
+           (assoc acc method (->endpoint path data method method))))
+       (->methods (:handler top) data)
+       childs))))
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
@@ -133,7 +134,7 @@
                          (assoc ::interceptor/queue (partial interceptor/queue executor))
                          (dissoc :data) ; data is already merged into routes
                          (cond-> (seq interceptors)
-                                 (update-in [:data :interceptors] (partial into (vec interceptors)))))
+                           (update-in [:data :interceptors] (partial into (vec interceptors)))))
          router (reitit.http/router (r/routes router) router-opts) ;; will re-compile the interceptors
          enrich-request (ring/create-enrich-request inject-match? inject-router?)
          enrich-default-request (ring/create-enrich-default-request inject-router?)]

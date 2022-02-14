@@ -1,8 +1,9 @@
 (ns reitit.ring.middleware.dev
-  (:require [lambdaisland.deep-diff :as ddiff]
-            [lambdaisland.deep-diff.printer :as printer]
-            [puget.color :as color]
-            [reitit.core :as r]))
+  (:require
+   [lambdaisland.deep-diff :as ddiff]
+   [lambdaisland.deep-diff.printer :as printer]
+   [puget.color :as color]
+   [reitit.core :as r]))
 
 (def printer
   (-> (printer/puget-printer)
@@ -48,6 +49,6 @@
   printer between all middleware."
   [chain]
   (reduce
-    (fn [chain mw]
-      (into chain [mw (print-diff-middleware (select-keys mw [:name]))]))
-    [(print-diff-middleware)] chain))
+   (fn [chain mw]
+     (into chain [mw (print-diff-middleware (select-keys mw [:name]))]))
+   [(print-diff-middleware)] chain))

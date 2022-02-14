@@ -1,5 +1,6 @@
 (ns reitit.ring.malli
-  #?(:clj (:import (java.io File))))
+  #?(:clj (:import
+           (java.io File))))
 
 #?(:clj
    (def temp-file-part

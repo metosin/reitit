@@ -2,7 +2,8 @@
   "Easy wrapper over reitit.frontend.history,
   handling the state. Only one router can be active
   at a time."
-  (:require [reitit.frontend.history :as rfh]))
+  (:require
+   [reitit.frontend.history :as rfh]))
 
 (defonce history (atom nil))
 
@@ -38,7 +39,7 @@
                        (when (nil? @history)
                          (reset! history this))
                        (on-navigate m this))
-    opts))
+              opts))
 
 (defn
   ^{:see-also ["reitit.frontend.history/href"]}
