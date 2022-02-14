@@ -1,15 +1,13 @@
 (ns reitit.ring-spec-test
-  (:require
-   [clojure.spec.alpha :as s]
-   [clojure.test :refer [deftest is testing]]
-   [reitit.coercion.spec]
-   [reitit.core :as r]
-   [reitit.ring :as ring]
-   [reitit.ring.coercion :as rrc]
-   [reitit.ring.spec :as rrs])
+  (:require [clojure.spec.alpha :as s]
+            [clojure.test :refer [deftest is testing]]
+            [reitit.coercion.spec]
+            [reitit.core :as r]
+            [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
+            [reitit.ring.spec :as rrs])
   #?(:clj
-     (:import
-      (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (s/def ::role #{:admin :user})
 (s/def ::roles (s/and (s/coll-of ::role :into #{}) set?))

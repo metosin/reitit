@@ -1,11 +1,9 @@
 (ns reitit.middleware-test
-  (:require
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.core :as r]
-   [reitit.middleware :as middleware])
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
+            [reitit.middleware :as middleware])
   #?(:clj
-     (:import
-      (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (def request [])
 

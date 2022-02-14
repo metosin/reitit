@@ -1,7 +1,6 @@
 (ns reitit.swagger-ui
-  #?(:clj (:require
-           [jsonista.core :as j]
-           [reitit.ring :as ring])))
+  #?(:clj (:require [jsonista.core :as j]
+                    [reitit.ring :as ring])))
 
 #?(:clj
    (defn create-swagger-ui-handler

@@ -1,19 +1,17 @@
 (ns reitit.http-coercion-test
-  (:require
-   [clojure.test :refer [deftest is testing]]
-   [jsonista.core :as j]
-   [muuntaja.interceptor]
-   [reitit.coercion.malli :as malli]
-   [reitit.coercion.schema :as schema]
-   [reitit.coercion.spec :as spec]
-   [reitit.core :as r]
-   [reitit.http :as http]
-   [reitit.http.coercion :as rrc]
-   [reitit.interceptor.sieppari :as sieppari]
-   [schema.core :as s])
-  (:import
-   (clojure.lang ExceptionInfo)
-   (java.io ByteArrayInputStream)))
+  (:require [clojure.test :refer [deftest is testing]]
+            [jsonista.core :as j]
+            [muuntaja.interceptor]
+            [reitit.coercion.malli :as malli]
+            [reitit.coercion.schema :as schema]
+            [reitit.coercion.spec :as spec]
+            [reitit.core :as r]
+            [reitit.http :as http]
+            [reitit.http.coercion :as rrc]
+            [reitit.interceptor.sieppari :as sieppari]
+            [schema.core :as s])
+  (:import (clojure.lang ExceptionInfo)
+           (java.io ByteArrayInputStream)))
 
 (defn mounted-interceptor [app path method]
   (->> app

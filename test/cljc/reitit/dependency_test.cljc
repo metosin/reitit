@@ -1,9 +1,7 @@
 (ns reitit.dependency-test
-  (:require
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.dependency :as rc])
-  #?(:clj (:import
-           [clojure.lang ExceptionInfo])))
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.dependency :as rc])
+  #?(:clj (:import [clojure.lang ExceptionInfo])))
 
 (deftest post-order-test
   (let [base-middlewares [{:name ::bar, :provides #{:bar}, :requires #{:foo}, :wrap identity}

@@ -1,8 +1,7 @@
 (ns reitit.ring.middleware.muuntaja
-  (:require
-   [clojure.spec.alpha :as s]
-   [muuntaja.core :as m]
-   [muuntaja.middleware]))
+  (:require [clojure.spec.alpha :as s]
+            [muuntaja.core :as m]
+            [muuntaja.middleware]))
 
 (s/def ::muuntaja m/muuntaja?)
 (s/def ::spec (s/keys :opt-un [::muuntaja]))

@@ -1,6 +1,5 @@
 (ns reitit.ring.middleware.parameters
-  (:require
-   [ring.middleware.params :as params]))
+  (:require [ring.middleware.params :as params]))
 
 (def parameters-middleware
   "Middleware to parse urlencoded parameters from the query string and form

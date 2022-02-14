@@ -1,9 +1,7 @@
 (ns reitit.ring.schema
-  (:require
-   [schema-tools.swagger.core :as swagger]
-   [schema.core :as s])
-  #?(:clj (:import
-           (java.io File))))
+  (:require [schema-tools.swagger.core :as swagger]
+            [schema.core :as s])
+  #?(:clj (:import (java.io File))))
 
 (defrecord Upload [m]
   s/Schema

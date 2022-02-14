@@ -1,15 +1,13 @@
 (ns reitit.coercion.spec
-  (:require
-   [clojure.set :as set]
-   [clojure.spec.alpha :as s]
-   [reitit.coercion :as coercion]
-   [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
-   [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
-   [spec-tools.swagger.core :as swagger])
+  (:require [clojure.set :as set]
+            [clojure.spec.alpha :as s]
+            [reitit.coercion :as coercion]
+            [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
+            [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
+            [spec-tools.swagger.core :as swagger])
   #?(:clj
-     (:import
-      (spec_tools.core Spec)
-      (spec_tools.data_spec Maybe))))
+     (:import (spec_tools.core Spec)
+              (spec_tools.data_spec Maybe))))
 
 (def string-transformer
   (st/type-transformer

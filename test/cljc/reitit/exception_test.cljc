@@ -1,14 +1,12 @@
 (ns reitit.exception-test
-  (:require
-   [clojure.spec.alpha :as s]
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.core :as r]
-   [reitit.dev.pretty :as pretty]
-   [reitit.exception :as exception]
-   [reitit.spec :as rs])
+  (:require [clojure.spec.alpha :as s]
+            [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
+            [reitit.dev.pretty :as pretty]
+            [reitit.exception :as exception]
+            [reitit.spec :as rs])
   #?(:clj
-     (:import
-      (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (s/def ::role #{:admin :manager})
 (s/def ::roles (s/coll-of ::role :into #{}))

@@ -1,16 +1,15 @@
 (ns reitit.swagger-test
-  (:require
-   [clojure.test :refer [deftest is testing]]
-   [muuntaja.core :as m]
-   [reitit.coercion.malli :as malli]
-   [reitit.coercion.schema :as schema]
-   [reitit.coercion.spec :as spec]
-   [reitit.ring :as ring]
-   [reitit.ring.coercion :as rrc]
-   [reitit.swagger :as swagger]
-   [reitit.swagger-ui :as swagger-ui]
-   [schema.core :as s]
-   [spec-tools.data-spec :as ds]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [muuntaja.core :as m]
+            [reitit.coercion.malli :as malli]
+            [reitit.coercion.schema :as schema]
+            [reitit.coercion.spec :as spec]
+            [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
+            [reitit.swagger :as swagger]
+            [reitit.swagger-ui :as swagger-ui]
+            [schema.core :as s]
+            [spec-tools.data-spec :as ds]))
 
 (def app
   (ring/ring-handler

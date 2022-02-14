@@ -1,8 +1,7 @@
 (ns reitit.ring.coercion
-  (:require
-   [reitit.coercion :as coercion]
-   [reitit.impl :as impl]
-   [reitit.spec :as rs]))
+  (:require [reitit.coercion :as coercion]
+            [reitit.impl :as impl]
+            [reitit.spec :as rs]))
 
 (defn handle-coercion-exception [e respond raise]
   (let [data (ex-data e)]

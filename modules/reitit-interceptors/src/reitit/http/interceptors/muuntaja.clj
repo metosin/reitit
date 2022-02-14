@@ -1,8 +1,7 @@
 (ns reitit.http.interceptors.muuntaja
-  (:require
-   [clojure.spec.alpha :as s]
-   [muuntaja.core :as m]
-   [muuntaja.interceptor]))
+  (:require [clojure.spec.alpha :as s]
+            [muuntaja.core :as m]
+            [muuntaja.interceptor]))
 
 (s/def ::muuntaja m/muuntaja?)
 (s/def ::spec (s/keys :opt-un [::muuntaja]))

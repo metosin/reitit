@@ -1,11 +1,9 @@
 (ns reitit.interceptor-test
-  (:require
-   [clojure.test :refer [are deftest is testing]]
-   [reitit.core :as r]
-   [reitit.interceptor :as interceptor])
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
+            [reitit.interceptor :as interceptor])
   #?(:clj
-     (:import
-      (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (def ctx (interceptor/context []))
 
