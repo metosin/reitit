@@ -16,6 +16,18 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 **[compare](https://github.com/metosin/reitit/compare/0.5.15...master)**
 
+* Support for [Malli Lite Syntax](https://github.com/metosin/malli#lite) in coercion (enabled by default):
+
+```clj
+["/add/:id" {:post {:parameters {:path {:id int?}
+                                 :query {:a (l/optional int?)}
+                                 :body {:id int?
+                                        :data {:id (l/maybe int?)
+                                               :orders (l/map-of uuid? {:name string?})}}}
+                    :responses {200 {:body {:total pos-int?}}
+                                500 {:description "fail"}}}}]
+```
+
 * Improved Reitit-frontend function docstrings
 
 * Updated deps:
