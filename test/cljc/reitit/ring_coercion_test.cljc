@@ -1,6 +1,7 @@
 (ns reitit.ring-coercion-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [malli.experimental.lite :as l]
    #?@(:clj [[muuntaja.middleware]
              [jsonista.core :as j]])
    [reitit.coercion.malli :as malli]
@@ -10,8 +11,7 @@
    [reitit.ring :as ring]
    [reitit.ring.coercion :as rrc]
    [schema.core :as s]
-   [spec-tools.data-spec :as ds]
-   [malli.experimental.lite :as l])
+   [spec-tools.data-spec :as ds])
   #?(:clj
      (:import
       (clojure.lang ExceptionInfo)

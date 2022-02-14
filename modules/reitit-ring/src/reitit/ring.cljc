@@ -3,7 +3,7 @@
    [clojure.string :as str]
    [meta-merge.core :refer [meta-merge]]
    #?@(:clj [[ring.util.mime-type :as mime-type]
-                      [ring.util.response :as response]])
+             [ring.util.response :as response]])
    [reitit.core :as r]
    [reitit.exception :as ex]
    [reitit.impl :as impl]

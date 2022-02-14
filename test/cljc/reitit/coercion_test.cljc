@@ -1,14 +1,14 @@
 (ns reitit.coercion-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [malli.experimental.lite :as l]
    [reitit.coercion :as coercion]
    [reitit.coercion.malli]
    [reitit.coercion.schema]
    [reitit.coercion.spec]
    [reitit.core :as r]
    [schema.core :as s]
-   [spec-tools.data-spec :as ds]
-   [malli.experimental.lite :as l])
+   [spec-tools.data-spec :as ds])
   #?(:clj
      (:import
       (clojure.lang ExceptionInfo))))
