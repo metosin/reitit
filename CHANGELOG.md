@@ -12,9 +12,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
+## 0.5.16 (2022-02-15)
 
-**[compare](https://github.com/metosin/reitit/compare/0.5.15...master)**
+**[compare](https://github.com/metosin/reitit/compare/0.5.15...0.5.16)**
 
 * Support for [Malli Lite Syntax](https://github.com/metosin/malli#lite) in coercion (enabled by default):
 
