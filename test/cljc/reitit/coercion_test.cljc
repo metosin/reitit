@@ -7,6 +7,7 @@
             [reitit.coercion.spec]
             [reitit.core :as r]
             [schema.core :as s]
+            [schema.utils :as su]
             [spec-tools.data-spec :as ds])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
@@ -106,3 +107,19 @@
                 {:compile coercion/compile-request-coercers})]
     (is (= {:path {:user-id 123, :company "metosin"}}
            (:parameters (match-by-path-and-coerce! router "/metosin/users/123"))))))
+
+(deftest schema-stringify-test
+  (is (= {"(opt :foo)" #?(:clj "java.lang.String" :cljs "Str")
+          "(req \"bar\")" #?(:clj "java.lang.String" :cljs "Str")}
+         (reitit.coercion.schema/stringify
+           {(s/optional-key :foo) s/Str
+            (s/required-key "bar") s/Str})))
+
+  (is (= "(named \"error-object\" \"name\")"
+         (reitit.coercion.schema/stringify
+           (new #?(:clj schema.utils.NamedError :cljs su/NamedError) "name" "error-object"))))
+
+  (is (= "(not :foo)"
+         (reitit.coercion.schema/stringify
+           (new #?(:clj schema.utils.ValidationError :cljs su/ValidationError)
+                nil nil (delay :foo) nil)))))

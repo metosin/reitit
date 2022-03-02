@@ -26,11 +26,11 @@
    (fn [x]
      (cond
        #?@(:clj [(class? x) (.getName ^Class x)])
-       (instance? schema.core.OptionalKey x) (pr-str (list 'opt (:k x)))
-       (instance? schema.core.RequiredKey x) (pr-str (list 'req (:k x)))
+       (instance? #?(:clj schema.core.OptionalKey :cljs s/OptionalKey) x) (pr-str (list 'opt (:k x)))
+       (instance? #?(:clj schema.core.RequiredKey :cljs s/RequiredKey) x) (pr-str (list 'req (:k x)))
        (and (satisfies? s/Schema x) (record? x)) (try (pr-str (s/explain x)) (catch #?(:clj Exception :cljs js/Error) _ x))
-       (instance? schema.utils.ValidationError x) (str (su/validation-error-explain x))
-       (instance? schema.utils.NamedError x) (str (su/named-error-explain x))
+       (instance? #?(:clj schema.utils.ValidationError :cljs su/ValidationError) x) (str (su/validation-error-explain x))
+       (instance? #?(:clj schema.utils.NamedError :cljs su/NamedError) x) (str (su/named-error-explain x))
        :else x))
    schema))
 
