@@ -69,21 +69,6 @@
   ([match query-params]
    (some-> match :path (cond-> (seq query-params) (str "?" (impl/query-string query-params))))))
 
-(defn- matcher [router1 router2]
-  (if (and router1 router2)
-    (reify
-      Router
-      (match-by-path [_ path]
-        (or (match-by-path router1 path)
-            (match-by-path router2 path)))
-      (match-by-name [_ name]
-        (or (match-by-name router1 name)
-            (match-by-name router2 name)))
-      (match-by-name [_ name path-params]
-        (or (match-by-name router1 name path-params)
-            (match-by-name router2 name path-params))))
-    (or router1 router2)))
-
 ;;
 ;; Different routers
 ;;
@@ -185,42 +170,41 @@
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
-   (when compiled-routes
-     (let [compiler (::trie/trie-compiler opts (trie/compiler))
-           names (impl/find-names compiled-routes opts)
-           [pl nl] (reduce
-                    (fn [[pl nl] [p {:keys [name] :as data} result]]
-                      (let [{:keys [path-params] :as route} (impl/parse p opts)
-                            f #(if-let [path (impl/path-for route %)]
-                                 (->Match p data result (impl/url-decode-coll %) path)
-                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                        [(trie/insert pl p (->Match p data result nil nil) opts)
-                         (if name (assoc nl name f) nl)]))
-                    [nil {}]
-                    compiled-routes)
-           matcher (trie/compile pl compiler)
-           match-by-path (trie/path-matcher matcher compiler)
-           lookup (impl/fast-map nl)
-           routes (impl/uncompile-routes compiled-routes)]
-       ^{:type ::router}
-       (reify
-         Router
-         (router-name [_] :trie-router)
-         (routes [_] routes)
-         (compiled-routes [_] compiled-routes)
-         (options [_] opts)
-         (route-names [_] names)
-         (match-by-path [_ path]
-           (if-let [match (match-by-path path)]
-             (-> (:data match)
-                 (assoc :path-params (:params match))
-                 (assoc :path path))))
-         (match-by-name [_ name]
-           (if-let [match (impl/fast-get lookup name)]
-             (match nil)))
-         (match-by-name [_ name path-params]
-           (if-let [match (impl/fast-get lookup name)]
-             (match (impl/path-params path-params)))))))))
+   (let [compiler (::trie/trie-compiler opts (trie/compiler))
+         names (impl/find-names compiled-routes opts)
+         [pl nl] (reduce
+                  (fn [[pl nl] [p {:keys [name] :as data} result]]
+                    (let [{:keys [path-params] :as route} (impl/parse p opts)
+                          f #(if-let [path (impl/path-for route %)]
+                               (->Match p data result (impl/url-decode-coll %) path)
+                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                      [(trie/insert pl p (->Match p data result nil nil) opts)
+                       (if name (assoc nl name f) nl)]))
+                  [nil {}]
+                  compiled-routes)
+         matcher (trie/compile pl compiler)
+         match-by-path (if matcher (trie/path-matcher matcher compiler))
+         lookup (impl/fast-map nl)
+         routes (impl/uncompile-routes compiled-routes)]
+     ^{:type ::router}
+     (reify
+       Router
+       (router-name [_] :trie-router)
+       (routes [_] routes)
+       (compiled-routes [_] compiled-routes)
+       (options [_] opts)
+       (route-names [_] names)
+       (match-by-path [_ path]
+         (if-let [match (and match-by-path (match-by-path path))]
+           (-> (:data match)
+               (assoc :path-params (:params match))
+               (assoc :path path))))
+       (match-by-name [_ name]
+         (if-let [match (impl/fast-get lookup name)]
+           (match nil)))
+       (match-by-name [_ name path-params]
+         (if-let [match (impl/fast-get lookup name)]
+           (match (impl/path-params path-params))))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
@@ -264,8 +248,7 @@
          wildcard-router (trie-router wild opts)
          static-router (->static-router lookup opts)
          names (impl/find-names compiled-routes opts)
-         routes (impl/uncompile-routes compiled-routes)
-         router (matcher static-router wildcard-router)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_] :mixed-router)
@@ -273,9 +256,15 @@
        (compiled-routes [_] compiled-routes)
        (options [_] opts)
        (route-names [_] names)
-       (match-by-path [_ path] (match-by-path router path))
-       (match-by-name [_ name] (match-by-name router name))
-       (match-by-name [_ name path-params] (match-by-name router name path-params))))))
+       (match-by-path [_ path]
+         (or (match-by-path static-router path)
+             (match-by-path wildcard-router path)))
+       (match-by-name [_ name]
+         (or (match-by-name static-router name)
+             (match-by-name wildcard-router name)))
+       (match-by-name [_ name path-params]
+         (or (match-by-name static-router name path-params)
+             (match-by-name wildcard-router name path-params)))))))
 
 (defn quarantine-router
   "Creates two routers: [[mixed-router]] for non-conflicting routes
@@ -290,8 +279,7 @@
          linear-router (linear-router conflicting opts)
          mixed-router (mixed-router non-conflicting opts)
          names (impl/find-names compiled-routes opts)
-         routes (impl/uncompile-routes compiled-routes)
-         router (matcher mixed-router linear-router)]
+         routes (impl/uncompile-routes compiled-routes)]
      ^{:type ::router}
      (reify Router
        (router-name [_] :quarantine-router)
@@ -299,9 +287,15 @@
        (compiled-routes [_] compiled-routes)
        (options [_] opts)
        (route-names [_] names)
-       (match-by-path [_ path] (match-by-path router path))
-       (match-by-name [_ name] (match-by-name router name))
-       (match-by-name [_ name path-params] (match-by-name router name path-params))))))
+       (match-by-path [_ path]
+         (or (match-by-path mixed-router path)
+             (match-by-path linear-router path)))
+       (match-by-name [_ name]
+         (or (match-by-name mixed-router name)
+             (match-by-name linear-router name)))
+       (match-by-name [_ name path-params]
+         (or (match-by-name mixed-router name path-params)
+             (match-by-name linear-router name path-params)))))))
 
 ;;
 ;; Creating Routers
