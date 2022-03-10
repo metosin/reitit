@@ -364,8 +364,7 @@
                       (into (for [[p c] catch-all] (catch-all-matcher compiler (:value p) params (:data c)))))]
      (cond
        (> (count matchers) 1) (linear-matcher compiler matchers false)
-       (= (count matchers) 1) (first matchers)
-       :else (data-matcher compiler {} nil)))))
+       (= (count matchers) 1) (first matchers)))))
 
 (defn pretty
   "Returns a simplified EDN structure of a compiled trie for printing purposes."
