@@ -433,8 +433,7 @@
     (is (= :root (-> (r/match-by-path router2 "/") :data :name)))))
 
 (deftest routing-bug-test-538
-  (let [router (r/router
-                [["/:a"]
-                 ["/:b"]]
-                {:conflicts nil})]
+  (let [router (r/router [["/:a"] ["/:b"]] {:conflicts nil})]
     (is (nil? (r/match-by-path router "")))))
+
+
