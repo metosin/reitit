@@ -73,6 +73,23 @@
 ;; Different routers
 ;;
 
+(defn empty-router
+  "Creates an empty routes, not matching to anything"
+  ([] (empty-router nil))
+  ([opts]
+   ^{:type ::router}
+   (reify Router
+     (router-name [_]
+       :empty-router)
+     (routes [_])
+     (compiled-routes [_])
+     (options [_]
+       opts)
+     (route-names [_])
+     (match-by-path [_ _])
+     (match-by-name [_ _])
+     (match-by-name [_ _ _]))))
+
 (defn linear-router
   "Creates a linear-router from resolved routes and optional
   expanded options. See [[router]] for available options, plus the following:
@@ -180,46 +197,48 @@
   ([compiled-routes]
    (trie-router compiled-routes {}))
   ([compiled-routes opts]
-   (let [compiler (::trie/trie-compiler opts (trie/compiler))
-         names (impl/find-names compiled-routes opts)
-         [pl nl] (reduce
-                  (fn [[pl nl] [p {:keys [name] :as data} result]]
-                    (let [{:keys [path-params] :as route} (impl/parse p opts)
-                          f #(if-let [path (impl/path-for route %)]
-                               (->Match p data result (impl/url-decode-coll %) path)
-                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
-                      [(trie/insert pl p (->Match p data result nil nil) opts)
-                       (if name (assoc nl name f) nl)]))
-                  [nil {}]
-                  compiled-routes)
-         matcher (trie/compile pl compiler)
-         match-by-path (trie/path-matcher matcher compiler)
-         lookup (impl/fast-map nl)
-         routes (impl/uncompile-routes compiled-routes)]
-     ^{:type ::router}
-     (reify
-       Router
-       (router-name [_]
-         :trie-router)
-       (routes [_]
-         routes)
-       (compiled-routes [_]
-         compiled-routes)
-       (options [_]
-         opts)
-       (route-names [_]
-         names)
-       (match-by-path [_ path]
-         (if-let [match (match-by-path path)]
-           (-> (:data match)
-               (assoc :path-params (:params match))
-               (assoc :path path))))
-       (match-by-name [_ name]
-         (if-let [match (impl/fast-get lookup name)]
-           (match nil)))
-       (match-by-name [_ name path-params]
-         (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))))))
+   (if-not compiled-routes
+     (empty-router opts)
+     (let [compiler (::trie/trie-compiler opts (trie/compiler))
+           names (impl/find-names compiled-routes opts)
+           [pl nl] (reduce
+                    (fn [[pl nl] [p {:keys [name] :as data} result]]
+                      (let [{:keys [path-params] :as route} (impl/parse p opts)
+                            f #(if-let [path (impl/path-for route %)]
+                                 (->Match p data result (impl/url-decode-coll %) path)
+                                 (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                        [(trie/insert pl p (->Match p data result nil nil) opts)
+                         (if name (assoc nl name f) nl)]))
+                    [nil {}]
+                    compiled-routes)
+           matcher (trie/compile pl compiler)
+           match-by-path (trie/path-matcher matcher compiler)
+           lookup (impl/fast-map nl)
+           routes (impl/uncompile-routes compiled-routes)]
+       ^{:type ::router}
+       (reify
+         Router
+         (router-name [_]
+           :trie-router)
+         (routes [_]
+           routes)
+         (compiled-routes [_]
+           compiled-routes)
+         (options [_]
+           opts)
+         (route-names [_]
+           names)
+         (match-by-path [_ path]
+           (if-let [match (match-by-path path)]
+             (-> (:data match)
+                 (assoc :path-params (:params match))
+                 (assoc :path path))))
+         (match-by-name [_ name]
+           (if-let [match (impl/fast-get lookup name)]
+             (match nil)))
+         (match-by-name [_ name path-params]
+           (if-let [match (impl/fast-get lookup name)]
+             (match (impl/path-params path-params)))))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
