@@ -59,7 +59,7 @@ There is an extra option in ring-router (actually, in the underlying middleware-
 ### Printing Request Diffs
 
 ```clj
-[metosin/reitit-middleware "0.5.16"]
+[metosin/reitit-middleware "0.5.17"]
 ```
 
 Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the request diffs between each middleware are printed out to the console. To use it, add the following router option:

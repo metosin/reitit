@@ -12,6 +12,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.17 (2022-03-10)
+
+* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
+
+
 ## 0.5.16 (2022-02-15)
 
 **[compare](https://github.com/metosin/reitit/compare/0.5.15...0.5.16)**
