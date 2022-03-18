@@ -122,7 +122,7 @@
   (let [spec (wrap spec)
         spec-explain (fn [[p d _]]
                        (when-let [problems (and spec (s/explain-data spec d))]
-                         (->Problem p nil d spec problems))) h
+                         (->Problem p nil d spec problems)))
         errors (into [] (keep spec-explain) routes)]
     (when (pos? (count errors)) errors)))
 
