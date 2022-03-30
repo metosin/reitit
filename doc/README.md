@@ -139,7 +139,7 @@ Routing:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/users"})
-; {:status 200, :body "ok", :wrap (:api :admin}
+; {:status 200, :body "ok", :wrap (:api :admin)}
 
 (app {:request-method :put, :uri "/api/admin/users"})
 ; nil
