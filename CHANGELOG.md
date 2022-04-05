@@ -14,7 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
-* FIX [#334](https://github.com/metosin/reitit/pull/549) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
+* FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
 
 ## 0.5.17 (2022-03-10)
 
