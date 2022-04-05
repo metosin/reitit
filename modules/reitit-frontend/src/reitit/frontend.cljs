@@ -22,7 +22,9 @@
 
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
-  coerced parameters. Return nil if no match found."
+  coerced parameters. Return nil if no match found.
+
+  :on-coercion-error - a sideeffecting fn of `match exception -> nil`"
   ([router path] (match-by-path router path nil))
   ([router path {:keys [on-coercion-error]}]
    (let [uri (.parse Uri path)
