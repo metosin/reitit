@@ -85,8 +85,12 @@
           (is (thrown? js/Error (m (rf/match-by-path router "/a")))))
 
         (testing "thows and calles on-coercion-error"
-          (let [exception (atom nil)]
-            (is (thrown? js/Error (m (rf/match-by-path router "/a" {:on-coercion-error (fn [e] (reset! exception e))}))))
+          (let [exception (atom nil)
+                match (atom nil)]
+            (is (thrown? js/Error (m (rf/match-by-path router "/a" {:on-coercion-error (fn [m e]
+                                                                                         (reset! match m)
+                                                                                         (reset! exception e))}))))
+            (is (= {:id "a"} (-> @match :path-params)))
             (is (= {:id "a"} (-> @exception (ex-data) :value))))))
 
       (testing "query param is read"

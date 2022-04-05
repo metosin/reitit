@@ -30,7 +30,7 @@
                    (fn [match]
                      (try (coercion/coerce! match)
                           (catch js/Error e
-                            (on-coercion-error e)
+                            (on-coercion-error match e)
                             (throw e))))
                    coercion/coerce!)]
      (if-let [match (r/match-by-path router (.getPath uri))]
