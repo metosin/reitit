@@ -12,9 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.5.18 (2022-04-05)
 
 * FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
+* Save three seq constructions [#537](https://github.com/metosin/reitit/pull/537)
+* update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
+* Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
 
 ## 0.5.17 (2022-03-10)
 
