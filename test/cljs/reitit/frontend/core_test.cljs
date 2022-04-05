@@ -80,6 +80,19 @@
       (is (= "/5"
              (r/match->path (rf/match-by-name router ::foo {:id 5}))))
 
+      (testing "coercion error"
+        (testing "throws without options"
+          (is (thrown? js/Error (m (rf/match-by-path router "/a")))))
+
+        (testing "thows and calles on-coercion-error"
+          (let [exception (atom nil)
+                match (atom nil)]
+            (is (thrown? js/Error (m (rf/match-by-path router "/a" {:on-coercion-error (fn [m e]
+                                                                                         (reset! match m)
+                                                                                         (reset! exception e))}))))
+            (is (= {:id "a"} (-> @match :path-params)))
+            (is (= {:id "a"} (-> @exception (ex-data) :value))))))
+
       (testing "query param is read"
         (is (= (r/map->Match
                  {:template "/:id"
