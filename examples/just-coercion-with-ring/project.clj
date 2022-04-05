@@ -2,4 +2,4 @@
   :description "Reitit coercion with vanilla ring"
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [ring/ring-jetty-adapter "1.7.1"]
-                 [metosin/reitit "0.5.17"]])
+                 [metosin/reitit "0.5.18"]])

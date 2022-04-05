@@ -1,7 +1,7 @@
 # Sieppari
 
 ```clj
-[metosin/reitit-sieppari "0.5.17"]
+[metosin/reitit-sieppari "0.5.18"]
 ```
 
 [Sieppari](https://github.com/metosin/sieppari) is a new and fast interceptor implementation for Clojure, with pluggable async supporting [core.async](https://github.com/clojure/core.async), [Manifold](https://github.com/ztellman/manifold) and [Promesa](http://funcool.github.io/promesa/latest).
