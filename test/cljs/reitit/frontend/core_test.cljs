@@ -21,9 +21,11 @@
                 :data {:name ::frontpage}
                 :path-params {}
                 :query-params {}
+                :fragment-params {}
                 :path "/"
                 :parameters {:query {}
-                             :path {}}})
+                             :path {}
+                             :fragment {}}})
              (rf/match-by-path router "/")))
 
       (is (= "/"
@@ -34,9 +36,11 @@
                 :data {:name ::foo}
                 :path-params {}
                 :query-params {}
+                :fragment-params {}
                 :path "/foo"
                 :parameters {:query {}
-                             :path {}}})
+                             :path {}
+                             :fragment {}}})
              (rf/match-by-path router "/foo")))
 
       (is (= (r/map->Match
@@ -44,9 +48,11 @@
                 :data {:name ::foo}
                 :path-params {}
                 :query-params {:mode ["foo", "bar"]}
+                :fragment-params {}
                 :path "/foo"
                 :parameters {:query {:mode ["foo", "bar"]}
-                             :path {}}})
+                             :path {}
+                             :fragment {}}})
              (rf/match-by-path router "/foo?mode=foo&mode=bar")))
 
       (is (= "/foo"
@@ -64,7 +70,12 @@
     (let [router (r/router ["/"
                             [":id" {:name ::foo
                                     :parameters {:path {:id s/Int}
-                                                 :query {(s/optional-key :mode) s/Keyword}}}]]
+                                                 :query {(s/optional-key :mode) s/Keyword}
+                                                 :fragment {(s/optional-key :access_token) s/Str
+                                                            (s/optional-key :refresh_token) s/Str
+                                                            (s/optional-key :expires_in) s/Int
+                                                            (s/optional-key :provider_token) s/Str
+                                                            (s/optional-key :token_type) s/Str}}}]]
                            {:compile rc/compile-request-coercers
                             :data {:coercion rsc/coercion}})]
 
@@ -72,9 +83,11 @@
                {:template "/:id"
                 :path-params {:id "5"}
                 :query-params {}
+                :fragment-params {}
                 :path "/5"
                 :parameters {:query {}
-                             :path {:id 5}}})
+                             :path {:id 5}
+                             :fragment {}}})
              (m (rf/match-by-path router "/5"))))
 
       (is (= "/5"
@@ -98,23 +111,35 @@
                  {:template "/:id"
                   :path-params {:id "5"}
                   :query-params {:mode "foo"}
+                  :fragment-params {}
                   :path "/5"
                   :parameters {:path {:id 5}
-                               :query {:mode :foo}}})
+                               :query {:mode :foo}
+                               :fragment {}}})
                (m (rf/match-by-path router "/5?mode=foo"))))
 
         (is (= "/5?mode=foo"
                (r/match->path (rf/match-by-name router ::foo {:id 5}) {:mode :foo}))))
 
-      (testing "fragment is ignored"
+      (testing "fragment is read"
         (is (= (r/map->Match
                  {:template "/:id"
                   :path-params {:id "5"}
                   :query-params {:mode "foo"}
+                  :fragment-params {:access_token "foo"
+                                    :refresh_token "bar"
+                                    :provider_token "baz"
+                                    :token_type "bearer"
+                                    :expires_in "3600"}
                   :path "/5"
                   :parameters {:path {:id 5}
-                               :query {:mode :foo}}})
-               (m (rf/match-by-path router "/5?mode=foo#fragment")))))
+                               :query {:mode :foo}
+                               :fragment {:access_token "foo"
+                                          :refresh_token "bar"
+                                          :provider_token "baz"
+                                          :token_type "bearer"
+                                          :expires_in 3600}}})
+               (m (rf/match-by-path router "/5?mode=foo#access_token=foo&refresh_token=bar&provider_token=baz&token_type=bearer&expires_in=3600")))))
 
       (testing "console warning about missing params"
         (is (= [{:type :warn
