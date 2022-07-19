@@ -20,7 +20,9 @@
 
 (defn- polish [ctx]
   (-> ctx
-      (dissoc ::original ::previous :stack :queue)
+      (dissoc ::original ::previous :stack :queue
+              :io.pedestal.interceptor.chain/stack
+              :io.pedestal.interceptor.chain/queue)
       (update :request dissoc ::r/match ::r/router)))
 
 (defn- handle [name stage]
