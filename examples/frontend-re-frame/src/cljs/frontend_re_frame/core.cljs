@@ -15,6 +15,18 @@
   (fn [route]
     (apply rfe/push-state route)))
 
+;;; Coeffects ;;;
+
+;; Producing side-effects from routes’ controllers.
+
+(re-frame/reg-cofx :route-controllers
+ (fn [{:keys [event db] :as coeffects} _]
+   (let [new-route-match (second event)
+         old-controllers (-> db :current-route :controllers)]
+     (assoc coeffects
+            :route-controllers
+            (rfc/apply-controllers old-controllers new-route-match)))))
+
 ;;; Events ;;;
 
 (re-frame/reg-event-db ::initialize-db
@@ -27,11 +39,10 @@
   (fn [_ [_ & route]]
     {:push-state route}))
 
-(re-frame/reg-event-db ::navigated
-  (fn [db [_ new-match]]
-    (let [old-match   (:current-route db)
-          controllers (rfc/apply-controllers (:controllers old-match) new-match)]
-      (assoc db :current-route (assoc new-match :controllers controllers)))))
+(re-frame/reg-event-fx ::navigated
+ [(re-frame/inject-cofx :route-controllers)]
+ (fn [{:keys [db route-controllers]} [_ new-match]]
+   {:db (assoc db :current-route (assoc new-match :controllers route-controllers))}))
 
 ;;; Subscriptions ;;;
 
