@@ -60,17 +60,17 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [p x]
+(defn merge-data [{:keys [meta-merge-fn] :as g} p x]
   (reduce
    (fn [acc [k v]]
      (try
-       (mm/meta-merge acc {k v})
+       ((or meta-merge-fn mm/meta-merge) acc {k v})
        (catch #?(:clj Exception, :cljs js/Error) e
          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
    {} x))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
-  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
+  (cond->> (->> (walk raw-routes opts) (map-data #(merge-data opts %1 %2)))
     coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]

@@ -138,8 +138,8 @@
                      :handler get-user}]])"
   ([data]
    (router data nil))
-  ([data opts]
-   (let [opts (meta-merge {:compile compile-result} opts)]
+  ([data {:keys [meta-merge-fn] :as opts}]
+   (let [opts ((or meta-merge-fn meta-merge) {:compile compile-result} opts)]
      (r/router data opts))))
 
 (defn middleware-handler [router]
