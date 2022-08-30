@@ -4,6 +4,7 @@
             [reitit.coercion :as coercion]
             [schema-tools.coerce :as stc]
             [schema-tools.core :as st]
+            [schema-tools.openapi.core :as openapi]
             [schema-tools.swagger.core :as swagger]
             [schema.coerce :as sc]
             [schema.core :as s]
@@ -67,6 +68,33 @@
                               (if (:schema $)
                                 (update $ :schema #(coercion/-compile-model this % nil))
                                 $))]))})))
+        :openapi (merge
+                   (when (seq (dissoc parameters :body :request))
+                     (openapi/openapi-spec {::openapi/parameters
+                                            (into
+                                              (empty parameters)
+                                              (for [[k v] (dissoc parameters :body :request)]
+                                                [k (coercion/-compile-model this v nil)]))}))
+                   (when (:body parameters)
+                     {:requestBody  (openapi/openapi-spec
+                                      {::openapi/content {"application/json" (:body parameters)}})})
+                   (when (:request parameters)
+                     {:requestBody  (openapi/openapi-spec
+                                      {::openapi/content (:content (:request parameters))})})
+                   (when responses
+                     {:responses
+                      (into
+                        (empty responses)
+                        (for [[k response] responses]
+                          [k (merge
+                               (select-keys response [:description])
+                               (when (:body response)
+                                 (openapi/openapi-spec
+                                   {::openapi/content {"application/json" (coercion/-compile-model this (:body response) nil)}}))
+                               (when (:content response)
+                                 (openapi/openapi-spec
+                                   {::openapi/content (:content response)})))]))}))
+
         (throw
          (ex-info
           (str "Can't produce Schema apidocs for " specification)

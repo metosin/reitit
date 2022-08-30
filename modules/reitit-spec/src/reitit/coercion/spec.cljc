@@ -4,6 +4,7 @@
             [reitit.coercion :as coercion]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
+            [spec-tools.openapi.core :as openapi]
             [spec-tools.swagger.core :as swagger])
   #?(:clj
      (:import (spec_tools.core Spec)
@@ -105,6 +106,32 @@
                               (if (:schema $)
                                 (update $ :schema #(coercion/-compile-model this % nil))
                                 $))]))})))
+        :openapi (openapi/openapi-spec
+                   (merge
+                     (when (seq (dissoc parameters :body :request))
+                       {::openapi/parameters
+                        (into (empty parameters)
+                              (for [[k v] (dissoc parameters :body :request)]
+                                [k (coercion/-compile-model this v nil)]))})
+                     (when (:body parameters)
+                       {:requestBody  (openapi/openapi-spec
+                                        {::openapi/content {"application/json"  (coercion/-compile-model this (:body parameters) nil)}})})
+                     (when (:request parameters)
+                       {:requestBody  (openapi/openapi-spec
+                                        {::openapi/content  (coercion/-compile-model this (:content (:request parameters)) nil)})})
+                     (when responses
+                       {:responses
+                        (into
+                          (empty responses)
+                          (for [[k response] responses]
+                            [k (merge
+                                 (select-keys response [:description])
+                                 (when (:body response)
+                                   (openapi/openapi-spec
+                                     {::openapi/content {"application/json" (coercion/-compile-model this (:body response) nil)}}))
+                                 (when (:content response)
+                                   (openapi/openapi-spec
+                                     {::openapi/content  (coercion/-compile-model this (:content response) nil)})))]))})))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)

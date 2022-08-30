@@ -146,6 +146,7 @@
                            :path :path
                            :multipart :formData}]
     (case specification
+      :openapi (-get-apidocs coercion specification data)
       :swagger (->> (update
                      data
                      :parameters
@@ -155,6 +156,7 @@
                             (filter first)
                             (into {}))))
                     (-get-apidocs coercion specification)))))
+
 
 ;;
 ;; integration

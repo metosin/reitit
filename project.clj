@@ -65,6 +65,7 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
+                                  "modules/reitit-openapi/src"
                                   "modules/reitit-interceptors/src"
                                   "modules/reitit-malli/src"
                                   "modules/reitit-spec/src"
@@ -86,7 +87,7 @@
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.5"]
-                                  [metosin/malli "0.8.2"]
+                                  [metosin/malli "0.8.9"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
