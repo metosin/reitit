@@ -249,6 +249,10 @@
   (->> params
        (map (fn [[k v]]
               (if (or (sequential? v) (set? v))
-                (str/join "&" (map query-parameter (repeat k) v))
+                (if (seq v)
+                  (str/join "&" (map query-parameter (repeat k) v))
+                  ;; Empty seq results in single & character in the query string.
+                  ;; Handle as empty string to behave similarly as when the value is nil.
+                  (query-parameter k ""))
                 (query-parameter k v))))
        (str/join "&")))
