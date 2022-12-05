@@ -6,4 +6,4 @@
                  [metosin/reitit-malli "0.5.18"]
                  [metosin/reitit-pedestal "0.5.18"]
                  [metosin/reitit "0.5.18"]]
-  :repl-options {:init-ns example.server})
+  :repl-options {:init-ns server})
