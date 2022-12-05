@@ -56,15 +56,15 @@
        childs))))
 
 (def default-options-handler
-  (let [handle (fn [request]
-                 (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
-                       allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
-                   {:status 200, :body "", :headers {"Allow" allow}}))]
+  (let [handler (fn [request]
+                  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+                        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+                    {:status 200, :body "", :headers {"Allow" allow}}))]
     (fn
       ([request]
-       (handle request))
+       (handler request))
       ([request respond _]
-       (respond (handle request))))))
+       (respond (handler request))))))
 
 (def default-options-endpoint
   {:no-doc true
