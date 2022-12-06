@@ -47,13 +47,15 @@
     (if serialize-failed-result
       (str "Request coercion failed: " (pr-str result))
       "Request coercion failed")
-    (merge
-     (into {} result)
-     {:type ::request-coercion
-      :coercion coercion
-      :value value
-      :in [:request in]
-      :request request}))))
+    (-> {}
+        transient
+        (as-> $ (reduce conj! $ result))
+        (assoc! :type ::request-coercion)
+        (assoc! :coercion coercion)
+        (assoc! :value value)
+        (assoc! :in [:request in])
+        (assoc! :request request)
+        persistent!))))
 
 (defn ^:no-doc response-coercion-failed! [result coercion value request response serialize-failed-result]
   (throw
@@ -61,14 +63,16 @@
     (if serialize-failed-result
       (str "Response coercion failed: " (pr-str result))
       "Response coercion failed")
-    (merge
-     (into {} result)
-     {:type ::response-coercion
-      :coercion coercion
-      :value value
-      :in [:response :body]
-      :request request
-      :response response}))))
+    (-> {}
+        transient
+        (as-> $ (reduce conj! $ result))
+        (assoc! :type ::response-coercion)
+        (assoc! :coercion coercion)
+        (assoc! :value value)
+        (assoc! :in [:response :body])
+        (assoc! :request request)
+        (assoc! :response response)
+        persistent!))))
 
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
