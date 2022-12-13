@@ -41,36 +41,44 @@
    :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
 
-(defn ^:no-doc request-coercion-failed! [result coercion value in request]
+(defn ^:no-doc request-coercion-failed! [result coercion value in request serialize-failed-result]
   (throw
    (ex-info
-    (str "Request coercion failed: " (pr-str result))
-    (merge
-     (into {} result)
-     {:type ::request-coercion
-      :coercion coercion
-      :value value
-      :in [:request in]
-      :request request}))))
+    (if serialize-failed-result
+      (str "Request coercion failed: " (pr-str result))
+      "Request coercion failed")
+    (-> {}
+        transient
+        (as-> $ (reduce conj! $ result))
+        (assoc! :type ::request-coercion)
+        (assoc! :coercion coercion)
+        (assoc! :value value)
+        (assoc! :in [:request in])
+        (assoc! :request request)
+        persistent!))))
 
-(defn ^:no-doc response-coercion-failed! [result coercion value request response]
+(defn ^:no-doc response-coercion-failed! [result coercion value request response serialize-failed-result]
   (throw
    (ex-info
-    (str "Response coercion failed: " (pr-str result))
-    (merge
-     (into {} result)
-     {:type ::response-coercion
-      :coercion coercion
-      :value value
-      :in [:response :body]
-      :request request
-      :response response}))))
+    (if serialize-failed-result
+      (str "Response coercion failed: " (pr-str result))
+      "Response coercion failed")
+    (-> {}
+        transient
+        (as-> $ (reduce conj! $ result))
+        (assoc! :type ::response-coercion)
+        (assoc! :coercion coercion)
+        (assoc! :value value)
+        (assoc! :in [:response :body])
+        (assoc! :request request)
+        (assoc! :response response)
+        persistent!))))
 
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion]
+(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion serialize-failed-result]
                                             :or {extract-request-format extract-request-format-default
                                                  parameter-coercion default-parameter-coercion}}]
   (if coercion
@@ -83,13 +91,13 @@
                   format (extract-request-format request)
                   result (coercer value format)]
               (if (error? result)
-                (request-coercion-failed! result coercion value in request)
+                (request-coercion-failed! result coercion value in request serialize-failed-result)
                 result))))))))
 
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
 
-(defn response-coercer [coercion body {:keys [extract-response-format]
+(defn response-coercer [coercion body {:keys [extract-response-format serialize-failed-result]
                                        :or {extract-response-format extract-response-format-default}}]
   (if coercion
     (if-let [coercer (-response-coercer coercion body)]
@@ -98,7 +106,7 @@
               value (:body response)
               result (coercer value format)]
           (if (error? result)
-            (response-coercion-failed! result coercion value request response)
+            (response-coercion-failed! result coercion value request response serialize-failed-result)
             result))))))
 
 (defn encode-error [data]
