@@ -36,8 +36,8 @@
                          [metosin/malli "0.8.2"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.13.2"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.13.2.2"]
+                         [com.fasterxml.jackson.core/jackson-core "2.14.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.14.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.25" :exclusions [org.clojure/core.rrb-vector]]
