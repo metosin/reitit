@@ -14,7 +14,7 @@
              (update acc method expand opts)
              acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
+(defn compile-result [[path data] {:keys [::default-options-endpoint expand meta-merge-fn] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
                  (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
@@ -38,7 +38,7 @@
       (->methods true top)
       (reduce-kv
        (fn [acc method data]
-         (let [data (meta-merge top data)]
+         (let [data ((or meta-merge-fn meta-merge) top data)]
            (assoc acc method (->endpoint path data method method))))
        (->methods (:handler top) data)
        childs))))
