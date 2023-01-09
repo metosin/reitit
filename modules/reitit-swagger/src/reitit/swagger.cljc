@@ -10,11 +10,12 @@
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
+(s/def ::operationId string?)
 (s/def ::summary string?)
 (s/def ::description string?)
 
 (s/def ::swagger (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description]))
+(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::operationId ::summary ::description]))
 
 (def swagger-feature
   "Feature for handling swagger-documentation for routes.
@@ -52,6 +53,7 @@
 
        [\"/plus\"
         {:get {:swagger {:tags \"math\"}
+               :operationId \"addTwoNumbers\"
                :summary \"adds numbers together\"
                :description \"takes `x` and `y` query-params and adds them together\"
                :parameters {:query {:x int?, :y int?}}
@@ -75,7 +77,7 @@
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
-           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
+           strip-endpoint-keys #(dissoc % :id :operationId :parameters :responses :summary :description)
            swagger (->> (strip-endpoint-keys swagger)
                         (merge {:swagger "2.0"
                                 :x-id ids}))
@@ -93,7 +95,7 @@
                                     (apply meta-merge (keep (comp :swagger :data) interceptors))
                                     (if coercion
                                       (coercion/get-apidocs coercion :swagger data))
-                                    (select-keys data [:tags :summary :description])
+                                    (select-keys data [:tags :operationId :summary :description])
                                     (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
