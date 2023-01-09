@@ -22,33 +22,35 @@
              :swagger {:info {:title "my-api"}}
              :handler (swagger/create-swagger-handler)}}]
 
-     ["/spec" {:coercion spec/coercion}
-      ["/plus/:z"
-       {:patch {:summary "patch"
-                :handler (constantly {:status 200})}
-        :options {:summary "options"
-                  :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
+       ["/spec" {:coercion spec/coercion}
+        ["/plus/:z"
+         {:patch {:summary "patch"
+                  :operationId "Patch"
                   :handler (constantly {:status 200})}
-        :get {:summary "plus"
-              :parameters {:query {:x int?, :y int?}
-                           :path {:z int?}}
-              :swagger {:responses {400 {:schema {:type "string"}
-                                         :description "kosh"}}}
-              :responses {200 {:body {:total int?}}
-                          500 {:description "fail"}}
-              :handler (fn [{{{:keys [x y]} :query
-                              {:keys [z]} :path} :parameters}]
-                         {:status 200, :body {:total (+ x y z)}})}
-        :post {:summary "plus with body"
-               :parameters {:body (ds/maybe [int?])
-                            :path {:z int?}}
-               :swagger {:responses {400 {:schema {:type "string"}
-                                          :description "kosh"}}}
-               :responses {200 {:body {:total int?}}
-                           500 {:description "fail"}}
-               :handler (fn [{{{:keys [z]} :path
-                               xs :body} :parameters}]
-                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+          :options {:summary "options"
+                    :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
+                    :handler (constantly {:status 200})}
+          :get {:summary "plus"
+                :operationId "GetPlus"
+                :parameters {:query {:x int?, :y int?}
+                             :path {:z int?}}
+                :swagger {:responses {400 {:schema {:type "string"}
+                                           :description "kosh"}}}
+                :responses {200 {:body {:total int?}}
+                            500 {:description "fail"}}
+                :handler (fn [{{{:keys [x y]} :query
+                                {:keys [z]} :path} :parameters}]
+                           {:status 200, :body {:total (+ x y z)}})}
+          :post {:summary "plus with body"
+                 :parameters {:body (ds/maybe [int?])
+                              :path {:z int?}}
+                 :swagger {:responses {400 {:schema {:type "string"}
+                                            :description "kosh"}}}
+                 :responses {200 {:body {:total int?}}
+                             500 {:description "fail"}}
+                 :handler (fn [{{{:keys [z]} :path
+                                 xs :body} :parameters}]
+                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
      ["/malli" {:coercion malli/coercion}
       ["/plus/*z"
@@ -118,6 +120,7 @@
              (app {:request-method :get
                    :uri "/api/schema/plus/3"
                    :query-params {:x "2", :y "1"}})))))
+
   (testing "swagger-spec"
     (let [spec (:body (app {:request-method :get
                             :uri "/api/swagger.json"}))
@@ -126,6 +129,7 @@
                     :info {:title "my-api"}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
+                                                          :operationId "Patch"
                                                           :responses {:default {:description ""}}}
                                                   :options {:parameters []
                                                             :summary "options"
@@ -156,7 +160,8 @@
                                                                     400 {:schema {:type "string"}
                                                                          :description "kosh"}
                                                                     500 {:description "fail"}}
-                                                        :summary "plus"}
+                                                        :summary "plus"
+                                                        :operationId "GetPlus"}
                                                   :post {:parameters [{:in "body",
                                                                        :name "body",
                                                                        :description "",

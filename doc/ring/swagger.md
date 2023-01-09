@@ -23,6 +23,7 @@ The following route data keys contribute to the generated swagger specification:
 | :tags         | optional set of string or keyword tags for an endpoint api docs
 | :summary      | optional short string summary of an endpoint
 | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
+| :operationId  | optional string specifying the unique ID of an Operation
 
 Coercion keys also contribute to the docs:
 
