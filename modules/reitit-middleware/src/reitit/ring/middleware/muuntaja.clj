@@ -1,7 +1,7 @@
 (ns reitit.ring.middleware.muuntaja
-  (:require [muuntaja.core :as m]
-            [muuntaja.middleware]
-            [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [muuntaja.core :as m]
+            [muuntaja.middleware]))
 
 (s/def ::muuntaja m/muuntaja?)
 (s/def ::spec (s/keys :opt-un [::muuntaja]))
@@ -34,10 +34,10 @@
    :compile (fn [{:keys [muuntaja parameters]} _]
               (if muuntaja
                 (merge
-                  (if (publish-swagger-data? parameters)
-                    {:data {:swagger {:produces (displace (m/encodes muuntaja))
-                                      :consumes (displace (m/decodes muuntaja))}}})
-                  {:wrap #(muuntaja.middleware/wrap-format % muuntaja)})))})
+                 (if (publish-swagger-data? parameters)
+                   {:data {:swagger {:produces (displace (m/encodes muuntaja))
+                                     :consumes (displace (m/decodes muuntaja))}}})
+                 {:wrap #(muuntaja.middleware/wrap-format % muuntaja)})))})
 
 (def format-negotiate-middleware
   "Middleware for content-negotiation.
@@ -71,9 +71,9 @@
    :compile (fn [{:keys [muuntaja parameters]} _]
               (if muuntaja
                 (merge
-                  (when (publish-swagger-data? parameters)
-                    {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}})
-                  {:wrap #(muuntaja.middleware/wrap-format-request % muuntaja)})))})
+                 (when (publish-swagger-data? parameters)
+                   {:data {:swagger {:consumes (displace (m/decodes muuntaja))}}})
+                 {:wrap #(muuntaja.middleware/wrap-format-request % muuntaja)})))})
 
 (def format-response-middleware
   "Middleware for response formatting.
@@ -91,6 +91,6 @@
    :compile (fn [{:keys [muuntaja parameters]} _]
               (if muuntaja
                 (merge
-                  (when (publish-swagger-data? parameters)
-                    {:data {:swagger {:produces (displace (m/encodes muuntaja))}}})
-                  {:wrap #(muuntaja.middleware/wrap-format-response % muuntaja)})))})
+                 (when (publish-swagger-data? parameters)
+                   {:data {:swagger {:produces (displace (m/encodes muuntaja))}}})
+                 {:wrap #(muuntaja.middleware/wrap-format-response % muuntaja)})))})

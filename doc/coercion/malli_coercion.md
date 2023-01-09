@@ -2,6 +2,10 @@
 
 [Malli](https://github.com/metosin/malli) is data-driven Schema library for Clojure/Script.
 
+## Default Syntax
+
+By default, [Vector Syntax](https://github.com/metosin/malli#vector-syntax) is used:
+
 ```clj
 (require '[reitit.coercion.malli])
 (require '[reitit.coercion :as coercion])
@@ -13,7 +17,7 @@
                                  :coercion reitit.coercion.malli/coercion
                                  :parameters {:path [:map
                                                      [:company string?]
-                                                     [:user-id int?]]}]
+                                                     [:user-id int?]]}}]
     {:compile coercion/compile-request-coercers}))
 
 (defn match-by-path-and-coerce! [path]
@@ -44,18 +48,36 @@ Failing coercion:
 ; => ExceptionInfo Request coercion failed...
 ```
 
+## Lite Syntax
+
+Same using [Lite Syntax](https://github.com/metosin/malli#lite):
+
+```clj
+(def router
+  (r/router
+    ["/:company/users/:user-id" {:name ::user-view
+                                 :coercion reitit.coercion.malli/coercion
+                                 :parameters {:path {:company string?
+                                                     :user-id int?}}}]
+    {:compile coercion/compile-request-coercers}))
+```
+
 ## Configuring coercion
 
 Using `create` with options to create the coercion instead of `coercion`:
 
 ```clj
+(require '[malli.util :as mu])
+
 (reitit.coercion.malli/create
-  {:transformers {:body {:default default-transformer-provider
-                         :formats {"application/json" json-transformer-provider}}
-                  :string {:default string-transformer-provider}
-                  :response {:default default-transformer-provider}}
+  {:transformers {:body {:default reitit.coercion.malli/default-transformer-provider
+                         :formats {"application/json" reitit.coercion.malli/json-transformer-provider}}
+                  :string {:default reitit.coercion.malli/string-transformer-provider}
+                  :response {:default reitit.coercion.malli/default-transformer-provider}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   ;; support lite syntax?
+   :lite true
    ;; schema identity function (default: close all map schemas)
    :compile mu/closed-schema
    ;; validate request & response

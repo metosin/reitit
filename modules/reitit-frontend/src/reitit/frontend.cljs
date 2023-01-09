@@ -22,18 +22,28 @@
 
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
-  coerced parameters. Return nil if no match found."
-  [router path]
-  (let [uri (.parse Uri path)]
-    (if-let [match (r/match-by-path router (.getPath uri))]
-      (let [q (query-params uri)
-            match (assoc match :query-params q)
-            ;; Return uncoerced values if coercion is not enabled - so
-            ;; that tha parameters are always accessible from same property.
-            parameters (or (coercion/coerce! match)
-                           {:path (:path-params match)
-                            :query q})]
-        (assoc match :parameters parameters)))))
+  coerced parameters. Return nil if no match found.
+
+  :on-coercion-error - a sideeffecting fn of `match exception -> nil`"
+  ([router path] (match-by-path router path nil))
+  ([router path {:keys [on-coercion-error]}]
+   (let [uri (.parse Uri path)
+         coerce! (if on-coercion-error
+                   (fn [match]
+                     (try (coercion/coerce! match)
+                          (catch js/Error e
+                            (on-coercion-error match e)
+                            (throw e))))
+                   coercion/coerce!)]
+     (if-let [match (r/match-by-path router (.getPath uri))]
+       (let [q (query-params uri)
+             match (assoc match :query-params q)
+             ;; Return uncoerced values if coercion is not enabled - so
+             ;; that tha parameters are always accessible from same property.
+             parameters (or (coerce! match)
+                            {:path (:path-params match)
+                             :query q})]
+         (assoc match :parameters parameters))))))
 
 (defn match-by-name
   "Given a router, route name and optionally path-parameters,
@@ -64,11 +74,11 @@
          (let [defined (-> path-params keys set)
                missing (set/difference (:required match) defined)]
            (js/console.warn
-             "missing path-params for route" name
-             {:template (:template match)
-              :missing missing
-              :path-params path-params
-              :required (:required match)})
+            "missing path-params for route" name
+            {:template (:template match)
+             :missing missing
+             :path-params path-params
+             :required (:required match)})
            nil))
        match)
      (do (js/console.warn "missing route" name)

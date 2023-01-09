@@ -6,7 +6,7 @@
 * Route [conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
-* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema), [clojure.spec](https://clojure.org/about/spec), [malli](https://github.com/metosin/malli))
 * Helpers for [ring](./ring/ring.md), [http](./http/interceptors.md), [pedestal](./http/pedestal.md) & [frontend](./frontend/basics.md)
 * Friendly [Error Messages](./basics/error_messages.md)
 * Extendable
@@ -40,7 +40,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.5.10"]
+[metosin/reitit "0.5.18"]
 ```
 
 Optionally, the parts can be required separately.
@@ -139,7 +139,7 @@ Routing:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/users"})
-; {:status 200, :body "ok", :wrap (:api :admin}
+; {:status 200, :body "ok", :wrap (:api :admin)}
 
 (app {:request-method :put, :uri "/api/admin/users"})
 ; nil

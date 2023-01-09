@@ -12,7 +12,137 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.5.18 (2022-04-05)
+
+* FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
+* Save three seq constructions [#537](https://github.com/metosin/reitit/pull/537)
+* update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
+* Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
+
+## 0.5.17 (2022-03-10)
+
+* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
+
+
+## 0.5.16 (2022-02-15)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.15...0.5.16)**
+
+* Support for [Malli Lite Syntax](https://github.com/metosin/malli#lite) in coercion (enabled by default):
+
+```clj
+["/add/:id" {:post {:parameters {:path {:id int?}
+                                 :query {:a (l/optional int?)}
+                                 :body {:id int?
+                                        :data {:id (l/maybe int?)
+                                               :orders (l/map-of uuid? {:name string?})}}}
+                    :responses {200 {:body {:total pos-int?}}
+                                500 {:description "fail"}}}}]
+```
+
+* Improved Reitit-frontend function docstrings
+
+* Updated deps:
+
+```clj
+[metosin/ring-swagger-ui "4.3.0"] is available but we use "3.46.0"
+[metosin/jsonista "0.3.5"] is available but we use "0.3.3"
+[metosin/malli "0.8.2"] is available but we use "0.5.1"
+[com.fasterxml.jackson.core/jackson-core "2.13.1"] is available but we use "2.12.4"
+[com.fasterxml.jackson.core/jackson-databind "2.13.1"] is available but we use "2.12.4"
+[fipp "0.6.25"] is available but we use "0.6.24"
+[expound "0.9.0"] is available but we use "0.8.9"
+[ring/ring-core "1.9.5"] is available but we use "1.9.4"
+```
+
+## 0.5.15 (2021-08-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.14...0.5.15)**
+
+* recompiled with Java8
+
+## 0.5.14 (2021-08-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.13...0.5.14)**
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.46.0"] is available but we use "3.36.0"
+[metosin/jsonista "0.3.3"] is available but we use "0.3.1"
+[metosin/malli "0.5.1"] is available but we use "0.3.0"
+[com.fasterxml.jackson.core/jackson-core "2.12.4"] is available but we use "2.12.1"
+[com.fasterxml.jackson.core/jackson-databind "2.12.4"] is available but we use "2.12.1"
+[fipp "0.6.24"] is available but we use "0.6.23"
+[ring/ring-core "1.9.4"] is available but we use "1.9.1"
+[io.pedestal/pedestal.service "0.5.9"] is available but we use "0.5.8"
+```
+
+### `reitit-ring`
+
+* Fixes `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` to support URL-escaped characters. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
+
+### `reitit-malli`
+
+* FIX: Malli response coercision seems to do nothing at all [#498](https://github.com/metosin/reitit/pull/501)
+
+### `reitit-pedestal`
+
+* Enrich request for pedestal/routing-interceptor default-queue [#495](https://github.com/metosin/reitit/pull/495)
+
+## 0.5.13 (2021-04-23)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.12...0.5.13)**
+
+* updated deps:
+
+```clj
+[metosin/malli "0.3.0"] is available but we use "0.2.1"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[ring/ring-core "1.9.1"] is available but we use "1.9.0"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[expound "0.8.9"] is available but we use "0.8.7"
+[ring "1.9.1"] is available but we use "1.9.0"
+```
+
+### `reitit-ring`
+
+* Make reitit.ring/create-resource-handler's `:not-found-handler` work when used outside of a router. [#464](https://github.com/metosin/reitit/issues/464). PR [#471](https://github.com/metosin/reitit/pull/471) by Kari Marttila and Metosin Maintenance Mob.
+
+## 0.5.12 (2021-02-01)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.11...0.5.12)**
+
+* updated deps:
+
+```
+[metosin/spec-tools "0.10.5"] is available but we use "0.10.4"
+[metosin/jsonista "0.3.1"] is available but we use "0.3.0"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[ring/ring-core "1.9.0"] is available but we use "1.8.2"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.1"] is available but we use "2.12.0"
+[com.fasterxml.jackson.core/jackson-databind "2.12.1"] is available but we use "2.12.0"
+```
+
+* Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
+
+## 0.5.11 (2020-12-27)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.10...0.5.11)**
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.36.0"] is available but we use "3.25.3"
+[metosin/jsonista "0.3.0"] is available but we use "0.2.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.0"] is available but we use "2.11.2"
+[com.fasterxml.jackson.core/jackson-databind "2.12.0"] is available but we use "2.11.2"
+```
+
 ## 0.5.10 (2020-10-22)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.9...0.5.10)**
 
 * updated deps:
 
@@ -26,6 +156,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.9 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.8...0.5.9)**
+
 ### `reitit-frontend`
 
 - `reitit.frontend.easy/start!` now correctly removes old event listeners
@@ -34,9 +166,13 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.8 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.7...0.5.8)**
+
 * Add `:conflicting` to route data spec [#444](https://github.com/metosin/reitit/pull/444).
 
 ## 0.5.7 (2020-10-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.6...0.5.7)**
 
 * updated deps:
 
@@ -54,6 +190,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 * Automatically publish Swagger `:consumes` for `:form` params, fixes [#217](https://github.com/metosin/reitit/issues/217).
 
 ## 0.5.6 (2020-09-26)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.5...0.5.6)**
 
 * updated deps:
 
@@ -79,6 +217,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.5 (2020-07-15)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.4...0.5.5)**
+
 * recompile with Java8
 
 ```clj
@@ -87,17 +227,23 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.4 (2020-07-13)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.3...0.5.4)**
+
 ```clj
 [metosin/malli "0.0.1-20200713.080243-20"] is available but we use "0.0.1-20200709.163702-18"
 ```
 
 ## 0.5.3 (2020-07-09)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.2...0.5.3)**
+
 ```clj
 [metosin/malli "0.0.1-20200709.163702-18"] is available but we use "0.0.1-20200525.162645-15"
 ```
 
 ## 0.5.2 (2020-05-27)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.1...0.5.2)**
 
 ```clj
 [metosin/malli "0.0.1-20200525.162645-15"] is available but we use "0.0.1-20200404.091302-14"
@@ -123,6 +269,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 * Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
 ## 0.5.1 (2020-05-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.0...0.5.1)**
 
 ```clj
 [metosin/sieppari "0.0.0-alpha13"] is available but we use "0.0.0-alpha10"

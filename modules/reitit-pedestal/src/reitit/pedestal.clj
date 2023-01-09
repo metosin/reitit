@@ -1,11 +1,11 @@
 (ns reitit.pedestal
-  (:require [io.pedestal.interceptor.chain :as chain]
+  (:require [io.pedestal.http :as http]
             [io.pedestal.interceptor :as interceptor]
-            [io.pedestal.http :as http]
-            [reitit.interceptor]
-            [reitit.http])
-  (:import (reitit.interceptor Executor)
-           (java.lang.reflect Method)))
+            [io.pedestal.interceptor.chain :as chain]
+            [reitit.http]
+            [reitit.interceptor])
+  (:import (java.lang.reflect Method)
+           (reitit.interceptor Executor)))
 
 ;; TODO: variadic
 (defn- arities [f]
@@ -36,9 +36,9 @@
     interceptor
     (->> (select-keys interceptor [:enter :leave :error]) (vals) (keep identity) (seq))
     (interceptor/interceptor
-      (if (error-without-arity-2? interceptor)
-        (wrap-error-arity-2->1 interceptor)
-        interceptor))))
+     (if (error-without-arity-2? interceptor)
+       (wrap-error-arity-2->1 interceptor)
+       interceptor))))
 
 ;;
 ;; Public API
@@ -62,11 +62,11 @@
    (routing-interceptor router default-handler nil))
   ([router default-handler {:keys [interceptors]}]
    (interceptor/interceptor
-     (reitit.http/routing-interceptor
-       router
-       default-handler
-       {:executor pedestal-executor
-        :interceptors interceptors}))))
+    (reitit.http/routing-interceptor
+     router
+     default-handler
+     {:executor pedestal-executor
+      :interceptors interceptors}))))
 
 (defn replace-last-interceptor [service-map interceptor]
   (-> service-map

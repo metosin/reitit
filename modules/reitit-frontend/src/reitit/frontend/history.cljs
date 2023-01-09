@@ -1,9 +1,9 @@
 (ns reitit.frontend.history
   "Provides integration to hash-change or HTML5 History
   events."
-  (:require [reitit.core :as reitit]
-            [reitit.frontend :as rf]
-            [goog.events :as gevents])
+  (:require [goog.events :as gevents]
+            [reitit.core :as reitit]
+            [reitit.frontend :as rf])
   (:import goog.Uri))
 
 (defprotocol History
@@ -40,7 +40,7 @@
     nil)
   (-on-navigate [this path]
     (reset! last-fragment path)
-    (on-navigate (rf/match-by-path router path) this))
+    (on-navigate (rf/match-by-path router path this) this))
   (-get-path [this]
     ;; Remove #
     ;; "" or "#" should be same as "#/"
@@ -125,7 +125,7 @@
       (-on-navigate this (-get-path this))
       this))
   (-on-navigate [this path]
-    (on-navigate (rf/match-by-path router path) this))
+    (on-navigate (rf/match-by-path router path this) this))
   (-stop [this]
     (gevents/unlistenByKey listen-key)
     (gevents/unlistenByKey click-listen-key)
@@ -171,40 +171,73 @@
               (map->FragmentHistory opts)
               (map->Html5History opts))))))
 
-(defn stop! [history]
+(defn stop!
+  "Stops the given history handler, removing the event handlers."
+  [history]
   (if history
     (-stop history)))
 
 (defn href
-  ([history k]
-   (href history k nil))
-  ([history k params]
-   (href history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)]
-     (-href history (reitit/match->path match query)))))
+  "Generate a URL for a route defined by name, with given path-params and query-params.
 
-(defn push-state
-  "Sets the new route, leaving previous route in history."
-  ([history k]
-   (push-state history k nil nil))
-  ([history k params]
-   (push-state history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)
-         path (reitit/match->path match query)]
+  The URL is formatted using Reitit frontend history handler, so using it with
+  anchor element href will correctly trigger route change event.
+
+  Note: currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first."
+  ([history name]
+   (href history name nil))
+  ([history name path-params]
+   (href history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)]
+     (-href history (reitit/match->path match query-params)))))
+
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  push-state
+  "Updates the browser URL and pushes new entry to the history stack using
+  a route defined by name, with given path-params and query-params.
+
+  Will also trigger on-navigate callback on Reitit frontend History handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
+  ([history name]
+   (push-state history name nil nil))
+  ([history name path-params]
+   (push-state history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)
+         path (reitit/match->path match query-params)]
      ;; pushState and replaceState don't trigger popstate event so call on-navigate manually
      (.pushState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
 
 (defn replace-state
-  "Replaces current route. I.e. current route is not left on history."
-  ([history k]
-   (replace-state history k nil nil))
-  ([history k params]
-   (replace-state history k params nil))
-  ([history k params query]
-   (let [match (rf/match-by-name! (:router history) k params)
-         path (reitit/match->path match query)]
+  "Updates the browser location and replaces latest entry in the history stack
+  using URL built from a route defined by name, with given path-params and
+  query-params.
+
+  Will also trigger on-navigate callback on Reitit frontend History handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
+  ([history name]
+   (replace-state history name nil nil))
+  ([history name path-params]
+   (replace-state history name path-params nil))
+  ([history name path-params query-params]
+   (let [match (rf/match-by-name! (:router history) name path-params)
+         path (reitit/match->path match query-params)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))

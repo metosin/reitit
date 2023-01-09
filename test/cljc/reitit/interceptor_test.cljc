@@ -1,7 +1,7 @@
 (ns reitit.interceptor-test
-  (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.interceptor :as interceptor]
-            [reitit.core :as r])
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
+            [reitit.interceptor :as interceptor])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -9,9 +9,9 @@
 
 (defn execute [interceptors ctx]
   (as-> ctx $
-        (reduce #(%2 %1) $ (keep :enter interceptors))
-        (reduce #(%2 %1) $ (reverse (keep :leave interceptors)))
-        (:response $)))
+    (reduce #(%2 %1) $ (keep :enter interceptors))
+    (reduce #(%2 %1) $ (reverse (keep :leave interceptors)))
+    (:response $)))
 
 (defn f [value ctx]
   (update ctx :request conj value))
@@ -36,8 +36,8 @@
    (create interceptors nil))
   ([interceptors opts]
    (let [chain (interceptor/chain
-                 (conj interceptors handler)
-                 :data opts)]
+                (conj interceptors handler)
+                :data opts)]
      (partial execute chain))))
 
 (deftest expand-interceptor-test
@@ -74,9 +74,9 @@
 
         (testing "missing keyword"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"Interceptor :enter not found in registry"
-                (create [:enter]))))
+               ExceptionInfo
+               #"Interceptor :enter not found in registry"
+               (create [:enter]))))
 
         (testing "existing keyword, compiling to nil"
           (let [app (create [:enter] {::interceptor/registry {:enter {:compile (constantly nil)}}})]
@@ -134,9 +134,9 @@
         (testing "too deeply compiled interceptor fails"
           (binding [interceptor/*max-compile-depth* 2]
             (is (thrown?
-                  ExceptionInfo
-                  #"Too deep Interceptor compilation"
-                  (create [[i3 :value]])))))
+                 ExceptionInfo
+                 #"Too deep Interceptor compilation"
+                 (create [[i3 :value]])))))
 
         (testing "nil unmounts the interceptor"
           (let [app (create [{:compile (constantly nil)}
@@ -155,11 +155,11 @@
   (testing "interceptor-handler"
     (let [api-interceptor (interceptor :api)
           router (interceptor/router
-                   [["/ping" handler]
-                    ["/api" {:interceptors [api-interceptor]}
-                     ["/ping" handler]
-                     ["/admin" {:interceptors [[interceptor :admin]]}
-                      ["/ping" handler]]]])
+                  [["/ping" handler]
+                   ["/api" {:interceptors [api-interceptor]}
+                    ["/ping" handler]
+                    ["/admin" {:interceptors [[interceptor :admin]]}
+                     ["/ping" handler]]]])
           app (create-app router)]
 
       (testing "not found"
@@ -179,8 +179,8 @@
               i2 {:name ::i2, :compile (constantly nil)}
               i3 (interceptor ::i3)
               router (interceptor/router
-                       ["/api" {:interceptors [i1 i2 i3 i2]
-                                :handler handler}])
+                      ["/api" {:interceptors [i1 i2 i3 i2]
+                               :handler handler}])
               app (create-app router)]
 
           (is (= [::enter_i1 ::enter_i3 :ok ::leave_i3 ::leave_i1] (app "/api")))
@@ -221,12 +221,12 @@
   (let [debug-i (enter ::debug)
         create (fn [options]
                  (create-app
-                   (interceptor/router
-                     ["/ping" {:interceptors [(enter ::olipa)
-                                              (enter ::kerran)
-                                              (enter ::avaruus)]
-                               :handler handler}]
-                     options)))
+                  (interceptor/router
+                   ["/ping" {:interceptors [(enter ::olipa)
+                                            (enter ::kerran)
+                                            (enter ::avaruus)]
+                             :handler handler}]
+                   options)))
         inject-debug (interceptor/transform-butlast #(interleave % (repeat debug-i)))
         sort-interceptors (interceptor/transform-butlast (partial sort-by :name))]
 

@@ -1,10 +1,10 @@
 (ns reitit.pedestal-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [io.pedestal.test]
+  (:require [clojure.test :refer [deftest is testing]]
             [io.pedestal.http]
+            [io.pedestal.test]
             [reitit.http :as http]
-            [reitit.pedestal :as pedestal]
-            [reitit.http.interceptors.exception :as exception]))
+            [reitit.http.interceptors.exception :as exception]
+            [reitit.pedestal :as pedestal]))
 
 (deftest arities-test
   (is (= #{0} (#'pedestal/arities (fn []))))
@@ -28,11 +28,11 @@
 
 (deftest pedestal-e2e-test
   (let [router (pedestal/routing-interceptor
-                 (http/router
-                   [""
-                    {:interceptors [{:name :nop} (exception/exception-interceptor)]}
-                    ["/ok" (fn [_] {:status 200, :body "ok"})]
-                    ["/fail" (fn [_] (throw (ex-info "kosh" {})))]]))
+                (http/router
+                 [""
+                  {:interceptors [{:name :nop} (exception/exception-interceptor)]}
+                  ["/ok" (fn [_] {:status 200, :body "ok"})]
+                  ["/fail" (fn [_] (throw (ex-info "kosh" {})))]]))
         service (-> {:io.pedestal.http/request-logger nil
                      :io.pedestal.http/routes []}
                     (io.pedestal.http/default-interceptors)
@@ -41,3 +41,25 @@
                     (:io.pedestal.http/service-fn))]
     (is (= "ok" (:body (io.pedestal.test/response-for service :get "/ok"))))
     (is (= 500 (:status (io.pedestal.test/response-for service :get "/fail"))))))
+
+(deftest pedestal-inject-router-test
+  (let [check-router (fn [r] (when-not (:reitit.core/router r)
+                               (throw (ex-info "Missing :reitit.core/router!" {}))))
+        interceptor {:name ::needs-router
+                     :enter (fn [{:as context :keys [request]}]
+                              (check-router request)
+                              context)}
+        router (pedestal/routing-interceptor
+                (http/router
+                 [""
+                  ["/ok" (fn [r] (check-router r) {:status 200, :body "ok"})]])
+                nil
+                {:interceptors [interceptor]})
+        service (-> {:io.pedestal.http/request-logger nil
+                     :io.pedestal.http/routes []}
+                    (io.pedestal.http/default-interceptors)
+                    (pedestal/replace-last-interceptor router)
+                    (io.pedestal.http/create-servlet)
+                    (:io.pedestal.http/service-fn))]
+    (is (= "ok" (:body (io.pedestal.test/response-for service :get "/ok"))))
+    (is (= "Not Found" (:body (io.pedestal.test/response-for service :get "/not-existing"))))))

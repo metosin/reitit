@@ -143,10 +143,10 @@ As the `Match` contains all the route data, we can create a new matching functio
 (require '[clojure.string :as str])
 
 (defn recursive-match-by-path [router path]
-  (if-let [match (r/match-by-path router path)]
+  (when-let [match (r/match-by-path router path)]
     (if-let [subrouter (-> match :data :router)]
       (let [subpath (subs path (str/last-index-of (:template match) "/"))]
-        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+        (when-let [submatch (recursive-match-by-path subrouter subpath)]
           (cons match submatch)))
       (list match))))
 ```
@@ -206,10 +206,10 @@ First, we need to modify our matching function to support router references:
     (deref x) x))
 
 (defn recursive-match-by-path [router path]
-  (if-let [match (r/match-by-path (<< router) path)]
+  (when-let [match (r/match-by-path (<< router) path)]
     (if-let [subrouter (-> match :data :router <<)]
       (let [subpath (subs path (str/last-index-of (:template match) "/"))]
-        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+        (when-let [submatch (recursive-match-by-path subrouter subpath)]
           (cons match submatch)))
       (list match))))
 ```

@@ -1,10 +1,10 @@
 (ns reitit.exception-test
-  (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.spec :as rs]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.test :refer [are deftest is testing]]
             [reitit.core :as r]
             [reitit.dev.pretty :as pretty]
-            [clojure.spec.alpha :as s]
-            [reitit.exception :as exception])
+            [reitit.exception :as exception]
+            [reitit.spec :as rs])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -17,12 +17,12 @@
   (are [exception]
     (are [error routes]
       (is (thrown-with-msg?
-            ExceptionInfo
-            error
-            (r/router
-              routes
-              {:validate rs/validate
-               :exception exception})))
+           ExceptionInfo
+           error
+           (r/router
+            routes
+            {:validate rs/validate
+             :exception exception})))
 
       #"Router contains conflicting route paths"
       [["/:a/1"]

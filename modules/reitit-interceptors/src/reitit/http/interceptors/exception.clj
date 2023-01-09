@@ -1,10 +1,10 @@
 (ns reitit.http.interceptors.exception
-  (:require [reitit.coercion :as coercion]
-            [reitit.ring :as ring]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str])
-  (:import (java.time Instant)
-           (java.io PrintWriter)))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [reitit.coercion :as coercion]
+            [reitit.ring :as ring])
+  (:import (java.io PrintWriter Writer)
+           (java.time Instant)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))
@@ -25,17 +25,17 @@
         error-handler (or (get handlers type)
                           (get handlers ex-class)
                           (some
-                            (partial get handlers)
-                            (descendants type))
+                           (partial get handlers)
+                           (descendants type))
                           (some
-                            (partial get handlers)
-                            (super-classes ex-class))
+                           (partial get handlers)
+                           (super-classes ex-class))
                           (get handlers ::default))]
     (if-let [wrap (get handlers ::wrap)]
       (wrap error-handler error request)
       (error-handler error request))))
 
-(defn print! [^PrintWriter writer & more]
+(defn print! [^Writer writer & more]
   (.write writer (str (str/join " " more) "\n")))
 
 ;;
@@ -68,7 +68,7 @@
 
 (defn wrap-log-to-console [handler ^Throwable e {:keys [uri request-method] :as req}]
   (print! *out* (Instant/now) request-method (pr-str uri) "=>" (.getMessage e))
-  (.printStackTrace e ^PrintWriter *out*)
+  (.printStackTrace e (PrintWriter. ^Writer *out*))
   (handler e req))
 
 ;;

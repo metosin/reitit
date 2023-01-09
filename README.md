@@ -1,4 +1,4 @@
-# reitit [![Build Status](https://img.shields.io/circleci/project/github/metosin/reitit.svg)](https://circleci.com/gh/metosin/reitit) [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
+# reitit [![Build Status](https://github.com/metosin/reitit/workflows/testsuite/badge.svg)](https://github.com/metosin/reitit/actions?query=workflow%3Atestsuite) [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
 
 A fast data-driven router for Clojure(Script).
 
@@ -19,6 +19,8 @@ Presentations:
 * [Welcome Reitit 0.2.0!](https://www.metosin.fi/blog/reitit020/)
 * [Data-Driven Ring with Reitit](https://www.metosin.fi/blog/reitit-ring/)
 * [Reitit, Data-Driven Routing with Clojure(Script)](https://www.metosin.fi/blog/reitit/)
+
+**Status:** [stable](https://github.com/metosin/open-source#project-lifecycle-model)
 
 ## [Full Documentation](https://cljdoc.org/d/metosin/reitit/CURRENT)
 
@@ -50,7 +52,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.5.10"]
+[metosin/reitit "0.5.18"]
 ```
 
 Optionally, the parts can be required separately.
@@ -85,23 +87,28 @@ Optionally, the parts can be required separately.
 A Ring routing app with input & output coercion using [data-specs](https://github.com/metosin/spec-tools/blob/master/README.md#data-specs).
 
 ```clj
+(require '[muuntaja.core :as m])
 (require '[reitit.ring :as ring])
 (require '[reitit.coercion.spec])
 (require '[reitit.ring.coercion :as rrc])
+(require '[reitit.ring.middleware.muuntaja :as muuntaja])
+(require '[reitit.ring.middleware.parameters :as parameters])
 
 (def app
   (ring/ring-handler
     (ring/router
       ["/api"
        ["/math" {:get {:parameters {:query {:x int?, :y int?}}
-                       :responses {200 {:body {:total pos-int?}}}
-                       :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                                  {:status 200
-                                   :body {:total (+ x y)}})}}]]
-      ;; router data effecting all routes
-      {:data {:coercion reitit.coercion.spec/coercion
-              :middleware [rrc/coerce-exceptions-middleware
+                       :responses  {200 {:body {:total int?}}}
+                       :handler    (fn [{{{:keys [x y]} :query} :parameters}]
+                                     {:status 200
+                                      :body   {:total (+ x y)}})}}]]
+      ;; router data affecting all routes
+      {:data {:coercion   reitit.coercion.spec/coercion
+              :muuntaja   m/instance
+              :middleware [parameters/parameters-middleware
                            rrc/coerce-request-middleware
+                           muuntaja/format-response-middleware
                            rrc/coerce-response-middleware]}})))
 ```
 
@@ -146,12 +153,17 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 
 ## External resources
 * Simple web application using Ring/Reitit and Integrant: https://github.com/PrestanceDesign/usermanager-reitit-integrant-example
-* A simple [ClojureScript](https://clojurescript.org/) frontend and Clojure backend using Reitit, [JUXT Clip](https://github.com/juxt/clip), [next.jdbc](https://github.com/seancorfield/next-jdbc) and other bits and bobs...
-  * [startrek](https://git.sr.ht/~dharrigan/startrek)
-  * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
+* A simple Clojure backend using Reitit to serve up a RESTful API: [startrek](https://github.com/dharrigan/startrek). Technologies include:
+    * [Donut System](https://github.com/donut-party/system)
+    * [next-jdbc](https://github.com/seancorfield/next-jdbc)
+    * [JUXT Clip](https://github.com/juxt/clip)
+    * [Flyway](https://github.com/flyway/flyway)
+    * [HoneySQL](https://github.com/seancorfield/honeysql)
+    * [Babashka](https://babashka.org)
 * https://www.learnreitit.com/
 * Lipas, liikuntapalvelut: https://github.com/lipas-liikuntapaikat/lipas
 * Implementation of the Todo-Backend API spec, using Clojure, Ring/Reitit and next-jdbc: https://github.com/PrestanceDesign/todo-backend-clojure-reitit
+* Ping CRM, a single page app written in Clojure Ring, Reitit, Integrant and next.jdbc: https://github.com/prestancedesign/clojure-inertia-pingcrm-demo
 
 ## More info
 
@@ -172,6 +184,6 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## License
 
-Copyright © 2017-2020 [Metosin Oy](http://www.metosin.fi)
+Copyright © 2017-2021 [Metosin Oy](http://www.metosin.fi)
 
 Distributed under the Eclipse Public License, the same as Clojure.

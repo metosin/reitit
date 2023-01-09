@@ -1,15 +1,16 @@
 (ns reitit.swagger
-  (:require [reitit.core :as r]
-            [meta-merge.core :refer [meta-merge]]
+  (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [clojure.set :as set]
             [clojure.string :as str]
+            [meta-merge.core :refer [meta-merge]]
             [reitit.coercion :as coercion]
+            [reitit.core :as r]
             [reitit.trie :as trie]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
+(s/def ::operationId string?)
 (s/def ::summary string?)
 (s/def ::description string?)
 (s/def ::operationId string?)
@@ -53,6 +54,7 @@
 
        [\"/plus\"
         {:get {:swagger {:tags \"math\"}
+               :operationId \"addTwoNumbers\"
                :summary \"adds numbers together\"
                :description \"takes `x` and `y` query-params and adds them together\"
                :parameters {:query {:x int?, :y int?}}

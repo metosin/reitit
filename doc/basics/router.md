@@ -63,14 +63,6 @@ Route names:
 ; [:user/ping :user/user]
 ```
 
-The compiled route tree:
-
-```clj
-(r/routes router)
-; [["/api/ping" {:name :user/ping} nil]
-;  ["/api/user/:id" {:name :user/user} nil]]
-```
-
 ### Composing
 
 As routes are defined as plain data, it's easy to merge multiple route trees into a single router
@@ -85,9 +77,10 @@ As routes are defined as plain data, it's easy to merge multiple route trees int
    ["/ping" ::ping]
    ["/db" ::db]])
 
-(r/router
-  [admin-routes
-   user-routes])
+(def router
+  (r/router
+    [admin-routes
+     user-routes]))
 ```
 
 Merged route tree:
@@ -109,6 +102,6 @@ When router is created, the following steps are done:
 * route arguments are expanded (via `:expand` option)
 * routes are coerced (via `:coerce` options)
 * route tree is compiled (via `:compile` options)
-* [route conflicts](advanced/route_conflicts.md) are resolved (via `:conflicts` options)
+* [route conflicts](route_conflicts.md) are resolved (via `:conflicts` options)
 * optionally, route data is validated (via `:validate` options)
 * [router implementation](../advanced/different_routers.md) is automatically selected (or forced via `:router` options) and created

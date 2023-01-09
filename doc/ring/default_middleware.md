@@ -1,10 +1,10 @@
 # Default Middleware
 
 ```clj
-[metosin/reitit-middleware "0.5.10"]
+[metosin/reitit-middleware "0.5.18"]
 ```
 
-Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases, yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.
+Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.
 
 * [Parameter Handling](#parameters-handling)
 * [Exception Handling](#exception-handling)
@@ -17,7 +17,7 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 `reitit.ring.middleware.parameters/parameters-middleware` to capture query- and form-params. Wraps
 `ring.middleware.params/wrap-params`.
 
-**NOTE**: will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.
+**NOTE**: This middleware will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.  cf. https://github.com/metosin/reitit/issues/134
 
 ## Exception Handling
 
@@ -32,7 +32,7 @@ See [Content Negotiation](content_negotiation.md).
 Wrapper for [Ring Multipart Middleware](https://github.com/ring-clojure/ring/blob/master/ring-core/src/ring/middleware/multipart_params.clj). Emits swagger `:consumes` definitions automatically.
 
 Expected route data:
- 
+
 | key          | description |
 | -------------|-------------|
 | `[:parameters :multipart]`  | mounts only if defined for a route.

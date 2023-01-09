@@ -132,7 +132,7 @@ Routes are just data, so it's easy to create them programmatically:
 
 ### Explicit path-parameter syntax
 
-Router options `:syntax` allows the path-parameter syntax to be explicitely defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
+Router options `:syntax` allows the path-parameter syntax to be explicitly defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
 
 With defaults:
 

@@ -1,5 +1,5 @@
 (ns reitit.dependency-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [are deftest is testing]]
             [reitit.dependency :as rc])
   #?(:clj (:import [clojure.lang ExceptionInfo])))
 

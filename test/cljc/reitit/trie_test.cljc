@@ -1,5 +1,5 @@
 (ns reitit.trie-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [are deftest is testing]]
             [reitit.trie :as trie]))
 
 (deftest into-set-test
@@ -121,4 +121,11 @@
                       (trie/compile)
                       (trie/path-matcher)) "/a")]
        (is (record? (:params match)))
-       (is (= (trie/->Match {:a "a"} {:a 1}) (update match :params (partial into {})))))))
+       (is (= (trie/->Match {:a "a"} {:a 1}) (update match :params (partial into {}))))))
+
+  (testing "space as separator"
+    (is (= (trie/->Match {:arg1 "say" :arg2 "hello"} ::cmd1)
+           ((-> (trie/insert nil "/command1 {arg1} {arg2}" ::cmd1)
+                (trie/insert "/command2 {arg1} {arg2} {arg3}" ::cmd2)
+                (trie/compile)
+                (trie/path-matcher)) "/command1 say hello")))))

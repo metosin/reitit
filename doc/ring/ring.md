@@ -5,14 +5,14 @@
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
 ```clj
-[metosin/reitit-ring "0.5.10"]
+[metosin/reitit-ring "0.5.18"]
 ```
 
 ## `reitit.ring/ring-router`
 
 `ring-router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
- 
- It accepts the following options:
+
+It accepts the following options:
 
 | key                                     | description |
 | ----------------------------------------|-------------|
@@ -53,7 +53,7 @@ Given a `ring-router`, optional default-handler & options, `ring-handler` functi
 
 | key               | description |
 | ------------------|-------------|
-| `:middleware`     | Optional sequence of middleware that wrap the ring-handler"
+| `:middleware`     | Optional sequence of middlewares that wrap the ring-handler
 | `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
 | `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)
 
@@ -91,7 +91,7 @@ The router can be accessed via `get-router`:
 
 # Request-method based routing
 
-Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found. 
+Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found.
 
 By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
@@ -196,7 +196,7 @@ Top-level middleware, applied before any routing is done:
     (ring/router
       ["/api" {:middleware [[mw :api]]}
        ["/get" {:get handler}]])
-    nil 
+    nil
     {:middleware [[mw :top]]}))
 
 (app {:request-method :get, :uri "/api/get"})
