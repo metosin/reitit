@@ -60,11 +60,11 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [{:keys [meta-merge-fn] :as g} p x]
+(defn merge-data [{:keys [meta-merge]} p x]
   (reduce
    (fn [acc [k v]]
      (try
-       ((or meta-merge-fn mm/meta-merge) acc {k v})
+       ((or meta-merge mm/meta-merge) acc {k v})
        (catch #?(:clj Exception, :cljs js/Error) e
          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
    {} x))

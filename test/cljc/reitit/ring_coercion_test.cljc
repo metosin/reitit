@@ -562,7 +562,7 @@
           (is (= {:status 200, :body {:total +4}} (call "application/edn" [:int {:encode/json -}]))))))
 
     (testing "using custom meta-merge function"
-      (let [->app (fn [schema-fn meta-merge-fn]
+      (let [->app (fn [schema-fn meta-merge]
                     (ring/ring-handler
                      (ring/router
                       ["/merging-params/:foo" {:parameters {:path (schema-fn [:map [:foo :string]])}}
@@ -574,10 +574,10 @@
                       {:data {:middleware [rrc/coerce-request-middleware
                                            rrc/coerce-response-middleware]
                               :coercion malli/coercion}
-                       :meta-merge-fn meta-merge-fn})))
-            call (fn [schema-fn meta-merge-fn]
-                   ((->app schema-fn meta-merge-fn) {:uri "/merging-params/this/that"
-                                                     :request-method :get}))]
+                       :meta-merge meta-merge})))
+            call (fn [schema-fn meta-merge]
+                   ((->app schema-fn meta-merge) {:uri "/merging-params/this/that"
+                                                  :request-method :get}))]
 
         (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call m/schema custom-meta-merge-checking-schema)))
         (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call identity custom-meta-merge-checking-parameters)))))))
