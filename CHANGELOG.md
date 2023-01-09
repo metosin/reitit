@@ -12,6 +12,19 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* NEW option `:meta-merge` on a router for custom merge strategy on route data
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.15.5"] is available but we use "4.3.0"
+[metosin/jsonista "0.3.7"] is available but we use "0.3.5"
+[metosin/malli "0.9.2"] is available but we use "0.8.2"
+[fipp "0.6.26"] is available but we use "0.6.25"
+[ring/ring-core "1.9.6"] is available but we use "1.9.5"
+```
+
 ## 0.5.18 (2022-04-05)
 
 * FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))

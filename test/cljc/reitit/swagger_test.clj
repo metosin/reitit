@@ -206,6 +206,7 @@
                                                          :responses {200 {:schema {:type "object"
                                                                                    :properties {:total {:format "int64"
                                                                                                         :type "integer"}}
+                                                                                   :additionalProperties false
                                                                                    :required [:total]}
                                                                           :description ""}
                                                                      400 {:schema {:type "string"}
@@ -229,6 +230,7 @@
                                                           :responses {200 {:description ""
                                                                            :schema {:properties {:total {:format "int64"
                                                                                                          :type "integer"}}
+                                                                                    :additionalProperties false
                                                                                     :required [:total]
                                                                                     :type "object"}}
                                                                       400 {:schema {:type "string"}
