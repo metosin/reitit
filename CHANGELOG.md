@@ -15,7 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * NEW option `:meta-merge` on a router for custom merge strategy on route data
-* Swagger: support operationId in generated swagger json [#569](https://github.com/metosin/reitit/pull/569)
+* Swagger: support operationId in generated swagger json [#452](https://github.com/metosin/reitit/pull/452) & [#569](https://github.com/metosin/reitit/pull/569)
 * Update documentation and link to the startrek project [#578](https://github.com/metosin/reitit/pull/578)
 * Upgrade jackson for CVE-2022-42003 and CVE-2022-42004 [#577](https://github.com/metosin/reitit/pull/577)
 * Improved coercion errors perf [#576](https://github.com/metosin/reitit/pull/576)
