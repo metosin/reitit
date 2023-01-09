@@ -52,7 +52,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.5.15"]
+[metosin/reitit "0.5.18"]
 ```
 
 Optionally, the parts can be required separately.
@@ -153,9 +153,13 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 
 ## External resources
 * Simple web application using Ring/Reitit and Integrant: https://github.com/PrestanceDesign/usermanager-reitit-integrant-example
-* A simple [ClojureScript](https://clojurescript.org/) frontend and Clojure backend using Reitit, [JUXT Clip](https://github.com/juxt/clip), [next.jdbc](https://github.com/seancorfield/next-jdbc) and other bits and bobs...
-  * [startrek](https://git.sr.ht/~dharrigan/startrek)
-  * [startrek-ui](https://git.sr.ht/~dharrigan/startrek-ui)
+* A simple Clojure backend using Reitit to serve up a RESTful API: [startrek](https://github.com/dharrigan/startrek). Technologies include:
+    * [Donut System](https://github.com/donut-party/system)
+    * [next-jdbc](https://github.com/seancorfield/next-jdbc)
+    * [JUXT Clip](https://github.com/juxt/clip)
+    * [Flyway](https://github.com/flyway/flyway)
+    * [HoneySQL](https://github.com/seancorfield/honeysql)
+    * [Babashka](https://babashka.org)
 * https://www.learnreitit.com/
 * Lipas, liikuntapalvelut: https://github.com/lipas-liikuntapaikat/lipas
 * Implementation of the Todo-Backend API spec, using Clojure, Ring/Reitit and next-jdbc: https://github.com/PrestanceDesign/todo-backend-clojure-reitit

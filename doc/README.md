@@ -40,7 +40,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.5.15"]
+[metosin/reitit "0.5.18"]
 ```
 
 Optionally, the parts can be required separately.
@@ -139,7 +139,7 @@ Routing:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/users"})
-; {:status 200, :body "ok", :wrap (:api :admin}
+; {:status 200, :body "ok", :wrap (:api :admin)}
 
 (app {:request-method :put, :uri "/api/admin/users"})
 ; nil

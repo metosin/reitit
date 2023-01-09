@@ -1,7 +1,7 @@
 # Swagger Support
 
 ```
-[metosin/reitit-swagger "0.5.15"]
+[metosin/reitit-swagger "0.5.18"]
 ```
 
 Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema-tools](https://github.com/metosin/schema-tools) and [spec-tools](https://github.com/metosin/spec-tools). Documentation is extracted from route definitions, coercion `:parameters` and `:responses` and from a set of new documentation keys.
@@ -23,6 +23,7 @@ The following route data keys contribute to the generated swagger specification:
 | :tags         | optional set of string or keyword tags for an endpoint api docs
 | :summary      | optional short string summary of an endpoint
 | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
+| :operationId  | optional string specifying the unique ID of an Operation
 
 Coercion keys also contribute to the docs:
 
@@ -44,7 +45,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 [Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger specification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
 
 ```
-[metosin/reitit-swagger-ui "0.5.15"]
+[metosin/reitit-swagger-ui "0.5.18"]
 ```
 
 `reitit.swagger-ui/create-swagger-ui-handler` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:

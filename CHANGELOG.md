@@ -12,12 +12,49 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
+## 0.5.18 (2022-04-05)
 
-**[compare](https://github.com/metosin/reitit/compare/0.5.15...master)**
+* FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
+* Save three seq constructions [#537](https://github.com/metosin/reitit/pull/537)
+* update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
+* Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
+
+## 0.5.17 (2022-03-10)
+
+* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
+
+
+## 0.5.16 (2022-02-15)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.15...0.5.16)**
+
+* Support for [Malli Lite Syntax](https://github.com/metosin/malli#lite) in coercion (enabled by default):
+
+```clj
+["/add/:id" {:post {:parameters {:path {:id int?}
+                                 :query {:a (l/optional int?)}
+                                 :body {:id int?
+                                        :data {:id (l/maybe int?)
+                                               :orders (l/map-of uuid? {:name string?})}}}
+                    :responses {200 {:body {:total pos-int?}}
+                                500 {:description "fail"}}}}]
+```
 
 * Improved Reitit-frontend function docstrings
 * Allow multimethods to be interpreted as interceptors
+
+* Updated deps:
+
+```clj
+[metosin/ring-swagger-ui "4.3.0"] is available but we use "3.46.0"
+[metosin/jsonista "0.3.5"] is available but we use "0.3.3"
+[metosin/malli "0.8.2"] is available but we use "0.5.1"
+[com.fasterxml.jackson.core/jackson-core "2.13.1"] is available but we use "2.12.4"
+[com.fasterxml.jackson.core/jackson-databind "2.13.1"] is available but we use "2.12.4"
+[fipp "0.6.25"] is available but we use "0.6.24"
+[expound "0.9.0"] is available but we use "0.8.9"
+[ring/ring-core "1.9.5"] is available but we use "1.9.4"
+```
 
 ## 0.5.15 (2021-08-05)
 

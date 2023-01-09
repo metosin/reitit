@@ -1,9 +1,9 @@
 (ns reitit.frontend.history
   "Provides integration to hash-change or HTML5 History
   events."
-  (:require [reitit.core :as reitit]
-            [reitit.frontend :as rf]
-            [goog.events :as gevents])
+  (:require [goog.events :as gevents]
+            [reitit.core :as reitit]
+            [reitit.frontend :as rf])
   (:import goog.Uri))
 
 (defprotocol History
@@ -40,7 +40,7 @@
     nil)
   (-on-navigate [this path]
     (reset! last-fragment path)
-    (on-navigate (rf/match-by-path router path) this))
+    (on-navigate (rf/match-by-path router path this) this))
   (-get-path [this]
     ;; Remove #
     ;; "" or "#" should be same as "#/"
@@ -125,7 +125,7 @@
       (-on-navigate this (-get-path this))
       this))
   (-on-navigate [this path]
-    (on-navigate (rf/match-by-path router path) this))
+    (on-navigate (rf/match-by-path router path this) this))
   (-stop [this]
     (gevents/unlistenByKey listen-key)
     (gevents/unlistenByKey click-listen-key)

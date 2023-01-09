@@ -1,9 +1,9 @@
 (ns reitit.interceptor
-  (:require [meta-merge.core :refer [meta-merge]]
-            [clojure.pprint :as pprint]
+  (:require [clojure.pprint :as pprint]
+            [meta-merge.core :refer [meta-merge]]
             [reitit.core :as r]
-            [reitit.impl :as impl]
-            [reitit.exception :as exception]))
+            [reitit.exception :as exception]
+            [reitit.impl :as impl]))
 
 (defprotocol IntoInterceptor
   (into-interceptor [this data opts]))
@@ -42,25 +42,25 @@
     (if-let [interceptor (if registry (registry this))]
       (into-interceptor interceptor data opts)
       (throw
-        (ex-info
-          (str
-            "Interceptor " this " not found in registry.\n\n"
-            (if (seq registry)
-              (str
-                "Available interceptors in registry:\n"
-                (with-out-str
-                  (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
-              "see [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
-          {:id this
-           :registry registry}))))
+       (ex-info
+        (str
+         "Interceptor " this " not found in registry.\n\n"
+         (if (seq registry)
+           (str
+            "Available interceptors in registry:\n"
+            (with-out-str
+              (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+           "see [reitit.interceptor/router] on how to add interceptor to the registry.\n") "\n")
+        {:id this
+         :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
   (into-interceptor [[f & args :as form] data opts]
     (when (and (seq args) (not (fn? f)))
       (exception/fail!
-        (str "Invalid Interceptor form: " form "")
-        {:form form}))
+       (str "Invalid Interceptor form: " form "")
+       {:form form}))
     (into-interceptor (apply f args) data opts))
 
   #?(:clj  clojure.lang.Fn
@@ -91,13 +91,13 @@
             opts (assoc opts ::compiled (inc ^long compiled))]
         (when (>= ^long compiled ^long *max-compile-depth*)
           (exception/fail!
-            (str "Too deep Interceptor compilation - " compiled)
-            {:this this, :data data, :opts opts}))
+           (str "Too deep Interceptor compilation - " compiled)
+           {:this this, :data data, :opts opts}))
         (if-let [interceptor (into-interceptor (compile data opts) data opts)]
           (map->Interceptor
-            (merge
-              (dissoc this :compile)
-              (impl/strip-nils interceptor)))))))
+           (merge
+            (dissoc this :compile)
+            (impl/strip-nils interceptor)))))))
 
   nil
   (into-interceptor [_ _ _]))
@@ -127,9 +127,9 @@
   ([[_ {:keys [interceptors handler] :as data}] {::keys [queue] :as opts} _]
    (let [chain (chain (into (vec interceptors) [handler]) data opts)]
      (map->Endpoint
-       {:interceptors chain
-        :queue ((or queue identity) chain)
-        :data data}))))
+      {:interceptors chain
+       :queue ((or queue identity) chain)
+       :data data}))))
 
 (defn transform-butlast
   "Returns a function to that takes a interceptor transformation function and
@@ -137,8 +137,8 @@
   [f]
   (fn [interceptors]
     (concat
-      (f (butlast interceptors))
-      [(last interceptors)])))
+     (f (butlast interceptors))
+     [(last interceptors)])))
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
@@ -160,8 +160,8 @@
                      :handler get-user}]])"
   ([data]
    (router data nil))
-  ([data opts]
-   (let [opts (meta-merge {:compile compile-result} opts)]
+  ([data {:keys [meta-merge-fn] :as opts}]
+   (let [opts ((or meta-merge-fn meta-merge) {:compile compile-result} opts)]
      (r/router data opts))))
 
 (defn interceptor-handler [router]

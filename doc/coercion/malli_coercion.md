@@ -2,6 +2,10 @@
 
 [Malli](https://github.com/metosin/malli) is data-driven Schema library for Clojure/Script.
 
+## Default Syntax
+
+By default, [Vector Syntax](https://github.com/metosin/malli#vector-syntax) is used:
+
 ```clj
 (require '[reitit.coercion.malli])
 (require '[reitit.coercion :as coercion])
@@ -44,6 +48,20 @@ Failing coercion:
 ; => ExceptionInfo Request coercion failed...
 ```
 
+## Lite Syntax
+
+Same using [Lite Syntax](https://github.com/metosin/malli#lite):
+
+```clj
+(def router
+  (r/router
+    ["/:company/users/:user-id" {:name ::user-view
+                                 :coercion reitit.coercion.malli/coercion
+                                 :parameters {:path {:company string?
+                                                     :user-id int?}}}]
+    {:compile coercion/compile-request-coercers}))
+```
+
 ## Configuring coercion
 
 Using `create` with options to create the coercion instead of `coercion`:
@@ -58,6 +76,8 @@ Using `create` with options to create the coercion instead of `coercion`:
                   :response {:default reitit.coercion.malli/default-transformer-provider}}
    ;; set of keys to include in error messages
    :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   ;; support lite syntax?
+   :lite true
    ;; schema identity function (default: close all map schemas)
    :compile mu/closed-schema
    ;; validate request & response

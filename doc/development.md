@@ -13,6 +13,13 @@
 ./scripts/test.sh cljs
 ```
 
+## Formatting
+
+```bash
+clojure-lsp format
+clojure-lsp clean-ns
+```
+
 ## Documentation
 
 The documentation lives under `doc` and it is hosted on [cljdoc](https://cljdoc.org). See their
