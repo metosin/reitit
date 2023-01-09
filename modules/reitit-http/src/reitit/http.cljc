@@ -1,7 +1,7 @@
 (ns reitit.http
-  (:require [meta-merge.core :as mm]
-            [reitit.core :as r]
+  (:require [reitit.core :as r]
             [reitit.exception :as ex]
+            [reitit.impl :as impl]
             [reitit.interceptor :as interceptor]
             [reitit.ring :as ring]))
 
@@ -14,7 +14,7 @@
              (update acc method expand opts)
              acc)) data ring/http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-endpoint expand meta-merge] :as opts}]
+(defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (ring/group-keys data)
         childs (cond-> childs
                  (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
@@ -38,7 +38,7 @@
       (->methods true top)
       (reduce-kv
        (fn [acc method data]
-         (let [data ((or meta-merge mm/meta-merge) top data)]
+         (let [data (impl/meta-merge top data opts)]
            (assoc acc method (->endpoint path data method method))))
        (->methods (:handler top) data)
        childs))))

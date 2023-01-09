@@ -1,6 +1,5 @@
 (ns reitit.interceptor
   (:require [clojure.pprint :as pprint]
-            [meta-merge.core :as mm]
             [reitit.core :as r]
             [reitit.exception :as exception]
             [reitit.impl :as impl]))
@@ -155,8 +154,8 @@
                      :handler get-user}]])"
   ([data]
    (router data nil))
-  ([data {:keys [meta-merge] :as opts}]
-   (let [opts ((or meta-merge mm/meta-merge) {:compile compile-result} opts)]
+  ([data opts]
+   (let [opts (impl/meta-merge {:compile compile-result} opts opts)]
      (r/router data opts))))
 
 (defn interceptor-handler [router]
