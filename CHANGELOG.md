@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * NEW option `:meta-merge` on a router for custom merge strategy on route data
+* Support `:operationId` in the swagger spec
 * Updated dependencies:
 
 ```clojure
