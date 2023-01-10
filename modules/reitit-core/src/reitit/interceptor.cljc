@@ -160,8 +160,8 @@
 
 (defn interceptor-handler [router]
   (with-meta
-    (fn [path]
-      (some->> (r/match-by-path router path)
-               :result
-               :interceptors))
-    {::router router}))
+   (fn [path]
+     (some->> (r/match-by-path router path)
+              :result
+              :interceptors))
+   {::router router}))

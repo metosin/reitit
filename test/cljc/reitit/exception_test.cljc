@@ -1,6 +1,6 @@
 (ns reitit.exception-test
   (:require [clojure.spec.alpha :as s]
-            [clojure.test :refer [are deftest is testing]]
+            [clojure.test :refer [are deftest is]]
             [reitit.core :as r]
             [reitit.dev.pretty :as pretty]
             [reitit.exception :as exception]

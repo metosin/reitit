@@ -77,7 +77,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.2"]
+                   :dependencies [[org.clojure/clojure "1.11.1"]
                                   [org.clojure/clojurescript "1.10.773"]
 
                                   ;; modules dependencies
@@ -115,7 +115,7 @@
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.10.3"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
@@ -141,7 +141,7 @@
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
                                             "-XX:+PrintInlining"]}}
-  :aliases {"all" ["with-profile" "dev,default:dev,default,1.9"]
+  :aliases {"all" ["with-profile" "dev,default:dev,default,1.10"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
             "test-browser" ["doo" "chrome-headless" "test"]

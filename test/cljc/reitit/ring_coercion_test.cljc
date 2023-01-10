@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [malli.experimental.lite :as l]
             #?@(:clj [[muuntaja.middleware]
-             [jsonista.core :as j]])
+                      [jsonista.core :as j]])
             [malli.core :as m]
             [malli.util :as mu]
             [meta-merge.core :refer [meta-merge]]

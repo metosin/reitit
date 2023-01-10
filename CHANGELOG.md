@@ -14,6 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* **BREAKING**: Drop tests for Clojure 1.9, run tests with 1.10 & 1.11
 * Add support for fragment parameters in the reitit-frontend module [#554](https://github.com/metosin/reitit/pull/554)
 * NEW option `:meta-merge` on a router for custom merge strategy on route data
 * Swagger: support operationId in generated swagger json [#452](https://github.com/metosin/reitit/pull/452) & [#569](https://github.com/metosin/reitit/pull/569)

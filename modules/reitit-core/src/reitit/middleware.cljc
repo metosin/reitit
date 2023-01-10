@@ -143,9 +143,9 @@
 
 (defn middleware-handler [router]
   (with-meta
-    (fn [path]
-      (some->> path
-               (r/match-by-path router)
-               :result
-               :handler))
-    {::router router}))
+   (fn [path]
+     (some->> path
+              (r/match-by-path router)
+              :result
+              :handler))
+   {::router router}))

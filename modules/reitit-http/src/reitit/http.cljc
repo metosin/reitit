@@ -138,35 +138,35 @@
          enrich-request (ring/create-enrich-request inject-match? inject-router?)
          enrich-default-request (ring/create-enrich-default-request inject-router?)]
      (with-meta
-       (fn
-         ([request]
-          (if-let [match (r/match-by-path router (:uri request))]
-            (let [method (:request-method request)
-                  path-params (:path-params match)
-                  endpoint (-> match :result method)
-                  interceptors (or (:queue endpoint) (:interceptors endpoint))
-                  request (enrich-request request path-params match router)]
-              (or (interceptor/execute executor interceptors request)
-                  (interceptor/execute executor default-queue request)))
-            (interceptor/execute executor default-queue (enrich-default-request request router))))
-         ([request respond raise]
-          (let [default #(interceptor/execute executor default-queue % respond raise)]
-            (if-let [match (r/match-by-path router (:uri request))]
-              (let [method (:request-method request)
-                    path-params (:path-params match)
-                    endpoint (-> match :result method)
-                    interceptors (or (:queue endpoint) (:interceptors endpoint))
-                    request (enrich-request request path-params match router)
-                    respond' (fn [response]
-                               (if response
-                                 (respond response)
-                                 (default request)))]
-                (if interceptors
-                  (interceptor/execute executor interceptors request respond' raise)
-                  (default request)))
-              (default (enrich-default-request request router))))
-          nil))
-       {::r/router router}))))
+      (fn
+        ([request]
+         (if-let [match (r/match-by-path router (:uri request))]
+           (let [method (:request-method request)
+                 path-params (:path-params match)
+                 endpoint (-> match :result method)
+                 interceptors (or (:queue endpoint) (:interceptors endpoint))
+                 request (enrich-request request path-params match router)]
+             (or (interceptor/execute executor interceptors request)
+                 (interceptor/execute executor default-queue request)))
+           (interceptor/execute executor default-queue (enrich-default-request request router))))
+        ([request respond raise]
+         (let [default #(interceptor/execute executor default-queue % respond raise)]
+           (if-let [match (r/match-by-path router (:uri request))]
+             (let [method (:request-method request)
+                   path-params (:path-params match)
+                   endpoint (-> match :result method)
+                   interceptors (or (:queue endpoint) (:interceptors endpoint))
+                   request (enrich-request request path-params match router)
+                   respond' (fn [response]
+                              (if response
+                                (respond response)
+                                (default request)))]
+               (if interceptors
+                 (interceptor/execute executor interceptors request respond' raise)
+                 (default request)))
+             (default (enrich-default-request request router))))
+         nil))
+      {::r/router router}))))
 
 (defn get-router [handler]
   (-> handler meta ::r/router))

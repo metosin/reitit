@@ -9,8 +9,7 @@
             [fipp.engine]
             [fipp.visit]
             [reitit.exception :as exception]
-            [spell-spec.expound] ;; expound
-))
+            [spell-spec.expound])) ;; expound
 
 ;;
 ;; colors
@@ -46,17 +45,17 @@
    :error 196})
 
 (comment
-  (defn- -color [color & text]
-    (str "\033[38;5;" (colors color color) "m" (apply str text) "\u001B[0m"))
+ (defn- -color [color & text]
+   (str "\033[38;5;" (colors color color) "m" (apply str text) "\u001B[0m"))
 
-  (doseq [c (range 0 255)]
-    (println (-color c "kikka") "->" c))
+ (doseq [c (range 0 255)]
+   (println (-color c "kikka") "->" c))
 
-  (doseq [[n c] colors]
-    (println (-color c "kikka") "->" c n))
+ (doseq [[n c] colors]
+   (println (-color c "kikka") "->" c n))
 
-  (doseq [[k v] expound.ansi/sgr-code]
-    (println (expound.ansi/sgr "kikka" k) "->" k)))
+ (doseq [[k v] expound.ansi/sgr-code]
+   (println (expound.ansi/sgr "kikka" k) "->" k)))
 
 (defn- -start [x] (str "\033[38;5;" x "m"))
 (defn- -end [] "\u001B[0m")
@@ -220,10 +219,10 @@
 (defn exception [e]
   (let [data (-> e ex-data :data)
         message (format-exception (-> e ex-data :type) #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)) data)
-        source #?(:clj  (->> e Throwable->map :trace
-                             (drop-while #(not= (name (first %)) "reitit.core$router"))
-                             (drop-while #(= (name (first %)) "reitit.core$router"))
-                             next first source-str)
+        source #?(:clj (->> e Throwable->map :trace
+                            (drop-while #(not= (name (first %)) "reitit.core$router"))
+                            (drop-while #(= (name (first %)) "reitit.core$router"))
+                            next first source-str)
                   :cljs "unknown")]
     (ex-info (exception-str message source (printer)) (assoc (or data {}) ::exception/cause e))))
 
