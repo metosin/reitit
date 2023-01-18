@@ -21,19 +21,6 @@
          (map (juxt keyword #(query-param q %)))
          (into {}))))
 
-(defn fragment-params
-  "Given goog.Uri, read fragment parameters into Clojure map."
-  [^Uri uri]
-  (let [fp (.getFragment uri)]
-    (if-not (seq fp)
-      {}
-      (into {}
-            (comp
-              (map #(str/split % #"="))
-              (map (fn [[k v]]
-                     [(keyword k) v])))
-            (str/split fp #"&")))))
-
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
   coerced parameters. Return nil if no match found.
@@ -51,14 +38,17 @@
                    coercion/coerce!)]
      (if-let [match (r/match-by-path router (.getPath uri))]
        (let [q (query-params uri)
-             fp (fragment-params uri)
-             match (assoc match :query-params q :fragment-params fp)
+             fragment (when (.hasFragment uri)
+                        (.getFragment uri))
+             match (assoc match
+                          :query-params q
+                          :fragment fragment)
              ;; Return uncoerced values if coercion is not enabled - so
              ;; that tha parameters are always accessible from same property.
              parameters (or (coerce! match)
                             {:path (:path-params match)
                              :query q
-                             :fragment fp})]
+                             :fragment fragment})]
          (assoc match :parameters parameters))))))
 
 (defn match-by-name
