@@ -133,10 +133,10 @@
   "
   ([] (redirect-trailing-slash-handler {:method :both}))
   ([{:keys [method]}]
-   (letfn [(maybe-redirect [request path]
+   (letfn [(maybe-redirect [{:keys [query-string] :as request} path]
              (if (and (seq path) (r/match-by-path (::r/router request) path))
                {:status (if (= (:request-method request) :get) 301 308)
-                :headers {"Location" path}
+                :headers {"Location" (if query-string (str path "?" query-string) path)}
                 :body ""}))
            (redirect-handler [request]
              (let [uri (:uri request)]
