@@ -1,6 +1,6 @@
 (ns reitit.ring-test
   (:require [clojure.set :as set]
-            [clojure.test :refer [deftest is testing]]
+            [clojure.test :refer [are deftest is testing]]
             [reitit.core :as r]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
@@ -312,7 +312,15 @@
 
         (testing "does not strip slashes"
           (is (= nil (app {:request-method :get, :uri "/slash-less/"})))
-          (is (= nil (app {:request-method :post, :uri "/slash-less/"}))))))
+          (is (= nil (app {:request-method :post, :uri "/slash-less/"}))))
+
+        (testing "retains query-string in location header"
+          (are [method uri]
+            (is (= "/with-slash/?kikka=kukka"
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/with-slash"
+            :post "/with-slash"))))
 
     (testing "using :method :strip"
       (let [app (ring/ring-handler
@@ -338,7 +346,17 @@
 
         (testing "strips multiple slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))
+
+        (testing "retains query-string in location header"
+          (are [method uri]
+            (is (= "/slash-less?kikka=kukka"
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/slash-less/"
+            :get "/slash-less//"
+            :post "/slash-less/"
+            :post "/slash-less//"))))
 
     (testing "without option (equivalent to using :method :both)"
       (let [app (ring/ring-handler
@@ -361,7 +379,19 @@
 
         (testing "strips multiple slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))
+
+        (testing "retains query-string in location header"
+          (are [method uri expected-location]
+            (is (= expected-location
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/with-slash" "/with-slash/?kikka=kukka"
+            :get "/slash-less/" "/slash-less?kikka=kukka"
+            :get "/slash-less//" "/slash-less?kikka=kukka"
+            :post "/with-slash" "/with-slash/?kikka=kukka"
+            :post "/slash-less/" "/slash-less?kikka=kukka"
+            :post "/slash-less//" "/slash-less?kikka=kukka"))))))
 
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
