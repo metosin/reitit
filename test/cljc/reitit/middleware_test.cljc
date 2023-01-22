@@ -1,5 +1,5 @@
 (ns reitit.middleware-test
-  (:require [clojure.test :refer [are deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing]]
             [reitit.core :as r]
             [reitit.middleware :as middleware])
   #?(:clj

@@ -12,6 +12,29 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Remove redundant s/and [#552](https://github.com/metosin/reitit/pull/552)
+* FIX: redirect-trailing-slash-handler strips query-params [#565](https://github.com/metosin/reitit/issues/565)
+* **BREAKING**: Drop tests for Clojure 1.9, run tests with 1.10 & 1.11
+* NEW option `:meta-merge` on a router for custom merge strategy on route data
+* Swagger: support operationId in generated swagger json [#452](https://github.com/metosin/reitit/pull/452) & [#569](https://github.com/metosin/reitit/pull/569)
+* Update documentation and link to the startrek project [#578](https://github.com/metosin/reitit/pull/578)
+* Upgrade jackson for CVE-2022-42003 and CVE-2022-42004 [#577](https://github.com/metosin/reitit/pull/577)
+* Improved coercion errors perf [#576](https://github.com/metosin/reitit/pull/576)
+* Add example for Reitit + Pedestal + Malli coercion [#572](https://github.com/metosin/reitit/pull/572)
+* Handle empty seq as empty string in query-string [#566](https://github.com/metosin/reitit/pull/566)
+* Polish pedestal chains when printing context diffs [#557](https://github.com/metosin/reitit/pull/557)
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.15.5"] is available but we use "4.3.0"
+[metosin/jsonista "0.3.7"] is available but we use "0.3.5"
+[metosin/malli "0.10.1"] is available but we use "0.8.2"
+[fipp "0.6.26"] is available but we use "0.6.25"
+[ring/ring-core "1.9.6"] is available but we use "1.9.5"
+```
+
 ## 0.5.18 (2022-04-05)
 
 * FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))

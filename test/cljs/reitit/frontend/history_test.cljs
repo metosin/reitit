@@ -27,8 +27,8 @@
         (is (= "#/bar/5?q=x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
         (let [{:keys [value messages]} (capture-console
-                                         (fn []
-                                           (rfh/href history ::asd)))]
+                                        (fn []
+                                          (rfh/href history ::asd)))]
           (is (= nil value))
           (is (= [{:type :warn
                    :message ["missing route" ::asd]}]
@@ -84,8 +84,8 @@
         (is (= "/bar/5?q=x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
         (let [{:keys [value messages]} (capture-console
-                                         (fn []
-                                           (rfh/href history ::asd)))]
+                                        (fn []
+                                          (rfh/href history ::asd)))]
           (is (= nil value))
           (is (= [{:type :warn
                    :message ["missing route" ::asd]}]
@@ -153,7 +153,7 @@
                                                (done)))))
                                 {:use-fragment false})
             create-link #(doto
-                           (js/document.createElement "A")
+                          (js/document.createElement "A")
                            (.setAttribute "href" (rfh/href history ::foo)))
             document-link (create-link)
             shadow-link (create-link)]

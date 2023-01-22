@@ -1,8 +1,7 @@
 (ns reitit.ring
   (:require [clojure.string :as str]
-            [meta-merge.core :refer [meta-merge]]
             #?@(:clj [[ring.util.mime-type :as mime-type]
-             [ring.util.response :as response]])
+                      [ring.util.response :as response]])
             [reitit.core :as r]
             [reitit.exception :as ex]
             [reitit.impl :as impl]
@@ -29,7 +28,7 @@
              (update acc method expand opts)
              acc)) data http-methods)])
 
-(defn compile-result [[path data] {:keys [::default-options-endpoint expand meta-merge-fn] :as opts}]
+(defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
                  (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
@@ -50,7 +49,7 @@
       (->methods true top)
       (reduce-kv
        (fn [acc method data]
-         (let [data ((or meta-merge-fn meta-merge) top data)]
+         (let [data (impl/meta-merge top data opts)]
            (assoc acc method (->endpoint path data method method))))
        (->methods (:handler top) data)
        childs))))
@@ -317,28 +316,28 @@
          enrich-request (create-enrich-request inject-match? inject-router?)
          enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
-       (wrap
-        (fn
-          ([request]
-           (if-let [match (r/match-by-path router (:uri request))]
-             (let [method (:request-method request)
-                   path-params (:path-params match)
-                   result (:result match)
-                   handler (-> result method :handler (or default-handler))
-                   request (enrich-request request path-params match router)]
-               (or (handler request) (default-handler request)))
-             (default-handler (enrich-default-request request router))))
-          ([request respond raise]
-           (if-let [match (r/match-by-path router (:uri request))]
-             (let [method (:request-method request)
-                   path-params (:path-params match)
-                   result (:result match)
-                   handler (-> result method :handler (or default-handler))
-                   request (enrich-request request path-params match router)]
-               ((routes handler default-handler) request respond raise))
-             (default-handler (enrich-default-request request router) respond raise))
-           nil)))
-       {::r/router router}))))
+      (wrap
+       (fn
+         ([request]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              (or (handler request) (default-handler request)))
+            (default-handler (enrich-default-request request router))))
+         ([request respond raise]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              ((routes handler default-handler) request respond raise))
+            (default-handler (enrich-default-request request router) respond raise))
+          nil)))
+      {::r/router router}))))
 
 (defn reloading-ring-handler
   "Returns a ring-handler that recreates the actual ring-handler for each request.

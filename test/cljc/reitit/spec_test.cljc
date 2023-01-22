@@ -39,7 +39,7 @@
         (are [data]
           (is (thrown-with-msg?
                ExceptionInfo
-               #"Call to #'reitit.core/router did not conform to spec"
+               #"Call to (#')*reitit.core/router did not conform to spec"
                (r/router
                 data)))
 
@@ -69,7 +69,7 @@
       (are [opts]
         (is (thrown-with-msg?
              ExceptionInfo
-             #"Call to #'reitit.core/router did not conform to spec"
+             #"Call to (#')*reitit.core/router did not conform to spec"
              (r/router
               ["/api"] opts)))
 

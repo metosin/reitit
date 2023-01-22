@@ -56,9 +56,9 @@
         (is (= [{:type :warn
                  :message ["missing route" ::asd]}]
                (:messages
-                 (capture-console
-                   (fn []
-                     (rf/match-by-name! router ::asd)))))))))
+                (capture-console
+                 (fn []
+                   (rf/match-by-name! router ::asd)))))))))
 
   (testing "schema coercion"
     (let [router (r/router ["/"
@@ -124,6 +124,6 @@
                             :required #{:id}
                             :path-params {}}]}]
                (:messages
-                 (capture-console
-                   (fn []
-                     (rf/match-by-name! router ::foo {}))))))))))
+                (capture-console
+                 (fn []
+                   (rf/match-by-name! router ::foo {}))))))))))
