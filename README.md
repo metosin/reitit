@@ -184,6 +184,6 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## License
 
-Copyright © 2017-2022 [Metosin Oy](http://www.metosin.fi)
+Copyright © 2017-2023 [Metosin Oy](http://www.metosin.fi)
 
 Distributed under the Eclipse Public License, the same as Clojure.
