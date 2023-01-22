@@ -47,7 +47,7 @@
     (-get-name [_] :schema)
     (-get-options [_] opts)
     (-get-apidocs [this specification {:keys [parameters responses]}]
-      ;; TODO: this looks identical to spec, refactor when schema is done.
+     ;; TODO: this looks identical to spec, refactor when schema is done.
       (case specification
         :swagger (swagger/swagger-spec
                   (merge

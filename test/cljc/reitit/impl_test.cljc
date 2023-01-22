@@ -1,5 +1,5 @@
 (ns reitit.impl-test
-  (:require [clojure.test :refer [are deftest is testing]]
+  (:require [clojure.test :refer [are deftest is]]
             [reitit.impl :as impl]))
 
 (deftest strip-nils-test

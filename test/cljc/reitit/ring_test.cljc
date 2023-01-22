@@ -733,6 +733,6 @@
                     {::trie/trie-compiler compiler})]
            (dotimes [_ 10]
              (future
-               (dotimes [n 100000]
-                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
-                   (is (= body (str n))))))))))))
+              (dotimes [n 100000]
+                (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
+                  (is (= body (str n))))))))))))

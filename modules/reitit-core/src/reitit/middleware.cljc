@@ -1,6 +1,5 @@
 (ns reitit.middleware
   (:require [clojure.pprint :as pprint]
-            [meta-merge.core :refer [meta-merge]]
             [reitit.core :as r]
             [reitit.exception :as exception]
             [reitit.impl :as impl]))
@@ -138,15 +137,15 @@
                      :handler get-user}]])"
   ([data]
    (router data nil))
-  ([data {:keys [meta-merge-fn] :as opts}]
-   (let [opts ((or meta-merge-fn meta-merge) {:compile compile-result} opts)]
+  ([data opts]
+   (let [opts (impl/meta-merge {:compile compile-result} opts opts)]
      (r/router data opts))))
 
 (defn middleware-handler [router]
   (with-meta
-    (fn [path]
-      (some->> path
-               (r/match-by-path router)
-               :result
-               :handler))
-    {::router router}))
+   (fn [path]
+     (some->> path
+              (r/match-by-path router)
+              :result
+              :handler))
+   {::router router}))
