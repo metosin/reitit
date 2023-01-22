@@ -83,7 +83,7 @@
          ExceptionInfo
          #"Invalid route data"
          (ring/router
-          ["/api" {:handler    identity
+          ["/api" {:handler identity
                    :middleware '()}]
           {:validate rrs/validate})))))
 

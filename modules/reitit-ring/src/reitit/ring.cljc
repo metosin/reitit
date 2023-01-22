@@ -1,8 +1,7 @@
 (ns reitit.ring
   (:require [clojure.string :as str]
-            [meta-merge.core :refer [meta-merge]]
             #?@(:clj [[ring.util.mime-type :as mime-type]
-             [ring.util.response :as response]])
+                      [ring.util.response :as response]])
             [reitit.core :as r]
             [reitit.exception :as ex]
             [reitit.impl :as impl]
@@ -50,21 +49,21 @@
       (->methods true top)
       (reduce-kv
        (fn [acc method data]
-         (let [data (meta-merge top data)]
+         (let [data (impl/meta-merge top data opts)]
            (assoc acc method (->endpoint path data method method))))
        (->methods (:handler top) data)
        childs))))
 
 (def default-options-handler
-  (let [handle (fn [request]
-                 (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
-                       allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
-                   {:status 200, :body "", :headers {"Allow" allow}}))]
+  (let [handler (fn [request]
+                  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+                        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+                    {:status 200, :body "", :headers {"Allow" allow}}))]
     (fn
       ([request]
-       (handle request))
+       (handler request))
       ([request respond _]
-       (respond (handle request))))))
+       (respond (handler request))))))
 
 (def default-options-endpoint
   {:no-doc true
@@ -133,10 +132,10 @@
   "
   ([] (redirect-trailing-slash-handler {:method :both}))
   ([{:keys [method]}]
-   (letfn [(maybe-redirect [request path]
+   (letfn [(maybe-redirect [{:keys [query-string] :as request} path]
              (if (and (seq path) (r/match-by-path (::r/router request) path))
                {:status (if (= (:request-method request) :get) 301 308)
-                :headers {"Location" path}
+                :headers {"Location" (if query-string (str path "?" query-string) path)}
                 :body ""}))
            (redirect-handler [request]
              (let [uri (:uri request)]
@@ -317,28 +316,28 @@
          enrich-request (create-enrich-request inject-match? inject-router?)
          enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
-       (wrap
-        (fn
-          ([request]
-           (if-let [match (r/match-by-path router (:uri request))]
-             (let [method (:request-method request)
-                   path-params (:path-params match)
-                   result (:result match)
-                   handler (-> result method :handler (or default-handler))
-                   request (enrich-request request path-params match router)]
-               (or (handler request) (default-handler request)))
-             (default-handler (enrich-default-request request router))))
-          ([request respond raise]
-           (if-let [match (r/match-by-path router (:uri request))]
-             (let [method (:request-method request)
-                   path-params (:path-params match)
-                   result (:result match)
-                   handler (-> result method :handler (or default-handler))
-                   request (enrich-request request path-params match router)]
-               ((routes handler default-handler) request respond raise))
-             (default-handler (enrich-default-request request router) respond raise))
-           nil)))
-       {::r/router router}))))
+      (wrap
+       (fn
+         ([request]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              (or (handler request) (default-handler request)))
+            (default-handler (enrich-default-request request router))))
+         ([request respond raise]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              ((routes handler default-handler) request respond raise))
+            (default-handler (enrich-default-request request router) respond raise))
+          nil)))
+      {::r/router router}))))
 
 (defn get-router [handler]
   (-> handler meta ::r/router))

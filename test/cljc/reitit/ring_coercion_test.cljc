@@ -2,7 +2,10 @@
   (:require [clojure.test :refer [deftest is testing]]
             [malli.experimental.lite :as l]
             #?@(:clj [[muuntaja.middleware]
-             [jsonista.core :as j]])
+                      [jsonista.core :as j]])
+            [malli.core :as m]
+            [malli.util :as mu]
+            [meta-merge.core :refer [meta-merge]]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
@@ -207,6 +210,38 @@
         (testing "invalid response"
           (let [{:keys [status]} (app invalid-request2)]
             (is (= 500 status))))))))
+
+(defn- custom-meta-merge-checking-schema
+  ([] {})
+  ([left] left)
+  ([left right]
+   (cond
+     (and (map? left) (map? right))
+     (merge-with custom-meta-merge-checking-schema left right)
+
+     (and (m/schema? left)
+          (m/schema? right))
+     (mu/merge left right)
+
+     :else
+     (meta-merge left right)))
+  ([left right & more]
+   (reduce custom-meta-merge-checking-schema left (cons right more))))
+
+(defn- custom-meta-merge-checking-parameters
+  ([] {})
+  ([left] left)
+  ([left right]
+   (if (and (map? left) (map? right)
+            (contains? left :parameters)
+            (contains? right :parameters))
+     (-> (merge-with custom-meta-merge-checking-parameters left right)
+         (assoc :parameters (merge-with mu/merge
+                                        (:parameters left)
+                                        (:parameters right))))
+     (meta-merge left right)))
+  ([left right & more]
+   (reduce custom-meta-merge-checking-parameters left (cons right more))))
 
 (deftest malli-coercion-test
   (let [create (fn [middleware routes]
@@ -524,7 +559,28 @@
           (is (= {:status 200, :body {:total -4}} (call "application/json" [:int {:encode/json -}]))))
 
         (testing "edn encoding (nada)"
-          (is (= {:status 200, :body {:total +4}} (call "application/edn" [:int {:encode/json -}]))))))))
+          (is (= {:status 200, :body {:total +4}} (call "application/edn" [:int {:encode/json -}]))))))
+
+    (testing "using custom meta-merge function"
+      (let [->app (fn [schema-fn meta-merge]
+                    (ring/ring-handler
+                     (ring/router
+                      ["/merging-params/:foo" {:parameters {:path (schema-fn [:map [:foo :string]])}}
+                       ["/:bar" {:parameters {:path (schema-fn [:map [:bar :string]])}
+                                 :get {:handler (fn [{{{:keys [foo bar]} :path} :parameters}]
+                                                  {:status 200
+                                                   :body {:total (str "FOO: " foo ", "
+                                                                      "BAR: " bar)}})}}]]
+                      {:data {:middleware [rrc/coerce-request-middleware
+                                           rrc/coerce-response-middleware]
+                              :coercion malli/coercion}
+                       :meta-merge meta-merge})))
+            call (fn [schema-fn meta-merge]
+                   ((->app schema-fn meta-merge) {:uri "/merging-params/this/that"
+                                                  :request-method :get}))]
+
+        (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call m/schema custom-meta-merge-checking-schema)))
+        (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call identity custom-meta-merge-checking-parameters)))))))
 
 #?(:clj
    (deftest muuntaja-test

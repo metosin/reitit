@@ -60,17 +60,20 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn merge-data [p x]
+(defn meta-merge [left right opts]
+  ((or (:meta-merge opts) mm/meta-merge) left right))
+
+(defn merge-data [opts p x]
   (reduce
    (fn [acc [k v]]
      (try
-       (mm/meta-merge acc {k v})
+       (meta-merge acc {k v} opts)
        (catch #?(:clj Exception, :cljs js/Error) e
          (ex/fail! ::merge-data {:path p, :left acc, :right {k v}, :exception e}))))
    {} x))
 
 (defn resolve-routes [raw-routes {:keys [coerce] :as opts}]
-  (cond->> (->> (walk raw-routes opts) (map-data merge-data))
+  (cond->> (->> (walk raw-routes opts) (map-data #(merge-data opts %1 %2)))
     coerce (into [] (keep #(coerce % opts)))))
 
 (defn path-conflicting-routes [routes opts]
@@ -249,6 +252,10 @@
   (->> params
        (map (fn [[k v]]
               (if (or (sequential? v) (set? v))
-                (str/join "&" (map query-parameter (repeat k) v))
+                (if (seq v)
+                  (str/join "&" (map query-parameter (repeat k) v))
+                  ;; Empty seq results in single & character in the query string.
+                  ;; Handle as empty string to behave similarly as when the value is nil.
+                  (query-parameter k ""))
                 (query-parameter k v))))
        (str/join "&")))

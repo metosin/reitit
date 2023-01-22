@@ -115,7 +115,7 @@
                   :response {:default default-transformer-provider
                              :formats {"application/json" json-transformer-provider}}}
    ;; set of keys to include in error messages
-   :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   :error-keys #{:type :coercion :in #_:schema :value #_:errors :humanized #_:transformed}
    ;; support lite syntax?
    :lite true
    ;; schema identity function (default: close all map schemas)
@@ -211,7 +211,7 @@
          show? (fn [key] (contains? error-keys key))
          transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)
          compile (if lite (fn [schema options] (compile (binding [l/*options* options] (l/schema schema)) options))
-                     compile)]
+                          compile)]
      ^{:type ::coercion/coercion}
      (reify coercion/Coercion
        (-get-name [_] :malli)

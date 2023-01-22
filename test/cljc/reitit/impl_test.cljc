@@ -1,5 +1,5 @@
 (ns reitit.impl-test
-  (:require [clojure.test :refer [are deftest is testing]]
+  (:require [clojure.test :refer [are deftest is]]
             [reitit.impl :as impl]))
 
 (deftest strip-nils-test
@@ -50,6 +50,8 @@
     {"a" "b"} "a=b"
     {:a 1} "a=1"
     {:a nil} "a="
+    {:a []} "a="
+    {:a '()} "a="
     {:a :b :c "d"} "a=b&c=d"
     {:a "b c"} "a=b+c"
     {:a ["b" "c"]} "a=b&a=c"

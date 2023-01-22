@@ -25,11 +25,13 @@
      ["/spec" {:coercion spec/coercion}
       ["/plus/:z"
        {:patch {:summary "patch"
+                :operationId "Patch"
                 :handler (constantly {:status 200})}
         :options {:summary "options"
                   :middleware [{:data {:swagger {:responses {200 {:description "200"}}}}}]
                   :handler (constantly {:status 200})}
         :get {:summary "plus"
+              :operationId "GetPlus"
               :parameters {:query {:x int?, :y int?}
                            :path {:z int?}}
               :swagger {:responses {400 {:schema {:type "string"}
@@ -118,6 +120,7 @@
              (app {:request-method :get
                    :uri "/api/schema/plus/3"
                    :query-params {:x "2", :y "1"}})))))
+
   (testing "swagger-spec"
     (let [spec (:body (app {:request-method :get
                             :uri "/api/swagger.json"}))
@@ -126,6 +129,7 @@
                     :info {:title "my-api"}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
+                                                          :operationId "Patch"
                                                           :responses {:default {:description ""}}}
                                                   :options {:parameters []
                                                             :summary "options"
@@ -156,7 +160,8 @@
                                                                     400 {:schema {:type "string"}
                                                                          :description "kosh"}
                                                                     500 {:description "fail"}}
-                                                        :summary "plus"}
+                                                        :summary "plus"
+                                                        :operationId "GetPlus"}
                                                   :post {:parameters [{:in "body",
                                                                        :name "body",
                                                                        :description "",
@@ -201,6 +206,7 @@
                                                          :responses {200 {:schema {:type "object"
                                                                                    :properties {:total {:format "int64"
                                                                                                         :type "integer"}}
+                                                                                   :additionalProperties false
                                                                                    :required [:total]}
                                                                           :description ""}
                                                                      400 {:schema {:type "string"}
@@ -224,6 +230,7 @@
                                                           :responses {200 {:description ""
                                                                            :schema {:properties {:total {:format "int64"
                                                                                                          :type "integer"}}
+                                                                                    :additionalProperties false
                                                                                     :required [:total]
                                                                                     :type "object"}}
                                                                       400 {:schema {:type "string"}
