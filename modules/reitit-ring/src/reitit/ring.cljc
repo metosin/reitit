@@ -340,6 +340,22 @@
            nil)))
        {::r/router router}))))
 
+(defn reloading-ring-handler
+  "Returns a ring-handler that recreates the actual ring-handler for each request.
+  Takes a 0-arity function that should return a valid ring-handler. Effectively creates
+  an auto-reloading ring-handler, which is good for REPL-driven development.
+
+  Example:
+
+        ;; for dev-mode, recreate the ring-handler for each request, for prod, just once
+        (let [dev-mode ...
+              f (fn [] (reitit.ring/ring-handler ...)]
+          (if dev-mode (reitit.ring/reloading-ring-handler f) (f)))"
+  [f]
+  (fn
+    ([request] ((f) request))
+    ([request respond raise] ((f) request respond raise))))
+
 (defn get-router [handler]
   (-> handler meta ::r/router))
 
