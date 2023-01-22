@@ -14,8 +14,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* Remove redundant s/and [#552](https://github.com/metosin/reitit/pull/552)
+* FIX: redirect-trailing-slash-handler strips query-params [#565](https://github.com/metosin/reitit/issues/565)
 * **BREAKING**: Drop tests for Clojure 1.9, run tests with 1.10 & 1.11
-* Add support for fragment parameters in the reitit-frontend module [#554](https://github.com/metosin/reitit/pull/554)
 * NEW option `:meta-merge` on a router for custom merge strategy on route data
 * Swagger: support operationId in generated swagger json [#452](https://github.com/metosin/reitit/pull/452) & [#569](https://github.com/metosin/reitit/pull/569)
 * Update documentation and link to the startrek project [#578](https://github.com/metosin/reitit/pull/578)
