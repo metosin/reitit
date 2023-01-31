@@ -31,7 +31,7 @@
    ["Data-specs" {:file "doc/coercion/data_spec_coercion.md"}]
    ["Malli" {:file "doc/coercion/malli_coercion.md"}]]
   ["Ring" {}
-   ["Ring-router" {:file "doc/ring/ring.md"}]
+   ["Ring Router" {:file "doc/ring/ring.md"}]
    ["Reverse-routing" {:file "doc/ring/reverse_routing.md"}]
    ["Default handler" {:file "doc/ring/default_handler.md"}]
    ["Slash handler" {:file "doc/ring/slash_handler.md"}]

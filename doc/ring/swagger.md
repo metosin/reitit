@@ -6,7 +6,7 @@
 
 Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema-tools](https://github.com/metosin/schema-tools) and [spec-tools](https://github.com/metosin/spec-tools). Documentation is extracted from route definitions, coercion `:parameters` and `:responses` and from a set of new documentation keys.
 
-To enable swagger-documentation for a ring-router:
+To enable swagger-documentation for a Ring router:
 
 1. annotate your routes with swagger-data
 2. mount a swagger-handler to serve the swagger-spec
@@ -129,7 +129,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
         ["/pong" {:post (constantly {:status 200, :body "pong"})}]]
        ["/swagger.json"
         {:get {:no-doc true
-               :handler (swagger/create-swagger-handler)}}]]) 
+               :handler (swagger/create-swagger-handler)}}]])
     (swagger-ui/create-swagger-ui-handler {:path "/api-docs"})))
 ```
 

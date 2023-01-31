@@ -25,7 +25,7 @@
 
 ## Ring
 
-* [Ring-router](ring/ring.md)
+* [Ring Router](ring/ring.md)
 * [Reverse-routing](ring/reverse_routing.md)
 * [Default handler](ring/default_handler.md)
 * [Slash handler](ring/slash_handler.md)
