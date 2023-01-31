@@ -38,7 +38,7 @@
 ;;
 
 (s/def ::name keyword?)
-(s/def ::handler fn?)
+(s/def ::handler (s/or :fn fn? :var var?))
 (s/def ::no-doc boolean?)
 (s/def ::conflicting boolean?)
 (s/def ::default-data
