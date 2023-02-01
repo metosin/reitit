@@ -38,7 +38,7 @@
             nil
             nil)))))
 
-(deftest ring-router-test
+(deftest router-test
 
   (testing "all paths should have a handler"
     (is (thrown-with-msg?
