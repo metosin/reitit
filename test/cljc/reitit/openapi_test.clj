@@ -175,6 +175,7 @@
                                                                        :schema {:type "integer"}}]
                                                          :responses {200 {:content {"application/json" {:schema {:type "object"
                                                                                                                  :properties {:total {:type "integer"}}
+                                                                                                                 :additionalProperties false
                                                                                                                  :required [:total]}}}}
                                                                      400 {:description "kosh"
                                                                           :content {"application/json" {:schema {:type "string"}}}}
@@ -189,6 +190,7 @@
                                                                                                                        {:type "null"}]}}}}
                                                           :responses {200 {:content {"application/json" {:schema {:properties {:total {:type "integer"}}
                                                                                                                   :required [:total]
+                                                                                                                  :additionalProperties false
                                                                                                                   :type "object"}}}}
                                                                       400 {:description "kosh"
                                                                            :content {"application/json" {:schema {:type "string"}}}}
@@ -361,6 +363,7 @@
       "body parameter"
       (is (= {"application/json" {:schema {:type "object"
                                            :properties {:b {:type "string"}}
+                                           :additionalProperties false
                                            :required [:b]}}}
              (-> spec
                  (get-in [:paths "/parameters" :post :requestBody :content])
@@ -369,6 +372,7 @@
       "body response"
       (is (= {"application/json" {:schema {:type "object"
                                            :properties {:ok {:type "string"}}
+                                           :additionalProperties false
                                            :required [:ok]}}}
              (-> spec
                  (get-in [:paths "/parameters" :post :responses 200 :content])
@@ -423,6 +427,7 @@
       "body parameter"
       (is (= {"application/json" {:schema {:type "object"
                                            :properties {:b {:type "string"}}
+                                           :additionalProperties false
                                            :required [:b]}}}
              (-> spec
                  (get-in [:paths "/parameters" :post :requestBody :content])
@@ -431,6 +436,7 @@
       "body response"
       (is (= {"application/json" {:schema {:type "object"
                                            :properties {:ok {:type "string"}}
+                                           :additionalProperties false
                                            :required [:ok]}}}
              (-> spec
                  (get-in [:paths "/parameters" :post :responses 200 :content])
