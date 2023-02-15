@@ -22,14 +22,9 @@
                :openapi {:info {:title "my-api"}}
                :handler (openapi/create-openapi-handler)}}]
 
-       #_["/spec" {:coercion spec/coercion}
+       ["/spec" {:coercion spec/coercion}
           ["/plus/:z"
-           {:patch {:summary "patch"
-                    :handler (constantly {:status 200})}
-            :options {:summary "options"
-                      :middleware [{:data {:openapi {:responses {200 {:description "200"}}}}}]
-                      :handler (constantly {:status 200})}
-            :get {:summary "plus"
+           {:get {:summary "plus"
                   :parameters {:query {:x int?, :y int?}
                                :path {:z int?}}
                   :openapi {:responses {400 {:description "kosh"
@@ -119,48 +114,50 @@
           expected {:x-id #{::math}
                     :openapi "3.1.0"
                     :info {:title "my-api"}
-                    :paths {#_#_"/api/spec/plus/{z}" {:patch {:summary "patch"
-                                                              :responses {:default {:description ""}}}
-                                                      :options {:summary "options"
-                                                                :responses {200 {:description "200"}}}
-                                                      :get {:parameters [{:in "query"
-                                                                          :name "x"
-                                                                          :description ""
-                                                                          :required true
-                                                                          :schema {:type "integer"}}
-                                                                         {:in "query"
-                                                                          :name "y"
-                                                                          :description ""
-                                                                          :required true
-                                                                          :schema {:type "integer"}}
-                                                                         {:in "path"
-                                                                          :name "z"
-                                                                          :description ""
-                                                                          :required true
-                                                                          :schema {:type "integer"}}]
-                                                            :responses {200 {:content {"application/json" {:schema {:type "object"
-                                                                                                                    :properties {"total" {:format "int64"
-                                                                                                                                          :type "integer"}}
-                                                                                                                    :required ["total"]}}}}
-                                                                        400 {:description "kosh"
-                                                                             :content {"application/json" {:schema {:type "string"}}}}
-                                                                        500 {:description "fail"}}
-                                                            :summary "plus"}
-                                                      :post {:parameters [{:in "path"
-                                                                           :name "z"
-                                                                           :required true
-                                                                           :schema {:type "integer"}}]
-                                                             :requestBody {:content {"application/json" {:schema {:oneOf [{:items {:type "integer"}
-                                                                                                                           :type "array"}
-                                                                                                                          {:type "null"}]}}}}
-                                                             :responses {200 {:content {"application/json" {:schema {:properties {"total" {:format "int64"
-                                                                                                                                           :type "integer"}}
-                                                                                                                     :required ["total"]
-                                                                                                                     :type "object"}}}}
-                                                                         400 {:content {"application/json" {:schema {:type "string"}}}
-                                                                              :description "kosh"}
-                                                                         500 {:description "fail"}}
-                                                             :summary "plus with body"}}
+                    :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
+                                                                      :name "x"
+                                                                      :description ""
+                                                                      :required true
+                                                                      :schema {:type "integer"
+                                                                               :format "int64"}}
+                                                                     {:in "query"
+                                                                      :name "y"
+                                                                      :description ""
+                                                                      :required true
+                                                                      :schema {:type "integer"
+                                                                               :format "int64"}}
+                                                                     {:in "path"
+                                                                      :name "z"
+                                                                      :description ""
+                                                                      :required true
+                                                                      :schema {:type "integer"
+                                                                               :format "int64"}}]
+                                                        :responses {200 {:content {"application/json" {:schema {:type "object"
+                                                                                                                :properties {"total" {:format "int64"
+                                                                                                                                      :type "integer"}}
+                                                                                                                :required ["total"]}}}}
+                                                                    400 {:description "kosh"
+                                                                         :content {"application/json" {:schema {:type "string"}}}}
+                                                                    500 {:description "fail"}}
+                                                        :summary "plus"}
+                                                  :post {:parameters [{:in "path"
+                                                                       :name "z"
+                                                                       :required true
+                                                                       :description ""
+                                                                       :schema {:type "integer"
+                                                                                :format "int64"}}]
+                                                         :requestBody {:content {"application/json" {:schema {:oneOf [{:items {:type "integer"
+                                                                                                                               :format "int64"}
+                                                                                                                       :type "array"}
+                                                                                                                      {:type "null"}]}}}}
+                                                         :responses {200 {:content {"application/json" {:schema {:properties {"total" {:format "int64"
+                                                                                                                                       :type "integer"}}
+                                                                                                                 :required ["total"]
+                                                                                                                 :type "object"}}}}
+                                                                     400 {:content {"application/json" {:schema {:type "string"}}}
+                                                                          :description "kosh"}
+                                                                     500 {:description "fail"}}
+                                                         :summary "plus with body"}}
                             "/api/malli/plus/{z}" {:get {:parameters [{:in "query"
                                                                        :name :x
                                                                        :required true
