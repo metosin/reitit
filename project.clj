@@ -105,6 +105,7 @@
                                   [org.clojure/test.check "1.1.1"]
                                   [org.clojure/tools.namespace "1.3.0"]
                                   [com.gfredericks/test.chuck "0.2.13"]
+                                  [nubank/matcher-combinators "3.8.3"]
 
                                   [io.pedestal/pedestal.service "0.5.10"]
 

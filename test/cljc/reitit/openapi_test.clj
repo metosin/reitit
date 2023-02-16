@@ -1,5 +1,7 @@
 (ns reitit.openapi-test
   (:require [clojure.test :refer [deftest is testing]]
+            [jsonista.core :as j]
+            [matcher-combinators.test :refer [match?]]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
@@ -96,7 +98,6 @@
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})))
 
-(require '[fipp.edn])
 (deftest openapi-test
   (testing "endpoints work"
     (testing "malli"
@@ -311,245 +312,133 @@
            (-> {:request-method :get :uri "/openapi.json"}
                (app) :body :x-id)))))
 
-(deftest malli-all-parameter-types-test
-  (let [app (ring/ring-handler
-              (ring/router
-                [["/parameters"
-                  {:post {:coercion malli/coercion
-                          :parameters {:query [:map
-                                               [:q :string]]
-                                       :body [:map
-                                              [:b :string]]
-                                       :header [:map
-                                                [:h :string]]
-                                       :cookie [:map
-                                                [:c :string]]
-                                       :path [:map
-                                              [:p :string]]}
-                          :responses {200 {:body [:map [:ok :string]]}}
-                          :handler identity}}]
-                 ["/openapi.json"
-                  {:get {:handler (openapi/create-openapi-handler)
-                         :no-doc true}}]]))
-        spec (-> {:request-method :get
-                  :uri "/openapi.json"}
-                 app
-                 :body)]
-    (testing
-      "all non-body parameters"
-      (is (= [{:in "query"
-               :name :q
-               :required true
-               :schema {:type "string"}}
-              {:in "header"
-               :name :h
-               :required true
-               :schema {:type "string"}}
-              {:in "cookie"
-               :name :c
-               :required true
-               :schema {:type "string"}}
-              {:in "path"
-               :name :p
-               :required true
-               :schema {:type "string"}}]
-             (-> spec
-                 (get-in [:paths "/parameters" :post :parameters])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body parameter"
-      (is (= {"application/json" {:schema {:type "object"
-                                           :properties {:b {:type "string"}}
-                                           :additionalProperties false
-                                           :required [:b]}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :requestBody :content])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body response"
-      (is (= {"application/json" {:schema {:type "object"
-                                           :properties {:ok {:type "string"}}
-                                           :additionalProperties false
-                                           :required [:ok]}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :responses 200 :content])
-                 #_(doto clojure.pprint/pprint)))))))
+(defn- normalize
+  "Normalize format of openapi spec by converting it to json and back.
+  Handles differences like :q vs \"q\" in openapi generation."
+  [data]
+  (-> data
+      j/write-value-as-string
+      (j/read-value j/keyword-keys-object-mapper)))
 
-(deftest malli-all-parameter-types-test-per-content-type
-  (let [app (ring/ring-handler
-              (ring/router
-                [["/parameters"
-                  {:post {:coercion malli/coercion
-                          :parameters {:query [:map
-                                               [:q :string]]
-                                       :request {:content {"application/json" [:map
-                                                                               [:b :string]]}}
-                                       :header [:map
-                                                [:h :string]]
-                                       :cookie [:map
-                                                [:c :string]]
-                                       :path [:map
-                                              [:p :string]]}
-                          :responses {200 {:content {"application/json" [:map [:ok :string]]}}}
-                          :handler identity}}]
-                 ["/openapi.json"
-                  {:get {:handler (openapi/create-openapi-handler)
-                         :no-doc true}}]]))
-        spec (-> {:request-method :get
-                  :uri "/openapi.json"}
-                 app
-                 :body)]
-    (testing
-      "all non-body parameters"
-      (is (= [{:in "query"
-               :name :q
-               :required true
-               :schema {:type "string"}}
-              {:in "header"
-               :name :h
-               :required true
-               :schema {:type "string"}}
-              {:in "cookie"
-               :name :c
-               :required true
-               :schema {:type "string"}}
-              {:in "path"
-               :name :p
-               :required true
-               :schema {:type "string"}}]
-             (-> spec
-                 (get-in [:paths "/parameters" :post :parameters])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body parameter"
-      (is (= {"application/json" {:schema {:type "object"
-                                           :properties {:b {:type "string"}}
-                                           :additionalProperties false
-                                           :required [:b]}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :requestBody :content])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body response"
-      (is (= {"application/json" {:schema {:type "object"
-                                           :properties {:ok {:type "string"}}
-                                           :additionalProperties false
-                                           :required [:ok]}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :responses 200 :content])
-                 #_(doto clojure.pprint/pprint)))))))
-
-
-(deftest schema-all-parameter-types-test-per-content-type
-  (let [app (ring/ring-handler
-              (ring/router
-                [["/parameters"
-                  {:post {:coercion schema/coercion
-                          :parameters {:query {:q s/Str}
-                                       :request {:content {"application/json" {:b s/Str}}}
-                                       :header {:h s/Str}
-                                       :cookie {:c s/Str}
-                                       :path {:p s/Str}}
-                          :responses {200 {:content {"application/json" {:ok s/Str}}}}
-                          :handler identity}}]
-                 ["/openapi.json"
-                  {:get {:handler (openapi/create-openapi-handler)
-                         :no-doc true}}]]))
-        spec (-> {:request-method :get
-                  :uri "/openapi.json"}
-                 app
-                 :body)]
-    (testing
-      "all non-body parameters"
-      (is (= [{:description ""
-               :in "query"
-               :name "q"
-               :required true
-               :schema {:type "string"}}
-              {:description ""
-               :in "header"
-               :name "h"
-               :required true
-               :schema {:type "string"}}
-              {:description ""
-               :in "cookie"
-               :name "c"
-               :required true
-               :schema {:type "string"}}
-              {:description ""
-               :in "path"
-               :name "p"
-               :required true
-               :schema {:type "string"}}]
-             (-> spec
-                 (get-in [:paths "/parameters" :post :parameters])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body parameter"
-      (is (= {"application/json" {:schema {:additionalProperties false
-                                           :properties {"b" {:type "string"}}
-                                           :required ["b"]
-                                           :type "object"}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :requestBody :content])
-                 #_(doto clojure.pprint/pprint)))))
-    (testing
-      "body response"
-      (is (= {"application/json" {:schema {:additionalProperties false
-                                           :properties {"ok" {:type "string"}}
-                                           :required ["ok"]
-                                           :type "object"}}}
-             (-> spec
-                 (get-in [:paths "/parameters" :post :responses 200 :content])
-                 #_(doto clojure.pprint/pprint)))))))
 (deftest all-parameter-types-test
-  (let [app (ring/ring-handler
-              (ring/router
-                [["/parameters"
-                  {:post {:coercion spec/coercion
-                          :parameters {:query {:q string?}
-                                       :body {:b string?}
-                                       :cookies {:c string?}
-                                       :header {:h string?}
-                                       :path {:p string?}}
-                          :responses {200 {:body {:ok string?}}}
-                          :handler identity}}]
-                 ["/openapi.json"
-                  {:get {:no-doc true
-                         :handler (openapi/create-openapi-handler)}}]]))
-        spec (:body (app {:request-method :get, :uri "/openapi.json"}))]
-    (is (= [{:description ""
-             :in "query"
-             :name "q"
-             :required true
-             :schema {:type "string"}}
-            {:description ""
-             :in "cookies"
-             :name "c"
-             :required true
-             :schema {:type "string"}}
-            {:description ""
-             :in "header"
-             :name "h"
-             :required true
-             :schema {:type "string"}}
-            {:description ""
-             :in "path"
-             :name "p"
-             :required true
-             :schema {:type "string"}}]
-           (-> spec
-               (get-in [:paths "/parameters" :post :parameters])
-               #_(doto clojure.pprint/pprint))))
-    (is (= {"application/json" {:schema {:properties {"b" {:type "string"}}
-                                         :required ["b"]
-                                         :type "object"}}}
-           (-> spec
-               (get-in [:paths "/parameters" :post :requestBody :content])
-               #_(doto clojure.pprint/pprint))))
-    (is (= {"application/json" {:schema {:properties {"ok" {:type "string"}}
-                                         :required ["ok"]
-                                         :type "object"}}}
-           (-> spec
-               (get-in [:paths "/parameters" :post :responses 200 :content])
-               #_(doto clojure.pprint/pprint))))))
+  (doseq [[coercion ->schema]
+          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
+           [#'schema/coercion (fn [nom] {nom s/Str})]
+           [#'spec/coercion (fn [nom] {nom string?})]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/parameters"
+                    {:post {:coercion @coercion
+                            :parameters {:query (->schema :q)
+                                         :body (->schema :b)
+                                         :header (->schema :h)
+                                         :cookie (->schema :c)
+                                         :path (->schema :p)}
+                            :responses {200 {:body (->schema :ok)}}
+                            :handler identity}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :no-doc true}}]]))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)]
+        (testing "all non-body parameters"
+          (is (match? [{:in "query"
+                        :name "q"
+                        :required true
+                        :schema {:type "string"}}
+                       {:in "header"
+                        :name "h"
+                        :required true
+                        :schema {:type "string"}}
+                       {:in "cookie"
+                        :name "c"
+                        :required true
+                        :schema {:type "string"}}
+                       {:in "path"
+                        :name "p"
+                        :required true
+                        :schema {:type "string"}}]
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :parameters])
+                     normalize))))
+        (testing "body parameter"
+          (is (match? {:schema {:type "object"
+                                :properties {:b {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["b"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
+                          normalize))))
+        (testing "body response"
+          (is (match? {:schema {:type "object"
+                                :properties {:ok {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["ok"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
+                          normalize))))))))
+
+(deftest per-content-type-test
+  (doseq [[coercion ->schema]
+          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
+           [#'schema/coercion (fn [nom] {nom s/Str})]
+           #_ ;; Doesn't work yet
+           [#'spec/coercion (fn [nom] {nom string?})]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/parameters"
+                    {:post {:coercion @coercion
+                            :parameters {:request {:content {"application/json" (->schema :b)}}}
+                            :responses {200 {:content {"application/json" (->schema :ok)}}}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :no-doc true}}]]
+                  {:data {:middleware [rrc/coerce-request-middleware
+                                       rrc/coerce-response-middleware]}}))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)]
+        (testing "body parameter"
+          (is (= {:schema {:type "object"
+                           :properties {:b {:type "string"}}
+                           :additionalProperties false
+                           :required ["b"]}}
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
+                     normalize))))
+        (testing "body response"
+          (is (= {:schema {:type "object"
+                           :properties {:ok {:type "string"}}
+                           :additionalProperties false
+                           :required ["ok"]}}
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
+                     normalize))))
+        (testing "validation"
+          (let [valid-query {:request-method :post
+                             :uri "/parameters"
+                             :muuntaja/request {:format "application/json"}
+                             :muuntaja/response {:format "application/json"}
+                             :body-params {:b "x"}}]
+            (testing "of output"
+              (is (= {:type :reitit.coercion/response-coercion
+                      :in [:response :body]}
+                     (try
+                       (app (assoc valid-query :body-params {:b "x"}))
+                       (catch clojure.lang.ExceptionInfo e
+                         (select-keys (ex-data e) [:type :in]))))))
+            (testing "of input"
+              (is (= {:type :reitit.coercion/request-coercion
+                      :in [:request :body-params]}
+                     (try
+                       (app (assoc valid-query :body-params {:z 1}))
+                       (catch clojure.lang.ExceptionInfo e
+                         (select-keys (ex-data e) [:type :in]))))))))))))
