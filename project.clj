@@ -4,7 +4,10 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :test-paths ["test/clj" "test/cljc"]
-  :deploy-repositories [["releases" :clojars]]
+  :deploy-repositories {"clojars" {:url "https://repo.clojars.org"
+                                   :sign-releases false
+                                   :username :env/clojars_username
+                                   :password :env/clojars_password}}
   :codox {:output-path "doc"
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
