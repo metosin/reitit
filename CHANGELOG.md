@@ -12,8 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.6.0 (2022-02-21)
 
+* Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
+* reloading-ring-handler [#584](https://github.com/metosin/reitit/pull/584)
 * Remove redundant s/and [#552](https://github.com/metosin/reitit/pull/552)
 * FIX: redirect-trailing-slash-handler strips query-params [#565](https://github.com/metosin/reitit/issues/565)
 * **BREAKING**: Drop tests for Clojure 1.9, run tests with 1.10 & 1.11
@@ -33,6 +35,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/malli "0.10.1"] is available but we use "0.8.2"
 [fipp "0.6.26"] is available but we use "0.6.25"
 [ring/ring-core "1.9.6"] is available but we use "1.9.5"
+[com.fasterxml.jackson.core/jackson-core "2.14.2"] is available but we use "2.14.1"
+[com.fasterxml.jackson.core/jackson-databind "2.14.2"] is available but we use "2.14.1"
 ```
 
 ## 0.5.18 (2022-04-05)
