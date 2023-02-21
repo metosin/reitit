@@ -39,7 +39,8 @@
    :body (->ParameterCoercion :body-params :body false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :headers :string true true)
-   :path (->ParameterCoercion :path-params :string true true)})
+   :path (->ParameterCoercion :path-params :string true true)
+   :fragment (->ParameterCoercion :fragment :string true true)})
 
 (defn ^:no-doc request-coercion-failed! [result coercion value in request serialize-failed-result]
   (throw
