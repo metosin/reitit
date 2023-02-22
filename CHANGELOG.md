@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.6.0 (2022-02-21)
+## 0.6.0 (2023-02-21)
 
 * Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
 * reloading-ring-handler [#584](https://github.com/metosin/reitit/pull/584)
@@ -232,12 +232,12 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ### `reitit-malli`
 
-* `:map-of` keys in JSON are correctly decoded using string-decoders 
+* `:map-of` keys in JSON are correctly decoded using string-decoders
 * new `:encode-error` option in coercion:
 
 ```clj
-(def coercion 
-  (reitit.coercion.malli/create 
+(def coercion
+  (reitit.coercion.malli/create
     {:encode-error (fn [error] {:errors (:humanized error)})}))
 ; results in... => {:status 400, :body {:errors {:x ["missing required key"]}}}
 ```
@@ -347,13 +347,13 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
 * `reitit.ring/create-file-handler` to serve files from filesystem, fixes [#395](https://github.com/metosin/reitit/issues/395)
-* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated 
+* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated
   * fails with router creation time error
   * use `:reitit.ring/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
 
 ### `reitit-http`
 
-* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated 
+* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated
   * fails with router creation time error
   * use `:reitit.http/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
 
@@ -432,7 +432,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * **BREAKING**: Decode multi-valued query params correctly into seqs (e.g. `foo=bar&foo=baz` ↦ `{:foo ["bar", "baz"]}`).
   * Previously you'd get only the first value. (e.g. `foo=bar&foo=baz` ↦ `{:foo "bar"}`)
-  
+
 ### `reitit-ring`
 
 * **BREAKING**: New validation rule: `:middleware` must be a vector, not a list. Fixes [#296](https://github.com/metosin/reitit/issues/296). ([#319](https://github.com/metosin/reitit/pull/319) by [Daw-Ran Liou](https://github.com/dawran6))
@@ -550,23 +550,23 @@ is called the first time, so that `rfe/push-state` and such can be called
     {:parameters {:body [s/Str]}}]]
   {:exception pretty/exception})
 ; -- Router creation failed -------------------------------------------- user:7 --
-; 
+;
 ; Error merging route-data:
-; 
+;
 ; -- On route -----------------------
-; 
+;
 ; /kikka/kakka
-; 
+;
 ; -- Exception ----------------------
-; 
+;
 ; Don't know how to create ISeq from: java.lang.Class
-; 
+;
 ;    {:parameters {:body {:id java.lang.String}}}
-; 
+;
 ;    {:parameters {:body [java.lang.String]}}
-; 
+;
 ; https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data
-; 
+;
 ; --------------------------------------------------------------------------------
 ```
 
@@ -585,7 +585,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 ### `reitit-core`
 
-* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
+* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs.
   * Updated swagger-examples to easily enable closed spec validation
 
 ```clj
@@ -650,9 +650,9 @@ is called the first time, so that `rfe/push-state` and such can be called
 * new module for friendly router creation time exception handling
   * new option `:exception` in `r/router`, of type `Exception => Exception` (default `reitit.exception/exception`)
   * new exception pretty-printer `reitit.dev.pretty/exception`, based on [fipp](https://github.com/brandonbloom/fipp) and [expound](https://github.com/bhb/expound) for human readable, newbie-friendly errors.
-  
+
 #### Conflicting paths
- 
+
 ```clj
 (require '[reitit.core :as r])
 (require '[reitit.dev.pretty :as pretty])
