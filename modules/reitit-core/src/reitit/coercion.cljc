@@ -37,6 +37,7 @@
 (def ^:no-doc default-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
+   :request (->ParameterCoercion :body-params :request false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)})
@@ -84,11 +85,22 @@
   (if coercion
     (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
-            model (if open? (-open-model coercion model) model)]
-        (if-let [coercer (-request-coercer coercion style model)]
+            ->open (if open? #(-open-model coercion %) identity)
+            format-coercer-pairs (if (= :request style)
+                                   (for [[format schema] (:content model)]
+                                     [format (-request-coercer coercion :body (->open schema))])
+                                   [[:default (-request-coercer coercion style (->open model))]])
+            format->coercer (some->> format-coercer-pairs
+                                     (filter second)
+                                     (seq)
+                                     (into {}))]
+        (when format->coercer
           (fn [request]
             (let [value (transform request)
                   format (extract-request-format request)
+                  coercer (or (format->coercer format)
+                              (format->coercer :default)
+                              (fn [value _format] value))
                   result (coercer value format)]
               (if (error? result)
                 (request-coercion-failed! result coercion value in request serialize-failed-result)
@@ -97,17 +109,24 @@
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
 
-(defn response-coercer [coercion body {:keys [extract-response-format serialize-failed-result]
-                                       :or {extract-response-format extract-response-format-default}}]
+(defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
+                                                         :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (if-let [coercer (-response-coercer coercion body)]
-      (fn [request response]
-        (let [format (extract-response-format request response)
-              value (:body response)
-              result (coercer value format)]
-          (if (error? result)
-            (response-coercion-failed! result coercion value request response serialize-failed-result)
-            result))))))
+    (let [per-format-coercers (some->> (for [[format schema] content]
+                                         [format (-response-coercer coercion schema)])
+                                       (filter second)
+                                       (seq)
+                                       (into {}))
+          default (when body (-response-coercer coercion body))]
+      (when (or per-format-coercers default)
+        (fn [request response]
+          (let [format (extract-response-format request response)
+                value (:body response)
+                coercer (get per-format-coercers format (or default (fn [value _format] value)))
+                result (coercer value format)]
+            (if (error? result)
+              (response-coercion-failed! result coercion value request response serialize-failed-result)
+              result)))))))
 
 (defn encode-error [data]
   (-> data
@@ -136,8 +155,8 @@
            (into {})))
 
 (defn response-coercers [coercion responses opts]
-  (some->> (for [[status {:keys [body]}] responses :when body]
-             [status (response-coercer coercion body opts)])
+  (some->> (for [[status model] responses]
+             [status (response-coercer coercion model opts)])
            (filter second)
            (seq)
            (into {})))
