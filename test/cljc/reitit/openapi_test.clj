@@ -385,15 +385,16 @@
   (doseq [[coercion ->schema]
           [[#'malli/coercion (fn [nom] [:map [nom :string]])]
            [#'schema/coercion (fn [nom] {nom s/Str})]
-           #_ ;; Doesn't work yet
            [#'spec/coercion (fn [nom] {nom string?})]]]
     (testing coercion
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
                     {:post {:coercion @coercion
-                            :parameters {:request {:content {"application/json" (->schema :b)}}}
-                            :responses {200 {:content {"application/json" (->schema :ok)}}}
+                            :parameters {:request {:content {"application/json" (->schema :b)
+                                                             "application/edn" (->schema :c)}}}
+                            :responses {200 {:content {"application/json" (->schema :ok)
+                                                       "application/edn" (->schema :edn)}}}
                             :handler (fn [req]
                                        {:status 200
                                         :body (-> req :parameters :request)})}}]
@@ -407,38 +408,52 @@
                      app
                      :body)]
         (testing "body parameter"
-          (is (= {:schema {:type "object"
-                           :properties {:b {:type "string"}}
-                           :additionalProperties false
-                           :required ["b"]}}
-                 (-> spec
-                     (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
-                     normalize))))
+          (is (match? {:schema {:type "object"
+                                :properties {:b {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["b"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
+                          normalize)))
+          (is (match? {:schema {:type "object"
+                                :properties {:c {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["c"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :requestBody :content "application/edn"])
+                          normalize))))
         (testing "body response"
-          (is (= {:schema {:type "object"
-                           :properties {:ok {:type "string"}}
-                           :additionalProperties false
-                           :required ["ok"]}}
-                 (-> spec
-                     (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
-                     normalize))))
+          (is (match? {:schema {:type "object"
+                                :properties {:ok {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["ok"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
+                          normalize)))
+          (is (match? {:schema {:type "object"
+                                :properties {:edn {:type "string"}}
+                                #_#_:additionalProperties false ;; not present for spec
+                                :required ["edn"]}}
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :responses 200 :content "application/edn"])
+                          normalize))))
         (testing "validation"
-          (let [valid-query {:request-method :post
-                             :uri "/parameters"
-                             :muuntaja/request {:format "application/json"}
-                             :muuntaja/response {:format "application/json"}
-                             :body-params {:b "x"}}]
+          (let [query {:request-method :post
+                       :uri "/parameters"
+                       :muuntaja/request {:format "application/json"}
+                       :muuntaja/response {:format "application/json"}
+                       :body-params {:b "x"}}]
             (testing "of output"
               (is (= {:type :reitit.coercion/response-coercion
                       :in [:response :body]}
                      (try
-                       (app (assoc valid-query :body-params {:b "x"}))
+                       (app query)
                        (catch clojure.lang.ExceptionInfo e
                          (select-keys (ex-data e) [:type :in]))))))
             (testing "of input"
               (is (= {:type :reitit.coercion/request-coercion
                       :in [:request :body-params]}
                      (try
-                       (app (assoc valid-query :body-params {:z 1}))
+                       (app (assoc query :body-params {:z 1}))
                        (catch clojure.lang.ExceptionInfo e
                          (select-keys (ex-data e) [:type :in]))))))))))))

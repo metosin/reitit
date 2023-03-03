@@ -118,7 +118,9 @@
                                         {::openapi/content {"application/json"  (coercion/-compile-model this (:body parameters) nil)}})})
                      (when (:request parameters)
                        {:requestBody  (openapi/openapi-spec
-                                        {::openapi/content  (coercion/-compile-model this (:content (:request parameters)) nil)})})
+                                       {::openapi/content (into {}
+                                                                (for [[format model] (:content (:request parameters))]
+                                                                  [format (coercion/-compile-model this model nil)]))})})
                      (when responses
                        {:responses
                         (into
@@ -131,7 +133,9 @@
                                      {::openapi/content {"application/json" (coercion/-compile-model this (:body response) nil)}}))
                                  (when (:content response)
                                    (openapi/openapi-spec
-                                     {::openapi/content  (coercion/-compile-model this (:content response) nil)})))]))})))
+                                    {::openapi/content (into {}
+                                                             (for [[format model] (:content response)]
+                                                               [format (coercion/-compile-model this model nil)]))})))]))})))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)
