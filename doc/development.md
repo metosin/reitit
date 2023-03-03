@@ -49,7 +49,7 @@ git tag 1.0.0
 lein test
 
 # deploy to clojars
-./scripts/lein-modules do clean, deploy clojars
+CLOJARS_USERNAME=*** CLOJARS_PASSWORD=*** ./scripts/lein-modules do clean, deploy clojars
 
 # push the commit and the tag
 git push

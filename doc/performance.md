@@ -114,7 +114,7 @@ A quick poke to [the fast routers in Go](https://github.com/julienschmidt/go-htt
 
 ### Faster!
 
-By default, `reitit.ring/ring-router`, `reitit.http/ring-router` and `reitit.http/routing-interceptor` inject both `Match` and `Router` into the request. You can remove the injections setting options `:inject-match?` and `:inject-router?` to `false`. This saves some tens of nanos (with the hw described above).
+By default, `reitit.ring/router`, `reitit.http/router` and `reitit.http/routing-interceptor` inject both `Match` and `Router` into the request. You can remove the injections setting options `:inject-match?` and `:inject-router?` to `false`. This saves some tens of nanos (with the hw described above).
 
 ```clj
 (require '[reitit.ring :as ring])

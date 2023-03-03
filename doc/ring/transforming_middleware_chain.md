@@ -1,6 +1,6 @@
 # Transforming the Middleware Chain
 
-There is an extra option in ring-router (actually, in the underlying middleware-router): `:reitit.middleware/transform` to transform the middleware chain per endpoint. Value should be a function or a vector of functions that get a vector of compiled middleware and should return a new vector of middleware.
+There is an extra option in the Ring router (actually, in the underlying middleware-router): `:reitit.middleware/transform` to transform the middleware chain per endpoint. Value should be a function or a vector of functions that get a vector of compiled middleware and should return a new vector of middleware.
 
 ## Example Application
 
@@ -59,7 +59,7 @@ There is an extra option in ring-router (actually, in the underlying middleware-
 ### Printing Request Diffs
 
 ```clj
-[metosin/reitit-middleware "0.5.18"]
+[metosin/reitit-middleware "0.6.0"]
 ```
 
 Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the request diffs between each middleware are printed out to the console. To use it, add the following router option:
@@ -71,4 +71,3 @@ Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the reque
 Sample output:
 
 ![Ring Request Diff](../images/ring-request-diff.png)
-

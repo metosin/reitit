@@ -40,7 +40,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.5.18"]
+[metosin/reitit "0.6.0"]
 ```
 
 Optionally, the parts can be required separately.
@@ -110,9 +110,9 @@ Reverse-routing:
 ;        :path "/api/orders/2"}
 ```
 
-## Ring-router
+## Ring router
 
-Ring-router adds support for `:handler` functions, `:middleware` and routing based on `:request-method`. It also supports pluggable parameter coercion (`clojure.spec`), data-driven middleware, route and middleware compilation, dynamic extensions and more.
+A Ring router function adds support for `:handler` functions, `:middleware` and routing based on `:request-method`. It also supports pluggable parameter coercion (`clojure.spec`), data-driven middleware, route and middleware compilation, dynamic extensions and more.
 
 ```clj
 (require '[reitit.ring :as ring])

@@ -5,12 +5,12 @@
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
 ```clj
-[metosin/reitit-ring "0.5.18"]
+[metosin/reitit-ring "0.6.0"]
 ```
 
-## `reitit.ring/ring-router`
+## `reitit.ring/router`
 
-`ring-router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
+`reitit.ring/router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
 
 It accepts the following options:
 
@@ -33,7 +33,7 @@ Example router:
     ["/ping" {:get handler}]))
 ```
 
-Match contains `:result` compiled by the `ring-router`:
+Match contains `:result` compiled by `reitit.ring/router`:
 
 ```clj
 (require '[reitit.core :as r])
@@ -49,7 +49,7 @@ Match contains `:result` compiled by the `ring-router`:
 
 ## `reitit.ring/ring-handler`
 
-Given a `ring-router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
+Given a router from `reitit.ring/router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
 
 | key               | description |
 | ------------------|-------------|

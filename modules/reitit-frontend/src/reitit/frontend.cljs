@@ -37,12 +37,17 @@
                    coercion/coerce!)]
      (if-let [match (r/match-by-path router (.getPath uri))]
        (let [q (query-params uri)
-             match (assoc match :query-params q)
+             fragment (when (.hasFragment uri)
+                        (.getFragment uri))
+             match (assoc match
+                          :query-params q
+                          :fragment fragment)
              ;; Return uncoerced values if coercion is not enabled - so
              ;; that tha parameters are always accessible from same property.
              parameters (or (coerce! match)
                             {:path (:path-params match)
-                             :query q})]
+                             :query q
+                             :fragment fragment})]
          (assoc match :parameters parameters))))))
 
 (defn match-by-name
