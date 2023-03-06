@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [matcher-combinators.test :refer [match?]]
+            [matcher-combinators.matchers :as matchers]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
@@ -457,3 +458,43 @@
                        (app (assoc query :body-params {:z 1}))
                        (catch clojure.lang.ExceptionInfo e
                          (select-keys (ex-data e) [:type :in]))))))))))))
+
+(deftest default-content-type-test
+  (doseq [[coercion ->schema]
+          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
+           [#'schema/coercion (fn [nom] {nom s/Str})]
+           [#'spec/coercion (fn [nom] {nom string?})]]]
+    (testing coercion
+      (doseq [content-type ["application/json" "application/edn"]]
+        (testing (str "default content type " content-type)
+          (let [app (ring/ring-handler
+                     (ring/router
+                      [["/parameters"
+                        {:post {:coercion @coercion
+                                :content-types [content-type] ;; TODO should this be under :openapi ?
+                                :parameters {:request {:content {"application/transit" (->schema :transit)}
+                                                       :body (->schema :default)}}
+                                :responses {200 {:content {"application/transit" (->schema :transit)}
+                                                 :body (->schema :default)}}
+                                :handler (fn [req]
+                                           {:status 200
+                                            :body (-> req :parameters :request)})}}]
+                       ["/openapi.json"
+                        {:get {:handler (openapi/create-openapi-handler)
+                               :no-doc true}}]]
+                      {:data {:middleware [rrc/coerce-request-middleware
+                                           rrc/coerce-response-middleware]}}))
+                spec (-> {:request-method :get
+                          :uri "/openapi.json"}
+                         app
+                         :body)]
+            (testing "body parameter"
+              (is (match? (matchers/in-any-order [content-type "application/transit"])
+                          (-> spec
+                              (get-in [:paths "/parameters" :post :requestBody :content])
+                              keys))))
+            (testing "body response"
+              (is (match? (matchers/in-any-order [content-type "application/transit"])
+                          (-> spec
+                              (get-in [:paths "/parameters" :post :responses 200 :content])
+                              keys))))))))))

@@ -86,7 +86,8 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses]}]
+    (-get-apidocs [this specification {:keys [parameters responses content-types]
+                                       :or {content-types ["application/json"]}}]
       (case specification
         :swagger (swagger/swagger-spec
                   (merge
@@ -114,28 +115,32 @@
                               (for [[k v] (dissoc parameters :body :request)]
                                 [k (coercion/-compile-model this v nil)]))})
                      (when (:body parameters)
-                       {:requestBody  (openapi/openapi-spec
-                                        {::openapi/content {"application/json"  (coercion/-compile-model this (:body parameters) nil)}})})
+                       {:requestBody (openapi/openapi-spec
+                                      {::openapi/content (zipmap content-types (repeat (coercion/-compile-model this (:body parameters) nil)))})})
                      (when (:request parameters)
-                       {:requestBody  (openapi/openapi-spec
-                                       {::openapi/content (into {}
+                       {:requestBody (openapi/openapi-spec
+                                      {::openapi/content (merge
+                                                          (when-let [default (get-in parameters [:request :body])]
+                                                            (zipmap content-types (repeat (coercion/-compile-model this default nil))))
+                                                          (into {}
                                                                 (for [[format model] (:content (:request parameters))]
-                                                                  [format (coercion/-compile-model this model nil)]))})})
+                                                                  [format (coercion/-compile-model this model nil)])))})})
                      (when responses
                        {:responses
                         (into
                           (empty responses)
-                          (for [[k response] responses]
+                          (for [[k {:keys [body content] :as response}] responses]
                             [k (merge
                                  (select-keys response [:description])
-                                 (when (:body response)
+                                 (when (or body content)
                                    (openapi/openapi-spec
-                                     {::openapi/content {"application/json" (coercion/-compile-model this (:body response) nil)}}))
-                                 (when (:content response)
-                                   (openapi/openapi-spec
-                                    {::openapi/content (into {}
-                                                             (for [[format model] (:content response)]
-                                                               [format (coercion/-compile-model this model nil)]))})))]))})))
+                                    {::openapi/content (merge
+                                                        (when body
+                                                          (zipmap content-types (repeat (coercion/-compile-model this (:body response) nil))))
+                                                        (when response
+                                                          (into {}
+                                                                (for [[format model] (:content response)]
+                                                                  [format (coercion/-compile-model this model nil)]))))})))]))})))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)

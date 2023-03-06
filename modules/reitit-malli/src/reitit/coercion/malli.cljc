@@ -141,7 +141,6 @@
                           (let [current-opts (merge options opts)]
                             (json-schema/transform (coercion/-compile-model coercion schema current-opts)
                                                    current-opts)))]
-
     (merge
       (when (seq parameters)
         {:parameters
@@ -165,17 +164,26 @@
                                                                                  :content-type content-type})]
                                                [content-type {:schema schema}])))
                                       content-types)}})
+
       (when request
         ;; request allow to different :requestBody per content-type
         {:requestBody
-         {:content
-          (into {}
-                (map (fn [[content-type requestBody]]
-                       (let [schema (->schema-object requestBody {:in :requestBody
-                                                                  :type :schema
-                                                                  :content-type content-type})]
-                         [content-type {:schema schema}])))
-                (:content request))}})
+         {:content (merge
+                    (when (:body request)
+                      (into {}
+                            (map (fn [content-type]
+                                   (let [schema (->schema-object (:body request) {:in :requestBody
+                                                                                  :type :schema
+                                                                                  :content-type content-type})]
+                                     [content-type {:schema schema}])))
+                            content-types))
+                    (into {}
+                          (map (fn [[content-type requestBody]]
+                                 (let [schema (->schema-object requestBody {:in :requestBody
+                                                                            :type :schema
+                                                                            :content-type content-type})]
+                                   [content-type {:schema schema}])))
+                          (:content request)))}})
       (when responses
         {:responses
          (into {}
