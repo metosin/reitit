@@ -87,11 +87,12 @@
     (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
             ->open (if open? #(-open-model coercion %) identity)
-            format-coercer-pairs (if (= :request style)
-                                   (for [[format schema] (:content model)]
-                                     [format (-request-coercer coercion :body (->open schema))])
-                                   [[:default (-request-coercer coercion style (->open model))]])
-            format->coercer (some->> format-coercer-pairs
+            format-schema-pairs (if (= :request style)
+                                  (conj (:content model) [:default (:body model)])
+                                  [[:default model]])
+            format->coercer (some->> (for [[format schema] format-schema-pairs
+                                           :when schema]
+                                       [format (-request-coercer coercion (case style :request :body style) (->open schema))])
                                      (filter second)
                                      (seq)
                                      (into {}))]

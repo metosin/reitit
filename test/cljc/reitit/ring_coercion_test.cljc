@@ -610,8 +610,8 @@
       (let [app (ring/ring-handler
                  (ring/router
                   [["/foo" {:post {:parameters {:request {:content {"application/json" json-request
-                                                                    "application/edn" edn-request
-                                                                    :default default-request}}}
+                                                                    "application/edn" edn-request}
+                                                          :body default-request}}
                                    :responses {200 {:content {"application/json" json-response
                                                               "application/edn" edn-response}
                                                     :body default-response}}
