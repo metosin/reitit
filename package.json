@@ -2,6 +2,7 @@
   "name": "reitit",
   "private": true,
   "devDependencies": {
+    "@seriousme/openapi-schema-validator": "^2.1.0",
     "karma": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^2.0.0",
