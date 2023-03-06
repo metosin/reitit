@@ -102,9 +102,17 @@
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
-           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
+           definitions (reduce-kv
+                         (fn [ds _ v]
+                           (let [ks (keys v)]
+                             (merge ds (apply merge
+                                              (for [k ks]
+                                                (when-let [method-map (get v k)]
+                                                  (:definitions method-map)))))))
+                         {} paths)]
        {:status 200
-        :body (meta-merge swagger {:paths paths})}))
+        :body (meta-merge swagger {:paths paths :definitions definitions})}))
     ([req res raise]
      (try
        (res (create-swagger req))
