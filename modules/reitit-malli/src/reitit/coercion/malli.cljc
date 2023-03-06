@@ -76,33 +76,6 @@
                 value))))))))
 
 ;;
-;; swagger
-;;
-
-(defmulti extract-parameter (fn [in _ _] in))
-
-(defmethod extract-parameter :body [_ schema options]
-  (let [swagger-schema (swagger/transform schema (merge options {:in :body, :type :parameter}))]
-    [{:in "body"
-      :name (:title swagger-schema "body")
-      :description (:description swagger-schema "")
-      :required (not= :maybe (m/type schema))
-      :schema swagger-schema}]))
-
-(defmethod extract-parameter :default [in schema options]
-  (let [{:keys [properties required]} (swagger/transform schema (merge options {:in in, :type :parameter}))]
-    (mapv
-     (fn [[k {:keys [type] :as schema}]]
-       (merge
-        {:in (name in)
-         :name k
-         :description (:description schema "")
-         :type type
-         :required (contains? (set required) k)}
-        schema))
-     properties)))
-
-;;
 ;; public api
 ;;
 
@@ -145,28 +118,26 @@
      (reify coercion/Coercion
        (-get-name [_] :malli)
        (-get-options [_] opts)
-       (-get-apidocs [_ specification {:keys [parameters responses]}]
+       (-get-apidocs [this specification {:keys [parameters responses]}]
          (case specification
-           :swagger (merge
-                     (if parameters
-                       {:parameters
-                        (->> (for [[in schema] parameters
-                                   parameter (extract-parameter in (compile schema options) options)]
-                               parameter)
-                             (into []))})
-                     (if responses
-                       {:responses
-                        (into
-                         (empty responses)
-                         (for [[status response] responses]
-                           [status (as-> response $
-                                     (set/rename-keys $ {:body :schema})
-                                     (update $ :description (fnil identity ""))
-                                     (if (:schema $)
-                                       (-> $
-                                           (update :schema compile options)
-                                           (update :schema swagger/transform {:type :schema}))
-                                       $))]))}))
+           :swagger (swagger/swagger-spec
+                      (merge
+                        (if parameters
+                          {::swagger/parameters
+                           (into
+                             (empty parameters)
+                             (for [[k v] parameters]
+                               [k (coercion/-compile-model this v nil)]))})
+                        (if responses
+                          {::swagger/responses
+                           (into
+                             (empty responses)
+                             (for [[k response] responses]
+                               [k (as-> response $
+                                        (set/rename-keys $ {:body :schema})
+                                        (if (:schema $)
+                                          (update $ :schema #(coercion/-compile-model this % nil))
+                                          $))]))})))
            (throw
             (ex-info
              (str "Can't produce Schema apidocs for " specification)
