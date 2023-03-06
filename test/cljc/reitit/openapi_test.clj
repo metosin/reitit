@@ -1,5 +1,6 @@
 (ns reitit.openapi-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.java.shell :as shell]
+            [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [matcher-combinators.test :refer [match?]]
             [matcher-combinators.matchers :as matchers]
@@ -14,6 +15,16 @@
             [schema.core :as s]
             [spec-tools.data-spec :as ds]))
 
+(defn validate
+  "Returns nil if data is a valid openapi spec, otherwise validation result"
+  [data]
+  (let [file (java.io.File/createTempFile "reitit-openapi" ".json")]
+    (.deleteOnExit file)
+    (spit file (j/write-value-as-string data))
+    (let [result (shell/sh "npx" "-p" "@seriousme/openapi-schema-validator" "validate-api" (.getPath file))]
+      (when-not (zero? (:exit result))
+        (j/read-value (:out result))))))
+
 (def app
   (ring/ring-handler
     (ring/router
@@ -22,7 +33,8 @@
 
        ["/openapi.json"
         {:get {:no-doc true
-               :openapi {:info {:title "my-api"}}
+               :openapi {:info {:title "my-api"
+                                :version "0.0.1"}}
                :handler (openapi/create-openapi-handler)}}]
 
        ["/spec" {:coercion spec/coercion}
@@ -32,7 +44,8 @@
                                :path {:z int?}}
                   :openapi {:responses {400 {:description "kosh"
                                              :content {"application/json" {:schema {:type "string"}}}}}}
-                  :responses {200 {:body {:total int?}}
+                  :responses {200 {:description "success"
+                                   :body {:total int?}}
                               500 {:description "fail"}}
                   :handler (fn [{{{:keys [x y]} :query
                                   {:keys [z]} :path} :parameters}]
@@ -42,7 +55,8 @@
                                 :path {:z int?}}
                    :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                               :description "kosh"}}}
-                   :responses {200 {:body {:total int?}}
+                   :responses {200 {:description "success"
+                                    :body {:total int?}}
                                500 {:description "fail"}}
                    :handler (fn [{{{:keys [z]} :path
                                    xs :body} :parameters}]
@@ -55,7 +69,8 @@
                              :path [:map [:z int?]]}
                 :openapi {:responses {400 {:description "kosh"
                                            :content {"application/json" {:schema {:type "string"}}}}}}
-                :responses {200 {:body [:map [:total int?]]}
+                :responses {200 {:description "success"
+                                 :body [:map [:total int?]]}
                             500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
                                 {:keys [z]} :path} :parameters}]
@@ -65,7 +80,8 @@
                               :path [:map [:z int?]]}
                  :openapi {:responses {400 {:description "kosh"
                                             :content {"application/json" {:schema {:type "string"}}}}}}
-                 :responses {200 {:body [:map [:total int?]]}
+                 :responses {200 {:description "success"
+                                  :body [:map [:total int?]]}
                              500 {:description "fail"}}
                  :handler (fn [{{{:keys [z]} :path
                                  xs :body} :parameters}]
@@ -78,7 +94,8 @@
                              :path {:z s/Int}}
                 :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                            :description "kosh"}}}
-                :responses {200 {:body {:total s/Int}}
+                :responses {200 {:description "success"
+                                 :body {:total s/Int}}
                             500 {:description "fail"}}
                 :handler (fn [{{{:keys [x y]} :query
                                 {:keys [z]} :path} :parameters}]
@@ -88,7 +105,8 @@
                               :path {:z s/Int}}
                  :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                             :description "kosh"}}}
-                 :responses {200 {:body {:total s/Int}}
+                 :responses {200 {:description "success"
+                                  :body {:total s/Int}}
                              500 {:description "fail"}}
                  :handler (fn [{{{:keys [z]} :path
                                  xs :body} :parameters}]
@@ -115,7 +133,8 @@
                             :uri "/api/openapi.json"}))
           expected {:x-id #{::math}
                     :openapi "3.1.0"
-                    :info {:title "my-api"}
+                    :info {:title "my-api"
+                           :version "0.0.1"}
                     :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
                                                                       :name "x"
                                                                       :description ""
@@ -134,7 +153,8 @@
                                                                       :required true
                                                                       :schema {:type "integer"
                                                                                :format "int64"}}]
-                                                        :responses {200 {:content {"application/json" {:schema {:type "object"
+                                                        :responses {200 {:description "success"
+                                                                         :content {"application/json" {:schema {:type "object"
                                                                                                                 :properties {"total" {:format "int64"
                                                                                                                                       :type "integer"}}
                                                                                                                 :required ["total"]}}}}
@@ -152,7 +172,8 @@
                                                                                                                                :format "int64"}
                                                                                                                        :type "array"}
                                                                                                                       {:type "null"}]}}}}
-                                                         :responses {200 {:content {"application/json" {:schema {:properties {"total" {:format "int64"
+                                                         :responses {200 {:description "success"
+                                                                          :content {"application/json" {:schema {:properties {"total" {:format "int64"
                                                                                                                                        :type "integer"}}
                                                                                                                  :required ["total"]
                                                                                                                  :type "object"}}}}
@@ -172,7 +193,8 @@
                                                                        :name :z
                                                                        :required true
                                                                        :schema {:type "integer"}}]
-                                                         :responses {200 {:content {"application/json" {:schema {:type "object"
+                                                         :responses {200 {:description "success"
+                                                                          :content {"application/json" {:schema {:type "object"
                                                                                                                  :properties {:total {:type "integer"}}
                                                                                                                  :additionalProperties false
                                                                                                                  :required [:total]}}}}
@@ -187,7 +209,8 @@
                                                           :requestBody {:content {"application/json" {:schema {:oneOf [{:items {:type "integer"}
                                                                                                                         :type "array"}
                                                                                                                        {:type "null"}]}}}}
-                                                          :responses {200 {:content {"application/json" {:schema {:properties {:total {:type "integer"}}
+                                                          :responses {200 {:description "success"
+                                                                           :content {"application/json" {:schema {:properties {:total {:type "integer"}}
                                                                                                                   :required [:total]
                                                                                                                   :additionalProperties false
                                                                                                                   :type "object"}}}}
@@ -213,7 +236,8 @@
                                                                         :required true
                                                                         :schema {:type "integer"
                                                                                  :format "int32"}}]
-                                                          :responses {200 {:content {"application/json" {:schema {:additionalProperties false
+                                                          :responses {200 {:description "success"
+                                                                           :content {"application/json" {:schema {:additionalProperties false
                                                                                                                   :properties {"total" {:format "int32"
                                                                                                                                         :type "integer"}}
                                                                                                                   :required ["total"]
@@ -232,7 +256,8 @@
                                                                                                                          :items {:type "integer"
                                                                                                                                  :format "int32"}}
                                                                                                                         {:type "null"}]}}}}
-                                                           :responses {200 {:content {"application/json" {:schema {:properties {"total" {:format "int32"
+                                                           :responses {200 {:description "success"
+                                                                            :content {"application/json" {:schema {:properties {"total" {:format "int32"
                                                                                                                                          :type "integer"}}
                                                                                                                    :additionalProperties false
                                                                                                                    :required ["total"]
@@ -241,7 +266,8 @@
                                                                             :content {"application/json" {:schema {:type "string"}}}}
                                                                        500 {:description "fail"}}
                                                            :summary "plus with body"}}}}]
-      (is (= expected spec)))))
+      (is (= expected spec))
+      (is (nil? (validate spec))))))
 
 (defn spec-paths [app uri]
   (-> {:request-method :get, :uri uri} app :body :paths keys))
