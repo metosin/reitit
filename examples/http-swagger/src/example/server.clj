@@ -4,6 +4,7 @@
             [reitit.coercion.spec]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [reitit.openapi :as openapi]
             [reitit.http.coercion :as coercion]
             [reitit.dev.pretty :as pretty]
             [reitit.interceptor.sieppari :as sieppari]
@@ -44,6 +45,14 @@
                :swagger {:info {:title "my-api"
                                 :description "with reitit-http"}}
                :handler (swagger/create-swagger-handler)}}]
+       ["/openapi.json"
+        {:get {:no-doc true
+               ;; TODO swagger-ui hasn't released support for OAS 3.1 yet, so we pretend it's 3.0
+               :openapi {:openapi "3.0.0"
+                         :info {:title "my-api"
+                                :description "with reitit-http"
+                                :version "0.0.1"}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
         {:swagger {:tags ["files"]}}
