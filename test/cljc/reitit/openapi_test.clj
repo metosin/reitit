@@ -356,16 +356,19 @@
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
-                    {:post {:coercion @coercion
+                    {:post {:decription "parameters"
+                            :coercion @coercion
                             :parameters {:query (->schema :q)
                                          :body (->schema :b)
                                          :header (->schema :h)
                                          :cookie (->schema :c)
                                          :path (->schema :p)}
-                            :responses {200 {:body (->schema :ok)}}
+                            :responses {200 {:description "success"
+                                             :body (->schema :ok)}}
                             :handler identity}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
                            :no-doc true}}]]))
             spec (-> {:request-method :get
                       :uri "/openapi.json"}
@@ -406,7 +409,9 @@
                                 :required ["ok"]}}
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
-                          normalize))))))))
+                          normalize))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
 
 (deftest per-content-type-test
   (doseq [[coercion ->schema]
@@ -417,16 +422,19 @@
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
-                    {:post {:coercion @coercion
+                    {:post {:description "parameters"
+                            :coercion @coercion
                             :parameters {:request {:content {"application/json" (->schema :b)
                                                              "application/edn" (->schema :c)}}}
-                            :responses {200 {:content {"application/json" (->schema :ok)
+                            :responses {200 {:description "success"
+                                             :content {"application/json" (->schema :ok)
                                                        "application/edn" (->schema :edn)}}}
                             :handler (fn [req]
                                        {:status 200
                                         :body (-> req :parameters :request)})}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
                            :no-doc true}}]]
                   {:data {:middleware [rrc/coerce-request-middleware
                                        rrc/coerce-response-middleware]}}))
@@ -483,7 +491,9 @@
                      (try
                        (app (assoc query :body-params {:z 1}))
                        (catch clojure.lang.ExceptionInfo e
-                         (select-keys (ex-data e) [:type :in]))))))))))))
+                         (select-keys (ex-data e) [:type :in]))))))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
 
 (deftest default-content-type-test
   (doseq [[coercion ->schema]
@@ -496,17 +506,20 @@
           (let [app (ring/ring-handler
                      (ring/router
                       [["/parameters"
-                        {:post {:coercion @coercion
+                        {:post {:description "parameters"
+                                :coercion @coercion
                                 :content-types [content-type] ;; TODO should this be under :openapi ?
                                 :parameters {:request {:content {"application/transit" (->schema :transit)}
                                                        :body (->schema :default)}}
-                                :responses {200 {:content {"application/transit" (->schema :transit)}
+                                :responses {200 {:description "success"
+                                                 :content {"application/transit" (->schema :transit)}
                                                  :body (->schema :default)}}
                                 :handler (fn [req]
                                            {:status 200
                                             :body (-> req :parameters :request)})}}]
                        ["/openapi.json"
                         {:get {:handler (openapi/create-openapi-handler)
+                               :openapi {:info {:title "" :version "0.0.1"}}
                                :no-doc true}}]]
                       {:data {:middleware [rrc/coerce-request-middleware
                                            rrc/coerce-response-middleware]}}))
@@ -523,4 +536,6 @@
               (is (match? (matchers/in-any-order [content-type "application/transit"])
                           (-> spec
                               (get-in [:paths "/parameters" :post :responses 200 :content])
-                              keys))))))))))
+                              keys))))
+            (testing "spec is valid"
+              (is (nil? (validate spec))))))))))
