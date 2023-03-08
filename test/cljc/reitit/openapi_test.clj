@@ -40,9 +40,12 @@
        ["/spec" {:coercion spec/coercion}
           ["/plus/:z"
            {:get {:summary "plus"
+                  :tags [:plus :spec]
                   :parameters {:query {:x int?, :y int?}
                                :path {:z int?}}
-                  :openapi {:responses {400 {:description "kosh"
+                  :openapi {:operationId "spec-plus"
+                            :deprecated true
+                            :responses {400 {:description "kosh"
                                              :content {"application/json" {:schema {:type "string"}}}}}}
                   :responses {200 {:description "success"
                                    :body {:total int?}}
@@ -65,6 +68,7 @@
        ["/malli" {:coercion malli/coercion}
         ["/plus/*z"
          {:get {:summary "plus"
+                :tags [:plus :malli]
                 :parameters {:query [:map [:x int?] [:y int?]]
                              :path [:map [:z int?]]}
                 :openapi {:responses {400 {:description "kosh"
@@ -90,6 +94,7 @@
        ["/schema" {:coercion schema/coercion}
         ["/plus/*z"
          {:get {:summary "plus"
+                :tags [:plus :schema]
                 :parameters {:query {:x s/Int, :y s/Int}
                              :path {:z s/Int}}
                 :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
@@ -161,6 +166,9 @@
                                                                     400 {:description "kosh"
                                                                          :content {"application/json" {:schema {:type "string"}}}}
                                                                     500 {:description "fail"}}
+                                                        :operationId "spec-plus"
+                                                        :deprecated true
+                                                        :tags [:plus :spec]
                                                         :summary "plus"}
                                                   :post {:parameters [{:in "path"
                                                                        :name "z"
@@ -201,6 +209,7 @@
                                                                      400 {:description "kosh"
                                                                           :content {"application/json" {:schema {:type "string"}}}}
                                                                      500 {:description "fail"}}
+                                                         :tags [:plus :malli]
                                                          :summary "plus"}
                                                    :post {:parameters [{:in "path"
                                                                         :name :z
@@ -245,6 +254,7 @@
                                                                       400 {:description "kosh"
                                                                            :content {"application/json" {:schema {:type "string"}}}}
                                                                       500 {:description "fail"}}
+                                                          :tags [:plus :schema]
                                                           :summary "plus"}
                                                     :post {:parameters [{:in "path"
                                                                          :name "z"
