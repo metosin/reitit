@@ -10,6 +10,7 @@
             [reitit.coercion.spec :as spec]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
+            [reitit.ring.spec]
             [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
@@ -117,7 +118,8 @@
                                  xs :body} :parameters}]
                             {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
 
-      {:data {:middleware [openapi/openapi-feature
+      {:validate reitit.ring.spec/validate
+       :data {:middleware [openapi/openapi-feature
                            rrc/coerce-exceptions-middleware
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})))
@@ -379,7 +381,8 @@
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
                            :openapi {:info {:title "" :version "0.0.1"}}
-                           :no-doc true}}]]))
+                           :no-doc true}}]]
+                  {:data {:middleware [openapi/openapi-feature]}}))
             spec (-> {:request-method :get
                       :uri "/openapi.json"}
                      app
@@ -446,7 +449,9 @@
                     {:get {:handler (openapi/create-openapi-handler)
                            :openapi {:info {:title "" :version "0.0.1"}}
                            :no-doc true}}]]
-                  {:data {:middleware [rrc/coerce-request-middleware
+                  {:validate reitit.ring.spec/validate
+                   :data {:middleware [openapi/openapi-feature
+                                       rrc/coerce-request-middleware
                                        rrc/coerce-response-middleware]}}))
             spec (-> {:request-method :get
                       :uri "/openapi.json"}
@@ -531,7 +536,9 @@
                         {:get {:handler (openapi/create-openapi-handler)
                                :openapi {:info {:title "" :version "0.0.1"}}
                                :no-doc true}}]]
-                      {:data {:middleware [rrc/coerce-request-middleware
+                      {:validate reitit.ring.spec/validate
+                       :data {:middleware [openapi/openapi-feature
+                                           rrc/coerce-request-middleware
                                            rrc/coerce-response-middleware]}}))
                 spec (-> {:request-method :get
                           :uri "/openapi.json"}
