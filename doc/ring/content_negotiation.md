@@ -84,6 +84,8 @@ Server: Jetty(9.2.21.v20170120)
 <kikka>kukka</kikka>
 ```
 
+You can also specify request and response schemas per content-type. See [Coercion](coercion.md) and [OpenAPI Support](openapi.md).
+
 
 ## Changing default parameters
 

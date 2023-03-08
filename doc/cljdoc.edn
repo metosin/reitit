@@ -47,6 +47,7 @@
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
    ["Swagger Support" {:file "doc/ring/swagger.md"}]
+   ["OpenAPI Support" {:file "doc/ring/openapi.md"}]
    ["RESTful form methods" {:file "doc/ring/RESTful_form_methods.md"}]]
   ["HTTP" {}
    ["Interceptors" {:file "doc/http/interceptors.md"}]

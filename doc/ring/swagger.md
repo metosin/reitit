@@ -6,6 +6,8 @@
 
 Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema-tools](https://github.com/metosin/schema-tools) and [spec-tools](https://github.com/metosin/spec-tools). Documentation is extracted from route definitions, coercion `:parameters` and `:responses` and from a set of new documentation keys.
 
+See also: [OpenAPI support](openapi.md).
+
 To enable swagger-documentation for a Ring router:
 
 1. annotate your routes with swagger-data
