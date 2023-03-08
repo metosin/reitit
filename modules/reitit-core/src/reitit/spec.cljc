@@ -82,14 +82,21 @@
 
 (s/def :reitit.core.coercion/model any?)
 
+(s/def :reitit.core.coercion/content
+  (s/map-of string? :reitit.core.coercion/model))
+
 (s/def :reitit.core.coercion/query :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/body :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/request
+  (s/keys :opt-un [:reitit.core.coercion/content
+                   :reitit.core.coercion/body]))
 (s/def :reitit.core.coercion/form :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/header :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/path :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/parameters
   (s/keys :opt-un [:reitit.core.coercion/query
                    :reitit.core.coercion/body
+                   :reitit.core.coercion/request
                    :reitit.core.coercion/form
                    :reitit.core.coercion/header
                    :reitit.core.coercion/path]))
@@ -103,7 +110,8 @@
 (s/def :reitit.core.coercion/body any?)
 (s/def :reitit.core.coercion/description string?)
 (s/def :reitit.core.coercion/response
-  (s/keys :opt-un [:reitit.core.coercion/body
+  (s/keys :opt-un [:reitit.core.coercion/content
+                   :reitit.core.coercion/body
                    :reitit.core.coercion/description]))
 (s/def :reitit.core.coercion/responses
   (s/map-of :reitit.core.coercion/status :reitit.core.coercion/response))

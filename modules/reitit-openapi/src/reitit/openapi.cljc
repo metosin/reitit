@@ -12,9 +12,10 @@
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
+(s/def ::content-types (s/coll-of string?))
 
 (s/def ::openapi (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description]))
+(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description ::content-types]))
 
 (def openapi-feature
   "Feature for handling openapi-documentation for routes.

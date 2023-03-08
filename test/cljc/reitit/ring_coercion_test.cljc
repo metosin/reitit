@@ -11,6 +11,7 @@
             [reitit.coercion.spec :as spec]
             [reitit.core :as r]
             [reitit.ring :as ring]
+            [reitit.ring.spec]
             [reitit.ring.coercion :as rrc]
             [schema.core :as s]
             [clojure.spec.alpha]
@@ -618,7 +619,8 @@
                                    :handler (fn [req]
                                               {:status 200
                                                :body (-> req :parameters :request)})}}]]
-                  {:data {:middleware [rrc/coerce-request-middleware
+                  {:validate reitit.ring.spec/validate
+                   :data {:middleware [rrc/coerce-request-middleware
                                        rrc/coerce-response-middleware]
                           :coercion @coercion}}))
             call (fn [request]
