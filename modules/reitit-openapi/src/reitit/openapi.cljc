@@ -22,16 +22,18 @@
   Works both with Middleware & Interceptors. Does not participate
   in actual request processing, just provides specs for the new
   documentation keys for the route data. Should be accompanied by a
-  [[openapi-spec-handler]] to expose the openapi spec.
+  [[create-openapi-handler]] to expose the openapi spec.
 
   New route data keys contributing to openapi docs:
 
-  | key           | description |
-  | --------------|-------------|
-  | :openapi      | map of any openapi-data. Must have `:id` (keyword or sequence of keywords) to identify the api
-  | :no-doc       | optional boolean to exclude endpoint from api docs
-  | :summary      | optional short string summary of an endpoint
-  | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
+  | key            | description |
+  | ---------------|-------------|
+  | :openapi       | map of any openapi-data. Can contain keys like `:deprecated`.
+  | :content-types | vector of supported content types. Defaults to `[\"application/json\"]`
+  | :no-doc        | optional boolean to exclude endpoint from api docs
+  | :tags          | optional set of string or keyword tags for an endpoint api docs
+  | :summary       | optional short string summary of an endpoint
+  | :description   | optional long description of an endpoint. Supports http://spec.commonmark.org/
 
   Also the coercion keys contribute to openapi spec:
 
@@ -39,6 +41,8 @@
   | --------------|-------------|
   | :parameters   | optional input parameters for a route, in a format defined by the coercion
   | :responses    | optional descriptions of responses, in a format defined by coercion
+
+  Use `:request` parameter coercion (instead of `:body`) to unlock per-content-type coercions.
 
   Example:
 
