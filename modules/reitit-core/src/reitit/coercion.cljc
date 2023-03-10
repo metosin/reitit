@@ -167,6 +167,12 @@
 ;; api-docs
 ;;
 
+(defn -warn-unsupported-coercions [{:keys [parameters responses] :as data}]
+  (when (:request parameters)
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
+  (when (some :content (vals responses))
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
+
 (defn get-apidocs [coercion specification data]
   (let [swagger-parameter {:query :query
                            :body :body
@@ -176,15 +182,17 @@
                            :multipart :formData}]
     (case specification
       :openapi (-get-apidocs coercion specification data)
-      :swagger (->> (update
-                     data
-                     :parameters
-                     (fn [parameters]
-                       (->> parameters
-                            (map (fn [[k v]] [(swagger-parameter k) v]))
-                            (filter first)
-                            (into {}))))
-                    (-get-apidocs coercion specification)))))
+      :swagger (do
+                 (-warn-unsupported-coercions data)
+                 (->> (update
+                       data
+                       :parameters
+                       (fn [parameters]
+                         (->> parameters
+                              (map (fn [[k v]] [(swagger-parameter k) v]))
+                              (filter first)
+                              (into {}))))
+                      (-get-apidocs coercion specification))))))
 
 
 ;;
