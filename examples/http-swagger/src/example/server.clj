@@ -47,9 +47,7 @@
                :handler (swagger/create-swagger-handler)}}]
        ["/openapi.json"
         {:get {:no-doc true
-               ;; TODO swagger-ui hasn't released support for OAS 3.1 yet, so we pretend it's 3.0
-               :openapi {:openapi "3.0.0"
-                         :info {:title "my-api"
+               :openapi {:info {:title "my-api"
                                 :description "with reitit-http"
                                 :version "0.0.1"}}
                :handler (openapi/create-openapi-handler)}}]
