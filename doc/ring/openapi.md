@@ -1,5 +1,7 @@
 # OpenAPI Support
 
+**Stability: alpha**
+
 Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
 documentation. The feature works similarly to [Swagger documentation](swagger.md).
 

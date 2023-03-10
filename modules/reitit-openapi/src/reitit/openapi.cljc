@@ -18,7 +18,9 @@
 (s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description ::content-types]))
 
 (def openapi-feature
-  "Feature for handling openapi-documentation for routes.
+  "Stability: alpha
+
+  Feature for handling openapi-documentation for routes.
   Works both with Middleware & Interceptors. Does not participate
   in actual request processing, just provides specs for the new
   documentation keys for the route data. Should be accompanied by a
@@ -72,7 +74,9 @@
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
 (defn create-openapi-handler
-  "Create a ring handler to emit openapi spec. Collects all routes from router which have
+  "Stability: alpha
+
+  Create a ring handler to emit openapi spec. Collects all routes from router which have
   an intersecting `[:openapi :id]` and which are not marked with `:no-doc` route data."
   []
   (fn create-openapi
