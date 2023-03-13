@@ -53,7 +53,7 @@
                :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:swagger {:tags ["files"]}}
+        {:tags ["files"]}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -74,7 +74,7 @@
                                     (io/resource "reitit.png"))})}}]]
 
        ["/async"
-        {:get {:swagger {:tags ["async"]}
+        {:get {:tags ["async"]
                :summary "fetches random users asynchronously over the internet"
                :parameters {:query (s/keys :req-un [::results] :opt-un [::seed])}
                :responses {200 {:body any?}}
@@ -91,7 +91,7 @@
                                :body results})))}}]
 
        ["/math"
-        {:swagger {:tags ["math"]}}
+        {:tags ["math"]}
 
         ["/plus"
          {:get {:summary "plus with data-spec query parameters"
@@ -129,6 +129,8 @@
               :muuntaja m/instance
               :interceptors [;; swagger feature
                              swagger/swagger-feature
+                             ;; openapi feature
+                             openapi/openapi-feature
                              ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
