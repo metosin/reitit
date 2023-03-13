@@ -43,13 +43,21 @@
       [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"
-                                :description "with reitit-http"}}
+                                :description "with reitit-http"}
+                         ;; used in /secure APIs below
+                         :securityDefinitions {"auth" {:type :apiKey
+                                                       :in :header
+                                                       :name "Example-Api-Key"}}}
                :handler (swagger/create-swagger-handler)}}]
        ["/openapi.json"
         {:get {:no-doc true
                :openapi {:info {:title "my-api"
                                 :description "with reitit-http"
-                                :version "0.0.1"}}
+                                :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :components {:securitySchemes {"auth" {:type :apiKey
+                                                                :in :header
+                                                                :name "Example-Api-Key"}}}}
                :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
@@ -119,7 +127,22 @@
                  :responses {200 {:body (s/keys :req-un [::total])}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
-                             :body {:total (- x y)}})}}]]]
+                             :body {:total (- x y)}})}}]]
+       ["/secure"
+        {:tags ["secure"]
+         :openapi {:security [{"auth" []}]}
+         :swagger {:security [{"auth" []}]}}
+        ["/get"
+         {:get {:summary "endpoint authenticated with a header"
+                :responses {200 {:body {:secret string?}}
+                            401 {:body {:error string?}}}
+                :handler (fn [request]
+                           ;; In a real app authentication would be handled by middleware
+                           (if (= "secret" (get-in request [:headers "example-api-key"]))
+                             {:status 200
+                              :body {:secret "I am a marmot"}}
+                             {:status 401
+                              :body {:error "unauthorized"}}))}}]]]
 
       {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
        ;;:validate spec/validate ;; enable spec validation for route data
