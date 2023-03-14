@@ -90,14 +90,12 @@
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :openapi :id (or ::default) (trie/into-set) (set/intersection ids) seq))
-           ;base-openapi-spec {:responses ^:displace {:default {:description ""}}}
            transform-endpoint (fn [[method {{:keys [coercion no-doc openapi] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
                                 (if (and data (not no-doc))
                                   [method
                                    (meta-merge
-                                    #_base-openapi-spec
                                     (apply meta-merge (keep (comp :openapi :data) middleware))
                                     (apply meta-merge (keep (comp :openapi :data) interceptors))
                                     (if coercion
