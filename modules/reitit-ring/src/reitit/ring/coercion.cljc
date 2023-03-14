@@ -24,7 +24,7 @@
   and :parameters from route data, otherwise does not mount."
   {:name ::coerce-request
    :spec ::rs/parameters
-   :compile (fn [{:keys [coercion parameters]} opts]
+   :compile (fn [{:keys [coercion parameters] :as route-data} opts]
               (cond
                 ;; no coercion, skip
                 (not coercion) nil
@@ -32,16 +32,25 @@
                 (not parameters) {}
                 ;; mount
                 :else
-                (if-let [coercers (coercion/request-coercers coercion parameters opts)]
-                  (fn [handler]
-                    (fn
-                      ([request]
-                       (let [coerced (coercion/coerce-request coercers request)]
-                         (handler (impl/fast-assoc request :parameters coerced))))
-                      ([request respond raise]
-                       (let [coerced (coercion/coerce-request coercers request)]
-                         (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
-                  {})))})
+                (try
+                  (if-let [coercers (coercion/request-coercers coercion parameters opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (let [coerced (coercion/coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced))))
+                        ([request respond raise]
+                         (let [coerced (coercion/coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
+                    {})
+                  (catch Exception e
+                    (throw (ex-info (str "Coerce-request-middleware failed: " (.getMessage e))
+                                    ;; TODO: Format error properly
+                                    {:type :coerce-request-middleware-fail
+                                     ;; TODO: Add path?
+                                     :data {:route-data (select-keys route-data [:parameters])
+                                            :cause-data (ex-data e)}}
+                                    e))))))})
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
