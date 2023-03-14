@@ -79,6 +79,9 @@
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
 
+(defn -identity-coercer [value _format]
+  value)
+
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
 (defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion serialize-failed-result]
                                             :or {extract-request-format extract-request-format-default
@@ -102,7 +105,7 @@
                   format (extract-request-format request)
                   coercer (or (format->coercer format)
                               (format->coercer :default)
-                              (fn [value _format] value))
+                              -identity-coercer)
                   result (coercer value format)]
               (if (error? result)
                 (request-coercion-failed! result coercion value in request serialize-failed-result)
@@ -124,7 +127,7 @@
         (fn [request response]
           (let [format (extract-response-format request response)
                 value (:body response)
-                coercer (get per-format-coercers format (or default (fn [value _format] value)))
+                coercer (get per-format-coercers format (or default -identity-coercer))
                 result (coercer value format)]
             (if (error? result)
               (response-coercion-failed! result coercion value request response serialize-failed-result)
