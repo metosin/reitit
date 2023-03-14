@@ -19,6 +19,7 @@
                  [metosin/reitit-http]
                  [metosin/reitit-interceptors]
                  [metosin/reitit-swagger]
+                 [metosin/reitit-openapi]
                  [metosin/reitit-swagger-ui]
                  [metosin/reitit-frontend]
                  [metosin/reitit-sieppari]

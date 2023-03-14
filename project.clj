@@ -26,6 +26,7 @@
                          [metosin/reitit-http "0.6.0"]
                          [metosin/reitit-interceptors "0.6.0"]
                          [metosin/reitit-swagger "0.6.0"]
+                         [metosin/reitit-openapi "0.6.0"]
                          [metosin/reitit-swagger-ui "0.6.0"]
                          [metosin/reitit-frontend "0.6.0"]
                          [metosin/reitit-sieppari "0.6.0"]
