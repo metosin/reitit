@@ -8,6 +8,7 @@
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
+            [reitit.http.interceptors.multipart]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
             [reitit.ring.spec]
@@ -426,6 +427,39 @@
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
                           normalize))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
+
+(deftest multipart-test
+  (doseq [[coercion file-schema]
+          [#_[#'malli/coercion (fn [nom] [:map [nom :string]])]
+           #_[#'schema/coercion (fn [nom] {nom s/Str})]
+           [#'spec/coercion reitit.http.interceptors.multipart/bytes-part]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/upload"
+                    {:post {:decription "upload"
+                            :coercion @coercion
+                            :parameters {:multipart {:file file-schema}}
+                            :handler identity}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :no-doc true}}]]
+                  {:data {:middleware [openapi/openapi-feature]}}))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)]
+        (testing "multipart body"
+          (is (= {:requestBody {:content {"multipart/form-data" {:schema {:type "object"
+                                                                          :properties {"file" {:type "string"
+                                                                                               :format "binary"}}
+                                                                          :required ["file"]}}}}}
+                 (-> spec
+                     (get-in [:paths "/upload" :post])
+                     #_normalize))))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 
