@@ -26,6 +26,7 @@
                          [metosin/reitit-http "0.6.0"]
                          [metosin/reitit-interceptors "0.6.0"]
                          [metosin/reitit-swagger "0.6.0"]
+                         [metosin/reitit-openapi "0.6.0"]
                          [metosin/reitit-swagger-ui "0.6.0"]
                          [metosin/reitit-frontend "0.6.0"]
                          [metosin/reitit-sieppari "0.6.0"]
@@ -68,6 +69,7 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
+                                  "modules/reitit-openapi/src"
                                   "modules/reitit-interceptors/src"
                                   "modules/reitit-malli/src"
                                   "modules/reitit-spec/src"
@@ -107,6 +109,7 @@
                                   [org.clojure/test.check "1.1.1"]
                                   [org.clojure/tools.namespace "1.4.1"]
                                   [com.gfredericks/test.chuck "0.2.14"]
+                                  [nubank/matcher-combinators "3.8.3"]
 
                                   [io.pedestal/pedestal.service "0.5.10"]
 

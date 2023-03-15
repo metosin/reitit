@@ -4,6 +4,7 @@
             [reitit.coercion :as coercion]
             [schema-tools.coerce :as stc]
             [schema-tools.core :as st]
+            [schema-tools.openapi.core :as openapi]
             [schema-tools.swagger.core :as swagger]
             [schema.coerce :as sc]
             [schema.core :as s]
@@ -46,8 +47,9 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses]}]
-     ;; TODO: this looks identical to spec, refactor when schema is done.
+    (-get-apidocs [this specification {:keys [parameters responses content-types]
+                                       :or {content-types ["application/json"]}}]
+      ;; TODO: this looks identical to spec, refactor when schema is done.
       (case specification
         :swagger (swagger/swagger-spec
                   (merge
@@ -67,6 +69,37 @@
                               (if (:schema $)
                                 (update $ :schema #(coercion/-compile-model this % nil))
                                 $))]))})))
+        :openapi (merge
+                   (when (seq (dissoc parameters :body :request))
+                     (openapi/openapi-spec {::openapi/parameters
+                                            (into
+                                              (empty parameters)
+                                              (for [[k v] (dissoc parameters :body :request)]
+                                                [k (coercion/-compile-model this v nil)]))}))
+                   (when (:body parameters)
+                     {:requestBody (openapi/openapi-spec
+                                    {::openapi/content (zipmap content-types (repeat (:body parameters)))})})
+                   (when (:request parameters)
+                     {:requestBody (openapi/openapi-spec
+                                    {::openapi/content (merge
+                                                        (when-let [default (get-in parameters [:request :body])]
+                                                          (zipmap content-types (repeat default)))
+                                                        (:content (:request parameters)))})})
+                   (when responses
+                     {:responses
+                      (into
+                        (empty responses)
+                        (for [[k {:keys [body content] :as response}] responses]
+                          [k (merge
+                               (select-keys response [:description])
+                               (when (or body content)
+                                 (openapi/openapi-spec
+                                  {::openapi/content (merge
+                                                      (when body
+                                                        (zipmap content-types (repeat (coercion/-compile-model this body nil))))
+                                                      (when response
+                                                        (:content response)))})))]))}))
+
         (throw
          (ex-info
           (str "Can't produce Schema apidocs for " specification)

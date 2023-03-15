@@ -384,3 +384,29 @@
         spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
     (is (= ["query" "body" "formData" "header" "path"]
            (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
+
+(deftest multiple-content-types-test
+  (testing ":request coercion"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/parameters"
+                  {:post {:coercion spec/coercion
+                          :parameters {:request {:content {"application/json" {:x string?}}}}
+                          :handler identity}}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+          output (with-out-str (app {:request-method :get, :uri "/swagger.json"}))]
+      (is (.contains output "WARN"))))
+  (testing "multiple response content types"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/parameters"
+                  {:post {:coercion spec/coercion
+                          :responses {200 {:content {"application/json" {:r string?}}}}
+                          :handler identity}}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+          output (with-out-str (app {:request-method :get, :uri "/swagger.json"}))]
+      (is (.contains output "WARN")))))

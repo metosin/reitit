@@ -37,6 +37,7 @@
 (def ^:no-doc default-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
+   :request (->ParameterCoercion :body-params :request false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)
@@ -78,6 +79,9 @@
 (defn extract-request-format-default [request]
   (-> request :muuntaja/request :format))
 
+(defn -identity-coercer [value _format]
+  value)
+
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
 (defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion serialize-failed-result]
                                             :or {extract-request-format extract-request-format-default
@@ -85,11 +89,23 @@
   (if coercion
     (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
-            model (if open? (-open-model coercion model) model)]
-        (if-let [coercer (-request-coercer coercion style model)]
+            ->open (if open? #(-open-model coercion %) identity)
+            format-schema-pairs (if (= :request style)
+                                  (conj (:content model) [:default (:body model)])
+                                  [[:default model]])
+            format->coercer (some->> (for [[format schema] format-schema-pairs
+                                           :when schema]
+                                       [format (-request-coercer coercion (case style :request :body style) (->open schema))])
+                                     (filter second)
+                                     (seq)
+                                     (into {}))]
+        (when format->coercer
           (fn [request]
             (let [value (transform request)
                   format (extract-request-format request)
+                  coercer (or (format->coercer format)
+                              (format->coercer :default)
+                              -identity-coercer)
                   result (coercer value format)]
               (if (error? result)
                 (request-coercion-failed! result coercion value in request serialize-failed-result)
@@ -98,17 +114,24 @@
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
 
-(defn response-coercer [coercion body {:keys [extract-response-format serialize-failed-result]
-                                       :or {extract-response-format extract-response-format-default}}]
+(defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
+                                                         :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (if-let [coercer (-response-coercer coercion body)]
-      (fn [request response]
-        (let [format (extract-response-format request response)
-              value (:body response)
-              result (coercer value format)]
-          (if (error? result)
-            (response-coercion-failed! result coercion value request response serialize-failed-result)
-            result))))))
+    (let [per-format-coercers (some->> (for [[format schema] content]
+                                         [format (-response-coercer coercion schema)])
+                                       (filter second)
+                                       (seq)
+                                       (into {}))
+          default (when body (-response-coercer coercion body))]
+      (when (or per-format-coercers default)
+        (fn [request response]
+          (let [format (extract-response-format request response)
+                value (:body response)
+                coercer (get per-format-coercers format (or default -identity-coercer))
+                result (coercer value format)]
+            (if (error? result)
+              (response-coercion-failed! result coercion value request response serialize-failed-result)
+              result)))))))
 
 (defn encode-error [data]
   (-> data
@@ -137,8 +160,8 @@
            (into {})))
 
 (defn response-coercers [coercion responses opts]
-  (some->> (for [[status {:keys [body]}] responses :when body]
-             [status (response-coercer coercion body opts)])
+  (some->> (for [[status model] responses]
+             [status (response-coercer coercion model opts)])
            (filter second)
            (seq)
            (into {})))
@@ -146,6 +169,12 @@
 ;;
 ;; api-docs
 ;;
+
+(defn -warn-unsupported-coercions [{:keys [parameters responses] :as data}]
+  (when (:request parameters)
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
+  (when (some :content (vals responses))
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
 
 (defn get-apidocs [coercion specification data]
   (let [swagger-parameter {:query :query
@@ -155,15 +184,19 @@
                            :path :path
                            :multipart :formData}]
     (case specification
-      :swagger (->> (update
-                     data
-                     :parameters
-                     (fn [parameters]
-                       (->> parameters
-                            (map (fn [[k v]] [(swagger-parameter k) v]))
-                            (filter first)
-                            (into {}))))
-                    (-get-apidocs coercion specification)))))
+      :openapi (-get-apidocs coercion specification data)
+      :swagger (do
+                 (-warn-unsupported-coercions data)
+                 (->> (update
+                       data
+                       :parameters
+                       (fn [parameters]
+                         (->> parameters
+                              (map (fn [[k v]] [(swagger-parameter k) v]))
+                              (filter first)
+                              (into {}))))
+                      (-get-apidocs coercion specification))))))
+
 
 ;;
 ;; integration

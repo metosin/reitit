@@ -4,6 +4,7 @@
             [reitit.coercion.spec]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [reitit.openapi :as openapi]
             [reitit.http.coercion :as coercion]
             [reitit.dev.pretty :as pretty]
             [reitit.interceptor.sieppari :as sieppari]
@@ -42,11 +43,26 @@
       [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"
-                                :description "with reitit-http"}}
+                                :description "swagger-docs with reitit-http"
+                                :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :securityDefinitions {"auth" {:type :apiKey
+                                                       :in :header
+                                                       :name "Example-Api-Key"}}}
                :handler (swagger/create-swagger-handler)}}]
+       ["/openapi.json"
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openap-docs with reitit-http"
+                                :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :components {:securitySchemes {"auth" {:type :apiKey
+                                                                :in :header
+                                                                :name "Example-Api-Key"}}}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:swagger {:tags ["files"]}}
+        {:tags ["files"]}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -67,7 +83,7 @@
                                     (io/resource "reitit.png"))})}}]]
 
        ["/async"
-        {:get {:swagger {:tags ["async"]}
+        {:get {:tags ["async"]
                :summary "fetches random users asynchronously over the internet"
                :parameters {:query (s/keys :req-un [::results] :opt-un [::seed])}
                :responses {200 {:body any?}}
@@ -84,7 +100,7 @@
                                :body results})))}}]
 
        ["/math"
-        {:swagger {:tags ["math"]}}
+        {:tags ["math"]}
 
         ["/plus"
          {:get {:summary "plus with data-spec query parameters"
@@ -112,7 +128,22 @@
                  :responses {200 {:body (s/keys :req-un [::total])}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
-                             :body {:total (- x y)}})}}]]]
+                             :body {:total (- x y)}})}}]]
+       ["/secure"
+        {:tags ["secure"]
+         :openapi {:security [{"auth" []}]}
+         :swagger {:security [{"auth" []}]}}
+        ["/get"
+         {:get {:summary "endpoint authenticated with a header"
+                :responses {200 {:body {:secret string?}}
+                            401 {:body {:error string?}}}
+                :handler (fn [request]
+                           ;; In a real app authentication would be handled by middleware
+                           (if (= "secret" (get-in request [:headers "example-api-key"]))
+                             {:status 200
+                              :body {:secret "I am a marmot"}}
+                             {:status 401
+                              :body {:error "unauthorized"}}))}}]]]
 
       {;:reitit.interceptor/transform dev/print-context-diffs ;; pretty context diffs
        ;;:validate spec/validate ;; enable spec validation for route data
@@ -122,6 +153,8 @@
               :muuntaja m/instance
               :interceptors [;; swagger feature
                              swagger/swagger-feature
+                             ;; openapi feature
+                             openapi/openapi-feature
                              ;; query-params & form-params
                              (parameters/parameters-interceptor)
                              ;; content-negotiation
@@ -142,6 +175,9 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
+         	        :urls [{:name "swagger", :url "swagger.json"} 
+         	               {:name "openapi", :url "openapi.json"}]
+         	        :urls.primaryName "openapi"
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))
     {:executor sieppari/executor}))
