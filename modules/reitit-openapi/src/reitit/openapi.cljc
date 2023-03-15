@@ -55,7 +55,7 @@
        [\"/openapi.json\"
         {:get {:no-doc true
                :openapi {:info {:title \"my-api\"}}
-               :handler reitit.openapi/openapi-spec-handler}}]
+               :handler (reitit.openapi/create-openapi-handler)}}]
 
        [\"/plus\"
         {:get {:openapi {:tags \"math\"}
