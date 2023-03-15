@@ -432,25 +432,32 @@
           (is (nil? (validate spec))))))))
 
 (deftest multipart-test
-  (doseq [[coercion file-schema]
-          [[#'malli/coercion [:map {:json-schema {:type "string"
-                                                  :format "binary"}}
-                              [:filename :string]
-                              [:content-type :string]
-                              [:bytes :int]]]
-           [#'schema/coercion (schema-tools.core/schema {:filename s/Str
-                                                         :content-type s/Str
-                                                         :bytes s/Num}
-                                                        {:openapi {:type "string"
-                                                                   :format "binary"}})]
-           [#'spec/coercion reitit.http.interceptors.multipart/bytes-part]]]
+  (doseq [[coercion file-schema string-schema]
+          [[#'malli/coercion
+            [:map {:json-schema {:type "string"
+                                 :format "binary"}}
+             [:filename :string]
+             [:content-type :string]
+             [:bytes :int]]
+            :string]
+           [#'schema/coercion
+            (schema-tools.core/schema {:filename s/Str
+                                       :content-type s/Str
+                                       :bytes s/Num}
+                                      {:openapi {:type "string"
+                                                 :format "binary"}})
+            s/Str]
+           [#'spec/coercion
+            reitit.http.interceptors.multipart/bytes-part
+            string?]]]
     (testing coercion
       (let [app (ring/ring-handler
                  (ring/router
                   [["/upload"
                     {:post {:decription "upload"
                             :coercion @coercion
-                            :parameters {:multipart {:file file-schema}}
+                            :parameters {:multipart {:file file-schema
+                                                     :more string-schema}}
                             :handler identity}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
@@ -465,8 +472,9 @@
           (is (nil? (get-in spec [:paths "/upload" :post :parameters])))
           (is (= (merge {:type "object"
                          :properties {:file {:type "string"
-                                             :format "binary"}}
-                         :required ["file"]}
+                                             :format "binary"}
+                                      :more {:type "string"}}
+                         :required ["file" "more"]}
                         (when-not (= #'spec/coercion coercion)
                           {:additionalProperties false}))
                  (-> spec
