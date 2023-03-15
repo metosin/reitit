@@ -15,6 +15,7 @@
             [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
+            [schema-tools.core]
             [spec-tools.data-spec :as ds]))
 
 (defn validate
@@ -437,7 +438,11 @@
                               [:filename :string]
                               [:content-type :string]
                               [:bytes :int]]]
-           #_[#'schema/coercion (fn [nom] {nom s/Str})]
+           [#'schema/coercion (schema-tools.core/schema {:filename s/Str
+                                                         :content-type s/Str
+                                                         :bytes s/Num}
+                                                        {:openapi {:type "string"
+                                                                   :format "binary"}})]
            [#'spec/coercion reitit.http.interceptors.multipart/bytes-part]]]
     (testing coercion
       (let [app (ring/ring-handler

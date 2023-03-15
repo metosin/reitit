@@ -70,7 +70,7 @@
                                 (update $ :schema #(coercion/-compile-model this % nil))
                                 $))]))})))
         :openapi (merge
-                   (when (seq (dissoc parameters :body :request))
+                   (when (seq (dissoc parameters :body :request :multipart))
                      (openapi/openapi-spec {::openapi/parameters
                                             (into
                                               (empty parameters)
@@ -85,6 +85,10 @@
                                                         (when-let [default (get-in parameters [:request :body])]
                                                           (zipmap content-types (repeat default)))
                                                         (:content (:request parameters)))})})
+                   (when (:multipart parameters)
+                     {:requestBody
+                      (openapi/openapi-spec
+                       {::openapi/content {"multipart/form-data" (:multipart parameters)}})})
                    (when responses
                      {:responses
                       (into
