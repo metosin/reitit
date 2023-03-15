@@ -408,18 +408,21 @@
                      (get-in [:paths "/parameters" :post :parameters])
                      normalize))))
         (testing "body parameter"
-          (is (match? {:schema {:type "object"
-                                :properties {:b {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["b"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:b {:type "string"}}
+                                       :required ["b"]}
+                                      ;; spec outputs open schemas
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
                           normalize))))
         (testing "body response"
-          (is (match? {:schema {:type "object"
-                                :properties {:ok {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["ok"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:ok {:type "string"}}
+                                       :required ["ok"]}
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
                           normalize))))
@@ -458,32 +461,36 @@
                      app
                      :body)]
         (testing "body parameter"
-          (is (match? {:schema {:type "object"
-                                :properties {:b {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["b"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:b {:type "string"}}
+                                       :required ["b"]}
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :requestBody :content "application/json"])
                           normalize)))
-          (is (match? {:schema {:type "object"
-                                :properties {:c {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["c"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:c {:type "string"}}
+                                       :required ["c"]}
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :requestBody :content "application/edn"])
                           normalize))))
         (testing "body response"
-          (is (match? {:schema {:type "object"
-                                :properties {:ok {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["ok"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:ok {:type "string"}}
+                                       :required ["ok"]}
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json"])
                           normalize)))
-          (is (match? {:schema {:type "object"
-                                :properties {:edn {:type "string"}}
-                                #_#_:additionalProperties false ;; not present for spec
-                                :required ["edn"]}}
+          (is (match? {:schema (merge {:type "object"
+                                       :properties {:edn {:type "string"}}
+                                       :required ["edn"]}
+                                      (when-not (#{#'spec/coercion} coercion)
+                                        {:additionalProperties false}))}
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/edn"])
                           normalize))))
