@@ -53,7 +53,7 @@
        ["/openapi.json"
         {:get {:no-doc true
                :openapi {:info {:title "my-api"
-                                :description "openap-docs with reitit-http"
+                                :description "openapi3-docs with reitit-http"
                                 :version "0.0.1"}
                          ;; used in /secure APIs below
                          :components {:securitySchemes {"auth" {:type :apiKey
@@ -175,9 +175,9 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
-         	        :urls [{:name "swagger", :url "swagger.json"} 
-         	               {:name "openapi", :url "openapi.json"}]
-         	        :urls.primaryName "openapi"
+                        :urls [{:name "swagger", :url "swagger.json"}
+                               {:name "openapi", :url "openapi.json"}]
+                        :urls.primaryName "openapi"
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))
     {:executor sieppari/executor}))
