@@ -432,7 +432,11 @@
 
 (deftest multipart-test
   (doseq [[coercion file-schema]
-          [#_[#'malli/coercion (fn [nom] [:map [nom :string]])]
+          [[#'malli/coercion [:map {:json-schema {:type "string"
+                                                  :format "binary"}}
+                              [:filename :string]
+                              [:content-type :string]
+                              [:bytes :int]]]
            #_[#'schema/coercion (fn [nom] {nom s/Str})]
            [#'spec/coercion reitit.http.interceptors.multipart/bytes-part]]]
     (testing coercion
@@ -453,13 +457,16 @@
                      app
                      :body)]
         (testing "multipart body"
-          (is (= {:requestBody {:content {"multipart/form-data" {:schema {:type "object"
-                                                                          :properties {"file" {:type "string"
-                                                                                               :format "binary"}}
-                                                                          :required ["file"]}}}}}
+          (is (nil? (get-in spec [:paths "/upload" :post :parameters])))
+          (is (= (merge {:type "object"
+                         :properties {:file {:type "string"
+                                             :format "binary"}}
+                         :required ["file"]}
+                        (when-not (= #'spec/coercion coercion)
+                          {:additionalProperties false}))
                  (-> spec
-                     (get-in [:paths "/upload" :post])
-                     #_normalize))))
+                     (get-in [:paths "/upload" :post :requestBody :content "multipart/form-data" :schema])
+                     normalize))))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 

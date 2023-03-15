@@ -135,8 +135,8 @@
 
 (defn -get-apidocs-openapi
   [coercion {:keys [parameters responses content-types] :or {content-types ["application/json"]}} options]
-  (let [{:keys [body request]} parameters
-        parameters (dissoc parameters :request :body)
+  (let [{:keys [body request multipart]} parameters
+        parameters (dissoc parameters :request :body :multipart)
         ->schema-object (fn [schema opts]
                           (let [current-opts (merge options opts)]
                             (json-schema/transform (coercion/-compile-model coercion schema current-opts)
@@ -184,6 +184,14 @@
                                                                             :content-type content-type})]
                                    [content-type {:schema schema}])))
                           (:content request)))}})
+      (when multipart
+        {:requestBody
+         {:content
+          {"multipart/form-data"
+           {:schema
+            (->schema-object multipart {:in :requestBody
+                                        :type :schema
+                                        :content-type "multipart/form-data"})}}}})
       (when responses
         {:responses
          (into {}
