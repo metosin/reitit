@@ -12,7 +12,7 @@ The following request parameters are currently supported:
 | `:form`      | `:form-params`                                   |
 | `:header`    | `:header-params`                                 |
 | `:path`      | `:path-params`                                   |
-| `:multipart` | `:multipart-params`, only properly supports `clojure.spec`, see [Default Middleware](default_middleware.md) |
+| `:multipart` | `:multipart-params`, see [Default Middleware](default_middleware.md) |
 
 To enable coercion, the following things need to be done:
 
