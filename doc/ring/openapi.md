@@ -5,7 +5,9 @@
 Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
 documentation. The feature works similarly to [Swagger documentation](swagger.md).
 
-The [http-swagger example](../../examples/http-swagger) also has OpenAPI documentation.
+The [http-swagger](../../examples/http-swagger) and
+[ring-malli-swagger](../../examples/ring-malli-swagger) examples also
+have OpenAPI documentation.
 
 ## OpenAPI data
 
