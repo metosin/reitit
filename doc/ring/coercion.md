@@ -4,14 +4,15 @@ Basic coercion is explained in detail [in the Coercion Guide](../coercion/coerci
 
 The following request parameters are currently supported:
 
-| type       | request source                                   |
-|------------|--------------------------------------------------|
-| `:query`   | `:query-params`                                  |
-| `:body`    | `:body-params`                                   |
-| `:request` | `:body-params`, allows per-content-type coercion |
-| `:form`    | `:form-params`                                   |
-| `:header`  | `:header-params`                                 |
-| `:path`    | `:path-params`                                   |
+| type         | request source                                   |
+|--------------|--------------------------------------------------|
+| `:query`     | `:query-params`                                  |
+| `:body`      | `:body-params`                                   |
+| `:request`   | `:body-params`, allows per-content-type coercion |
+| `:form`      | `:form-params`                                   |
+| `:header`    | `:header-params`                                 |
+| `:path`      | `:path-params`                                   |
+| `:multipart` | `:multipart-params`, only properly supports `clojure.spec`, see [Default Middleware](default_middleware.md) |
 
 To enable coercion, the following things need to be done:
 
