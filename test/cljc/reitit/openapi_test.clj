@@ -11,6 +11,7 @@
             [reitit.http.interceptors.multipart]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
+            [reitit.ring.malli]
             [reitit.ring.spec]
             [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
@@ -434,11 +435,7 @@
 (deftest multipart-test
   (doseq [[coercion file-schema string-schema]
           [[#'malli/coercion
-            [:map {:json-schema {:type "string"
-                                 :format "binary"}}
-             [:filename :string]
-             [:content-type :string]
-             [:bytes :int]]
+            reitit.ring.malli/bytes-part
             :string]
            [#'schema/coercion
             (schema-tools.core/schema {:filename s/Str
