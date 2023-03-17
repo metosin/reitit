@@ -31,11 +31,11 @@
                                 {:name "math", :description "math api"}]}
                :handler (swagger/create-swagger-handler)}}]
        ["/openapi.json"
-      {:get {:no-doc true
-             :openapi {:info {:title "my-api"
-                              :description "openapi3 docs with [malli](https://github.com/metosin/malli) and reitit-ring"
-                              :version "0.0.1"}}
-             :handler (openapi/create-openapi-handler)}}]
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openapi3 docs with [malli](https://github.com/metosin/malli) and reitit-ring"
+                                :version "0.0.1"}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
         {:swagger {:tags ["files"]}}
