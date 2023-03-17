@@ -8,12 +8,15 @@
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
+            [reitit.http.interceptors.multipart]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
+            [reitit.ring.malli]
             [reitit.ring.spec]
             [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
+            [schema-tools.core]
             [spec-tools.data-spec :as ds]))
 
 (defn validate
@@ -426,6 +429,54 @@
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
                           normalize))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
+
+(deftest multipart-test
+  (doseq [[coercion file-schema string-schema]
+          [[#'malli/coercion
+            reitit.ring.malli/bytes-part
+            :string]
+           [#'schema/coercion
+            (schema-tools.core/schema {:filename s/Str
+                                       :content-type s/Str
+                                       :bytes s/Num}
+                                      {:openapi {:type "string"
+                                                 :format "binary"}})
+            s/Str]
+           [#'spec/coercion
+            reitit.http.interceptors.multipart/bytes-part
+            string?]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/upload"
+                    {:post {:decription "upload"
+                            :coercion @coercion
+                            :parameters {:multipart {:file file-schema
+                                                     :more string-schema}}
+                            :handler identity}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :no-doc true}}]]
+                  {:data {:middleware [openapi/openapi-feature]}}))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)]
+        (testing "multipart body"
+          (is (nil? (get-in spec [:paths "/upload" :post :parameters])))
+          (is (= (merge {:type "object"
+                         :properties {:file {:type "string"
+                                             :format "binary"}
+                                      :more {:type "string"}}
+                         :required ["file" "more"]}
+                        (when-not (= #'spec/coercion coercion)
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/upload" :post :requestBody :content "multipart/form-data" :schema])
+                     normalize))))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 

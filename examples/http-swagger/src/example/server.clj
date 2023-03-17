@@ -76,6 +76,8 @@
       ["/download"
        {:get {:summary "downloads a file"
               :swagger {:produces ["image/png"]}
+              :responses {200 {:description "an image"
+                               :content {"image/png" any?}}}
               :handler (fn [_]
                          {:status 200
                           :headers {"Content-Type" "image/png"}
