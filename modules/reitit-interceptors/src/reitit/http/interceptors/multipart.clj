@@ -19,7 +19,7 @@
   "Spec for file param created by ring.middleware.multipart-params.temp-file store."
   (st/spec
    {:spec (s/keys :req-un [::filename ::content-type ::tempfile ::size])
-    :swagger/type "file"
+    :swagger {:type "file"}
     :openapi {:type "string"
               :format "binary"}}))
 
@@ -27,7 +27,7 @@
   "Spec for file param created by ring.middleware.multipart-params.byte-array store."
   (st/spec
    {:spec (s/keys :req-un [::filename ::content-type ::bytes])
-    :swagger/type "file"
+    :swagger {:type "file"}
     :openapi {:type "string"
               :format "binary"}}))
 

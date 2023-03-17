@@ -1,15 +1,26 @@
 (ns reitit.swagger-test
   (:require [clojure.test :refer [deftest is testing]]
+            [jsonista.core :as j]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
+            [reitit.http.interceptors.multipart]
             [reitit.ring :as ring]
+            [reitit.ring.malli]
             [reitit.ring.coercion :as rrc]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
             [spec-tools.data-spec :as ds]))
+
+(defn- normalize
+  "Normalize format of swagger spec by converting it to json and back.
+  Handles differences like :q vs \"q\" in swagger generation."
+  [data]
+  (-> data
+      j/write-value-as-string
+      (j/read-value j/keyword-keys-object-mapper)))
 
 (def app
   (ring/ring-handler
@@ -410,3 +421,41 @@
                          :handler (swagger/create-swagger-handler)}}]]))
           output (with-out-str (app {:request-method :get, :uri "/swagger.json"}))]
       (is (.contains output "WARN")))))
+
+(deftest multipart-test
+  (doseq [[coercion file-schema string-schema]
+          [[#'malli/coercion
+            reitit.ring.malli/bytes-part
+            :string]
+           [#'spec/coercion
+            reitit.http.interceptors.multipart/bytes-part
+            string?]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/upload"
+                    {:post {:decription "upload"
+                            :coercion @coercion
+                            :parameters {:multipart {:file file-schema
+                                                     :more string-schema}}
+                            :handler identity}}]
+                   ["/swagger.json"
+                    {:get {:no-doc true
+                           :handler (swagger/create-swagger-handler)}}]]
+                  {:data {:middleware [swagger/swagger-feature]}}))
+            spec (-> {:request-method :get
+                      :uri "/swagger.json"}
+                     app
+                     :body)]
+        (is (= [{:description ""
+                 :in "formData"
+                 :name "file"
+                 :required true
+                 :type "file"}
+                {:description ""
+                 :in "formData"
+                 :name "more"
+                 :required true
+                 :type "string"}]
+               (normalize
+                (get-in spec [:paths "/upload" :post :parameters]))))))))
