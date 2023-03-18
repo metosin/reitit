@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.coercion.malli]
+            [reitit.openapi :as openapi]
             [reitit.ring.malli]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
@@ -24,13 +25,20 @@
       [["/swagger.json"
         {:get {:no-doc true
                :swagger {:info {:title "my-api"
-                                :description "with [malli](https://github.com/metosin/malli) and reitit-ring"}
+                                :description "swagger docs with [malli](https://github.com/metosin/malli) and reitit-ring"
+                                :version "0.0.1"}
                          :tags [{:name "files", :description "file api"}
                                 {:name "math", :description "math api"}]}
                :handler (swagger/create-swagger-handler)}}]
+       ["/openapi.json"
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openapi3 docs with [malli](https://github.com/metosin/malli) and reitit-ring"
+                                :version "0.0.1"}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:swagger {:tags ["files"]}}
+        {:tags ["files"]}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -44,6 +52,8 @@
         ["/download"
          {:get {:summary "downloads a file"
                 :swagger {:produces ["image/png"]}
+                :responses {200 {:description "an image"
+                                 :content {"image/png" any?}}}
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
@@ -52,7 +62,7 @@
                                       (io/input-stream))})}}]]
 
        ["/math"
-        {:swagger {:tags ["math"]}}
+        {:tags ["math"]}
 
         ["/plus"
          {:get {:summary "plus with malli query parameters"
@@ -96,8 +106,9 @@
                            ;; malli options
                            :options nil})
               :muuntaja m/instance
-              :middleware [;; swagger feature
+              :middleware [;; swagger & openapi
                            swagger/swagger-feature
+                           openapi/openapi-feature
                            ;; query-params & form-params
                            parameters/parameters-middleware
                            ;; content-negotiation
@@ -118,6 +129,9 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
+                  :urls [{:name "swagger", :url "swagger.json"}
+                         {:name "openapi", :url "openapi.json"}]
+                  :urls.primaryName "openapi"
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
 

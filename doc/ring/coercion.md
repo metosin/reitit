@@ -4,13 +4,15 @@ Basic coercion is explained in detail [in the Coercion Guide](../coercion/coerci
 
 The following request parameters are currently supported:
 
-| type      | request source   |
-|-----------|------------------|
-| `:query`  | `:query-params`  |
-| `:body`   | `:body-params`   |
-| `:form`   | `:form-params`   |
-| `:header` | `:header-params` |
-| `:path`   | `:path-params`   |
+| type         | request source                                   |
+|--------------|--------------------------------------------------|
+| `:query`     | `:query-params`                                  |
+| `:body`      | `:body-params`                                   |
+| `:request`   | `:body-params`, allows per-content-type coercion |
+| `:form`      | `:form-params`                                   |
+| `:header`    | `:header-params`                                 |
+| `:path`      | `:path-params`                                   |
+| `:multipart` | `:multipart-params`, see [Default Middleware](default_middleware.md) |
 
 To enable coercion, the following things need to be done:
 
@@ -146,6 +148,30 @@ Invalid response:
 ;         :coercion :schema,
 ;         :value {:total -6},
 ;         :in [:response :body]}}
+```
+
+## Per-content-type coercion
+
+You can also specify request and response body schemas per content-type. The syntax for this is:
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api"
+       ["/example" {:post {:coercion reitit.coercion.schema/coercion
+                           :parameters {:request {:content {"application/json" {:y s/Int}
+                                                            "application/edn" {:z s/Int}}
+                                                  ;; default if no content-type matches:
+                                                  :body {:yy s/Int}}}
+                           :responses {200 {:content {"application/json" {:w s/Int}
+                                                      "application/edn" {:x s/Int}}
+                                            ;; default if no content-type matches:
+                                            :body {:ww s/Int}}
+                           :handler ...}}]]
+      {:data {:middleware [rrc/coerce-exceptions-middleware
+                           rrc/coerce-request-middleware
+                           rrc/coerce-response-middleware]}})))
 ```
 
 ## Pretty printing spec errors

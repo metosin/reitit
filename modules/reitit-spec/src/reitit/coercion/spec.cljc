@@ -4,6 +4,7 @@
             [reitit.coercion :as coercion]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
+            [spec-tools.openapi.core :as openapi]
             [spec-tools.swagger.core :as swagger])
   #?(:clj
      (:import (spec_tools.core Spec)
@@ -85,7 +86,8 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses]}]
+    (-get-apidocs [this specification {:keys [parameters responses content-types]
+                                       :or {content-types ["application/json"]}}]
       (case specification
         :swagger (swagger/swagger-spec
                   (merge
@@ -105,6 +107,45 @@
                               (if (:schema $)
                                 (update $ :schema #(coercion/-compile-model this % nil))
                                 $))]))})))
+        :openapi (merge
+                  (when (seq (dissoc parameters :body :request :multipart))
+                    (openapi/openapi-spec {::openapi/parameters
+                                           (into (empty parameters)
+                                                 (for [[k v] (dissoc parameters :body :request)]
+                                                   [k (coercion/-compile-model this v nil)]))}))
+                  (when (:body parameters)
+                    {:requestBody (openapi/openapi-spec
+                                   {::openapi/content (zipmap content-types (repeat (coercion/-compile-model this (:body parameters) nil)))})})
+                  (when (:request parameters)
+                    {:requestBody (openapi/openapi-spec
+                                   {::openapi/content (merge
+                                                       (when-let [default (get-in parameters [:request :body])]
+                                                         (zipmap content-types (repeat (coercion/-compile-model this default nil))))
+                                                       (into {}
+                                                             (for [[format model] (:content (:request parameters))]
+                                                               [format (coercion/-compile-model this model nil)])))})})
+                  (when (:multipart parameters)
+                       {:requestBody
+                        (openapi/openapi-spec
+                         {::openapi/content
+                          {"multipart/form-data"
+                           (coercion/-compile-model this (:multipart parameters) nil)}})})
+                  (when responses
+                    {:responses
+                     (into
+                      (empty responses)
+                      (for [[k {:keys [body content] :as response}] responses]
+                        [k (merge
+                            (select-keys response [:description])
+                            (when (or body content)
+                              (openapi/openapi-spec
+                               {::openapi/content (merge
+                                                   (when body
+                                                     (zipmap content-types (repeat (coercion/-compile-model this (:body response) nil))))
+                                                   (when response
+                                                     (into {}
+                                                           (for [[format model] (:content response)]
+                                                             [format (coercion/-compile-model this model nil)]))))})))]))}))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)
