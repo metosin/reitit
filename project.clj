@@ -31,13 +31,13 @@
                          [metosin/reitit-frontend "0.6.0"]
                          [metosin/reitit-sieppari "0.6.0"]
                          [metosin/reitit-pedestal "0.6.0"]
-                         [metosin/ring-swagger-ui "4.15.5"]
+                         [metosin/ring-swagger-ui "5.0.0-alpha.0"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.13.0"]
                          [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.10.1"]
+                         [metosin/malli "0.10.3"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.14.2"]
@@ -52,11 +52,11 @@
 
                          [io.pedestal/pedestal.service "0.5.10"]]
 
-  :plugins [[jonase/eastwood "1.2.2"]
+  :plugins [[jonase/eastwood "1.3.0"]
             ;[lein-virgil "0.1.7"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
-            [lein-cloverage "1.2.2"]
+            [lein-cloverage "1.2.4"]
             [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
@@ -91,7 +91,7 @@
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.7"]
-                                  [metosin/malli "0.10.1"]
+                                  [metosin/malli "0.10.3"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -103,13 +103,13 @@
                                   [ring "1.9.6"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.3"]
-                                  [metosin/ring-swagger-ui "4.15.5"]
+                                  [metosin/ring-swagger-ui "5.0.0-alpha.0"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.1"]
-                                  [org.clojure/tools.namespace "1.4.1"]
+                                  [org.clojure/tools.namespace "1.4.4"]
                                   [com.gfredericks/test.chuck "0.2.14"]
-                                  [nubank/matcher-combinators "3.8.3"]
+                                  [nubank/matcher-combinators "3.8.4"]
 
                                   [io.pedestal/pedestal.service "0.5.10"]
 
@@ -137,7 +137,7 @@
                                    [funcool/promesa "10.0.594"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.6.0"]
+                                   [aleph "0.6.1"]
                                    [ring/ring-defaults "0.3.4"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]

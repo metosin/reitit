@@ -12,6 +12,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "5.0.0-alpha.0"] is available but we use "4.15.5"
+[metosin/malli "0.10.3"] is available but we use "0.10.1"
+```
+
 ## 0.6.0 (2023-02-21)
 
 * Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
