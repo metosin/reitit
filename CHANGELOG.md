@@ -12,6 +12,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
+* Updated dependencies:
+
+```clojure
+[metosin/malli "0.10.4"] is available but we use "0.10.1"
+```
+
 ## 0.6.0 (2023-02-21)
 
 * Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
