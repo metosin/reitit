@@ -18,7 +18,6 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ```clojure
 [metosin/ring-swagger-ui "5.0.0-alpha.0"] is available but we use "4.15.5"
-[metosin/malli "0.10.4"] is available but we use "0.10.1"
 ```
 
 ## 0.6.0 (2023-02-21)

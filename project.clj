@@ -31,7 +31,7 @@
                          [metosin/reitit-frontend "0.6.0"]
                          [metosin/reitit-sieppari "0.6.0"]
                          [metosin/reitit-pedestal "0.6.0"]
-                         [metosin/ring-swagger-ui "5.0.0-alpha.0"]
+                         [metosin/ring-swagger-ui "4.15.5"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.13.0"]
                          [metosin/muuntaja "0.6.8"]
@@ -103,7 +103,7 @@
                                   [ring "1.9.6"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.3"]
-                                  [metosin/ring-swagger-ui "5.0.0-alpha.0"]
+                                  [metosin/ring-swagger-ui "4.15.5"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.1"]
