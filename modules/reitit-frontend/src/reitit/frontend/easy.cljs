@@ -104,11 +104,13 @@
    (rfh/replace-state @history name path-params query-params)))
 
 (defn update-query
+  ;; TODO: Sync the docstring with other namespaces
   "Takes the current location and updates the query params
   with given fn and arguments."
   [f & args]
   ;; TODO: rfh version?
   (let [current-path (rfh/-get-path @history)
         new-path (apply rf/update-path-query-params current-path f args)]
+    ;; TODO: replaceState version
     (.pushState js/window.history nil "" new-path)
     (rfh/-on-navigate @history new-path)))

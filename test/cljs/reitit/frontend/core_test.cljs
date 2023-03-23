@@ -227,3 +227,20 @@
                                           :token_type "bearer"
                                           :expires_in 3600}}})
                (m (rf/match-by-path router "/5?mode=foo#access_token=foo&refresh_token=bar&provider_token=baz&token_type=bearer&expires_in=3600"))))))))
+
+(deftest update-path-query-params-test
+  (is (= "foo?bar=1"
+         (rf/update-path-query-params "foo" #(assoc % :bar 1))))
+
+  (is (= "foo?asd=1&bar=1"
+         (rf/update-path-query-params "foo?asd=1" #(assoc % :bar 1))))
+
+  (is (= "foo?bar=1"
+         (rf/update-path-query-params "foo?asd=1&bar=1" #(dissoc % :asd))))
+
+  (is (= "foo"
+         (rf/update-path-query-params "foo?asd=1" #(dissoc % :asd))))
+
+  (testing "Need to coerce current values manually"
+    (is (= "foo?foo=2"
+           (rf/update-path-query-params "foo?foo=1" update :foo #(inc (js/parseInt %)))))))
