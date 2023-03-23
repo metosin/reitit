@@ -232,6 +232,10 @@
   (is (= "foo?bar=1"
          (rf/update-path-query-params "foo" assoc :bar 1)))
 
+  (testing "Keep fragment"
+    (is (= "foo?bar=1&zzz=2#aaa"
+           (rf/update-path-query-params "foo?bar=1#aaa" assoc :zzz 2))))
+
   (is (= "foo?asd=1&bar=1"
          (rf/update-path-query-params "foo?asd=1" assoc :bar 1)))
 
