@@ -88,3 +88,14 @@
        match)
      (do (js/console.warn "missing route" name)
          nil))))
+
+(defn update-path-query-params
+  "Given Reitit-frontend path, update the query params
+  with given function and arguments.
+
+  NOTE: coercion is not applied to the query params"
+  [path f & args]
+  (let [^goog.Uri uri (Uri/parse path)
+        new-query (apply f (query-params uri) args)]
+    (.setQueryData uri (QueryData/createFromMap (clj->js new-query)))
+    (.toString uri)))

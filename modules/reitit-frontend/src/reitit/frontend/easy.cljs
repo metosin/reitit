@@ -2,7 +2,8 @@
   "Easy wrapper over reitit.frontend.history,
   handling the state. Only one router can be active
   at a time."
-  (:require [reitit.frontend.history :as rfh]))
+  (:require [reitit.frontend.history :as rfh]
+            [reitit.frontend :as rf]))
 
 (defonce history (atom nil))
 
@@ -101,3 +102,13 @@
    (rfh/replace-state @history name path-params nil))
   ([name path-params query-params]
    (rfh/replace-state @history name path-params query-params)))
+
+(defn update-query
+  "Takes the current location and updates the query params
+  with given fn and arguments."
+  [f & args]
+  ;; TODO: rfh version?
+  (let [current-path (rfh/-get-path @history)
+        new-path (apply rf/update-path-query-params current-path f args)]
+    (.pushState js/window.history nil "" new-path)
+    (rfh/-on-navigate @history new-path)))
