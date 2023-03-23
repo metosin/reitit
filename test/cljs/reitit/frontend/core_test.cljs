@@ -230,16 +230,16 @@
 
 (deftest update-path-query-params-test
   (is (= "foo?bar=1"
-         (rf/update-path-query-params "foo" #(assoc % :bar 1))))
+         (rf/update-path-query-params "foo" assoc :bar 1)))
 
   (is (= "foo?asd=1&bar=1"
-         (rf/update-path-query-params "foo?asd=1" #(assoc % :bar 1))))
+         (rf/update-path-query-params "foo?asd=1" assoc :bar 1)))
 
   (is (= "foo?bar=1"
-         (rf/update-path-query-params "foo?asd=1&bar=1" #(dissoc % :asd))))
+         (rf/update-path-query-params "foo?asd=1&bar=1" dissoc :asd)))
 
   (is (= "foo"
-         (rf/update-path-query-params "foo?asd=1" #(dissoc % :asd))))
+         (rf/update-path-query-params "foo?asd=1" dissoc :asd)))
 
   (testing "Need to coerce current values manually"
     (is (= "foo?foo=2"
