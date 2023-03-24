@@ -1,11 +1,11 @@
 (ns reitit.frontend
   (:require [clojure.set :as set]
             [reitit.coercion :as coercion]
-            [reitit.core :as r])
-  (:import goog.Uri
-           goog.Uri.QueryData))
+            [reitit.core :as r]
+            goog.Uri
+            goog.Uri.QueryData))
 
-(defn- query-param [^QueryData q k]
+(defn- query-param [^goog.uri.QueryData q k]
   (let [vs (.getValues q k)]
     (if (< (alength vs) 2)
       (aget vs 0)
@@ -13,7 +13,7 @@
 
 (defn query-params
   "Given goog.Uri, read query parameters into a Clojure map."
-  [^Uri uri]
+  [^goog.Uri uri]
   (let [q (.getQueryData uri)]
     (->> q
          (.getKeys)
@@ -26,11 +26,11 @@
 
   Note: coercion is not applied to the query params"
   [path new-query-or-update-fn]
-  (let [^goog.Uri uri (Uri/parse path)
+  (let [^goog.Uri uri (goog.Uri/parse path)
         new-query (if (fn? new-query-or-update-fn)
                     (new-query-or-update-fn (query-params uri))
                     new-query-or-update-fn)]
-    (.setQueryData uri (QueryData/createFromMap (clj->js new-query)))
+    (.setQueryData uri (goog.Uri.QueryData/createFromMap (clj->js new-query)))
     (.toString uri)))
 
 (defn match-by-path
@@ -40,7 +40,7 @@
   :on-coercion-error - a sideeffecting fn of `match exception -> nil`"
   ([router path] (match-by-path router path nil))
   ([router path {:keys [on-coercion-error]}]
-   (let [uri (.parse Uri path)
+   (let [uri (.parse goog.Uri path)
          coerce! (if on-coercion-error
                    (fn [match]
                      (try (coercion/coerce! match)

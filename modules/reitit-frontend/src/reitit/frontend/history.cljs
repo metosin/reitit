@@ -3,8 +3,8 @@
   events."
   (:require [goog.events :as gevents]
             [reitit.core :as reitit]
-            [reitit.frontend :as rf])
-  (:import goog.Uri))
+            [reitit.frontend :as rf]
+            goog.Uri))
 
 (defprotocol History
   (-init [this] "Create event listeners")
@@ -78,7 +78,7 @@
   the page location is updated using History API."
   [router e el uri]
   (let [current-domain (if (exists? js/location)
-                         (.getDomain (.parse Uri js/location)))]
+                         (.getDomain (.parse goog.Uri js/location)))]
     (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
              (= current-domain (.getDomain uri)))
          (not (.-altKey e))
@@ -109,7 +109,7 @@
           ignore-anchor-click (fn [e]
                                 ;; Returns the next matching ancestor of event target
                                 (when-let [el (closest-by-tag (event-target e) "a")]
-                                  (let [uri (.parse Uri (.-href el))]
+                                  (let [uri (.parse goog.Uri (.-href el))]
                                     (when (ignore-anchor-click-predicate router e el uri)
                                       (.preventDefault e)
                                       (let [path (str (.getPath uri)

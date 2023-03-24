@@ -2,8 +2,16 @@
 
 Reitit includes two browser history integrations.
 
-Functions follow HTML5 History API: `push-state` to change route, `replace-state`
-to change route without leaving previous entry in browser history.
+Main functions are `navigate` and `set-query`. Navigate is used to navigate
+to named routes, and the options parameter can be used to control all
+parameters and if `pushState` or `replaceState` should be used to control
+browser history stack. The `set-query` function can be used to change
+or modify query parameters for the current route, it takes either map of
+new query params or function from old params to the new params.
+
+There are also secondary functions following HTML5 History API:
+`push-state` to navigate to new route adding entry to the history and
+`replace-state` to change route without leaving previous entry in browser history.
 
 ## Fragment router
 
