@@ -6,7 +6,8 @@
             [schema.core :as s]
             [reitit.coercion.schema :as rcs]
             [reitit.coercion.malli :as rcm]
-            [reitit.frontend.test-utils :refer [capture-console]]))
+            [reitit.frontend.test-utils :refer [capture-console]]
+            [reitit.impl :as impl]))
 
 (deftest query-params-test
   (is (= {:foo "1"}
@@ -244,7 +245,17 @@
 (deftest set-query-params-test
   (is (= "foo?bar=1"
          (rf/set-query-params "foo" {:bar 1})
-         (rf/set-query-params "foo" #(assoc % :bar 1))))
+         (rf/set-query-params "foo" #(assoc % :bar 1))
+         ;; Also compare to reitit.impl version which is used by match->path (and history fns)
+         (str "foo?" (impl/query-string {:bar 1}))))
+
+  (testing "Encoding"
+    (is (= "foo?bar=foo%20bar"
+           (rf/set-query-params "foo" {:bar "foo bar"})
+           (rf/set-query-params "foo" #(assoc % :bar "foo bar"))
+           ;; FIXME: Reitit.impl encodes space as "+"
+           ; (str "foo?" (impl/query-string {:bar "foo bar"}))
+           )))
 
   (testing "Keep fragment"
     (is (= "foo?bar=1&zzz=2#aaa"
@@ -260,7 +271,10 @@
          (rf/set-query-params "foo?asd=1&bar" #(dissoc % :asd))))
 
   (is (= "foo?bar"
-         (rf/set-query-params "foo" #(assoc % :bar ""))))
+         (rf/set-query-params "foo" #(assoc % :bar ""))
+         ;; FIXME: Reitit.impl adds "=" for empty string values
+         ; (str "foo?" (impl/query-string {:bar ""}))
+         ))
 
   (is (= "foo"
          (rf/set-query-params "foo?asd=1" #(dissoc % :asd))))

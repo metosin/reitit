@@ -30,6 +30,9 @@
         new-query (if (fn? new-query-or-update-fn)
                     (new-query-or-update-fn (query-params uri))
                     new-query-or-update-fn)]
+    ;; NOTE: Differences to reitit.impl/query-string?
+    ;; reitit fn adds "=" even if value is empty string
+    ;; reitit encodes " " as "+" while browser and goog.Uri encode as "%20"
     (.setQueryData uri (goog.Uri.QueryData/createFromMap (clj->js new-query)))
     (.toString uri)))
 
