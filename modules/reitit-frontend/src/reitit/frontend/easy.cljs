@@ -101,3 +101,44 @@
    (rfh/replace-state @history name path-params nil))
   ([name path-params query-params]
    (rfh/replace-state @history name path-params query-params)))
+
+;; This duplicates previous two, but the map parameter will be easier way to
+;; extend the functions, e.g. to work with fragment string. Toggling push vs
+;; replace can be also simpler with a flag.
+;; Navigate and set-query are also similer to react-router API.
+(defn
+  ^{:see-also ["reitit.frontend.history/navigate"]}
+  navigate
+  "Updates the browser location and either pushes new entry to the history stack
+  or replaces the latest entry in the the history stack (controlled by
+  `replace` option) using URL built from a route defined by name given
+  parameters.
+
+  Will also trigger on-navigate callback on Reitit frontend History handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+  https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
+  ([name]
+   (rfh/navigate @history name))
+  ([name {:keys [path-params query-params replace] :as opts}]
+   (rfh/navigate @history name opts)))
+
+(defn
+  ^{:see-also ["reitit.frontend.history/set-query"]}
+  set-query
+  "Update query parameters for the current route.
+
+  New query params can be given as a map, or a function taking
+  the old params and returning the new modified params.
+
+  Note: The query parameter values aren't coereced, so the
+  update fn will see string values for all query params."
+  ([new-query-or-update-fn]
+   (rfh/set-query @history new-query-or-update-fn))
+  ([new-query-or-update-fn {:keys [replace] :as opts}]
+   (rfh/set-query @history new-query-or-update-fn opts)))
