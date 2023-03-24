@@ -18,7 +18,7 @@
     [:div
      [:ul
       [:li [:a {:href (rfe/href ::item {:id 1})} "Item 1"]]
-      [:li [:a {:href (rfe/href ::item {:id 2} {:foo "bar"})} "Item 2"]]]
+      [:li [:a {:href (rfe/href ::item {:id 2} {:foo "bar"} "zzz")} "Item 2"]]]
      (when id
        [:h2 "Selected item " id])
      [:p "Query params: " [:pre (pr-str query)]]

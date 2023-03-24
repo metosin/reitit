@@ -52,11 +52,13 @@
   pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
   differently, convert the collections to strings first."
   ([name]
-   (rfh/href @history name nil nil))
+   (rfh/href @history name nil nil nil))
   ([name path-params]
-   (rfh/href @history name path-params nil))
+   (rfh/href @history name path-params nil nil))
   ([name path-params query-params]
-   (rfh/href @history name path-params query-params)))
+   (rfh/href @history name path-params query-params nil))
+  ([name path-params query-params fragment]
+   (rfh/href @history name path-params query-params fragment)))
 
 (defn
   ^{:see-also ["reitit.frontend.history/push-state"]}
@@ -74,11 +76,13 @@
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
   ([name]
-   (rfh/push-state @history name nil nil))
+   (rfh/push-state @history name nil nil nil))
   ([name path-params]
-   (rfh/push-state @history name path-params nil))
+   (rfh/push-state @history name path-params nil nil))
   ([name path-params query-params]
-   (rfh/push-state @history name path-params query-params)))
+   (rfh/push-state @history name path-params query-params nil))
+  ([name path-params query-params fragment]
+   (rfh/push-state @history name path-params query-params fragment)))
 
 (defn
   ^{:see-also ["reitit.frontend.history/replace-state"]}
@@ -96,11 +100,13 @@
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
   ([name]
-   (rfh/replace-state @history name nil nil))
+   (rfh/replace-state @history name nil nil nil))
   ([name path-params]
-   (rfh/replace-state @history name path-params nil))
+   (rfh/replace-state @history name path-params nil nil))
   ([name path-params query-params]
-   (rfh/replace-state @history name path-params query-params)))
+   (rfh/replace-state @history name path-params query-params nil))
+  ([name path-params query-params fragment]
+   (rfh/replace-state @history name path-params query-params fragment)))
 
 ;; This duplicates previous two, but the map parameter will be easier way to
 ;; extend the functions, e.g. to work with fragment string. Toggling push vs
@@ -125,7 +131,7 @@
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
   ([name]
    (rfh/navigate @history name))
-  ([name {:keys [path-params query-params replace] :as opts}]
+  ([name {:keys [path-params query-params replace fragment] :as opts}]
    (rfh/navigate @history name opts)))
 
 (defn

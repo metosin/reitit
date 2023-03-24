@@ -29,10 +29,10 @@
                           1 (do (is (some? (:popstate-listener history)))
                                 (is (= "/" url)
                                     "start at root")
-                                (rfe/push-state ::foo))
+                                (rfe/push-state ::foo nil {:a 1} "foo bar"))
                           ;; 0. /
-                          ;; 1. /foo
-                          2 (do (is (= "/foo" url)
+                          ;; 1. /foo?a=1#foo+bar
+                          2 (do (is (= "/foo?a=1#foo+bar" url)
                                     "push-state")
                                 (.back js/window.history))
                           ;; 0. /
