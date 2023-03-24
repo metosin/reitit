@@ -30,33 +30,53 @@
                                 (is (= "/" url)
                                     "start at root")
                                 (rfe/push-state ::foo))
+                          ;; 0. /
+                          ;; 1. /foo
                           2 (do (is (= "/foo" url)
                                     "push-state")
                                 (.back js/window.history))
+                          ;; 0. /
                           3 (do (is (= "/" url)
                                     "go back")
-                                (rfe/push-state ::bar {:id 1}))
+                                (rfe/navigate ::bar {:path-params {:id 1}}))
+                          ;; 0. /
+                          ;; 1. /bar/1
                           4 (do (is (= "/bar/1" url)
                                     "push-state 2")
                                 (rfe/replace-state ::bar {:id 2}))
+                          ;; 0. /
+                          ;; 1. /bar/2
                           5 (do (is (= "/bar/2" url)
                                     "replace-state")
-                                (.back js/window.history))
-                          6 (do (is (= "/" url)
-                                    "go back after replace state")
+                                (rfe/set-query {:a 1}))
+                          ;; 0. /
+                          ;; 1. /bar/2
+                          ;; 2. /bar/2?a=1
+                          6 (do (is (= "/bar/2?a=1" url)
+                                    "update-query with map")
+                                (rfe/set-query #(assoc % :b "foo") {:replace true}))
+                          ;; 0. /
+                          ;; 1. /bar/2
+                          ;; 2. /bar/2?a=1&b=foo
+                          7 (do (is (= "/bar/2?a=1&b=foo" url)
+                                    "update-query with fn")
+                                (.go js/window.history -2))
+                          ;; 0. /
+                          8 (do (is (= "/" url)
+                                    "go back two events")
 
                                 ;; Reset to ensure old event listeners aren't called
                                 (rfe/start! router
                                             (fn on-navigate [match history]
                                               (let [url (rfh/-get-path history)]
                                                 (case (swap! n inc)
-                                                  7 (do (is (= "/" url)
+                                                  9 (do (is (= "/" url)
                                                             "start at root")
                                                         (rfe/push-state ::foo))
-                                                  8 (do (is (= "/foo" url)
-                                                            "push-state")
-                                                        (rfh/stop! @rfe/history)
-                                                        (done))
+                                                  10 (do (is (= "/foo" url)
+                                                             "push-state")
+                                                         (rfh/stop! @rfe/history)
+                                                         (done))
                                                   (do
                                                     (is false (str "extra event 2" {:n @n, :url url}))
                                                     (done)))))

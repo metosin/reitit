@@ -9,9 +9,9 @@
 (defprotocol History
   (-init [this] "Create event listeners")
   (-stop [this] "Remove event listeners")
-  (-on-navigate [this path])
-  (-get-path [this])
-  (-href [this path]))
+  (-on-navigate [this path] "Find a match for current routing path and call on-navigate callback")
+  (-get-path [this] "Get the current routing path")
+  (-href [this path] "Converts given routing path to browser location"))
 
 ;; This version listens for both pop-state and hash-change for
 ;; compatibility for old browsers not supporting History API.
@@ -177,7 +177,9 @@
   (if history
     (-stop history)))
 
-(defn href
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  href
   "Generate a URL for a route defined by name, with given path-params and query-params.
 
   The URL is formatted using Reitit frontend history handler, so using it with
@@ -219,7 +221,9 @@
      (.pushState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
 
-(defn replace-state
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  replace-state
   "Updates the browser location and replaces latest entry in the history stack
   using URL built from a route defined by name, with given path-params and
   query-params.
@@ -241,3 +245,50 @@
          path (reitit/match->path match query-params)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
+
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  navigate
+  "Updates the browser location and either pushes new entry to the history stack
+  or replaces the latest entry in the the history stack (controlled by
+  `replace` option) using URL built from a route defined by name given
+  parameters.
+
+  Will also trigger on-navigate callback on Reitit frontend History handler.
+
+  Note: currently collections in query-parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
+  differently, convert the collections to strings first.
+
+  See also:
+  https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+  https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
+  ([history name]
+   (navigate history name nil))
+  ([history name {:keys [path-params query-params replace] :as opts}]
+   (let [match (rf/match-by-name! (:router history) name path-params)
+         path (reitit/match->path match query-params)]
+     (if replace
+       (.replaceState js/window.history nil "" (-href history path))
+       (.pushState js/window.history nil "" (-href history path)))
+     (-on-navigate history path))))
+
+(defn
+  ^{:see-also ["reitit.frontend/set-query-params"]}
+  set-query
+  "Update query parameters for the current route.
+
+  New query params can be given as a map, or a function taking
+  the old params and returning the new modified params.
+
+  Note: The query parameter values aren't coereced, so the
+  update fn will see string values for all query params."
+  ([history new-query-or-update-fn]
+   (set-query history new-query-or-update-fn nil))
+  ([history new-query-or-update-fn {:keys [replace] :as opts}]
+   (let [current-path (-get-path history)
+         new-path (rf/set-query-params current-path new-query-or-update-fn)]
+     (if replace
+       (.replaceState js/window.history nil "" (-href history new-path))
+       (.pushState js/window.history nil "" (-href history new-path)))
+     (-on-navigate history new-path))))

@@ -12,13 +12,26 @@
       (vec vs))))
 
 (defn query-params
-  "Given goog.Uri, read query parameters into Clojure map."
+  "Given goog.Uri, read query parameters into a Clojure map."
   [^Uri uri]
   (let [q (.getQueryData uri)]
     (->> q
          (.getKeys)
          (map (juxt keyword #(query-param q %)))
          (into {}))))
+
+(defn set-query-params
+  "Given Reitit-frontend path, update the query params
+  with given function and arguments.
+
+  Note: coercion is not applied to the query params"
+  [path new-query-or-update-fn]
+  (let [^goog.Uri uri (Uri/parse path)
+        new-query (if (fn? new-query-or-update-fn)
+                    (new-query-or-update-fn (query-params uri))
+                    new-query-or-update-fn)]
+    (.setQueryData uri (QueryData/createFromMap (clj->js new-query)))
+    (.toString uri)))
 
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
@@ -88,14 +101,3 @@
        match)
      (do (js/console.warn "missing route" name)
          nil))))
-
-(defn update-path-query-params
-  "Given Reitit-frontend path, update the query params
-  with given function and arguments.
-
-  NOTE: coercion is not applied to the query params"
-  [path f & args]
-  (let [^goog.Uri uri (Uri/parse path)
-        new-query (apply f (query-params uri) args)]
-    (.setQueryData uri (QueryData/createFromMap (clj->js new-query)))
-    (.toString uri)))
