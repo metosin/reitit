@@ -6,7 +6,7 @@
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"
         :dir "../.."}
-  :plugins [[lein-parent "0.3.8"]]
+  :plugins [[lein-parent "0.3.9"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-core]])
