@@ -54,6 +54,7 @@
 
   :plugins [[jonase/eastwood "1.3.0"]
             ;[lein-virgil "0.1.7"]
+            [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
             [lein-cloverage "1.2.4"]
