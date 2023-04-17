@@ -6,7 +6,21 @@
             [schema.core :as s]
             [reitit.coercion.schema :as rcs]
             [reitit.coercion.malli :as rcm]
-            [reitit.frontend.test-utils :refer [capture-console]]))
+            [reitit.frontend.test-utils :refer [capture-console]]
+            [reitit.impl :as impl]))
+
+(deftest query-params-test
+  (is (= {:foo "1"}
+         (rf/query-params (.parse goog.Uri "?foo=1"))))
+
+  (is (= {:foo "1" :bar "aaa"}
+         (rf/query-params (.parse goog.Uri "?foo=1&bar=aaa"))))
+
+  (is (= {:foo ""}
+         (rf/query-params (.parse goog.Uri "?foo="))))
+
+  (is (= {:foo ""}
+         (rf/query-params (.parse goog.Uri "?foo")))))
 
 (defn m [x]
   (assoc x :data nil :result nil))
@@ -227,3 +241,44 @@
                                           :token_type "bearer"
                                           :expires_in 3600}}})
                (m (rf/match-by-path router "/5?mode=foo#access_token=foo&refresh_token=bar&provider_token=baz&token_type=bearer&expires_in=3600"))))))))
+
+(deftest set-query-params-test
+  (is (= "foo?bar=1"
+         (rf/set-query-params "foo" {:bar 1})
+         (rf/set-query-params "foo" #(assoc % :bar 1))
+         ;; Also compare to reitit.impl version which is used by match->path (and history fns)
+         (str "foo?" (impl/query-string {:bar 1}))))
+
+  (testing "Encoding"
+    (is (= "foo?bar=foo%20bar"
+           (rf/set-query-params "foo" {:bar "foo bar"})
+           (rf/set-query-params "foo" #(assoc % :bar "foo bar"))
+           ;; FIXME: Reitit.impl encodes space as "+"
+           ; (str "foo?" (impl/query-string {:bar "foo bar"}))
+           )))
+
+  (testing "Keep fragment"
+    (is (= "foo?bar=1&zzz=2#aaa"
+           (rf/set-query-params "foo?bar=1#aaa" #(assoc % :zzz 2)))))
+
+  (is (= "foo?asd=1&bar=1"
+         (rf/set-query-params "foo?asd=1" #(assoc % :bar 1))))
+
+  (is (= "foo?bar=1"
+         (rf/set-query-params "foo?asd=1&bar=1" #(dissoc % :asd))))
+
+  (is (= "foo?bar"
+         (rf/set-query-params "foo?asd=1&bar" #(dissoc % :asd))))
+
+  (is (= "foo?bar"
+         (rf/set-query-params "foo" #(assoc % :bar ""))
+         ;; FIXME: Reitit.impl adds "=" for empty string values
+         ; (str "foo?" (impl/query-string {:bar ""}))
+         ))
+
+  (is (= "foo"
+         (rf/set-query-params "foo?asd=1" #(dissoc % :asd))))
+
+  (testing "Need to coerce current values manually"
+    (is (= "foo?foo=2"
+           (rf/set-query-params "foo?foo=1" (fn [q] (update q :foo #(inc (js/parseInt %)))))))))
