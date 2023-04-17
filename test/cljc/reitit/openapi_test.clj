@@ -614,3 +614,59 @@
                               keys))))
             (testing "spec is valid"
               (is (nil? (validate spec))))))))))
+
+(deftest recursive-test
+  ;; Recursive schemas only properly supported for malli
+  ;; See https://github.com/metosin/schema-tools/issues/41
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/parameters"
+                {:post {:description "parameters"
+                        :coercion malli/coercion
+                        :parameters {:request
+                                     {:body
+                                      [:schema
+                                       {:registry {"friend" [:map
+                                                             [:age int?]
+                                                             [:pet [:ref "pet"]]]
+                                                   "pet" [:map
+                                                          [:name :string]
+                                                          [:friends [:vector [:ref "friend"]]]]}}
+                                       "friend"]}}
+                        :handler (fn [req]
+                                   {:status 200
+                                    :body (-> req :parameters :request)})}}]
+               ["/openapi.json"
+                {:get {:handler (openapi/create-openapi-handler)
+                       :openapi {:info {:title "" :version "0.0.1"}}
+                       :no-doc true}}]]
+              {:validate reitit.ring.spec/validate
+               :data {:middleware [openapi/openapi-feature
+                                   rrc/coerce-request-middleware
+                                   rrc/coerce-response-middleware]}}))
+        spec (-> {:request-method :get
+                  :uri "/openapi.json"}
+                 app
+                 :body)]
+    (is (= {:info {:title "" :version "0.0.1"}
+            :openapi "3.1.0"
+            :x-id #{:reitit.openapi/default}
+            :paths {"/parameters"
+                    {:post
+                     {:description "parameters"
+                      :requestBody
+                      {:content
+                       {"application/json"
+                        {:schema {:$ref "#/definitions/friend"
+                                  :definitions {"friend" {:properties {:age {:type "integer"}
+                                                                       :pet {:$ref "#/definitions/pet"}}
+                                                          :required [:age :pet]
+                                                          :type "object"}
+                                                "pet" {:properties {:friends {:items {:$ref "#/definitions/friend"}
+                                                                              :type "array"}
+                                                                    :name {:type "string"}}
+                                                       :required [:name :friends]
+                                                       :type "object"}}}}}}}}}}
+           spec))
+    (testing "spec is valid"
+      (is (nil? (validate spec))))))
