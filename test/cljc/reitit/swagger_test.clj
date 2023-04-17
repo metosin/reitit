@@ -138,6 +138,7 @@
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
+                    :definitions {}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
                                                           :operationId "Patch"
@@ -223,6 +224,7 @@
                                                                      400 {:schema {:type "string"}
                                                                           :description "kosh"}
                                                                      500 {:description "fail"}}
+                                                         :definitions nil
                                                          :summary "plus"}
                                                    :post {:parameters [{:in "body",
                                                                         :name "body",
@@ -247,6 +249,7 @@
                                                                       400 {:schema {:type "string"}
                                                                            :description "kosh"}
                                                                       500 {:description "fail"}}
+                                                          :definitions nil
                                                           :summary "plus with body"}}
                             "/api/schema/plus/{z}" {:get {:parameters [{:description ""
                                                                         :format "int32"
