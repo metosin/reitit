@@ -17,6 +17,7 @@
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
             [schema-tools.core]
+            [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]))
 
 (defn validate
@@ -428,6 +429,83 @@
                                {:additionalProperties false}))
                       (-> spec
                           (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
+                          normalize))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
+
+(deftest examples-test
+  (doseq [[coercion ->schema]
+          [[#'malli/coercion (fn [nom] [:map
+                                        {:json-schema/example {nom "EXAMPLE2"}}
+                                        [nom [:string {:json-schema/example "EXAMPLE"}]]])]
+           [#'schema/coercion (fn [nom] (schema-tools.core/schema
+                                         {nom (schema-tools.core/schema s/Str {:openapi/example "EXAMPLE"})}
+                                         {:openapi/example {nom "EXAMPLE2"}}))]
+           [#'spec/coercion (fn [nom]
+                              (assoc
+                               (ds/spec ::foo {nom (st/spec string? {:openapi/example "EXAMPLE"})})
+                               :openapi/example {nom "EXAMPLE2"}))]]]
+    (testing coercion
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/examples"
+                    {:post {:decription "examples"
+                            :coercion @coercion
+                            :parameters {:query (->schema :q)
+                                         :request {:body (->schema :b)}}
+                            :responses {200 {:description "success"
+                                             :body (->schema :ok)}}
+                            :openapi {:requestBody
+                                      {:content
+                                       {"application/json"
+                                        {:examples
+                                         {"named-example" {:description "a named example"
+                                                           :value {:b "named"}}}}}}
+                                      :responses
+                                      {200
+                                       {:content
+                                        {"application/json"
+                                         {:examples
+                                          {"response-example" {:value {:ok "response"}}}}}}}}
+                            :handler identity}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :no-doc true}}]]
+                  {:data {:middleware [openapi/openapi-feature]}}))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)]
+        (testing "query parameter"
+          (is (match? [{:in "query"
+                        :name "q"
+                        :required true
+                        :schema {:type "string"
+                                 :example "EXAMPLE"}}]
+                 (-> spec
+                     (get-in [:paths "/examples" :post :parameters])
+                     normalize))))
+        (testing "body parameter"
+          (is (match? {:schema {:type "object"
+                                :properties {:b {:type "string"
+                                                 :example "EXAMPLE"}}
+                                :required ["b"]
+                                :example {:b "EXAMPLE2"}}
+                       :examples {:named-example {:description "a named example"
+                                                  :value {:b "named"}}}}
+                      (-> spec
+                          (get-in [:paths "/examples" :post :requestBody :content "application/json"])
+                          normalize))))
+        (testing "body response"
+          (is (match? {:schema {:type "object"
+                                :properties {:ok {:type "string"
+                                                  :example "EXAMPLE"}}
+                                :required ["ok"]
+                                :example {:ok "EXAMPLE2"}}
+                       :examples {:response-example {:value {:ok "response"}}}}
+                      (-> spec
+                          (get-in [:paths "/examples" :post :responses 200 :content "application/json"])
                           normalize))))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
