@@ -31,6 +31,29 @@ Coercion keys also contribute to the docs:
 
 Use `:request` parameter coercion (instead of `:body`) to unlock per-content-type coercions. See [Coercion](coercion.md).
 
+## Custom OpenAPI data
+
+The `:openapi` route data key can be used to add top-level or
+route-level information to the generated OpenAPI spec. This is useful
+for providing `"securitySchemes"`, `"examples"` or other OpenAPI keys
+that are not generated automatically by reitit.
+
+```clj
+["/foo"
+ {:post {:parameters {:body {:name string? :age int?}}
+         :openapi {:requestBody
+                   {:content
+                    {"application/json"
+                     {:examples {"Pyry" {:summary "Pyry, 45y"
+                                         :value {:name "Pyry" :age 45}}
+                                 "Cat" {:summary "Cat, 8y"
+                                        :value {:name "Cat" :age 8}}}}}}}
+         ...}}]
+```
+
+See [the http-swagger example](../../examples/http-swagger) for a
+working examples of `"securitySchemes"` and `"examples"`.
+
 ## OpenAPI spec
 
 Serving the OpenAPI specification is handled by `reitit.openapi/create-openapi-handler`. It takes no arguments and returns a ring handler which collects at request-time data from all routes and returns an OpenAPI specification as Clojure data, to be encoded by a response formatter.
