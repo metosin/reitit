@@ -455,6 +455,18 @@
                                          :request {:body (->schema :b)}}
                             :responses {200 {:description "success"
                                              :body (->schema :ok)}}
+                            :openapi {:requestBody
+                                      {:content
+                                       {"application/json"
+                                        {:examples
+                                         {"named-example" {:description "a named example"
+                                                           :value {:b "named"}}}}}}
+                                      :responses
+                                      {200
+                                       {:content
+                                        {"application/json"
+                                         {:examples
+                                          {"response-example" {:value {:ok "response"}}}}}}}}
                             :handler identity}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
@@ -479,7 +491,9 @@
                                 :properties {:b {:type "string"
                                                  :example "EXAMPLE"}}
                                 :required ["b"]
-                                :example {:b "EXAMPLE2"}}}
+                                :example {:b "EXAMPLE2"}}
+                       :examples {:named-example {:description "a named example"
+                                                  :value {:b "named"}}}}
                       (-> spec
                           (get-in [:paths "/examples" :post :requestBody :content "application/json"])
                           normalize))))
@@ -488,7 +502,8 @@
                                 :properties {:ok {:type "string"
                                                   :example "EXAMPLE"}}
                                 :required ["ok"]
-                                :example {:ok "EXAMPLE2"}}}
+                                :example {:ok "EXAMPLE2"}}
+                       :examples {:response-example {:value {:ok "response"}}}}
                       (-> spec
                           (get-in [:paths "/examples" :post :responses 200 :content "application/json"])
                           normalize))))
