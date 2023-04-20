@@ -12,7 +12,8 @@
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
-            [spec-tools.data-spec :as ds]))
+            [spec-tools.data-spec :as ds]
+            [malli.core :as mc]))
 
 (defn- normalize
   "Normalize format of swagger spec by converting it to json and back.
@@ -21,6 +22,23 @@
   (-> data
       j/write-value-as-string
       (j/read-value j/keyword-keys-object-mapper)))
+
+(def malli-registry
+  (merge
+   (mc/base-schemas)
+   (mc/predicate-schemas)
+   (mc/type-schemas)
+   {::req-key [:or :keyword :string]
+    ::req-val [:or map? :string]
+    ::resp-map map?
+    ::resp-string [:string {:min 1}]}))
+
+
+(def PutReqBody
+  (mc/schema [:map-of ::req-key ::req-val] {:registry malli-registry}))
+
+(def PutRespBody
+  (mc/schema [:or ::resp-map ::resp-string] {:registry malli-registry}))
 
 (def app
   (ring/ring-handler
@@ -84,7 +102,13 @@
                            500 {:description "fail"}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
-                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}
+        :put {:summary "plus put with definitions"
+              :parameters {:body PutReqBody}
+              :responses {200 {:body PutRespBody}
+                          500 {:description "fail"}}
+              :handler (fn [{{body :body} :parameters}]
+                         {:status 200, :body (str "got " body)})}}]]
 
      ["/schema" {:coercion schema/coercion}
       ["/plus/*z"
@@ -138,7 +162,15 @@
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
-                    :definitions {}
+                    :definitions {::req-key {:type "string"
+                                             :x-anyOf [{:type "string"}
+                                                       {:type "string"}]}
+                                  ::req-val {:type "object"
+                                             :x-anyOf [{:type "object"}
+                                                       {:type "string"}]}
+                                  ::resp-map {:type "object"},
+                                  ::resp-string {:type "string"
+                                                 :minLength 1}}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
                                                           :operationId "Patch"
@@ -250,7 +282,42 @@
                                                                            :description "kosh"}
                                                                       500 {:description "fail"}}
                                                           :definitions nil
-                                                          :summary "plus with body"}}
+                                                          :summary "plus with body"}
+                                                   :put {:parameters [{:in "body"
+                                                                       :name "body"
+                                                                       :description ""
+                                                                       :required true
+                                                                       :schema
+                                                                       {:type "object"
+                                                                        :additionalProperties
+                                                                        {:$ref "#/definitions/reitit.swagger-test~1req-val"}
+                                                                        :definitions {::req-key
+                                                                                      {:type "string"
+                                                                                       :x-anyOf [{:type "string"}
+                                                                                                 {:type "string"}]}
+                                                                                      ::req-val
+                                                                                      {:type "object"
+                                                                                       :x-anyOf [{:type "object"}
+                                                                                                 {:type "string"}]}}}}]
+                                                         :responses {200
+                                                                     {:schema
+                                                                      {:$ref "#/definitions/reitit.swagger-test~1resp-map"
+                                                                       :x-anyOf [{:$ref "#/definitions/reitit.swagger-test~1resp-map"}
+                                                                                 {:$ref "#/definitions/reitit.swagger-test~1resp-string"}]
+                                                                       :definitions {::resp-map {:type "object"}
+                                                                                     ::resp-string
+                                                                                     {:type "string", :minLength 1}}}
+                                                                      :description ""}
+                                                                     500 {:description "fail"}}
+                                                         :definitions {::req-key {:type "string"
+                                                                                  :x-anyOf [{:type "string"}
+                                                                                            {:type "string"}]}
+                                                                       ::req-val {:type "object"
+                                                                                  :x-anyOf [{:type "object"}
+                                                                                            {:type "string"}]}
+                                                                       ::resp-map {:type "object"}
+                                                                       ::resp-string {:type "string", :minLength 1}}
+                                                         :summary "plus put with definitions"}}
                             "/api/schema/plus/{z}" {:get {:parameters [{:description ""
                                                                         :format "int32"
                                                                         :in "query"
