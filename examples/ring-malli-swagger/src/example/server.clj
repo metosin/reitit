@@ -1,6 +1,7 @@
 (ns example.server
-  (:require [reitit.ring :as ring]
-            [reitit.coercion.malli]
+  (:require [jsonista.core :as j]
+            [reitit.ring :as ring]
+            [reitit.coercion.malli :as rcm]
             [reitit.openapi :as openapi]
             [reitit.ring.malli]
             [reitit.swagger :as swagger]
@@ -11,9 +12,9 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
-    ;       [reitit.ring.middleware.dev :as dev]
-    ;       [reitit.ring.spec :as spec]
-    ;       [spec-tools.spell :as spell]
+   ;       [reitit.ring.middleware.dev :as dev]
+   ;       [reitit.ring.spec :as spec]
+   ;       [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]
@@ -64,6 +65,14 @@
        ["/math"
         {:tags ["math"]}
 
+        ["/edn"
+         {:post {:parameters {:body [:map [:json-string
+                                           {:decode/string #(j/read-value % j/keyword-keys-object-mapper)}
+                                           [:map [:id :int]]]]}
+                 :handler (fn [request]
+                              {:status 200
+                               :body (-> request :parameters :body)})}}]
+
         ["/plus"
          {:get {:summary "plus with malli query parameters"
                 :parameters {:query [:map
@@ -94,8 +103,15 @@
        ;;:validate spec/validate ;; enable spec validation for route data
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
-       :data {:coercion (reitit.coercion.malli/create
-                          {;; set of keys to include in error messages
+       :data {:coercion (rcm/create
+                         ;; override default transformers
+                         {:transformers {:body {:default rcm/default-transformer-provider
+                                                :formats {"application/json" rcm/json-transformer-provider
+                                                          "application/edn" rcm/string-transformer-provider}}
+                                         :string {:default rcm/string-transformer-provider}
+                                         :response {:default rcm/default-transformer-provider
+                                                    :formats {"application/json" rcm/json-transformer-provider}}}
+                           ;; set of keys to include in error messages
                            :error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
                            ;; schema identity function (default: close all map schemas)
                            :compile mu/closed-schema
