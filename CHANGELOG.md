@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
+* Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
 * Updated dependencies:
 
 ```clojure
