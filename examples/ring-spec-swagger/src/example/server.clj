@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.coercion.spec]
+            [reitit.openapi :as openapi]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as coercion]
@@ -44,9 +45,15 @@
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
                :handler (swagger/create-swagger-handler)}}]
+       ["/openapi.json"
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openapi3-docs with reitit-http"
+                                :version "0.0.1"}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:swagger {:tags ["files"]}}
+        {:tags ["files"]}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -67,7 +74,7 @@
                                     (io/resource "reitit.png"))})}}]]
 
        ["/math"
-        {:swagger {:tags ["math"]}}
+        {:tags ["math"]}
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
@@ -111,6 +118,9 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
+                  :urls [{:name "swagger" :url "swagger.json"}
+                         {:name "openapi" :url "openapi.json"}]
+                  :urls.primaryName "openapi"
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
 
