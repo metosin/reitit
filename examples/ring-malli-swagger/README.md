@@ -1,4 +1,4 @@
-# reitit-ring, malli, swagger
+# reitit-ring, malli, swagger, openapi 3
 
 ## Usage
 
