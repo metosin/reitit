@@ -12,7 +12,8 @@
   metosin/reitit-swagger-ui
   metosin/reitit-frontend
   metosin/reitit-sieppari
-  metosin/reitit-pedestal]
+  metosin/reitit-pedestal
+  fi.metosin/reitit-openapi]
  :cljdoc.doc/tree
  [["Introduction" {:file "doc/README.md"}]
   ["Basics" {}
