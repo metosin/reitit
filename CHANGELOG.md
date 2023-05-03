@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.7.0-alpha1 (2023-05-03)
 
 * Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
 * Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
