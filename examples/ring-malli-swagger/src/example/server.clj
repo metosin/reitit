@@ -27,6 +27,10 @@
                :swagger {:info {:title "my-api"
                                 :description "swagger docs with [malli](https://github.com/metosin/malli) and reitit-ring"
                                 :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :securityDefinitions {"auth" {:type :apiKey
+                                                       :in :header
+                                                       :name "Example-Api-Key"}}
                          :tags [{:name "files", :description "file api"}
                                 {:name "math", :description "math api"}]}
                :handler (swagger/create-swagger-handler)}}]
@@ -34,7 +38,11 @@
         {:get {:no-doc true
                :openapi {:info {:title "my-api"
                                 :description "openapi3 docs with [malli](https://github.com/metosin/malli) and reitit-ring"
-                                :version "0.0.1"}}
+                                :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :components {:securitySchemes {"auth" {:type :apiKey
+                                                                :in :header
+                                                                :name "Example-Api-Key"}}}}
                :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
@@ -85,10 +93,42 @@
                                        :json-schema/default 42}
                                       int?]
                                      [:y int?]]}
+                 ;; OpenAPI3 named examples for request & response
+                 :openapi {:requestBody
+                           {:content
+                            {"application/json"
+                             {:examples {"add-one-one" {:summary "1+1"
+                                                        :value {:x 1 :y 1}}
+                                         "add-one-two" {:summary "1+2"
+                                                        :value {:x 1 :y 2}}}}}}
+                           :responses
+                           {200
+                            {:content
+                             {"application/json"
+                              {:examples {"two" {:summary "2"
+                                                 :value {:total 2}}
+                                          "three" {:summary "3"
+                                                   :value {:total 3}}}}}}}}
                  :responses {200 {:body [:map [:total int?]]}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
-                             :body {:total (+ x y)}})}}]]]
+                             :body {:total (+ x y)}})}}]]
+
+       ["/secure"
+        {:tags ["secure"]
+         :openapi {:security [{"auth" []}]}
+         :swagger {:security [{"auth" []}]}}
+        ["/get"
+         {:get {:summary "endpoint authenticated with a header"
+                :responses {200 {:body [:map [:secret :string]]}
+                            401 {:body [:map [:error :string]]}}
+                :handler (fn [request]
+                           ;; In a real app authentication would be handled by middleware
+                           (if (= "secret" (get-in request [:headers "example-api-key"]))
+                             {:status 200
+                              :body {:secret "I am a marmot"}}
+                             {:status 401
+                              :body {:error "unauthorized"}}))}}]]]
 
       {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
        ;;:validate spec/validate ;; enable spec validation for route data

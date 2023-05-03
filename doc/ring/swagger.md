@@ -145,7 +145,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
 * missed routes are handled by `create-default-handler`
 * served via [ring-jetty](https://github.com/ring-clojure/ring/tree/master/ring-jetty-adapter)
 
-Whole example project is in [`/examples/ring-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-swagger).
+Whole example project is in [`/examples/ring-spec-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-spec-swagger).
 
 ```clj
 (ns example.server
