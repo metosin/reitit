@@ -44,7 +44,3 @@ Coercion with Malli and Swagger generation.
 ## ring-spec-swagger
 
 Coercion with Spec and Swagger generation.
-
-## ring-swagger
-
-Coercion with Spec and Swagger generation. Same as previous!

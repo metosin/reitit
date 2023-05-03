@@ -59,4 +59,4 @@ Partial sample output:
 
 ## Example app
 
-See an example app with the default middleware in action: https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj.
+See an example app with the default middleware in action: <https://github.com/metosin/reitit/blob/master/examples/ring-malli-swagger/src/example/server.clj>.
