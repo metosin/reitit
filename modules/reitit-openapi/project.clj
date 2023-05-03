@@ -1,4 +1,4 @@
-(defproject metosin/reitit-openapi "0.7.0-alpha1"
+(defproject fi.metosin/reitit-openapi "0.7.0-alpha1"
   :description "Reitit: OpenAPI-support"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

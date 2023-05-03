@@ -26,7 +26,7 @@
                          [metosin/reitit-http "0.7.0-alpha1"]
                          [metosin/reitit-interceptors "0.7.0-alpha1"]
                          [metosin/reitit-swagger "0.7.0-alpha1"]
-                         [metosin/reitit-openapi "0.7.0-alpha1"]
+                         [fi.metosin/reitit-openapi "0.7.0-alpha1"]
                          [metosin/reitit-swagger-ui "0.7.0-alpha1"]
                          [metosin/reitit-frontend "0.7.0-alpha1"]
                          [metosin/reitit-sieppari "0.7.0-alpha1"]
