@@ -10,7 +10,7 @@
   (-init [this] "Create event listeners")
   (-stop [this] "Remove event listeners")
   (-on-navigate [this path] "Find a match for current routing path and call on-navigate callback")
-  (-get-path [this] "Get the current routing path")
+  (-get-path [this] "Get the current routing path, including query string and fragment")
   (-href [this path] "Converts given routing path to browser location"))
 
 ;; This version listens for both pop-state and hash-change for
@@ -92,6 +92,7 @@
          ;; isContentEditable property is inherited from parents,
          ;; so if the anchor is inside contenteditable div, the property will be true.
          (not (.-isContentEditable el))
+         ;; NOTE: Why doesn't this use frontend variant instead of core?
          (reitit/match-by-path router (.getPath uri)))))
 
 (defrecord Html5History [on-navigate router listen-key click-listen-key]
@@ -194,8 +195,10 @@
   ([history name path-params]
    (href history name path-params nil))
   ([history name path-params query-params]
+   (href history name path-params query-params nil))
+  ([history name path-params query-params fragment]
    (let [match (rf/match-by-name! (:router history) name path-params)]
-     (-href history (reitit/match->path match query-params)))))
+     (-href history (rf/match->path match query-params fragment)))))
 
 (defn
   ^{:see-also ["reitit.core/match->path"]}
@@ -212,12 +215,14 @@
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
   ([history name]
-   (push-state history name nil nil))
+   (push-state history name nil nil nil))
   ([history name path-params]
-   (push-state history name path-params nil))
+   (push-state history name path-params nil nil))
   ([history name path-params query-params]
+   (push-state history name path-params query-params nil))
+  ([history name path-params query-params fragment]
    (let [match (rf/match-by-name! (:router history) name path-params)
-         path (reitit/match->path match query-params)]
+         path (rf/match->path match query-params fragment)]
      ;; pushState and replaceState don't trigger popstate event so call on-navigate manually
      (.pushState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
@@ -238,12 +243,14 @@
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
   ([history name]
-   (replace-state history name nil nil))
+   (replace-state history name nil nil nil))
   ([history name path-params]
-   (replace-state history name path-params nil))
+   (replace-state history name path-params nil nil))
   ([history name path-params query-params]
+   (replace-state history name path-params query-params nil))
+  ([history name path-params query-params fragment]
    (let [match (rf/match-by-name! (:router history) name path-params)
-         path (reitit/match->path match query-params)]
+         path (rf/match->path match query-params fragment)]
      (.replaceState js/window.history nil "" (-href history path))
      (-on-navigate history path))))
 
@@ -266,9 +273,9 @@
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
   ([history name]
    (navigate history name nil))
-  ([history name {:keys [path-params query-params replace] :as opts}]
+  ([history name {:keys [path-params query-params fragment replace] :as opts}]
    (let [match (rf/match-by-name! (:router history) name path-params)
-         path (reitit/match->path match query-params)]
+         path (rf/match->path match query-params fragment)]
      (if replace
        (.replaceState js/window.history nil "" (-href history path))
        (.pushState js/window.history nil "" (-href history path)))

@@ -282,3 +282,16 @@
   (testing "Need to coerce current values manually"
     (is (= "foo?foo=2"
            (rf/set-query-params "foo?foo=1" (fn [q] (update q :foo #(inc (js/parseInt %)))))))))
+
+(deftest match->path-test
+  (is (= "foo"
+         (rf/match->path {:path "foo"} nil nil)
+         (rf/match->path {:path "foo"} {} "")))
+  (is (= "foo?a=1&b=&c=foo+bar"
+         ;; NOTE: This encoding differs from set-query
+         (rf/match->path {:path "foo"} {:a "1" :b "" :c "foo bar"} nil)))
+  (is (= "foo#aaa"
+         (rf/match->path {:path "foo"} nil "aaa")))
+  (testing "Fragment encoding"
+    (is (= "foo#foo+bar+%25"
+           (rf/match->path {:path "foo"} nil "foo bar %")))))
