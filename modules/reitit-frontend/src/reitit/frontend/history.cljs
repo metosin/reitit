@@ -132,7 +132,8 @@
     nil)
   (-get-path [this]
     (str (.. js/window -location -pathname)
-         (.. js/window -location -search)))
+         (.. js/window -location -search)
+         (.. js/window -location -hash)))
   (-href [this path]
     path))
 
