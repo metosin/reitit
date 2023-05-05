@@ -1,7 +1,7 @@
 # Default Interceptors
 
 ```clj
-[metosin/reitit-interceptors "0.7.0-alpha2"]
+[metosin/reitit-interceptors "0.7.0-alpha3"]
 ```
 
 Just like the [ring default middleware](../ring/default_middleware.md), but for interceptors.

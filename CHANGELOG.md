@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.7.3-alpha3 (2023-05-05)
+
+* Compile `reitit.Trie` with Java 1.8 target for compatibility
+
 ## 0.7.0-alpha2 (2023-05-04)
 
 * Fix reading fragment string on `Html5History` initialization
