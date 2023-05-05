@@ -10,4 +10,5 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :java-source-paths ["java-src"]
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :dependencies [[meta-merge]])
