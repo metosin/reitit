@@ -256,7 +256,6 @@
                                                                      400 {:schema {:type "string"}
                                                                           :description "kosh"}
                                                                      500 {:description "fail"}}
-                                                         :definitions nil
                                                          :summary "plus"}
                                                    :post {:parameters [{:in "body",
                                                                         :name "body",
@@ -281,7 +280,6 @@
                                                                       400 {:schema {:type "string"}
                                                                            :description "kosh"}
                                                                       500 {:description "fail"}}
-                                                          :definitions nil
                                                           :summary "plus with body"}
                                                    :put {:parameters [{:in "body"
                                                                        :name "body"
@@ -290,33 +288,14 @@
                                                                        :schema
                                                                        {:type "object"
                                                                         :additionalProperties
-                                                                        {:$ref "#/definitions/reitit.swagger-test~1req-val"}
-                                                                        :definitions {::req-key
-                                                                                      {:type "string"
-                                                                                       :x-anyOf [{:type "string"}
-                                                                                                 {:type "string"}]}
-                                                                                      ::req-val
-                                                                                      {:type "object"
-                                                                                       :x-anyOf [{:type "object"}
-                                                                                                 {:type "string"}]}}}}]
+                                                                        {:$ref "#/definitions/reitit.swagger-test~1req-val"}}}]
                                                          :responses {200
                                                                      {:schema
                                                                       {:$ref "#/definitions/reitit.swagger-test~1resp-map"
                                                                        :x-anyOf [{:$ref "#/definitions/reitit.swagger-test~1resp-map"}
-                                                                                 {:$ref "#/definitions/reitit.swagger-test~1resp-string"}]
-                                                                       :definitions {::resp-map {:type "object"}
-                                                                                     ::resp-string
-                                                                                     {:type "string", :minLength 1}}}
+                                                                                 {:$ref "#/definitions/reitit.swagger-test~1resp-string"}]}
                                                                       :description ""}
                                                                      500 {:description "fail"}}
-                                                         :definitions {::req-key {:type "string"
-                                                                                  :x-anyOf [{:type "string"}
-                                                                                            {:type "string"}]}
-                                                                       ::req-val {:type "object"
-                                                                                  :x-anyOf [{:type "object"}
-                                                                                            {:type "string"}]}
-                                                                       ::resp-map {:type "object"}
-                                                                       ::resp-string {:type "string", :minLength 1}}
                                                          :summary "plus put with definitions"}}
                             "/api/schema/plus/{z}" {:get {:parameters [{:description ""
                                                                         :format "int32"
