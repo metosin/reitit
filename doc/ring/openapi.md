@@ -34,6 +34,53 @@ Coercion keys also contribute to the docs:
 
 Use `:request` parameter coercion (instead of `:body`) to unlock per-content-type coercions. See [Coercion](coercion.md).
 
+## Annotating schemas
+
+You can use malli properties, schema-tools data or spec-tools data to
+annotate your models with examples, descriptions and defaults that
+show up in the OpenAPI spec.
+
+Malli:
+
+```clj
+["/plus"
+ {:post
+  {:parameters
+   {:body [:map
+           [:x
+            {:title "X parameter"
+             :description "Description for X parameter"
+             :json-schema/default 42}
+            int?]
+           [:y int?]]}}}]
+```
+
+Schema:
+
+```clj
+["/plus"
+ {:post
+  {:parameters
+   {:body {:x (schema-tools.core/schema s/Num {:description "Description for X parameter"
+                                               :openapi/example 13
+                                               :openapi/default 42})
+           :y int?}}}}]
+```
+
+Spec:
+
+```clj
+["/plus"
+ {:post
+  {:parameters
+   {:body (spec-tools.data-spec/spec ::foo
+                                     {:x (schema-tools.core/spec {:spec int?
+                                                                  :description "Description for X parameter"
+                                                                  :openapi/example 13
+                                                                  :openapi/default 42})
+                                      :y int?}}}}}]
+```
+
 ## Custom OpenAPI data
 
 The `:openapi` route data key can be used to add top-level or
