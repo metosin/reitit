@@ -365,7 +365,7 @@
 
 (deftest all-parameter-types-test
   (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map {:description (str "description " nom)} [nom :string]])]
+          [[#'malli/coercion (fn [nom] [:map [nom [:string {:description (str "description " nom)}]]])]
            [#'schema/coercion (fn [nom] {nom s/Str})]
            [#'spec/coercion (fn [nom] {nom string?})]]]
     (testing coercion
