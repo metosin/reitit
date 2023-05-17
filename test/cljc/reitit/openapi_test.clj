@@ -365,9 +365,10 @@
 
 (deftest all-parameter-types-test
   (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
+          [[#'malli/coercion (fn [nom] [:map [nom [:string {:description (str "description " nom)}]]])]
            [#'schema/coercion (fn [nom] {nom s/Str})]
-           [#'spec/coercion (fn [nom] {nom string?})]]]
+           [#'spec/coercion (fn [nom] {nom (st/spec {:spec string?
+                                                     :description (str "description " nom)})})]]]
     (testing coercion
       (let [app (ring/ring-handler
                  (ring/router
@@ -395,18 +396,30 @@
           (is (match? [{:in "query"
                         :name "q"
                         :required true
+                        :description (if (not= #'schema/coercion coercion)
+                                       "description :q"
+                                       "")
                         :schema {:type "string"}}
                        {:in "header"
                         :name "h"
                         :required true
+                        :description (if (not= #'schema/coercion coercion)
+                                       "description :h"
+                                       "")
                         :schema {:type "string"}}
                        {:in "cookie"
                         :name "c"
                         :required true
+                        :description (if (not= #'schema/coercion coercion)
+                                       "description :c"
+                                       "")
                         :schema {:type "string"}}
                        {:in "path"
                         :name "p"
                         :required true
+                        :description (if (not= #'schema/coercion coercion)
+                                       "description :p"
+                                       "")
                         :schema {:type "string"}}]
                  (-> spec
                      (get-in [:paths "/parameters" :post :parameters])

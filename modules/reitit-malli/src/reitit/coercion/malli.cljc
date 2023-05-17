@@ -145,14 +145,14 @@
       (when (seq parameters)
         {:parameters
          (->> (for [[in schema] parameters
-                    :let [{:keys [properties required] :as root} (->schema-object schema {:in in :type :parameter})
+                    :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
                           required? (partial contains? (set required))]
                     [k schema] properties]
                 (merge {:in (name in)
                         :name k
                         :required (required? k)
                         :schema schema}
-                       (select-keys root [:description])))
+                       (select-keys schema [:description])))
               (into []))})
       (when body
         ;; body uses a single schema to describe every :requestBody
