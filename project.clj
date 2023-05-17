@@ -87,7 +87,7 @@
                                   [org.clojure/clojurescript "1.10.773"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.13.0"]
+                                  [metosin/schema-tools "0.13.1"]
                                   [metosin/spec-tools "0.10.5"]
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
