@@ -1,7 +1,7 @@
 # Default Middleware
 
 ```clj
-[metosin/reitit-middleware "0.7.0-alpha3"]
+[metosin/reitit-middleware "0.7.0-alpha4"]
 ```
 
 Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.

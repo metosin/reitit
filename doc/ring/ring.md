@@ -5,7 +5,7 @@
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
 ```clj
-[metosin/reitit-ring "0.7.0-alpha3"]
+[metosin/reitit-ring "0.7.0-alpha4"]
 ```
 
 ## `reitit.ring/router`
