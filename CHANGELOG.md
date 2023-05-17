@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+* OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
+
 ## 0.7.3-alpha3 (2023-05-05)
 
 * Compile `reitit.Trie` with Java 1.8 target for compatibility
