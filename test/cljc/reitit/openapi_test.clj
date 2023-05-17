@@ -366,7 +366,8 @@
 (deftest all-parameter-types-test
   (doseq [[coercion ->schema]
           [[#'malli/coercion (fn [nom] [:map [nom [:string {:description (str "description " nom)}]]])]
-           [#'schema/coercion (fn [nom] {nom s/Str})]
+           [#'schema/coercion (fn [nom] {nom (schema-tools.core/schema s/Str
+                                                                       {:description (str "description " nom)})})]
            [#'spec/coercion (fn [nom] {nom (st/spec {:spec string?
                                                      :description (str "description " nom)})})]]]
     (testing coercion
@@ -396,30 +397,22 @@
           (is (match? [{:in "query"
                         :name "q"
                         :required true
-                        :description (if (not= #'schema/coercion coercion)
-                                       "description :q"
-                                       "")
+                        :description "description :q"
                         :schema {:type "string"}}
                        {:in "header"
                         :name "h"
                         :required true
-                        :description (if (not= #'schema/coercion coercion)
-                                       "description :h"
-                                       "")
+                        :description "description :h"
                         :schema {:type "string"}}
                        {:in "cookie"
                         :name "c"
                         :required true
-                        :description (if (not= #'schema/coercion coercion)
-                                       "description :c"
-                                       "")
+                        :description "description :c"
                         :schema {:type "string"}}
                        {:in "path"
                         :name "p"
                         :required true
-                        :description (if (not= #'schema/coercion coercion)
-                                       "description :p"
-                                       "")
+                        :description "description :p"
                         :schema {:type "string"}}]
                  (-> spec
                      (get-in [:paths "/parameters" :post :parameters])
