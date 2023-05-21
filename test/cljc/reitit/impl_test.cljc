@@ -171,3 +171,18 @@
           :path-parts ["https://google.com"]
           :path-params #{}}
          (impl/parse "https://google.com" nil))))
+
+(deftest path-update-test
+  (is (= {:get {:responses {200 {:body [[:map [:total :int]]]}}
+                :parameters {:query [[:map [:x :int]]]}},
+          :parameters {:query [[:map [:x :int]]]}
+          :post {}}
+         (impl/path-update
+          {:parameters {:query [:map [:x :int]]}
+           :get {:parameters {:query [:map [:x :int]]}
+                 :responses {200 {:body [:map [:total :int]]}}}
+           :post {}}
+          [[[:parameters any?] vector]
+           [[any? :parameters any?] vector]
+           [[:responses any? :body] vector]
+           [[any? :responses any? :body] vector]]))))
