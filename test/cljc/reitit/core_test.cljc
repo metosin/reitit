@@ -267,14 +267,14 @@
     (let [pong (constantly "ok")
           routes ["/api" {:mw [:api]}
                   ["/ping" :kikka]
-                  ["/user/:id" {:parameters {:id "String"}}
-                   ["/:sub-id" {:parameters {:sub-id "String"}}]]
+                  ["/user/:id" {:parameters {:path {:id :string}}}
+                   ["/:sub-id" {:parameters {:path {:sub-id :string}}}]]
                   ["/pong" pong]
                   ["/admin" {:mw [:admin] :roles #{:admin}}
                    ["/user" {:roles ^:replace #{:user}}]
                    ["/db" {:mw [:db]}]]]
           expected [["/api/ping" {:mw [:api], :name :kikka}]
-                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:id "String", :sub-id "String"}}]
+                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:path [{:id :string} {:sub-id :string}]}}]
                     ["/api/pong" {:mw [:api], :handler pong}]
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
@@ -282,7 +282,7 @@
       (is (= expected (impl/resolve-routes routes (r/default-router-options))))
       (is (= (r/map->Match
               {:template "/api/user/:id/:sub-id"
-               :data {:mw [:api], :parameters {:id "String", :sub-id "String"}}
+               :data {:mw [:api], :parameters {:path [{:id :string} {:sub-id :string}]}}
                :path "/api/user/1/2"
                :path-params {:id "1", :sub-id "2"}})
              (r/match-by-path router "/api/user/1/2"))))))
