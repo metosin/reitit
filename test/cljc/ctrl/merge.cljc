@@ -67,11 +67,16 @@
                                                (= nil p pp) true))]
                              (when match (reduced f)))) nil path-map)))
 
+(defrecord Acc [data])
+(defn accumulate? [x] (instance? Acc x))
+(defn unaccumulate [x] (if (accumulate? x) (:data x) x))
+(defn accumulate
+  ([x] (if (accumulate? x) x (->Acc [x])))
+  ([x y] (update (accumulate x) :data into (unaccumulate y))))
+
 ;;
 ;; public api
 ;;
-
-(defn any [_] true)
 
 (defn merge
   ([] {})
@@ -83,6 +88,9 @@
        (different-priority? left right)
        (pick-prioritized left right options)
 
+       (accumulate? left)
+       (accumulate left right)
+
        custom-merge
        (custom-merge left right options)
 
@@ -90,7 +98,9 @@
        (let [merge-entry (fn [m e]
                            (let [k (key e) v (val e)]
                              (if (contains? m k)
-                               (assoc m k (merge (get m k) v (update options ::path (fnil conj []) k)))
+                               (assoc m k (merge (get m k) v (-> options
+                                                                 (update ::path (fnil conj []) k)
+                                                                 (update ::acc assoc (or path []) m))))
                                (assoc m k v))))
              merge2 (fn [m1 m2]
                       (reduce merge-entry (or m1 {}) (seq m2)))]
@@ -108,82 +118,3 @@
          (into (empty left) (concat left right)))
 
        :else right))))
-
-;;
-;; spike
-;;
-
-(comment
- (merge
-  {:parameters {:query {:x 1}}}
-  {:parameters {:query nil}}
-  {::replace-nil true}))
-
-(ns demo2)
-
-(require '[reitit.ring :as ring]
-         '[malli.util :as mu]
-         '[reitit.core :as r]
-         '[ctrl.merge :as cm])
-
-(defn ring-path-map [f]
-  [[[:parameters cm/any] f]
-   [[ring/http-methods :parameters cm/any] f]
-   [[:responses cm/any :body] f]
-   [[ring/http-methods :responses cm/any :body] f]])
-
-(defn malli-merge [x y _] (mu/merge x y))
-
-(-> (ring/router
-     ["/api" {:parameters {:header [:map ["Api" :string]]}}
-      ["/math/:x" {:parameters {:path [:map [:x :int]]
-                                :query [:map [:b :string]]
-                                :header [:map ["Math" :string]]}
-                   :responses {200 {:body [:map [:total :int]]}
-                               500 {:description "fail"}}}
-       ["/plus/:y" {:get {:parameters {:query ^:replace [:map [:a :int]]
-                                       :body [:map [:b :int]]
-                                       :header [:map ["Plus" :string]]
-                                       :path [:map [:y :int]]}
-                          :responses {200 {:body [:map [:total2 :int]]}
-                                      500 {:description "fail"}}
-                          :handler (constantly {:status 200, :body "ok"})}}]]]
-     {:meta-merge #(cm/merge %1 %2 {::cm/path-map (ring-path-map malli-merge)})})
-    (ring/ring-handler)
-    (ring/get-router)
-    (r/compiled-routes)
-    (last)
-    (last)
-    :get
-    :data)
-;{:parameters {:header [:map
-;                       ["Api" :string]
-;                       ["Math" :string]
-;                       ["Plus" :string]],
-;              :path [:map
-;                     [:x :int]
-;                     [:y :int]],
-;              :query [:map [:a :int]],
-;              :body [:map [:b :int]]},
-; :responses {200 {:body [:map
-;                         [:total :int]
-;                         [:total2 :int]]}
-;             500 {:description "fail"}},
-; :handler #object[clojure.core$constantly$fn__5740]}
-
-(cm/merge
- {:parameters {:query [:map [:x :int]]}
-  :get {:parameters {:query [:map [:x :int]]}
-        :responses {200 {:body [:map [:total :int]]}}}}
- {:parameters {:query [:map [:y :int]]}
-  :get {:parameters {:query [:map [:y :int]]}
-        :responses {200 {:body [:map [:total :int]]}}}
-  :post {:parameters {:query [:map [:y :int]]}}}
- {::cm/path-map [[[:parameters cm/any] malli-merge]
-                 [[cm/any :parameters cm/any] malli-merge]
-                 [[:responses cm/any :body] malli-merge]
-                 [[cm/any :responses cm/any :body] malli-merge]]})
-;{:parameters {:query [:map [:x :int] [:y :int]]},
-; :get {:parameters {:query [:map [:x :int] [:y :int]]}
-;       :responses {200 {:body [:map [:total :int]]}}},
-; :post {:parameters {:query [:map [:y :int]]}}}
