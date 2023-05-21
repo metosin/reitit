@@ -11,9 +11,9 @@ Routers can be configured via options. The following options are available for t
 | `:syntax`     | Path-parameter syntax as keyword or set of keywords (default #{:bracket :colon})
 | `:expand`     | Function of `arg opts => data` to expand route arg to route data (default `reitit.core/expand`)
 | `:coerce`     | Function of `route opts => route` to coerce resolved route, can throw or return `nil`
-| `:meta-merge` | Function which follows the signature of `meta-merge.core/meta-merge`, useful for when you want to have more control over the meta merging
 | `:compile`    | Function of `route opts => result` to compile a route handler
 | `:validate`   | Function of `routes opts => ()` to validate route (data) via side-effects
 | `:conflicts`  | Function of `{route #{route}} => ()` to handle conflicting routes
 | `:exception`  | Function of `Exception => Exception ` to handle creation time exceptions (default `reitit.exception/exception`)
+| `:meta-merge` | Function of `left right => merged` to merge route-data (default `meta-merge.core/meta-merge`)
 | `:router`     | Function of `routes opts => router` to override the actual router implementation
