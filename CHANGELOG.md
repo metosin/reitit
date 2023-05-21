@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNREALEASED
+
+```clojure
+[metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
+[com.fasterxml.jackson.core/jackson-core "2.15.1"] is available but we use "2.14.2"
+[com.fasterxml.jackson.core/jackson-databind "2.15.1"] is available but we use "2.14.2"
+```
+
 ## 0.7.3-alpha4 (2023-05-17)
 
 * OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)

@@ -33,15 +33,15 @@
                          [metosin/reitit-pedestal "0.7.0-alpha4"]
                          [metosin/ring-swagger-ui "4.18.1"]
                          [metosin/spec-tools "0.10.5"]
-                         [metosin/schema-tools "0.13.0"]
+                         [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.11.0"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.14.2"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.14.2"]
+                         [com.fasterxml.jackson.core/jackson-core "2.15.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.15.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.26" :exclusions [org.clojure/core.rrb-vector]]
@@ -52,7 +52,7 @@
 
                          [io.pedestal/pedestal.service "0.5.10"]]
 
-  :plugins [[jonase/eastwood "1.3.0"]
+  :plugins [[jonase/eastwood "1.4.0"]
             ;[lein-virgil "0.1.7"]
             [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
@@ -115,8 +115,8 @@
                                   [io.pedestal/pedestal.service "0.5.10"]
 
                                   [org.clojure/core.async "1.6.673"]
-                                  [manifold "0.4.0"]
-                                  [funcool/promesa "10.0.594"]
+                                  [manifold "0.4.1"]
+                                  [funcool/promesa "11.0.664"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "1.0.3"]
                                   [ring-cors "0.1.13"]
@@ -134,8 +134,8 @@
                                    [io.pedestal/pedestal.jetty "0.5.10"]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.6.673"]
-                                   [manifold "0.4.0"]
-                                   [funcool/promesa "10.0.594"]
+                                   [manifold "0.4.1"]
+                                   [funcool/promesa "11.0.664"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.6.1"]
