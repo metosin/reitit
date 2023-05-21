@@ -94,8 +94,9 @@
                                   (conj (:content model) [:default (:body model)])
                                   [[:default model]])
             format->coercer (some->> (for [[format schema] format-schema-pairs
-                                           :when schema]
-                                       [format (-request-coercer coercion (case style :request :body style) (->open schema))])
+                                           :when schema
+                                           :let [type (case style :request :body style)]]
+                                       [format (-request-coercer coercion type (->open schema))])
                                      (filter second)
                                      (seq)
                                      (into {}))]
@@ -117,7 +118,8 @@
 (defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
                                                          :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (let [per-format-coercers (some->> (for [[format schema] content]
+    (let [per-format-coercers (some->> (for [[format schema] content
+                                             :when schema]
                                          [format (-response-coercer coercion schema)])
                                        (filter second)
                                        (seq)
@@ -152,25 +154,23 @@
       response)))
 
 (defn request-coercers [coercion parameters opts]
-  (some->> (for [[k v] parameters
-                 :when v]
+  (some->> (for [[k v] parameters, :when v]
              [k (request-coercer coercion k v opts)])
-           (filter second)
-           (seq)
-           (into {})))
+           (filter second) (seq) (into {})))
 
 (defn response-coercers [coercion responses opts]
   (some->> (for [[status model] responses]
              [status (response-coercer coercion model opts)])
-           (filter second)
-           (seq)
-           (into {})))
+           (filter second) (seq) (into {})))
+
+(defn -compile-parameters [data coercion]
+  (impl/path-update data [[[:parameters any?] #(-compile-model coercion % nil)]]))
 
 ;;
 ;; api-docs
 ;;
 
-(defn -warn-unsupported-coercions [{:keys [parameters responses] :as data}]
+(defn -warn-unsupported-coercions [{:keys [parameters responses] :as _data}]
   (when (:request parameters)
     (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
   (when (some :content (vals responses))
@@ -204,17 +204,29 @@
 
 (defn compile-request-coercers
   "A router :compile implementation which reads the `:parameters`
-  and `:coercion` data to create compiled coercers into Match under
-  `:result. A pre-requisite to use [[coerce!]]."
-  [[_ {:keys [parameters coercion]}] opts]
+  and `:coercion` data to both compile the schemas and create compiled coercers
+  into Match under `:result with the following keys:
+
+   | key       | description
+   | ----------|-------------
+   | `:data`   | data with compiled schemas
+   | `:coerce` | function of `Match -> coerced parameters` to coerce parameters
+
+  A pre-requisite to use [[coerce!]].
+
+  NOTE: this is not needed with ring/http, where the coercion compilation is
+  managed in the request coercion middleware/interceptors."
+  [[_ {:keys [parameters coercion] :as data}] opts]
   (if (and parameters coercion)
-    (request-coercers coercion parameters opts)))
+    (let [{:keys [parameters] :as data} (-compile-parameters data coercion)]
+      {:data data
+       :coerce (request-coercers coercion parameters opts)})))
 
 (defn coerce!
-  "Returns a map of coerced input parameters using pre-compiled
-  coercers under `:result` (provided by [[compile-request-coercers]].
-  Throws `ex-info` if parameters can't be coerced
-  If coercion or parameters are not defined, return `nil`"
+  "Returns a map of coerced input parameters using pre-compiled coercers in `Match`
+  under path `[:result :coerce]` (provided by [[compile-request-coercers]].
+  Throws `ex-info` if parameters can't be coerced. If coercion or parameters
+  are not defined, returns `nil`"
   [match]
-  (if-let [coercers (:result match)]
+  (if-let [coercers (-> match :result :coerce)]
     (coerce-request coercers match)))

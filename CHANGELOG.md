@@ -12,7 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNREALEASED
+## UNRELEASED
+
+**BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
+**BREAKING**: Parameter and Response schemas are acculated into vector in route data - to be merged properly into compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - works will all of `Malli`, `Schema` and `Spec`.
 
 ```clojure
 [metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
@@ -20,11 +23,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [com.fasterxml.jackson.core/jackson-databind "2.15.1"] is available but we use "2.14.2"
 ```
 
-## 0.7.3-alpha4 (2023-05-17)
+## 0.7.0-alpha4 (2023-05-17)
 
 * OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
 
-## 0.7.3-alpha3 (2023-05-05)
+## 0.7.0-alpha3 (2023-05-05)
 
 * Compile `reitit.Trie` with Java 1.8 target for compatibility
 

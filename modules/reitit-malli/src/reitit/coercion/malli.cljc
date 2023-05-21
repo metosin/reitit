@@ -139,85 +139,84 @@
         parameters (dissoc parameters :request :body :multipart)
         ->schema-object (fn [schema opts]
                           (let [current-opts (merge options opts)]
-                            (json-schema/transform (coercion/-compile-model coercion schema current-opts)
-                                                   current-opts)))]
+                            (json-schema/transform schema current-opts)))]
     (merge
-      (when (seq parameters)
-        {:parameters
-         (->> (for [[in schema] parameters
-                    :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
-                          required? (partial contains? (set required))]
-                    [k schema] properties]
-                (merge {:in (name in)
-                        :name k
-                        :required (required? k)
-                        :schema schema}
-                       (select-keys schema [:description])))
-              (into []))})
-      (when body
-        ;; body uses a single schema to describe every :requestBody
-        ;; the schema-object transformer should be able to transform into distinct content-types
-        {:requestBody {:content (into {}
-                                      (map (fn [content-type]
-                                             (let [schema (->schema-object body {:in :requestBody
+     (when (seq parameters)
+       {:parameters
+        (->> (for [[in schema] parameters
+                   :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
+                         required? (partial contains? (set required))]
+                   [k schema] properties]
+               (merge {:in (name in)
+                       :name k
+                       :required (required? k)
+                       :schema schema}
+                      (select-keys schema [:description])))
+             (into []))})
+     (when body
+       ;; body uses a single schema to describe every :requestBody
+       ;; the schema-object transformer should be able to transform into distinct content-types
+       {:requestBody {:content (into {}
+                                     (map (fn [content-type]
+                                            (let [schema (->schema-object body {:in :requestBody
+                                                                                :type :schema
+                                                                                :content-type content-type})]
+                                              [content-type {:schema schema}])))
+                                     content-types)}})
+
+     (when request
+       ;; request allow to different :requestBody per content-type
+       {:requestBody
+        {:content (merge
+                   (when (:body request)
+                     (into {}
+                           (map (fn [content-type]
+                                  (let [schema (->schema-object (:body request) {:in :requestBody
                                                                                  :type :schema
                                                                                  :content-type content-type})]
-                                               [content-type {:schema schema}])))
-                                      content-types)}})
-
-      (when request
-        ;; request allow to different :requestBody per content-type
-        {:requestBody
-         {:content (merge
-                    (when (:body request)
-                      (into {}
-                            (map (fn [content-type]
-                                   (let [schema (->schema-object (:body request) {:in :requestBody
-                                                                                  :type :schema
-                                                                                  :content-type content-type})]
-                                     [content-type {:schema schema}])))
-                            content-types))
-                    (into {}
-                          (map (fn [[content-type requestBody]]
-                                 (let [schema (->schema-object requestBody {:in :requestBody
-                                                                            :type :schema
-                                                                            :content-type content-type})]
-                                   [content-type {:schema schema}])))
-                          (:content request)))}})
-      (when multipart
-        {:requestBody
-         {:content
-          {"multipart/form-data"
-           {:schema
-            (->schema-object multipart {:in :requestBody
-                                        :type :schema
-                                        :content-type "multipart/form-data"})}}}})
-      (when responses
-        {:responses
-         (into {}
-               (map (fn [[status {:keys [body content]
-                                  :as response}]]
-                      (let [content (merge
-                                      (when body
-                                        (into {}
-                                              (map (fn [content-type]
-                                                     (let [schema (->schema-object body {:in :responses
+                                    [content-type {:schema schema}])))
+                           content-types))
+                   (into {}
+                         (map (fn [[content-type requestBody]]
+                                (let [schema (->schema-object requestBody {:in :requestBody
+                                                                           :type :schema
+                                                                           :content-type content-type})]
+                                  [content-type {:schema schema}])))
+                         (:content request)))}})
+     (when multipart
+       {:requestBody
+        {:content
+         {"multipart/form-data"
+          {:schema
+           (->schema-object multipart {:in :requestBody
+                                       :type :schema
+                                       :content-type "multipart/form-data"})}}}})
+     (when responses
+       {:responses
+        (into {}
+              (map (fn [[status {:keys [body content]
+                                 :as response}]]
+                     (let [content (merge
+                                    (when body
+                                      (into {}
+                                            (map (fn [content-type]
+                                                   (let [schema (->schema-object body {:in :responses
+                                                                                       :type :schema
+                                                                                       :content-type content-type})]
+                                                     [content-type {:schema schema}])))
+                                            content-types))
+                                    (when content
+                                      (into {}
+                                            (map (fn [[content-type schema]]
+                                                   (let [schema (->schema-object schema {:in :responses
                                                                                          :type :schema
                                                                                          :content-type content-type})]
-                                                       [content-type {:schema schema}])))
-                                              content-types))
+                                                     [content-type {:schema schema}])))
+                                            content)))]
+                       [status (merge (select-keys response [:description])
                                       (when content
-                                        (into {}
-                                              (map (fn [[content-type schema]]
-                                                     (let [schema (->schema-object schema {:in :responses
-                                                                                           :type :schema
-                                                                                           :content-type content-type})]
-                                                       [content-type {:schema schema}])))
-                                              content)))]
-                        [status (merge (select-keys response [:description])
-                                       (when content
-                                         {:content content}))])))
-               responses)}))))
+                                        {:content content}))])))
+              responses)}))))
 
 (defn create
   ([]
@@ -226,7 +225,8 @@
    (let [{:keys [transformers lite compile options error-keys encode-error] :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
          transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)
-         compile (if lite (fn [schema options] (compile (binding [l/*options* options] (l/schema schema)) options))
+         compile (if lite (fn [schema options]
+                            (compile (binding [l/*options* options] (l/schema schema)) options))
                           compile)]
      ^{:type ::coercion/coercion}
      (reify coercion/Coercion
@@ -238,7 +238,7 @@
                      (if parameters
                        {:parameters
                         (->> (for [[in schema] parameters
-                                   parameter (extract-parameter in (compile schema options) options)]
+                                   parameter (extract-parameter in schema options)]
                                parameter)
                              (into []))})
                      (if responses
@@ -250,16 +250,17 @@
                                      (set/rename-keys $ {:body :schema})
                                      (update $ :description (fnil identity ""))
                                      (if (:schema $)
-                                       (-> $
-                                           (update :schema compile options)
-                                           (update :schema swagger/transform {:type :schema}))
+                                       (update $ :schema swagger/transform {:type :schema})
                                        $))]))}))
            :openapi (-get-apidocs-openapi this data options)
            (throw
             (ex-info
              (str "Can't produce Schema apidocs for " specification)
              {:type specification, :coercion :schema}))))
-       (-compile-model [_ model _] (compile model options))
+       (-compile-model [_ model _]
+         (if (= 1 (count model))
+           (compile (first model) options)
+           (reduce (fn [x y] (mu/merge x y options)) (map #(compile % options) model))))
        (-open-model [_ schema] schema)
        (-encode-error [_ error]
          (cond-> error
@@ -270,8 +271,8 @@
            (seq error-keys) (select-keys error-keys)
            encode-error (encode-error)))
        (-request-coercer [_ type schema]
-         (-coercer (compile schema options) type transformers :decode opts))
+         (-coercer schema type transformers :decode opts))
        (-response-coercer [_ schema]
-         (-coercer (compile schema options) :response transformers :encode opts))))))
+         (-coercer schema :response transformers :encode opts))))))
 
 (def coercion (create default-options))

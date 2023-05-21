@@ -3,6 +3,7 @@
             #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
             [reitit.core :as r]
+            [reitit.coercion :as coercion]
             [reitit.exception :as ex]
             [reitit.impl :as impl]
             [reitit.middleware :as middleware]))
@@ -28,16 +29,37 @@
              (update acc method expand opts)
              acc)) data http-methods)])
 
+(defn -update-paths [f]
+  (let [not-request? #(not= :request %)
+        http-method? #(contains? http-methods %)]
+    [;; default parameters and responses
+     [[:parameters not-request?] f]
+     [[http-method? :parameters not-request?] f]
+     [[:responses any? :body] f]
+     [[http-method? :responses any? :body] f]
+
+     ;; openapi3 parameters and responses
+     [[:parameters :request :content any?] f]
+     [[http-method? :parameters :request :content any?] f]
+     [[:parameters :request :body] f]
+     [[http-method? :parameters :request :body] f]
+     [[:responses any? :content any?] f]
+     [[http-method? :responses any? :content any?] f]]))
+
+(defn -compile-coercion [{:keys [coercion] :as data}]
+  (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))
+
 (defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
                  (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
                  (assoc :options (expand default-options-endpoint opts)))
         ->endpoint (fn [p d m s]
-                     (-> (middleware/compile-result [p d] opts s)
-                         (map->Endpoint)
-                         (assoc :path p)
-                         (assoc :method m)))
+                     (let [d (-compile-coercion d)]
+                       (-> (middleware/compile-result [p d] opts s)
+                           (map->Endpoint)
+                           (assoc :path p)
+                           (assoc :method m))))
         ->methods (fn [any? data]
                     (reduce
                      (fn [acc method]
@@ -97,6 +119,7 @@
   ([data opts]
    (let [opts (merge {:coerce coerce-handler
                       :compile compile-result
+                      :update-paths (-update-paths impl/accumulate)
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
      (when (contains? opts ::default-options-handler)

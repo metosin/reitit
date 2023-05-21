@@ -54,28 +54,16 @@
         :swagger (swagger/swagger-spec
                   (merge
                    (if parameters
-                     {::swagger/parameters
-                      (into
-                       (empty parameters)
-                       (for [[k v] parameters]
-                         [k (coercion/-compile-model this v nil)]))})
+                     {::swagger/parameters parameters})
                    (if responses
                      {::swagger/responses
                       (into
                        (empty responses)
                        (for [[k response] responses]
-                         [k (as-> response $
-                              (set/rename-keys $ {:body :schema})
-                              (if (:schema $)
-                                (update $ :schema #(coercion/-compile-model this % nil))
-                                $))]))})))
+                         [k (set/rename-keys response {:body :schema})]))})))
         :openapi (merge
                    (when (seq (dissoc parameters :body :request :multipart))
-                     (openapi/openapi-spec {::openapi/parameters
-                                            (into
-                                              (empty parameters)
-                                              (for [[k v] (dissoc parameters :body :request)]
-                                                [k (coercion/-compile-model this v nil)]))}))
+                     (openapi/openapi-spec {::openapi/parameters (dissoc parameters :body :request)}))
                    (when (:body parameters)
                      {:requestBody (openapi/openapi-spec
                                     {::openapi/content (zipmap content-types (repeat (:body parameters)))})})
@@ -92,23 +80,26 @@
                    (when responses
                      {:responses
                       (into
-                        (empty responses)
-                        (for [[k {:keys [body content] :as response}] responses]
-                          [k (merge
-                               (select-keys response [:description])
-                               (when (or body content)
-                                 (openapi/openapi-spec
-                                  {::openapi/content (merge
-                                                      (when body
-                                                        (zipmap content-types (repeat (coercion/-compile-model this body nil))))
-                                                      (when response
-                                                        (:content response)))})))]))}))
+                       (empty responses)
+                       (for [[k {:keys [body content] :as response}] responses]
+                         [k (merge
+                             (select-keys response [:description])
+                             (when (or body content)
+                               (openapi/openapi-spec
+                                {::openapi/content (merge
+                                                    (when body
+                                                      (zipmap content-types (repeat body)))
+                                                    (when response
+                                                      (:content response)))})))]))}))
 
         (throw
          (ex-info
           (str "Can't produce Schema apidocs for " specification)
           {:type specification, :coercion :schema}))))
-    (-compile-model [_ model _] model)
+    (-compile-model [_ model _]
+      (if (= 1 (count model))
+        (first model)
+        (apply st/merge model)))
     (-open-model [_ schema] (st/open-schema schema))
     (-encode-error [_ error]
       (-> error

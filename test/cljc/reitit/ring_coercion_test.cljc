@@ -234,14 +234,12 @@
   ([] {})
   ([left] left)
   ([left right]
-   (if (and (map? left) (map? right)
-            (contains? left :parameters)
-            (contains? right :parameters))
-     (-> (merge-with custom-meta-merge-checking-parameters left right)
-         (assoc :parameters (merge-with mu/merge
-                                        (:parameters left)
-                                        (:parameters right))))
-     (meta-merge left right)))
+   (let [pleft (-> left :parameters :path)
+         pright (-> right :parameters :path)]
+     (if (and (map? left) (map? right) pleft pright)
+       (-> (merge-with custom-meta-merge-checking-parameters left right)
+           (assoc-in [:parameters :path] (reduce mu/merge (concat pleft pright))))
+       (meta-merge left right))))
   ([left right & more]
    (reduce custom-meta-merge-checking-parameters left (cons right more))))
 
@@ -586,43 +584,43 @@
 
 (deftest per-content-type-test
   (doseq [[coercion json-request edn-request default-request json-response edn-response default-response]
-          [[#'malli/coercion
+          [[malli/coercion
             [:map [:request [:enum :json]] [:response any?]]
             [:map [:request [:enum :edn]] [:response any?]]
             [:map [:request [:enum :default]] [:response any?]]
             [:map [:request any?] [:response [:enum :json]]]
             [:map [:request any?] [:response [:enum :edn]]]
             [:map [:request any?] [:response [:enum :default]]]]
-           [#'schema/coercion
+           [schema/coercion
             {:request (s/eq :json) :response s/Any}
             {:request (s/eq :edn) :response s/Any}
             {:request (s/eq :default) :response s/Any}
             {:request s/Any :response (s/eq :json)}
             {:request s/Any :response (s/eq :edn)}
             {:request s/Any :response (s/eq :default)}]
-           [#'spec/coercion
+           [spec/coercion
             {:request (clojure.spec.alpha/spec #{:json}) :response any?}
             {:request (clojure.spec.alpha/spec #{:edn}) :response any?}
             {:request (clojure.spec.alpha/spec #{:default}) :response any?}
             {:request any? :response (clojure.spec.alpha/spec #{:json})}
             {:request any? :response (clojure.spec.alpha/spec #{:end})}
             {:request any? :response (clojure.spec.alpha/spec #{:default})}]]]
-    (testing coercion
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
-                  [["/foo" {:post {:parameters {:request {:content {"application/json" json-request
-                                                                    "application/edn" edn-request}
-                                                          :body default-request}}
-                                   :responses {200 {:content {"application/json" json-response
-                                                              "application/edn" edn-response}
-                                                    :body default-response}}
-                                   :handler (fn [req]
-                                              {:status 200
-                                               :body (-> req :parameters :request)})}}]]
-                  {:validate reitit.ring.spec/validate
+                  ["/foo" {:post {:parameters {:request {:content {"application/json" json-request
+                                                                   "application/edn" edn-request}
+                                                         :body default-request}}
+                                  :responses {200 {:content {"application/json" json-response
+                                                             "application/edn" edn-response}
+                                                   :body default-response}}
+                                  :handler (fn [req]
+                                             {:status 200
+                                              :body (-> req :parameters :request)})}}]
+                  {#_#_:validate reitit.ring.spec/validate
                    :data {:middleware [rrc/coerce-request-middleware
                                        rrc/coerce-response-middleware]
-                          :coercion @coercion}}))
+                          :coercion coercion}}))
             call (fn [request]
                    (try
                      (app request)

@@ -14,27 +14,28 @@
 (deftest coercion-test
   (let [r (r/router
            [["/schema" {:coercion reitit.coercion.schema/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number s/Int
-                                                       :keyword s/Keyword}
-                                                :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]
+             ["/:number" {:parameters {:path {:number s/Int}}}
+              ["/:keyword" {:parameters {:path {:keyword s/Keyword}
+                                         :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]]
             ["/malli" {:coercion reitit.coercion.malli/coercion}
-             ["/:number/:keyword" {:parameters {:path [:map [:number int?] [:keyword keyword?]]
-                                                :query [:maybe [:map [:int int?]
-                                                                [:ints [:vector int?]]
-                                                                [:map [:map-of int? int?]]]]}}]]
+             ["/:number" {:parameters {:path [:map [:number int?]]}}
+              ["/:keyword" {:parameters {:path [:map [:keyword keyword?]]
+                                         :query [:maybe [:map [:int int?]
+                                                         [:ints [:vector int?]]
+                                                         [:map [:map-of int? int?]]]]}}]]]
             ["/malli-lite" {:coercion reitit.coercion.malli/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}
-                                                :query (l/maybe {:int int?
-                                                                 :ints (l/vector int?)
-                                                                 :map (l/map-of int? int?)})}}]]
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}
+                                         :query (l/maybe {:int int?
+                                                          :ints (l/vector int?)
+                                                          :map (l/map-of int? int?)})}}]]]
             ["/spec" {:coercion reitit.coercion.spec/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}
-                                                :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}
+                                         :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]]
             ["/none"
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}}}]]]
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}}}]]]]
            {:compile coercion/compile-request-coercers})]
 
     (testing "schema-coercion"

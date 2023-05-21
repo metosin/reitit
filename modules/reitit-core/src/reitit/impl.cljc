@@ -105,8 +105,10 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn meta-merge [left right opts]
-  ((or (:meta-merge opts) mm/meta-merge) left right))
+(defn meta-merge [left right {:keys [meta-merge update-paths]}]
+  (let [update (if update-paths #(path-update % update-paths) identity)
+        merge (or meta-merge mm/meta-merge)]
+    (merge (update left) (update right))))
 
 (defn merge-data [opts p x]
   (reduce
