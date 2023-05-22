@@ -143,10 +143,8 @@
          (= (count model) 1) (first model)
          ;; here be dragons, best effort
          (every? map? model) (apply mm/meta-merge model)
-         ;; not sure if this is what we want
-         (every? s/spec? model) (reduce (fn [acc s] (st/merge acc s)) model)
          ;; fail fast
-         :else (ex/fail! ::model-error {:message "Can't merge nested data-specs & specs together", :spec model}))
+         :else (ex/fail! ::model-error {:message "Can't merge nested clojure specs", :spec model}))
        name))
     (-open-model [_ spec] spec)
     (-encode-error [_ error]

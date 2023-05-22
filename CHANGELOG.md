@@ -15,7 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
-**BREAKING**: Parameter and Response schemas are acculated into vector in route data - to be merged properly into compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - works will all of `Malli`, `Schema` and `Spec`.
+**BREAKING**: Parameter and Response schemas are acculated into vector in route data - to be merged properly into compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
 
 ```clojure
 [metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
