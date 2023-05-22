@@ -17,10 +17,8 @@
   (letfn [(match [x f] (if (fn? f) (f x) (= x f)))]
     (reduce
      (fn [_ [ps f]]
-       (let [match (loop [[p & pr] path, [pp & ppr] ps]
-                     (cond (and p pp (match p pp)) (recur pr ppr)
-                           (= nil p pp) true))]
-         (when match (reduced f))))
+       (when (and (>= (count path) (count ps)) (every? identity (map match path ps)))
+         (reduced f)))
      nil path-map)))
 
 (defn -path-vals [m path-map]
@@ -30,11 +28,11 @@
                (let [p' (conj p k)
                      f (-match p' path-map)]
                  (cond
-                   f (cons [p' (f v)] l)
+                   f (conj l [p' (f v)])
                    (and (map? v) (seq v)) (-path-vals l p' v)
-                   :else (cons [p' v] l))))
+                   :else (conj l [p' v]))))
              l m))]
-    (reverse (-path-vals [] [] m))))
+    (-path-vals [] [] m)))
 
 (defn -assoc-in-path-vals [c]
   (reduce (partial apply assoc-in) {} c))
