@@ -32,101 +32,101 @@
 
 (def app
   (ring/ring-handler
-    (ring/router
-      ["/api"
-       {:openapi {:id ::math}}
+   (ring/router
+    ["/api"
+     {:openapi {:id ::math}}
 
-       ["/openapi.json"
-        {:get {:no-doc true
-               :openapi {:info {:title "my-api"
-                                :version "0.0.1"}}
-               :handler (openapi/create-openapi-handler)}}]
+     ["/openapi.json"
+      {:get {:no-doc true
+             :openapi {:info {:title "my-api"
+                              :version "0.0.1"}}
+             :handler (openapi/create-openapi-handler)}}]
 
-       ["/spec" {:coercion spec/coercion}
-          ["/plus/:z"
-           {:get {:summary "plus"
-                  :tags [:plus :spec]
-                  :parameters {:query {:x int?, :y int?}
-                               :path {:z int?}}
-                  :openapi {:operationId "spec-plus"
-                            :deprecated true
-                            :responses {400 {:description "kosh"
-                                             :content {"application/json" {:schema {:type "string"}}}}}}
-                  :responses {200 {:description "success"
-                                   :body {:total int?}}
-                              500 {:description "fail"}}
-                  :handler (fn [{{{:keys [x y]} :query
-                                  {:keys [z]} :path} :parameters}]
-                             {:status 200, :body {:total (+ x y z)}})}
-            :post {:summary "plus with body"
-                   :parameters {:body (ds/maybe [int?])
-                                :path {:z int?}}
-                   :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
-                                              :description "kosh"}}}
-                   :responses {200 {:description "success"
-                                    :body {:total int?}}
-                               500 {:description "fail"}}
-                   :handler (fn [{{{:keys [z]} :path
-                                   xs :body} :parameters}]
-                              {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+     ["/spec" {:coercion spec/coercion}
+      ["/plus/:z"
+       {:get {:summary "plus"
+              :tags [:plus :spec]
+              :parameters {:query {:x int?, :y int?}
+                           :path {:z int?}}
+              :openapi {:operationId "spec-plus"
+                        :deprecated true
+                        :responses {400 {:description "kosh"
+                                         :content {"application/json" {:schema {:type "string"}}}}}}
+              :responses {200 {:description "success"
+                               :body {:total int?}}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body (ds/maybe [int?])
+                            :path {:z int?}}
+               :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
+                                          :description "kosh"}}}
+               :responses {200 {:description "success"
+                                :body {:total int?}}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
-       ["/malli" {:coercion malli/coercion}
-        ["/plus/*z"
-         {:get {:summary "plus"
-                :tags [:plus :malli]
-                :parameters {:query [:map [:x int?] [:y int?]]
-                             :path [:map [:z int?]]}
-                :openapi {:responses {400 {:description "kosh"
-                                           :content {"application/json" {:schema {:type "string"}}}}}}
-                :responses {200 {:description "success"
-                                 :body [:map [:total int?]]}
-                            500 {:description "fail"}}
-                :handler (fn [{{{:keys [x y]} :query
-                                {:keys [z]} :path} :parameters}]
-                           {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary "plus with body"
-                 :parameters {:body [:maybe [:vector int?]]
-                              :path [:map [:z int?]]}
-                 :openapi {:responses {400 {:description "kosh"
-                                            :content {"application/json" {:schema {:type "string"}}}}}}
-                 :responses {200 {:description "success"
-                                  :body [:map [:total int?]]}
-                             500 {:description "fail"}}
-                 :handler (fn [{{{:keys [z]} :path
-                                 xs :body} :parameters}]
-                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
+     ["/malli" {:coercion malli/coercion}
+      ["/plus/*z"
+       {:get {:summary "plus"
+              :tags [:plus :malli]
+              :parameters {:query [:map [:x int?] [:y int?]]
+                           :path [:map [:z int?]]}
+              :openapi {:responses {400 {:description "kosh"
+                                         :content {"application/json" {:schema {:type "string"}}}}}}
+              :responses {200 {:description "success"
+                               :body [:map [:total int?]]}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body [:maybe [:vector int?]]
+                            :path [:map [:z int?]]}
+               :openapi {:responses {400 {:description "kosh"
+                                          :content {"application/json" {:schema {:type "string"}}}}}}
+               :responses {200 {:description "success"
+                                :body [:map [:total int?]]}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
 
-       ["/schema" {:coercion schema/coercion}
-        ["/plus/*z"
-         {:get {:summary "plus"
-                :tags [:plus :schema]
-                :parameters {:query {:x s/Int, :y s/Int}
+     ["/schema" {:coercion schema/coercion}
+      ["/plus/*z"
+       {:get {:summary "plus"
+              :tags [:plus :schema]
+              :parameters {:query {:x s/Int, :y s/Int}
                              :path {:z s/Int}}
-                :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
-                                           :description "kosh"}}}
-                :responses {200 {:description "success"
-                                 :body {:total s/Int}}
-                            500 {:description "fail"}}
-                :handler (fn [{{{:keys [x y]} :query
-                                {:keys [z]} :path} :parameters}]
-                           {:status 200, :body {:total (+ x y z)}})}
-          :post {:summary "plus with body"
-                 :parameters {:body (s/maybe [s/Int])
-                              :path {:z s/Int}}
-                 :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
-                                            :description "kosh"}}}
-                 :responses {200 {:description "success"
-                                  :body {:total s/Int}}
-                             500 {:description "fail"}}
-                 :handler (fn [{{{:keys [z]} :path
-                                 xs :body} :parameters}]
-                            {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
+              :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
+                                         :description "kosh"}}}
+              :responses {200 {:description "success"
+                               :body {:total s/Int}}
+                          500 {:description "fail"}}
+              :handler (fn [{{{:keys [x y]} :query
+                              {:keys [z]} :path} :parameters}]
+                         {:status 200, :body {:total (+ x y z)}})}
+        :post {:summary "plus with body"
+               :parameters {:body (s/maybe [s/Int])
+                            :path {:z s/Int}}
+               :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
+                                          :description "kosh"}}}
+               :responses {200 {:description "success"
+                                :body {:total s/Int}}
+                           500 {:description "fail"}}
+               :handler (fn [{{{:keys [z]} :path
+                               xs :body} :parameters}]
+                          {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
 
-      {:validate reitit.ring.spec/validate
-       :data {:middleware [openapi/openapi-feature
-                           rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
+    {:validate reitit.ring.spec/validate
+     :data {:middleware [openapi/openapi-feature
+                         rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}})))
 
 (deftest openapi-test
   (testing "endpoints work"
@@ -294,21 +294,21 @@
                     {:get {:no-doc true
                            :handler (openapi/create-openapi-handler)}}]
         app (ring/ring-handler
-              (ring/router
-                [["/common" {:openapi {:id #{::one ::two}}}
-                  ping-route]
+             (ring/router
+              [["/common" {:openapi {:id #{::one ::two}}}
+                ping-route]
 
-                 ["/one" {:openapi {:id ::one}}
-                  ping-route
-                  spec-route]
+               ["/one" {:openapi {:id ::one}}
+                ping-route
+                spec-route]
 
-                 ["/two" {:openapi {:id ::two}}
-                  ping-route
-                  spec-route
-                  ["/deep" {:openapi {:id ::one}}
-                   ping-route]]
-                 ["/one-two" {:openapi {:id #{::one ::two}}}
-                  spec-route]]))]
+               ["/two" {:openapi {:id ::two}}
+                ping-route
+                spec-route
+                ["/deep" {:openapi {:id ::one}}
+                 ping-route]]
+               ["/one-two" {:openapi {:id #{::one ::two}}}
+                spec-route]]))]
     (is (= ["/common/ping" "/one/ping" "/two/deep/ping"]
            (spec-paths app "/one/openapi.json")))
     (is (= ["/common/ping" "/two/ping"]
@@ -318,9 +318,9 @@
 
 (deftest openapi-ui-config-test
   (let [app (swagger-ui/create-swagger-ui-handler
-              {:path "/"
-               :url "/openapi.json"
-               :config {:jsonEditor true}})]
+             {:path "/"
+              :url "/openapi.json"
+              :config {:jsonEditor true}})]
     (is (= 302 (:status (app {:request-method :get, :uri "/"}))))
     (is (= 200 (:status (app {:request-method :get, :uri "/index.html"}))))
     (is (= {:jsonEditor true, :url "/openapi.json"}
@@ -329,12 +329,12 @@
 
 (deftest without-openapi-id-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/ping"
-                  {:get (constantly "ping")}]
-                 ["/openapi.json"
-                  {:get {:no-doc true
-                         :handler (openapi/create-openapi-handler)}}]]))]
+             (ring/router
+              [["/ping"
+                {:get (constantly "ping")}]
+               ["/openapi.json"
+                {:get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]]))]
     (is (= ["/ping"] (spec-paths app "/openapi.json")))
     (is (= #{::openapi/default}
            (-> {:request-method :get :uri "/openapi.json"}
@@ -342,14 +342,14 @@
 
 (deftest with-options-endpoint-test
   (let [app (ring/ring-handler
-              (ring/router
-                [["/ping"
-                  {:options (constantly "options")}]
-                 ["/pong"
-                  (constantly "options")]
-                 ["/openapi.json"
-                  {:get {:no-doc true
-                         :handler (openapi/create-openapi-handler)}}]]))]
+             (ring/router
+              [["/ping"
+                {:options (constantly "options")}]
+               ["/pong"
+                (constantly "options")]
+               ["/openapi.json"
+                {:get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]]))]
     (is (= ["/ping" "/pong"] (spec-paths app "/openapi.json")))
     (is (= #{::openapi/default}
            (-> {:request-method :get :uri "/openapi.json"}
@@ -370,7 +370,7 @@
                                                                        {:description (str "description " nom)})})]
            [#'spec/coercion (fn [nom] {nom (st/spec {:spec string?
                                                      :description (str "description " nom)})})]]]
-    (testing coercion
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
@@ -414,9 +414,9 @@
                         :required true
                         :description "description :p"
                         :schema {:type "string"}}]
-                 (-> spec
-                     (get-in [:paths "/parameters" :post :parameters])
-                     normalize))))
+                      (-> spec
+                          (get-in [:paths "/parameters" :post :parameters])
+                          normalize))))
         (testing "body parameter"
           (is (match? (merge {:type "object"
                               :properties {:b {:type "string"}}
@@ -449,9 +449,9 @@
                                          {:openapi/example {nom "EXAMPLE2"}}))]
            [#'spec/coercion (fn [nom]
                               (assoc
-                               (ds/spec ::foo {nom (st/spec string? {:openapi/example "EXAMPLE"})})
-                               :openapi/example {nom "EXAMPLE2"}))]]]
-    (testing coercion
+                                (ds/spec ::foo {nom (st/spec string? {:openapi/example "EXAMPLE"})})
+                                :openapi/example {nom "EXAMPLE2"}))]]]
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/examples"
@@ -489,9 +489,9 @@
                         :required true
                         :schema {:type "string"
                                  :example "EXAMPLE"}}]
-                 (-> spec
-                     (get-in [:paths "/examples" :post :parameters])
-                     normalize))))
+                      (-> spec
+                          (get-in [:paths "/examples" :post :parameters])
+                          normalize))))
         (testing "body parameter"
           (is (match? {:schema {:type "object"
                                 :properties {:b {:type "string"
@@ -531,7 +531,7 @@
            [#'spec/coercion
             reitit.http.interceptors.multipart/bytes-part
             string?]]]
-    (testing coercion
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/upload"
@@ -569,7 +569,7 @@
           [[#'malli/coercion (fn [nom] [:map [nom :string]])]
            [#'schema/coercion (fn [nom] {nom s/Str})]
            [#'spec/coercion (fn [nom] {nom string?})]]]
-    (testing coercion
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"

@@ -67,8 +67,8 @@
              fragment (when (.hasFragment uri)
                         (.getFragment uri))
              match (assoc match
-                          :query-params q
-                          :fragment fragment)
+                     :query-params q
+                     :fragment fragment)
              ;; Return uncoerced values if coercion is not enabled - so
              ;; that tha parameters are always accessible from same property.
              parameters (or (coerce! match)

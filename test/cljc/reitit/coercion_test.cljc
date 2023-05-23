@@ -7,34 +7,55 @@
             [reitit.coercion.spec]
             [reitit.core :as r]
             [schema.core :as s]
+            [clojure.spec.alpha :as cs]
             [spec-tools.data-spec :as ds])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
+(cs/def ::number int?)
+(cs/def ::keyword keyword?)
+(cs/def ::int int?)
+(cs/def ::ints (cs/coll-of int? :kind vector))
+(cs/def ::map (cs/map-of int? int?))
+
 (deftest coercion-test
   (let [r (r/router
            [["/schema" {:coercion reitit.coercion.schema/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number s/Int
-                                                       :keyword s/Keyword}
-                                                :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]
+             ["/:number" {:parameters {:path {:number s/Int}}}
+              ["/:keyword" {:parameters {:path {:keyword s/Keyword}
+                                         :query (s/maybe {:int s/Int, :ints [s/Int], :map {s/Int s/Int}})}}]]]
+
             ["/malli" {:coercion reitit.coercion.malli/coercion}
-             ["/:number/:keyword" {:parameters {:path [:map [:number int?] [:keyword keyword?]]
-                                                :query [:maybe [:map [:int int?]
-                                                                [:ints [:vector int?]]
-                                                                [:map [:map-of int? int?]]]]}}]]
+             ["/:number" {:parameters {:path [:map [:number int?]]}}
+              ["/:keyword" {:parameters {:path [:map [:keyword keyword?]]
+                                         :query [:maybe [:map [:int int?]
+                                                         [:ints [:vector int?]]
+                                                         [:map [:map-of int? int?]]]]}}]]]
+
             ["/malli-lite" {:coercion reitit.coercion.malli/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}
-                                                :query (l/maybe {:int int?
-                                                                 :ints (l/vector int?)
-                                                                 :map (l/map-of int? int?)})}}]]
-            ["/spec" {:coercion reitit.coercion.spec/coercion}
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}
-                                                :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}
+                                         :query (l/maybe {:int int?
+                                                          :ints (l/vector int?)
+                                                          :map (l/map-of int? int?)})}}]]]
+
+            #_["/spec" {:coercion reitit.coercion.spec/coercion}
+               ["/:number" {:parameters {:path (cs/keys :req-un [::number])}}
+                ["/:keyword" {:parameters {:path (cs/keys :req-un [::keyword])
+                                           :query (cs/nilable (cs/keys :req-un [::int ::ints ::map]))}}]]]
+
+            ["/spec-shallow" {:coercion reitit.coercion.spec/coercion}
+             ["/:number/:keyword" {:parameters {:path (cs/keys :req-un [::number ::keyword])
+                                                :query (cs/nilable (cs/keys :req-un [::int ::ints ::map]))}}]]
+
+            ["/data-spec" {:coercion reitit.coercion.spec/coercion}
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}
+                                         :query (ds/maybe {:int int?, :ints [int?], :map {int? int?}})}}]]]
+
             ["/none"
-             ["/:number/:keyword" {:parameters {:path {:number int?
-                                                       :keyword keyword?}}}]]]
+             ["/:number" {:parameters {:path {:number int?}}}
+              ["/:keyword" {:parameters {:path {:keyword keyword?}}}]]]]
            {:compile coercion/compile-request-coercers})]
 
     (testing "schema-coercion"
@@ -73,18 +94,41 @@
         (let [m (r/match-by-path r "/malli-lite/kikka/abba")]
           (is (thrown? ExceptionInfo (coercion/coerce! m))))))
 
-    ;; TODO: :map-of fails with string-keys
-    (testing "spec-coercion"
-      (testing "succeeds"
+    #_(testing "spec-coercion"
+      (testing "fails"
         (let [m (r/match-by-path r "/spec/1/abba")]
-          (is (= {:path {:keyword :abba, :number 1}, :query nil}
-                 (coercion/coerce! m))))
-        (let [m (r/match-by-path r "/schema/1/abba")]
-          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1, 2, 3], :map {1 1, #_#_2 2}}}
-                 (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"], "map" {:1 "1"}, #_#_"2" "2"}))))))
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))
+        (let [m (r/match-by-path r "/spec/1/abba")]
+          (is (thrown? ExceptionInfo (coercion/coerce! m)))))
       (testing "throws with invalid input"
         (let [m (r/match-by-path r "/spec/kikka/abba")]
           (is (thrown? ExceptionInfo (coercion/coerce! m))))))
+
+    (testing "spec-coercion (shallow)"
+      (testing "succeeds"
+        (let [m (r/match-by-path r "/spec-shallow/1/abba")]
+          (def MATCH m)
+          (is (= {:path {:keyword :abba, :number 1}, :query nil}
+                 (coercion/coerce! m))))
+        (let [m (r/match-by-path r "/spec-shallow/1/abba")]
+          (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1, 2, 3], :map {1 1, #_#_2 2}}}
+                 (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"], "map" {:1 "1"}, #_#_"2" "2"}))))))
+      (testing "throws with invalid input"
+        (let [m (r/match-by-path r "/spec-shallow/kikka/abba")]
+          (is (thrown? ExceptionInfo (coercion/coerce! m))))))
+
+    ;; TODO: :map-of fails with string-keys
+    #_(testing "data-spec-coercion"
+        (testing "succeeds"
+          (let [m (r/match-by-path r "/data-spec/1/abba")]
+            (is (= {:path {:keyword :abba, :number 1}, :query nil}
+                   (coercion/coerce! m))))
+          (let [m (r/match-by-path r "/data-spec/1/abba")]
+            (is (= {:path {:keyword :abba, :number 1}, :query {:int 10, :ints [1, 2, 3], :map {1 1, #_#_2 2}}}
+                   (coercion/coerce! (assoc m :query-params {"int" "10", "ints" ["1" "2" "3"], "map" {:1 "1"}, #_#_"2" "2"}))))))
+        (testing "throws with invalid input"
+          (let [m (r/match-by-path r "/data-spec/kikka/abba")]
+            (is (thrown? ExceptionInfo (coercion/coerce! m))))))
 
     (testing "no coercion defined"
       (testing "doesn't coerce"

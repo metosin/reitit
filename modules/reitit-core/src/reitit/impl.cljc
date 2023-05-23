@@ -9,6 +9,49 @@
      (:import (java.net URLEncoder URLDecoder)
               (java.util HashMap Map))))
 
+;;
+;; path-update
+;;
+
+(defn -match [path path-map]
+  (letfn [(match [x f] (if (fn? f) (f x) (= x f)))]
+    (reduce
+     (fn [_ [ps f]]
+       (when (and (>= (count path) (count ps)) (every? identity (map match path ps)))
+         (reduced f)))
+     nil path-map)))
+
+(defn -path-vals [m path-map]
+  (letfn [(-path-vals [l p m]
+            (reduce
+             (fn [l [k v]]
+               (let [p' (conj p k)
+                     f (-match p' path-map)]
+                 (cond
+                   f (conj l [p' (f v)])
+                   (and (map? v) (seq v)) (-path-vals l p' v)
+                   :else (conj l [p' v]))))
+             l m))]
+    (-path-vals [] [] m)))
+
+(defn -assoc-in-path-vals [c]
+  (reduce (partial apply assoc-in) {} c))
+
+(defn path-update [m path-map]
+  (-> (-path-vals m path-map)
+      (-assoc-in-path-vals)))
+
+(defn accumulator? [x]
+  (-> x meta ::accumulator))
+
+(defn accumulate
+  ([x] (if-not (accumulator? x) (with-meta [x] {::accumulator true}) x))
+  ([x y] (into (accumulate x) y)))
+
+;;
+;; impl
+;;
+
 (defn parse [path opts]
   (let [path #?(:clj (.intern ^String (trie/normalize path opts)) :cljs (trie/normalize path opts))
         path-parts (trie/split-path path opts)
@@ -60,8 +103,10 @@
 (defn map-data [f routes]
   (mapv (fn [[p ds]] [p (f p ds)]) routes))
 
-(defn meta-merge [left right opts]
-  ((or (:meta-merge opts) mm/meta-merge) left right))
+(defn meta-merge [left right {:keys [meta-merge update-paths]}]
+  (let [update (if update-paths #(path-update % update-paths) identity)
+        merge (or meta-merge mm/meta-merge)]
+    (merge (update left) (update right))))
 
 (defn merge-data [opts p x]
   (reduce
