@@ -608,16 +608,16 @@
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
-                  ["/foo" {:post {:parameters {:request {:content {"application/json" json-request
-                                                                   "application/edn" edn-request}
+                  ["/foo" {:post {:parameters {:request {:content {"application/json" {:schema json-request}
+                                                                   "application/edn" {:schema edn-request}}
                                                          :body default-request}}
-                                  :responses {200 {:content {"application/json" json-response
-                                                             "application/edn" edn-response}
+                                  :responses {200 {:content {"application/json" {:schema json-response}
+                                                             "application/edn" {:schema edn-response}}
                                                    :body default-response}}
                                   :handler (fn [req]
                                              {:status 200
                                               :body (-> req :parameters :request)})}}]
-                  {#_#_:validate reitit.ring.spec/validate
+                  {:validate reitit.ring.spec/validate
                    :data {:middleware [rrc/coerce-request-middleware
                                        rrc/coerce-response-middleware]
                           :coercion coercion}}))

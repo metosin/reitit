@@ -101,7 +101,7 @@
        {:get {:summary "plus"
               :tags [:plus :schema]
               :parameters {:query {:x s/Int, :y s/Int}
-                             :path {:z s/Int}}
+                           :path {:z s/Int}}
               :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                          :description "kosh"}}}
               :responses {200 {:description "success"
@@ -566,20 +566,20 @@
 
 (deftest per-content-type-test
   (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
-           [#'schema/coercion (fn [nom] {nom s/Str})]
-           [#'spec/coercion (fn [nom] {nom string?})]]]
+          [[malli/coercion (fn [nom] [:map [nom :string]])]
+           [schema/coercion (fn [nom] {nom s/Str})]
+           [spec/coercion (fn [nom] {nom string?})]]]
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
                     {:post {:description "parameters"
-                            :coercion @coercion
-                            :parameters {:request {:content {"application/json" (->schema :b)
-                                                             "application/edn" (->schema :c)}}}
+                            :coercion coercion
+                            :parameters {:request {:content {"application/json" {:schema (->schema :b)}
+                                                             "application/edn" {:schema (->schema :c)}}}}
                             :responses {200 {:description "success"
-                                             :content {"application/json" (->schema :ok)
-                                                       "application/edn" (->schema :edn)}}}
+                                             :content {"application/json" {:schema (->schema :ok)}
+                                                       "application/edn" {:schema (->schema :edn)}}}}
                             :handler (fn [req]
                                        {:status 200
                                         :body (-> req :parameters :request)})}}]
@@ -594,41 +594,42 @@
             spec (-> {:request-method :get
                       :uri "/openapi.json"}
                      app
-                     :body)]
+                     :body)
+            spec-coercion (= coercion spec/coercion)]
         (testing "body parameter"
-          (is (match? (merge {:type "object"
-                              :properties {:b {:type "string"}}
-                              :required ["b"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :requestBody :content "application/json" :schema])
-                          normalize)))
-          (is (match? (merge {:type "object"
-                              :properties {:c {:type "string"}}
-                              :required ["c"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :requestBody :content "application/edn" :schema])
-                          normalize))))
+          (is (= (merge {:type "object"
+                         :properties {:b {:type "string"}}
+                         :required ["b"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :requestBody :content "application/json" :schema])
+                     normalize)))
+          (is (= (merge {:type "object"
+                         :properties {:c {:type "string"}}
+                         :required ["c"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :requestBody :content "application/edn" :schema])
+                     normalize))))
         (testing "body response"
-          (is (match? (merge {:type "object"
-                              :properties {:ok {:type "string"}}
-                              :required ["ok"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
-                          normalize)))
-          (is (match? (merge {:type "object"
-                              :properties {:edn {:type "string"}}
-                              :required ["edn"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :responses 200 :content "application/edn" :schema])
-                          normalize))))
+          (is (= (merge {:type "object"
+                         :properties {:ok {:type "string"}}
+                         :required ["ok"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
+                     normalize)))
+          (is (= (merge {:type "object"
+                         :properties {:edn {:type "string"}}
+                         :required ["edn"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :responses 200 :content "application/edn" :schema])
+                     normalize))))
         (testing "validation"
           (let [query {:request-method :post
                        :uri "/parameters"
@@ -654,22 +655,22 @@
 
 (deftest default-content-type-test
   (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
-           [#'schema/coercion (fn [nom] {nom s/Str})]
-           [#'spec/coercion (fn [nom] {nom string?})]]]
-    (testing coercion
+          [[malli/coercion (fn [nom] [:map [nom :string]])]
+           [schema/coercion (fn [nom] {nom s/Str})]
+           [spec/coercion (fn [nom] {nom string?})]]]
+    (testing (str coercion)
       (doseq [content-type ["application/json" "application/edn"]]
         (testing (str "default content type " content-type)
           (let [app (ring/ring-handler
                      (ring/router
                       [["/parameters"
                         {:post {:description "parameters"
-                                :coercion @coercion
+                                :coercion coercion
                                 :content-types [content-type] ;; TODO should this be under :openapi ?
-                                :parameters {:request {:content {"application/transit" (->schema :transit)}
+                                :parameters {:request {:content {"application/transit" {:schema (->schema :transit)}}
                                                        :body (->schema :default)}}
                                 :responses {200 {:description "success"
-                                                 :content {"application/transit" (->schema :transit)}
+                                                 :content {"application/transit" {:schema (->schema :transit)}}
                                                  :body (->schema :default)}}
                                 :handler (fn [req]
                                            {:status 200

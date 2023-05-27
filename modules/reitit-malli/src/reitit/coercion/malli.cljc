@@ -134,7 +134,7 @@
    :options nil})
 
 (defn -get-apidocs-openapi
-  [coercion {:keys [parameters responses content-types] :or {content-types ["application/json"]}} options]
+  [_ {:keys [parameters responses content-types] :or {content-types ["application/json"]}} options]
   (let [{:keys [body request multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->schema-object (fn [schema opts]
@@ -177,10 +177,10 @@
                                     [content-type {:schema schema}])))
                            content-types))
                    (into {}
-                         (map (fn [[content-type requestBody]]
-                                (let [schema (->schema-object requestBody {:in :requestBody
-                                                                           :type :schema
-                                                                           :content-type content-type})]
+                         (map (fn [[content-type {:keys [schema]}]]
+                                (let [schema (->schema-object schema {:in :requestBody
+                                                                      :type :schema
+                                                                      :content-type content-type})]
                                   [content-type {:schema schema}])))
                          (:content request)))}})
      (when multipart
@@ -207,7 +207,7 @@
                                             content-types))
                                     (when content
                                       (into {}
-                                            (map (fn [[content-type schema]]
+                                            (map (fn [[content-type {:keys [schema]}]]
                                                    (let [schema (->schema-object schema {:in :responses
                                                                                          :type :schema
                                                                                          :content-type content-type})]

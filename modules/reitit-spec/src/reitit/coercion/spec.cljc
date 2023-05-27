@@ -113,7 +113,9 @@
                                    {::openapi/content (merge
                                                        (when-let [default (get-in parameters [:request :body])]
                                                          (zipmap content-types (repeat default)))
-                                                       (:content (:request parameters)))})})
+                                                       (->> (for [[content-type {:keys [schema]}] (:content (:request parameters))]
+                                                              [content-type schema])
+                                                            (into {})))})})
                   (when (:multipart parameters)
                     {:requestBody
                      (openapi/openapi-spec
@@ -130,8 +132,9 @@
                                {::openapi/content (merge
                                                    (when body
                                                      (zipmap content-types (repeat (:body response))))
-                                                   (when response
-                                                     (:content response)))})))]))}))
+                                                   (->> (for [[content-type {:keys [schema]}] (:content response)]
+                                                          [content-type schema])
+                                                        (into {})))})))]))}))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)

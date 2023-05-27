@@ -91,9 +91,9 @@
       (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
             ->open (if open? #(-open-model coercion %) identity)
             format-schema-pairs (if (= :request style)
-                                  (conj (:content model) [:default (:body model)])
-                                  [[:default model]])
-            format->coercer (some->> (for [[format schema] format-schema-pairs
+                                  (conj (:content model) [:default {:schema (:body model)}])
+                                  [[:default {:schema model}]])
+            format->coercer (some->> (for [[format {:keys [schema]}] format-schema-pairs
                                            :when schema
                                            :let [type (case style :request :body style)]]
                                        [format (-request-coercer coercion type (->open schema))])
@@ -118,7 +118,7 @@
 (defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
                                                          :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (let [per-format-coercers (some->> (for [[format schema] content
+    (let [per-format-coercers (some->> (for [[format {:keys [schema]}] content
                                              :when schema]
                                          [format (-response-coercer coercion schema)])
                                        (filter second)

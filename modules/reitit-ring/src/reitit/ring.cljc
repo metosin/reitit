@@ -39,12 +39,12 @@
      [[http-method? :responses any? :body] f]
 
      ;; openapi3 parameters and responses
-     [[:parameters :request :content any?] f]
-     [[http-method? :parameters :request :content any?] f]
+     [[:parameters :request :content any? :schema] f]
+     [[http-method? :parameters :request :content any? :schema] f]
      [[:parameters :request :body] f]
      [[http-method? :parameters :request :body] f]
-     [[:responses any? :content any?] f]
-     [[http-method? :responses any? :content any?] f]]))
+     [[:responses any? :content any? :schema] f]
+     [[http-method? :responses any? :content any? :schema] f]]))
 
 (defn -compile-coercion [{:keys [coercion] :as data}]
   (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))
