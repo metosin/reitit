@@ -517,20 +517,19 @@
           (is (nil? (validate spec))))))))
 
 (deftest multipart-test
-  (doseq [[coercion file-schema string-schema]
-          [[#'malli/coercion
-            reitit.ring.malli/bytes-part
-            :string]
-           [#'schema/coercion
-            (schema-tools.core/schema {:filename s/Str
-                                       :content-type s/Str
-                                       :bytes s/Num}
-                                      {:openapi {:type "string"
-                                                 :format "binary"}})
-            s/Str]
-           [#'spec/coercion
-            reitit.http.interceptors.multipart/bytes-part
-            string?]]]
+  (doseq [[coercion file-schema string-schema] [[#'malli/coercion
+                                                 reitit.ring.malli/bytes-part
+                                                 :string]
+                                                [#'schema/coercion
+                                                 (schema-tools.core/schema {:filename s/Str
+                                                                            :content-type s/Str
+                                                                            :bytes s/Num}
+                                                                           {:openapi {:type "string"
+                                                                                      :format "binary"}})
+                                                 s/Str]
+                                                [#'spec/coercion
+                                                 reitit.http.interceptors.multipart/bytes-part
+                                                 string?]]]
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
@@ -565,10 +564,9 @@
           (is (nil? (validate spec))))))))
 
 (deftest per-content-type-test
-  (doseq [[coercion ->schema]
-          [[malli/coercion (fn [nom] [:map [nom :string]])]
-           [schema/coercion (fn [nom] {nom s/Str})]
-           [spec/coercion (fn [nom] {nom string?})]]]
+  (doseq [[coercion ->schema] [[malli/coercion (fn [nom] [:map [nom :string]])]
+                               [schema/coercion (fn [nom] {nom s/Str})]
+                               [spec/coercion (fn [nom] {nom string?})]]]
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
@@ -654,10 +652,9 @@
           (is (nil? (validate spec))))))))
 
 (deftest default-content-type-test
-  (doseq [[coercion ->schema]
-          [[malli/coercion (fn [nom] [:map [nom :string]])]
-           [schema/coercion (fn [nom] {nom s/Str})]
-           [spec/coercion (fn [nom] {nom string?})]]]
+  (doseq [[coercion ->schema] [[malli/coercion (fn [nom] [:map [nom :string]])]
+                               [schema/coercion (fn [nom] {nom s/Str})]
+                               [spec/coercion (fn [nom] {nom string?})]]]
     (testing (str coercion)
       (doseq [content-type ["application/json" "application/edn"]]
         (testing (str "default content type " content-type)
