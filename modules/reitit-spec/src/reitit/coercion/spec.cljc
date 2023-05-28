@@ -88,7 +88,7 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses content-types]
+    (-get-apidocs [this specification {:keys [request parameters responses content-types]
                                        :or {content-types ["application/json"]}}]
       (case specification
         :swagger (swagger/swagger-spec
@@ -108,12 +108,12 @@
                   (when (:body parameters)
                     {:requestBody (openapi/openapi-spec
                                    {::openapi/content (zipmap content-types (repeat (:body parameters)))})})
-                  (when (:request parameters)
+                  (when request
                     {:requestBody (openapi/openapi-spec
                                    {::openapi/content (merge
-                                                       (when-let [default (get-in parameters [:request :body])]
+                                                       (when-let [default (:body request)]
                                                          (zipmap content-types (repeat default)))
-                                                       (->> (for [[content-type {:keys [schema]}] (:content (:request parameters))]
+                                                       (->> (for [[content-type {:keys [schema]}] (:content request)]
                                                               [content-type schema])
                                                             (into {})))})})
                   (when (:multipart parameters)

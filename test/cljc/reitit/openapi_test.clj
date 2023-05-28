@@ -457,8 +457,8 @@
                   [["/examples"
                     {:post {:decription "examples"
                             :coercion @coercion
-                            :parameters {:query (->schema :q)
-                                         :request {:body (->schema :b)}}
+                            :request {:body (->schema :b)}
+                            :parameters {:query (->schema :q)}
                             :responses {200 {:description "success"
                                              :body (->schema :ok)}}
                             :openapi {:requestBody
@@ -573,8 +573,8 @@
                   [["/parameters"
                     {:post {:description "parameters"
                             :coercion coercion
-                            :parameters {:request {:content {"application/json" {:schema (->schema :b)}
-                                                             "application/edn" {:schema (->schema :c)}}}}
+                            :request {:content {"application/json" {:schema (->schema :b)}
+                                                "application/edn" {:schema (->schema :c)}}}
                             :responses {200 {:description "success"
                                              :content {"application/json" {:schema (->schema :ok)}
                                                        "application/edn" {:schema (->schema :edn)}}}}
@@ -664,8 +664,8 @@
                         {:post {:description "parameters"
                                 :coercion coercion
                                 :content-types [content-type] ;; TODO should this be under :openapi ?
-                                :parameters {:request {:content {"application/transit" {:schema (->schema :transit)}}
-                                                       :body (->schema :default)}}
+                                :request {:content {"application/transit" {:schema (->schema :transit)}}
+                                          :body (->schema :default)}
                                 :responses {200 {:description "success"
                                                  :content {"application/transit" {:schema (->schema :transit)}}
                                                  :body (->schema :default)}}
@@ -705,16 +705,15 @@
               [["/parameters"
                 {:post {:description "parameters"
                         :coercion malli/coercion
-                        :parameters {:request
-                                     {:body
-                                      [:schema
-                                       {:registry {"friend" [:map
-                                                             [:age int?]
-                                                             [:pet [:ref "pet"]]]
-                                                   "pet" [:map
-                                                          [:name :string]
-                                                          [:friends [:vector [:ref "friend"]]]]}}
-                                       "friend"]}}
+                        :request {:body
+                                  [:schema
+                                   {:registry {"friend" [:map
+                                                         [:age int?]
+                                                         [:pet [:ref "pet"]]]
+                                               "pet" [:map
+                                                      [:name :string]
+                                                      [:friends [:vector [:ref "friend"]]]]}}
+                                   "friend"]}
                         :handler (fn [req]
                                    {:status 200
                                     :body (-> req :parameters :request)})}}]

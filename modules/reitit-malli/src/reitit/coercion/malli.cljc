@@ -134,8 +134,8 @@
    :options nil})
 
 (defn -get-apidocs-openapi
-  [_ {:keys [parameters responses content-types] :or {content-types ["application/json"]}} options]
-  (let [{:keys [body request multipart]} parameters
+  [_ {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
+  (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->schema-object (fn [schema opts]
                           (let [current-opts (merge options opts)]

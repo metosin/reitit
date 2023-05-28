@@ -37,7 +37,6 @@
 (def ^:no-doc default-parameter-coercion
   {:query (->ParameterCoercion :query-params :string true true)
    :body (->ParameterCoercion :body-params :body false false)
-   :request (->ParameterCoercion :body-params :request false false)
    :form (->ParameterCoercion :form-params :string true true)
    :header (->ParameterCoercion :headers :string true true)
    :path (->ParameterCoercion :path-params :string true true)
@@ -83,34 +82,45 @@
   value)
 
 ;; TODO: support faster key walking, walk/keywordize-keys is quite slow...
-(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion serialize-failed-result]
+(defn request-coercer [coercion type model {::keys [extract-request-format parameter-coercion serialize-failed-result skip]
                                             :or {extract-request-format extract-request-format-default
-                                                 parameter-coercion default-parameter-coercion}}]
+                                                 parameter-coercion default-parameter-coercion
+                                                 skip #{}}}]
   (if coercion
-    (if-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
-      (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
-            ->open (if open? #(-open-model coercion %) identity)
-            format-schema-pairs (if (= :request style)
-                                  (conj (:content model) [:default {:schema (:body model)}])
-                                  [[:default {:schema model}]])
-            format->coercer (some->> (for [[format {:keys [schema]}] format-schema-pairs
-                                           :when schema
-                                           :let [type (case style :request :body style)]]
-                                       [format (-request-coercer coercion type (->open schema))])
-                                     (filter second)
-                                     (seq)
-                                     (into {}))]
-        (when format->coercer
-          (fn [request]
-            (let [value (transform request)
-                  format (extract-request-format request)
-                  coercer (or (format->coercer format)
-                              (format->coercer :default)
-                              -identity-coercer)
-                  result (coercer value format)]
-              (if (error? result)
-                (request-coercion-failed! result coercion value in request serialize-failed-result)
-                result))))))))
+    (when-let [{:keys [keywordize? open? in style]} (parameter-coercion type)]
+      (when-not (skip style)
+        (let [transform (comp (if keywordize? walk/keywordize-keys identity) in)
+              ->open (if open? #(-open-model coercion %) identity)
+              coercer (-request-coercer coercion style (->open model))]
+          (when coercer
+            (fn [request]
+              (let [value (transform request)
+                    format (extract-request-format request)
+                    result (coercer value format)]
+                (if (error? result)
+                  (request-coercion-failed! result coercion value in request serialize-failed-result)
+                  result)))))))))
+
+(defn content-request-coercer [coercion {:keys [content body]} {::keys [extract-request-format serialize-failed-result]
+                                                                :or {extract-request-format extract-request-format-default}}]
+  (when coercion
+    (let [in :body-params
+          format->coercer (some->> (concat (when body
+                                             [[:default (-request-coercer coercion :body body)]])
+                                           (for [[format {:keys [schema]}] content, :when schema]
+                                             [format (-request-coercer coercion :body schema)]))
+                                   (filter second) (seq) (into (array-map)))]
+      (when format->coercer
+        (fn [request]
+          (let [value (in request)
+                format (extract-request-format request)
+                coercer (or (format->coercer format)
+                            (format->coercer :default)
+                            -identity-coercer)
+                result (coercer value format)]
+            (if (error? result)
+              (request-coercion-failed! result coercion value in request serialize-failed-result)
+              result)))))))
 
 (defn extract-response-format-default [request _]
   (-> request :muuntaja/response :format))
@@ -118,18 +128,18 @@
 (defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
                                                          :or {extract-response-format extract-response-format-default}}]
   (if coercion
-    (let [per-format-coercers (some->> (for [[format {:keys [schema]}] content
-                                             :when schema]
-                                         [format (-response-coercer coercion schema)])
-                                       (filter second)
-                                       (seq)
-                                       (into {}))
-          default (when body (-response-coercer coercion body))]
-      (when (or per-format-coercers default)
+    (let [format->coercer (some->> (concat (when body
+                                                 [[:default (-response-coercer coercion body)]])
+                                               (for [[format {:keys [schema]}] content, :when schema]
+                                                 [format (-response-coercer coercion schema)]))
+                                       (filter second) (seq) (into (array-map)))]
+      (when format->coercer
         (fn [request response]
           (let [format (extract-response-format request response)
                 value (:body response)
-                coercer (get per-format-coercers format (or default -identity-coercer))
+                coercer (or (format->coercer format)
+                            (format->coercer :default)
+                            -identity-coercer)
                 result (coercer value format)]
             (if (error? result)
               (response-coercion-failed! result coercion value request response serialize-failed-result)
@@ -153,10 +163,15 @@
       (impl/fast-assoc response :body (coercer request response))
       response)))
 
-(defn request-coercers [coercion parameters opts]
-  (some->> (for [[k v] parameters, :when v]
-             [k (request-coercer coercion k v opts)])
-           (filter second) (seq) (into {})))
+(defn request-coercers
+  ([coercion parameters opts]
+   (some->> (for [[k v] parameters, :when v]
+              [k (request-coercer coercion k v opts)])
+            (filter second) (seq) (into {})))
+  ([coercion parameters request opts]
+   (let [crc (when request (some->> (content-request-coercer coercion request opts) (array-map :request)))
+         rcs (request-coercers coercion parameters (cond-> opts request (assoc ::skip #{:body})))]
+     (if (and crc rcs) (into crc (vec rcs)) (or crc rcs)))))
 
 (defn response-coercers [coercion responses opts]
   (some->> (for [[status model] responses]
@@ -170,8 +185,8 @@
 ;; api-docs
 ;;
 
-(defn -warn-unsupported-coercions [{:keys [parameters responses] :as _data}]
-  (when (:request parameters)
+(defn -warn-unsupported-coercions [{:keys [request responses] :as _data}]
+  (when request
     (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
   (when (some :content (vals responses))
     (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
@@ -196,7 +211,6 @@
                               (filter first)
                               (into {}))))
                       (-get-apidocs coercion specification))))))
-
 
 ;;
 ;; integration
