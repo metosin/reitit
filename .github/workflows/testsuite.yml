@@ -70,9 +70,26 @@ jobs:
         run: ./scripts/test.sh cljs
 
   lint:
-    name: Lint
+    name: Lint cljdoc.edn
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Verify cljdoc.edn
         run: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
+
+  check-cljdoc:
+    name: Check cljdoc analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@11.0
+        with:
+          lein: 2.9.5
+          cli: 1.11.0.1100
+      - name: Build jars so that CljDoc analyze can use it
+        run: ./scripts/lein-modules install
+      - name: Install cljdoc analyzer
+        run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer '{:git/tag "RELEASE"}' :as cljdoc-analyzer
+      - name: CljDoc Check
+        run: ./scripts/cljdoc-check.sh
