@@ -12,4 +12,5 @@
                  [com.bhauman/spell-spec]
                  [expound]
                  [fipp]
+                 [org.clojure/core.rrb-vector]
                  [mvxcvi/arrangement]])
