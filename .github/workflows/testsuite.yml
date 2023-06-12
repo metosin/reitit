@@ -87,8 +87,6 @@ jobs:
         with:
           lein: 2.9.5
           cli: 1.11.0.1100
-      - name: Build jars so that CljDoc analyze can use it
-        run: ./scripts/lein-modules install
       - name: Install cljdoc analyzer
         run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer '{:git/tag "RELEASE"}' :as cljdoc-analyzer
       - name: CljDoc Check
