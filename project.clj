@@ -48,6 +48,7 @@
                          [expound "0.9.0"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
+                         [mvxcvi/arrangement "2.1.0"]
                          [ring/ring-core "1.10.0"]
 
                          [io.pedestal/pedestal.service "0.5.10"]]

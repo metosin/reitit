@@ -11,4 +11,5 @@
   :dependencies [[metosin/reitit-core]
                  [com.bhauman/spell-spec]
                  [expound]
-                 [fipp]])
+                 [fipp]
+                 [mvxcvi/arrangement]])
