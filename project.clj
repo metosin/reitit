@@ -45,9 +45,12 @@
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.26" :exclusions [org.clojure/core.rrb-vector]]
+                         ;; Deep-diff uses this version, override olders versiom from fipp.
+                         [org.clojure/core.rrb-vector "0.0.14"]
                          [expound "0.9.0"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
+                         [mvxcvi/arrangement "2.1.0"]
                          [ring/ring-core "1.10.0"]
 
                          [io.pedestal/pedestal.service "0.5.10"]]

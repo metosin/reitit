@@ -11,4 +11,5 @@
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-ring]
                  [lambdaisland/deep-diff]
-                 [metosin/muuntaja]])
+                 [metosin/muuntaja]
+                 [metosin/spec-tools]])

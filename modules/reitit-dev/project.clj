@@ -11,4 +11,6 @@
   :dependencies [[metosin/reitit-core]
                  [com.bhauman/spell-spec]
                  [expound]
-                 [fipp]])
+                 [fipp]
+                 [org.clojure/core.rrb-vector]
+                 [mvxcvi/arrangement]])
