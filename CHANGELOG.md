@@ -17,7 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## 0.7.0-alpha5 (2023-06-14)
 
 * **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
-* **BREAKING**: Parameter and Response schemas are acculated into vector in route data - to be merged properly into compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
+* **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
 * Fixed some module dependencies so Cljdoc can properly analyze all the modules
 * Updated dependencies:
 
