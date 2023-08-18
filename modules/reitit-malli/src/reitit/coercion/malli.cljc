@@ -168,12 +168,12 @@
        ;; request allow to different :requestBody per content-type
        {:requestBody
         {:content (merge
-                   (when (:body request)
+                   (when-let [default (coercion/get-default-schema request)]
                      (into {}
                            (map (fn [content-type]
-                                  (let [schema (->schema-object (:body request) {:in :requestBody
-                                                                                 :type :schema
-                                                                                 :content-type content-type})]
+                                  (let [schema (->schema-object default {:in :requestBody
+                                                                         :type :schema
+                                                                         :content-type content-type})]
                                     [content-type {:schema schema}])))
                            content-types))
                    (into {}
@@ -194,15 +194,14 @@
      (when responses
        {:responses
         (into {}
-              (map (fn [[status {:keys [body content]
-                                 :as response}]]
+              (map (fn [[status {:keys [content], :as response}]]
                      (let [content (merge
-                                    (when body
+                                    (when-let [default (coercion/get-default-schema response)]
                                       (into {}
                                             (map (fn [content-type]
-                                                   (let [schema (->schema-object body {:in :responses
-                                                                                       :type :schema
-                                                                                       :content-type content-type})]
+                                                   (let [schema (->schema-object default {:in :responses
+                                                                                          :type :schema
+                                                                                          :content-type content-type})]
                                                      [content-type {:schema schema}])))
                                             content-types))
                                     (when content
@@ -215,8 +214,8 @@
                                             content)))]
                        [status (merge (select-keys response [:description])
                                       (when content
-                                        {:content content}))])))
-              responses)}))))
+                                        {:content content}))]))
+                   responses))}))))
 
 (defn create
   ([]

@@ -83,13 +83,16 @@
                   :string {:default string-transformer}
                   :response {:default no-op-transformer}}})
 
+(defn get-request-default-body [request]
+  (or (-> request :content :default :schema) (:body request)))
+
 (defn create [{:keys [transformers coerce-response?] :as opts}]
   ^{:type ::coercion/coercion}
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [request parameters responses content-types]
-                                       :or {content-types ["application/json"]}}]
+    (-get-apidocs [_ specification {:keys [request parameters responses content-types]
+                                    :or {content-types ["application/json"]}}]
       (case specification
         :swagger (swagger/swagger-spec
                   (merge
@@ -111,7 +114,7 @@
                   (when request
                     {:requestBody (openapi/openapi-spec
                                    {::openapi/content (merge
-                                                       (when-let [default (:body request)]
+                                                       (when-let [default (coercion/get-default-schema request)]
                                                          (zipmap content-types (repeat default)))
                                                        (->> (for [[content-type {:keys [schema]}] (:content request)]
                                                               [content-type schema])
@@ -124,15 +127,16 @@
                     {:responses
                      (into
                       (empty responses)
-                      (for [[k {:keys [body content] :as response}] responses]
+                      (for [[k {:keys [content] :as response}] responses
+                            :let [default (coercion/get-default-schema response)]]
                         [k (merge
                             (select-keys response [:description])
-                            (when (or body content)
+                            (when (or content default)
                               (openapi/openapi-spec
                                {::openapi/content (merge
-                                                   (when body
-                                                     (zipmap content-types (repeat (:body response))))
-                                                   (->> (for [[content-type {:keys [schema]}] (:content response)]
+                                                   (when default
+                                                     (zipmap content-types (repeat default)))
+                                                   (->> (for [[content-type {:keys [schema]}] content]
                                                           [content-type schema])
                                                         (into {})))})))]))}))
         (throw

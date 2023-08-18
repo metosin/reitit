@@ -101,6 +101,10 @@
                   (request-coercion-failed! result coercion value in request serialize-failed-result)
                   result)))))))))
 
+(defn get-default-schema [request-or-response]
+  (or (-> request-or-response :content :default :schema)
+      (:body request-or-response)))
+
 (defn content-request-coercer [coercion {:keys [content body]} {::keys [extract-request-format serialize-failed-result]
                                                                 :or {extract-request-format extract-request-format-default}}]
   (when coercion
@@ -129,10 +133,10 @@
                                                          :or {extract-response-format extract-response-format-default}}]
   (if coercion
     (let [format->coercer (some->> (concat (when body
-                                                 [[:default (-response-coercer coercion body)]])
-                                               (for [[format {:keys [schema]}] content, :when schema]
-                                                 [format (-response-coercer coercion schema)]))
-                                       (filter second) (seq) (into (array-map)))]
+                                             [[:default (-response-coercer coercion body)]])
+                                           (for [[format {:keys [schema]}] content, :when schema]
+                                             [format (-response-coercer coercion schema)]))
+                                   (filter second) (seq) (into (array-map)))]
       (when format->coercer
         (fn [request response]
           (let [format (extract-response-format request response)
