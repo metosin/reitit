@@ -167,8 +167,8 @@ You can also specify request and response body schemas per content-type. The syn
                          :responses {200 {:content {"application/json" {:w s/Int}
                                                     "application/edn" {:x s/Int}}
                                           ;; default if no content-type matches:
-                                          :body {:ww s/Int}}
-                                     :handler ...}}}]]
+                                          :body {:ww s/Int}}}
+                         :handler ...}}]]
     {:data {:middleware [rrc/coerce-exceptions-middleware
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})))
