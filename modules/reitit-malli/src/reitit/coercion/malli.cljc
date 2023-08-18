@@ -195,23 +195,25 @@
        {:responses
         (into {}
               (map (fn [[status {:keys [content], :as response}]]
-                     (let [content (merge
-                                    (when-let [default (coercion/get-default-schema response)]
-                                      (into {}
-                                            (map (fn [content-type]
-                                                   (let [schema (->schema-object default {:in :responses
-                                                                                          :type :schema
-                                                                                          :content-type content-type})]
-                                                     [content-type {:schema schema}])))
-                                            content-types))
-                                    (when content
-                                      (into {}
-                                            (map (fn [[content-type {:keys [schema]}]]
-                                                   (let [schema (->schema-object schema {:in :responses
-                                                                                         :type :schema
-                                                                                         :content-type content-type})]
-                                                     [content-type {:schema schema}])))
-                                            content)))]
+                     (let [default (coercion/get-default-schema response)
+                           content (-> (merge
+                                        (when default
+                                          (into {}
+                                                (map (fn [content-type]
+                                                       (let [schema (->schema-object default {:in :responses
+                                                                                              :type :schema
+                                                                                              :content-type content-type})]
+                                                         [content-type {:schema schema}])))
+                                                content-types))
+                                        (when content
+                                          (into {}
+                                                (map (fn [[content-type {:keys [schema]}]]
+                                                       (let [schema (->schema-object schema {:in :responses
+                                                                                             :type :schema
+                                                                                             :content-type content-type})]
+                                                         [content-type {:schema schema}])))
+                                                content)))
+                                       (dissoc :default))]
                        [status (merge (select-keys response [:description])
                                       (when content
                                         {:content content}))]))

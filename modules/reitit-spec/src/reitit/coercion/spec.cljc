@@ -128,17 +128,19 @@
                      (into
                       (empty responses)
                       (for [[k {:keys [content] :as response}] responses
-                            :let [default (coercion/get-default-schema response)]]
+                            :let [default (coercion/get-default-schema response)
+                                  content-types (remove #{:default} content-types)]]
                         [k (merge
                             (select-keys response [:description])
                             (when (or content default)
                               (openapi/openapi-spec
-                               {::openapi/content (merge
-                                                   (when default
-                                                     (zipmap content-types (repeat default)))
-                                                   (->> (for [[content-type {:keys [schema]}] content]
-                                                          [content-type schema])
-                                                        (into {})))})))]))}))
+                               {::openapi/content (-> (merge
+                                                       (when default
+                                                         (zipmap content-types (repeat default)))
+                                                       (->> (for [[content-type {:keys [schema]}] content]
+                                                              [content-type schema])
+                                                            (into {})))
+                                                      (dissoc :default))})))]))}))
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)

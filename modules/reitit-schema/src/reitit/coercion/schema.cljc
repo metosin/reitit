@@ -89,12 +89,13 @@
                             (select-keys response [:description])
                             (when (or content default)
                               (openapi/openapi-spec
-                               {::openapi/content (merge
-                                                   (when default
-                                                     (zipmap content-types (repeat default)))
-                                                   (->> (for [[content-type {:keys [schema]}] content]
-                                                          [content-type schema])
-                                                        (into {})))})))]))}))
+                               {::openapi/content (-> (merge
+                                                       (when default
+                                                         (zipmap content-types (repeat default)))
+                                                       (->> (for [[content-type {:keys [schema]}] content]
+                                                              [content-type schema])
+                                                            (into {})))
+                                                      (dissoc :default))})))]))}))
 
         (throw
          (ex-info
