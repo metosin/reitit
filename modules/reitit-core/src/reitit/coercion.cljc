@@ -105,6 +105,10 @@
   (or (-> request-or-response :content :default :schema)
       (:body request-or-response)))
 
+(defn get-default [request-or-response]
+  (or (-> request-or-response :content :default)
+      (some->> request-or-response :body (assoc {} :schema))))
+
 (defn content-request-coercer [coercion {:keys [content body]} {::keys [extract-request-format serialize-failed-result]
                                                                 :or {extract-request-format extract-request-format-default}}]
   (when coercion

@@ -774,3 +774,53 @@
            spec))
     (testing "spec is valid"
       (is (nil? (validate spec))))))
+
+(deftest openapi-malli-tests
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/openapi.json"
+                {:get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]
+
+               ["/malli" {:coercion malli/coercion}
+                ["/plus" {:post {:summary "plus with body"
+                                 :request {:description "body description"
+                                           :content {"application/json" {:schema {:x int?, :y int?}
+                                                                         :examples {"1+1" {:x 1, :y 1}
+                                                                                    "1+2" {:x 1, :y 2}}
+                                                                         :openapi {:example {:x 2, :y 2}}}}}
+                                 :responses {200 {:description "success"
+                                                  :content {"application/json" {:schema {:total int?}
+                                                                                :examples {"2" {:total 2}
+                                                                                           "3" {:total 3}}
+                                                                                :openapi {:example {:total 4}}}}}}
+                                 :handler (fn [request]
+                                            (let [{:keys [x y]} (-> request :parameters :body)]
+                                              {:status 200, :body {:total (+ x y)}}))}}]]]
+
+              {:validate reitit.ring.spec/validate
+               :data {:middleware [openapi/openapi-feature
+                                   rrc/coerce-exceptions-middleware
+                                   rrc/coerce-request-middleware
+                                   rrc/coerce-response-middleware]}}))]
+    (is (= {"/malli/plus" {:post {:requestBody {:content {:description "body description",
+                                                          "application/json" {:schema {:type "object",
+                                                                                       :properties {:x {:type "integer"},
+                                                                                                    :y {:type "integer"}},
+                                                                                       :required [:x :y],
+                                                                                       :additionalProperties false},
+                                                                              :examples {"1+1" {:x 1, :y 1}, "1+2" {:x 1, :y 2}},
+                                                                              :example {:x 2, :y 2}}}},
+                                  :responses {200 {:description "success",
+                                                   :content {"application/json" {:schema {:type "object",
+                                                                                          :properties {:total {:type "integer"}},
+                                                                                          :required [:total],
+                                                                                          :additionalProperties false},
+                                                                                 :examples {"2" {:total 2}, "3" {:total 3}},
+                                                                                 :example {:total 4}}}}},
+                                  :summary "plus with body"}}})
+        (-> {:request-method :get
+             :uri "/openapi.json"}
+            (app)
+            :body
+            :paths))))
