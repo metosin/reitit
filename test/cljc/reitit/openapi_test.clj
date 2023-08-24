@@ -65,7 +65,10 @@
                                           :description "kosh"}}}
                :responses {200 {:description "success"
                                 :body {:total int?}}
-                           500 {:description "fail"}}
+                           500 {:description "fail"}
+                           504 {:description "default"
+                                :content {:default {:schema {:error string?}}}
+                                :body {:masked string?}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
@@ -91,7 +94,10 @@
                                           :content {"application/json" {:schema {:type "string"}}}}}}
                :responses {200 {:description "success"
                                 :body [:map [:total int?]]}
-                           500 {:description "fail"}}
+                           500 {:description "fail"}
+                           504 {:description "default"
+                                :content {:default {:schema {:error string?}}}
+                                :body {:masked string?}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
@@ -101,7 +107,7 @@
        {:get {:summary "plus"
               :tags [:plus :schema]
               :parameters {:query {:x s/Int, :y s/Int}
-                             :path {:z s/Int}}
+                           :path {:z s/Int}}
               :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                          :description "kosh"}}}
               :responses {200 {:description "success"
@@ -117,7 +123,10 @@
                                           :description "kosh"}}}
                :responses {200 {:description "success"
                                 :body {:total s/Int}}
-                           500 {:description "fail"}}
+                           500 {:description "fail"}
+                           504 {:description "default"
+                                :content {:default {:schema {:error s/Str}}}
+                                :body {:masked s/Str}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
@@ -193,7 +202,11 @@
                                                                                                                  :type "object"}}}}
                                                                      400 {:content {"application/json" {:schema {:type "string"}}}
                                                                           :description "kosh"}
-                                                                     500 {:description "fail"}}
+                                                                     500 {:description "fail"}
+                                                                     504 {:description "default"
+                                                                          :content {"application/json" {:schema {:properties {"error" {:type "string"}}
+                                                                                                                 :required ["error"]
+                                                                                                                 :type "object"}}}}}
                                                          :summary "plus with body"}}
                             "/api/malli/plus/{z}" {:get {:parameters [{:in "query"
                                                                        :name :x
@@ -231,7 +244,12 @@
                                                                                                                   :type "object"}}}}
                                                                       400 {:description "kosh"
                                                                            :content {"application/json" {:schema {:type "string"}}}}
-                                                                      500 {:description "fail"}}
+                                                                      500 {:description "fail"}
+                                                                      504 {:description "default"
+                                                                           :content {"application/json" {:schema {:additionalProperties false
+                                                                                                                  :properties {:error {:type "string"}}
+                                                                                                                  :required [:error]
+                                                                                                                  :type "object"}}}}}
                                                           :summary "plus with body"}}
                             "/api/schema/plus/{z}" {:get {:parameters [{:description ""
                                                                         :in "query"
@@ -280,10 +298,15 @@
                                                                                                                    :type "object"}}}}
                                                                        400 {:description "kosh"
                                                                             :content {"application/json" {:schema {:type "string"}}}}
-                                                                       500 {:description "fail"}}
+                                                                       500 {:description "fail"}
+                                                                       504 {:description "default"
+                                                                            :content {"application/json" {:schema {:additionalProperties false
+                                                                                                                   :properties {"error" {:type "string"}}
+                                                                                                                   :required ["error"]
+                                                                                                                   :type "object"}}}}}
                                                            :summary "plus with body"}}}}]
       (is (= expected spec))
-      (is (nil? (validate spec))))))
+      (is (= nil (validate spec))))))
 
 (defn spec-paths [app uri]
   (-> {:request-method :get, :uri uri} app :body :paths keys))
@@ -457,8 +480,8 @@
                   [["/examples"
                     {:post {:decription "examples"
                             :coercion @coercion
-                            :parameters {:query (->schema :q)
-                                         :request {:body (->schema :b)}}
+                            :request {:body (->schema :b)}
+                            :parameters {:query (->schema :q)}
                             :responses {200 {:description "success"
                                              :body (->schema :ok)}}
                             :openapi {:requestBody
@@ -517,20 +540,19 @@
           (is (nil? (validate spec))))))))
 
 (deftest multipart-test
-  (doseq [[coercion file-schema string-schema]
-          [[#'malli/coercion
-            reitit.ring.malli/bytes-part
-            :string]
-           [#'schema/coercion
-            (schema-tools.core/schema {:filename s/Str
-                                       :content-type s/Str
-                                       :bytes s/Num}
-                                      {:openapi {:type "string"
-                                                 :format "binary"}})
-            s/Str]
-           [#'spec/coercion
-            reitit.http.interceptors.multipart/bytes-part
-            string?]]]
+  (doseq [[coercion file-schema string-schema] [[#'malli/coercion
+                                                 reitit.ring.malli/bytes-part
+                                                 :string]
+                                                [#'schema/coercion
+                                                 (schema-tools.core/schema {:filename s/Str
+                                                                            :content-type s/Str
+                                                                            :bytes s/Num}
+                                                                           {:openapi {:type "string"
+                                                                                      :format "binary"}})
+                                                 s/Str]
+                                                [#'spec/coercion
+                                                 reitit.http.interceptors.multipart/bytes-part
+                                                 string?]]]
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
@@ -565,21 +587,20 @@
           (is (nil? (validate spec))))))))
 
 (deftest per-content-type-test
-  (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
-           [#'schema/coercion (fn [nom] {nom s/Str})]
-           [#'spec/coercion (fn [nom] {nom string?})]]]
+  (doseq [[coercion ->schema] [[malli/coercion (fn [nom] [:map [nom :string]])]
+                               [schema/coercion (fn [nom] {nom s/Str})]
+                               [spec/coercion (fn [nom] {nom string?})]]]
     (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/parameters"
                     {:post {:description "parameters"
-                            :coercion @coercion
-                            :parameters {:request {:content {"application/json" (->schema :b)
-                                                             "application/edn" (->schema :c)}}}
+                            :coercion coercion
+                            :request {:content {"application/json" {:schema (->schema :b)}
+                                                "application/edn" {:schema (->schema :c)}}}
                             :responses {200 {:description "success"
-                                             :content {"application/json" (->schema :ok)
-                                                       "application/edn" (->schema :edn)}}}
+                                             :content {"application/json" {:schema (->schema :ok)}
+                                                       "application/edn" {:schema (->schema :edn)}}}}
                             :handler (fn [req]
                                        {:status 200
                                         :body (-> req :parameters :request)})}}]
@@ -594,41 +615,42 @@
             spec (-> {:request-method :get
                       :uri "/openapi.json"}
                      app
-                     :body)]
+                     :body)
+            spec-coercion (= coercion spec/coercion)]
         (testing "body parameter"
-          (is (match? (merge {:type "object"
-                              :properties {:b {:type "string"}}
-                              :required ["b"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :requestBody :content "application/json" :schema])
-                          normalize)))
-          (is (match? (merge {:type "object"
-                              :properties {:c {:type "string"}}
-                              :required ["c"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :requestBody :content "application/edn" :schema])
-                          normalize))))
+          (is (= (merge {:type "object"
+                         :properties {:b {:type "string"}}
+                         :required ["b"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :requestBody :content "application/json" :schema])
+                     normalize)))
+          (is (= (merge {:type "object"
+                         :properties {:c {:type "string"}}
+                         :required ["c"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :requestBody :content "application/edn" :schema])
+                     normalize))))
         (testing "body response"
-          (is (match? (merge {:type "object"
-                              :properties {:ok {:type "string"}}
-                              :required ["ok"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
-                          normalize)))
-          (is (match? (merge {:type "object"
-                              :properties {:edn {:type "string"}}
-                              :required ["edn"]}
-                             (when-not (#{#'spec/coercion} coercion)
-                               {:additionalProperties false}))
-                      (-> spec
-                          (get-in [:paths "/parameters" :post :responses 200 :content "application/edn" :schema])
-                          normalize))))
+          (is (= (merge {:type "object"
+                         :properties {:ok {:type "string"}}
+                         :required ["ok"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :responses 200 :content "application/json" :schema])
+                     normalize)))
+          (is (= (merge {:type "object"
+                         :properties {:edn {:type "string"}}
+                         :required ["edn"]}
+                        (when-not spec-coercion
+                          {:additionalProperties false}))
+                 (-> spec
+                     (get-in [:paths "/parameters" :post :responses 200 :content "application/edn" :schema])
+                     normalize))))
         (testing "validation"
           (let [query {:request-method :post
                        :uri "/parameters"
@@ -653,23 +675,22 @@
           (is (nil? (validate spec))))))))
 
 (deftest default-content-type-test
-  (doseq [[coercion ->schema]
-          [[#'malli/coercion (fn [nom] [:map [nom :string]])]
-           [#'schema/coercion (fn [nom] {nom s/Str})]
-           [#'spec/coercion (fn [nom] {nom string?})]]]
-    (testing coercion
+  (doseq [[coercion ->schema] [[malli/coercion (fn [nom] [:map [nom :string]])]
+                               [schema/coercion (fn [nom] {nom s/Str})]
+                               [spec/coercion (fn [nom] {nom string?})]]]
+    (testing (str coercion)
       (doseq [content-type ["application/json" "application/edn"]]
         (testing (str "default content type " content-type)
           (let [app (ring/ring-handler
                      (ring/router
                       [["/parameters"
                         {:post {:description "parameters"
-                                :coercion @coercion
+                                :coercion coercion
                                 :content-types [content-type] ;; TODO should this be under :openapi ?
-                                :parameters {:request {:content {"application/transit" (->schema :transit)}
-                                                       :body (->schema :default)}}
+                                :request {:content {"application/transit" {:schema (->schema :transit)}}
+                                          :body (->schema :default)}
                                 :responses {200 {:description "success"
-                                                 :content {"application/transit" (->schema :transit)}
+                                                 :content {"application/transit" {:schema (->schema :transit)}}
                                                  :body (->schema :default)}}
                                 :handler (fn [req]
                                            {:status 200
@@ -707,16 +728,15 @@
               [["/parameters"
                 {:post {:description "parameters"
                         :coercion malli/coercion
-                        :parameters {:request
-                                     {:body
-                                      [:schema
-                                       {:registry {"friend" [:map
-                                                             [:age int?]
-                                                             [:pet [:ref "pet"]]]
-                                                   "pet" [:map
-                                                          [:name :string]
-                                                          [:friends [:vector [:ref "friend"]]]]}}
-                                       "friend"]}}
+                        :request {:body
+                                  [:schema
+                                   {:registry {"friend" [:map
+                                                         [:age int?]
+                                                         [:pet [:ref "pet"]]]
+                                               "pet" [:map
+                                                      [:name :string]
+                                                      [:friends [:vector [:ref "friend"]]]]}}
+                                   "friend"]}
                         :handler (fn [req]
                                    {:status 200
                                     :body (-> req :parameters :request)})}}]
@@ -754,3 +774,53 @@
            spec))
     (testing "spec is valid"
       (is (nil? (validate spec))))))
+
+(deftest openapi-malli-tests
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/openapi.json"
+                {:get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]
+
+               ["/malli" {:coercion malli/coercion}
+                ["/plus" {:post {:summary "plus with body"
+                                 :request {:description "body description"
+                                           :content {"application/json" {:schema {:x int?, :y int?}
+                                                                         :examples {"1+1" {:x 1, :y 1}
+                                                                                    "1+2" {:x 1, :y 2}}
+                                                                         :openapi {:example {:x 2, :y 2}}}}}
+                                 :responses {200 {:description "success"
+                                                  :content {"application/json" {:schema {:total int?}
+                                                                                :examples {"2" {:total 2}
+                                                                                           "3" {:total 3}}
+                                                                                :openapi {:example {:total 4}}}}}}
+                                 :handler (fn [request]
+                                            (let [{:keys [x y]} (-> request :parameters :body)]
+                                              {:status 200, :body {:total (+ x y)}}))}}]]]
+
+              {:validate reitit.ring.spec/validate
+               :data {:middleware [openapi/openapi-feature
+                                   rrc/coerce-exceptions-middleware
+                                   rrc/coerce-request-middleware
+                                   rrc/coerce-response-middleware]}}))]
+    (is (= {"/malli/plus" {:post {:requestBody {:content {:description "body description",
+                                                          "application/json" {:schema {:type "object",
+                                                                                       :properties {:x {:type "integer"},
+                                                                                                    :y {:type "integer"}},
+                                                                                       :required [:x :y],
+                                                                                       :additionalProperties false},
+                                                                              :examples {"1+1" {:x 1, :y 1}, "1+2" {:x 1, :y 2}},
+                                                                              :example {:x 2, :y 2}}}},
+                                  :responses {200 {:description "success",
+                                                   :content {"application/json" {:schema {:type "object",
+                                                                                          :properties {:total {:type "integer"}},
+                                                                                          :required [:total],
+                                                                                          :additionalProperties false},
+                                                                                 :examples {"2" {:total 2}, "3" {:total 3}},
+                                                                                 :example {:total 4}}}}},
+                                  :summary "plus with body"}}})
+        (-> {:request-method :get
+             :uri "/openapi.json"}
+            (app)
+            :body
+            :paths))))

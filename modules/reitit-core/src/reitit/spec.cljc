@@ -82,8 +82,11 @@
 
 (s/def :reitit.core.coercion/model any?)
 
+(s/def :reitit.core.coercion/schema any?)
+(s/def :reitit.core.coercion/map-model (s/keys :opt-un [:reitit.core.coercion/schema]))
+
 (s/def :reitit.core.coercion/content
-  (s/map-of string? :reitit.core.coercion/model))
+  (s/map-of (s/or :string string?, :default #{:default}) :reitit.core.coercion/map-model))
 
 (s/def :reitit.core.coercion/query :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/body :reitit.core.coercion/model)

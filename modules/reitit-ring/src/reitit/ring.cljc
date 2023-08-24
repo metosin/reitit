@@ -32,19 +32,25 @@
 (defn -update-paths [f]
   (let [not-request? #(not= :request %)
         http-method? #(contains? http-methods %)]
-    [;; default parameters and responses
+    [;; default parameters
      [[:parameters not-request?] f]
      [[http-method? :parameters not-request?] f]
+
+     ;; default responses
      [[:responses any? :body] f]
      [[http-method? :responses any? :body] f]
 
-     ;; openapi3 parameters and responses
-     [[:parameters :request :content any?] f]
-     [[http-method? :parameters :request :content any?] f]
-     [[:parameters :request :body] f]
-     [[http-method? :parameters :request :body] f]
-     [[:responses any? :content any?] f]
-     [[http-method? :responses any? :content any?] f]]))
+     ;; openapi3 request
+     [[:request :content any? :schema] f]
+     [[http-method? :request :content any? :schema] f]
+
+     ;; openapi3 LEGACY body
+     [[:request :body] f]
+     [[http-method? :request :body] f]
+
+     ;; openapi3 responses
+     [[:responses any? :content any? :schema] f]
+     [[http-method? :responses any? :content any? :schema] f]]))
 
 (defn -compile-coercion [{:keys [coercion] :as data}]
   (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))

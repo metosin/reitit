@@ -606,53 +606,74 @@
             {:request any? :response (clojure.spec.alpha/spec #{:end})}
             {:request any? :response (clojure.spec.alpha/spec #{:default})}]]]
     (testing (str coercion)
-      (let [app (ring/ring-handler
-                 (ring/router
-                  ["/foo" {:post {:parameters {:request {:content {"application/json" json-request
-                                                                   "application/edn" edn-request}
-                                                         :body default-request}}
-                                  :responses {200 {:content {"application/json" json-response
-                                                             "application/edn" edn-response}
-                                                   :body default-response}}
-                                  :handler (fn [req]
-                                             {:status 200
-                                              :body (-> req :parameters :request)})}}]
-                  {#_#_:validate reitit.ring.spec/validate
-                   :data {:middleware [rrc/coerce-request-middleware
-                                       rrc/coerce-response-middleware]
-                          :coercion coercion}}))
-            call (fn [request]
-                   (try
-                     (app request)
-                     (catch ExceptionInfo e
-                       (select-keys (ex-data e) [:type :in]))))
-            request (fn [request-format response-format body]
-                      {:request-method :post
-                       :uri "/foo"
-                       :muuntaja/request {:format request-format}
-                       :muuntaja/response {:format response-format}
-                       :body-params body})]
-        (testing "succesful call"
-          (is (= {:status 200 :body {:request :json, :response :json}}
-                 (call (request "application/json" "application/json" {:request :json :response :json}))))
-          (is (= {:status 200 :body {:request :edn, :response :json}}
-                 (call (request "application/edn" "application/json" {:request :edn :response :json}))))
-          (is (= {:status 200 :body {:request :default, :response :default}}
-                 (call (request "application/transit" "application/transit" {:request :default :response :default})))))
-        (testing "request validation fails"
-          (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
-                 (call (request "application/edn" "application/json" {:request :json :response :json}))))
-          (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
-                 (call (request "application/json" "application/json" {:request :edn :response :json}))))
-          (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
-                 (call (request "application/transit" "application/json" {:request :edn :response :json})))))
-        (testing "response validation fails"
-          (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
-                 (call (request "application/json" "application/json" {:request :json :response :edn}))))
-          (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
-                 (call (request "application/json" "application/edn" {:request :json :response :json}))))
-          (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
-                 (call (request "application/json" "application/transit" {:request :json :response :json})))))))))
+      (doseq [{:keys [name app]}
+              [{:name "using top-level :body"
+                :app (ring/ring-handler
+                      (ring/router
+                       ["/foo" {:post {:request {:content {"application/json" {:schema json-request}
+                                                           "application/edn" {:schema edn-request}}
+                                                 :body default-request}
+                                       :responses {200 {:content {"application/json" {:schema json-response}
+                                                                  "application/edn" {:schema edn-response}}
+                                                        :body default-response}}
+                                       :handler (fn [req]
+                                                  {:status 200
+                                                   :body (-> req :parameters :request)})}}]
+                       {:validate reitit.ring.spec/validate
+                        :data {:middleware [rrc/coerce-request-middleware
+                                            rrc/coerce-response-middleware]
+                               :coercion coercion}}))}
+               {:name "using :default content"
+                :app (ring/ring-handler
+                      (ring/router
+                       ["/foo" {:post {:request {:content {"application/json" {:schema json-request}
+                                                           "application/edn" {:schema edn-request}
+                                                           :default {:schema default-request}}
+                                                 :body json-request} ;; not applied as :default exists
+                                       :responses {200 {:content {"application/json" {:schema json-response}
+                                                                  "application/edn" {:schema edn-response}
+                                                                  :default {:schema default-response}}
+                                                        :body json-response}} ;; not applied as :default exists
+                                       :handler (fn [req]
+                                                  {:status 200
+                                                   :body (-> req :parameters :request)})}}]
+                       {:validate reitit.ring.spec/validate
+                        :data {:middleware [rrc/coerce-request-middleware
+                                            rrc/coerce-response-middleware]
+                               :coercion coercion}}))}]]
+        (testing name
+          (let [call (fn [request]
+                       (try
+                         (app request)
+                         (catch ExceptionInfo e
+                           (select-keys (ex-data e) [:type :in]))))
+                request (fn [request-format response-format body]
+                          {:request-method :post
+                           :uri "/foo"
+                           :muuntaja/request {:format request-format}
+                           :muuntaja/response {:format response-format}
+                           :body-params body})]
+            (testing "succesful call"
+              (is (= {:status 200 :body {:request :json, :response :json}}
+                     (call (request "application/json" "application/json" {:request :json :response :json}))))
+              (is (= {:status 200 :body {:request :edn, :response :json}}
+                     (call (request "application/edn" "application/json" {:request :edn :response :json}))))
+              (is (= {:status 200 :body {:request :default, :response :default}}
+                     (call (request "application/transit" "application/transit" {:request :default :response :default})))))
+            (testing "request validation fails"
+              (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
+                     (call (request "application/edn" "application/json" {:request :json :response :json}))))
+              (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
+                     (call (request "application/json" "application/json" {:request :edn :response :json}))))
+              (is (= {:type :reitit.coercion/request-coercion :in [:request :body-params]}
+                     (call (request "application/transit" "application/json" {:request :edn :response :json})))))
+            (testing "response validation fails"
+              (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
+                     (call (request "application/json" "application/json" {:request :json :response :edn}))))
+              (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
+                     (call (request "application/json" "application/edn" {:request :json :response :json}))))
+              (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
+                     (call (request "application/json" "application/transit" {:request :json :response :json})))))))))))
 
 
 #?(:clj

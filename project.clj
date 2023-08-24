@@ -108,6 +108,7 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.3"]
                                   [metosin/ring-swagger-ui "4.18.1"]
+                                  [org.clojure/tools.analyzer "1.1.1"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.1"]
