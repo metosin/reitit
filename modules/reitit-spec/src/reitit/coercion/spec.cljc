@@ -83,9 +83,6 @@
                   :string {:default string-transformer}
                   :response {:default no-op-transformer}}})
 
-(defn get-request-default-body [request]
-  (or (-> request :content :default :schema) (:body request)))
-
 (defn create [{:keys [transformers coerce-response?] :as opts}]
   ^{:type ::coercion/coercion}
   (reify coercion/Coercion

@@ -176,9 +176,9 @@
    (some->> (for [[k v] parameters, :when v]
               [k (request-coercer coercion k v opts)])
             (filter second) (seq) (into {})))
-  ([coercion parameters request opts]
-   (let [crc (when request (some->> (content-request-coercer coercion request opts) (array-map :request)))
-         rcs (request-coercers coercion parameters (cond-> opts request (assoc ::skip #{:body})))]
+  ([coercion parameters route-request opts]
+   (let [crc (when route-request (some->> (content-request-coercer coercion route-request opts) (array-map :request)))
+         rcs (request-coercers coercion parameters (cond-> opts route-request (assoc ::skip #{:body})))]
      (if (and crc rcs) (into crc (vec rcs)) (or crc rcs)))))
 
 (defn response-coercers [coercion responses opts]
