@@ -138,17 +138,15 @@
 ;; also, this has internally massive amount of duplicate code, could be simplified
 ;; ... tests too
 (defn -get-apidocs-openapi
-  [_ {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
+  [->schema-object {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
   (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
-        ->schema-object (fn [schema opts]
-                          (let [current-opts (merge options opts)]
-                            (json-schema/transform schema current-opts)))
         ->content (fn [data schema]
                     (merge
                      {:schema schema}
                      (select-keys data [:description :examples])
-                     (:openapi data)))]
+                     (:openapi data)))
+        ->schema-object #(->schema-object %1 (merge options %2))]
     (merge
      (when (seq parameters)
        {:parameters
@@ -263,7 +261,7 @@
                                      (if (:schema $)
                                        (update $ :schema swagger/transform {:type :schema})
                                        $))]))}))
-           :openapi (-get-apidocs-openapi this data options)
+           :openapi (-get-apidocs-openapi json-schema/transform data options)
            (throw
             (ex-info
              (str "Can't produce Schema apidocs for " specification)
