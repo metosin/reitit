@@ -47,6 +47,13 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
+    (-get-model-apidocs [_ specification model options]
+      (case specification
+        :openapi (openapi/transform model (merge opts options))
+        (throw
+         (ex-info
+          (str "Can't produce Schema apidocs for " specification)
+          {:type specification, :coercion :schema}))))
     (-get-apidocs [_ specification {:keys [request parameters responses content-types]
                                     :or {content-types ["application/json"]}}]
      ;; TODO: this looks identical to spec, refactor when schema is done.

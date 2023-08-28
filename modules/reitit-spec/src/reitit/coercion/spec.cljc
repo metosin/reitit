@@ -88,6 +88,13 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
+    (-get-model-apidocs [_ specification model options]
+      (case specification
+        :openapi (openapi/transform model (merge opts options))
+        (throw
+         (ex-info
+          (str "Can't produce Spec apidocs for " specification)
+          {:type specification, :coercion :spec}))))
     (-get-apidocs [_ specification {:keys [request parameters responses content-types]
                                     :or {content-types ["application/json"]}}]
       (case specification
