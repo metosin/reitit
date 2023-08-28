@@ -1,18 +1,18 @@
 {:cljdoc/include-namespaces-from-dependencies
- [metosin/reitit
-  metosin/reitit-core
-  metosin/reitit-dev
-  metosin/reitit-ring
-  metosin/reitit-http
-  metosin/reitit-middleware
-  metosin/reitit-interceptors
-  metosin/reitit-spec
-  metosin/reitit-schema
-  metosin/reitit-swagger
-  metosin/reitit-swagger-ui
-  metosin/reitit-frontend
-  metosin/reitit-sieppari
-  metosin/reitit-pedestal
+ [fi.metosin/reitit
+  fi.metosin/reitit-core
+  fi.metosin/reitit-dev
+  fi.metosin/reitit-ring
+  fi.metosin/reitit-http
+  fi.metosin/reitit-middleware
+  fi.metosin/reitit-interceptors
+  fi.metosin/reitit-spec
+  fi.metosin/reitit-schema
+  fi.metosin/reitit-swagger
+  fi.metosin/reitit-swagger-ui
+  fi.metosin/reitit-frontend
+  fi.metosin/reitit-sieppari
+  fi.metosin/reitit-pedestal
   fi.metosin/reitit-openapi]
  :cljdoc.doc/tree
  [["Introduction" {:file "doc/README.md"}]
