@@ -103,10 +103,6 @@
                   (request-coercion-failed! result coercion value in request serialize-failed-result)
                   result)))))))))
 
-(defn get-default-schema [request-or-response]
-  (or (-> request-or-response :content :default :schema)
-      (:body request-or-response)))
-
 (defn get-default [request-or-response]
   (or (-> request-or-response :content :default)
       (some->> request-or-response :body (assoc {} :schema))))
