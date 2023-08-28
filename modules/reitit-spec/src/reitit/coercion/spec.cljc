@@ -101,6 +101,7 @@
                        (empty responses)
                        (for [[k response] responses]
                          [k (as-> response $
+                              (dissoc $ :content)
                               (set/rename-keys $ {:body :schema}))]))})))
         :openapi (merge
                   (when (seq (dissoc parameters :body :request :multipart))

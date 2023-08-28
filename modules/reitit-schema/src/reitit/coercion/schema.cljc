@@ -60,7 +60,9 @@
                       (into
                        (empty responses)
                        (for [[k response] responses]
-                         [k (set/rename-keys response {:body :schema})]))})))
+                         [k (-> response
+                                (dissoc :content)
+                                (set/rename-keys {:body :schema}))]))})))
         :openapi (merge
                   (when (seq (dissoc parameters :body :request :multipart))
                     (openapi/openapi-spec {::openapi/parameters (dissoc parameters :body :request)}))

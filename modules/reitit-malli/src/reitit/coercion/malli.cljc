@@ -259,6 +259,7 @@
                          (for [[status response] responses]
                            [status (as-> response $
                                      (set/rename-keys $ {:body :schema})
+                                     (dissoc $ :content)
                                      (update $ :description (fnil identity ""))
                                      (if (:schema $)
                                        (update $ :schema swagger/transform {:type :schema})
