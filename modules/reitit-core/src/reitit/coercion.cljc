@@ -209,7 +209,7 @@
                            :path :path
                            :multipart :formData}]
     (case specification
-      :openapi (-get-apidocs coercion specification data)
+      ;; :openapi handled in reitit.openapi
       :swagger (do
                  (-warn-unsupported-coercions data)
                  (->> (update

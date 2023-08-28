@@ -109,42 +109,7 @@
                        (for [[k response] responses]
                          [k (as-> response $
                               (set/rename-keys $ {:body :schema}))]))})))
-        :openapi (merge
-                  (when (seq (dissoc parameters :body :request :multipart))
-                    (openapi/openapi-spec {::openapi/parameters (dissoc parameters :body :request)}))
-                  (when (:body parameters)
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (zipmap content-types (repeat (:body parameters)))})})
-                  (when request
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (merge
-                                                       (when-let [default (coercion/get-default-schema request)]
-                                                         (zipmap content-types (repeat default)))
-                                                       (->> (for [[content-type {:keys [schema]}] (:content request)]
-                                                              [content-type schema])
-                                                            (into {})))})})
-                  (when (:multipart parameters)
-                    {:requestBody
-                     (openapi/openapi-spec
-                      {::openapi/content {"multipart/form-data" (:multipart parameters)}})})
-                  (when responses
-                    {:responses
-                     (into
-                      (empty responses)
-                      (for [[k {:keys [content] :as response}] responses
-                            :let [default (coercion/get-default-schema response)
-                                  content-types (remove #{:default} content-types)]]
-                        [k (merge
-                            (select-keys response [:description])
-                            (when (or content default)
-                              (openapi/openapi-spec
-                               {::openapi/content (-> (merge
-                                                       (when default
-                                                         (zipmap content-types (repeat default)))
-                                                       (->> (for [[content-type {:keys [schema]}] content]
-                                                              [content-type schema])
-                                                            (into {})))
-                                                      (dissoc :default))})))]))}))
+        ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)
