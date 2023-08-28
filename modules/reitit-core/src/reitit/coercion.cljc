@@ -192,37 +192,6 @@
   (impl/path-update data [[[:parameters any?] #(-compile-model coercion % nil)]]))
 
 ;;
-;; api-docs
-;;
-
-(defn -warn-unsupported-coercions [{:keys [request responses] :as _data}]
-  (when request
-    (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
-  (when (some :content (vals responses))
-    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
-
-(defn get-apidocs [coercion specification data]
-  (let [swagger-parameter {:query :query
-                           :body :body
-                           :form :formData
-                           :header :header
-                           :path :path
-                           :multipart :formData}]
-    (case specification
-      ;; :openapi handled in reitit.openapi
-      :swagger (do
-                 (-warn-unsupported-coercions data)
-                 (->> (update
-                       data
-                       :parameters
-                       (fn [parameters]
-                         (->> parameters
-                              (map (fn [[k v]] [(swagger-parameter k) v]))
-                              (filter first)
-                              (into {}))))
-                      (-get-apidocs coercion specification))))))
-
-;;
 ;; integration
 ;;
 
