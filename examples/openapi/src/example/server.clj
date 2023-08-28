@@ -29,7 +29,6 @@
 
        ["/pizza"
         {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
-               :content-types ["application/json" "application/edn"]
                :responses {200 {:content {"application/json" {:description "Fetch a pizza as json"
                                                               :schema [:map
                                                                        [:color :keyword]
@@ -51,7 +50,6 @@
                            :body {:color :red
                                   :pineapple true}})}
          :post {:summary "Create a pizza | Multiple content-types, multiple examples"
-                :content-types ["application/json" "application/edn"]
                 :request {:content {"application/json" {:description "Create a pizza using json"
                                                         :schema [:map
                                                                  [:color :keyword]
@@ -64,6 +62,8 @@
                                                                 [:pineapple :boolean]]
                                                        :examples {:purple {:value (pr-str {:color :purple
                                                                                            :pineapple false})}}}}}
+                ;; Need to list content types explicitly because we use :default in :responses
+                :content-types ["application/json" "application/edn"]
                 :responses {200 {:content {:default {:description "Success"
                                                      :schema [:map [:success :boolean]]
                                                      :example {:success true}}}}}
