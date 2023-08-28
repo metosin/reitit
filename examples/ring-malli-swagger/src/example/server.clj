@@ -93,22 +93,6 @@
                                        :json-schema/default 42}
                                       int?]
                                      [:y int?]]}
-                 ;; OpenAPI3 named examples for request & response
-                 :openapi {:requestBody
-                           {:content
-                            {"application/json"
-                             {:examples {"add-one-one" {:summary "1+1"
-                                                        :value {:x 1 :y 1}}
-                                         "add-one-two" {:summary "1+2"
-                                                        :value {:x 1 :y 2}}}}}}
-                           :responses
-                           {200
-                            {:content
-                             {"application/json"
-                              {:examples {"two" {:summary "2"
-                                                 :value {:total 2}}
-                                          "three" {:summary "3"
-                                                   :value {:total 3}}}}}}}}
                  :responses {200 {:body [:map [:total int?]]}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
