@@ -67,7 +67,9 @@
                       (into
                        (empty responses)
                        (for [[k response] responses]
-                         [k (set/rename-keys response {:body :schema})]))})))
+                         [k (-> response
+                                (dissoc :content)
+                                (set/rename-keys {:body :schema}))]))})))
         ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
         (throw
          (ex-info
