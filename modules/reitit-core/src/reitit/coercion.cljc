@@ -13,6 +13,8 @@
   (-get-name [this] "Keyword name for the coercion")
   (-get-options [this] "Coercion options")
   (-get-apidocs [this specification data] "Returns api documentation")
+  ;; TODO doc options:
+  (-get-model-apidocs [this specification model options] "Convert model into a format that can be used in api docs")
   (-compile-model [this model name] "Compiles a model")
   (-open-model [this model] "Returns a new model which allows extra keys in maps")
   (-encode-error [this error] "Converts error in to a serializable format")

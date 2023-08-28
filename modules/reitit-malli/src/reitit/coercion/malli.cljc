@@ -138,7 +138,7 @@
 ;; also, this has internally massive amount of duplicate code, could be simplified
 ;; ... tests too
 (defn -get-apidocs-openapi
-  [->schema-object {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
+  [coercion {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
   (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->content (fn [data schema]
@@ -146,7 +146,7 @@
                      {:schema schema}
                      (select-keys data [:description :examples])
                      (:openapi data)))
-        ->schema-object #(->schema-object %1 (merge options %2))]
+        ->schema-object #(coercion/-get-model-apidocs coercion :openapi %1 (merge options %2))]
     (merge
      (when (seq parameters)
        {:parameters
@@ -241,6 +241,13 @@
      (reify coercion/Coercion
        (-get-name [_] :malli)
        (-get-options [_] opts)
+       (-get-model-apidocs [this specification model options]
+         (case specification
+           :openapi (json-schema/transform model options)
+           (throw
+            (ex-info
+             (str "Can't produce Malli apidocs for " specification)
+             {:type specification, :coercion :malli}))))
        (-get-apidocs [this specification {:keys [parameters responses] :as data}]
          (case specification
            :swagger (merge
@@ -261,11 +268,11 @@
                                      (if (:schema $)
                                        (update $ :schema swagger/transform {:type :schema})
                                        $))]))}))
-           :openapi (-get-apidocs-openapi json-schema/transform data options)
+           :openapi (-get-apidocs-openapi this data options)
            (throw
             (ex-info
-             (str "Can't produce Schema apidocs for " specification)
-             {:type specification, :coercion :schema}))))
+             (str "Can't produce Malli apidocs for " specification)
+             {:type specification, :coercion :malli}))))
        (-compile-model [_ model _]
          (if (= 1 (count model))
            (compile (first model) options)
