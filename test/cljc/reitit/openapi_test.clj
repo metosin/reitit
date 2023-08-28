@@ -157,19 +157,16 @@
                            :version "0.0.1"}
                     :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
                                                                       :name "x"
-                                                                      :description ""
                                                                       :required true
                                                                       :schema {:type "integer"
                                                                                :format "int64"}}
                                                                      {:in "query"
                                                                       :name "y"
-                                                                      :description ""
                                                                       :required true
                                                                       :schema {:type "integer"
                                                                                :format "int64"}}
                                                                      {:in "path"
                                                                       :name "z"
-                                                                      :description ""
                                                                       :required true
                                                                       :schema {:type "integer"
                                                                                :format "int64"}}]
@@ -188,7 +185,6 @@
                                                   :post {:parameters [{:in "path"
                                                                        :name "z"
                                                                        :required true
-                                                                       :description ""
                                                                        :schema {:type "integer"
                                                                                 :format "int64"}}]
                                                          :requestBody {:content {"application/json" {:schema {:oneOf [{:items {:type "integer"
@@ -251,21 +247,18 @@
                                                                                                                   :required [:error]
                                                                                                                   :type "object"}}}}}
                                                           :summary "plus with body"}}
-                            "/api/schema/plus/{z}" {:get {:parameters [{:description ""
-                                                                        :in "query"
+                            "/api/schema/plus/{z}" {:get {:parameters [{:in "query"
                                                                         :name "x"
                                                                         :required true
                                                                         :schema {:format "int32"
                                                                                  :type "integer"}}
-                                                                       {:description ""
-                                                                        :in "query"
+                                                                       {:in "query"
                                                                         :name "y"
                                                                         :required true
                                                                         :schema {:type "integer"
                                                                                  :format "int32"}}
                                                                        {:in "path"
                                                                         :name "z"
-                                                                        :description ""
                                                                         :required true
                                                                         :schema {:type "integer"
                                                                                  :format "int32"}}]
@@ -282,7 +275,6 @@
                                                           :summary "plus"}
                                                     :post {:parameters [{:in "path"
                                                                          :name "z"
-                                                                         :description ""
                                                                          :required true
                                                                          :schema {:type "integer"
                                                                                   :format "int32"}}]
