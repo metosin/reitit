@@ -1,4 +1,4 @@
-(defproject metosin/reitit-swagger "0.7.0-alpha5"
+(defproject fi.metosin/reitit-swagger "0.7.0-alpha5"
   :description "Reitit: Swagger-support"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,4 +9,4 @@
   :plugins [[lein-parent "0.3.9"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
-  :dependencies [[metosin/reitit-core]])
+  :dependencies [[fi.metosin/reitit-core]])

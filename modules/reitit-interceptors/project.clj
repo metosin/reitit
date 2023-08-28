@@ -1,4 +1,4 @@
-(defproject metosin/reitit-interceptors "0.7.0-alpha5"
+(defproject fi.metosin/reitit-interceptors "0.7.0-alpha5"
   :description "Reitit, common interceptors bundled"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,7 +9,7 @@
   :plugins [[lein-parent "0.3.9"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
-  :dependencies [[metosin/reitit-ring]
+  :dependencies [[fi.metosin/reitit-ring]
                  [lambdaisland/deep-diff]
                  [metosin/muuntaja]
                  [metosin/spec-tools]])

@@ -2,7 +2,7 @@
   :description "Reitit Ring App with Swagger"
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [ring/ring-jetty-adapter "1.7.1"]
-                 [metosin/reitit "0.7.0-alpha5"]
+                 [fi.metosin/reitit "0.7.0-alpha5"]
                  [metosin/ring-swagger-ui "5.0.0-alpha.0"]]
   :repl-options {:init-ns example.server}
   :profiles {:dev {:dependencies [[ring/ring-mock "0.3.2"]]}})
