@@ -471,14 +471,20 @@
                  (ring/router
                   [["/examples"
                     {:post {:decription "examples"
+                            :content-types ["application/json" "application/edn"]
                             :coercion @coercion
                             :request {:content {"application/json" {:schema (->schema :b)
                                                                     :examples {"named-example" {:description "a named example"
-                                                                                                :value {:b "named"}}}}}}
+                                                                                                :value {:b "named"}}}}
+                                                :default {:schema (->schema :b2)
+                                                          :examples {"default-example" {:description "default example"
+                                                                                        :value {:b2 "named"}}}}}}
                             :parameters {:query (->schema :q)}
                             :responses {200 {:description "success"
                                              :content {"application/json" {:schema (->schema :ok)
-                                                                           :examples {"response-example" {:value {:ok "response"}}}}}}}
+                                                                           :examples {"response-example" {:value {:ok "response"}}}}
+                                                       :default {:schema (->schema :ok)
+                                                                 :examples {"default-response-example" {:value {:ok "default"}}}}}}}
                             :handler identity}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
@@ -508,7 +514,18 @@
                                                   :value {:b "named"}}}}
                       (-> spec
                           (get-in [:paths "/examples" :post :requestBody :content "application/json"])
-                          normalize))))
+                          normalize)))
+          (testing "default"
+            (is (match? {:schema {:type "object"
+                                  :properties {:b2 {:type "string"
+                                                    :example "EXAMPLE"}}
+                                  :required ["b2"]
+                                  :example {:b2 "EXAMPLE2"}}
+                         :examples {:default-example {:description "default example"
+                                                      :value {:b2 "named"}}}}
+                        (-> spec
+                            (get-in [:paths "/examples" :post :requestBody :content "application/edn"])
+                            normalize)))))
         (testing "body response"
           (is (match? {:schema {:type "object"
                                 :properties {:ok {:type "string"
@@ -518,7 +535,17 @@
                        :examples {:response-example {:value {:ok "response"}}}}
                       (-> spec
                           (get-in [:paths "/examples" :post :responses 200 :content "application/json"])
-                          normalize))))
+                          normalize)))
+          (testing "default"
+            (is (match? {:schema {:type "object"
+                                  :properties {:ok {:type "string"
+                                                    :example "EXAMPLE"}}
+                                  :required ["ok"]
+                                  :example {:ok "EXAMPLE2"}}
+                         :examples {:default-response-example {:value {:ok "default"}}}}
+                        (-> spec
+                            (get-in [:paths "/examples" :post :responses 200 :content "application/edn"])
+                            normalize)))))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 

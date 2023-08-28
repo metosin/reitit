@@ -139,15 +139,15 @@
        {:responses
         (into {}
               (map (fn [[status {:keys [content], :as response}]]
-                     (let [default (coercion/get-default-schema response)
+                     (let [default (coercion/get-default response)
                            content (-> (merge
                                         (when default
                                           (into {}
                                                 (map (fn [content-type]
-                                                       (let [schema (->schema-object default {:in :responses
-                                                                                              :type :schema
-                                                                                              :content-type content-type})]
-                                                         [content-type (->content nil schema)])))
+                                                       (let [schema (->schema-object (:schema default) {:in :responses
+                                                                                                        :type :schema
+                                                                                                        :content-type content-type})]
+                                                         [content-type (->content default schema)])))
                                                 content-types))
                                         (when content
                                           (into {}
