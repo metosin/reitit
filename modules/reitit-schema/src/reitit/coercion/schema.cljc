@@ -47,6 +47,13 @@
   (reify coercion/Coercion
     (-get-name [_] :schema)
     (-get-options [_] opts)
+    (-get-model-apidocs [_ specification model options]
+      (case specification
+        :openapi (openapi/transform model (merge opts options))
+        (throw
+         (ex-info
+          (str "Can't produce Schema apidocs for " specification)
+          {:type specification, :coercion :schema}))))
     (-get-apidocs [_ specification {:keys [request parameters responses content-types]
                                     :or {content-types ["application/json"]}}]
      ;; TODO: this looks identical to spec, refactor when schema is done.
@@ -63,42 +70,7 @@
                          [k (-> response
                                 (dissoc :content)
                                 (set/rename-keys {:body :schema}))]))})))
-        :openapi (merge
-                  (when (seq (dissoc parameters :body :request :multipart))
-                    (openapi/openapi-spec {::openapi/parameters (dissoc parameters :body :request)}))
-                  (when (:body parameters)
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (zipmap content-types (repeat (:body parameters)))})})
-                  (when request
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (merge
-                                                       (when-let [default (coercion/get-default-schema request)]
-                                                         (zipmap content-types (repeat default)))
-                                                       (->> (for [[content-type {:keys [schema]}] (:content request)]
-                                                              [content-type schema])
-                                                            (into {})))})})
-                  (when (:multipart parameters)
-                    {:requestBody
-                     (openapi/openapi-spec
-                      {::openapi/content {"multipart/form-data" (:multipart parameters)}})})
-                  (when responses
-                    {:responses
-                     (into
-                      (empty responses)
-                      (for [[k {:keys [content] :as response}] responses
-                            :let [default (coercion/get-default-schema response)]]
-                        [k (merge
-                            (select-keys response [:description])
-                            (when (or content default)
-                              (openapi/openapi-spec
-                               {::openapi/content (-> (merge
-                                                       (when default
-                                                         (zipmap content-types (repeat default)))
-                                                       (->> (for [[content-type {:keys [schema]}] content]
-                                                              [content-type schema])
-                                                            (into {})))
-                                                      (dissoc :default))})))]))}))
-
+        ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
         (throw
          (ex-info
           (str "Can't produce Schema apidocs for " specification)

@@ -133,102 +133,6 @@
    ;; malli options
    :options nil})
 
-;; TODO: this is now seems like a generic transforming function that could be used in all of malli, spec, schema
-;; ... just tranform the schemas in place
-;; also, this has internally massive amount of duplicate code, could be simplified
-;; ... tests too
-(defn -get-apidocs-openapi
-  [_ {:keys [request parameters responses content-types] :or {content-types ["application/json"]}} options]
-  (let [{:keys [body multipart]} parameters
-        parameters (dissoc parameters :request :body :multipart)
-        ->schema-object (fn [schema opts]
-                          (let [current-opts (merge options opts)]
-                            (json-schema/transform schema current-opts)))
-        ->content (fn [data schema]
-                    (merge
-                     {:schema schema}
-                     (select-keys data [:description :examples])
-                     (:openapi data)))]
-    (merge
-     (when (seq parameters)
-       {:parameters
-        (->> (for [[in schema] parameters
-                   :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
-                         required? (partial contains? (set required))]
-                   [k schema] properties]
-               (merge {:in (name in)
-                       :name k
-                       :required (required? k)
-                       :schema schema}
-                      (select-keys schema [:description])))
-             (into []))})
-     (when body
-       ;; body uses a single schema to describe every :requestBody
-       ;; the schema-object transformer should be able to transform into distinct content-types
-       {:requestBody {:content (into {}
-                                     (map (fn [content-type]
-                                            (let [schema (->schema-object body {:in :requestBody
-                                                                                :type :schema
-                                                                                :content-type content-type})]
-                                              [content-type {:schema schema}])))
-                                     content-types)}})
-
-     (when request
-       ;; request allow to different :requestBody per content-type
-       {:requestBody
-        {:content (merge
-                   (select-keys request [:description])
-                   (when-let [{:keys [schema] :as data} (coercion/get-default request)]
-                     (into {}
-                           (map (fn [content-type]
-                                  (let [schema (->schema-object schema {:in :requestBody
-                                                                        :type :schema
-                                                                        :content-type content-type})]
-                                    [content-type (->content data schema)])))
-                           content-types))
-                   (into {}
-                         (map (fn [[content-type {:keys [schema] :as data}]]
-                                (let [schema (->schema-object schema {:in :requestBody
-                                                                      :type :schema
-                                                                      :content-type content-type})]
-                                  [content-type (->content data schema)])))
-                         (:content request)))}})
-     (when multipart
-       {:requestBody
-        {:content
-         {"multipart/form-data"
-          {:schema
-           (->schema-object multipart {:in :requestBody
-                                       :type :schema
-                                       :content-type "multipart/form-data"})}}}})
-     (when responses
-       {:responses
-        (into {}
-              (map (fn [[status {:keys [content], :as response}]]
-                     (let [default (coercion/get-default-schema response)
-                           content (-> (merge
-                                        (when default
-                                          (into {}
-                                                (map (fn [content-type]
-                                                       (let [schema (->schema-object default {:in :responses
-                                                                                              :type :schema
-                                                                                              :content-type content-type})]
-                                                         [content-type (->content nil schema)])))
-                                                content-types))
-                                        (when content
-                                          (into {}
-                                                (map (fn [[content-type {:keys [schema] :as data}]]
-                                                       (let [schema (->schema-object schema {:in :responses
-                                                                                             :type :schema
-                                                                                             :content-type content-type})]
-                                                         [content-type (->content data schema)])))
-                                                content)))
-                                       (dissoc :default))]
-                       [status (merge (select-keys response [:description])
-                                      (when content
-                                        {:content content}))]))
-                   responses))}))))
-
 (defn create
   ([]
    (create nil))
@@ -243,6 +147,13 @@
      (reify coercion/Coercion
        (-get-name [_] :malli)
        (-get-options [_] opts)
+       (-get-model-apidocs [this specification model options]
+         (case specification
+           :openapi (json-schema/transform model (merge opts options))
+           (throw
+            (ex-info
+             (str "Can't produce Malli apidocs for " specification)
+             {:type specification, :coercion :malli}))))
        (-get-apidocs [this specification {:keys [parameters responses] :as data}]
          (case specification
            :swagger (merge
@@ -264,11 +175,11 @@
                                      (if (:schema $)
                                        (update $ :schema swagger/transform {:type :schema})
                                        $))]))}))
-           :openapi (-get-apidocs-openapi this data options)
+           ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
            (throw
             (ex-info
-             (str "Can't produce Schema apidocs for " specification)
-             {:type specification, :coercion :schema}))))
+             (str "Can't produce Malli apidocs for " specification)
+             {:type specification, :coercion :malli}))))
        (-compile-model [_ model _]
          (if (= 1 (count model))
            (compile (first model) options)
