@@ -472,22 +472,13 @@
                   [["/examples"
                     {:post {:decription "examples"
                             :coercion @coercion
-                            :request {:body (->schema :b)}
+                            :request {:content {"application/json" {:schema (->schema :b)
+                                                                    :examples {"named-example" {:description "a named example"
+                                                                                                :value {:b "named"}}}}}}
                             :parameters {:query (->schema :q)}
                             :responses {200 {:description "success"
-                                             :body (->schema :ok)}}
-                            :openapi {:requestBody
-                                      {:content
-                                       {"application/json"
-                                        {:examples
-                                         {"named-example" {:description "a named example"
-                                                           :value {:b "named"}}}}}}
-                                      :responses
-                                      {200
-                                       {:content
-                                        {"application/json"
-                                         {:examples
-                                          {"response-example" {:value {:ok "response"}}}}}}}}
+                                             :content {"application/json" {:schema (->schema :ok)
+                                                                           :examples {"response-example" {:value {:ok "response"}}}}}}}
                             :handler identity}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
