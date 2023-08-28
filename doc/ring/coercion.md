@@ -152,7 +152,10 @@ Invalid response:
 
 ## Per-content-type coercion
 
-You can also specify request and response body schemas per content-type. The syntax for this is:
+You can also specify request and response body schemas per
+content-type. These are also read by the [OpenAPI
+feature](./openapi.md) when generating api docs. The syntax for this
+is:
 
 ```clj
 (def app
@@ -161,13 +164,12 @@ You can also specify request and response body schemas per content-type. The syn
     ["/api"
      ["/example" {:post {:coercion reitit.coercion.schema/coercion
                          :request {:content {"application/json" {:schema {:y s/Int}}
-                                             "application/edn" {:schema {:z s/Int}}}
-                                   ;; default if no content-type matches:
-                                   :body {:yy s/Int}}
+                                             "application/edn" {:schema {:z s/Int}}
+                                             ;; default if no content-type matches:
+                                             :default {:schema {:yy s/Int}}}}
                          :responses {200 {:content {"application/json" {:schema {:w s/Int}}
-                                                    "application/edn" {:schema {:x s/Int}}}
-                                          ;; default if no content-type matches:
-                                          :body {:ww s/Int}}}
+                                                    "application/edn" {:schema {:x s/Int}}
+                                                    :default {:schema {:ww s/Int}}}}}
                          :handler ...}}]]
     {:data {:middleware [rrc/coerce-exceptions-middleware
                          rrc/coerce-request-middleware
