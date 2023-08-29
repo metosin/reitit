@@ -142,7 +142,7 @@ Let's apply a small change to our ```ns3```. We'll replace our router by two dif
    ["/ping" ::ping]])
 
 (def dev-router #(r/router (routes))) ;; A router for dev
-(def prod-router (constantly (r/router (routes)))) ;; A router for prod 
+(def prod-router (r/router (routes))) ;; A router for prod 
 ```
 
 And there you have it, dynamic during dev, performance at production. We have it all !
