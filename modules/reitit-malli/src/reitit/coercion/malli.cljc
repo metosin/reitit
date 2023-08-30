@@ -136,7 +136,7 @@
                            (into
                              (empty parameters)
                              (for [[k v] parameters]
-                               [k (coercion/-compile-model this v nil)]))})
+                               [k (compile v options)]))})
                         (if responses
                           {::swagger/responses
                            (into
@@ -145,7 +145,7 @@
                                [k (as-> response $
                                         (set/rename-keys $ {:body :schema})
                                         (if (:schema $)
-                                          (update $ :schema #(coercion/-compile-model this % nil))
+                                          (update $ :schema compile options)
                                           $))]))})))
            ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
            (throw
