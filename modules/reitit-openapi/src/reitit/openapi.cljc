@@ -73,6 +73,96 @@
 (defn- openapi-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
+(defn -get-apidocs-openapi
+  [coercion {:keys [request parameters responses content-types] :or {content-types ["application/json"]}}]
+  (let [{:keys [body multipart]} parameters
+        parameters (dissoc parameters :request :body :multipart)
+        ->content (fn [data schema]
+                    (merge
+                     {:schema schema}
+                     (select-keys data [:description :examples])
+                     (:openapi data)))
+        ->schema-object #(coercion/-get-model-apidocs coercion :openapi %1 %2)]
+    (merge
+     (when (seq parameters)
+       {:parameters
+        (->> (for [[in schema] parameters
+                   :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
+                         required? (partial contains? (set required))]
+                   [k schema] properties]
+               (merge {:in (name in)
+                       :name k
+                       :required (required? k)
+                       :schema schema}
+                      (select-keys schema [:description])))
+             (into []))})
+     (when body
+       ;; body uses a single schema to describe every :requestBody
+       ;; the schema-object transformer should be able to transform into distinct content-types
+       {:requestBody {:content (into {}
+                                     (map (fn [content-type]
+                                            (let [schema (->schema-object body {:in :requestBody
+                                                                                :type :schema
+                                                                                :content-type content-type})]
+                                              [content-type {:schema schema}])))
+                                     content-types)}})
+
+     (when request
+       ;; request allow to different :requestBody per content-type
+       {:requestBody
+        {:content (merge
+                   (select-keys request [:description])
+                   (when-let [{:keys [schema] :as data} (coercion/get-default request)]
+                     (into {}
+                           (map (fn [content-type]
+                                  (let [schema (->schema-object schema {:in :requestBody
+                                                                        :type :schema
+                                                                        :content-type content-type})]
+                                    [content-type (->content data schema)])))
+                           content-types))
+                   (into {}
+                         (map (fn [[content-type {:keys [schema] :as data}]]
+                                (let [schema (->schema-object schema {:in :requestBody
+                                                                      :type :schema
+                                                                      :content-type content-type})]
+                                  [content-type (->content data schema)])))
+                         (:content request)))}})
+     (when multipart
+       {:requestBody
+        {:content
+         {"multipart/form-data"
+          {:schema
+           (->schema-object multipart {:in :requestBody
+                                       :type :schema
+                                       :content-type "multipart/form-data"})}}}})
+     (when responses
+       {:responses
+        (into {}
+              (map (fn [[status {:keys [content], :as response}]]
+                     (let [default (coercion/get-default-schema response)
+                           content (-> (merge
+                                        (when default
+                                          (into {}
+                                                (map (fn [content-type]
+                                                       (let [schema (->schema-object default {:in :responses
+                                                                                              :type :schema
+                                                                                              :content-type content-type})]
+                                                         [content-type (->content nil schema)])))
+                                                content-types))
+                                        (when content
+                                          (into {}
+                                                (map (fn [[content-type {:keys [schema] :as data}]]
+                                                       (let [schema (->schema-object schema {:in :responses
+                                                                                             :type :schema
+                                                                                             :content-type content-type})]
+                                                         [content-type (->content data schema)])))
+                                                content)))
+                                       (dissoc :default))]
+                       [status (merge (select-keys response [:description])
+                                      (when content
+                                        {:content content}))]))
+                   responses))}))))
+
 (defn create-openapi-handler
   "Stability: alpha
 
@@ -99,7 +189,7 @@
                                     (apply meta-merge (keep (comp :openapi :data) middleware))
                                     (apply meta-merge (keep (comp :openapi :data) interceptors))
                                     (if coercion
-                                      (coercion/get-apidocs coercion :openapi data))
+                                      (-get-apidocs-openapi coercion data))
                                     (select-keys data [:tags :summary :description])
                                     (strip-top-level-keys openapi))]))
            transform-path (fn [[p _ c]]

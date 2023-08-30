@@ -24,15 +24,15 @@
   and :parameters from route data, otherwise does not mount."
   {:name ::coerce-request
    :spec ::rs/parameters
-   :compile (fn [{:keys [coercion parameters]} opts]
+   :compile (fn [{:keys [coercion parameters request]} opts]
               (cond
                 ;; no coercion, skip
                 (not coercion) nil
                 ;; just coercion, don't mount
-                (not parameters) {}
+                (not (or parameters request)) {}
                 ;; mount
                 :else
-                (if-let [coercers (coercion/request-coercers coercion parameters opts)]
+                (if-let [coercers (coercion/request-coercers coercion parameters request opts)]
                   (fn [handler]
                     (fn
                       ([request]

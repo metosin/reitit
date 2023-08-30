@@ -1,7 +1,9 @@
 (ns reitit.coercion.spec
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
+            [meta-merge.core :as mm]
             [reitit.coercion :as coercion]
+            [reitit.exception :as ex]
             [spec-tools.core :as st #?@(:cljs [:refer [Spec]])]
             [spec-tools.data-spec :as ds #?@(:cljs [:refer [Maybe]])]
             [spec-tools.openapi.core :as openapi]
@@ -66,7 +68,7 @@
     (st/create-spec {:spec this}))
 
   nil
-  (into-spec [this _]))
+  (into-spec [_ _]))
 
 (defn stringify-pred [pred]
   (str (if (seq? pred) (seq pred) pred)))
@@ -86,81 +88,51 @@
   (reify coercion/Coercion
     (-get-name [_] :spec)
     (-get-options [_] opts)
-    (-get-apidocs [this specification {:keys [parameters responses content-types]
-                                       :or {content-types ["application/json"]}}]
+    (-get-model-apidocs [_ specification model options]
+      (case specification
+        :openapi (openapi/transform model (merge opts options))
+        (throw
+         (ex-info
+          (str "Can't produce Spec apidocs for " specification)
+          {:type specification, :coercion :spec}))))
+    (-get-apidocs [_ specification {:keys [request parameters responses content-types]
+                                    :or {content-types ["application/json"]}}]
       (case specification
         :swagger (swagger/swagger-spec
                   (merge
                    (if parameters
-                     {::swagger/parameters
-                      (into
-                       (empty parameters)
-                       (for [[k v] parameters]
-                         [k (coercion/-compile-model this v nil)]))})
+                     {::swagger/parameters parameters})
                    (if responses
                      {::swagger/responses
                       (into
                        (empty responses)
                        (for [[k response] responses]
                          [k (as-> response $
-                              (set/rename-keys $ {:body :schema})
-                              (if (:schema $)
-                                (update $ :schema #(coercion/-compile-model this % nil))
-                                $))]))})))
-        :openapi (merge
-                  (when (seq (dissoc parameters :body :request :multipart))
-                    (openapi/openapi-spec {::openapi/parameters
-                                           (into (empty parameters)
-                                                 (for [[k v] (dissoc parameters :body :request)]
-                                                   [k (coercion/-compile-model this v nil)]))}))
-                  (when (:body parameters)
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (zipmap content-types (repeat (coercion/-compile-model this (:body parameters) nil)))})})
-                  (when (:request parameters)
-                    {:requestBody (openapi/openapi-spec
-                                   {::openapi/content (merge
-                                                       (when-let [default (get-in parameters [:request :body])]
-                                                         (zipmap content-types (repeat (coercion/-compile-model this default nil))))
-                                                       (into {}
-                                                             (for [[format model] (:content (:request parameters))]
-                                                               [format (coercion/-compile-model this model nil)])))})})
-                  (when (:multipart parameters)
-                       {:requestBody
-                        (openapi/openapi-spec
-                         {::openapi/content
-                          {"multipart/form-data"
-                           (coercion/-compile-model this (:multipart parameters) nil)}})})
-                  (when responses
-                    {:responses
-                     (into
-                      (empty responses)
-                      (for [[k {:keys [body content] :as response}] responses]
-                        [k (merge
-                            (select-keys response [:description])
-                            (when (or body content)
-                              (openapi/openapi-spec
-                               {::openapi/content (merge
-                                                   (when body
-                                                     (zipmap content-types (repeat (coercion/-compile-model this (:body response) nil))))
-                                                   (when response
-                                                     (into {}
-                                                           (for [[format model] (:content response)]
-                                                             [format (coercion/-compile-model this model nil)]))))})))]))}))
+                              (dissoc $ :content)
+                              (set/rename-keys $ {:body :schema}))]))})))
+        ;; :openapi handled in reitit.openapi/-get-apidocs-openapi
         (throw
          (ex-info
           (str "Can't produce Spec apidocs for " specification)
           {:specification specification, :coercion :spec}))))
     (-compile-model [_ model name]
-      (into-spec model name))
+      (into-spec
+       (cond
+         ;; we are safe!
+         (= (count model) 1) (first model)
+         ;; here be dragons, best effort
+         (every? map? model) (apply mm/meta-merge model)
+         ;; fail fast
+         :else (ex/fail! ::model-error {:message "Can't merge nested clojure specs", :spec model}))
+       name))
     (-open-model [_ spec] spec)
     (-encode-error [_ error]
       (let [problems (-> error :problems ::s/problems)]
         (-> error
             (update :spec (comp str s/form))
             (assoc :problems (mapv #(update % :pred stringify-pred) problems)))))
-    (-request-coercer [this type spec]
-      (let [spec (coercion/-compile-model this spec nil)
-            {:keys [formats default]} (transformers type)]
+    (-request-coercer [_ type spec]
+      (let [{:keys [formats default]} (transformers type)]
         (fn [value format]
           (if-let [transformer (or (get formats format) default)]
             (let [coerced (st/coerce spec value transformer)]

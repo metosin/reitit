@@ -157,21 +157,21 @@ You can also specify request and response body schemas per content-type. The syn
 ```clj
 (def app
   (ring/ring-handler
-    (ring/router
-      ["/api"
-       ["/example" {:post {:coercion reitit.coercion.schema/coercion
-                           :parameters {:request {:content {"application/json" {:y s/Int}
-                                                            "application/edn" {:z s/Int}}
-                                                  ;; default if no content-type matches:
-                                                  :body {:yy s/Int}}}
-                           :responses {200 {:content {"application/json" {:w s/Int}
-                                                      "application/edn" {:x s/Int}}
-                                            ;; default if no content-type matches:
-                                            :body {:ww s/Int}}
-                           :handler ...}}]]
-      {:data {:middleware [rrc/coerce-exceptions-middleware
-                           rrc/coerce-request-middleware
-                           rrc/coerce-response-middleware]}})))
+   (ring/router
+    ["/api"
+     ["/example" {:post {:coercion reitit.coercion.schema/coercion
+                         :request {:content {"application/json" {:schema {:y s/Int}}
+                                             "application/edn" {:schema {:z s/Int}}}
+                                   ;; default if no content-type matches:
+                                   :body {:yy s/Int}}
+                         :responses {200 {:content {"application/json" {:schema {:w s/Int}}
+                                                    "application/edn" {:schema {:x s/Int}}}
+                                          ;; default if no content-type matches:
+                                          :body {:ww s/Int}}}
+                         :handler ...}}]]
+    {:data {:middleware [rrc/coerce-exceptions-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}})))
 ```
 
 ## Pretty printing spec errors

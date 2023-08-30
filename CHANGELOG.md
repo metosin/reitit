@@ -14,7 +14,44 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+## 0.7.0-alpha5 (2023-06-14)
+
+* **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
+* **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
+* Fixed some module dependencies so Cljdoc can properly analyze all the modules
+* Updated dependencies:
+
+```clojure
+[metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
+[com.fasterxml.jackson.core/jackson-core "2.15.1"] is available but we use "2.14.2"
+[com.fasterxml.jackson.core/jackson-databind "2.15.1"] is available but we use "2.14.2"
+```
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha4...0.7.0-alpha5)**
+
+## 0.7.0-alpha4 (2023-05-17)
+
+* OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha3...0.7.0-alpha4)**
+
+## 0.7.0-alpha3 (2023-05-05)
+
+* Compile `reitit.Trie` with Java 1.8 target for compatibility
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha2...0.7.0-alpha3)**
+
+## 0.7.0-alpha2 (2023-05-04)
+
+* Fix reading fragment string on `Html5History` initialization
+* Add fragment string parameter to reitit-frontend functions ([#604](https://github.com/metosin/reitit/pull/604))
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha1...0.7.0-alpha2)**
+
+## 0.7.0-alpha1 (2023-05-03)
+
 * Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
+* Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
 * Updated dependencies:
 
 ```clojure
@@ -22,6 +59,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/malli "0.11.0"] is available but we use "0.10.1"
 [ring/ring-core "1.10.0"] is available but we use "1.9.6"
 ```
+
+**[compare](https://github.com/metosin/reitit/compare/0.6.0...0.7.0-alpha1)**
 
 ## 0.6.0 (2023-02-21)
 
@@ -50,6 +89,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [com.fasterxml.jackson.core/jackson-databind "2.14.2"] is available but we use "2.14.1"
 ```
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.18...0.6.0)**
+
 ## 0.5.18 (2022-04-05)
 
 * FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
@@ -57,10 +98,13 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
 * Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.17...0.5.18)**
+
 ## 0.5.17 (2022-03-10)
 
 * FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.16...0.5.17)**
 
 ## 0.5.16 (2022-02-15)
 

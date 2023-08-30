@@ -26,6 +26,8 @@
                (rfh/href history ::bar {:id 5})))
         (is (= "#/bar/5?q=x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
+        (is (= "#/bar/5?q=x#foo"
+               (rfh/href history ::bar {:id 5} {:q "x"} "foo")))
         (let [{:keys [value messages]} (capture-console
                                         (fn []
                                           (rfh/href history ::asd)))]

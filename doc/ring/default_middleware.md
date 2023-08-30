@@ -1,7 +1,7 @@
 # Default Middleware
 
 ```clj
-[metosin/reitit-middleware "0.6.0"]
+[metosin/reitit-middleware "0.7.0-alpha5"]
 ```
 
 Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.
@@ -59,4 +59,4 @@ Partial sample output:
 
 ## Example app
 
-See an example app with the default middleware in action: https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj.
+See an example app with the default middleware in action: <https://github.com/metosin/reitit/blob/master/examples/ring-malli-swagger/src/example/server.clj>.

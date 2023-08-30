@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [reitit.coercion :as coercion]
             [reitit.core :as r]
+            [reitit.impl :as impl]
             goog.Uri
             goog.Uri.QueryData))
 
@@ -36,6 +37,16 @@
     (.setQueryData uri (goog.Uri.QueryData/createFromMap (clj->js new-query)))
     (.toString uri)))
 
+(defn
+  ^{:see-also ["reitit.core/match->path"]}
+  match->path
+  "Create routing path from given match and optional query-string map and
+  optional fragment string."
+  [match query-params fragment]
+  (when-let [path (r/match->path match query-params)]
+    (cond-> path
+      (and fragment (seq fragment)) (str "#" (impl/form-encode fragment)))))
+
 (defn match-by-path
   "Given routing tree and current path, return match with possibly
   coerced parameters. Return nil if no match found.
@@ -56,8 +67,8 @@
              fragment (when (.hasFragment uri)
                         (.getFragment uri))
              match (assoc match
-                          :query-params q
-                          :fragment fragment)
+                     :query-params q
+                     :fragment fragment)
              ;; Return uncoerced values if coercion is not enabled - so
              ;; that tha parameters are always accessible from same property.
              parameters (or (coerce! match)

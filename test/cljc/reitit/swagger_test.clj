@@ -138,7 +138,6 @@
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})))
 
-(require '[fipp.edn])
 (deftest swagger-test
   (testing "endpoints work"
     (testing "spec"
@@ -451,7 +450,7 @@
                (ring/router
                 [["/parameters"
                   {:post {:coercion spec/coercion
-                          :parameters {:request {:content {"application/json" {:x string?}}}}
+                          :request {:content {"application/json" {:x string?}}}
                           :handler identity}}]
                  ["/swagger.json"
                   {:get {:no-doc true
@@ -479,7 +478,7 @@
            [#'spec/coercion
             reitit.http.interceptors.multipart/bytes-part
             string?]]]
-    (testing coercion
+    (testing (str coercion)
       (let [app (ring/ring-handler
                  (ring/router
                   [["/upload"

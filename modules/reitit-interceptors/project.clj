@@ -1,4 +1,4 @@
-(defproject metosin/reitit-interceptors "0.6.0"
+(defproject metosin/reitit-interceptors "0.7.0-alpha5"
   :description "Reitit, common interceptors bundled"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -11,4 +11,5 @@
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[metosin/reitit-ring]
                  [lambdaisland/deep-diff]
-                 [metosin/muuntaja]])
+                 [metosin/muuntaja]
+                 [metosin/spec-tools]])

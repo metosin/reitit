@@ -22,11 +22,12 @@
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
-                     (let [compiled (compile [p d] opts s)]
-                       (-> compiled
-                           (map->Endpoint)
-                           (assoc :path p)
-                           (assoc :method m))))
+                     (let [d (ring/-compile-coercion d)]
+                       (let [compiled (compile [p d] opts s)]
+                         (-> compiled
+                             (map->Endpoint)
+                             (assoc :path p)
+                             (assoc :method m)))))
         ->methods (fn [any? data]
                     (reduce
                      (fn [acc method]
@@ -67,6 +68,7 @@
   ([data opts]
    (let [opts (merge {:coerce coerce-handler
                       :compile compile-result
+                      :update-paths (ring/-update-paths impl/accumulate)
                       ::default-options-endpoint ring/default-options-endpoint} opts)]
      (when (contains? opts ::default-options-handler)
        (ex/fail! (str "Option :reitit.http/default-options-handler is deprecated."

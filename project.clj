@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.6.0"
+(defproject metosin/reitit-parent "0.7.0-alpha5"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -15,44 +15,47 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.6.0"]
-                         [metosin/reitit-core "0.6.0"]
-                         [metosin/reitit-dev "0.6.0"]
-                         [metosin/reitit-spec "0.6.0"]
-                         [metosin/reitit-malli "0.6.0"]
-                         [metosin/reitit-schema "0.6.0"]
-                         [metosin/reitit-ring "0.6.0"]
-                         [metosin/reitit-middleware "0.6.0"]
-                         [metosin/reitit-http "0.6.0"]
-                         [metosin/reitit-interceptors "0.6.0"]
-                         [metosin/reitit-swagger "0.6.0"]
-                         [metosin/reitit-openapi "0.6.0"]
-                         [metosin/reitit-swagger-ui "0.6.0"]
-                         [metosin/reitit-frontend "0.6.0"]
-                         [metosin/reitit-sieppari "0.6.0"]
-                         [metosin/reitit-pedestal "0.6.0"]
+  :managed-dependencies [[metosin/reitit "0.7.0-alpha5"]
+                         [metosin/reitit-core "0.7.0-alpha5"]
+                         [metosin/reitit-dev "0.7.0-alpha5"]
+                         [metosin/reitit-spec "0.7.0-alpha5"]
+                         [metosin/reitit-malli "0.7.0-alpha5"]
+                         [metosin/reitit-schema "0.7.0-alpha5"]
+                         [metosin/reitit-ring "0.7.0-alpha5"]
+                         [metosin/reitit-middleware "0.7.0-alpha5"]
+                         [metosin/reitit-http "0.7.0-alpha5"]
+                         [metosin/reitit-interceptors "0.7.0-alpha5"]
+                         [metosin/reitit-swagger "0.7.0-alpha5"]
+                         [fi.metosin/reitit-openapi "0.7.0-alpha5"]
+                         [metosin/reitit-swagger-ui "0.7.0-alpha5"]
+                         [metosin/reitit-frontend "0.7.0-alpha5"]
+                         [metosin/reitit-sieppari "0.7.0-alpha5"]
+                         [metosin/reitit-pedestal "0.7.0-alpha5"]
                          [metosin/ring-swagger-ui "4.18.1"]
                          [metosin/spec-tools "0.10.5"]
-                         [metosin/schema-tools "0.13.0"]
+                         [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.8"]
                          [metosin/jsonista "0.3.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.11.0"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.14.2"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.14.2"]
+                         [com.fasterxml.jackson.core/jackson-core "2.15.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.15.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.26" :exclusions [org.clojure/core.rrb-vector]]
+                         ;; Deep-diff uses this version, override olders versiom from fipp.
+                         [org.clojure/core.rrb-vector "0.0.14"]
                          [expound "0.9.0"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
+                         [mvxcvi/arrangement "2.1.0"]
                          [ring/ring-core "1.10.0"]
 
                          [io.pedestal/pedestal.service "0.5.10"]]
 
-  :plugins [[jonase/eastwood "1.3.0"]
+  :plugins [[jonase/eastwood "1.4.0"]
             ;[lein-virgil "0.1.7"]
             [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
@@ -87,7 +90,7 @@
                                   [org.clojure/clojurescript "1.10.773"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.13.0"]
+                                  [metosin/schema-tools "0.13.1"]
                                   [metosin/spec-tools "0.10.5"]
                                   [metosin/muuntaja "0.6.8"]
                                   [metosin/sieppari "0.0.0-alpha13"]
@@ -105,6 +108,7 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.3"]
                                   [metosin/ring-swagger-ui "4.18.1"]
+                                  [org.clojure/tools.analyzer "1.1.1"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.1"]
@@ -115,8 +119,8 @@
                                   [io.pedestal/pedestal.service "0.5.10"]
 
                                   [org.clojure/core.async "1.6.673"]
-                                  [manifold "0.4.0"]
-                                  [funcool/promesa "10.0.594"]
+                                  [manifold "0.4.1"]
+                                  [funcool/promesa "11.0.664"]
 
                                   [com.clojure-goes-fast/clj-async-profiler "1.0.3"]
                                   [ring-cors "0.1.13"]
@@ -134,8 +138,8 @@
                                    [io.pedestal/pedestal.jetty "0.5.10"]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.6.673"]
-                                   [manifold "0.4.0"]
-                                   [funcool/promesa "10.0.594"]
+                                   [manifold "0.4.1"]
+                                   [funcool/promesa "11.0.664"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.6.1"]

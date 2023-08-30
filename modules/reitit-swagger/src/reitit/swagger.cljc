@@ -69,6 +69,30 @@
 (defn- swagger-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
+(defn -warn-unsupported-coercions [{:keys [request responses] :as _data}]
+  (when request
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
+  (when (some :content (vals responses))
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
+
+(defn -get-swagger-apidocs [coercion data]
+  (let [swagger-parameter {:query :query
+                           :body :body
+                           :form :formData
+                           :header :header
+                           :path :path
+                           :multipart :formData}]
+    (-warn-unsupported-coercions data)
+    (->> (update
+          data
+          :parameters
+          (fn [parameters]
+            (->> parameters
+                 (map (fn [[k v]] [(swagger-parameter k) v]))
+                 (filter first)
+                 (into {}))))
+         (coercion/-get-apidocs coercion :swagger))))
+
 (defn create-swagger-handler
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
@@ -95,7 +119,7 @@
                                     (apply meta-merge (keep (comp :swagger :data) middleware))
                                     (apply meta-merge (keep (comp :swagger :data) interceptors))
                                     (if coercion
-                                      (coercion/get-apidocs coercion :swagger data))
+                                      (-get-swagger-apidocs coercion data))
                                     (select-keys data [:tags :summary :description :operationId])
                                     (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]

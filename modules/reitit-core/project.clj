@@ -1,4 +1,4 @@
-(defproject metosin/reitit-core "0.6.0"
+(defproject metosin/reitit-core "0.7.0-alpha5"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,4 +10,5 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :java-source-paths ["java-src"]
+  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :dependencies [[meta-merge]])

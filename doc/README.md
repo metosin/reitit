@@ -24,6 +24,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
+* `reitit-openapi` OpenAPI 3 apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
 * `reitit-frontend` Tools for [frontend routing](frontend/basics.md)
 * `reitit-http` http-routing with Pedestal-style Interceptors
@@ -40,7 +41,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.6.0"]
+[metosin/reitit "0.7.0-alpha5"]
 ```
 
 Optionally, the parts can be required separately.
