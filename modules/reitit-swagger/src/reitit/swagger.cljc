@@ -127,16 +127,17 @@
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
            paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
-           definitions (reduce-kv
-                         (fn [ds _ v]
-                           (let [ks (keys v)]
-                             (merge ds (apply merge
-                                              (for [k ks]
-                                                (when-let [method-map (get v k)]
-                                                  (:definitions method-map)))))))
-                         {} paths)]
+           definitions (apply merge
+                              (for [[_path path-data] paths
+                                    [_method data] path-data]
+                                (:definitions data)))
+           paths-without-definitions (into {}
+                                           (for [[path path-data] paths]
+                                             [path (into {}
+                                                         (for [[method data] path-data]
+                                                           [method (dissoc data :definitions)]))]))]
        {:status 200
-        :body (meta-merge swagger {:paths paths :definitions definitions})}))
+        :body (meta-merge swagger {:paths paths-without-definitions :definitions definitions})}))
     ([req res raise]
      (try
        (res (create-swagger req))
