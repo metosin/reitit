@@ -14,6 +14,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
+
 ## 0.7.0-alpha5 (2023-06-14)
 
 * **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
