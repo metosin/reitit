@@ -131,11 +131,8 @@
                               (for [[_path path-data] paths
                                     [_method data] path-data]
                                 (:definitions data)))
-           paths-without-definitions (into {}
-                                           (for [[path path-data] paths]
-                                             [path (into {}
-                                                         (for [[method data] path-data]
-                                                           [method (dissoc data :definitions)]))]))]
+           paths-without-definitions (update-vals paths (fn [methods]
+                                                          (update-vals methods #(dissoc % :definitions))))]
        {:status 200
         :body (meta-merge swagger {:paths paths-without-definitions :definitions definitions})}))
     ([req res raise]
