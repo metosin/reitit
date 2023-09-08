@@ -19,7 +19,8 @@ The following route data keys contribute to the generated swagger specification:
 | key            | description |
 | ---------------|-------------|
 | :openapi       | map of any openapi data. Can contain keys like `:deprecated`.
-| :content-types | vector of supported content types. Defaults to `["application/json"]`
+| :openapi/request-content-types | vector of supported request content types. Defaults to `["application/json"]`. Only needed if you use the [:request :content :default] coercion.
+| :openapi/response-content-types | vector of supported response content types. Defaults to `["application/json"]`. Only needed if you use the [:response nnn :content :default] coercion.
 | :no-doc        | optional boolean to exclude endpoint from api docs
 | :tags          | optional set of string or keyword tags for an endpoint api docs
 | :summary       | optional short string summary of an endpoint
@@ -90,7 +91,6 @@ openapi example](../../examples/openapi).
 ```clj
 ["/pizza"
  {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
-        :content-types ["application/json" "application/edn"]
         :responses {200 {:content {"application/json" {:description "Fetch a pizza as json"
                                                        :schema [:map
                                                                 [:color :keyword]

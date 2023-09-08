@@ -12,10 +12,10 @@
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
-(s/def ::content-types (s/coll-of string?))
+(s/def :openapi/content-types (s/coll-of string?))
 
 (s/def ::openapi (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description ::content-types]))
+(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description] :opt [:openapi/content-types]))
 
 (def openapi-feature
   "Stability: alpha
@@ -31,7 +31,8 @@
   | key            | description |
   | ---------------|-------------|
   | :openapi       | map of any openapi-data. Can contain keys like `:deprecated`.
-  | :content-types | vector of supported content types. Defaults to `[\"application/json\"]`
+  | :openapi/request-content-types | vector of supported request content types. Defaults to `[\"application/json\"]` :response nnn :content :default. Only needed if you use the [:request :content :default] coercion.
+  | :openapi/response-content-types | vector of supported response content types. Defaults to `[\"application/json\"]`. Only needed if you use the [:response nnn :content :default] coercion.
   | :no-doc        | optional boolean to exclude endpoint from api docs
   | :tags          | optional set of string or keyword tags for an endpoint api docs
   | :summary       | optional short string summary of an endpoint
@@ -74,7 +75,9 @@
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
 (defn -get-apidocs-openapi
-  [coercion {:keys [request parameters responses content-types] :or {content-types ["application/json"]}}]
+  [coercion {:keys [request parameters responses openapi/request-content-types openapi/response-content-types]
+             :or {request-content-types ["application/json"]
+                  response-content-types ["application/json"]}}]
   (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->content (fn [data schema]
@@ -105,7 +108,7 @@
                                                                                 :type :schema
                                                                                 :content-type content-type})]
                                               [content-type {:schema schema}])))
-                                     content-types)}})
+                                     request-content-types)}})
 
      (when request
        ;; request allow to different :requestBody per content-type
@@ -119,7 +122,7 @@
                                                                         :type :schema
                                                                         :content-type content-type})]
                                     [content-type (->content data schema)])))
-                           content-types))
+                           request-content-types))
                    (into {}
                          (map (fn [[content-type {:keys [schema] :as data}]]
                                 (let [schema (->schema-object schema {:in :requestBody
@@ -148,7 +151,7 @@
                                                                                                         :type :schema
                                                                                                         :content-type content-type})]
                                                          [content-type (->content default schema)])))
-                                                content-types))
+                                                response-content-types))
                                         (when content
                                           (into {}
                                                 (map (fn [[content-type {:keys [schema] :as data}]]

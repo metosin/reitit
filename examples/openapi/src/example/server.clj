@@ -63,7 +63,7 @@
                                                        :examples {:purple {:value (pr-str {:color :purple
                                                                                            :pineapple false})}}}}}
                 ;; Need to list content types explicitly because we use :default in :responses
-                :content-types ["application/json" "application/edn"]
+                :openapi/response-content-types ["application/json" "application/edn"]
                 :responses {200 {:content {:default {:description "Success"
                                                      :schema [:map [:success :boolean]]
                                                      :example {:success true}}}}}

@@ -471,7 +471,8 @@
                  (ring/router
                   [["/examples"
                     {:post {:decription "examples"
-                            :content-types ["application/json" "application/edn"]
+                            :openapi/request-content-types ["application/json" "application/edn"]
+                            :openapi/response-content-types ["application/json" "application/edn"]
                             :coercion @coercion
                             :request {:content {"application/json" {:schema (->schema :b)
                                                                     :examples {"named-example" {:description "a named example"
@@ -696,7 +697,8 @@
                       [["/parameters"
                         {:post {:description "parameters"
                                 :coercion coercion
-                                :content-types [content-type] ;; TODO should this be under :openapi ?
+                                :openapi/request-content-types [content-type]
+                                :openapi/response-content-types [content-type "application/response"]
                                 :request {:content {"application/transit" {:schema (->schema :transit)}}
                                           :body (->schema :default)}
                                 :responses {200 {:description "success"
@@ -723,7 +725,7 @@
                               (get-in [:paths "/parameters" :post :requestBody :content])
                               keys))))
             (testing "body response"
-              (is (match? (matchers/in-any-order [content-type "application/transit"])
+              (is (match? (matchers/in-any-order [content-type "application/transit" "application/response"])
                           (-> spec
                               (get-in [:paths "/parameters" :post :responses 200 :content])
                               keys))))
