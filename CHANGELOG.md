@@ -14,6 +14,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* **BREAKING**: new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
+* **BREAKING**: replace the openapi `:content-types` keyword with separate `:openapi/request-content-types` and `:openapi/response-content-types`. See [openapi.md](doc/ring/openapi.md)
+
 ## 0.7.0-alpha5 (2023-06-14)
 
 * **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
