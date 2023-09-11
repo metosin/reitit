@@ -1,5 +1,6 @@
 (ns example.server
   (:require [reitit.ring :as ring]
+            [reitit.ring.spec]
             [reitit.coercion.malli]
             [reitit.openapi :as openapi]
             [reitit.ring.malli]
@@ -94,7 +95,7 @@
                             :email "heidi@alps.ch"}])}}]
 
        ["/secure"
-        {:tags ["secure"]
+        {:tags #{"secure"}
          :openapi {:security [{"auth" []}]}}
         ["/get"
          {:get {:summary "endpoint authenticated with a header"
@@ -109,6 +110,7 @@
                               :body {:error "unauthorized"}}))}}]]]
 
       {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
+       :validate reitit.ring.spec/validate
        :exception pretty/exception
        :data {:coercion reitit.coercion.malli/coercion
               :muuntaja m/instance
