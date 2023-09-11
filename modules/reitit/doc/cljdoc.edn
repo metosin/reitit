@@ -1,0 +1,2 @@
+{;; language autodetect is broken on this module since it has no source files
+ :cljdoc/languages ["clj" "cljs"]}
