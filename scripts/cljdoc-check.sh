@@ -9,10 +9,6 @@ set -e
 
 for i in modules/*; do
   cd $i
-  if [ "$(ls -A src)" ]; then
-    clojure -J-Dclojure.main.report=stderr -Tcljdoc-analyzer analyze-local
-  else
-    echo "Skip $i, empty src folder"
-  fi
+  clojure -J-Dclojure.main.report=stderr -Tcljdoc-analyzer analyze-local
   cd ../..
 done
