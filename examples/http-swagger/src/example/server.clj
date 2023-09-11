@@ -62,7 +62,7 @@
              :handler (openapi/create-openapi-handler)}}]
 
      ["/files"
-      {:tags ["files"]}
+      {:tags #{"files"}}
 
       ["/upload"
        {:post {:summary "upload a file"
@@ -77,7 +77,7 @@
        {:get {:summary "downloads a file"
               :swagger {:produces ["image/png"]}
               :responses {200 {:description "an image"
-                               :content {"image/png" any?}}}
+                               :content {"image/png" {:schema any?}}}}
               :handler (fn [_]
                          {:status 200
                           :headers {"Content-Type" "image/png"}
@@ -85,7 +85,7 @@
                                  (io/resource "reitit.png"))})}}]]
 
      ["/async"
-      {:get {:tags ["async"]
+      {:get {:tags #{"async"}
              :summary "fetches random users asynchronously over the internet"
              :parameters {:query (s/keys :req-un [::results] :opt-un [::seed])}
              :responses {200 {:body any?}}
@@ -102,7 +102,7 @@
                             :body results})))}}]
 
      ["/math"
-      {:tags ["math"]}
+      {:tags #{"math"}}
 
       ["/plus"
        {:get {:summary "plus with data-spec query parameters"
@@ -132,7 +132,7 @@
                           {:status 200
                            :body {:total (- x y)}})}}]]
      ["/secure"
-      {:tags ["secure"]
+      {:tags #{"secure"}
        :openapi {:security [{"auth" []}]}
        :swagger {:security [{"auth" []}]}}
       ["/get"
