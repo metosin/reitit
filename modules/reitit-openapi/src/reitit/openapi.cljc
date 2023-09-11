@@ -9,7 +9,7 @@
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
-(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind set?))
+(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
 (s/def :openapi/request-content-types (s/coll-of string?))
