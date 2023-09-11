@@ -10,7 +10,6 @@
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind set?))
-(s/def ::operationId string?)
 (s/def ::summary string?)
 (s/def ::description string?)
 (s/def ::operationId string?)
@@ -126,9 +125,15 @@
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
-           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
+           definitions (apply merge
+                              (for [[_path path-data] paths
+                                    [_method data] path-data]
+                                (:definitions data)))
+           paths-without-definitions (update-vals paths (fn [methods]
+                                                          (update-vals methods #(dissoc % :definitions))))]
        {:status 200
-        :body (meta-merge swagger {:paths paths})}))
+        :body (meta-merge swagger {:paths paths-without-definitions :definitions definitions})}))
     ([req res raise]
      (try
        (res (create-swagger req))
