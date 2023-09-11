@@ -12,10 +12,11 @@
 (s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
-(s/def :openapi/content-types (s/coll-of string?))
+(s/def :openapi/request-content-types (s/coll-of string?))
+(s/def :openapi/response-content-types (s/coll-of string?))
 
 (s/def ::openapi (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description] :opt [:openapi/content-types]))
+(s/def ::spec (s/keys :opt-un [::openapi ::no-doc ::tags ::summary ::description] :opt [:openapi/request-content-types :openapi/response-content-types]))
 
 (def openapi-feature
   "Stability: alpha
