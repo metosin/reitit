@@ -1,4 +1,4 @@
-(defproject fi.metosin/reitit-pedestal "0.7.0-alpha5"
+(defproject fi.metosin/reitit-pedestal "0.7.0-alpha6"
   :description "Reitit + Pedestal Integration"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

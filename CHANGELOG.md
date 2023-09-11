@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.7.0-alpha6 (2023-09-11)
 
 * **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
 * **BREAKING**: new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
