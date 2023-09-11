@@ -12,7 +12,7 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
     ;       [reitit.ring.middleware.dev :as dev]
-    ;       [reitit.ring.spec :as spec]
+            [reitit.ring.spec :as spec]
     ;       [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
@@ -46,7 +46,7 @@
                :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:tags ["files"]}
+        {:tags #{"files"}}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -61,7 +61,7 @@
          {:get {:summary "downloads a file"
                 :swagger {:produces ["image/png"]}
                 :responses {200 {:description "an image"
-                                 :content {"image/png" any?}}}
+                                 :content {"image/png" {:schema any?}}}}
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
@@ -70,7 +70,7 @@
                                       (io/input-stream))})}}]]
 
        ["/math"
-        {:tags ["math"]}
+        {:tags #{"math"}}
 
         ["/plus"
          {:get {:summary "plus with malli query parameters"
@@ -99,7 +99,7 @@
                              :body {:total (+ x y)}})}}]]
 
        ["/secure"
-        {:tags ["secure"]
+        {:tags #{"secure"}
          :openapi {:security [{"auth" []}]}
          :swagger {:security [{"auth" []}]}}
         ["/get"
@@ -115,7 +115,7 @@
                               :body {:error "unauthorized"}}))}}]]]
 
       {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
-       ;;:validate spec/validate ;; enable spec validation for route data
+       :validate spec/validate ;; enable spec validation for route data
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
        :data {:coercion (reitit.coercion.malli/create
