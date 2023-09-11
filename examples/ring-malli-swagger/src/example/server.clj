@@ -12,7 +12,7 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
     ;       [reitit.ring.middleware.dev :as dev]
-    ;       [reitit.ring.spec :as spec]
+            [reitit.ring.spec :as spec]
     ;       [spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
@@ -46,7 +46,7 @@
                :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:tags ["files"]}
+        {:tags #{"files"}}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -70,7 +70,7 @@
                                       (io/input-stream))})}}]]
 
        ["/math"
-        {:tags ["math"]}
+        {:tags #{"math"}}
 
         ["/plus"
          {:get {:summary "plus with malli query parameters"
@@ -93,29 +93,13 @@
                                        :json-schema/default 42}
                                       int?]
                                      [:y int?]]}
-                 ;; OpenAPI3 named examples for request & response
-                 :openapi {:requestBody
-                           {:content
-                            {"application/json"
-                             {:examples {"add-one-one" {:summary "1+1"
-                                                        :value {:x 1 :y 1}}
-                                         "add-one-two" {:summary "1+2"
-                                                        :value {:x 1 :y 2}}}}}}
-                           :responses
-                           {200
-                            {:content
-                             {"application/json"
-                              {:examples {"two" {:summary "2"
-                                                 :value {:total 2}}
-                                          "three" {:summary "3"
-                                                   :value {:total 3}}}}}}}}
                  :responses {200 {:body [:map [:total int?]]}}
                  :handler (fn [{{{:keys [x y]} :body} :parameters}]
                             {:status 200
                              :body {:total (+ x y)}})}}]]
 
        ["/secure"
-        {:tags ["secure"]
+        {:tags #{"secure"}
          :openapi {:security [{"auth" []}]}
          :swagger {:security [{"auth" []}]}}
         ["/get"
@@ -131,7 +115,7 @@
                               :body {:error "unauthorized"}}))}}]]]
 
       {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
-       ;;:validate spec/validate ;; enable spec validation for route data
+       :validate spec/validate ;; enable spec validation for route data
        ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
        :exception pretty/exception
        :data {:coercion (reitit.coercion.malli/create

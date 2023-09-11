@@ -9,7 +9,7 @@
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
-(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
+(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
 (s/def ::operationId string?)

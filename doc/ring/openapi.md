@@ -19,7 +19,8 @@ The following route data keys contribute to the generated swagger specification:
 | key            | description |
 | ---------------|-------------|
 | :openapi       | map of any openapi data. Can contain keys like `:deprecated`.
-| :content-types | vector of supported content types. Defaults to `["application/json"]`
+| :openapi/request-content-types | vector of supported request content types. Defaults to `["application/json"]`. Only needed if you use the [:request :content :default] coercion.
+| :openapi/response-content-types | vector of supported response content types. Defaults to `["application/json"]`. Only needed if you use the [:response nnn :content :default] coercion.
 | :no-doc        | optional boolean to exclude endpoint from api docs
 | :tags          | optional set of string or keyword tags for an endpoint api docs
 | :summary       | optional short string summary of an endpoint
@@ -30,9 +31,8 @@ Coercion keys also contribute to the docs:
 | key           | description |
 | --------------|-------------|
 | :parameters   | optional input parameters for a route, in a format defined by the coercion
+| :request      | optional description of body parameters, possibly per content-type
 | :responses    | optional descriptions of responses, in a format defined by coercion
-
-Use `:request` parameter coercion (instead of `:body`) to unlock per-content-type coercions. See [Coercion](coercion.md).
 
 ## Annotating schemas
 
@@ -81,28 +81,45 @@ Spec:
                                       :y int?}}}}}]
 ```
 
+## Per-content-type coercions
+
+Use `:request` coercion (instead of `:body`) to unlock
+per-content-type coercions. This also lets you specify multiple named
+examples. See [Coercion](coercion.md) for more info. See also [the
+openapi example](../../examples/openapi).
+
+```clj
+["/pizza"
+ {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
+        :responses {200 {:content {"application/json" {:description "Fetch a pizza as json"
+                                                       :schema [:map
+                                                                [:color :keyword]
+                                                                [:pineapple :boolean]]
+                                                       :examples {:white {:description "White pizza with pineapple"
+                                                                          :value {:color :white
+                                                                                  :pineapple true}}
+                                                                  :red {:description "Red pizza"
+                                                                        :value {:color :red
+                                                                                :pineapple false}}}}
+                                   "application/edn" {:description "Fetch a pizza as edn"
+                                                      :schema [:map
+                                                               [:color :keyword]
+                                                               [:pineapple :boolean]]
+                                                      :examples {:red {:description "Red pizza with pineapple"
+                                                                       :value (pr-str {:color :red :pineapple true})}}}}}}
+```
+
+
+
 ## Custom OpenAPI data
 
 The `:openapi` route data key can be used to add top-level or
 route-level information to the generated OpenAPI spec. This is useful
-for providing `"securitySchemes"`, `"examples"` or other OpenAPI keys
-that are not generated automatically by reitit.
+for providing `"securitySchemes"` or other OpenAPI keys that are not
+generated automatically by reitit.
 
-```clj
-["/foo"
- {:post {:parameters {:body {:name string? :age int?}}
-         :openapi {:requestBody
-                   {:content
-                    {"application/json"
-                     {:examples {"Pyry" {:summary "Pyry, 45y"
-                                         :value {:name "Pyry" :age 45}}
-                                 "Cat" {:summary "Cat, 8y"
-                                        :value {:name "Cat" :age 8}}}}}}}
-         ...}}]
-```
-
-See [the ring-malli-swagger example](../../examples/ring-malli-swagger) for
-working examples of `"securitySchemes"` and `"examples"`.
+See [the openapi example](../../examples/openapi) for a working
+example of `"securitySchemes"`.
 
 ## OpenAPI spec
 
