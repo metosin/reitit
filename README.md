@@ -1,17 +1,17 @@
-# reitit [![Build Status](https://github.com/metosin/reitit/workflows/testsuite/badge.svg)](https://github.com/metosin/reitit/actions?query=workflow%3Atestsuite) [![cljdoc badge](https://cljdoc.org/badge/fi.metosin/reitit)](https://cljdoc.org/jump/release/fi.metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
+# reitit [![Build Status](https://github.com/metosin/reitit/workflows/testsuite/badge.svg)](https://github.com/metosin/reitit/actions?query=workflow%3Atestsuite) [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/jump/release/metosin/reitit) [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
 
 A fast data-driven router for Clojure(Script).
 
-* Simple data-driven [route syntax](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/basics/route-syntax/)
-* Route [conflict resolution](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/basics/route-conflicts/)
-* First-class [route data](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/basics/route-data/)
+* Simple data-driven [route syntax](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-syntax/)
+* Route [conflict resolution](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts/)
+* First-class [route data](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data/)
 * Bi-directional routing
-* [Pluggable coercion](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/coercion/coercion-explained) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
-* Helpers for [ring](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/ring/ring-router), [http](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/http/interceptors/), [pedestal](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/http/pedestal/) & [frontend](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/frontend/basics/)
-* Friendly [Error Messages](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/basics/error-messages/)
+* [Pluggable coercion](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/coercion/coercion-explained) ([malli](https://github.com/metosin/malli), [schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* Helpers for [ring](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring-router), [http](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/interceptors/), [pedestal](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/pedestal/) & [frontend](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/)
+* Friendly [Error Messages](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/error-messages/)
 * Extendable
 * Modular
-* [Fast](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/misc/performance)
+* [Fast](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/misc/performance)
 
 Presentations:
 * [Reitit, The Ancient Art of Data-Driven](https://www.slideshare.net/mobile/metosin/reitit-clojurenorth-2019-141438093), Clojure/North 2019, [video](https://youtu.be/cSntRGAjPiM)
@@ -22,7 +22,7 @@ Presentations:
 
 **Status:** [stable](https://github.com/metosin/open-source#project-lifecycle-model)
 
-## [Full Documentation](https://cljdoc.org/d/fi.metosin/reitit/CURRENT)
+## [Full Documentation](https://cljdoc.org/d/metosin/reitit/CURRENT)
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
 
@@ -30,16 +30,16 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
-* `reitit-ring` - a [ring router](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/ring/ring/)
-* `reitit-middleware` - [common middleware](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/ring/default-middleware/)
+* `reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring/)
+* `reitit-middleware` - [common middleware](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/default-middleware/)
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-malli` [malli](https://github.com/metosin/malli) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
-* `reitit-frontend` Tools for [frontend routing]((https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/frontend/basics/))
+* `reitit-frontend` Tools for [frontend routing]((https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/))
 * `reitit-http` http-routing with Interceptors
-* `reitit-interceptors` - [common interceptors](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/doc/http/default-interceptors/)
+* `reitit-interceptors` - [common interceptors](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/default-interceptors/)
 * `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
 * `reitit-dev` - development utilities
 
@@ -52,7 +52,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All main modules bundled:
 
 ```clj
-[fi.metosin/reitit "0.7.0-alpha6"]
+[metosin/reitit "0.7.0-alpha6"]
 ```
 
 Optionally, the parts can be required separately.
@@ -167,7 +167,7 @@ All examples are in https://github.com/metosin/reitit/tree/master/examples
 
 ## More info
 
-[Check out the full documentation!](https://cljdoc.org/d/fi.metosin/reitit/CURRENT/)
+[Check out the full documentation!](https://cljdoc.org/d/metosin/reitit/CURRENT/)
 
 Join [#reitit](https://clojurians.slack.com/messages/reitit/) channel in [Clojurians slack](http://clojurians.net/).
 

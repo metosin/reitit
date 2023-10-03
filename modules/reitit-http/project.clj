@@ -1,4 +1,4 @@
-(defproject fi.metosin/reitit-http "0.7.0-alpha6"
+(defproject metosin/reitit-http "0.7.0-alpha6"
   :description "Reitit: HTTP routing with interceptors"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -9,5 +9,5 @@
   :plugins [[lein-parent "0.3.9"]]
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
-  :dependencies [[fi.metosin/reitit-core]
-                 [fi.metosin/reitit-ring]])
+  :dependencies [[metosin/reitit-core]
+                 [metosin/reitit-ring]])

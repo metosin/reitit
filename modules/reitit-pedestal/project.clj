@@ -1,4 +1,4 @@
-(defproject fi.metosin/reitit-pedestal "0.7.0-alpha6"
+(defproject metosin/reitit-pedestal "0.7.0-alpha6"
   :description "Reitit + Pedestal Integration"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -10,4 +10,4 @@
   :parent-project {:path "../../project.clj"
                    :inherit [:deploy-repositories :managed-dependencies]}
   :dependencies [[io.pedestal/pedestal.service]
-                 [fi.metosin/reitit-http]])
+                 [metosin/reitit-http]])
