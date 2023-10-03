@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.7.0-alpha6"
+(defproject metosin/reitit-parent "0.7.0-alpha7"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -15,22 +15,22 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.7.0-alpha6"]
-                         [metosin/reitit-core "0.7.0-alpha6"]
-                         [metosin/reitit-dev "0.7.0-alpha6"]
-                         [metosin/reitit-spec "0.7.0-alpha6"]
-                         [metosin/reitit-malli "0.7.0-alpha6"]
-                         [metosin/reitit-schema "0.7.0-alpha6"]
-                         [metosin/reitit-ring "0.7.0-alpha6"]
-                         [metosin/reitit-middleware "0.7.0-alpha6"]
-                         [metosin/reitit-http "0.7.0-alpha6"]
-                         [metosin/reitit-interceptors "0.7.0-alpha6"]
-                         [metosin/reitit-swagger "0.7.0-alpha6"]
-                         [fi.metosin/reitit-openapi "0.7.0-alpha6"]
-                         [metosin/reitit-swagger-ui "0.7.0-alpha6"]
-                         [metosin/reitit-frontend "0.7.0-alpha6"]
-                         [metosin/reitit-sieppari "0.7.0-alpha6"]
-                         [metosin/reitit-pedestal "0.7.0-alpha6"]
+  :managed-dependencies [[metosin/reitit "0.7.0-alpha7"]
+                         [metosin/reitit-core "0.7.0-alpha7"]
+                         [metosin/reitit-dev "0.7.0-alpha7"]
+                         [metosin/reitit-spec "0.7.0-alpha7"]
+                         [metosin/reitit-malli "0.7.0-alpha7"]
+                         [metosin/reitit-schema "0.7.0-alpha7"]
+                         [metosin/reitit-ring "0.7.0-alpha7"]
+                         [metosin/reitit-middleware "0.7.0-alpha7"]
+                         [metosin/reitit-http "0.7.0-alpha7"]
+                         [metosin/reitit-interceptors "0.7.0-alpha7"]
+                         [metosin/reitit-swagger "0.7.0-alpha7"]
+                         [fi.metosin/reitit-openapi "0.7.0-alpha7"]
+                         [metosin/reitit-swagger-ui "0.7.0-alpha7"]
+                         [metosin/reitit-frontend "0.7.0-alpha7"]
+                         [metosin/reitit-sieppari "0.7.0-alpha7"]
+                         [metosin/reitit-pedestal "0.7.0-alpha7"]
                          [metosin/ring-swagger-ui "4.19.1"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.13.1"]

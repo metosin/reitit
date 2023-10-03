@@ -12,14 +12,17 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## Unreleased
+## 0.7.0-alpha7 (2023-10-03)
 
 * Revert the group id change from alpha6
+* New release to bring alpha6 changes to the old group id
 * Updated dependencies:
 
 ```clojure
 [metosin/ring-swagger-ui "4.19.1"] is available but we use "4.18.1"
 ```
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha6...0.7.0-alpha7)**
 
 ## 0.7.0-alpha6 (2023-09-11)
 
@@ -27,6 +30,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **BREAKING**: new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
 * **BREAKING**: replace the openapi `:content-types` keyword with separate `:openapi/request-content-types` and `:openapi/response-content-types`. See [openapi.md](doc/ring/openapi.md)
 * **NOTE!**: all reitit libraries are now under the `fi.metosin` group on clojars instead of `metosin`. Use `fi.metosin/reitit` in your dependencies instead of `metosin/reitit` to get new versions.
+    - **Reverted in alpha7 due to problems with renaming artifacts**
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha5...0.7.0-alpha6)**
 
 ## 0.7.0-alpha5 (2023-06-14)
 
