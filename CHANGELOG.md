@@ -15,6 +15,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## Unreleased
 
 * Revert the group id change from alpha6
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.19.1"] is available but we use "4.18.1"
+```
 
 ## 0.7.0-alpha6 (2023-09-11)
 
