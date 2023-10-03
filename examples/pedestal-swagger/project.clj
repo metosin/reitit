@@ -3,6 +3,6 @@
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [io.pedestal/pedestal.service "0.5.5"]
                  [io.pedestal/pedestal.jetty "0.5.5"]
-                 [fi.metosin/reitit-pedestal "0.7.0-alpha6"]
-                 [fi.metosin/reitit "0.7.0-alpha6"]]
+                 [metosin/reitit-pedestal "0.7.0-alpha6"]
+                 [metosin/reitit "0.7.0-alpha6"]]
   :repl-options {:init-ns example.server})
