@@ -4,5 +4,5 @@
                  [ring/ring-jetty-adapter "1.7.1"]
                  [aleph "0.4.7-alpha5"]
                  [fi.metosin/reitit "0.7.0-alpha6"]
-                 [metosin/ring-swagger-ui "5.0.0-alpha.0"]]
+                 [metosin/ring-swagger-ui "5.9.0"]]
   :repl-options {:init-ns example.server})
