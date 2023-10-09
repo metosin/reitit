@@ -97,7 +97,7 @@
    :validate true
    ;; top-level short-circuit to disable request & response coercion
    :enabled true
-   ;; strip-extra-keys (effects only predefined transformers)
+   ;; strip-extra-keys (affects only predefined transformers)
    :strip-extra-keys true
    ;; add/set default values
    :default-values true
