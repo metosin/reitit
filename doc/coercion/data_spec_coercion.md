@@ -1,6 +1,6 @@
 # Data-spec Coercion
 
-[Data-specs](https://github.com/metosin/spec-tools#data-specs) is alternative, macro-free syntax to define `clojure.spec`s. As a bonus, supports the [runtime transformations via conforming](https://dev.clojure.org/jira/browse/CLJ-2116) out-of-the-box.
+[Data-specs](https://github.com/metosin/spec-tools#data-specs) is alternative, macro-free syntax to define `clojure.spec`s. As a bonus, supports the [runtime transformations via conforming](https://clojure.atlassian.net/browse/CLJ-2116) out-of-the-box.
 
 ```clj
 (require '[reitit.coercion.spec])
