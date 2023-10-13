@@ -205,6 +205,22 @@
                                                     {:status 200
                                                      :body (-> req :parameters :body)})}}]
 
+                    ["/validate-request" {:summary "just request validation"
+                                          :coercion (reitit.coercion.malli/create {:transformers {} :validate-response false})
+                                          :post {:parameters {:body [:map [:x int?]]}
+                                                 :responses {200 {:body [:map [:x int?]]}}
+                                                 :handler (fn [req]
+                                                            {:status 200
+                                                             :body "I am do not validate"})}}]
+
+                    ["/validate-response" {:summary "just response validation"
+                                           :coercion (reitit.coercion.malli/create {:transformers {} :validate-request false})
+                                           :post {:parameters {:body [:map [:x int?]]}
+                                                  :responses {200 {:body [:map [:x int?]]}}
+                                                  :handler (fn [req]
+                                                             {:status 200
+                                                              :body "I do not validate"})}}]
+
                     ["/no-op" {:summary "no-operation"
                                :coercion (reitit.coercion.malli/create {:transformers {}, :validate false})
                                :post {:parameters {:body [:map [:x int?]]}
@@ -290,11 +306,37 @@
                   :reitit.interceptor/handler]
                  (mounted-interceptor app "/api/validate" :post))))
 
+        (testing "just request validation"
+          (is (= 400 (:status (app {:uri "/api/validate-request"
+                                    :request-method :post
+                                    :muuntaja/request {:format "application/edn"}
+                                    :body-params 123}))))
+          (is (= [:reitit.http.coercion/coerce-exceptions
+                  :reitit.http.coercion/coerce-request
+                  :reitit.http.coercion/coerce-response
+                  :reitit.interceptor/handler]
+                 (mounted-interceptor app "/api/validate-request" :post))))
+
+        (testing "just response validation"
+          (is (= 500 (:status (app {:uri "/api/validate-response"
+                                    :request-method :post
+                                    :muuntaja/request {:format "application/edn"}
+                                    :body-params "not an integer"}))))
+          (is (= [:reitit.http.coercion/coerce-exceptions
+                  :reitit.http.coercion/coerce-request
+                  :reitit.http.coercion/coerce-response
+                  :reitit.interceptor/handler]
+                 (mounted-interceptor app "/api/validate-response" :post))))
+
         (testing "no tranformation & validation"
           (is (= 123 (:body (app {:uri "/api/no-op"
                                   :request-method :post
                                   :muuntaja/request {:format "application/edn"}
                                   :body-params 123}))))
+          (is (= "123" (:body (app {:uri "/api/no-op"
+                                    :request-method :post
+                                    :muuntaja/request {:format "application/edn"}
+                                    :body-params "123"}))))
           (is (= [:reitit.http.coercion/coerce-exceptions
                   :reitit.http.coercion/coerce-request
                   :reitit.http.coercion/coerce-response

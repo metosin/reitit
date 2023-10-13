@@ -18,7 +18,8 @@
 (defprotocol Coercer
   (-decode [this value])
   (-encode [this value])
-  (-validate [this value])
+  (-validate-request [this value])
+  (-validate-response [this value])
   (-explain [this value]))
 
 (defprotocol TransformationProvider
@@ -36,17 +37,20 @@
 (def json-transformer-provider (-provider (mt/json-transformer)))
 (def default-transformer-provider (-provider nil))
 
-(defn- -coercer [schema type transformers f {:keys [validate enabled options]}]
+(defn- -coercer [schema type transformers f {:keys [validate-request validate-response validate enabled options]}]
   (if schema
     (let [->coercer (fn [t]
                       (let [decoder (if t (m/decoder schema options t) identity)
                             encoder (if t (m/encoder schema options t) identity)
-                            validator (if validate (m/validator schema options) (constantly true))
+                            validator (m/validator schema options)
+                            request-validator (if (and validate validate-request) validator (constantly true))
+                            response-validator (if (and validate validate-response) validator (constantly true))
                             explainer (m/explainer schema options)]
                         (reify Coercer
                           (-decode [_ value] (decoder value))
                           (-encode [_ value] (encoder value))
-                          (-validate [_ value] (validator value))
+                          (-validate-request [_ value] (request-validator value))
+                          (-validate-response [_ value] (response-validator value))
                           (-explain [_ value] (explainer value)))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
@@ -59,7 +63,7 @@
           (fn [value format]
             (if-let [coercer (get-coercer format)]
               (let [transformed (-decode coercer value)]
-                (if (-validate coercer transformed)
+                (if (-validate-request coercer transformed)
                   transformed
                   (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
@@ -69,7 +73,7 @@
           (fn [value format]
             (let [transformed (-decode default-coercer value)]
               (if-let [coercer (get-coercer format)]
-                (if (-validate coercer transformed)
+                (if (-validate-response coercer transformed)
                   (-encode coercer transformed)
                   (let [error (-explain coercer transformed)]
                     (coercion/map->CoercionError
@@ -95,6 +99,8 @@
    :compile mu/closed-schema
    ;; validate request & response
    :validate true
+   :validate-request true
+   :validate-response true
    ;; top-level short-circuit to disable request & response coercion
    :enabled true
    ;; strip-extra-keys (affects only predefined transformers)
