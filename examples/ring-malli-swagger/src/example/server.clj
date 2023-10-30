@@ -123,7 +123,7 @@
                            :error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
                            ;; schema identity function (default: close all map schemas)
                            :compile mu/closed-schema
-                           ;; strip-extra-keys (effects only predefined transformers)
+                           ;; strip-extra-keys (affects only predefined transformers)
                            :strip-extra-keys true
                            ;; add/set default values
                            :default-values true
