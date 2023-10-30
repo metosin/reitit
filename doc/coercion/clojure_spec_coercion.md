@@ -10,7 +10,7 @@ The [clojure.spec](https://clojure.org/guides/spec) library specifies the struct
 
 For simple specs (core predicates, `spec-tools.core/spec`, `s/and`, `s/or`, `s/coll-of`, `s/keys`, `s/map-of`, `s/nillable` and `s/every`), the transformation is inferred using [spec-walker](https://github.com/metosin/spec-tools#spec-walker) and is automatic. To support all specs (like regex-specs), specs need to be wrapped into [Spec Records](https://github.com/metosin/spec-tools/blob/master/README.md#spec-records).
 
-There are [CLJ-2116](https://dev.clojure.org/jira/browse/CLJ-2116) and [CLJ-2251](https://dev.clojure.org/jira/browse/CLJ-2251) that would help solve this elegantly. Go vote 'em up.
+There are [CLJ-2116](https://clojure.atlassian.net/browse/CLJ-2116) and [CLJ-2251](https://clojure.atlassian.net/browse/CLJ-2251) that would help solve this elegantly. Go vote 'em up.
 
 ## Example
 
