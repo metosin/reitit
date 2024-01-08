@@ -30,7 +30,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 
 * `reitit` - all bundled
 * `reitit-core` - the routing core
-* `reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring/)
+* `reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring-router/)
 * `reitit-middleware` - [common middleware](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/default-middleware/)
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-malli` [malli](https://github.com/metosin/malli) coercion
