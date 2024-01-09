@@ -143,6 +143,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```
 
 * Improved Reitit-frontend function docstrings
+* Allow multimethods to be interpreted as interceptors
 
 * Updated deps:
 

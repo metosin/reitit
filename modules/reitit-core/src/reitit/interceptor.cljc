@@ -28,6 +28,11 @@
 
 (def ^:dynamic *max-compile-depth* 10)
 
+(defn- fn->interceptor-map [func]
+  {:name ::handler
+   ::handler func
+   :enter (fn [ctx] (assoc ctx :response (func (:request ctx))))})
+
 (extend-protocol IntoInterceptor
 
   #?(:clj  clojure.lang.Keyword
@@ -60,12 +65,12 @@
   #?(:clj  clojure.lang.Fn
      :cljs function)
   (into-interceptor [this data opts]
-    (into-interceptor
-     {:name ::handler
-      ::handler this
-      :enter (fn [ctx]
-               (assoc ctx :response (this (:request ctx))))}
-     data opts))
+    (into-interceptor (fn->interceptor-map this) data opts))
+
+  #?(:clj  clojure.lang.MultiFn
+     :cljs cljs.core.MultiFn)
+  (into-interceptor [this data opts]
+    (into-interceptor (fn->interceptor-map this) data opts))
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
