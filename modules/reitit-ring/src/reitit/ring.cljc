@@ -116,10 +116,10 @@
 
       (router
         [\"/api\" {:middleware [wrap-format wrap-oauth2]}
-          [\"/users\" {:get get-user
-                       :post update-user
-                       :delete {:middleware [wrap-delete]
-                               :handler delete-user}}]])"
+         [\"/users\" {:get get-user
+                    :post update-user
+                    :delete {:middleware [wrap-delete]
+                             :handler delete-user}}]])"
   ([data]
    (router data nil))
   ([data opts]
