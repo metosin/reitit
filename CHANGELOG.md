@@ -12,6 +12,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Updated dependencies:
+
+```clojure
+[metosin/malli "0.14.0"] is available but we use "0.13.0"
+```
+
 ## 0.7.0-alpha7 (2023-10-03)
 
 * Revert the group id change from alpha6
