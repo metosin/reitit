@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
+* **BREAKING** OpenAPI support is now clj only
 * Updated dependencies:
 
 ```clojure
