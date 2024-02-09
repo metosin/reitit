@@ -211,5 +211,5 @@
     ([req res raise]
      (try
        (res (create-openapi req))
-       (catch #?(:clj Exception :cljs :default) e
+       (catch Exception e
          (raise e))))))
