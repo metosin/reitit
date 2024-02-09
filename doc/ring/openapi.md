@@ -109,7 +109,7 @@ openapi example](../../examples/openapi).
                                                                        :value (pr-str {:color :red :pineapple true})}}}}}}
 ```
 
-The default content types map to the content types supported by the Muuntaja
+The special `:default` content types map to the content types supported by the Muuntaja
 instance. You can override these by using the `:openapi/request-content-types`
 and `:openapi/response-content-types` keys, which must contain vector of
 supported content types. If there is no Muuntaja instance, and these keys are
