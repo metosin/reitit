@@ -3,6 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [meta-merge.core :refer [meta-merge]]
+            [muuntaja.core :as m]
             [reitit.coercion :as coercion]
             [reitit.core :as r]
             [reitit.trie :as trie]))
@@ -76,9 +77,7 @@
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
 (defn -get-apidocs-openapi
-  [coercion {:keys [request parameters responses openapi/request-content-types openapi/response-content-types]
-             :or {request-content-types ["application/json"]
-                  response-content-types ["application/json"]}}]
+  [coercion {:keys [request muuntaja parameters responses openapi/request-content-types openapi/response-content-types]}]
   (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->content (fn [data schema]
@@ -86,7 +85,13 @@
                      {:schema schema}
                      (select-keys data [:description :examples])
                      (:openapi data)))
-        ->schema-object #(coercion/-get-model-apidocs coercion :openapi %1 %2)]
+        ->schema-object #(coercion/-get-model-apidocs coercion :openapi %1 %2)
+        request-content-types (or request-content-types
+                                  (when muuntaja (m/decodes muuntaja))
+                                  ["application/json"])
+        response-content-types (or response-content-types
+                                  (when muuntaja (m/encodes muuntaja))
+                                  ["application/json"])]
     (merge
      (when (seq parameters)
        {:parameters
@@ -130,7 +135,7 @@
                                                                       :type :schema
                                                                       :content-type content-type})]
                                   [content-type (->content data schema)])))
-                         (:content request)))}})
+                         (dissoc (:content request) :default)))}})
      (when multipart
        {:requestBody
         {:content
@@ -206,5 +211,5 @@
     ([req res raise]
      (try
        (res (create-openapi req))
-       (catch #?(:clj Exception :cljs :default) e
+       (catch Exception e
          (raise e))))))

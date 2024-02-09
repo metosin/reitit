@@ -685,52 +685,123 @@
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 
+
 (deftest default-content-type-test
   (doseq [[coercion ->schema] [[malli/coercion (fn [nom] [:map [nom :string]])]
                                [schema/coercion (fn [nom] {nom s/Str})]
                                [spec/coercion (fn [nom] {nom string?})]]]
     (testing (str coercion)
-      (doseq [content-type ["application/json" "application/edn"]]
-        (testing (str "default content type " content-type)
-          (let [app (ring/ring-handler
-                     (ring/router
-                      [["/parameters"
-                        {:post {:description "parameters"
-                                :coercion coercion
-                                :openapi/request-content-types [content-type]
-                                :openapi/response-content-types [content-type "application/response"]
-                                :request {:content {"application/transit" {:schema (->schema :transit)}}
-                                          :body (->schema :default)}
-                                :responses {200 {:description "success"
-                                                 :content {"application/transit" {:schema (->schema :transit)}}
-                                                 :body (->schema :default)}}
-                                :handler (fn [req]
-                                           {:status 200
-                                            :body (-> req :parameters :request)})}}]
-                       ["/openapi.json"
-                        {:get {:handler (openapi/create-openapi-handler)
-                               :openapi {:info {:title "" :version "0.0.1"}}
-                               :no-doc true}}]]
-                      {:validate reitit.ring.spec/validate
-                       :data {:middleware [openapi/openapi-feature
-                                           rrc/coerce-request-middleware
-                                           rrc/coerce-response-middleware]}}))
-                spec (-> {:request-method :get
-                          :uri "/openapi.json"}
-                         app
-                         :body)]
-            (testing "body parameter"
-              (is (match? (matchers/in-any-order [content-type "application/transit"])
-                          (-> spec
-                              (get-in [:paths "/parameters" :post :requestBody :content])
-                              keys))))
-            (testing "body response"
-              (is (match? (matchers/in-any-order [content-type "application/transit" "application/response"])
-                          (-> spec
-                              (get-in [:paths "/parameters" :post :responses 200 :content])
-                              keys))))
-            (testing "spec is valid"
-              (is (nil? (validate spec))))))))))
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/explicit-content-type"
+                    {:post {:description "parameters"
+                            :coercion coercion
+                            :request {:content {"application/json" {:schema (->schema :b)}
+                                                "application/edn" {:schema (->schema :c)}}}
+                            :responses {200 {:description "success"
+                                             :content {"application/json" {:schema (->schema :ok)}
+                                                       "application/edn" {:schema (->schema :edn)}}}}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
+                   ["/muuntaja"
+                    {:post {:description "default content types from muuntaja"
+                            :coercion coercion
+                            ;;; TODO: test the :parameters syntax
+                            :request {:content {:default {:schema (->schema :b)}
+                                                "application/reitit-request" {:schema (->schema :ok)}}}
+                            :responses {200 {:description "success"
+                                             :content {:default {:schema (->schema :ok)}
+                                                       "application/reitit-response" {:schema (->schema :ok)}}}}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
+                   ["/override-default-content-type"
+                    {:post {:description "override default content types from muuntaja"
+                            :coercion coercion
+                            :openapi/request-content-types ["application/request"]
+                            :openapi/response-content-types ["application/response"]
+                            ;;; TODO: test the :parameters syntax
+                            :request {:content {:default {:schema (->schema :b)}}}
+                            :responses {200 {:description "success"
+                                             :content {:default {:schema (->schema :ok)}}}}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
+                   ["/legacy"
+                    {:post {:description "default content types from muuntaja, legacy syntax"
+                            :coercion coercion
+                            ;;; TODO: test the :parameters syntax
+                            :request  {:body {:schema (->schema :b)}}
+                            :responses {200 {:description "success"
+                                             :body {:schema (->schema :ok)}}}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
+                   ["/openapi.json"
+                    {:get {:handler (openapi/create-openapi-handler)
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :no-doc true}}]]
+                  {:validate reitit.ring.spec/validate
+                   :data {:muuntaja (m/create (-> m/default-options
+                                                  (update-in [:formats] select-keys ["application/transit+json"])
+                                                  (assoc :default-format "application/transit+json")))
+                          :middleware [openapi/openapi-feature
+                                       rrc/coerce-request-middleware
+                                       rrc/coerce-response-middleware]}}))
+            spec (-> {:request-method :get
+                      :uri "/openapi.json"}
+                     app
+                     :body)
+            spec-coercion (= coercion spec/coercion)]
+        (testing "explicit content types"
+          (testing "body parameter"
+            (is (= ["application/edn" "application/json"]
+                   (-> spec
+                       (get-in [:paths "/explicit-content-type" :post :requestBody :content])
+                       keys
+                       sort))))
+          (testing "body response"
+            (is (= ["application/edn" "application/json"]
+                   (-> spec
+                       (get-in [:paths "/explicit-content-type" :post :responses 200 :content])
+                       keys
+                       sort)))))
+        (testing "muuntaja content types"
+          (testing "body parameter"
+            (is (= ["application/transit+json" "application/reitit-request"]
+                   (-> spec
+                       (get-in [:paths "/muuntaja" :post :requestBody :content])
+                       keys))))
+          (testing "body response"
+            (is (= ["application/transit+json" "application/reitit-response"]
+                   (-> spec
+                       (get-in [:paths "/muuntaja" :post :responses 200 :content])
+                       keys)))))
+        (testing "overridden muuntaja content types"
+          (testing "body parameter"
+            (is (= ["application/request"]
+                   (-> spec
+                       (get-in [:paths "/override-default-content-type" :post :requestBody :content])
+                       keys))))
+          (testing "body response"
+            (is (= ["application/response"]
+                   (-> spec
+                       (get-in [:paths "/override-default-content-type" :post :responses 200 :content])
+                       keys)))))
+        (testing "legacy syntax muuntaja content types"
+          (testing "body parameter"
+            (is (= ["application/transit+json"]
+                   (-> spec
+                       (get-in [:paths "/legacy" :post :requestBody :content])
+                       keys))))
+          (testing "body response"
+            (is (= ["application/transit+json"]
+                   (-> spec
+                       (get-in [:paths "/legacy" :post :responses 200 :content])
+                       keys)))))
+        (testing "spec is valid"
+          (is (nil? (validate spec))))))))
 
 (deftest recursive-test
   ;; Recursive schemas only properly supported for malli

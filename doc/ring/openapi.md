@@ -19,12 +19,12 @@ The following route data keys contribute to the generated swagger specification:
 | key            | description |
 | ---------------|-------------|
 | :openapi       | map of any openapi data. Can contain keys like `:deprecated`.
-| :openapi/request-content-types | vector of supported request content types. Defaults to `["application/json"]`. Only needed if you use the [:request :content :default] coercion.
-| :openapi/response-content-types | vector of supported response content types. Defaults to `["application/json"]`. Only needed if you use the [:response nnn :content :default] coercion.
 | :no-doc        | optional boolean to exclude endpoint from api docs
 | :tags          | optional set of string or keyword tags for an endpoint api docs
 | :summary       | optional short string summary of an endpoint
 | :description   | optional long description of an endpoint. Supports http://spec.commonmark.org/
+| :openapi/request-content-types | See the Per-content-type-coercions section below.
+| :openapi/response-content-types |See the Per-content-type-coercions section below. vector of supported response content types. Defaults to `["application/json"]`. Only needed if you use the [:response nnn :content :default] coercion.
 
 Coercion keys also contribute to the docs:
 
@@ -109,7 +109,11 @@ openapi example](../../examples/openapi).
                                                                        :value (pr-str {:color :red :pineapple true})}}}}}}
 ```
 
-
+The special `:default` content types map to the content types supported by the Muuntaja
+instance. You can override these by using the `:openapi/request-content-types`
+and `:openapi/response-content-types` keys, which must contain vector of
+supported content types. If there is no Muuntaja instance, and these keys are
+not defined, the content types will default to `["application/json"]`.
 
 ## Custom OpenAPI data
 
@@ -123,9 +127,13 @@ example of `"securitySchemes"`.
 
 ## OpenAPI spec
 
-Serving the OpenAPI specification is handled by `reitit.openapi/create-openapi-handler`. It takes no arguments and returns a ring handler which collects at request-time data from all routes and returns an OpenAPI specification as Clojure data, to be encoded by a response formatter.
+Serving the OpenAPI specification is handled by
+`reitit.openapi/create-openapi-handler`. It takes no arguments and returns a
+ring handler which collects at request-time data from all routes and returns an
+OpenAPI specification as Clojure data, to be encoded by a response formatter.
 
-You can use the `:openapi` route data key of the `create-openapi-handler` route to populate the top level of the OpenAPI spec.
+You can use the `:openapi` route data key of the `create-openapi-handler` route
+to populate the top level of the OpenAPI spec.
 
 Example:
 
