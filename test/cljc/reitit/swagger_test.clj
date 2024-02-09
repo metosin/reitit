@@ -161,14 +161,14 @@
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
-                    :definitions {::req-key {:type "string"
+                    :definitions {"reitit.swagger-test/req-key" {:type "string"
                                              :x-anyOf [{:type "string"}
                                                        {:type "string"}]}
-                                  ::req-val {:type "object"
+                                  "reitit.swagger-test/req-val" {:type "object"
                                              :x-anyOf [{:type "object"}
                                                        {:type "string"}]}
-                                  ::resp-map {:type "object"},
-                                  ::resp-string {:type "string"
+                                  "reitit.swagger-test/resp-map" {:type "object"},
+                                  "reitit.swagger-test/resp-string" {:type "string"
                                                  :minLength 1}}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
