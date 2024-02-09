@@ -130,7 +130,7 @@
                                                                       :type :schema
                                                                       :content-type content-type})]
                                   [content-type (->content data schema)])))
-                         (:content request)))}})
+                         (dissoc (:content request) :default)))}})
      (when multipart
        {:requestBody
         {:content
