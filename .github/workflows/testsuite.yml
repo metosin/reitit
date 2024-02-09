@@ -32,6 +32,9 @@ jobs:
       uses: DeLaGuardo/setup-clojure@3.1
       with:
         lein: 2.9.5
+    - name: Install dependencies
+      run: |
+        npm ci
     - name: Run tests
       run: ./scripts/test.sh clj
 

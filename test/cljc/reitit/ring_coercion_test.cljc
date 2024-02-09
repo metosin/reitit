@@ -652,12 +652,14 @@
                            :uri "/foo"
                            :muuntaja/request {:format request-format}
                            :muuntaja/response {:format response-format}
-                           :body-params body})]
+                           :body-params body})
+                normalize-json (fn[body]
+                                 (-> body j/write-value-as-string (j/read-value j/keyword-keys-object-mapper)))]
             (testing "succesful call"
-              (is (= {:status 200 :body {:request :json, :response :json}}
-                     (call (request "application/json" "application/json" {:request :json :response :json}))))
-              (is (= {:status 200 :body {:request :edn, :response :json}}
-                     (call (request "application/edn" "application/json" {:request :edn :response :json}))))
+              (is (= {:status 200 :body {:request "json", :response "json"}}
+                     (normalize-json (call (request "application/json" "application/json" {:request :json :response :json})))))
+              (is (= {:status 200 :body {:request "edn", :response "json"}}
+                     (normalize-json (call (request "application/edn" "application/json" {:request :edn :response :json})))))
               (is (= {:status 200 :body {:request :default, :response :default}}
                      (call (request "application/transit" "application/transit" {:request :default :response :default})))))
             (testing "request validation fails"
