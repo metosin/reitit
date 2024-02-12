@@ -435,3 +435,9 @@
 (deftest routing-bug-test-538
   (let [router (r/router [["/:a"] ["/:b"]] {:conflicts nil})]
     (is (nil? (r/match-by-path router "")))))
+
+(deftest query-string-support
+  (let [router (r/router [["/endpoint"]])
+        match (r/match-by-path router "/endpoint?foo=bar&foo=baz&some=123")]
+    (is (= ["bar" "baz"] (:foo (:query-params match))))
+    (is (= ["123"] (:some (:query-params match))))))

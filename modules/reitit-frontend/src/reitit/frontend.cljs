@@ -63,6 +63,7 @@
                             (throw e))))
                    coercion/coerce!)]
      (if-let [match (r/match-by-path router (.getPath uri))]
+       ;; query-params already part of match here (TODO ensure getPath includes query)
        (let [q (query-params uri)
              fragment (when (.hasFragment uri)
                         (.getFragment uri))

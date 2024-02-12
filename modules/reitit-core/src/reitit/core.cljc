@@ -112,6 +112,7 @@
          (if-let [match (match-by-path path)]
            (-> (:data match)
                (assoc :path-params (:params match))
+               (assoc :query-params (impl/query-params path))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
@@ -198,6 +199,7 @@
          (if-let [match (and match-by-path (match-by-path path))]
            (-> (:data match)
                (assoc :path-params (:params match))
+               (assoc :query-params (impl/query-params path))
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
