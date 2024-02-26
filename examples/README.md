@@ -7,6 +7,13 @@
 ## frontend-prompt
 ## frontend-re-frame
 ## frontend
+
+Frontend example with clojure.spec coercion.
+
+## frontend-malli
+
+Frontend example with Malli coercion.
+
 ## http-swagger
 
 Coercion with Spec and Swagger generation.
