@@ -6,6 +6,9 @@
      (:import (clojure.lang ExceptionInfo)
               (reitit.core Router))))
 
+(defn- var-handler [& _]
+  "var-handler")
+
 (deftest reitit-test
 
   (testing "routers handling wildcard paths"
@@ -245,7 +248,11 @@
       (let [router (r/router ["/ping" (constantly "ok")])
             {:keys [result]} (r/match-by-path router "/ping")]
         (is result)
-        (is (= "ok" (result))))))
+        (is (= "ok" (result))))
+      (testing "var handler gets expanded"
+      (let [router (r/router ["/ping" #'var-handler])
+            {:keys [result]} (r/match-by-path router "/ping")]
+        (is (= #'var-handler result))))))
 
   (testing "custom router"
     (let [router (r/router ["/ping"] {:router (fn [_ _]
