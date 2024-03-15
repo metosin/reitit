@@ -101,6 +101,11 @@
           ["/api" {:name "kikka"}]
           {:validate rs/validate}))))
 
+  (testing "handler can be a var"
+    (is (r/router? (r/router
+                    ["/api" {:handler #'identity}]
+                    {:validate rs/validate}))))
+
   (testing "spec can be overridden"
     (is (r/router? (r/router
                     ["/api" {:handler "identity"}]
