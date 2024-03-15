@@ -28,6 +28,10 @@
      :cljs function)
   (expand [this _] {:handler this})
 
+  #?(:clj  clojure.lang.Var
+     :cljs cljs.core.Var)
+  (expand [this _] {:handler this})
+
   nil
   (expand [_ _]))
 

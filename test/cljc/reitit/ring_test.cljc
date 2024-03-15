@@ -52,6 +52,7 @@
                   ["/api" {:middleware [api-mw]}
                    ["/all" handler]
                    ["/get" {:get handler}]
+                   ["/get-var" {:get {:handler #'handler}}]
                    ["/users" {:middleware [[mw :users]]
                               :get handler
                               :post {:handler handler
@@ -73,6 +74,10 @@
         (is (= {:status 200, :body [:api :ok]}
                (app {:uri "/api/get" :request-method :get})))
         (is (= nil (app {:uri "/api/get" :request-method :post}))))
+
+      (testing "var handler"
+        (is (= {:status 200, :body [:api :ok]}
+               (app {:uri "/api/get-var" :request-method :get}))))
 
       (testing "expanded method handler"
         (is (= {:status 200, :body [:api :users :ok]}
