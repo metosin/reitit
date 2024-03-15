@@ -34,7 +34,7 @@
                          [metosin/ring-swagger-ui "4.19.1"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.13.1"]
-                         [metosin/muuntaja "0.6.8"]
+                         [metosin/muuntaja "0.6.10"]
                          [metosin/jsonista "0.3.7"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.14.0"]
@@ -92,7 +92,7 @@
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
                                   [metosin/spec-tools "0.10.5"]
-                                  [metosin/muuntaja "0.6.8"]
+                                  [metosin/muuntaja "0.6.10"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.7"]
                                   [metosin/malli "0.14.0"]

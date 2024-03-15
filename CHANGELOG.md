@@ -21,6 +21,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ```clojure
 [metosin/malli "0.14.0"] is available but we use "0.13.0"
+[metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
 ```
 
 ## 0.7.0-alpha7 (2023-10-03)
