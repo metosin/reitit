@@ -286,6 +286,36 @@
   [params]
   (maybe-map-values #(url-encode (into-string %)) params))
 
+;; NOTE something like lambdaisland/url could help streamline this
+(do
+ #?@(:clj [(defn query-params [url]
+             ;; this impl is straight from chatgpt and probably not right
+             (let [url-parts (clojure.string/split url #"\?")
+                   query (second url-parts)
+                   params (and query (clojure.string/split query #"&"))]
+               (reduce (fn [acc param]
+                         (let [[key value] (clojure.string/split param #"=" 2)
+                               decoded-key (URLDecoder/decode key "UTF-8")
+                               decoded-value (URLDecoder/decode (or value "") "UTF-8")]
+                           (assoc acc decoded-key decoded-value)))
+                       {}
+                       params)))]
+
+          :cljs [(defn- query-param [^goog.uri.QueryData q k]
+                   (let [vs (.getValues q k)]
+                     (if (< (alength vs) 2)
+                       (aget vs 0)
+                       (vec vs))))
+
+                 (defn query-params
+                   "Given goog.Uri, read query parameters into a Clojure map."
+                   [^goog.Uri uri]
+                   (let [q (.getQueryData uri)]
+                     (->> q
+                          (.getKeys)
+                          (map (juxt keyword #(query-param q %)))
+                          (into {}))))]))
+
 (defn- query-parameter [k v]
   (str (form-encode (into-string k))
        "="
