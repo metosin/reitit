@@ -1,6 +1,6 @@
 (defproject openapi "0.1.0-SNAPSHOT"
   :description "Reitit OpenAPI example"
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.11.2"]
                  [metosin/jsonista "0.2.6"]
                  [ring/ring-jetty-adapter "1.7.1"]
                  [metosin/reitit "0.7.0-alpha7"]
