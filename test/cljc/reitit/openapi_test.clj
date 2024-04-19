@@ -844,16 +844,16 @@
                       :requestBody
                       {:content
                        {"application/json"
-                        {:schema {:$ref "#/definitions/friend"
-                                  :definitions {"friend" {:properties {:age {:type "integer"}
-                                                                       :pet {:$ref "#/definitions/pet"}}
-                                                          :required [:age :pet]
-                                                          :type "object"}
-                                                "pet" {:properties {:friends {:items {:$ref "#/definitions/friend"}
-                                                                              :type "array"}
-                                                                    :name {:type "string"}}
-                                                       :required [:name :friends]
-                                                       :type "object"}}}}}}}}}}
+                        {:schema {:$ref "#/components/schemas/friend"}}}}}}}
+            :components {:schemas {"friend" {:properties {:age {:type "integer"}
+                                                          :pet {:$ref "#/components/schemas/pet"}}
+                                             :required [:age :pet]
+                                             :type "object"}
+                                   "pet" {:properties {:friends {:items {:$ref "#/components/schemas/friend"}
+                                                                 :type "array"}
+                                                       :name {:type "string"}}
+                                          :required [:name :friends]
+                                          :type "object"}}}}
            spec))
     (testing "spec is valid"
       (is (nil? (validate spec))))))
