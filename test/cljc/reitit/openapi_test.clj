@@ -2,6 +2,7 @@
   (:require [clojure.java.shell :as shell]
             [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
+            [malli.core :as mc]
             [matcher-combinators.test :refer [match?]]
             [matcher-combinators.matchers :as matchers]
             [muuntaja.core :as m]
@@ -858,6 +859,11 @@
     (testing "spec is valid"
       (is (nil? (validate spec))))))
 
+(def Y :int)
+(def Plus [:map
+           [:x :int]
+           [:y #'Y]])
+
 (deftest openapi-malli-tests
   (let [app (ring/ring-handler
              (ring/router
@@ -906,4 +912,91 @@
                 :uri "/openapi.json"}
                (app)
                :body
-               :paths)))))
+               :paths))))
+  (testing "ref schemas"
+    (let [registry (merge (mc/base-schemas)
+                          (mc/type-schemas)
+                          {::plus [:map [:x :int] [:y ::y]]
+                           ::y :int})
+          app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/post"
+                  {:post {:coercion malli/coercion
+                          :parameters {:body (mc/schema ::plus {:registry registry})}
+                          :handler identity}}]
+                 ["/get"
+                  {:get {:coercion malli/coercion
+                         :parameters {:query (mc/schema ::plus {:registry registry})}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (= {:openapi "3.1.0"
+              :x-id #{:reitit.openapi/default}
+              :paths {"/get" {:get {:parameters [{:in "query"
+                                                  :name :x
+                                                  :required true
+                                                  :schema {:type "integer"}}
+                                                 {:in "query"
+                                                  :name :y
+                                                  :required true
+                                                  :schema {:$ref "#/components/schemas/reitit.openapi-test~1y"}}]}}
+                      "/post" {:post
+                               {:requestBody
+                                {:content
+                                 {"application/json"
+                                  {:schema
+                                   {:$ref "#/components/schemas/reitit.openapi-test~1plus"}}}}}}}
+              :components {:schemas
+                           {"reitit.openapi-test/y" {:type "integer"}
+                            "reitit.openapi-test/plus" {:type "object"
+                                                        :properties {:x {:type "integer"}
+                                                                     :y {:$ref "#/components/schemas/reitit.openapi-test~1y"}}
+                                                        :required [:x :y]}}}}
+             spec))))
+  (testing "var schemas"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/post"
+                  {:post {:coercion malli/coercion
+                          :parameters {:body #'Plus}
+                          :handler identity}}]
+                 ["/get"
+                  {:get {:coercion malli/coercion
+                         :parameters {:query #'Plus}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (= {:openapi "3.1.0"
+              :x-id #{:reitit.openapi/default}
+              :paths
+              {"/post"
+               {:post
+                {:requestBody
+                 {:content
+                  {"application/json"
+                   {:schema
+                    {:$ref "#/components/schemas/reitit.openapi-test~1Plus"}}}}}}
+               "/get"
+               {:get
+                {:parameters
+                 [{:in "query" :name :x
+                   :required true
+                   :schema {:type "integer"}}
+                  {:in "query"
+                   :name :y
+                   :required true
+                   :schema {:$ref "#/components/schemas/reitit.openapi-test~1Y"}}]}}}
+              :components
+              {:schemas
+               {"reitit.openapi-test/Plus"
+                {:type "object"
+                 :properties
+                 {:x {:type "integer"}
+                  :y {:$ref "#/components/schemas/reitit.openapi-test~1Y"}}
+                 :required [:x :y]}
+                "reitit.openapi-test/Y" {:type "integer"}}}}
+             spec)))))
