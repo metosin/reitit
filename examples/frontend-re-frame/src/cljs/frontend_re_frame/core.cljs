@@ -1,6 +1,7 @@
 (ns frontend-re-frame.core
   (:require [re-frame.core :as re-frame]
             [reagent.core :as reagent]
+            [reagent.dom :as rd]
             [reitit.core :as r]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
@@ -143,7 +144,7 @@
   (re-frame/dispatch-sync [::initialize-db])
   (dev-setup)
   (init-routes!) ;; Reset routes on figwheel reload
-  (reagent/render [router-component {:router router}]
+  (rd/render [router-component {:router router}]
                   (.getElementById js/document "app")))
 
 (init)

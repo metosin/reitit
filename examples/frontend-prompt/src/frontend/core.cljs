@@ -1,6 +1,7 @@
 (ns frontend.core
   (:require [fipp.edn :as fedn]
             [reagent.core :as r]
+            [reagent.dom :as rd]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]))
@@ -63,6 +64,6 @@
     on-navigate
     ;; set to false to enable HistoryAPI
     {:use-fragment true})
-  (r/render [current-page] (.getElementById js/document "app")))
+  (rd/render [current-page] (.getElementById js/document "app")))
 
 (init!)

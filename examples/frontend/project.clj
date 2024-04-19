@@ -4,15 +4,17 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.11.2"]
                  [ring-server "0.5.0"]
-                 [reagent "0.10.0"]
-                 [ring "1.8.1"]
+                 [reagent "1.2.0"]
+                 [ring "1.12.1"]
                  [hiccup "1.0.5"]
-                 [org.clojure/clojurescript "1.10.773"]
+                 [org.clojure/clojurescript "1.11.132"]
                  [metosin/reitit "0.7.0-alpha7"]
                  [metosin/reitit-spec "0.7.0-alpha7"]
                  [metosin/reitit-frontend "0.7.0-alpha7"]
+                 [cljsjs/react "17.0.2-0"]
+                 [cljsjs/react-dom "17.0.2-0"]
                  ;; Just for pretty printting the match
                  [fipp "0.6.23"]]
 
