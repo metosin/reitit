@@ -917,24 +917,26 @@
   (testing "ref schemas"
     (let [registry (merge (mc/base-schemas)
                           (mc/type-schemas)
-                          {::plus [:map [:x :int] [:y ::y]]
-                           ::y :int})
+                          {"plus" [:map [:x :int] [:y "y"]]
+                           "y" :int})
           app (ring/ring-handler
                (ring/router
                 [["/openapi.json"
                   {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
                          :handler (openapi/create-openapi-handler)}}]
                  ["/post"
                   {:post {:coercion malli/coercion
-                          :parameters {:body (mc/schema ::plus {:registry registry})}
+                          :parameters {:body (mc/schema "plus" {:registry registry})}
                           :handler identity}}]
                  ["/get"
                   {:get {:coercion malli/coercion
-                         :parameters {:query (mc/schema ::plus {:registry registry})}
+                         :parameters {:query (mc/schema "plus" {:registry registry})}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
       (is (= {:openapi "3.1.0"
               :x-id #{:reitit.openapi/default}
+              :info {:title "" :version "0.0.1"}
               :paths {"/get" {:get {:parameters [{:in "query"
                                                   :name :x
                                                   :required true
@@ -942,25 +944,27 @@
                                                  {:in "query"
                                                   :name :y
                                                   :required true
-                                                  :schema {:$ref "#/components/schemas/reitit.openapi-test~1y"}}]}}
+                                                  :schema {:$ref "#/components/schemas/y"}}]}}
                       "/post" {:post
                                {:requestBody
                                 {:content
                                  {"application/json"
                                   {:schema
-                                   {:$ref "#/components/schemas/reitit.openapi-test~1plus"}}}}}}}
+                                   {:$ref "#/components/schemas/plus"}}}}}}}
               :components {:schemas
-                           {"reitit.openapi-test/y" {:type "integer"}
-                            "reitit.openapi-test/plus" {:type "object"
-                                                        :properties {:x {:type "integer"}
-                                                                     :y {:$ref "#/components/schemas/reitit.openapi-test~1y"}}
-                                                        :required [:x :y]}}}}
-             spec))))
+                           {"y" {:type "integer"}
+                            "plus" {:type "object"
+                                    :properties {:x {:type "integer"}
+                                                 :y {:$ref "#/components/schemas/y"}}
+                                    :required [:x :y]}}}}
+             spec))
+      (is (nil? (validate spec)))))
   (testing "var schemas"
     (let [app (ring/ring-handler
                (ring/router
                 [["/openapi.json"
                   {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
                          :handler (openapi/create-openapi-handler)}}]
                  ["/post"
                   {:post {:coercion malli/coercion
@@ -973,6 +977,7 @@
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
       (is (= {:openapi "3.1.0"
               :x-id #{:reitit.openapi/default}
+              :info {:title "" :version "0.0.1"}
               :paths
               {"/post"
                {:post
@@ -1000,4 +1005,9 @@
                   :y {:$ref "#/components/schemas/reitit.openapi-test~1Y"}}
                  :required [:x :y]}
                 "reitit.openapi-test/Y" {:type "integer"}}}}
-             spec)))))
+             spec))
+      ;; TODO: the OAS 3.1 json schema disallows "/" in :components :schemas keys,
+      ;; even though the text of the spec allows it. See:
+      ;; https://github.com/seriousme/openapi-schema-validator/blob/772375bf4895f0e641d103c27140cdd1d2afc34e/schemas/v3.1/schema.json#L282
+      #_
+      (is (nil? (validate spec))))))
