@@ -122,7 +122,12 @@
        (-get-options [_] opts)
        (-get-model-apidocs [this specification model options]
          (case specification
-           :openapi (json-schema/transform model (merge opts options))
+           :openapi (if (= :parameter (:type options))
+                      ;; For :parameters we need to output an object schema with actual :properties.
+                      ;; The caller will iterate through the properties and add them individually to the openapi doc.
+                      ;; Thus, we deref to get the actual [:map ..] instead of some ref-schema.
+                      (json-schema/transform (m/deref model) (merge opts options))
+                      (json-schema/transform model (merge opts options)))
            (throw
             (ex-info
              (str "Can't produce Malli apidocs for " specification)
