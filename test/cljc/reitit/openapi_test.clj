@@ -901,9 +901,9 @@
                                                                                           :additionalProperties false},
                                                                                  :examples {"2" {:total 2}, "3" {:total 3}},
                                                                                  :example {:total 4}}}}},
-                                  :summary "plus with body"}}})
-        (-> {:request-method :get
-             :uri "/openapi.json"}
-            (app)
-            :body
-            :paths))))
+                                  :summary "plus with body"}}}
+           (-> {:request-method :get
+                :uri "/openapi.json"}
+               (app)
+               :body
+               :paths)))))
