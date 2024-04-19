@@ -1,4 +1,4 @@
-(ns example.server
+(ns server
   (:require [clojure.java.io :as io]
             [io.pedestal.http.route]
             [reitit.interceptor]
