@@ -12,7 +12,27 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty]
+            [malli.core :as malli]
             [muuntaja.core :as m]))
+
+(def Transaction
+  [:map
+   [:amount :double]
+   [:from :string]])
+
+(def AccountId
+  [:map
+   [:bank :string]
+   [:id :string]])
+
+(def Account
+  [:map
+   [:bank :string]
+   [:id :string]
+   [:balance :double]
+   [:transactions [:vector #'Transaction]]])
+
+
 
 (def app
   (ring/ring-handler
@@ -89,8 +109,23 @@
                                                               [:email {:json-schema/example "heidi@alps.ch"}
                                                                string?]]]}}}}
                :handler (fn [_request]
-                          [{:name "Heidi"
-                            :email "heidi@alps.ch"}])}}]
+                          {:status 200
+                           :body [{:name "Heidi"
+                                   :email "heidi@alps.ch"}]})}}]
+
+       ["/account"
+        {:get {:summary "Fetch an account | Recursive schemas using malli registry"
+               :parameters {:query #'AccountId}
+               :responses {200 {:content {:default {:schema #'Account}}}}
+               :handler (fn [_request]
+                          {:status 200
+                           :body {:bank "MiniBank"
+                                  :id "0001"
+                                  :balance 13.5
+                                  :transactions [{:from "0002"
+                                                  :amount 20.0}
+                                                 {:from "0003"
+                                                  :amount -6.5}]}})}}]
 
        ["/secure"
         {:tags #{"secure"}
