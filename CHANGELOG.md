@@ -17,6 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
 * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
 * **BREAKING** OpenAPI support is now clj only
+* Fix swagger generation when unsupported coercions are present [#671](https://github.com/metosin/reitit/pull/671)
 * Updated dependencies:
 
 ```clojure
