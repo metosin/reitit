@@ -31,7 +31,7 @@
                          [metosin/reitit-frontend "0.7.0-alpha7"]
                          [metosin/reitit-sieppari "0.7.0-alpha7"]
                          [metosin/reitit-pedestal "0.7.0-alpha7"]
-                         [metosin/ring-swagger-ui "4.19.1"]
+                         [metosin/ring-swagger-ui "5.9.0"]
                          [metosin/spec-tools "0.10.5"]
                          [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.10"]
