@@ -68,11 +68,13 @@
 (defn- swagger-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
-(defn -warn-unsupported-coercions [{:keys [request responses] :as _data}]
+(defn -remove-unsupported-coercions [{:keys [request responses] :as data}]
   (when request
     (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
   (when (some :content (vals responses))
-    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion")))
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion"))
+  (cond-> (dissoc data :request)
+    responses (assoc :responses (update-vals responses #(dissoc % :content)))))
 
 (defn -get-swagger-apidocs [coercion data]
   (let [swagger-parameter {:query :query
@@ -80,10 +82,10 @@
                            :form :formData
                            :header :header
                            :path :path
-                           :multipart :formData}]
-    (-warn-unsupported-coercions data)
+                           :multipart :formData}
+        cleaned (-remove-unsupported-coercions data)]
     (->> (update
-          data
+          cleaned
           :parameters
           (fn [parameters]
             (->> parameters
