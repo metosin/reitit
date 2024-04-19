@@ -869,19 +869,20 @@
              (ring/router
               [["/openapi.json"
                 {:get {:no-doc true
+                       :openapi {:info {:title "" :version "0.0.1"}}
                        :handler (openapi/create-openapi-handler)}}]
 
                ["/malli" {:coercion malli/coercion}
                 ["/plus" {:post {:summary "plus with body"
                                  :request {:description "body description"
                                            :content {"application/json" {:schema {:x int?, :y int?}
-                                                                         :examples {"1+1" {:x 1, :y 1}
-                                                                                    "1+2" {:x 1, :y 2}}
+                                                                         :examples {"1+1" {:value {:x 1, :y 1}}
+                                                                                    "1+2" {:value {:x 1, :y 2}}}
                                                                          :openapi {:example {:x 2, :y 2}}}}}
                                  :responses {200 {:description "success"
                                                   :content {"application/json" {:schema {:total int?}
-                                                                                :examples {"2" {:total 2}
-                                                                                           "3" {:total 3}}
+                                                                                :examples {"2" {:value {:total 2}}
+                                                                                           "3" {:value {:total 3}}}
                                                                                 :openapi {:example {:total 4}}}}}}
                                  :handler (fn [request]
                                             (let [{:keys [x y]} (-> request :parameters :body)]
@@ -891,28 +892,28 @@
                :data {:middleware [openapi/openapi-feature
                                    rrc/coerce-exceptions-middleware
                                    rrc/coerce-request-middleware
-                                   rrc/coerce-response-middleware]}}))]
-    (is (= {"/malli/plus" {:post {:requestBody {:content {:description "body description",
-                                                          "application/json" {:schema {:type "object",
+                                   rrc/coerce-response-middleware]}}))
+        spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+    (is (= {"/malli/plus" {:post {:requestBody {:description "body description",
+                                                :content {"application/json" {:schema {:type "object",
                                                                                        :properties {:x {:type "integer"},
                                                                                                     :y {:type "integer"}},
                                                                                        :required [:x :y],
                                                                                        :additionalProperties false},
-                                                                              :examples {"1+1" {:x 1, :y 1}, "1+2" {:x 1, :y 2}},
+                                                                              :examples {"1+1" {:value {:x 1, :y 1}}
+                                                                                         "1+2" {:value {:x 1, :y 2}}},
                                                                               :example {:x 2, :y 2}}}},
                                   :responses {200 {:description "success",
                                                    :content {"application/json" {:schema {:type "object",
                                                                                           :properties {:total {:type "integer"}},
                                                                                           :required [:total],
                                                                                           :additionalProperties false},
-                                                                                 :examples {"2" {:total 2}, "3" {:total 3}},
+                                                                                 :examples {"2" {:value {:total 2}},
+                                                                                            "3" {:value {:total 3}}},
                                                                                  :example {:total 4}}}}},
                                   :summary "plus with body"}}}
-           (-> {:request-method :get
-                :uri "/openapi.json"}
-               (app)
-               :body
-               :paths))))
+           (:paths spec)))
+    (is (nil? (validate spec))))
   (testing "ref schemas"
     (let [registry (merge (mc/base-schemas)
                           (mc/type-schemas)
