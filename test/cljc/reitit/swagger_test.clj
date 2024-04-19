@@ -507,3 +507,56 @@
                  :type "string"}]
                (normalize
                 (get-in spec [:paths "/upload" :post :parameters]))))))))
+
+(def X :int)
+(def Y :int)
+(def Plus [:map
+           [:x #'X]
+           [:y #'Y]])
+
+(deftest malli-var-test
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/post"
+                {:post {:coercion malli/coercion
+                        :parameters {:body #'Plus}
+                        :handler identity}}]
+               ["/get"
+                {:get {:coercion malli/coercion
+                       :parameters {:query
+                                    #'Plus}
+                       :handler identity}}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]))
+        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
+    (is (= {:definitions {"reitit.swagger-test/Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test~1X"},
+                                                                   :y {:$ref "#/definitions/reitit.swagger-test~1Y"}},
+                                                      :required [:x :y],
+                                                      :type "object"},
+                          "reitit.swagger-test/X" {:format "int64",
+                                                   :type "integer"},
+                          "reitit.swagger-test/Y" {:format "int64",
+                                                   :type "integer"}},
+            :paths {"/post" {:post {:parameters [{:description "",
+                                                  :in "body",
+                                                  :name "body",
+                                                  :required true,
+                                                  :schema {:$ref "#/definitions/reitit.swagger-test~1Plus"}}],
+                                    :responses {:default {:description ""}}}}
+                    "/get" {:get {:responses {:default {:description ""}}
+                                  :parameters [{:in "query"
+                                                :name :x
+                                                :description ""
+                                                :type "integer"
+                                                :required true
+                                                :format "int64"}
+                                               {:in "query"
+                                                :name :y
+                                                :description ""
+                                                :type "integer"
+                                                :required true
+                                                :format "int64"}]}}}
+            :swagger "2.0",
+            :x-id #{:reitit.swagger/default}}
+           spec))))
