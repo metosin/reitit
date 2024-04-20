@@ -21,8 +21,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Updated dependencies:
 
 ```clojure
-[metosin/malli "0.14.0"] is available but we use "0.13.0"
+[metosin/malli "0.16.0"] is available but we use "0.13.0"
 [metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
+[metosin/spec-tools "0.10.6"] is available but we use "0.10.5"
+[metosin/jsonista "0.3.8"] is available but we use "0.3.7"
+[com.fasterxml.jackson.core/jackson-core "2.17.0"] is available but we use "2.15.1"
+[com.fasterxml.jackson.core/jackson-databind "2.17.0"] is available but we use "2.15.1"
+[ring/ring-core "1.12.1"] is available but we use "1.10.0"
+[metosin/ring-swagger-ui "5.9.0"] is available but we use "4.19.1"
 ```
 
 ## 0.7.0-alpha7 (2023-10-03)
