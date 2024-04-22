@@ -513,6 +513,7 @@
 (def Plus [:map
            [:x #'X]
            [:y #'Y]])
+(def Result [:map [:result :int]])
 
 (deftest malli-var-test
   (let [app (ring/ring-handler
@@ -520,11 +521,12 @@
               [["/post"
                 {:post {:coercion malli/coercion
                         :parameters {:body #'Plus}
+                        :responses {200 {:body #'Result}}
                         :handler identity}}]
                ["/get"
                 {:get {:coercion malli/coercion
-                       :parameters {:query
-                                    #'Plus}
+                       :parameters {:query #'Plus}
+                       :responses {200 {:body #'Result}}
                        :handler identity}}]
                ["/swagger.json"
                 {:get {:no-doc true
@@ -537,15 +539,18 @@
                           "reitit.swagger-test/X" {:format "int64",
                                                    :type "integer"},
                           "reitit.swagger-test/Y" {:format "int64",
-                                                   :type "integer"}},
+                                                   :type "integer"},
+                          "reitit.swagger-test/Result" {:type "object",
+                                                        :properties {:result {:type "integer", :format "int64"}},
+                                                        :required [:result]}},
             :paths {"/post" {:post {:parameters [{:description "",
                                                   :in "body",
                                                   :name "body",
                                                   :required true,
-                                                  :schema {:$ref "#/definitions/reitit.swagger-test~1Plus"}}],
-                                    :responses {:default {:description ""}}}}
-                    "/get" {:get {:responses {:default {:description ""}}
-                                  :parameters [{:in "query"
+                                                  :schema {:$ref "#/definitions/reitit.swagger-test~1Plus"}}]
+                                    :responses {200 {:description ""
+                                                     :schema {:$ref "#/definitions/reitit.swagger-test~1Result"}}}}}
+                    "/get" {:get {:parameters [{:in "query"
                                                 :name :x
                                                 :description ""
                                                 :type "integer"
@@ -556,7 +561,9 @@
                                                 :description ""
                                                 :type "integer"
                                                 :required true
-                                                :format "int64"}]}}}
+                                                :format "int64"}]
+                                  :responses {200 {:description ""
+                                                   :schema {:$ref "#/definitions/reitit.swagger-test~1Result"}}}}}}
             :swagger "2.0",
             :x-id #{:reitit.swagger/default}}
            spec))))
