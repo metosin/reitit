@@ -77,7 +77,7 @@
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
 (defn -get-apidocs-openapi
-  [coercion {:keys [request muuntaja parameters responses openapi/request-content-types openapi/response-content-types]}]
+  [coercion {:keys [request muuntaja parameters responses openapi/request-content-types openapi/response-content-types]} definitions]
   (let [{:keys [body multipart]} parameters
         parameters (dissoc parameters :request :body :multipart)
         ->content (fn [data schema]
@@ -85,7 +85,13 @@
                      {:schema schema}
                      (select-keys data [:description :examples])
                      (:openapi data)))
-        ->schema-object #(coercion/-get-model-apidocs coercion :openapi %1 %2)
+        ->schema-object (fn [model opts]
+                          (let [result (coercion/-get-model-apidocs
+                                        coercion :openapi model
+                                        (assoc opts :malli.json-schema/definitions-path "#/components/schemas/"))]
+                            (when-let [d (:definitions result)]
+                              (vswap! definitions merge d))
+                            (dissoc result :definitions)))
         request-content-types (or request-content-types
                                   (when muuntaja (m/decodes muuntaja))
                                   ["application/json"])
@@ -189,6 +195,7 @@
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :openapi :id (or ::default) (trie/into-set) (set/intersection ids) seq))
+           definitions (volatile! {})
            transform-endpoint (fn [[method {{:keys [coercion no-doc openapi] :as data} :data
                                             middleware :middleware
                                             interceptors :interceptors}]]
@@ -198,7 +205,7 @@
                                     (apply meta-merge (keep (comp :openapi :data) middleware))
                                     (apply meta-merge (keep (comp :openapi :data) interceptors))
                                     (if coercion
-                                      (-get-apidocs-openapi coercion data))
+                                      (-get-apidocs-openapi coercion data definitions))
                                     (select-keys data [:tags :summary :description])
                                     (strip-top-level-keys openapi))]))
            transform-path (fn [[p _ c]]
@@ -207,7 +214,8 @@
            map-in-order #(->> % (apply concat) (apply array-map))
            paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
        {:status 200
-        :body (meta-merge openapi {:paths paths})}))
+        :body (cond-> (meta-merge openapi {:paths paths})
+                (seq @definitions) (assoc-in [:components :schemas] @definitions))}))
     ([req res raise]
      (try
        (res (create-openapi req))
