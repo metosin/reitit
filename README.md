@@ -57,7 +57,7 @@ All main modules bundled:
 
 Optionally, the parts can be required separately.
 
-Reitit requires Clojure 1.11.
+Reitit requires Java 11 and Clojure 1.11.
 
 ## Quick start
 
