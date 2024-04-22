@@ -125,23 +125,24 @@
      (when request
        ;; request allow to different :requestBody per content-type
        {:requestBody
-        {:content (merge
-                   (select-keys request [:description])
-                   (when-let [{:keys [schema] :as data} (coercion/get-default request)]
-                     (into {}
-                           (map (fn [content-type]
-                                  (let [schema (->schema-object schema {:in :requestBody
-                                                                        :type :schema
-                                                                        :content-type content-type})]
-                                    [content-type (->content data schema)])))
-                           request-content-types))
-                   (into {}
-                         (map (fn [[content-type {:keys [schema] :as data}]]
-                                (let [schema (->schema-object schema {:in :requestBody
-                                                                      :type :schema
-                                                                      :content-type content-type})]
-                                  [content-type (->content data schema)])))
-                         (dissoc (:content request) :default)))}})
+        (merge
+         (select-keys request [:description])
+         {:content (merge
+                    (when-let [{:keys [schema] :as data} (coercion/get-default request)]
+                      (into {}
+                            (map (fn [content-type]
+                                   (let [schema (->schema-object schema {:in :requestBody
+                                                                         :type :schema
+                                                                         :content-type content-type})]
+                                     [content-type (->content data schema)])))
+                            request-content-types))
+                    (into {}
+                          (map (fn [[content-type {:keys [schema] :as data}]]
+                                 (let [schema (->schema-object schema {:in :requestBody
+                                                                       :type :schema
+                                                                       :content-type content-type})]
+                                   [content-type (->content data schema)])))
+                          (dissoc (:content request) :default)))})})
      (when multipart
        {:requestBody
         {:content
