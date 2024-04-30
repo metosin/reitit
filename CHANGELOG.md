@@ -12,6 +12,40 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.7.0 (2024-04-30)
+
+The OpenAPI3 release, Year in the making - the changes span over multiple repositories.
+
+* Openapi3 support, see the [docs](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md)
+  * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
+  * OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
+  * Generate correct OpenAPI $ref schemas for malli var and ref schemas [#673](https://github.com/metosin/reitit/pull/673)
+  * new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
+  * [#84](https://github.com/metosin/reitit/issues/84)
+* Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
+* Fix swagger generation when unsupported coercions are present [#671](https://github.com/metosin/reitit/pull/671)
+* **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
+* **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
+* **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
+* Fixed some module dependencies so Cljdoc can properly analyze all the modules
+* Fix reading fragment string on `Html5History` initialization
+* Add fragment string parameter to reitit-frontend functions ([#604](https://github.com/metosin/reitit/pull/604))
+* Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
+
+* Updated dependencies:
+
+```clojure
+[metosin/malli "0.16.1"] is available but we use "0.10.1"
+[metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
+[metosin/spec-tools "0.10.6"] is available but we use "0.10.5"
+[metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
+[metosin/jsonista "0.3.8"] is available but we use "0.3.7"
+[com.fasterxml.jackson.core/jackson-core "2.17.0"] is available but we use "2.14.2"
+[com.fasterxml.jackson.core/jackson-databind "2.17.0"] is available but we use "2.14.2"
+[ring/ring-core "1.12.1"] is available but we use "1.9.6"
+[metosin/ring-swagger-ui "5.9.0"] is available but we use "4.15.5"
+```
+
 ## 0.7.0-alpha8 (2024-04-30)
 
 * Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
