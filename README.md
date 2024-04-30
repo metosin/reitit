@@ -1,6 +1,6 @@
 # reitit 
 
-[![Build Status](https://github.com/metosin/reitit/actions/workflows/clojure.yml/badge.svg)](https://github.com/metosin/reitit/actions)
+[![Build Status](https://github.com/metosin/reitit/actions/workflows/testsuite.yml/badge.svg)](https://github.com/metosin/reitit/actions)
 [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/d/metosin/reitit/)
 [![Clojars Project](https://img.shields.io/clojars/v/metosin/reitit.svg)](https://clojars.org/metosin/reitit)
 [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
