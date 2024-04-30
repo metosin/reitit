@@ -1,13 +1,15 @@
-(defproject metosin/reitit-parent "0.7.0-alpha8"
+(defproject metosin/reitit-parent "0.7.0"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :test-paths ["test/clj" "test/cljc"]
-  :deploy-repositories {"clojars" {:url "https://repo.clojars.org"
-                                   :sign-releases false
-                                   :username :env/clojars_username
-                                   :password :env/clojars_password}}
+  :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
+                                    :username :env/clojars_username
+                                    :password :env/clojars_password}]]
+  :repositories [["clojars" {:url "https://repo.clojars.org"
+                             :username :env/clojars_username
+                             :password :env/clojars_password}]]
   :codox {:output-path "doc"
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
@@ -15,22 +17,22 @@
         :url "https://github.com/metosin/reitit"}
   ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.7.0-alpha8"]
-                         [metosin/reitit-core "0.7.0-alpha8"]
-                         [metosin/reitit-dev "0.7.0-alpha8"]
-                         [metosin/reitit-spec "0.7.0-alpha8"]
-                         [metosin/reitit-malli "0.7.0-alpha8"]
-                         [metosin/reitit-schema "0.7.0-alpha8"]
-                         [metosin/reitit-ring "0.7.0-alpha8"]
-                         [metosin/reitit-middleware "0.7.0-alpha8"]
-                         [metosin/reitit-http "0.7.0-alpha8"]
-                         [metosin/reitit-interceptors "0.7.0-alpha8"]
-                         [metosin/reitit-swagger "0.7.0-alpha8"]
-                         [fi.metosin/reitit-openapi "0.7.0-alpha8"]
-                         [metosin/reitit-swagger-ui "0.7.0-alpha8"]
-                         [metosin/reitit-frontend "0.7.0-alpha8"]
-                         [metosin/reitit-sieppari "0.7.0-alpha8"]
-                         [metosin/reitit-pedestal "0.7.0-alpha8"]
+  :managed-dependencies [[metosin/reitit "0.7.0"]
+                         [metosin/reitit-core "0.7.0"]
+                         [metosin/reitit-dev "0.7.0"]
+                         [metosin/reitit-spec "0.7.0"]
+                         [metosin/reitit-malli "0.7.0"]
+                         [metosin/reitit-schema "0.7.0"]
+                         [metosin/reitit-ring "0.7.0"]
+                         [metosin/reitit-middleware "0.7.0"]
+                         [metosin/reitit-http "0.7.0"]
+                         [metosin/reitit-interceptors "0.7.0"]
+                         [metosin/reitit-swagger "0.7.0"]
+                         [fi.metosin/reitit-openapi "0.7.0"]
+                         [metosin/reitit-swagger-ui "0.7.0"]
+                         [metosin/reitit-frontend "0.7.0"]
+                         [metosin/reitit-sieppari "0.7.0"]
+                         [metosin/reitit-pedestal "0.7.0"]
                          [metosin/ring-swagger-ui "5.9.0"]
                          [metosin/spec-tools "0.10.6"]
                          [metosin/schema-tools "0.13.1"]
