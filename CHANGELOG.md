@@ -12,9 +12,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.7.0-alpha8 (2024-04-30)
 
-* **BREAKING** reitit requires Java11
 * Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
 * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
 * **BREAKING** OpenAPI support is now clj only
@@ -23,7 +22,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Updated dependencies:
 
 ```clojure
-[metosin/malli "0.16.0"] is available but we use "0.13.0"
+[metosin/malli "0.16.1"] is available but we use "0.13.0"
 [metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
 [metosin/spec-tools "0.10.6"] is available but we use "0.10.5"
 [metosin/jsonista "0.3.8"] is available but we use "0.3.7"

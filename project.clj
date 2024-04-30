@@ -37,7 +37,7 @@
                          [metosin/muuntaja "0.6.10"]
                          [metosin/jsonista "0.3.8"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.16.0"]
+                         [metosin/malli "0.16.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.17.0"]
@@ -55,7 +55,7 @@
 
                          [io.pedestal/pedestal.service "0.6.3"]]
 
-  :plugins [[jonase/eastwood "1.4.0"]
+  :plugins [[jonase/eastwood "1.4.2"]
             ;[lein-virgil "0.1.7"]
             [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
@@ -86,8 +86,8 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.11.1"]
-                                  [org.clojure/clojurescript "1.10.773"]
+                   :dependencies [[org.clojure/clojure "1.11.3"]
+                                  [org.clojure/clojurescript "1.11.132"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
@@ -95,7 +95,7 @@
                                   [metosin/muuntaja "0.6.10"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.8"]
-                                  [metosin/malli "0.16.0"]
+                                  [metosin/malli "0.16.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -131,7 +131,7 @@
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.7.1"]
-                                   [ring/ring-defaults "0.4.0"]
+                                   [ring/ring-defaults "0.5.0"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.6.3"]
                                    [io.pedestal/pedestal.jetty "0.6.3"]
@@ -142,7 +142,7 @@
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
                                    [aleph "0.7.1"]
-                                   [ring/ring-defaults "0.4.0"]
+                                   [ring/ring-defaults "0.5.0"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]
                                    [janus "1.3.2"]]}
