@@ -33,20 +33,24 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 
 ## Main Modules
 
-* `reitit` - all bundled
-* `reitit-core` - the routing core
-* `reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring-router/)
-* `reitit-middleware` - [common middleware](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/default-middleware/)
-* `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
-* `reitit-malli` [malli](https://github.com/metosin/malli) coercion
-* `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
-* `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
-* `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
-* `reitit-frontend` Tools for [frontend routing]((https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/))
-* `reitit-http` http-routing with Interceptors
-* `reitit-interceptors` - [common interceptors](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/default-interceptors/)
-* `reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
-* `reitit-dev` - development utilities
+* `metosin/reitit` - all bundled
+* `metosin/reitit-core` - the routing core
+* `metosin/reitit-ring` - a [ring router](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/ring-router/)
+* `metosin/reitit-middleware` - [common middleware](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/ring/default-middleware/)
+* `metosin/reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
+* `metosin/reitit-malli` [malli](https://github.com/metosin/malli) coercion
+* `metosin/reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
+* `fi.metosin/reitit-openapi` [OpenAPI](https://www.openapis.org/) apidocs *
+* `metosin/reitit-swagger` [Swagger2](https://swagger.io/) apidocs
+* `metosin/reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui)
+* `metosin/reitit-frontend` Tools for [frontend routing]((https://cljdoc.org/d/metosin/reitit/CURRENT/doc/frontend/basics/))
+* `metosin/reitit-http` http-routing with Interceptors
+* `metosin/reitit-interceptors` - [common interceptors](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/http/default-interceptors/)
+* `metosin/reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
+* `metosin/reitit-dev` - development utilities
+
+ * - This is not a typo; the new `reitit-openapi` was released under the new, verified `fi.metosin` group. Existing
+   modules will continue to be released under `metosin` for compatibility purposes.
 
 ## Extra modules
 
