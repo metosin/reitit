@@ -42,10 +42,14 @@
   match->path
   "Create routing path from given match and optional query-string map and
   optional fragment string."
-  [match query-params fragment]
-  (when-let [path (r/match->path match query-params)]
-    (cond-> path
-      (and fragment (seq fragment)) (str "#" (impl/form-encode fragment)))))
+  ([match]
+   (match->path match nil nil))
+  ([match query-params]
+   (match->path match query-params nil))
+  ([match query-params fragment]
+   (when-let [path (r/match->path match query-params)]
+     (cond-> path
+       (and fragment (seq fragment)) (str "#" (impl/form-encode fragment))))))
 
 (defn match-by-path
   "Given routing tree and current path, return match with possibly

@@ -285,6 +285,8 @@
 
 (deftest match->path-test
   (is (= "foo"
+         (rf/match->path {:path "foo"})
+         (rf/match->path {:path "foo"} nil)
          (rf/match->path {:path "foo"} nil nil)
          (rf/match->path {:path "foo"} {} "")))
   (is (= "foo?a=1&b=&c=foo+bar"
