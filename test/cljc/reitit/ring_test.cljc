@@ -765,12 +765,11 @@
 
 (deftest path-update-fix-686
   (testing "records are retained"
-    (is (true? (-> ["/api/foo" {:get {:handler (constantly {:status 200})
-                                      :test (FooTest. 1 2)}}]
-                   (ring/router)
-                   (r/compiled-routes)
-                   (first)
-                   (second)
-                   :get
-                   :test
-                   (record?))))))
+    (is (record? (-> ["/api/foo" {:get {:handler (constantly {:status 200})
+                                        :test (FooTest. 1 2)}}]
+                     (ring/router)
+                     (r/compiled-routes)
+                     (first)
+                     (second)
+                     :get
+                     :test)))))
