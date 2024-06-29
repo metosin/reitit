@@ -42,8 +42,8 @@
                          [metosin/malli "0.16.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.17.0"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.17.0"]
+                         [com.fasterxml.jackson.core/jackson-core "2.17.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.17.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.26" :exclusions [org.clojure/core.rrb-vector]]
@@ -53,9 +53,9 @@
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
                          [mvxcvi/arrangement "2.1.0"]
-                         [ring/ring-core "1.12.1"]
+                         [ring/ring-core "1.12.2"]
 
-                         [io.pedestal/pedestal.service "0.6.3"]]
+                         [io.pedestal/pedestal.service "0.6.4"]]
 
   :plugins [[jonase/eastwood "1.4.2"]
             ;[lein-virgil "0.1.7"]
@@ -106,7 +106,7 @@
 
                                   [orchestra "2021.01.01-1"]
 
-                                  [ring "1.12.1"]
+                                  [ring "1.12.2"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.3"]
                                   [metosin/ring-swagger-ui "5.9.0"]
@@ -118,13 +118,13 @@
                                   [com.gfredericks/test.chuck "0.2.14"]
                                   [nubank/matcher-combinators "3.9.1"]
 
-                                  [io.pedestal/pedestal.service "0.6.3"]
+                                  [io.pedestal/pedestal.service "0.6.4"]
 
                                   [org.clojure/core.async "1.6.681"]
-                                  [manifold "0.4.2"]
+                                  [manifold "0.4.3"]
                                   [funcool/promesa "11.0.678"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "1.2.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.2.2"]
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
@@ -135,15 +135,15 @@
                     :dependencies [[compojure "1.7.1"]
                                    [ring/ring-defaults "0.5.0"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.6.3"]
-                                   [io.pedestal/pedestal.jetty "0.6.3"]
+                                   [io.pedestal/pedestal.service "0.6.4"]
+                                   [io.pedestal/pedestal.jetty "0.6.4"]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.6.681"]
-                                   [manifold "0.4.2"]
+                                   [manifold "0.4.3"]
                                    [funcool/promesa "11.0.678"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.7.1"]
+                                   [aleph "0.8.1"]
                                    [ring/ring-defaults "0.5.0"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]

@@ -250,9 +250,9 @@
         (is result)
         (is (= "ok" (result))))
       (testing "var handler gets expanded"
-      (let [router (r/router ["/ping" #'var-handler])
-            {:keys [result]} (r/match-by-path router "/ping")]
-        (is (= #'var-handler result))))))
+        (let [router (r/router ["/ping" #'var-handler])
+              {:keys [result]} (r/match-by-path router "/ping")]
+          (is (= #'var-handler result))))))
 
   (testing "custom router"
     (let [router (r/router ["/ping"] {:router (fn [_ _]
@@ -423,7 +423,7 @@
   (r/expand [_ _] {:name n}))
 
 (deftest default-expand-test
-  (let [router (r/router ["/endpoint" (->Named :kikka)])]
+  (let [router (r/router ["/endpoint" (Named. :kikka)])]
     (is (= [["/endpoint" {:name :kikka}]]
            (r/routes router)))))
 

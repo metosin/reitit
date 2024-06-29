@@ -12,6 +12,18 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
+* Updated dependencies:
+
+```clojure
+[com.fasterxml.jackson.core/jackson-core "2.17.1"] is available but we use "2.17.0"
+[com.fasterxml.jackson.core/jackson-databind "2.17.1"] is available but we use "2.17.0"
+[ring/ring-core "1.12.2"] is available but we use "1.12.1"
+[ring "1.12.2"] is available but we use "1.12.1"
+```
+
 ## 0.7.0 (2024-04-30)
 
 The OpenAPI3 release, Year in the making - the changes span over multiple repositories.

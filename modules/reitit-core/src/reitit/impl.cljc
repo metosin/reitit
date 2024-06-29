@@ -29,7 +29,7 @@
                      f (-match p' path-map)]
                  (cond
                    f (conj l [p' (f v)])
-                   (and (map? v) (seq v)) (-path-vals l p' v)
+                   (and (map? v) (not (record? v)) (seq v)) (-path-vals l p' v)
                    :else (conj l [p' v]))))
              l m))]
     (-path-vals [] [] m)))

@@ -738,9 +738,9 @@
                     {::trie/trie-compiler compiler})]
            (dotimes [_ 10]
              (future
-               (dotimes [n 100000]
-                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
-                   (is (= body (str n))))))))))))
+              (dotimes [n 100000]
+                (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
+                  (is (= body (str n))))))))))))
 
 (declare routes)
 
@@ -760,3 +760,16 @@
           (is (= (r "2") (app {:uri "/", :request-method :get})))
           (def routes ["/" (constantly (r "3"))]) ;; redefine again
           (is (= (r "3") (app {:uri "/", :request-method :get}))))))))
+
+(defrecord FooTest [a b])
+
+(deftest path-update-fix-686
+  (testing "records are retained"
+    (is (record? (-> ["/api/foo" {:get {:handler (constantly {:status 200})
+                                        :test (FooTest. 1 2)}}]
+                     (ring/router)
+                     (r/compiled-routes)
+                     (first)
+                     (second)
+                     :get
+                     :test)))))
