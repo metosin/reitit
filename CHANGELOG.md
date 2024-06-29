@@ -14,6 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
 * Updated dependencies:
 
 ```clojure
