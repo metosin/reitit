@@ -36,14 +36,12 @@
 
 (defn -copy-meta [to from]
   (letfn [(-with-meta [x m]
-            (try (with-meta x m)
-                 (catch #?(:clj Exception, :cljs js/Error) _ x)))
+            (try (with-meta x m) (catch #?(:clj Exception, :cljs js/Error) _ x)))
           (-copy [l p m]
             (reduce-kv
              (fn [l k v]
                (let [p' (conj p k)
-                     m' (when (empty? (meta v))
-                          (meta (get-in from p')))]
+                     m' (when (empty? (meta v)) (meta (get-in from p')))]
                  (cond
                    m' (update-in l p' -with-meta m')
                    (and (map? v) (not (record? v)) (seq v)) (-copy l p' v)
