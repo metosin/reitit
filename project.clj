@@ -34,12 +34,12 @@
                          [metosin/reitit-sieppari "0.7.0"]
                          [metosin/reitit-pedestal "0.7.0"]
                          [metosin/ring-swagger-ui "5.9.0"]
-                         [metosin/spec-tools "0.10.6"]
+                         [metosin/spec-tools "0.10.7"]
                          [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.10"]
-                         [metosin/jsonista "0.3.8"]
+                         [metosin/jsonista "0.3.9"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.16.1"]
+                         [metosin/malli "0.16.2"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
                          [com.fasterxml.jackson.core/jackson-core "2.17.1"]
@@ -93,11 +93,11 @@
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
-                                  [metosin/spec-tools "0.10.6"]
+                                  [metosin/spec-tools "0.10.7"]
                                   [metosin/muuntaja "0.6.10"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.3.8"]
-                                  [metosin/malli "0.16.1"]
+                                  [metosin/jsonista "0.3.9"]
+                                  [metosin/malli "0.16.2"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -108,7 +108,7 @@
 
                                   [ring "1.12.2"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/ring-http-response "0.9.3"]
+                                  [metosin/ring-http-response "0.9.4"]
                                   [metosin/ring-swagger-ui "5.9.0"]
                                   [org.clojure/tools.analyzer "1.2.0"]
 
