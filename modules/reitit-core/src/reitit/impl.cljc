@@ -34,12 +34,28 @@
              l m))]
     (-path-vals [] [] m)))
 
+(defn -copy-meta [to from]
+  (letfn [(-with-meta [x m]
+            (try (with-meta x m) (catch #?(:clj Exception, :cljs js/Error) _)))
+          (-copy [l p m]
+            (reduce-kv
+             (fn [l k v]
+               (let [p' (conj p k)
+                     m' (meta (get-in from p'))]
+                 (cond
+                   (and m' (not (var? v))) (update-in l p' -with-meta m')
+                   (and (map? v) (not (record? v)) (seq v)) (-copy l p' v)
+                   :else l)))
+             l m))]
+    (-copy to [] to)))
+
 (defn -assoc-in-path-vals [c]
   (reduce (partial apply assoc-in) {} c))
 
 (defn path-update [m path-map]
   (-> (-path-vals m path-map)
-      (-assoc-in-path-vals)))
+      (-assoc-in-path-vals)
+      (-copy-meta m)))
 
 (defn accumulator? [x]
   (-> x meta ::accumulator))

@@ -442,3 +442,11 @@
 (deftest routing-bug-test-538
   (let [router (r/router [["/:a"] ["/:b"]] {:conflicts nil})]
     (is (nil? (r/match-by-path router "")))))
+
+(deftest metadata-regression-679
+  (is (= ["/context/leaf" {:roles {:foo true}}]
+         (-> ["/context" {:roles {:foo false :bar true}}
+              ["/leaf" {:roles ^:replace {:foo true}}]]
+             (r/router)
+             (r/routes)
+             (first)))))
