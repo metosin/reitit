@@ -23,8 +23,8 @@
 
 (defn -path-vals [m path-map]
   (letfn [(-path-vals [l p m]
-            (reduce
-             (fn [l [k v]]
+            (reduce-kv
+             (fn [l k v]
                (let [p' (conj p k)
                      f (-match p' path-map)]
                  (cond
