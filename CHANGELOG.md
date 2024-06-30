@@ -12,8 +12,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.7.1 (2024-06-30)
 
+* FIX: Route data maps ignore meta-merge options in 0.7.0, breaking compatibility [#679](https://github.com/metosin/reitit/issues/679)
 * FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
 * Updated dependencies:
 
