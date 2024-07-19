@@ -71,7 +71,10 @@
      :parameters {:path [:map
                          [:id :int]]
                   :query [:map
-                          [:foo {:optional true} :keyword]]}}]])
+                          [:foo {:optional true} :keyword]
+                          ;; ?repeated=a  ==>  ["a"]
+                          ;; ?repeated=a&repeated=b  ==>  ["a" "b"]
+                          [:repeated [:vector {:decode/string #(if (string? %) [%] %)} :string]]]}}]])
 
 (defn init! []
   (rfe/start!
