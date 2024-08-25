@@ -3,16 +3,13 @@
 (defprotocol IKeywordize
   (-keywordize [coll]))
 
+(defn- keywordize-kv
+  [m k v]
+  (assoc! m (if (string? k) (keyword k) (-keywordize k)) (-keywordize v)))
+
 (defn- -keywordize-map
   [m]
-  (persistent!
-   (reduce-kv
-    (fn [m k v]
-      (if (string? k)
-        (assoc! m (keyword k) (-keywordize v))
-        (assoc! m (-keywordize k) (-keywordize v))))
-    (transient (empty m))
-    m)))
+  (persistent! (reduce-kv keywordize-kv (transient (empty m)) m)))
 
 (defn- -keywordize-default
   [coll]
