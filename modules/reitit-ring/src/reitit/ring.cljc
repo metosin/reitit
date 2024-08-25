@@ -363,7 +363,10 @@
                   result (:result match)
                   handler (-> result method :handler (or default-handler))
                   request (enrich-request request path-params match router)]
-              ((routes handler default-handler) request respond raise))
+              (handler request (fn [response]
+                                 (if response
+                                   (respond response)
+                                   (default-handler request respond raise))) raise))
             (default-handler (enrich-default-request request router) respond raise))
           nil)))
       {::r/router router}))))
