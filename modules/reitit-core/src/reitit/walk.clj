@@ -1,52 +1,51 @@
 (ns ^:no-doc  reitit.walk)
 
-(defprotocol Walkable
-  (-walk [coll f]))
+(defprotocol IKeywordize
+  (-keywordize [coll]))
 
-(extend-protocol Walkable
-  nil
-  (-walk [_ _] nil)
-  Object
-  (-walk [x _] x)
-  clojure.lang.IMapEntry
-  (-walk [e f] (clojure.lang.MapEntry. (f (.key e)) (f (.val e))))
-  clojure.lang.ISeq
-  (-walk [coll f] (map f coll))
-  clojure.lang.PersistentList
-  (-walk [coll f] (apply list (map f coll)))
-  clojure.lang.PersistentList$EmptyList
-  (-walk [x _] x)
-  clojure.lang.IRecord
-  (-walk [r f] (reduce (fn [r x] (conj r (f x))) r r)))
+(defn- -keywordize-map
+  [m]
+  (persistent!
+   (reduce-kv
+    (fn [m k v]
+      (if (string? k)
+        (assoc! m (keyword k) (-keywordize v))
+        (assoc! m (-keywordize k) (-keywordize v))))
+    (transient (empty m))
+    m)))
 
-(defn- -walk-default
-  [coll f]
-  (into (empty coll) (map f) coll))
+(defn- -keywordize-default
+  [coll]
+  (into (empty coll) (map -keywordize) coll))
 
-(doseq [type [clojure.lang.PersistentArrayMap
-              clojure.lang.PersistentHashMap
-              clojure.lang.PersistentHashSet
+(doseq [type [clojure.lang.PersistentHashSet
               clojure.lang.PersistentVector
               clojure.lang.PersistentQueue
               clojure.lang.PersistentStructMap
               clojure.lang.PersistentTreeMap
               clojure.lang.PersistentTreeSet]]
-  (extend type Walkable {:-walk -walk-default}))
+  (extend type IKeywordize {:-keywordize -keywordize-default}))
 
-(defn walk
-  [inner outer form]
-  (outer (-walk form inner)))
+(doseq [type [clojure.lang.PersistentArrayMap
+              clojure.lang.PersistentHashMap]]
+  (extend type IKeywordize {:-keywordize -keywordize-map}))
 
-(defn postwalk [f form] (walk (partial postwalk f) f form))
+(extend-protocol IKeywordize
+  nil
+  (-keywordize [_] nil)
+  Object
+  (-keywordize [x] x)
+  clojure.lang.MapEntry
+  (-keywordize [e] (clojure.lang.MapEntry/create
+                    (-keywordize (.key e))
+                    (-keywordize (.val e))))
+  clojure.lang.ISeq
+  (-keywordize [coll] (map -keywordize coll))
+  clojure.lang.PersistentList
+  (-keywordize [coll] (apply list (map -keywordize coll)))
+  clojure.lang.PersistentList$EmptyList
+  (-keywordize [x] x)
+  clojure.lang.IRecord
+  (-keywordize [r] (reduce (fn [r x] (conj r (-keywordize x))) r r)))
 
-(defn- keywordize
-  [m]
-  (persistent!
-   (reduce-kv
-    (fn [m k v] (if (string? k) (assoc! m (keyword k) v) m))
-    (transient {})
-    m)))
-
-(defn keywordize-keys
-  [m]
-  (postwalk (fn [x] (if (map? x) (keywordize m) x)) m))
+(defn keywordize-keys [m] (-keywordize m))
