@@ -3,6 +3,8 @@
 (defprotocol IKeywordize
   (-keywordize [coll]))
 
+(defn keywordize-keys [m] (-keywordize m))
+
 (defn- keywordize-kv
   [m k v]
   (assoc! m (if (string? k) (keyword k) (-keywordize k)) (-keywordize v)))
@@ -11,7 +13,7 @@
   [m]
   (persistent! (reduce-kv keywordize-kv (transient (empty m)) m)))
 
-(def ^:private keywordize-xf (map -keywordize))
+(def ^:private keywordize-xf (map keywordize-keys))
 
 (defn- -keywordize-default
   [coll]
@@ -30,10 +32,10 @@
   (extend type IKeywordize {:-keywordize -keywordize-map}))
 
 (extend-protocol IKeywordize
-  nil
-  (-keywordize [_] nil)
   Object
   (-keywordize [x] x)
+  nil
+  (-keywordize [_] nil)
   clojure.lang.MapEntry
   (-keywordize [e] (clojure.lang.MapEntry/create
                     (-keywordize (.key e))
@@ -46,5 +48,3 @@
   (-keywordize [x] x)
   clojure.lang.IRecord
   (-keywordize [r] (reduce (fn [r x] (conj r (-keywordize x))) r r)))
-
-(defn keywordize-keys [m] (-keywordize m))
