@@ -23,12 +23,12 @@
               clojure.lang.PersistentVector
               clojure.lang.PersistentQueue
               clojure.lang.PersistentStructMap
-              clojure.lang.PersistentTreeMap
               clojure.lang.PersistentTreeSet]]
   (extend type IKeywordize {:-keywordize -keywordize-default}))
 
 (doseq [type [clojure.lang.PersistentArrayMap
-              clojure.lang.PersistentHashMap]]
+              clojure.lang.PersistentHashMap
+              clojure.lang.PersistentTreeMap]]
   (extend type IKeywordize {:-keywordize -keywordize-map}))
 
 (extend-protocol IKeywordize
