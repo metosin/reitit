@@ -11,9 +11,11 @@
   [m]
   (persistent! (reduce-kv keywordize-kv (transient (empty m)) m)))
 
+(def ^:private keywordize-xf (map -keywordize))
+
 (defn- -keywordize-default
   [coll]
-  (into (empty coll) (map -keywordize) coll))
+  (into (empty coll) keywordize-xf coll))
 
 (doseq [type [clojure.lang.PersistentHashSet
               clojure.lang.PersistentVector
