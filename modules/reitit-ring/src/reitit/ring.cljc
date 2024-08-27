@@ -133,21 +133,38 @@
                       " Use :reitit.ring/default-options-endpoint instead.")))
      (r/router data opts))))
 
+(defn- comp-handlers
+  "Compose two ring handlers such that if the first has an empty response
+  the second will be invoked."
+  ([handler]
+   handler)
+  ([handler1 handler2]
+   (let [single-arity (fn [request]
+                        (or (handler1 request) (handler2 request)))
+         multi-arity (fn [request respond raise]
+                       (handler1 request (fn [response]
+                                           (if response
+                                             (respond response)
+                                             (handler2 request respond raise))) raise))]
+     (fn
+       ([request]
+        (single-arity request))
+       ([request respond raise]
+        (multi-arity request respond raise))))))
+
 (defn routes
   "Create a ring handler by combining several handlers into one."
-  [& handlers]
-  (if-let [single-arity (some->> handlers (keep identity) (seq) (apply some-fn))]
-    (fn
-      ([request]
-       (single-arity request))
-      ([request respond raise]
-       (letfn [(f [handlers]
-                 (if (seq handlers)
-                   (let [handler (first handlers)
-                         respond' #(if % (respond %) (f (rest handlers)))]
-                     (handler request respond' raise))
-                   (respond nil)))]
-         (f handlers))))))
+  {:arglists '([& handlers])}
+  ([] nil)
+  ([handler] handler)
+  ([handler1 handler2]
+   (cond
+     (and handler1 handler2) (comp-handlers handler1 handler2)
+     handler1 handler1
+     handler2 handler2
+     :else nil))
+  ([handler1 handler2 & handlers]
+   (reduce routes (routes handler1 handler2) handlers)))
 
 (defn redirect-trailing-slash-handler
   "A ring handler that redirects a missing path if there is an
@@ -363,7 +380,10 @@
                   result (:result match)
                   handler (-> result method :handler (or default-handler))
                   request (enrich-request request path-params match router)]
-              ((routes handler default-handler) request respond raise))
+              (handler request (fn [response]
+                                 (if response
+                                   (respond response)
+                                   (default-handler request respond raise))) raise))
             (default-handler (enrich-default-request request router) respond raise))
           nil)))
       {::r/router router}))))
