@@ -97,6 +97,23 @@
   {:no-doc true
    :handler default-options-handler})
 
+(defn- comp-handlers
+  "Compose two ring handlers such that if the first has an empty response
+  the second will be invoked."
+  [handler1 handler2]
+  (let [single-arity (fn [request]
+                       (or (handler1 request) (handler2 request)))
+        multi-arity (fn [request respond raise]
+                      (handler1 request (fn [response]
+                                          (if response
+                                            (respond response)
+                                            (handler2 request respond raise))) raise))]
+    (fn
+      ([request]
+       (single-arity request))
+      ([request respond raise]
+       (multi-arity request respond raise)))))
+
 ;;
 ;; public api
 ;;
@@ -133,38 +150,13 @@
                       " Use :reitit.ring/default-options-endpoint instead.")))
      (r/router data opts))))
 
-(defn- comp-handlers
-  "Compose two ring handlers such that if the first has an empty response
-  the second will be invoked."
-  ([handler]
-   handler)
-  ([handler1 handler2]
-   (let [single-arity (fn [request]
-                        (or (handler1 request) (handler2 request)))
-         multi-arity (fn [request respond raise]
-                       (handler1 request (fn [response]
-                                           (if response
-                                             (respond response)
-                                             (handler2 request respond raise))) raise))]
-     (fn
-       ([request]
-        (single-arity request))
-       ([request respond raise]
-        (multi-arity request respond raise))))))
-
 (defn routes
   "Create a ring handler by combining several handlers into one."
   {:arglists '([& handlers])}
-  ([] nil)
-  ([handler] handler)
-  ([handler1 handler2]
-   (cond
-     (and handler1 handler2) (comp-handlers handler1 handler2)
-     handler1 handler1
-     handler2 handler2
-     :else nil))
-  ([handler1 handler2 & handlers]
-   (reduce routes (routes handler1 handler2) handlers)))
+  ([& [handler1 handler2 & handlers]]
+   (cond (seq handlers) (reduce routes (routes handler1 handler2) handlers)
+         (and handler1 handler2) (comp-handlers handler1 handler2)
+         :else (or handler1 handler2))))
 
 (defn redirect-trailing-slash-handler
   "A ring handler that redirects a missing path if there is an
