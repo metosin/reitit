@@ -97,6 +97,23 @@
   {:no-doc true
    :handler default-options-handler})
 
+(defn- comp-handlers
+  "Compose two ring handlers such that if the first has an empty response
+  the second will be invoked."
+  [handler1 handler2]
+  (let [single-arity (fn [request]
+                       (or (handler1 request) (handler2 request)))
+        multi-arity (fn [request respond raise]
+                      (handler1 request (fn [response]
+                                          (if response
+                                            (respond response)
+                                            (handler2 request respond raise))) raise))]
+    (fn
+      ([request]
+       (single-arity request))
+      ([request respond raise]
+       (multi-arity request respond raise)))))
+
 ;;
 ;; public api
 ;;
@@ -132,25 +149,6 @@
        (ex/fail! (str "Option :reitit.ring/default-options-handler is deprecated."
                       " Use :reitit.ring/default-options-endpoint instead.")))
      (r/router data opts))))
-
-(defn- comp-handlers
-  "Compose two ring handlers such that if the first has an empty response
-  the second will be invoked."
-  ([handler]
-   handler)
-  ([handler1 handler2]
-   (let [single-arity (fn [request]
-                        (or (handler1 request) (handler2 request)))
-         multi-arity (fn [request respond raise]
-                       (handler1 request (fn [response]
-                                           (if response
-                                             (respond response)
-                                             (handler2 request respond raise))) raise))]
-     (fn
-       ([request]
-        (single-arity request))
-       ([request respond raise]
-        (multi-arity request respond raise))))))
 
 (defn routes
   "Create a ring handler by combining several handlers into one."
