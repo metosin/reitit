@@ -153,16 +153,10 @@
 (defn routes
   "Create a ring handler by combining several handlers into one."
   {:arglists '([& handlers])}
-  ([] nil)
-  ([handler] handler)
-  ([handler1 handler2]
-   (cond
-     (and handler1 handler2) (comp-handlers handler1 handler2)
-     handler1 handler1
-     handler2 handler2
-     :else nil))
-  ([handler1 handler2 & handlers]
-   (reduce routes (routes handler1 handler2) handlers)))
+  ([& [handler1 handler2 & handlers]]
+   (cond (seq handlers) (reduce routes (routes handler1 handler2) handlers)
+         (and handler1 handler2) (comp-handlers handler1 handler2)
+         :else (or handler1 handler2))))
 
 (defn redirect-trailing-slash-handler
   "A ring handler that redirects a missing path if there is an
