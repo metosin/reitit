@@ -119,6 +119,7 @@
                                   [nubank/matcher-combinators "3.9.1"]
 
                                   [io.pedestal/pedestal.service "0.7.0"]
+                                  [jakarta.servlet/jakarta.servlet-api "5.0.0"]
 
                                   [org.clojure/core.async "1.6.681"]
                                   [manifold "0.4.3"]
