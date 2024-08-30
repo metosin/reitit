@@ -10,9 +10,9 @@
                  [ring "1.12.1"]
                  [hiccup "1.0.5"]
                  [org.clojure/clojurescript "1.11.132"]
-                 [metosin/reitit "0.7.1"]
-                 [metosin/reitit-malli "0.7.1"]
-                 [metosin/reitit-frontend "0.7.1"]
+                 [metosin/reitit "0.7.2"]
+                 [metosin/reitit-malli "0.7.2"]
+                 [metosin/reitit-frontend "0.7.2"]
                  [cljsjs/react "17.0.2-0"]
                  [cljsjs/react-dom "17.0.2-0"]
                  ;; Just for pretty printting the match
