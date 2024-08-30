@@ -12,10 +12,25 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.7.2 (2024-08-30)
+
+* Speed up routes and inline it in code ring handler [#693](https://github.com/metosin/reitit/pull/693) [#693](https://github.com/metosin/reitit/pull/696)
+* Fix: Can't get descendants of classes [#555](https://github.com/metosin/reitit/issues/555)
+* Faster keywordize [#506](https://github.com/metosin/reitit/pull/506)
+* Updated dependencies:
+
+```clojure
+[metosin/jsonista "0.3.10"] is available but we use "0.3.9"
+[metosin/malli "0.16.4"] is available but we use "0.16.2"
+[com.fasterxml.jackson.core/jackson-core "2.17.2"] is available but we use "2.17.1"
+[com.fasterxml.jackson.core/jackson-databind "2.17.2"] is available but we use "2.17.1"
+```
+
 ## 0.7.1 (2024-06-30)
 
 * FIX: Route data maps ignore meta-merge options in 0.7.0, breaking compatibility [#679](https://github.com/metosin/reitit/issues/679)
 * FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
+* Add arities 1 and 2 to rf/match->path [#685](https://github.com/metosin/reitit/pull/685)
 * Updated dependencies:
 
 ```clojure

@@ -37,13 +37,13 @@
                          [metosin/spec-tools "0.10.7"]
                          [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.10"]
-                         [metosin/jsonista "0.3.9"]
+                         [metosin/jsonista "0.3.10"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.16.2"]
+                         [metosin/malli "0.16.4"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.17.1"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.17.1"]
+                         [com.fasterxml.jackson.core/jackson-core "2.17.2"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.17.2"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.26" :exclusions [org.clojure/core.rrb-vector]]
@@ -55,9 +55,9 @@
                          [mvxcvi/arrangement "2.1.0"]
                          [ring/ring-core "1.12.2"]
 
-                         [io.pedestal/pedestal.service "0.6.4"]]
+                         [io.pedestal/pedestal.service "0.7.0"]]
 
-  :plugins [[jonase/eastwood "1.4.2"]
+  :plugins [[jonase/eastwood "1.4.3"]
             ;[lein-virgil "0.1.7"]
             [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
@@ -88,7 +88,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.11.3"]
+                   :dependencies [[org.clojure/clojure "1.11.4"]
                                   [org.clojure/clojurescript "1.11.132"]
 
                                   ;; modules dependencies
@@ -96,8 +96,8 @@
                                   [metosin/spec-tools "0.10.7"]
                                   [metosin/muuntaja "0.6.10"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.3.9"]
-                                  [metosin/malli "0.16.2"]
+                                  [metosin/jsonista "0.3.10"]
+                                  [metosin/malli "0.16.4"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -118,7 +118,7 @@
                                   [com.gfredericks/test.chuck "0.2.14"]
                                   [nubank/matcher-combinators "3.9.1"]
 
-                                  [io.pedestal/pedestal.service "0.6.4"]
+                                  [io.pedestal/pedestal.service "0.7.0"]
 
                                   [org.clojure/core.async "1.6.681"]
                                   [manifold "0.4.3"]
@@ -135,8 +135,8 @@
                     :dependencies [[compojure "1.7.1"]
                                    [ring/ring-defaults "0.5.0"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.6.4"]
-                                   [io.pedestal/pedestal.jetty "0.6.4"]
+                                   [io.pedestal/pedestal.service "0.7.0"]
+                                   [io.pedestal/pedestal.jetty "0.7.0"]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.6.681"]
                                    [manifold "0.4.3"]
