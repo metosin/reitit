@@ -88,7 +88,24 @@
 
       (testing "all named routes can be matched"
         (doseq [name (r/route-names router)]
-          (is (= name (-> (r/match-by-name router name) :data :name))))))))
+          (is (= name (-> (r/match-by-name router name) :data :name)))))))
+
+  (testing "path prefixed routes"
+    (let [router (http/router
+                   [["/all" {:handler handler}]
+                    ["/get" {:get {:handler handler}}]
+                    ["/users" {:get handler}]]
+                   {:path "/api"})
+          app (http/ring-handler router nil {:executor sieppari/executor})]
+
+      (testing "router can be extracted"
+        (is (= (r/routes router)
+               (r/routes (http/get-router app)))))
+
+      (testing "handler resolved original router routes"
+        (doseq [router-path (mapv first (r/routes router))]
+          (is (= 200
+                 (:status (app {:uri router-path :request-method :get})))))))))
 
 (def enforce-roles-interceptor
   {:enter (fn [{{::keys [roles] :as request} :request :as ctx}]

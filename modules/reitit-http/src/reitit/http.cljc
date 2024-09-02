@@ -133,7 +133,7 @@
                             (interceptor/queue executor))
          router-opts (-> (r/options router)
                          (assoc ::interceptor/queue (partial interceptor/queue executor))
-                         (dissoc :data) ; data is already merged into routes
+                         (dissoc :data :path) ; data and path already take effect in routes
                          (cond-> (seq interceptors)
                            (update-in [:data :interceptors] (partial into (vec interceptors)))))
          router (reitit.http/router (r/routes router) router-opts) ;; will re-compile the interceptors
