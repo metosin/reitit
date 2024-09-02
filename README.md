@@ -5,7 +5,7 @@
 [![Clojars Project](https://img.shields.io/clojars/v/metosin/reitit.svg)](https://clojars.org/metosin/reitit)
 [![Slack](https://img.shields.io/badge/clojurians-reitit-blue.svg?logo=slack)](https://clojurians.slack.com/messages/reitit/)
 
-<img src="https://raw.githubusercontent.com/metosin/reitit/examples/http-swagger/resources/reitit.png" width="600" />
+<img src="https://github.com/metosin/reitit/blob/add-logo/doc/images/reitit.png?raw=true" width="600" />
 A fast data-driven router for Clojure(Script).
 
 * Simple data-driven [route syntax](https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-syntax/)
