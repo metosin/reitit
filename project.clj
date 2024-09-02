@@ -55,7 +55,7 @@
                          [mvxcvi/arrangement "2.1.0"]
                          [ring/ring-core "1.12.2"]
 
-                         [io.pedestal/pedestal.service "0.7.0"]]
+                         [io.pedestal/pedestal.service "0.6.4"]]
 
   :plugins [[jonase/eastwood "1.4.3"]
             ;[lein-virgil "0.1.7"]
@@ -118,8 +118,7 @@
                                   [com.gfredericks/test.chuck "0.2.14"]
                                   [nubank/matcher-combinators "3.9.1"]
 
-                                  [io.pedestal/pedestal.service "0.7.0"]
-                                  [jakarta.servlet/jakarta.servlet-api "5.0.0"]
+                                  [io.pedestal/pedestal.service "0.6.4"]
 
                                   [org.clojure/core.async "1.6.681"]
                                   [manifold "0.4.3"]
@@ -136,8 +135,8 @@
                     :dependencies [[compojure "1.7.1"]
                                    [ring/ring-defaults "0.5.0"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.7.0"]
-                                   [io.pedestal/pedestal.jetty "0.7.0"]
+                                   [io.pedestal/pedestal.service "0.6.4"]
+                                   [io.pedestal/pedestal.jetty "0.6.4"]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.6.681"]
                                    [manifold "0.4.3"]
