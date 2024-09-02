@@ -50,8 +50,8 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `metosin/reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
 * `metosin/reitit-dev` - development utilities
 
- * - This is not a typo; the new `reitit-openapi` was released under the new, verified `fi.metosin` group. Existing
-   modules will continue to be released under `metosin` for compatibility purposes.
+... * This is not a typo; the new `reitit-openapi` was released under the new, verified `fi.metosin` group. Existing 
+modules will continue to be released under `metosin` for compatibility purposes.
 
 ## Extra modules
 
