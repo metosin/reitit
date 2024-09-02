@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.7.2 (2024-08-30)
+## 0.7.2 (2024-09-02)
 
 * Speed up routes and inline it in code ring handler [#693](https://github.com/metosin/reitit/pull/693) [#693](https://github.com/metosin/reitit/pull/696)
 * Fix: Can't get descendants of classes [#555](https://github.com/metosin/reitit/issues/555)
