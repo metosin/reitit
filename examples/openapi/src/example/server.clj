@@ -50,8 +50,8 @@
 
        ["/pizza"
         {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
-               :responses {200 {:content {"application/json" {:description "Fetch a pizza as json"
-                                                              :schema [:map
+               :responses {200 {:description "Fetch a pizza as json or EDN"
+                                :content {"application/json" {:schema [:map
                                                                        [:color :keyword]
                                                                        [:pineapple :boolean]]
                                                               :examples {:white {:description "White pizza with pineapple"
@@ -60,8 +60,7 @@
                                                                          :red {:description "Red pizza"
                                                                                :value {:color :red
                                                                                        :pineapple false}}}}
-                                          "application/edn" {:description "Fetch a pizza as edn"
-                                                             :schema [:map
+                                          "application/edn" {:schema [:map
                                                                       [:color :keyword]
                                                                       [:pineapple :boolean]]
                                                              :examples {:red {:description "Red pizza with pineapple"
@@ -71,20 +70,19 @@
                            :body {:color :red
                                   :pineapple true}})}
          :post {:summary "Create a pizza | Multiple content-types, multiple examples"
-                :request {:content {"application/json" {:description "Create a pizza using json"
-                                                        :schema [:map
+                :request {:description "Create a pizza using json or EDN"
+                          :content {"application/json" {:schema [:map
                                                                  [:color :keyword]
                                                                  [:pineapple :boolean]]
                                                         :examples {:purple {:value {:color :purple
                                                                                     :pineapple false}}}}
-                                    "application/edn" {:description "Create a pizza using EDN"
-                                                       :schema [:map
+                                    "application/edn" {:schema [:map
                                                                 [:color :keyword]
                                                                 [:pineapple :boolean]]
                                                        :examples {:purple {:value (pr-str {:color :purple
                                                                                            :pineapple false})}}}}}
-                :responses {200 {:content {:default {:description "Success"
-                                                     :schema [:map [:success :boolean]]
+                :responses {200 {:description "Success"
+                                 :content {:default {:schema [:map [:success :boolean]]
                                                      :example {:success true}}}}}
                 :handler (fn [_request]
                            {:status 200
@@ -114,9 +112,11 @@
                                    :email "heidi@alps.ch"}]})}}]
 
        ["/account"
-        {:get {:summary "Fetch an account | Recursive schemas using malli registry"
+        {:get {:summary "Fetch an account | Recursive schemas using malli registry, link to external docs"
                :parameters {:query #'AccountId}
                :responses {200 {:content {:default {:schema #'Account}}}}
+               :openapi {:externalDocs {:description "The reitit repository"
+                                        :url "https://github.com/metosin/reitit"}}
                :handler (fn [_request]
                           {:status 200
                            :body {:bank "MiniBank"
