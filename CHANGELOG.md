@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Improve OpenAPI docs, plus don't emit `:description` in the wrong place [#702](https://github.com/metosin/reitit/pull/702)
+
 ## 0.7.2 (2024-09-02)
 
 * Speed up routes and inline it in code ring handler [#693](https://github.com/metosin/reitit/pull/693) [#693](https://github.com/metosin/reitit/pull/696)
