@@ -83,7 +83,7 @@
         ->content (fn [data schema]
                     (merge
                      {:schema schema}
-                     (select-keys data [:description :examples])
+                     (select-keys data [:example :examples])
                      (:openapi data)))
         ->schema-object (fn [model opts]
                           (let [result (coercion/-get-model-apidocs
@@ -112,7 +112,7 @@
                       (select-keys schema [:description])))
              (into []))})
      (when body
-       ;; body uses a single schema to describe every :requestBody
+       ;; :body uses a single schema to describe every :requestBody
        ;; the schema-object transformer should be able to transform into distinct content-types
        {:requestBody {:content (into {}
                                      (map (fn [content-type]
@@ -123,7 +123,7 @@
                                      request-content-types)}})
 
      (when request
-       ;; request allow to different :requestBody per content-type
+       ;; :request allows different :requestBody per content-type
        {:requestBody
         (merge
          (select-keys request [:description])
