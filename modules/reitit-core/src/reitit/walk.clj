@@ -9,7 +9,7 @@
   [m k v]
   (assoc! m (if (string? k) (keyword k) (-keywordize k)) (-keywordize v)))
 
-(defn- -keywordize-map
+(defn- -keywordize-kvreducible
   [m]
   (persistent! (reduce-kv keywordize-kv (transient (empty m)) m)))
 
@@ -29,6 +29,14 @@
 (doseq [type [clojure.lang.PersistentArrayMap
               clojure.lang.PersistentHashMap
               clojure.lang.PersistentTreeMap]]
+  (extend type IKeywordize {:-keywordize -keywordize-kvreducible}))
+
+(defn- -keywordize-map
+  [m]
+  (let [f (fn [[k v]] (if (string? k) [(keyword k) v] [k v]))]
+    (into {} (map f) m)))
+
+(doseq [type [clojure.lang.IPersistentMap]]
   (extend type IKeywordize {:-keywordize -keywordize-map}))
 
 (extend-protocol IKeywordize
