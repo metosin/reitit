@@ -28,6 +28,10 @@ Presentations:
 
 **Status:** [stable](https://github.com/metosin/open-source#project-lifecycle-model)
 
+> Hi! We are [Metosin](https://metosin.fi), a consulting company. These libraries have evolved out of the work we do for our clients.
+> We maintain & develop this project, for you, for free. Issues and pull requests welcome!
+> However, if you want more help using the libraries, or want us to build something as cool for you, consider our [commercial support](https://www.metosin.fi/en/open-source-support).
+
 ## [Full Documentation](https://cljdoc.org/d/metosin/reitit/CURRENT)
 
 There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians Slack](http://clojurians.net/) for discussion & help.
