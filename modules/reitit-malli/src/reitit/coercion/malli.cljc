@@ -126,7 +126,10 @@
                       ;; For :parameters we need to output an object schema with actual :properties.
                       ;; The caller will iterate through the properties and add them individually to the openapi doc.
                       ;; Thus, we deref to get the actual [:map ..] instead of some ref-schema.
-                      (json-schema/transform (m/deref model) (merge opts options))
+                      (let [should-be-map (m/deref model)]
+                        (when-not (= :map (m/type should-be-map))
+                          (println "WARNING: Unsupported schema for OpenAPI (expected :map schema)" (select-keys options [:in :parameter]) should-be-map))
+                        (json-schema/transform should-be-map (merge opts options)))
                       (json-schema/transform model (merge opts options)))
            (throw
             (ex-info
