@@ -76,10 +76,12 @@
 (defn- openapi-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
+(def ^:private form-content-type "application/x-www-form-urlencoded")
+
 (defn -get-apidocs-openapi
   [coercion {:keys [request muuntaja parameters responses openapi/request-content-types openapi/response-content-types]} definitions]
-  (let [{:keys [body multipart]} parameters
-        parameters (dissoc parameters :request :body :multipart)
+  (let [{:keys [body form multipart]} parameters
+        parameters (dissoc parameters :request :body :form :multipart)
         ->content (fn [data schema]
                     (merge
                      {:schema schema}
@@ -121,6 +123,13 @@
                                                                                 :content-type content-type})]
                                               [content-type {:schema schema}])))
                                      request-content-types)}})
+
+     (when form
+       ;; :form is similar to any other body, but the content type must be application/x-www-form-urlencoded
+       {:requestBody {:content {form-content-type {:schema (->schema-object form
+                                                                            {:in :requestBody
+                                                                             :type :schema
+                                                                             :content-type form-content-type})}}}})
 
      (when request
        ;; :request allows different :requestBody per content-type

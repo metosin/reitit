@@ -739,6 +739,13 @@
                             :handler (fn [req]
                                        {:status 200
                                         :body (-> req :parameters :request)})}}]
+                   ["/form-params"
+                    {:post {:description "ring :form-params coercion with :parameters :form syntax"
+                            :coercion coercion
+                            :parameters {:form (->schema :b)}
+                            :handler (fn [req]
+                                       {:status 200
+                                        :body (-> req :parameters :request)})}}]
                    ["/openapi.json"
                     {:get {:handler (openapi/create-openapi-handler)
                            :openapi {:info {:title "" :version "0.0.1"}}
@@ -801,6 +808,13 @@
                    (-> spec
                        (get-in [:paths "/legacy" :post :responses 200 :content])
                        keys)))))
+        (testing ":parameters :form syntax"
+          (testing "body parameter"
+            (is (= ["application/x-www-form-urlencoded"]
+                   (-> spec
+                       (get-in [:paths "/form-params" :post :requestBody :content])
+                       keys))
+                "form parameter schema is put under :requestBody with correct content type")))
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 
