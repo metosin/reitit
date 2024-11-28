@@ -5,6 +5,7 @@
 Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
 documentation. The feature works similarly to [Swagger documentation](swagger.md).
 
+The main example is [examples/openapi](../../examples/openapi).
 The
 [ring-malli-swagger](../../examples/ring-malli-swagger)
 and
@@ -194,3 +195,16 @@ represents query parameters.
 {:parameters {:query [:map
                       [:a {:json-schema/example 1} :int]]}}
 ```
+
+### Named schemas
+
+OpenAPI supports reusable schema objects that can be referred to with
+the `"$ref": "#/components/schemas/Foo"` json-schema syntax. This is
+useful when you have multiple endpoints that use the same schema. It
+can also make OpenAPI-based code nicer for consumers of your API.
+
+Reusable schema objects are generated for Malli `:ref`s and vars. The
+[openapi example](../../examples/openapi) showcases this.
+
+Currently (as of 0.7.2), reusable schema objects are **not** generated
+for Plumatic Schema or Spec.
