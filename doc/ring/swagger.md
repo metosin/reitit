@@ -286,7 +286,17 @@ Example with:
 ; ("/common/ping" "/one/ping" "/two/ping" "/two/deep/ping")
 ```
 
-### TODO
+## Reusable schema definitions
+
+Swagger supports having reusable schema definitions under the
+`"definitions"` key. These can be reused in different parts of
+swagger.json using the `"$ref": "#/definitions/Foo"` syntax.
+
+Reusable schema objects are generated for Malli `:ref`s and vars.
+Currently (as of 0.7.2), reusable schema objects are **not** generated
+for Plumatic Schema or Spec.
+
+## TOD
 
 * ClojureScript
   * example for [Macchiato](https://github.com/macchiato-framework)
