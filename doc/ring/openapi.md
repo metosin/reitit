@@ -202,6 +202,7 @@ OpenAPI supports reusable schema objects that can be referred to with
 the `"$ref": "#/components/schemas/Foo"` json-schema syntax. This is
 useful when you have multiple endpoints that use the same schema. It
 can also make OpenAPI-based code nicer for consumers of your API.
+These schemas are also rendered in their own section in Swagger UI.
 
 Reusable schema objects are generated for Malli `:ref`s and vars. The
 [openapi example](../../examples/openapi) showcases this.
