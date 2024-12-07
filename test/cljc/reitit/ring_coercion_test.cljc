@@ -478,7 +478,7 @@
 
         (testing "encoding errors"
           (let [app (->app {:encode-error (fn [error] {:errors (:humanized error)})})]
-            (is (= {:status 400, :body {:errors {:x ["missing required key"]}}}
+            (is (= {:status 400, :headers {}, :body {:errors {:x ["missing required key"]}}}
                    (app (assoc (->request "closed") :body-params {}))))))
 
         (testing "when schemas are not closed and extra keys are not stripped"

@@ -7,7 +7,8 @@
             [reitit.ring :as ring]
             [reitit.ring.coercion]
             [reitit.ring.middleware.exception :as exception]
-            [ring.util.http-response :as http-response])
+            [ring.util.http-response :as http-response]
+            [ring.util.response :as response])
   (:import (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
@@ -34,8 +35,8 @@
                {:data {:middleware [(exception/create-exception-middleware
                                      (merge
                                       exception/default-handlers
-                                      {::kikka (constantly {:status 400, :body "kikka"})
-                                       SQLException (constantly {:status 400, :body "sql"})
+                                      {::kikka (constantly (response/bad-request "kikka"))
+                                       SQLException (constantly (response/bad-request "sql"))
                                        ::exception/wrap wrap}))]}}))))]
 
     (testing "normal calls work ok"
@@ -44,19 +45,21 @@
         (is (= response (app {:request-method :get, :uri "/defaults"})))))
 
     (testing "unknown exception"
-      (let [app (create (fn [_] (throw (NullPointerException.))))]
-        (is (= {:status 500
-                :body {:type "exception"
-                       :class "java.lang.NullPointerException"}}
-               (app {:request-method :get, :uri "/defaults"}))))
-      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::invalid}))))]
-        (is (= {:status 500
-                :body {:type "exception"
-                       :class "clojure.lang.ExceptionInfo"}}
-               (app {:request-method :get, :uri "/defaults"})))))
+      (let [app (create (fn [_] (throw (NullPointerException.))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 500))
+        (is (= body {:type "exception"
+                     :class "java.lang.NullPointerException"})))
+      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::invalid}))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 500))
+        (is (= body {:type "exception"
+                     :class "clojure.lang.ExceptionInfo"}))))
 
     (testing "::ring/response"
-      (let [response {:status 200, :body "ok"}
+      (let [response (response/response "ok")
             app (create (fn [_] (throw (ex-info "fail" {:type ::ring/response, :response response}))))]
         (is (= response (app {:request-method :get, :uri "/defaults"})))))
 
@@ -75,45 +78,56 @@
 
       (testing "::coercion/request-coercion"
         (let [app (create (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}}))]
+                            (response/response {:total (+ x y)})))]
 
-          (let [{:keys [status body]} (app {:request-method :get
-                                            :uri "/coercion"
-                                            :query-params {"x" "1", "y" "2"}})]
+          (let [{:keys [status body] :as resp} (app {:request-method :get
+                                                     :uri            "/coercion"
+                                                     :query-params   {"x" "1", "y" "2"}})]
+            (is (response/response? resp))
             (is (= 200 status))
             (is (= {:total 3} body)))
 
-          (let [{:keys [status body]} (app {:request-method :get
-                                            :uri "/coercion"
-                                            :query-params {"x" "abba", "y" "2"}})]
+          (let [{:keys [status body] :as resp} (app {:request-method :get
+                                                     :uri            "/coercion"
+                                                     :query-params   {"x" "abba", "y" "2"}})]
+            (is (response/response? resp))
             (is (= 400 status))
             (is (= :reitit.coercion/request-coercion (:type body))))
 
-          (let [{:keys [status body]} (app {:request-method :get
-                                            :uri "/coercion"
-                                            :query-params {"x" "-10", "y" "2"}})]
+          (let [{:keys [status body] :as resp} (app {:request-method :get
+                                                     :uri            "/coercion"
+                                                     :query-params   {"x" "-10", "y" "2"}})]
+            (is (response/response? resp))
             (is (= 500 status))
             (is (= :reitit.coercion/response-coercion (:type body)))))))
 
     (testing "exact :type"
-      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kikka}))))]
-        (is (= {:status 400, :body "kikka"}
-               (app {:request-method :get, :uri "/defaults"})))))
+      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kikka}))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 400))
+        (is (= body "kikka"))))
 
     (testing "parent :type"
-      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kukka}))))]
-        (is (= {:status 400, :body "kikka"}
-               (app {:request-method :get, :uri "/defaults"})))))
+      (let [app (create (fn [_] (throw (ex-info "fail" {:type ::kukka}))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 400))
+        (is (= body "kikka"))))
 
     (testing "exact Exception"
-      (let [app (create (fn [_] (throw (SQLException.))))]
-        (is (= {:status 400, :body "sql"}
-               (app {:request-method :get, :uri "/defaults"})))))
+      (let [app (create (fn [_] (throw (SQLException.))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 400))
+        (is (= body "sql"))))
 
     (testing "Exception SuperClass"
-      (let [app (create (fn [_] (throw (SQLWarning.))))]
-        (is (= {:status 400, :body "sql"}
-               (app {:request-method :get, :uri "/defaults"})))))
+      (let [app (create (fn [_] (throw (SQLWarning.))))
+            {:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+        (is (response/response? resp))
+        (is (= status 400))
+        (is (= body "sql"))))
 
     (testing "::exception/wrap"
       (let [calls (atom 0)
@@ -121,11 +135,17 @@
                         (fn [handler exception request]
                           (if (< (swap! calls inc) 2)
                             (handler exception request)
-                            {:status 500, :body "too many tries"})))]
-        (is (= {:status 400, :body "sql"}
-               (app {:request-method :get, :uri "/defaults"})))
-        (is (= {:status 500, :body "too many tries"}
-               (app {:request-method :get, :uri "/defaults"})))))))
+                            {:status 500
+                             :headers {}
+                             :body "too many tries"})))]
+        (let [{:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+          (is (response/response? resp))
+          (is (= status 400))
+          (is (= body "sql")))
+        (let [{:keys [status body] :as resp} (app {:request-method :get, :uri "/defaults"})]
+          (is (response/response? resp))
+          (is (= status 500))
+          (is (= body "too many tries")))))))
 
 (deftest spec-coercion-exception-test
   (let [app (ring/ring-handler
@@ -135,22 +155,26 @@
                 {:parameters {:query {:x int?, :y int?}}
                  :responses {200 {:body {:total pos-int?}}}
                  :handler (fn [{{{:keys [x y]} :query} :parameters}]
-                            {:status 200, :body {:total (+ x y)}})}}]
+                            (response/response {:total (+ x y)}))}}]
               {:data {:coercion reitit.coercion.spec/coercion
                       :middleware [(exception/create-exception-middleware
                                     (merge
                                      exception/default-handlers
-                                     {::coercion/request-coercion (fn [e _] {:status 400, :body (ex-data e)})
-                                      ::coercion/response-coercion (fn [e _] {:status 500, :body (ex-data e)})}))
+                                     {::coercion/request-coercion (fn [e _] (response/bad-request (ex-data e)) )
+                                      ::coercion/response-coercion (fn [e _] {:status 500
+                                                                              :headers {}
+                                                                              :body (ex-data e)})}))
                                    reitit.ring.coercion/coerce-request-middleware
                                    reitit.ring.coercion/coerce-response-middleware]}}))]
     (testing "success"
-      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "2"}})]
+      (let [{:keys [status body] :as resp} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "2"}})]
+        (is (response/response? resp))
         (is (= 200 status))
         (is (= body {:total 3}))))
 
     (testing "request error"
-      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "fail"}})]
+      (let [{:keys [status body] :as resp} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "fail"}})]
+        (is (response/response? resp))
         (is (= 400 status))
         (testing "spec error is exposed as is"
           (let [problems (:problems body)]
@@ -159,7 +183,8 @@
             (is (contains? problems ::s/problems))))))
 
     (testing "response error"
-      (let [{:keys [status body]} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "-2"}})]
+      (let [{:keys [status body] :as resp} (app {:uri "/plus", :request-method :get, :query-params {"x" "1", "y" "-2"}})]
+        (is (response/response? resp))
         (is (= 500 status))
         (testing "spec error is exposed as is"
           (let [problems (:problems body)]

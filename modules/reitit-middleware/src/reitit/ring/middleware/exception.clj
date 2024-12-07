@@ -69,6 +69,7 @@
   "Default safe handler for any exception."
   [^Exception e _]
   {:status 500
+   :headers {}
    :body {:type "exception"
           :class (.getName (.getClass e))}})
 
@@ -77,6 +78,7 @@
   [status]
   (fn [e _]
     {:status status
+     :headers {}
      :body (coercion/encode-error (ex-data e))}))
 
 (defn http-response-handler
