@@ -11,6 +11,7 @@
                       nil)]
       (respond
        {:status status
+        :headers {}
         :body (coercion/encode-error data)})
       (raise e))))
 
