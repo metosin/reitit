@@ -181,7 +181,10 @@
 
 (defn response-coercers [coercion responses opts]
   (some->> (for [[status model] responses]
-             [status (response-coercer coercion model opts)])
+             (do
+               (when-not (int? status)
+                 (throw (ex-info "Response status must be int" {:status status})))
+               [status (response-coercer coercion model opts)]))
            (filter second) (seq) (into {})))
 
 (defn -compile-parameters [data coercion]

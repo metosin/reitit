@@ -8,7 +8,8 @@
             [reitit.ring.coercion]
             [reitit.ring.middleware.exception :as exception]
             [ring.util.http-response :as http-response])
-  (:import (java.sql SQLException SQLWarning)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
 
@@ -190,3 +191,15 @@
             (is (contains? problems ::s/spec))
             (is (contains? problems ::s/value))
             (is (contains? problems ::s/problems))))))))
+
+(deftest response-keys-test
+  (is (thrown-with-msg?
+       ExceptionInfo
+       #"Response status must be int"
+       (ring/ring-handler
+        (ring/router
+         [["/coercion"
+           {:middleware [reitit.ring.coercion/coerce-response-middleware]
+            :coercion reitit.coercion.spec/coercion
+            :responses {:200 {:body {:total pos-int?}}}
+            :handler identity}]])))))
