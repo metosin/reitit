@@ -1,13 +1,14 @@
 (ns reitit.frontend.core-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.string :as str]
+            [clojure.test :refer [are deftest is testing]]
+            [reitit.coercion :as rc]
+            [reitit.coercion.malli :as rcm]
+            [reitit.coercion.schema :as rcs]
             [reitit.core :as r]
             [reitit.frontend :as rf]
-            [reitit.coercion :as rc]
-            [schema.core :as s]
-            [reitit.coercion.schema :as rcs]
-            [reitit.coercion.malli :as rcm]
             [reitit.frontend.test-utils :refer [capture-console]]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+            [schema.core :as s]))
 
 (deftest query-params-test
   (is (= {:foo "1"}
@@ -297,3 +298,28 @@
   (testing "Fragment encoding"
     (is (= "foo#foo+bar+%25"
            (rf/match->path {:path "foo"} nil "foo bar %")))))
+
+(defn instant->string
+  [x]
+  (str "x" (.toISOString x)))
+
+(defn string->instant
+  [x]
+  (if (string? x)
+    (js/Date. (subs x 1 (count x)))
+    x))
+
+(deftest match->path-coercion-test
+  (testing "default Date toString"
+    (is (str/starts-with?
+          (rf/match->path {:path "foo"} {:date (js/Date. 2024 0 1 12 13 0)})
+          "foo?date=Mon+Jan+01+2024+12")))
+
+  (is (= "foo?date=x2024-01-01T10%3A13%3A00.000Z"
+         (rf/match->path {:data {:coercion rcm/coercion
+                                 :parameters {:query [[:map
+                                                       [:date {:decode/string string->instant
+                                                               :encode/string instant->string}
+                                                        :any]]]}}
+                          :path "foo"}
+                         {:date (js/Date. 2024 0 1 12 13 0)}))))

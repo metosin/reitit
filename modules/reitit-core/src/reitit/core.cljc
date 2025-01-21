@@ -78,12 +78,9 @@
                          ;; on the coercion?
                          ;; NOTE: Re-creates coercer on every call, could this be pre-compiled somewhere
                          ;; or memoized? Does it matter much?
-                         (str "?" (let [schema (-> match :data :parameters :query
-                                                   ;; FIXME: Why?
-                                                   ;; Due the Malli schema merge? Needs
-                                                   ;; coercion/-compile-model call first.
-                                                   first)
-                                        coercion (-> match :data :coercion)
+                         (str "?" (let [coercion (-> match :data :coercion)
+                                        schema (when coercion
+                                                 (coercion/-compile-model coercion (-> match :data :parameters :query) nil))
                                         coercer (when (and schema coercion)
                                                   (coercion/-query-string-coercer coercion schema))
                                         query-params (or (when coercer
