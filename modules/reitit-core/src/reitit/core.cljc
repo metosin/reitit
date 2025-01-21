@@ -80,6 +80,8 @@
                          ;; or memoized? Does it matter much?
                          (str "?" (let [schema (-> match :data :parameters :query
                                                    ;; FIXME: Why?
+                                                   ;; Due the Malli schema merge? Needs
+                                                   ;; coercion/-compile-model call first.
                                                    first)
                                         coercion (-> match :data :coercion)
                                         coercer (when (and schema coercion)
