@@ -176,6 +176,8 @@
        (-request-coercer [_ type schema]
          (-coercer schema type transformers :decode opts))
        (-response-coercer [_ schema]
-         (-coercer schema :response transformers :encode opts))))))
+         (-coercer schema :response transformers :encode opts))
+       (-query-string-coercer [_ schema]
+         (-coercer schema :string transformers :encode opts))))))
 
 (def coercion (create default-options))

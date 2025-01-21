@@ -1,5 +1,8 @@
 (ns reitit.coercion-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.spec.alpha :as cs]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is testing]]
+            [malli.core :as m]
             [malli.experimental.lite :as l]
             [reitit.coercion :as coercion]
             [reitit.coercion.malli]
@@ -7,8 +10,8 @@
             [reitit.coercion.spec]
             [reitit.core :as r]
             [schema.core :as s]
-            [clojure.spec.alpha :as cs]
-            [spec-tools.data-spec :as ds])
+            [spec-tools.data-spec :as ds]
+            [malli.transform :as mt])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -150,3 +153,37 @@
                 {:compile coercion/compile-request-coercers})]
     (is (= {:path {:user-id 123, :company "metosin"}}
            (:parameters (match-by-path-and-coerce! router "/metosin/users/123"))))))
+
+(deftest match->path-parameter-coercion-test
+  (testing "default handling for query-string collection"
+    (let [router (r/router ["/:a/:b" ::route])]
+      (is (= "/olipa/kerran?x=a&x=b"
+             (-> router
+                 (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+                 (r/match->path {:x [:a :b]}))))))
+
+  (testing "custom encode/string for a collection"
+    (let [router (r/router ["/:a/:b"
+                            {:name ::route
+                             :coercion reitit.coercion.malli/coercion
+                             :parameters {:query [:map
+                                                  [:x
+                                                   [:vector
+                                                    {:encode/string (fn [xs]
+                                                                      (str/join "," (map name xs)))
+                                                     :decode/string (fn [s]
+                                                                      (if (string? s)
+                                                                        (mapv keyword (str/split s #","))
+                                                                        s))}
+                                                    :keyword]]]}}]
+                           {:compile coercion/compile-request-coercers})]
+      ;; NOTE: "," is urlencoded by the impl/query-string step, is that ok?
+      (is (= "/olipa/kerran?x=a%2Cb"
+             (-> router
+                 (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+                 (r/match->path {:x [:a :b]}))))
+
+      (is (= {:query {:x [:a :b]}}
+             (-> (r/match-by-path router "/olipa/kerran")
+                 (assoc :query-params {:x "a,b"})
+                 (coercion/coerce!)))))))

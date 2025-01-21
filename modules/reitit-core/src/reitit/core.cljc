@@ -1,7 +1,9 @@
 (ns reitit.core
   (:require [reitit.exception :as exception]
             [reitit.impl :as impl]
-            [reitit.trie :as trie]))
+            [reitit.trie :as trie]
+            ;; FIXME: Should avoid coercion require here?
+            [reitit.coercion :as coercion]))
 
 ;;
 ;; Expand
@@ -71,7 +73,22 @@
   ([match]
    (match->path match nil))
   ([match query-params]
-   (some-> match :path (cond-> (seq query-params) (str "?" (impl/query-string query-params))))))
+   (some-> match :path (cond-> (seq query-params)
+                         ;; TODO: Should the coercion be applied elsewhere (FE ns?) so the core ns doesn't depend
+                         ;; on the coercion?
+                         ;; NOTE: Re-creates coercer on every call, could this be pre-compiled somewhere
+                         ;; or memoized? Does it matter much?
+                         (str "?" (let [schema (-> match :data :parameters :query
+                                                   ;; FIXME: Why?
+                                                   first)
+                                        coercion (-> match :data :coercion)
+                                        coercer (when (and schema coercion)
+                                                  (coercion/-query-string-coercer coercion schema))
+                                        query-params (or (when coercer
+                                                           (coercer query-params :default))
+                                                         query-params)]
+                                    ;; Default encoding for values will handle values that aren't encoded using coercer
+                                    (impl/query-string query-params)))))))
 
 ;;
 ;; Different routers

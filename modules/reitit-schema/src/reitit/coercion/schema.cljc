@@ -101,6 +101,9 @@
             value))))
     (-response-coercer [this schema]
       (if (coerce-response? schema)
-        (coercion/-request-coercer this :response schema)))))
+        (coercion/-request-coercer this :response schema)))
+    (-query-string-coercer [this schema]
+      ;; TODO: Can this be implemented?
+      nil)))
 
 (def coercion (create default-options))

@@ -19,7 +19,8 @@
   (-open-model [this model] "Returns a new model which allows extra keys in maps")
   (-encode-error [this error] "Converts error in to a serializable format")
   (-request-coercer [this type model] "Returns a `value format => value` request coercion function")
-  (-response-coercer [this model] "Returns a `value format => value` response coercion function"))
+  (-response-coercer [this model] "Returns a `value format => value` response coercion function")
+  (-query-string-coercer [this model] "Returns a `value => value` query string coercion function"))
 
 #?(:clj
    (defmethod print-method ::coercion [coercion ^Writer w]
