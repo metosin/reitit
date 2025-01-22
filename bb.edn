@@ -1,0 +1,26 @@
+{:tasks
+ {init-lint {:task (shell "sh -c" "clj-kondo --copy-configs --lint $(lein classpath)")}
+  lint {:doc "Run clj-kondo"
+        :task (shell "./lint.sh")}
+
+  watch-node-test {:doc "Watch files for changes and run Cljs tests on Node.js"
+                   :task (shell "npx shadow-cljs watch node-test")}
+  node-test {:doc "Compile and run Cljs tests"
+             :task (shell "npx shadow-cljs compile node-test")}
+
+  watch-browser-test-local {:doc "Start watching Cljs tests for changes and start HTTP server for running tests in a local browser"
+                            :task (shell "npx shadow-cljs watch browser-test")}
+
+  ;; Karma watch needs to file to exist before start
+  -karma-placeholder (shell "sh -c" "mkdir -p target/karma && touch target/karma/ci.js")
+  -watch-karma-cljs {:depends [-karma-placeholder]
+                     :task (shell "npx shadow-cljs watch karma")}
+  -watch-karma-test (shell "npx karma start")
+  -watch-karma {:depends [-watch-karma-cljs -watch-karma-test]}
+  watch-karma {:doc "Watch Cljs tests for changes, compile for Karma and run Karma tests on changes"
+               :task (run '-watch-karma {:parallel true})}
+
+  test-karma {:doc "Compile Cljs tests and run using Karma once"
+              :task (do
+                      (shell "npx shadow-cljs compile karma")
+                      (shell "npx karma start --single-run"))}}}
