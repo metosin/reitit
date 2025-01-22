@@ -299,16 +299,6 @@
     (is (= "foo#foo+bar+%25"
            (rf/match->path {:path "foo"} nil "foo bar %")))))
 
-(defn instant->string
-  [x]
-  (str "x" (.toISOString x)))
-
-(defn string->instant
-  [x]
-  (if (string? x)
-    (js/Date. (subs x 1 (count x)))
-    x))
-
 (deftest match->path-coercion-test
   (testing "default keyword to string"
     (is (str/starts-with?
