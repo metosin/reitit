@@ -37,6 +37,11 @@ jobs:
       with:
         lein: 2.9.5
 
+    # Install openapi-schema-validator for openapi-tests
+    # Uses node version from the ubuntu-latest
+    - name: Install dependencies
+      run: npm ci
+
     - name: Run tests
       run: ./scripts/test.sh clj
 
@@ -74,9 +79,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      # - name: Install modules
-      #   run: ./scripts/lein-modules install
 
       - name: Run tests
         run: ./scripts/test.sh cljs

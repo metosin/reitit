@@ -6,6 +6,7 @@ module.exports = function (config) {
     // The file itself
     files: ['ci.js'],
     frameworks: ['cljs-test'],
+    reporters: ['progress', 'junit'],
     plugins: ['karma-cljs-test', 'karma-chrome-launcher'],
     colors: true,
     logLevel: config.LOG_INFO,
@@ -13,8 +14,5 @@ module.exports = function (config) {
       args: ["shadow.test.karma.init"],
       singleRun: true
     },
-    junitReporter: {
-      outputDir: "target/results/cljs"
-    }
   })
 };
