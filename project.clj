@@ -158,6 +158,8 @@
   :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
+            ;; NOTE: These are deprecated, kept around for ensuring shadow-cljs works
+            ;; the same way.
             "test-browser" ["doo" "chrome-headless" "test"]
             "test-advanced" ["doo" "chrome-headless" "advanced-test"]
             "test-node" ["doo" "node" "node-test"]}
@@ -167,9 +169,7 @@
                        :output-to "target/results/reitit/junit.xml"}]}
 
   :doo {:paths {:karma "./node_modules/.bin/karma"}
-        :karma {:config {"plugins" ["karma-junit-reporter"]
-                         "reporters" ["progress", "junit"]
-                         "junitReporter" {"outputDir" "target/results/cljs"}}}}
+        :karma {:config {"reporters" ["progress"]}}}
 
   :cljsbuild {:builds [{:id "test"
                         :source-paths ["src" "test/cljc" "test/cljs"]

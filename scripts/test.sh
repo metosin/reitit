@@ -5,7 +5,12 @@ case $1 in
         npx shadow-cljs compile node-test
         node target/shadow-node-test/node-tests.js
 
+        rm -rf target/karma
         npx shadow-cljs compile karma
+        npx karma start --single-run
+
+        rm -rf target/karma
+        npx shadow-cljs release karma
         npx karma start --single-run
         ;;
     clj)

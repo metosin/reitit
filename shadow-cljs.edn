@@ -1,5 +1,4 @@
 {:lein {:profile "+shadow"}
- ;; tests are served via http://localhost:8021
  :dev-http {8021 "target/shadow-browser-test"}
 
  :builds
@@ -12,6 +11,7 @@
    :compiler-options {:warnings {:redef-in-file false
                                  :fn-deprecated false}}}
 
+  ;; For local dev - http://localhost:8021
   :browser-test
   {:target :browser-test
    :test-dir "target/shadow-browser-test"

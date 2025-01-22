@@ -6,7 +6,7 @@ module.exports = function (config) {
     // The file itself
     files: ['ci.js'],
     frameworks: ['cljs-test'],
-    reporters: ['progress', 'junit'],
+    reporters: ['progress'],
     plugins: ['karma-cljs-test', 'karma-chrome-launcher'],
     colors: true,
     logLevel: config.LOG_INFO,
