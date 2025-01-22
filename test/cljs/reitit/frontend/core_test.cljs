@@ -310,16 +310,21 @@
     x))
 
 (deftest match->path-coercion-test
-  (testing "default Date toString"
+  (testing "default keyword to string"
     (is (str/starts-with?
-          (rf/match->path {:path "foo"} {:date (js/Date. 2024 0 1 12 13 0)})
-          "foo?date=Mon+Jan+01+2024+12")))
+          (rf/match->path {:path "foo"} {:q :x})
+          "foo?q=x")))
 
-  (is (= "foo?date=x2024-01-01T10%3A13%3A00.000Z"
+  (is (= "foo?q=__x"
          (rf/match->path {:data {:coercion rcm/coercion
                                  :parameters {:query [[:map
-                                                       [:date {:decode/string string->instant
-                                                               :encode/string instant->string}
-                                                        :any]]]}}
+                                                       [:q {:decode/string (fn [s]
+                                                                             (if (string? s)
+                                                                               (keyword (if (str/starts-with? s "__")
+                                                                                          (subs s 2)
+                                                                                          s))
+                                                                               s))
+                                                            :encode/string (fn [k] (str "__" (name k)))}
+                                                        :keyword]]]}}
                           :path "foo"}
-                         {:date (js/Date. 2024 0 1 12 13 0)}))))
+                         {:q "x"}))))
