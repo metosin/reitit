@@ -147,6 +147,7 @@
           (let [{:keys [status]} (app invalid-request2)]
             (is (= 500 status))))))))
 
+#?(:clj
 (deftest schema-coercion-test
   (let [create (fn [middleware]
                  (ring/ring-handler
@@ -211,7 +212,7 @@
 
         (testing "invalid response"
           (let [{:keys [status]} (app invalid-request2)]
-            (is (= 500 status))))))))
+            (is (= 500 status)))))))))
 
 (defn- custom-meta-merge-checking-schema
   ([] {})
@@ -582,6 +583,7 @@
         (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call m/schema custom-meta-merge-checking-schema)))
         (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call identity custom-meta-merge-checking-parameters)))))))
 
+#?(:clj
 (deftest per-content-type-test
   (doseq [[coercion json-request edn-request default-request json-response edn-response default-response]
           [[malli/coercion
@@ -675,7 +677,7 @@
               (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
                      (call (request "application/json" "application/edn" {:request :json :response :json}))))
               (is (= {:type :reitit.coercion/response-coercion :in [:response :body]}
-                     (call (request "application/json" "application/transit" {:request :json :response :json})))))))))))
+                     (call (request "application/json" "application/transit" {:request :json :response :json}))))))))))))
 
 
 #?(:clj
