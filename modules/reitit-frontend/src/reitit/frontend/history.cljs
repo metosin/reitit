@@ -289,13 +289,18 @@
   New query params can be given as a map, or a function taking
   the old params and returning the new modified params.
 
-  Note: The query parameter values aren't coereced, so the
-  update fn will see string values for all query params."
+  The current path is matched against the routing tree, and the match data
+  (schema, coercion) is used to encode the query parameters."
   ([history new-query-or-update-fn]
    (set-query history new-query-or-update-fn nil))
   ([history new-query-or-update-fn {:keys [replace] :as opts}]
    (let [current-path (-get-path history)
-         new-path (rf/set-query-params current-path new-query-or-update-fn)]
+         ;; FIXME: What if there is no match?
+         match (rf/match-by-path (.-router history) current-path)
+         query-params (if (fn? new-query-or-update-fn)
+                        (new-query-or-update-fn (:query (:parameters match)))
+                        new-query-or-update-fn)
+         new-path (rf/match->path match query-params (:fragment (:parameters match)))]
      (if replace
        (.replaceState js/window.history nil "" (-href history new-path))
        (.pushState js/window.history nil "" (-href history new-path)))

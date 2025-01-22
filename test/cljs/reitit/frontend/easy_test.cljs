@@ -69,11 +69,11 @@
                           ;; 2. /bar/2?a=1
                           6 (do (is (= "/bar/2?a=1" url)
                                     "update-query with map")
-                                (rfe/set-query #(assoc % :b "foo") {:replace true}))
+                                (rfe/set-query #(assoc % :q "x") {:replace true}))
                           ;; 0. /
                           ;; 1. /bar/2
                           ;; 2. /bar/2?a=1&b=foo
-                          7 (do (is (= "/bar/2?a=1&b=foo" url)
+                          7 (do (is (= "/bar/2?a=1&q=__x" url)
                                     "update-query with fn")
                                 (.go js/window.history -2))
                           ;; 0. /
