@@ -186,4 +186,30 @@
       (is (= {:query {:x [:a :b]}}
              (-> (r/match-by-path router "/olipa/kerran")
                  (assoc :query-params {:x "a,b"})
+                 (coercion/coerce!))))))
+
+  (testing "encoding and multiple query param values"
+    (let [router (r/router ["/:a/:b"
+                            {:name ::route
+                             :coercion reitit.coercion.malli/coercion
+                             :parameters {:query [:map
+                                                  [:x
+                                                   [:vector
+                                                    [:keyword
+                                                     {:decode/string (fn [s]
+                                                                       ;; Encoding coercer calls decoder -> validate -> encoder
+                                                                       ;; Decoder doesn't need to do anything as in this case the value is already "decoded"
+                                                                       (if (string? s)
+                                                                         (keyword (subs s 2))
+                                                                         s))
+                                                      :encode/string (fn [k] (str "__" (name k)))}]]]]}}]
+                           {:compile coercion/compile-request-coercers})]
+      (is (= "/olipa/kerran?x=__a&x=__b"
+             (-> router
+                 (r/match-by-name! ::route {:a "olipa", :b "kerran"})
+                 (r/match->path {:x [:a :b]}))))
+
+      (is (= {:query {:x [:a :b]}}
+             (-> (r/match-by-path router "/olipa/kerran")
+                 (assoc :query-params {:x ["__a" "__b"]})
                  (coercion/coerce!)))))))
