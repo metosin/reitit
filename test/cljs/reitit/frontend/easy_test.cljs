@@ -76,8 +76,20 @@
                           7 (do (is (= "/bar/2?a=1&q=__x" url)
                                     "update-query with fn")
                                 (.go js/window.history -2))
+
+                          ;; Go to non-matching path and check set-query works
+                          ;; (without coercion) without a match
+                          8 (do (is (= "/" url) "go back two events")
+                                (.pushState js/window.history nil "" "#/non-matching-path"))
+
+                          9 (do (is (= "/non-matching-path" url))
+                                (rfe/set-query #(assoc % :q "x")))
+
+                          10 (do (is (= "/non-matching-path?q=x" url))
+                                 (.go js/window.history -2))
+
                           ;; 0. /
-                          8 (do (is (= "/" url)
+                          11 (do (is (= "/" url)
                                     "go back two events")
 
                                 ;; Reset to ensure old event listeners aren't called
@@ -85,10 +97,10 @@
                                             (fn on-navigate [match history]
                                               (let [url (rfh/-get-path history)]
                                                 (case (swap! n inc)
-                                                  9 (do (is (= "/" url)
-                                                            "start at root")
-                                                        (rfe/push-state ::foo))
-                                                  10 (do (is (= "/foo" url)
+                                                  12 (do (is (= "/" url)
+                                                             "start at root")
+                                                         (rfe/push-state ::foo))
+                                                  13 (do (is (= "/foo" url)
                                                              "push-state")
                                                          (rfh/stop! @rfe/history)
                                                          (done))

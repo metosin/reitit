@@ -290,17 +290,21 @@
   the old params and returning the new modified params.
 
   The current path is matched against the routing tree, and the match data
-  (schema, coercion) is used to encode the query parameters."
+  (schema, coercion) is used to encode the query parameters.
+  If the current path doesn't match any route, the query parameters
+  are parsed from the path without coercion and new values
+  are also stored without coercion encoding."
   ([history new-query-or-update-fn]
    (set-query history new-query-or-update-fn nil))
   ([history new-query-or-update-fn {:keys [replace] :as opts}]
    (let [current-path (-get-path history)
-         ;; FIXME: What if there is no match?
-         match (rf/match-by-path (.-router history) current-path)
-         query-params (if (fn? new-query-or-update-fn)
-                        (new-query-or-update-fn (:query (:parameters match)))
-                        new-query-or-update-fn)
-         new-path (rf/match->path match query-params (:fragment (:parameters match)))]
+         match (rf/match-by-path (:router history) current-path)
+         new-path (if match
+                    (let [query-params (if (fn? new-query-or-update-fn)
+                                         (new-query-or-update-fn (:query (:parameters match)))
+                                         new-query-or-update-fn)]
+                      (rf/match->path match query-params (:fragment (:parameters match))))
+                    (rf/set-query-params current-path new-query-or-update-fn))]
      (if replace
        (.replaceState js/window.history nil "" (-href history new-path))
        (.pushState js/window.history nil "" (-href history new-path)))
