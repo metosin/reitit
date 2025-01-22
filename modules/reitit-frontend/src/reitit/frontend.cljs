@@ -15,7 +15,7 @@
 (defn query-params
   "Given goog.Uri, read query parameters into a Clojure map."
   [^goog.Uri uri]
-  (let [q (.getQueryData uri)]
+  (let [^goog.Uri.QueryData q (.getQueryData uri)]
     (->> q
          (.getKeys)
          (map (juxt keyword #(query-param q %)))
@@ -58,7 +58,7 @@
   :on-coercion-error - a sideeffecting fn of `match exception -> nil`"
   ([router path] (match-by-path router path nil))
   ([router path {:keys [on-coercion-error]}]
-   (let [uri (.parse goog.Uri path)
+   (let [^goog.Uri uri (.parse goog.Uri path)
          coerce! (if on-coercion-error
                    (fn [match]
                      (try (coercion/coerce! match)
