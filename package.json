@@ -2,11 +2,14 @@
   "name": "reitit",
   "private": true,
   "devDependencies": {
-    "@seriousme/openapi-schema-validator": "^2.2.1",
-    "karma": "^4.1.0",
-    "karma-chrome-launcher": "^2.2.0",
+    "@seriousme/openapi-schema-validator": "^2.3.1",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "^3.2.0",
     "karma-cli": "^2.0.0",
     "karma-cljs-test": "^0.1.0",
-    "karma-junit-reporter": "^1.2.0"
+    "karma-junit-reporter": "^2.0.1"
+  },
+  "dependencies": {
+    "shadow-cljs": "^2.28.20"
   }
 }

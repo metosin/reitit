@@ -89,6 +89,7 @@
                    :java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.11.4"]
+                                  [thheller/shadow-cljs "2.28.20"]
                                   [org.clojure/clojurescript "1.11.132"]
 
                                   ;; modules dependencies
@@ -128,6 +129,7 @@
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.4"]]}
+             :shadow {:test-paths ["test/cljs"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]

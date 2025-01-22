@@ -1,0 +1,20 @@
+{:lein {:profile "+shadow"}
+ ;; tests are served via http://localhost:8021
+ :dev-http {8021 "target/shadow-browser-test"}
+
+ :builds
+ {:node-test
+  {:target    :node-test
+   :output-to "target/shadow-node-test/node-tests.js"
+   :ns-regexp "-test"
+   ;; Watch will also run the tests
+   :autorun   true}
+
+  :browser-test
+  {:target :browser-test
+   :test-dir "target/shadow-browser-test"}
+
+  :karma
+  {:target :karma
+   :output-to  "target/karma/ci.js"
+   :ns-regexp  "-test$"}}}

@@ -16,25 +16,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
     - name: Cache dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-clj-${{ hashFiles('**/project.clj') }}
         restore-keys: |
           ${{ runner.os }}-clj-
+
     - name: Setup Java ${{ matrix.jdk }}
-      uses: actions/setup-java@v1.4.3
+      uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: ${{ matrix.jdk }}
+
     - name: Setup Clojure
-      uses: DeLaGuardo/setup-clojure@3.1
+      uses: DeLaGuardo/setup-clojure@13.1
       with:
         lein: 2.9.5
-    - name: Install dependencies
-      run: |
-        npm ci
+
     - name: Run tests
       run: ./scripts/test.sh clj
 
@@ -42,33 +44,40 @@ jobs:
     name: ClojureScript
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.m2/repository
-            **/node_modules
-          key: ${{ runner.os }}-cljs-${{ hashFiles('**/project.clj', '**/package-lock.json') }}
+          key: ${{ runner.os }}-cljs-${{ hashFiles('**/project.clj') }}
           restore-keys: |
             ${{ runner.os }}-cljs-
-      - name: Setup Java 11
-        uses: actions/setup-java@v1.4.3
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
+          distribution: temurin
+          java-version: 21
+
       - name: Setup Clojure
-        uses: DeLaGuardo/setup-clojure@3.1
+        uses: DeLaGuardo/setup-clojure@13.1
         with:
           lein: 2.9.5
+
       - name: Setup Node.js
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
+          cache: npm
+
       - name: Install dependencies
-        run: |
-          npm ci
-      - name: Install modules
-        run: ./scripts/lein-modules install
+        run: npm ci
+
+      # - name: Install modules
+      #   run: ./scripts/lein-modules install
+
       - name: Run tests
         run: ./scripts/test.sh cljs
 
@@ -76,7 +85,8 @@ jobs:
     name: Lint cljdoc.edn
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Verify cljdoc.edn
         run: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
 
@@ -84,13 +94,16 @@ jobs:
     name: Check cljdoc analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+
       - name: Setup Clojure
-        uses: DeLaGuardo/setup-clojure@11.0
+        uses: DeLaGuardo/setup-clojure@13.1
         with:
           lein: 2.9.5
           cli: 1.11.0.1100
+
       - name: Install cljdoc analyzer
         run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer '{:git/tag "RELEASE"}' :as cljdoc-analyzer
+
       - name: CljDoc Check
         run: ./scripts/cljdoc-check.sh
