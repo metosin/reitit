@@ -178,6 +178,12 @@
        (-response-coercer [_ schema]
          (-coercer schema :response transformers :encode opts))
        (-query-string-coercer [_ schema]
-         (-coercer schema :string transformers :encode opts))))))
+         ;; TODO: Create encoding function that only does encode, no decoding and validation?
+         (-coercer (mu/open-schema schema)
+                   :string
+                   ;; Tune transformer to not strip extra keys
+                   {:string {:default (-transformer string-transformer-provider (assoc opts :strip-extra-keys false))}}
+                   :encode
+                   opts))))))
 
 (def coercion (create default-options))

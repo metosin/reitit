@@ -1,16 +1,30 @@
 (ns reitit.frontend.easy-test
-  (:require [clojure.test :refer [deftest testing is are async]]
+  (:require [clojure.string :as str]
+            [clojure.test :refer [are async deftest is testing]]
+            [goog.events :as gevents]
+            [reitit.coercion.malli :as rcm]
             [reitit.core :as r]
             [reitit.frontend.easy :as rfe]
-            [reitit.frontend.history :as rfh]
-            [goog.events :as gevents]))
+            [reitit.frontend.history :as rfh]))
 
 (def browser (exists? js/window))
 
 (def router (r/router ["/"
                        ["" ::frontpage]
                        ["foo" ::foo]
-                       ["bar/:id" ::bar]]))
+                       ["bar/:id"
+                        {:name ::bar
+                         :coercion rcm/coercion
+                         :parameters {:query [:map
+                                              [:q {:optional true}
+                                               [:keyword
+                                                {:decode/string (fn [s]
+                                                                  (if (string? s)
+                                                                    (keyword (if (str/starts-with? s "__")
+                                                                               (subs s 2)
+                                                                               s))
+                                                                    s))
+                                                 :encode/string (fn [k] (str "__" (name k)))}]]]}}]]))
 
 ;; TODO: Only tests fragment history, also test HTML5?
 
@@ -38,10 +52,11 @@
                           ;; 0. /
                           3 (do (is (= "/" url)
                                     "go back")
-                                (rfe/navigate ::bar {:path-params {:id 1}}))
+                                (rfe/navigate ::bar {:path-params {:id 1}
+                                                     :query-params {:q "x"}}))
                           ;; 0. /
                           ;; 1. /bar/1
-                          4 (do (is (= "/bar/1" url)
+                          4 (do (is (= "/bar/1?q=__x" url)
                                     "push-state 2")
                                 (rfe/replace-state ::bar {:id 2}))
                           ;; 0. /

@@ -3,14 +3,28 @@
             [reitit.core :as r]
             [reitit.frontend.history :as rfh]
             [reitit.frontend.test-utils :refer [capture-console]]
-            [goog.events :as gevents]))
+            [goog.events :as gevents]
+            [reitit.coercion.malli :as rcm]
+            [clojure.string :as str]))
 
 (def browser (exists? js/window))
 
 (def router (r/router ["/"
                        ["" ::frontpage]
                        ["foo" ::foo]
-                       ["bar/:id" ::bar]]))
+                       ["bar/:id"
+                        {:name ::bar
+                         :coercion rcm/coercion
+                         :parameters {:query [:map
+                                              [:q {:optional true}
+                                               [:keyword
+                                                {:decode/string (fn [s]
+                                                                  (if (string? s)
+                                                                    (keyword (if (str/starts-with? s "__")
+                                                                               (subs s 2)
+                                                                               s))
+                                                                    s))
+                                                 :encode/string (fn [k] (str "__" (name k)))}]]]}}]]))
 
 (deftest fragment-history-test
   (when browser
@@ -24,9 +38,12 @@
                (rfh/href history ::foo)))
         (is (= "#/bar/5"
                (rfh/href history ::bar {:id 5})))
-        (is (= "#/bar/5?q=x"
+        (testing "query string coercion doesn't strip extra keys"
+          (is (= "#/bar/5?extra=a"
+                 (rfh/href history ::bar {:id 5} {:extra "a"}))))
+        (is (= "#/bar/5?q=__x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
-        (is (= "#/bar/5?q=x#foo"
+        (is (= "#/bar/5?q=__x#foo"
                (rfh/href history ::bar {:id 5} {:q "x"} "foo")))
         (let [{:keys [value messages]} (capture-console
                                         (fn []
@@ -58,11 +75,11 @@
                                 (.back js/window.history))
                           4 (do (is (= "/" url)
                                     "go back")
-                                (rfh/push-state history ::bar {:id 1}))
-                          5 (do (is (= "/bar/1" url)
+                                (rfh/push-state history ::bar {:id 1} {:extra "a"}))
+                          5 (do (is (= "/bar/1?extra=a" url)
                                     "push-state 2")
-                                (rfh/replace-state history ::bar {:id 2}))
-                          6 (do (is (= "/bar/2" url)
+                                (rfh/replace-state history ::bar {:id 2} {:q "x"}))
+                          6 (do (is (= "/bar/2?q=__x" url)
                                     "replace-state")
                                 (.back js/window.history))
                           7 (do (is (= "/" url)
@@ -84,7 +101,7 @@
                (rfh/href history ::foo)))
         (is (= "/bar/5"
                (rfh/href history ::bar {:id 5})))
-        (is (= "/bar/5?q=x"
+        (is (= "/bar/5?q=__x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
         (let [{:keys [value messages]} (capture-console
                                         (fn []
@@ -119,8 +136,8 @@
                                 (rfh/push-state history ::bar {:id 1}))
                           5 (do (is (= "/bar/1" url)
                                     "push-state 2")
-                                (rfh/replace-state history ::bar {:id 2}))
-                          6 (do (is (= "/bar/2" url)
+                                (rfh/replace-state history ::bar {:id 2} {:q "x"}))
+                          6 (do (is (= "/bar/2?q=__x" url)
                                     "replace-state")
                                 (.back js/window.history))
                           7 (do (is (= "/" url)
