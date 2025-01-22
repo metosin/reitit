@@ -65,7 +65,7 @@
 (defn- event-target
   "Read event's target from composed path to get shadow dom working,
   fallback to target property if not available"
-  [event]
+  [^goog.events.BrowserEvent event]
   (let [original-event (.getBrowserEvent event)]
     (if (exists? (.-composedPath original-event))
       (aget (.composedPath original-event) 0)
@@ -76,9 +76,9 @@
   should be ignored. This logic will ignore the event
   if anchor href matches the route tree, and in this case
   the page location is updated using History API."
-  [router e el uri]
+  [router e el ^goog.Uri uri]
   (let [current-domain (if (exists? js/location)
-                         (.getDomain (.parse goog.Uri js/location)))]
+                         (.getDomain ^goog.Uri (.parse goog.Uri js/location)))]
     (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
              (= current-domain (.getDomain uri)))
          (not (.-altKey e))
@@ -110,7 +110,7 @@
           ignore-anchor-click (fn [e]
                                 ;; Returns the next matching ancestor of event target
                                 (when-let [el (closest-by-tag (event-target e) "a")]
-                                  (let [uri (.parse goog.Uri (.-href el))]
+                                  (let [^goog.Uri uri (.parse goog.Uri (.-href el))]
                                     (when (ignore-anchor-click-predicate router e el uri)
                                       (.preventDefault e)
                                       (let [path (str (.getPath uri)
