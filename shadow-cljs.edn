@@ -8,13 +8,19 @@
    :output-to "target/shadow-node-test/node-tests.js"
    :ns-regexp "-test"
    ;; Watch will also run the tests
-   :autorun   true}
+   :autorun   true
+   :compiler-options {:warnings {:redef-in-file false
+                                 :fn-deprecated false}}}
 
   :browser-test
   {:target :browser-test
-   :test-dir "target/shadow-browser-test"}
+   :test-dir "target/shadow-browser-test"
+   :compiler-options {:warnings {:redef-in-file false
+                                 :fn-deprecated false}}}
 
   :karma
   {:target :karma
    :output-to  "target/karma/ci.js"
-   :ns-regexp  "-test$"}}}
+   :ns-regexp  "-test$"
+   :compiler-options {:warnings {:redef-in-file false
+                                 :fn-deprecated false}}}}}
