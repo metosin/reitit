@@ -78,14 +78,15 @@
                          ;; on the coercion?
                          ;; NOTE: Re-creates coercer on every call, could this be pre-compiled somewhere
                          ;; or memoized? Does it matter much?
+                         ;; TODO: query-coercer could be compiled in reitit.frontend/router, same as request coercers.
                          (str "?" (let [coercion (-> match :data :coercion)
                                         schema (when coercion
                                                  (coercion/-compile-model coercion (-> match :data :parameters :query) nil))
                                         coercer (when (and schema coercion)
                                                   (coercion/-query-string-coercer coercion schema))
-                                        query-params (or (when coercer
-                                                           (coercer query-params :default))
-                                                         query-params)]
+                                        query-params (if coercer
+                                                       (coercer query-params :default)
+                                                       query-params)]
                                     ;; Default encoding for values will handle values that aren't encoded using coercer
                                     (impl/query-string query-params)))))))
 
