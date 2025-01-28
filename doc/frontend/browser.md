@@ -13,6 +13,9 @@ There are also secondary functions following HTML5 History API:
 `push-state` to navigate to new route adding entry to the history and
 `replace-state` to change route without leaving previous entry in browser history.
 
+See [coercion notes](./coercion.md) to see how frontend route parameters
+can be decoded and encoded.
+
 ## Fragment router
 
 Fragment is simple integration which stores the current route in URL fragment,
@@ -62,7 +65,7 @@ event handler for page change events.
 
 ## History manipulation
 
-Reitit doesn't include functions to manipulate the history stack, i.e.
+Reitit doesn't include functions to manipulate the history stack, i.e.,
 go back or forwards, but calling History API functions directly should work:
 
 ```

@@ -187,9 +187,10 @@
   The URL is formatted using Reitit frontend history handler, so using it with
   anchor element href will correctly trigger route change event.
 
-  Note: currently collections in query parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first."
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function."
   ([history name]
    (href history name nil))
   ([history name path-params]
@@ -208,9 +209,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
@@ -236,9 +238,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
@@ -264,9 +267,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
