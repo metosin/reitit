@@ -308,12 +308,7 @@
   (is (= "foo?q=__x"
          (rf/match->path {:data {:coercion rcm/coercion
                                  :parameters {:query [[:map
-                                                       [:q {:decode/string (fn [s]
-                                                                             (if (string? s)
-                                                                               (keyword (if (str/starts-with? s "__")
-                                                                                          (subs s 2)
-                                                                                          s))
-                                                                               s))
+                                                       [:q {:decode/string (fn [s] (keyword (subs s 2)))
                                                             :encode/string (fn [k] (str "__" (name k)))}
                                                         :keyword]]]}}
                           :path "foo"}

@@ -1,6 +1,5 @@
 (ns reitit.frontend.easy-test
-  (:require [clojure.string :as str]
-            [clojure.test :refer [are async deftest is testing]]
+  (:require [clojure.test :refer [are async deftest is testing]]
             [goog.events :as gevents]
             [reitit.coercion.malli :as rcm]
             [reitit.core :as r]
@@ -18,12 +17,7 @@
                          :parameters {:query [:map
                                               [:q {:optional true}
                                                [:keyword
-                                                {:decode/string (fn [s]
-                                                                  (if (string? s)
-                                                                    (keyword (if (str/starts-with? s "__")
-                                                                               (subs s 2)
-                                                                               s))
-                                                                    s))
+                                                {:decode/string (fn [s] (keyword (subs s 2)))
                                                  :encode/string (fn [k] (str "__" (name k)))}]]]}}]]))
 
 ;; TODO: Only tests fragment history, also test HTML5?

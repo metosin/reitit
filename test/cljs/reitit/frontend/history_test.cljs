@@ -4,8 +4,7 @@
             [reitit.frontend.history :as rfh]
             [reitit.frontend.test-utils :refer [capture-console]]
             [goog.events :as gevents]
-            [reitit.coercion.malli :as rcm]
-            [clojure.string :as str]))
+            [reitit.coercion.malli :as rcm]))
 
 (def browser (exists? js/window))
 
@@ -18,12 +17,7 @@
                          :parameters {:query [:map
                                               [:q {:optional true}
                                                [:keyword
-                                                {:decode/string (fn [s]
-                                                                  (if (string? s)
-                                                                    (keyword (if (str/starts-with? s "__")
-                                                                               (subs s 2)
-                                                                               s))
-                                                                    s))
+                                                {:decode/string (fn [s] (keyword (subs s 2)))
                                                  :encode/string (fn [k] (str "__" (name k)))}]]]}}]]))
 
 (deftest fragment-history-test

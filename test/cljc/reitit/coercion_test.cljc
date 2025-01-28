@@ -178,9 +178,7 @@
                                                     {:encode/string (fn [xs]
                                                                       (str/join "," (map name xs)))
                                                      :decode/string (fn [s]
-                                                                      (if (string? s)
-                                                                        (mapv keyword (str/split s #","))
-                                                                        s))}
+                                                                      (mapv keyword (str/split s #",")))}
                                                     :keyword]]]}}]
                            {:compile coercion/compile-request-coercers})
           match (r/match-by-name! router ::route {:a "olipa", :b "kerran"})]
@@ -211,12 +209,8 @@
                                                   [:x
                                                    [:vector
                                                     [:keyword
-                                                     {:decode/string (fn [s]
-                                                                       ;; Encoding coercer calls decoder -> validate -> encoder
-                                                                       ;; Decoder doesn't need to do anything as in this case the value is already "decoded"
-                                                                       (if (string? s)
-                                                                         (keyword (subs s 2))
-                                                                         s))
+                                                     ;; For query strings encode only calls encode, so no need to check if decode if value is encoded or not.
+                                                     {:decode/string (fn [s] (keyword (subs s 2)))
                                                       :encode/string (fn [k] (str "__" (name k)))}]]]]}}]
                            {:compile coercion/compile-request-coercers})]
       (is (= "/olipa/kerran?x=__a&x=__b"

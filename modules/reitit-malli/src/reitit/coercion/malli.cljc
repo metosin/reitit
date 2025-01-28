@@ -76,6 +76,20 @@
                      (assoc error :transformed transformed))))
                 value))))))))
 
+(defn- -query-string-coercer
+  "Create coercer for query-parameters, always allows extra params and does
+  encoding using string-transformer."
+  [schema transfomers options]
+  (let [;; Always allow extra paramaters on query-parameters encoding
+        open-schema (mu/open-schema schema)
+        ;; Do not remove extra keys
+        string-transformer (-transformer string-transformer-provider (assoc options :strip-extra-keys false))
+        encoder (m/encoder open-schema options string-transformer)]
+    (fn [value format]
+      (if encoder
+        (encoder value)
+        value))))
+
 ;;
 ;; public api
 ;;
@@ -178,12 +192,6 @@
        (-response-coercer [_ schema]
          (-coercer schema :response transformers :encode opts))
        (-query-string-coercer [_ schema]
-         ;; TODO: Create encoding function that only does encode, no decoding and validation?
-         (-coercer (mu/open-schema schema)
-                   :string
-                   ;; Tune transformer to not strip extra keys
-                   {:string {:default (-transformer string-transformer-provider (assoc opts :strip-extra-keys false))}}
-                   :encode
-                   opts))))))
+         (-query-string-coercer schema transformers opts))))))
 
 (def coercion (create default-options))
