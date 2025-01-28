@@ -40,14 +40,16 @@
 (defn
   ^{:see-also ["reitit.core/match->path"]}
   match->path
-  "Create routing path from given match and optional query-string map and
-  optional fragment string."
+  "Create routing path from given match and optional query-parameters map and
+  optional fragment string.
+
+  Query-parameters are encoded using the input schema and coercion implementation."
   ([match]
    (match->path match nil nil))
   ([match query-params]
    (match->path match query-params nil))
   ([match query-params fragment]
-   (when-let [path (r/match->path match query-params)]
+   (when-let [path (coercion/match->path match query-params)]
      (cond-> path
        (and fragment (seq fragment)) (str "#" (impl/form-encode fragment))))))
 

@@ -1,5 +1,6 @@
 (ns reitit.coercion
   (:require [#?(:clj reitit.walk :cljs clojure.walk) :as walk]
+            [reitit.core :as r]
             [reitit.impl :as impl])
   #?(:clj
      (:import (java.io Writer))))
@@ -220,3 +221,33 @@
   [match]
   (if-let [coercers (-> match :result :coerce)]
     (coerce-request coercers match)))
+
+(defn coerce-query-params
+  "Uses an input schema and coercion implementation from the given match to
+  encode query-parameters map.
+
+  If no match, no input schema or coercion implementation, just returns the
+  original parameters map."
+  [match query-params]
+  (when query-params
+    (let [coercion (-> match :data :coercion)
+          schema (when coercion
+                   (-compile-model coercion (-> match :data :parameters :query) nil))
+          coercer (when (and schema coercion)
+                    (-query-string-coercer coercion schema))]
+      (if coercer
+        (let [result (coercer query-params :default)]
+          (if (error? result)
+            (throw (ex-info (str "Query parameters coercion failed")
+                            result))
+            result))
+        query-params))))
+
+(defn match->path
+  "Create routing path from given match and optional query-parameters map.
+
+  Query-parameters are encoded using the input schema and coercion implementation."
+  ([match]
+   (r/match->path match))
+  ([match query-params]
+   (r/match->path match (coerce-query-params match query-params))))

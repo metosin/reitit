@@ -40,74 +40,75 @@
                     (fn on-navigate [match history]
                       (let [url (rfh/-get-path history)]
                         (case (swap! n inc)
-                          1 (do (is (some? (:popstate-listener history)))
+                          1 (rfh/push-state history ::frontpage)
+                          2 (do (is (some? (:popstate-listener history)))
                                 (is (= "/" url)
                                     "start at root")
                                 (rfe/push-state ::foo nil {:a 1} "foo bar"))
                           ;; 0. /
                           ;; 1. /foo?a=1#foo+bar
-                          2 (do (is (= "/foo?a=1#foo+bar" url)
+                          3 (do (is (= "/foo?a=1#foo+bar" url)
                                     "push-state")
                                 (.back js/window.history))
                           ;; 0. /
-                          3 (do (is (= "/" url)
+                          4 (do (is (= "/" url)
                                     "go back")
                                 (rfe/navigate ::bar {:path-params {:id 1}
                                                      :query-params {:q "x"}}))
                           ;; 0. /
                           ;; 1. /bar/1
-                          4 (do (is (= "/bar/1?q=__x" url)
+                          5 (do (is (= "/bar/1?q=__x" url)
                                     "push-state 2")
                                 (rfe/replace-state ::bar {:id 2}))
                           ;; 0. /
                           ;; 1. /bar/2
-                          5 (do (is (= "/bar/2" url)
+                          6 (do (is (= "/bar/2" url)
                                     "replace-state")
                                 (rfe/set-query {:a 1}))
                           ;; 0. /
                           ;; 1. /bar/2
                           ;; 2. /bar/2?a=1
-                          6 (do (is (= "/bar/2?a=1" url)
+                          7 (do (is (= "/bar/2?a=1" url)
                                     "update-query with map")
                                 (rfe/set-query #(assoc % :q "x") {:replace true}))
                           ;; 0. /
                           ;; 1. /bar/2
                           ;; 2. /bar/2?a=1&b=foo
-                          7 (do (is (= "/bar/2?a=1&q=__x" url)
+                          8 (do (is (= "/bar/2?a=1&q=__x" url)
                                     "update-query with fn")
                                 (.go js/window.history -2))
 
                           ;; Go to non-matching path and check set-query works
                           ;; (without coercion) without a match
-                          8 (do (is (= "/" url) "go back two events")
+                          9 (do (is (= "/" url) "go back two events")
                                 (.pushState js/window.history nil "" "#/non-matching-path"))
 
-                          9 (do (is (= "/non-matching-path" url))
+                          10 (do (is (= "/non-matching-path" url))
                                 (rfe/set-query #(assoc % :q "x")))
 
-                          10 (do (is (= "/non-matching-path?q=x" url))
+                          11 (do (is (= "/non-matching-path?q=x" url))
                                  (.go js/window.history -2))
 
                           ;; 0. /
-                          11 (do (is (= "/" url)
-                                    "go back two events")
+                          12 (do (is (= "/" url)
+                                     "go back two events")
 
-                                ;; Reset to ensure old event listeners aren't called
-                                (rfe/start! router
-                                            (fn on-navigate [match history]
-                                              (let [url (rfh/-get-path history)]
-                                                (case (swap! n inc)
-                                                  12 (do (is (= "/" url)
-                                                             "start at root")
-                                                         (rfe/push-state ::foo))
-                                                  13 (do (is (= "/foo" url)
-                                                             "push-state")
-                                                         (rfh/stop! @rfe/history)
-                                                         (done))
-                                                  (do
-                                                    (is false (str "extra event 2" {:n @n, :url url}))
-                                                    (done)))))
-                                            {:use-fragment true}))
+                                 ;; Reset to ensure old event listeners aren't called
+                                 (rfe/start! router
+                                             (fn on-navigate [match history]
+                                               (let [url (rfh/-get-path history)]
+                                                 (case (swap! n inc)
+                                                   13 (do (is (= "/" url)
+                                                              "start at root")
+                                                          (rfe/push-state ::foo))
+                                                   14 (do (is (= "/foo" url)
+                                                              "push-state")
+                                                          (rfh/stop! @rfe/history)
+                                                          (done))
+                                                   (do
+                                                     (is false (str "extra event 2" {:n @n, :url url}))
+                                                     (done)))))
+                                             {:use-fragment true}))
                           (do
                             (is false (str "extra event 1" {:n @n, :url url}))
                             (done)))))

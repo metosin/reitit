@@ -160,13 +160,13 @@
       (is (= "/olipa/kerran?x=a&x=b"
              (-> router
                  (r/match-by-name! ::route {:a "olipa", :b "kerran"})
-                 (r/match->path {:x [:a :b]}))))
+                 (coercion/match->path {:x [:a :b]}))))
 
       (is (= "/olipa/kerran?x=a&x=b&extra=extra-param"
              (-> router
                  (r/match-by-name! ::route {:a "olipa", :b "kerran"})
-                 (r/match->path {:x [:a :b]
-                                 :extra "extra-param"}))))))
+                 (coercion/match->path {:x [:a :b]
+                                        :extra "extra-param"}))))))
 
   (testing "custom encode/string for a collection"
     (let [router (r/router ["/:a/:b"
@@ -182,18 +182,20 @@
                                                                         (mapv keyword (str/split s #","))
                                                                         s))}
                                                     :keyword]]]}}]
-                           {:compile coercion/compile-request-coercers})]
-      ;; NOTE: "," is urlencoded by the impl/query-string step, is that ok?
+                           {:compile coercion/compile-request-coercers})
+          match (r/match-by-name! router ::route {:a "olipa", :b "kerran"})]
+      (is (= {:x "a,b"}
+             (coercion/coerce-query-params match {:x [:a :b]})))
+
+      ;; NOTE: "," is urlencoded by the impl/query-string step
       (is (= "/olipa/kerran?x=a%2Cb"
-             (-> router
-                 (r/match-by-name! ::route {:a "olipa", :b "kerran"})
-                 (r/match->path {:x [:a :b]}))))
+             (coercion/match->path match {:x [:a :b]})))
 
       (testing "extra query-string parameters aren't removed by coercion"
         (is (= "/olipa/kerran?x=a%2Cb&extra=extra-param"
                (-> router
                    (r/match-by-name! ::route {:a "olipa", :b "kerran"})
-                   (r/match->path {:x [:a :b]
+                   (coercion/match->path {:x [:a :b]
                                    :extra "extra-param"})))))
 
       (is (= {:query {:x [:a :b]}}
@@ -220,7 +222,7 @@
       (is (= "/olipa/kerran?x=__a&x=__b"
              (-> router
                  (r/match-by-name! ::route {:a "olipa", :b "kerran"})
-                 (r/match->path {:x [:a :b]}))))
+                 (coercion/match->path {:x [:a :b]}))))
 
       (is (= {:query {:x [:a :b]}}
              (-> (r/match-by-path router "/olipa/kerran")

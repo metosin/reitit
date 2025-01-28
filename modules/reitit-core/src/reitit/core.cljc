@@ -1,9 +1,7 @@
 (ns reitit.core
   (:require [reitit.exception :as exception]
             [reitit.impl :as impl]
-            [reitit.trie :as trie]
-            ;; FIXME: Should avoid coercion require here?
-            [reitit.coercion :as coercion]))
+            [reitit.trie :as trie]))
 
 ;;
 ;; Expand
@@ -70,25 +68,12 @@
         (:template match) (:required match) path-params)))))
 
 (defn match->path
+  "Create routing path from given match and optional query-parameters map."
   ([match]
    (match->path match nil))
   ([match query-params]
    (some-> match :path (cond-> (seq query-params)
-                         ;; TODO: Should the coercion be applied elsewhere (FE ns?) so the core ns doesn't depend
-                         ;; on the coercion?
-                         ;; NOTE: Re-creates coercer on every call, could this be pre-compiled somewhere
-                         ;; or memoized? Does it matter much?
-                         ;; TODO: query-coercer could be compiled in reitit.frontend/router, same as request coercers.
-                         (str "?" (let [coercion (-> match :data :coercion)
-                                        schema (when coercion
-                                                 (coercion/-compile-model coercion (-> match :data :parameters :query) nil))
-                                        coercer (when (and schema coercion)
-                                                  (coercion/-query-string-coercer coercion schema))
-                                        query-params (if coercer
-                                                       (coercer query-params :default)
-                                                       query-params)]
-                                    ;; Default encoding for values will handle values that aren't encoded using coercer
-                                    (impl/query-string query-params)))))))
+                         (str "?" (impl/query-string query-params))))))
 
 ;;
 ;; Different routers
