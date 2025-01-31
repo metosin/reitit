@@ -9,9 +9,10 @@ pom.xml.asc
 .nrepl-port
 /.nrepl-history
 /gh-pages
-/node_modules
+node_modules
 /_book
 figwheel_server.log
 /.idea
 .clj-kondo
 .shadow-cljs
+

@@ -10,23 +10,10 @@
             [malli.transform :as mt]
             [malli.util :as mu]
             [reitit.coercion :as coercion]
-            [clojure.string :as string]))
-
-;;
-;; coercion
-;;
-
-(defprotocol Coercer
-  (-decode [this value])
-  (-encode [this value])
-  (-validate [this value])
-  (-explain [this value]))
-
-(defprotocol TransformationProvider
-  (-transformer [this options]))
+            [reitit.coercion.malli.protocols :as p]))
 
 (defn- -provider [transformer]
-  (reify TransformationProvider
+  (reify p/TransformationProvider
     (-transformer [_ {:keys [strip-extra-keys default-values]}]
       (mt/transformer
        (if strip-extra-keys (mt/strip-extra-keys-transformer))
@@ -44,7 +31,7 @@
                             encoder (if t (m/encoder schema options t) identity)
                             validator (if validate (m/validator schema options) (constantly true))
                             explainer (m/explainer schema options)]
-                        (reify Coercer
+                        (reify p/Coercer
                           (-decode [_ value] (decoder value))
                           (-encode [_ value] (encoder value))
                           (-validate [_ value] (validator value))
@@ -59,20 +46,20 @@
           ;; decode: decode -> validate
           (fn [value format]
             (if-let [coercer (get-coercer format)]
-              (let [transformed (-decode coercer value)]
-                (if (-validate coercer transformed)
+              (let [transformed (p/-decode coercer value)]
+                (if (p/-validate coercer transformed)
                   transformed
-                  (let [error (-explain coercer transformed)]
+                  (let [error (p/-explain coercer transformed)]
                     (coercion/map->CoercionError
                      (assoc error :transformed transformed)))))
               value))
           ;; encode: decode -> validate -> encode
           (fn [value format]
-            (let [transformed (-decode default-coercer value)]
+            (let [transformed (p/-decode default-coercer value)]
               (if-let [coercer (get-coercer format)]
-                (if (-validate coercer transformed)
-                  (-encode coercer transformed)
-                  (let [error (-explain coercer transformed)]
+                (if (p/-validate coercer transformed)
+                  (p/-encode coercer transformed)
+                  (let [error (p/-explain coercer transformed)]
                     (coercion/map->CoercionError
                      (assoc error :transformed transformed))))
                 value))))))))
@@ -84,8 +71,8 @@
   (let [;; Always allow extra paramaters on query-parameters encoding
         open-schema (mu/open-schema schema)
         ;; Do not remove extra keys
-        string-transformer (if (satisfies? TransformationProvider string-transformer-provider)
-                             (-transformer string-transformer-provider (assoc options :strip-extra-keys false))
+        string-transformer (if (satisfies? p/TransformationProvider string-transformer-provider)
+                             (p/-transformer string-transformer-provider (assoc options :strip-extra-keys false))
                              string-transformer-provider)
         encoder (m/encoder open-schema options string-transformer)]
     (fn [value format]
@@ -132,7 +119,7 @@
          ;; Query-string-coercer needs to construct transfomer without strip-extra-keys so it will
          ;; use the transformer-provider directly.
          string-transformer-provider (:default (:string transformers))
-         transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)
+         transformers (walk/prewalk #(if (satisfies? p/TransformationProvider %) (p/-transformer % opts) %) transformers)
          compile (if lite (fn [schema options]
                             (compile (binding [l/*options* options] (l/schema schema)) options))
                           compile)]
