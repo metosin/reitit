@@ -9,7 +9,8 @@
             [malli.swagger :as swagger]
             [malli.transform :as mt]
             [malli.util :as mu]
-            [reitit.coercion :as coercion]))
+            [reitit.coercion :as coercion]
+            [clojure.string :as string]))
 
 ;;
 ;; coercion
@@ -79,11 +80,13 @@
 (defn- -query-string-coercer
   "Create coercer for query-parameters, always allows extra params and does
   encoding using string-transformer."
-  [schema transfomers options]
+  [schema string-transformer-provider options]
   (let [;; Always allow extra paramaters on query-parameters encoding
         open-schema (mu/open-schema schema)
         ;; Do not remove extra keys
-        string-transformer (-transformer string-transformer-provider (assoc options :strip-extra-keys false))
+        string-transformer (if (satisfies? TransformationProvider string-transformer-provider)
+                             (-transformer string-transformer-provider (assoc options :strip-extra-keys false))
+                             string-transformer-provider)
         encoder (m/encoder open-schema options string-transformer)]
     (fn [value format]
       (if encoder
@@ -126,6 +129,9 @@
   ([opts]
    (let [{:keys [transformers lite compile options error-keys encode-error] :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
+         ;; Query-string-coercer needs to construct transfomer without strip-extra-keys so it will
+         ;; use the transformer-provider directly.
+         string-transformer-provider (:default (:string transformers))
          transformers (walk/prewalk #(if (satisfies? TransformationProvider %) (-transformer % opts) %) transformers)
          compile (if lite (fn [schema options]
                             (compile (binding [l/*options* options] (l/schema schema)) options))
@@ -192,6 +198,6 @@
        (-response-coercer [_ schema]
          (-coercer schema :response transformers :encode opts))
        (-query-string-coercer [_ schema]
-         (-query-string-coercer schema transformers opts))))))
+         (-query-string-coercer schema string-transformer-provider opts))))))
 
 (def coercion (create default-options))

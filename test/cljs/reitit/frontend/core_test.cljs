@@ -1,6 +1,8 @@
 (ns reitit.frontend.core-test
   (:require [clojure.string :as str]
             [clojure.test :refer [are deftest is testing]]
+            [malli.core :as m]
+            [malli.transform :as mt]
             [reitit.coercion :as rc]
             [reitit.coercion.malli :as rcm]
             [reitit.coercion.schema :as rcs]
@@ -305,11 +307,26 @@
           (rf/match->path {:path "foo"} {:q :x})
           "foo?q=x")))
 
-  (is (= "foo?q=__x"
-         (rf/match->path {:data {:coercion rcm/coercion
-                                 :parameters {:query [[:map
-                                                       [:q {:decode/string (fn [s] (keyword (subs s 2)))
-                                                            :encode/string (fn [k] (str "__" (name k)))}
-                                                        :keyword]]]}}
-                          :path "foo"}
-                         {:q "x"}))))
+  (testing "default string transformer"
+    (is (= "foo?q=__x"
+           (rf/match->path {:data {:coercion rcm/coercion
+                                   :parameters {:query [[:map
+                                                         [:q {:decode/string (fn [s] (keyword (subs s 2)))
+                                                              :encode/string (fn [k] (str "__" (name k)))}
+                                                          :keyword]]]}}
+                            :path "foo"}
+                           {:q "x"}))))
+
+  (testing "custom string transformer"
+    (is (= "foo?q=--x"
+           (rf/match->path {:data {:coercion (rcm/create (assoc-in rcm/default-options
+                                                                   [:transformers :string :default]
+                                                                   (mt/transformer
+                                                                     {:name :foo-string
+                                                                      :encoders {:foo/type {:leave (fn [x] (str "--" x))}}})))
+                                   :parameters {:query [[:map
+                                                         [:q (m/-simple-schema
+                                                               {:type :foo/type
+                                                                :pred string?})]]]}}
+                            :path "foo"}
+                           {:q "x"})))))
