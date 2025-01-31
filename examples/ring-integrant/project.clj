@@ -2,7 +2,7 @@
   :description "Reitit Ring App with Integrant"
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [ring/ring-jetty-adapter "1.12.1"]
-                 [metosin/reitit "0.7.2"]
+                 [metosin/reitit "0.8.0-alpha1"]
                  [integrant "0.8.1"]]
   :main example.server
   :repl-options {:init-ns user}

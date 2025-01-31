@@ -12,10 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.8.0-alpha1 (2025-01-31)
 
 * Improve OpenAPI docs, plus don't emit `:description` in the wrong place [#702](https://github.com/metosin/reitit/pull/702)
-* *POTENTIALLY BREAKING* The frontend functions (href, push/replace-state, set-query) now
+* *POTENTIALLY BREAKING* The frontend functions (href, push/replace-state, navigate, set-query) now
   encode query-string values using configured coercion when possible (only Malli supports encoding).
     - You can use this to encode query parameter values before they are URL-encoded. This works for DateTimes, collections etc.
     - In most cases this shouldn't break existing uses, but it is possible even without
