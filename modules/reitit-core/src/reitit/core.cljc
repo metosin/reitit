@@ -68,10 +68,12 @@
         (:template match) (:required match) path-params)))))
 
 (defn match->path
+  "Create routing path from given match and optional query-parameters map."
   ([match]
    (match->path match nil))
   ([match query-params]
-   (some-> match :path (cond-> (seq query-params) (str "?" (impl/query-string query-params))))))
+   (some-> match :path (cond-> (seq query-params)
+                         (str "?" (impl/query-string query-params))))))
 
 ;;
 ;; Different routers

@@ -187,9 +187,10 @@
   The URL is formatted using Reitit frontend history handler, so using it with
   anchor element href will correctly trigger route change event.
 
-  Note: currently collections in query parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first."
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function."
   ([history name]
    (href history name nil))
   ([history name path-params]
@@ -208,9 +209,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState"
@@ -236,9 +238,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState"
@@ -264,9 +267,10 @@
 
   Will also trigger on-navigate callback on Reitit frontend History handler.
 
-  Note: currently collections in query-parameters are encoded as field-value
-  pairs separated by &, i.e. \"?a=1&a=2\", if you want to encode them
-  differently, convert the collections to strings first.
+  By default currently collections in query parameters are encoded as field-value
+  pairs separated by &, i.e. \"?a=1&a=2\". To encode them differently, you can
+  either use Malli coercion to encode values, or just turn the values to strings
+  before calling the function.
 
   See also:
   https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
@@ -289,13 +293,22 @@
   New query params can be given as a map, or a function taking
   the old params and returning the new modified params.
 
-  Note: The query parameter values aren't coereced, so the
-  update fn will see string values for all query params."
+  The current path is matched against the routing tree, and the match data
+  (schema, coercion) is used to encode the query parameters.
+  If the current path doesn't match any route, the query parameters
+  are parsed from the path without coercion and new values
+  are also stored without coercion encoding."
   ([history new-query-or-update-fn]
    (set-query history new-query-or-update-fn nil))
   ([history new-query-or-update-fn {:keys [replace] :as opts}]
    (let [current-path (-get-path history)
-         new-path (rf/set-query-params current-path new-query-or-update-fn)]
+         match (rf/match-by-path (:router history) current-path)
+         new-path (if match
+                    (let [query-params (if (fn? new-query-or-update-fn)
+                                         (new-query-or-update-fn (:query (:parameters match)))
+                                         new-query-or-update-fn)]
+                      (rf/match->path match query-params (:fragment (:parameters match))))
+                    (rf/set-query-params current-path new-query-or-update-fn))]
      (if replace
        (.replaceState js/window.history nil "" (-href history new-path))
        (.pushState js/window.history nil "" (-href history new-path)))

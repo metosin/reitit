@@ -148,6 +148,8 @@
             value))))
     (-response-coercer [this spec]
       (if (coerce-response? spec)
-        (coercion/-request-coercer this :response spec)))))
+        (coercion/-request-coercer this :response spec)))
+    (-query-string-coercer [this spec]
+      nil)))
 
 (def coercion (create default-options))

@@ -15,6 +15,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * Improve OpenAPI docs, plus don't emit `:description` in the wrong place [#702](https://github.com/metosin/reitit/pull/702)
+* *POTENTIALLY BREAKING* The frontend functions (href, push/replace-state, set-query) now
+  encode query-string values using configured coercion when possible (only Malli supports encoding).
+    - You can use this to encode query parameter values before they are URL-encoded. This works for DateTimes, collections etc.
+    - In most cases this shouldn't break existing uses, but it is possible even without
+      a custom encoding function, the default Malli string-transformer could encode some values differently
+      then previously.
 
 ## 0.7.2 (2024-09-02)
 
