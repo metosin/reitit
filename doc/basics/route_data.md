@@ -85,6 +85,8 @@ Resolved route tree:
 ;                    :roles #{:db-admin}}]]
 ```
 
+See also [nested parameter definitions for coercions](../ring/coercion.md#nested-parameter-definitions)
+
 ## Route Data Fragments
 
 Just like [fragments in React.js](https://reactjs.org/docs/fragments.html), we can create routing tree fragments by using empty path `""`. This allows us to add route data without accumulating to path.
