@@ -63,6 +63,36 @@ Handlers can access the coerced parameters via the `:parameters` key in the requ
                  :body {:total total}}))})
 ```
 
+
+### Nested parameter definitions
+
+Parameters are accumulated recursively along the route tree, just like
+other [route data](../basics/route_data.md). There is special case
+handling for merging eg. malli `:map` schemas.
+
+```clj
+(def router
+ (reitit.ring/router
+   ["/api" {:get {:parameters {:query [:map [:api-key :string]]}}}
+    ["/project/:project-id" {:get {:parameters {:path [:map [:project-id :int]]}}}
+     ["/task/:task-id" {:get {:parameters {:path [:map [:task-id :int]]
+                                           :query [:map [:details :boolean]]}
+                              :handler (fn [req] (prn req))}}]]]
+   {:data {:coercion reitit.coercion.malli/coercion}}))
+```
+
+```clj
+(-> (r/match-by-path router "/api/project/1/task/2") :result :get :data :parameters)
+; {:query [:map
+;          {:closed true}
+;          [:api-key :string]
+;          [:details :boolean]],
+;  :path [:map
+;         {:closed true}
+;         [:project-id :int]
+;         [:task-id :int]]}
+```
+
 ## Coercion Middleware
 
 Defining a coercion for a route data doesn't do anything, as it's just data. We have to attach some code to apply the actual coercion. We can use the middleware from `reitit.ring.coercion`:
