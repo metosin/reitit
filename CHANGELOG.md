@@ -14,7 +14,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.8.0-alpha1 (2025-01-31)
 
+**[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0-alpha1)**
+
 * Improve OpenAPI docs, plus don't emit `:description` in the wrong place [#702](https://github.com/metosin/reitit/pull/702)
+* Support reitit.walk for all IPersitentMap implementations, fixes coercion with
+  aleph 0.7.2 [#700](https://github.com/metosin/reitit/issues/700), [#701](https://github.com/metosin/reitit/pull/701)
 * *POTENTIALLY BREAKING* The frontend functions (href, push/replace-state, navigate, set-query) now
   encode query-string values using configured coercion when possible (only Malli supports encoding).
   [#716](https://github.com/metosin/reitit/pull/716)
@@ -24,6 +28,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
       then previously.
 
 ## 0.7.2 (2024-09-02)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.1..0.7.2)**
 
 * Speed up routes and inline it in code ring handler [#693](https://github.com/metosin/reitit/pull/693) [#693](https://github.com/metosin/reitit/pull/696)
 * Fix: Can't get descendants of classes [#555](https://github.com/metosin/reitit/issues/555)
@@ -38,6 +44,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```
 
 ## 0.7.1 (2024-06-30)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0..0.7.1)**
 
 * FIX: Route data maps ignore meta-merge options in 0.7.0, breaking compatibility [#679](https://github.com/metosin/reitit/issues/679)
 * FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
@@ -54,6 +62,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ```
 
 ## 0.7.0 (2024-04-30)
+
+**[compare](https://github.com/metosin/reitit/compare/0.6.0..0.7.0)**
 
 The OpenAPI3 release, Year in the making - the changes span over multiple repositories.
 
@@ -89,6 +99,8 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 
 ## 0.7.0-alpha8 (2024-04-30)
 
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha7...0.7.0-alpha8)**
+
 * Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
 * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
 * **BREAKING** OpenAPI support is now clj only
@@ -109,6 +121,8 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 
 ## 0.7.0-alpha7 (2023-10-03)
 
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha6...0.7.0-alpha7)**
+
 * Revert the group id change from alpha6
 * New release to bring alpha6 changes to the old group id
 * Updated dependencies:
@@ -117,9 +131,9 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 [metosin/ring-swagger-ui "4.19.1"] is available but we use "4.18.1"
 ```
 
-**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha6...0.7.0-alpha7)**
-
 ## 0.7.0-alpha6 (2023-09-11)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha5...0.7.0-alpha6)**
 
 * **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
 * **BREAKING**: new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
@@ -127,9 +141,9 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 * **NOTE!**: all reitit libraries are now under the `fi.metosin` group on clojars instead of `metosin`. Use `fi.metosin/reitit` in your dependencies instead of `metosin/reitit` to get new versions.
     - **Reverted in alpha7 due to problems with renaming artifacts**
 
-**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha5...0.7.0-alpha6)**
-
 ## 0.7.0-alpha5 (2023-06-14)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha4...0.7.0-alpha5)**
 
 * **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
 * **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
@@ -142,28 +156,28 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 [com.fasterxml.jackson.core/jackson-databind "2.15.1"] is available but we use "2.14.2"
 ```
 
-**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha4...0.7.0-alpha5)**
-
 ## 0.7.0-alpha4 (2023-05-17)
-
-* OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
 
 **[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha3...0.7.0-alpha4)**
 
-## 0.7.0-alpha3 (2023-05-05)
+* OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
 
-* Compile `reitit.Trie` with Java 1.8 target for compatibility
+## 0.7.0-alpha3 (2023-05-05)
 
 **[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha2...0.7.0-alpha3)**
 
+* Compile `reitit.Trie` with Java 1.8 target for compatibility
+
 ## 0.7.0-alpha2 (2023-05-04)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha1...0.7.0-alpha2)**
 
 * Fix reading fragment string on `Html5History` initialization
 * Add fragment string parameter to reitit-frontend functions ([#604](https://github.com/metosin/reitit/pull/604))
 
-**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha1...0.7.0-alpha2)**
-
 ## 0.7.0-alpha1 (2023-05-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.6.0...0.7.0-alpha1)**
 
 * Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
 * Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
@@ -175,9 +189,9 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 [ring/ring-core "1.10.0"] is available but we use "1.9.6"
 ```
 
-**[compare](https://github.com/metosin/reitit/compare/0.6.0...0.7.0-alpha1)**
-
 ## 0.6.0 (2023-02-21)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.18...0.6.0)**
 
 * Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
 * reloading-ring-handler [#584](https://github.com/metosin/reitit/pull/584)
@@ -204,22 +218,20 @@ The OpenAPI3 release, Year in the making - the changes span over multiple reposi
 [com.fasterxml.jackson.core/jackson-databind "2.14.2"] is available but we use "2.14.1"
 ```
 
-**[compare](https://github.com/metosin/reitit/compare/0.5.18...0.6.0)**
-
 ## 0.5.18 (2022-04-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.17...0.5.18)**
 
 * FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
 * Save three seq constructions [#537](https://github.com/metosin/reitit/pull/537)
 * update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
 * Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
 
-**[compare](https://github.com/metosin/reitit/compare/0.5.17...0.5.18)**
-
 ## 0.5.17 (2022-03-10)
 
-* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
-
 **[compare](https://github.com/metosin/reitit/compare/0.5.16...0.5.17)**
+
+* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
 
 ## 0.5.16 (2022-02-15)
 
