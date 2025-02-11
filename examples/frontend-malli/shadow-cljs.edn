@@ -1,0 +1,13 @@
+{:builds
+ {:app {:asset-path "/js"
+        :modules {:main {:entries [frontend.core]}}
+        :output-dir "target/public/js"
+        :target :browser}}
+ :dependencies [[reagent "1.2.0"]
+                [metosin/reitit "0.8.0-alpha1"]
+                [metosin/reitit-malli "0.8.0-alpha1"]
+                [metosin/reitit-frontend "0.8.0-alpha1"]
+                [fipp "0.6.23"]]
+ :dev-http {3000 ["resources/public" "target/public"]}
+ :nrepl {:port 3333}
+ :source-paths ["src"]}
