@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
+
 ## 0.8.0-alpha1 (2025-01-31)
 
 **[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0-alpha1)**
