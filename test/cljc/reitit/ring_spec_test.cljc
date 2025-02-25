@@ -125,7 +125,7 @@
        (ring/router
         ["/api"
          ["/plus/:e"
-          {:get {:responses {"200" {}}
+          {:get {:responses {200 {:description 1}}
                  :handler identity}}]]
         {:data {:middleware [rrc/coerce-exceptions-middleware
                              rrc/coerce-request-middleware
