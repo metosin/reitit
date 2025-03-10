@@ -3,7 +3,7 @@
             [reagent.dom :as rd]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
-            [reitit.coercion.malli :as rsm]
+            [reitit.coercion.frontend.malli :as rsm]
             [fipp.edn :as fedn]))
 
 (defn home-page []
