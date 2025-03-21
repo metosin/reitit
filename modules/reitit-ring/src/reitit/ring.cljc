@@ -227,18 +227,20 @@
    ;; TODO: ring.middleware.head/wrap-head
    ;; TODO: handle etags
    (defn -create-file-or-resource-handler
-     [response-fn {:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
+     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? paths not-found-handler]
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
-                        paths (constantly nil)
-                        not-found-handler (if path
-                                            (constantly nil)
-                                            (constantly {:status 404, :body "", :headers {}}))}}]
+                        index-redirect? true
+                        paths (constantly nil)}}]
      (let [options {:root root
                     :loader loader
                     :index-files? false
                     :allow-symlinks? allow-symlinks?}
+           not-found-handler (or not-found-handler
+                                 (if path
+                                   (constantly nil)
+                                   (constantly {:status 404, :body "", :headers {}})))
            path-size (count path)
            create (fn [handler]
                     (fn
@@ -254,8 +256,10 @@
                                     (or (response path)
                                         (loop [[file & files] index-files]
                                           (if file
-                                            (if (response (join-paths path file))
-                                              (response/redirect (join-paths uri file))
+                                            (if-let [resp (response (join-paths path file))]
+                                              (if index-redirect?
+                                                (response/redirect (join-paths uri file))
+                                                resp)
                                               (recur files))))))
            handler (if path
                      (fn [request]
@@ -281,6 +285,7 @@
      | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader            | optional class loader to resolve the resources
      | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
      | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-resource-handler nil))
@@ -298,6 +303,7 @@
      | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader            | optional class loader to resolve the resources
      | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
      | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-file-handler nil))

@@ -61,6 +61,7 @@ This way, they are only served if none of the actual routes have matched.
 | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
 | :loader            | optional class loader to resolve the resources
 | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+| :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
 | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)
 
 
