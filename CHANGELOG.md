@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
+* Add `:index-redirect?` option to `create-file-handler` and `create-resource-handler` to allow serving index files without redirect [#725](https://github.com/metosin/reitit/pull/725)
 
 ## 0.8.0-alpha1 (2025-01-31)
 
