@@ -671,7 +671,33 @@
                      (app (request "/hello.xml") respond raise)
                      (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
                      (is (get-in @result [:headers "Last-Modified"]))
-                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))))))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))
+
+           (testing "with index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response))))))
+
+           (testing "without index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:index-redirect? false})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= 200 (:status response)))
+                   (is (= "<h1>hello</h1>\n" (slurp (:body response)))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= 200 (:status response)))
+                   (is (= "<h1>hello</h1>\n" (slurp (:body response)))))))))))))
 
 #?(:clj
    (deftest file-resource-handler-not-found-test
