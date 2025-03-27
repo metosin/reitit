@@ -54,15 +54,16 @@ This way, they are only served if none of the actual routes have matched.
 
 `reitit.ring/create-file-handler` and `reitit.ring/create-resource-handler` take optionally an options map to configure how the files are being served.
 
-| key                | description |
-| -------------------|-------------|
-| :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-| :root              | optional resource root, defaults to `\"public\"`
-| :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
-| :loader            | optional class loader to resolve the resources
-| :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-| :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
-| :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)
+| key                 | description |
+| --------------------|-------------|
+| :parameter          | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+| :root               | optional resource root, defaults to `\"public\"`
+| :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
+| :loader             | optional class loader to resolve the resources
+| :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+| :index-redirect?    | optional boolean: if true (default), redirect to index file, if false serve it directly
+| :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+| :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
 
 
 ### TODO

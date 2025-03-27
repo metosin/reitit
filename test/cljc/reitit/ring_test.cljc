@@ -697,7 +697,31 @@
                    (is (= "<h1>hello</h1>\n" (slurp (:body response)))))
                  (let [response (app (request "/docs/"))]
                    (is (= 200 (:status response)))
-                   (is (= "<h1>hello</h1>\n" (slurp (:body response)))))))))))))
+                   (is (= "<h1>hello</h1>\n" (slurp (:body response))))))))
+
+           (testing "with canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response))))))
+
+           (testing "without canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? false})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= 404 (:status response))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response)))))))))))
 
 #?(:clj
    (deftest file-resource-handler-not-found-test
