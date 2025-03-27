@@ -231,7 +231,7 @@
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
-                        index-redirect? true
+                        index-redirect? false
                         canonicalize-uris? true
                         paths (constantly nil)}}]
      (let [options {:root root
@@ -259,8 +259,14 @@
                                           (loop [[file & files] index-files]
                                             (if file
                                               (if-let [resp (response (join-paths path file))]
-                                                (if index-redirect?
+                                                (cond
+                                                  index-redirect?
                                                   (response/redirect (join-paths uri file))
+
+                                                  (not (str/ends-with? uri "/"))
+                                                  (response/redirect (str uri "/"))
+
+                                                  :else
                                                   resp)
                                                 (recur files)))))))
            handler (if path
@@ -287,8 +293,8 @@
      | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader             | optional class loader to resolve the resources
      | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :index-redirect?    | optional boolean: if true (default), redirect to index file, if false serve it directly
-     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :index-redirect?    | optional boolean: if true, redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), if path points to a folder with an index file, add a trailing slash (redirect) if it is missing.
      | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-resource-handler nil))
@@ -306,8 +312,8 @@
      | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
      | :loader             | optional class loader to resolve the resources
      | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :index-redirect?    | optional boolean: if true (default), redirect to index file, if false serve it directly
-     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :index-redirect?    | optional boolean: if true, redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), if path points to a folder with an index file, add a trailing slash (redirect) if it is missing.
      | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-file-handler nil))
