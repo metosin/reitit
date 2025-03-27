@@ -688,16 +688,61 @@
            (testing "without index-redirect"
              (let [app (ring/ring-handler
                         (ring/router
-                         ["/*" (create {:index-redirect? false})])
+                         ["/*" (create {:canonicalize-uris? false
+                                        :index-redirect? false})])
                         (ring/create-default-handler))]
 
                (testing "index-files"
                  (let [response (app (request "/docs"))]
-                   (is (= 200 (:status response)))
-                   (is (= "<h1>hello</h1>\n" (slurp (:body response)))))
+                   (is (= 404 (:status response))))
                  (let [response (app (request "/docs/"))]
                    (is (= 200 (:status response)))
-                   (is (= "<h1>hello</h1>\n" (slurp (:body response)))))))))))))
+                   (is (= "<h1>hello</h1>\n" (slurp (:body response))))))))
+
+           (testing "with canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (testing "not found if dir doesn't exist"
+                   (let [response (app (request "/foobar"))]
+                     (is (= 404 (:status response)))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= 302 (:status response))))
+                 (let [response (app (request "/docs/index.html"))]
+                   (is (= 200 (:status response)))))))
+
+           (testing "with canonicalize-uris and index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? true
+                                        :index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response))))))
+
+           (testing "without canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? false
+                                        :index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= 404 (:status response))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/foobar"))]
+                   (is (= 404 (:status response))))))))))))
 
 #?(:clj
    (deftest file-resource-handler-not-found-test

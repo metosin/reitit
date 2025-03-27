@@ -227,11 +227,12 @@
    ;; TODO: ring.middleware.head/wrap-head
    ;; TODO: handle etags
    (defn -create-file-or-resource-handler
-     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? paths not-found-handler]
+     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? canonicalize-uris? paths not-found-handler]
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
                         index-redirect? true
+                        canonicalize-uris? true
                         paths (constantly nil)}}]
      (let [options {:root root
                     :loader loader
@@ -254,13 +255,20 @@
                         (response/content-type response (mime-type/ext-mime-type path))))
            path-or-index-response (fn [path uri]
                                     (or (response path)
-                                        (loop [[file & files] index-files]
-                                          (if file
-                                            (if-let [resp (response (join-paths path file))]
-                                              (if index-redirect?
-                                                (response/redirect (join-paths uri file))
-                                                resp)
-                                              (recur files))))))
+                                        (when (or canonicalize-uris? (str/ends-with? uri "/"))
+                                          (loop [[file & files] index-files]
+                                            (if file
+                                              (if-let [resp (response (join-paths path file))]
+                                                (cond
+                                                  index-redirect?
+                                                  (response/redirect (join-paths uri file))
+
+                                                  (not (str/ends-with? uri "/"))
+                                                  (response/redirect (str uri "/"))
+
+                                                  :else
+                                                  resp)
+                                                (recur files)))))))
            handler (if path
                      (fn [request]
                        (let [uri (impl/url-decode (:uri request))]
@@ -278,15 +286,16 @@
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
-     | key                | description |
-     | -------------------|-------------|
-     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
-     | :loader            | optional class loader to resolve the resources
-     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
-     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | key                 | description |
+     | --------------------|-------------|
+     | :parameter          | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root               | optional resource root, defaults to `\"public\"`
+     | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
+     | :loader             | optional class loader to resolve the resources
+     | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?    | optional boolean: if true (default), redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-resource-handler nil))
      ([opts]
@@ -296,15 +305,16 @@
    (defn create-file-handler
      "A ring handler for serving file resources, configured via options:
 
-     | key                | description |
-     | -------------------|-------------|
-     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
-     | :loader            | optional class loader to resolve the resources
-     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :index-redirect?   | optional boolean: if true (default), redirect to index file, if false serve it directly
-     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | key                 | description |
+     | --------------------|-------------|
+     | :parameter          | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root               | optional resource root, defaults to `\"public\"`
+     | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
+     | :loader             | optional class loader to resolve the resources
+     | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?    | optional boolean: if true (default), redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
      ([]
       (create-file-handler nil))
      ([opts]
