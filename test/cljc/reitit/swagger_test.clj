@@ -392,7 +392,7 @@
   (let [app (swagger-ui/create-swagger-ui-handler
              {:path "/"
               :config {:jsonEditor true}})]
-    (is (= 302 (:status (app {:request-method :get, :uri "/"}))))
+    (is (= 200 (:status (app {:request-method :get, :uri "/"}))))
     (is (= 200 (:status (app {:request-method :get, :uri "/index.html"}))))
     (is (= {:jsonEditor true, :url "/swagger.json"}
            (->> {:request-method :get, :uri "/config.json"}

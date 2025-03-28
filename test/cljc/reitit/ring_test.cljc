@@ -526,9 +526,9 @@
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
-                     (is (= (redirect "/docs/index.html") response)))
+                     (is (= (redirect "/docs/") response)))
                    (let [response (app (request "/docs/"))]
-                     (is (= (redirect "/docs/index.html") response))))
+                     (is (= 200 (:status response)))))
 
                  (testing "not found"
                    (let [response (app (request "/not-found"))]
@@ -567,9 +567,9 @@
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
-                     (is (= (redirect "/docs/index.html") response)))
+                     (is (= (redirect "/docs/") response)))
                    (let [response (app (request "/docs/"))]
-                     (is (= (redirect "/docs/index.html") response))))
+                     (is (= 200 (:status response)))))
 
                  (testing "not found"
                    (let [response (app (request "/not-found"))]
@@ -609,9 +609,9 @@
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
-                     (is (= (redirect "/docs/index.html") response)))
+                     (is (= (redirect "/docs/") response)))
                    (let [response (app (request "/docs/"))]
-                     (is (= (redirect "/docs/index.html") response))))
+                     (is (= 200 (:status response)))))
 
                  (testing "not found"
                    (let [response (app (request "/not-found"))]
@@ -652,9 +652,9 @@
 
                  (testing "index-files"
                    (let [response (app (request "/docs"))]
-                     (is (= (redirect "/docs/index.html") response)))
+                     (is (= (redirect "/docs/") response)))
                    (let [response (app (request "/docs/"))]
-                     (is (= (redirect "/docs/index.html") response))))
+                     (is (= 200 (:status response)))))
 
                  (testing "not found"
                    (let [response (app {:uri "/not-found" :request-method :get})]
@@ -707,12 +707,12 @@
 
                (testing "index-files"
                  (let [response (app (request "/docs"))]
-                   (is (= (redirect "/docs/index.html") response)))
+                   (is (= (redirect "/docs/") response)))
                  (testing "not found if dir doesn't exist"
                    (let [response (app (request "/foobar"))]
                      (is (= 404 (:status response)))))
                  (let [response (app (request "/docs/"))]
-                   (is (= 302 (:status response))))
+                   (is (= 200 (:status response))))
                  (let [response (app (request "/docs/index.html"))]
                    (is (= 200 (:status response)))))))
 
