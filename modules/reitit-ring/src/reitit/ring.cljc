@@ -231,7 +231,7 @@
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
-                        index-redirect? true
+                        index-redirect? false
                         canonicalize-uris? true
                         paths (constantly nil)}}]
      (let [options {:root root
