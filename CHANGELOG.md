@@ -12,11 +12,19 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.8.0 (2025-03-28)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0)**
 
 * **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
 * **BREAKING**: Java 8 is no longer supported (Ring-core requires Apache Commons FileUpload which now requires Java 11)
-* Add `:index-redirect?` option to `create-file-handler` and `create-resource-handler` to allow serving index files without redirect [#725](https://github.com/metosin/reitit/pull/725)
+* File and resource handlers (`create-file-handler` and `create-resource-handler`)
+    * **BREAKING**: New default is to redirect from `dir` path to `dir/` and serve the index file (if found) on the path ending with `/`
+        * For example the Swagger UI handler now serves the index from `/api-docs/` instead of redirecting to `/api-docs/index.html` (both work)
+        * Mostly this is a visual change, though if you have unit tests checking for response status or redirect, those could break
+    * New option `:index-redirect?` (default false) allows enable redirecting to the index file, e.g. `dir` -> `dir/index.html` (same as the old default)
+    * New option `:canonicalize-uris?` (default true) enables redirect from `dir` to `dir/` if the index file exists for the path
+        * Without this option `dir` would return 404 and `dir/` and `dir/index.html` would return the file
 * Changes in 0.8.0-alpha1
 * Updated dependencies:
 

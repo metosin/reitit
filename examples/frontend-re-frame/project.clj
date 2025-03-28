@@ -1,7 +1,7 @@
 (defproject frontend-re-frame "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [org.clojure/clojurescript "1.11.132"]
-                 [metosin/reitit "0.8.0-alpha1"]
+                 [metosin/reitit "0.8.0"]
                  [reagent "1.2.0"]
                  [re-frame "0.10.6"]
                  [cljsjs/react "17.0.2-0"]

@@ -3,6 +3,6 @@
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [ring/ring-jetty-adapter "1.12.1"]
                  [aleph "0.7.1"]
-                 [metosin/reitit "0.8.0-alpha1"]
+                 [metosin/reitit "0.8.0"]
                  [metosin/ring-swagger-ui "5.9.0"]]
   :repl-options {:init-ns example.server})
