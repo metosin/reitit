@@ -15,7 +15,20 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
+* **BREAKING**: Java 8 is no longer supported (Ring-core requires Apache Commons FileUpload which now requires Java 11)
 * Add `:index-redirect?` option to `create-file-handler` and `create-resource-handler` to allow serving index files without redirect [#725](https://github.com/metosin/reitit/pull/725)
+* Changes in 0.8.0-alpha1
+* Updated dependencies:
+
+```
+[fipp "0.6.27"] is available but we use "0.6.26"
+[metosin/jsonista "0.3.13"] is available but we use "0.3.10"
+[metosin/malli "0.17.0"] is available but we use "0.16.4"
+[metosin/muuntaja "0.6.11"] is available but we use "0.6.10"
+[metosin/ring-swagger-ui "5.20.0"] is available but we use "5.9.0"
+[ring/ring-core "1.14.1"] is available but we use "1.12.2"
+[ring/ring-defaults "0.6.0"] is available but we use "0.5.0"
+```
 
 ## 0.8.0-alpha1 (2025-01-31)
 

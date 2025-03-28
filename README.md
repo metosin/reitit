@@ -71,9 +71,9 @@ All main modules bundled:
 
 Optionally, the parts can be required separately.
 
-Malli requires Clojure 1.11.
+Reitit requires Clojure 1.11 and Java 11.
 
-Malli is tested with the LTS releases Java 8, 11, 17 and 21.
+Reitit is tested with the LTS releases Java 11, 17 and 21.
 
 ## Quick start
 

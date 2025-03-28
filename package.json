@@ -9,6 +9,6 @@
     "karma-cljs-test": "^0.1.0"
   },
   "dependencies": {
-    "shadow-cljs": "^2.28.20"
+    "shadow-cljs": "^2.28.22"
   }
 }
