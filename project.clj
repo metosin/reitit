@@ -89,7 +89,7 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.12.0"]
+                   :dependencies [[org.clojure/clojure "1.11.4"]
                                   [thheller/shadow-cljs "2.28.22"]
                                   [org.clojure/clojurescript "1.11.132"]
 

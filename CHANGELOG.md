@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
+* **BREAKING**: Java 8 is no longer supported (Ring-core requires Apache Commons FileUpload which now requires Java 11)
 * Add `:index-redirect?` option to `create-file-handler` and `create-resource-handler` to allow serving index files without redirect [#725](https://github.com/metosin/reitit/pull/725)
 * Changes in 0.8.0-alpha1
 * Updated dependencies:
