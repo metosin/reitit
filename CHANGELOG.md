@@ -25,7 +25,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/malli "0.17.0"] is available but we use "0.16.4"
 [metosin/muuntaja "0.6.11"] is available but we use "0.6.10"
 [metosin/ring-swagger-ui "5.20.0"] is available but we use "5.9.0"
-[ring/ring-core "1.14.0"] is available but we use "1.12.2"
+[ring/ring-core "1.14.1"] is available but we use "1.12.2"
 [ring/ring-defaults "0.6.0"] is available but we use "0.5.0"
 ```
 

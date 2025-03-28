@@ -54,7 +54,7 @@
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
                          [mvxcvi/arrangement "2.1.0"]
-                         [ring/ring-core "1.14.0"]
+                         [ring/ring-core "1.14.1"]
 
                          [io.pedestal/pedestal.service "0.6.4"]]
 
@@ -108,7 +108,7 @@
 
                                   [orchestra "2021.01.01-1"]
 
-                                  [ring "1.14.0"]
+                                  [ring "1.14.1"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.5"]
                                   [metosin/ring-swagger-ui "5.20.0"]
