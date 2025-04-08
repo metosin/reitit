@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Improvements to mime type handling in `create-file-handler` and `create-resource-handler` [#733](https://github.com/metosin/reitit/pull/733)
+  * New `:mime-types` option to configure a map from file extension to mime type
+  * Don't set Content-Type header at all if mime type is not known
+
 ## 0.8.0 (2025-03-28)
 
 **[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0)**
