@@ -252,9 +252,9 @@
            response (fn [path]
                       (when-let [response (or (paths (join-paths "/" path))
                                               (response-fn path options))]
-                                (if-let [content-type (mime-type/ext-mime-type path mime-types)]
-                                        (response/content-type response content-type)
-                                        response)))
+                        (if-let [content-type (mime-type/ext-mime-type path mime-types)]
+                          (response/content-type response content-type)
+                          response)))
            path-or-index-response (fn [path uri]
                                     (or (response path)
                                         (when (or canonicalize-uris? (str/ends-with? uri "/"))
