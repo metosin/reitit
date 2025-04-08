@@ -742,7 +742,22 @@
                  (let [response (app (request "/docs/"))]
                    (is (= (redirect "/docs/index.html") response)))
                  (let [response (app (request "/foobar"))]
-                   (is (= 404 (:status response))))))))))))
+                   (is (= 404 (:status response)))))))
+           
+           (testing "with additional mime types"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:mime-types {"webmanifest" "application/manifest+json"}})])
+                        (ring/create-default-handler))
+                   response (app (request "/site.webmanifest"))]
+                  (is (= "application/manifest+json" (get-in response [:headers "Content-Type"])))))
+           (testing "when content type cannot be guessed"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create nil)])
+                        (ring/create-default-handler))
+                   response (app (request "/site.webmanifest"))]
+                  (is (not (contains? (:headers response) "Content-Type"))))))))))
 
 #?(:clj
    (deftest file-resource-handler-not-found-test
