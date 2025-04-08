@@ -227,7 +227,7 @@
    ;; TODO: ring.middleware.head/wrap-head
    ;; TODO: handle etags
    (defn -create-file-or-resource-handler
-     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? canonicalize-uris? paths not-found-handler]
+     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? canonicalize-uris? paths not-found-handler mime-types]
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
@@ -250,9 +250,11 @@
            join-paths (fn [& paths]
                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
            response (fn [path]
-                      (if-let [response (or (paths (join-paths "/" path))
-                                            (response-fn path options))]
-                        (response/content-type response (mime-type/ext-mime-type path))))
+                      (when-let [response (or (paths (join-paths "/" path))
+                                              (response-fn path options))]
+                                (if-let [content-type (mime-type/ext-mime-type path mime-types)]
+                                        (response/content-type response content-type)
+                                        response)))
            path-or-index-response (fn [path uri]
                                     (or (response path)
                                         (when (or canonicalize-uris? (str/ends-with? uri "/"))
@@ -295,7 +297,8 @@
      | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
      | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
      | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
-     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types"
      ([]
       (create-resource-handler nil))
      ([opts]
@@ -314,7 +317,8 @@
      | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
      | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
      | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
-     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types"
      ([]
       (create-file-handler nil))
      ([opts]
