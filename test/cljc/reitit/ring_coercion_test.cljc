@@ -696,6 +696,9 @@
          (let [app (ring/ring-handler
                     (ring/router
                      ["/foo" {:post {:responses {200 {:content {:default {:schema schema-200}}}
+                                                 201 {:content {"application/edn" {:schema schema-200}}}
+                                                 202 {:description "status code and content-type explicitly mentioned, but no :schema"
+                                                      :content {"application/edn" {} "application/json" {}}}
                                                  :default {:content {"application/json" {:schema schema-default}}}}
                                      :handler (fn [req]
                                                 {:status (-> req :body-params :status)
@@ -725,6 +728,19 @@
              (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
                     (call (request {:status 200 :response {:b 1} :format "application/edn"})))
                  "invalid response, different content-type"))
+           (testing "explicit response schema, but for the wrong content-type"
+             ;; TODO: we might want to rethink this behaviour!
+             (is (= {:status 201 :body "anything goes!"}
+                    (call (request {:status 201 :response "anything goes!"})))
+                 "no coercion applied"))
+           (testing "response config without :schema - default applies"
+             ;; TODO: we might want to rethink this behaviour!
+             (is (= {:status 202 :body {:b 1}}
+                    (call (request {:status 202 :response {:b 1}})))
+                 "valid response")
+             (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
+                    (call (request {:status 202 :response {:a 1}})))
+                 "invalid response"))
            (testing "default response schema"
              (is (= {:status 300 :body {:b 2}}
                     (call (request {:status 300 :response {:b 2}})))
