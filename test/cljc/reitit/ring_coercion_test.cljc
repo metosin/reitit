@@ -681,6 +681,62 @@
 
 
 #?(:clj
+   (deftest response-coercion-test
+     (doseq [[coercion schema-200 schema-default]
+             [[malli/coercion
+               [:map [:a :int]]
+               [:map [:b :int]]]
+              [schema/coercion
+               {:a s/Int}
+               {:b s/Int}]
+              [spec/coercion
+               {:a int?}
+               {:b int?}]]]
+       (testing (str coercion)
+         (let [app (ring/ring-handler
+                    (ring/router
+                     ["/foo" {:post {:responses {200 {:content {:default {:schema schema-200}}}
+                                                 :default {:content {"application/json" {:schema schema-default}}}}
+                                     :handler (fn [req]
+                                                {:status (-> req :body-params :status)
+                                                 :body (-> req :body-params :response)})}}]
+                     {:validate reitit.ring.spec/validate
+                      :data {:middleware [rrc/coerce-request-middleware
+                                          rrc/coerce-response-middleware]
+                             :coercion coercion}}))
+               call (fn [request]
+                      (try
+                        (app request)
+                        (catch ExceptionInfo e
+                          (select-keys (ex-data e) [:type :in]))))
+               request (fn [body]
+                         {:request-method :post
+                          :uri "/foo"
+                          :muuntaja/request {:format "application/json"}
+                          :muuntaja/response {:format (:format body "application/json")}
+                          :body-params body})]
+           (testing "explicit response schema"
+             (is (= {:status 200 :body {:a 1}}
+                    (call (request {:status 200 :response {:a 1}})))
+                 "valid response")
+             (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
+                    (call (request {:status 200 :response {:b 1}})))
+                 "invalid response")
+             (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
+                    (call (request {:status 200 :response {:b 1} :format "application/edn"})))
+                 "invalid response, different content-type"))
+           (testing "default response schema"
+             (is (= {:status 300 :body {:b 2}}
+                    (call (request {:status 300 :response {:b 2}})))
+                 "valid response")
+             (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
+                    (call (request {:status 300 :response {:a 2}})))
+                 "invalid response")
+             (is (= {:status 300 :body "anything goes!"}
+                    (call (request {:status 300 :response "anything goes!" :format "application/edn"})))
+                 "no coercion applied due to content-type")))))))
+
+#?(:clj
    (deftest muuntaja-test
      (let [app (ring/ring-handler
                 (ring/router

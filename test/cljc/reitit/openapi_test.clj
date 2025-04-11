@@ -67,9 +67,9 @@
                :responses {200 {:description "success"
                                 :body {:total int?}}
                            500 {:description "fail"}
-                           504 {:description "default"
-                                :content {:default {:schema {:error string?}}}
-                                :body {:masked string?}}}
+                           :default {:description "default"
+                                     :content {:default {:schema {:error string?}}}
+                                     :body {:masked string?}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
@@ -96,9 +96,9 @@
                :responses {200 {:description "success"
                                 :body [:map [:total int?]]}
                            500 {:description "fail"}
-                           504 {:description "default"
-                                :content {:default {:schema {:error string?}}}
-                                :body {:masked string?}}}
+                           :default {:description "default"
+                                     :content {:default {:schema {:error string?}}}
+                                     :body {:masked string?}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]
@@ -125,9 +125,9 @@
                :responses {200 {:description "success"
                                 :body {:total s/Int}}
                            500 {:description "fail"}
-                           504 {:description "default"
-                                :content {:default {:schema {:error s/Str}}}
-                                :body {:masked s/Str}}}
+                           :default {:description "default"
+                                     :content {:default {:schema {:error s/Str}}}
+                                     :body {:masked s/Str}}}
                :handler (fn [{{{:keys [z]} :path
                                xs :body} :parameters}]
                           {:status 200, :body {:total (+ (reduce + xs) z)}})}}]]]
@@ -200,10 +200,10 @@
                                                                      400 {:content {"application/json" {:schema {:type "string"}}}
                                                                           :description "kosh"}
                                                                      500 {:description "fail"}
-                                                                     504 {:description "default"
-                                                                          :content {"application/json" {:schema {:properties {"error" {:type "string"}}
-                                                                                                                 :required ["error"]
-                                                                                                                 :type "object"}}}}}
+                                                                     :default {:description "default"
+                                                                               :content {"application/json" {:schema {:properties {"error" {:type "string"}}
+                                                                                                                      :required ["error"]
+                                                                                                                      :type "object"}}}}}
                                                          :summary "plus with body"}}
                             "/api/malli/plus/{z}" {:get {:parameters [{:in "query"
                                                                        :name :x
@@ -242,11 +242,11 @@
                                                                       400 {:description "kosh"
                                                                            :content {"application/json" {:schema {:type "string"}}}}
                                                                       500 {:description "fail"}
-                                                                      504 {:description "default"
-                                                                           :content {"application/json" {:schema {:additionalProperties false
-                                                                                                                  :properties {:error {:type "string"}}
-                                                                                                                  :required [:error]
-                                                                                                                  :type "object"}}}}}
+                                                                      :default {:description "default"
+                                                                                :content {"application/json" {:schema {:additionalProperties false
+                                                                                                                       :properties {:error {:type "string"}}
+                                                                                                                       :required [:error]
+                                                                                                                       :type "object"}}}}}
                                                           :summary "plus with body"}}
                             "/api/schema/plus/{z}" {:get {:parameters [{:in "query"
                                                                         :name "x"
@@ -292,11 +292,11 @@
                                                                        400 {:description "kosh"
                                                                             :content {"application/json" {:schema {:type "string"}}}}
                                                                        500 {:description "fail"}
-                                                                       504 {:description "default"
-                                                                            :content {"application/json" {:schema {:additionalProperties false
-                                                                                                                   :properties {"error" {:type "string"}}
-                                                                                                                   :required ["error"]
-                                                                                                                   :type "object"}}}}}
+                                                                       :default {:description "default"
+                                                                                 :content {"application/json" {:schema {:additionalProperties false
+                                                                                                                        :properties {"error" {:type "string"}}
+                                                                                                                        :required ["error"]
+                                                                                                                        :type "object"}}}}}
                                                            :summary "plus with body"}}}}]
       (is (= expected spec))
       (is (= nil (validate spec))))))
