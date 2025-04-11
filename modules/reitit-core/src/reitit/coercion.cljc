@@ -184,8 +184,8 @@
 (defn response-coercers [coercion responses opts]
   (some->> (for [[status model] responses]
              (do
-               (when-not (int? status)
-                 (throw (ex-info "Response status must be int" {:status status})))
+               (when-not (or (= :default status) (int? status))
+                 (throw (ex-info "Response status must be int or :default" {:status status})))
                [status (response-coercer coercion model opts)]))
            (filter second) (seq) (into {})))
 
