@@ -171,8 +171,7 @@
                                                                       :deprecated true
                                                                       :required true
                                                                       :schema {:type "integer"
-                                                                               :format "int64"
-                                                                               :description "this is deprecated"}}
+                                                                               :format "int64"}}
                                                                      {:in "path"
                                                                       :name "z"
                                                                       :required true
@@ -221,8 +220,7 @@
                                                                        :required true
                                                                        :description "this is deprecated"
                                                                        :deprecated true
-                                                                       :schema {:type "integer"
-                                                                                :description "this is deprecated"}}
+                                                                       :schema {:type "integer"}}
                                                                       {:in "path"
                                                                        :name :z
                                                                        :required true
@@ -269,8 +267,7 @@
                                                                         :description "this is deprecated"
                                                                         :deprecated true
                                                                         :schema {:type "integer"
-                                                                                 :format "int32"
-                                                                                 :description "this is deprecated"}}
+                                                                                 :format "int32"}}
                                                                        {:in "path"
                                                                         :name "z"
                                                                         :required true
