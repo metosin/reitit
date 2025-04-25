@@ -139,6 +139,7 @@ Malli:
            [:x
             {:title "X parameter"
              :description "Description for X parameter"
+             :json-schema/deprecated true
              :json-schema/default 42}
             int?]
            [:y int?]]}}}]
@@ -151,6 +152,7 @@ Schema:
  {:post
   {:parameters
    {:body {:x (schema-tools.core/schema s/Num {:description "Description for X parameter"
+                                               :openapi/deprecated true
                                                :openapi/example 13
                                                :openapi/default 42})
            :y int?}}}}]
@@ -165,6 +167,7 @@ Spec:
    {:body (spec-tools.data-spec/spec ::foo
                                      {:x (schema-tools.core/spec {:spec int?
                                                                   :description "Description for X parameter"
+                                                                  :openapi/deprecated true
                                                                   :openapi/example 13
                                                                   :openapi/default 42})
                                       :y int?}}}}}]

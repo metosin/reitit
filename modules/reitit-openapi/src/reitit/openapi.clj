@@ -110,8 +110,8 @@
                (merge {:in (name in)
                        :name k
                        :required (required? k)
-                       :schema schema}
-                      (select-keys schema [:description])))
+                       :schema (dissoc schema :description :deprecated)}
+                      (select-keys schema [:description :deprecated])))
              (into []))})
      (when body
        ;; :body uses a single schema to describe every :requestBody
