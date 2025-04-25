@@ -207,6 +207,14 @@ is:
                          rrc/coerce-response-middleware]}})))
 ```
 
+The resolution logic for response coercers is:
+1. Get the response status, or `:default` from the `:responses` map
+2. From this map, get use the first of these to coerce:
+   1. `:content <content-type> :schema`
+   2. `:content :default :schema`
+   3. `:body`
+3. If nothing was found, do not coerce
+
 ## Pretty printing spec errors
 
 Spec problems are exposed as is in request & response coercion errors. Pretty-printers like [expound](https://github.com/bhb/expound) can be enabled like this:
