@@ -97,6 +97,10 @@
                                              :json-schema/default 30
                                              :json-schema/example 10}
                                      int?]
+                                    [:charset {:title "Which charset to use?"
+                                               :optional true
+                                               :json-schema/deprecated true}
+                                     string?]
                                     [:email {:title "Email address to search for"
                                              :json-schema/format "email"}
                                      string?]]}
