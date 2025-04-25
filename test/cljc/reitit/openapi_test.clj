@@ -47,7 +47,9 @@
       ["/plus/:z"
        {:get {:summary "plus"
               :tags [:plus :spec]
-              :parameters {:query {:x int?, :y int?}
+              :parameters {:query {:x int?, :y (st/spec {:spec int?
+                                                         :description "this is deprecated"
+                                                         :openapi/deprecated true})}
                            :path {:z int?}}
               :openapi {:operationId "spec-plus"
                         :deprecated true
@@ -78,7 +80,8 @@
       ["/plus/*z"
        {:get {:summary "plus"
               :tags [:plus :malli]
-              :parameters {:query [:map [:x int?] [:y int?]]
+              :parameters {:query [:map [:x int?] [:y {:json-schema/deprecated true
+                                                       :description "this is deprecated"} int?]]
                            :path [:map [:z int?]]}
               :openapi {:responses {400 {:description "kosh"
                                          :content {"application/json" {:schema {:type "string"}}}}}}
@@ -107,7 +110,8 @@
       ["/plus/*z"
        {:get {:summary "plus"
               :tags [:plus :schema]
-              :parameters {:query {:x s/Int, :y s/Int}
+              :parameters {:query {:x s/Int, :y (schema-tools.core/schema s/Int {:description "this is deprecated"
+                                                                                 :openapi/deprecated true})}
                            :path {:z s/Int}}
               :openapi {:responses {400 {:content {"application/json" {:schema {:type "string"}}}
                                          :description "kosh"}}}
@@ -163,9 +167,12 @@
                                                                                :format "int64"}}
                                                                      {:in "query"
                                                                       :name "y"
+                                                                      :description "this is deprecated"
+                                                                      :deprecated true
                                                                       :required true
                                                                       :schema {:type "integer"
-                                                                               :format "int64"}}
+                                                                               :format "int64"
+                                                                               :description "this is deprecated"}}
                                                                      {:in "path"
                                                                       :name "z"
                                                                       :required true
@@ -212,7 +219,10 @@
                                                                       {:in "query"
                                                                        :name :y
                                                                        :required true
-                                                                       :schema {:type "integer"}}
+                                                                       :description "this is deprecated"
+                                                                       :deprecated true
+                                                                       :schema {:type "integer"
+                                                                                :description "this is deprecated"}}
                                                                       {:in "path"
                                                                        :name :z
                                                                        :required true
@@ -256,8 +266,11 @@
                                                                        {:in "query"
                                                                         :name "y"
                                                                         :required true
+                                                                        :description "this is deprecated"
+                                                                        :deprecated true
                                                                         :schema {:type "integer"
-                                                                                 :format "int32"}}
+                                                                                 :format "int32"
+                                                                                 :description "this is deprecated"}}
                                                                        {:in "path"
                                                                         :name "z"
                                                                         :required true
