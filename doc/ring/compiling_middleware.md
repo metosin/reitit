@@ -27,8 +27,8 @@ To demonstrate the two approaches, below is the response coercion middleware wri
            coercion (-> match :data :coercion)
            opts (-> match :data :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (coerce-response coercers request response))
+         (let [coercer (response-coercer coercion responses opts)]
+           (coercer request response))
          response)))
     ([request respond raise]
      (let [method (:request-method request)
@@ -37,8 +37,8 @@ To demonstrate the two approaches, below is the response coercion middleware wri
            coercion (-> match :data :coercion)
            opts (-> match :data :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (handler request #(respond (coerce-response coercers request %))))
+         (let [coercer (response-coercer coercion responses opts)]
+           (handler request #(respond (coercer request %))))
          (handler request respond raise))))))
 ```
 
@@ -60,13 +60,13 @@ To demonstrate the two approaches, below is the response coercion middleware wri
    :spec ::rs/responses
    :compile (fn [{:keys [coercion responses]} opts]
               (if (and coercion responses)
-                (let [coercers (coercion/response-coercers coercion responses opts)]
+                (let [coercer (coercion/response-coercer coercion responses opts)]
                   (fn [handler]
                     (fn
                       ([request]
-                       (coercion/coerce-response coercers request (handler request)))
+                       (coercer request (handler request)))
                       ([request respond raise]
-                       (handler request #(respond (coercion/coerce-response coercers request %)) raise)))))))})
+                       (handler request #(respond (coercer request %)) raise)))))))})
 ```
 
 It has 50% less code, it's much easier to reason about and is much faster.

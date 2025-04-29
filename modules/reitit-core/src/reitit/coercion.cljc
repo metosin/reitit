@@ -130,29 +130,6 @@
               (request-coercion-failed! result coercion value in request serialize-failed-result)
               result)))))))
 
-(defn extract-response-format-default [request _]
-  (-> request :muuntaja/response :format))
-
-(defn response-coercer [coercion {:keys [content body]} {:keys [extract-response-format serialize-failed-result]
-                                                         :or {extract-response-format extract-response-format-default}}]
-  (if coercion
-    (let [format->coercer (some->> (concat (when body
-                                             [[:default (-response-coercer coercion body)]])
-                                           (for [[format {:keys [schema]}] content, :when schema]
-                                             [format (-response-coercer coercion schema)]))
-                                   (filter second) (seq) (into (array-map)))]
-      (when format->coercer
-        (fn [request response]
-          (let [format (extract-response-format request response)
-                value (:body response)
-                coercer (or (format->coercer format)
-                            (format->coercer :default)
-                            -identity-coercer)
-                result (coercer value format)]
-            (if (error? result)
-              (response-coercion-failed! result coercion value request response serialize-failed-result)
-              result)))))))
-
 (defn encode-error [data]
   (-> data
       (dissoc :request :response)
@@ -165,12 +142,6 @@
      (impl/fast-assoc acc k (coercer request)))
    {} coercers))
 
-(defn coerce-response [coercers request response]
-  (if response
-    (if-let [coercer (or (coercers (:status response)) (coercers :default))]
-      (impl/fast-assoc response :body (coercer request response))
-      response)))
-
 (defn request-coercers
   ([coercion parameters opts]
    (some->> (for [[k v] parameters, :when v]
@@ -181,13 +152,42 @@
          rcs (request-coercers coercion parameters (cond-> opts route-request (assoc ::skip #{:body})))]
      (if (and crc rcs) (into crc (vec rcs)) (or crc rcs)))))
 
-(defn response-coercers [coercion responses opts]
-  (some->> (for [[status model] responses]
-             (do
-               (when-not (int? status)
-                 (throw (ex-info "Response status must be int" {:status status})))
-               [status (response-coercer coercion model opts)]))
-           (filter second) (seq) (into {})))
+(defn extract-response-format-default [request _]
+  (-> request :muuntaja/response :format))
+
+(defn -format->coercer [coercion {:keys [content body]} _opts]
+  (->> (concat (when body
+                 [[:default (-response-coercer coercion body)]])
+               (for [[format {:keys [schema]}] content, :when schema]
+                 [format (-response-coercer coercion schema)]))
+       (filter second) (into (array-map))))
+
+(defn response-coercer [coercion responses {:keys [extract-response-format serialize-failed-result]
+                                            :or {extract-response-format extract-response-format-default}
+                                            :as opts}]
+  (when coercion
+    (let [status->format->coercer
+          (into {}
+                (for [[status model] responses]
+                  (do
+                    (when-not (or (= :default status) (int? status))
+                      (throw (ex-info "Response status must be int or :default" {:status status})))
+                    [status (-format->coercer coercion model opts)])))]
+      (when-not (every? empty? (vals status->format->coercer)) ;; fast path: return nil if there are no models to coerce
+        (fn [request response]
+          (let [format->coercer (or (status->format->coercer (:status response))
+                                    (status->format->coercer :default))
+                format (extract-response-format request response)
+                coercer (or (format->coercer format)
+                            (format->coercer :default))]
+            (if-not coercer
+              response
+              (let [value (:body response)
+                    coerced (coercer (:body response) format)
+                    result (if (error? coerced)
+                             (response-coercion-failed! coerced coercion value request response serialize-failed-result)
+                             coerced)]
+                (impl/fast-assoc response :body result)))))))))
 
 (defn -compile-parameters [data coercion]
   (impl/path-update data [[[:parameters any?] #(-compile-model coercion % nil)]]))

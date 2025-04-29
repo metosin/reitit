@@ -58,13 +58,13 @@
                 (not responses) {}
                 ;; mount
                 :else
-                (if-let [coercers (coercion/response-coercers coercion responses opts)]
+                (if-let [coercer (coercion/response-coercer coercion responses opts)]
                   (fn [handler]
                     (fn
                       ([request]
-                       (coercion/coerce-response coercers request (handler request)))
+                       (coercer request (handler request)))
                       ([request respond raise]
-                       (handler request #(respond (coercion/coerce-response coercers request %)) raise))))
+                       (handler request #(respond (coercer request %)) raise))))
                   {})))})
 
 (def coerce-exceptions-middleware

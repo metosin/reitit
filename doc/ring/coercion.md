@@ -37,7 +37,7 @@ Coercion can be attached to route data under `:coercion` key. There can be multi
 
 Parameters are defined in route data under `:parameters` key. It's value should be a map of parameter `:type` -> Coercion Schema.
 
-Responses are defined in route data under `:responses` key. It's value should be a map of http status code to a map which can contain `:body` key with Coercion Schema as value.
+Responses are defined in route data under `:responses` key. It's value should be a map of http status code to a map which can contain `:body` key with Coercion Schema as value. Additionally, the key `:default` specifies the coercion for other status codes.
 
 Below is an example with [Plumatic Schema](https://github.com/plumatic/schema). It defines schemas for `:query`, `:body` and `:path` parameters and for http 200 response `:body`.
 
@@ -54,7 +54,8 @@ Handlers can access the coerced parameters via the `:parameters` key in the requ
    :parameters {:query {:x s/Int}
                 :body {:y s/Int}
                 :path {:z s/Int}}
-   :responses {200 {:body {:total PositiveInt}}}
+   :responses {200 {:body {:total PositiveInt}}
+               :default {:body {:error s/Str}}}
    :handler (fn [{:keys [parameters]}]
               (let [total (+ (-> parameters :query :x)
                              (-> parameters :body :y)
@@ -205,6 +206,14 @@ is:
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})))
 ```
+
+The resolution logic for response coercers is:
+1. Get the response status, or `:default` from the `:responses` map
+2. From this map, get use the first of these to coerce:
+   1. `:content <content-type> :schema`
+   2. `:content :default :schema`
+   3. `:body`
+3. If nothing was found, do not coerce
 
 ## Pretty printing spec errors
 

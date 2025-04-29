@@ -69,7 +69,7 @@
                           {:status 200
                            :body {:color :red
                                   :pineapple true}})}
-         :post {:summary "Create a pizza | Multiple content-types, multiple examples"
+         :post {:summary "Create a pizza | Multiple content-types, multiple examples | Default response schema"
                 :request {:description "Create a pizza using json or EDN"
                           :content {"application/json" {:schema [:map
                                                                  [:color :keyword]
@@ -83,10 +83,16 @@
                                                                                            :pineapple false})}}}}}
                 :responses {200 {:description "Success"
                                  :content {:default {:schema [:map [:success :boolean]]
-                                                     :example {:success true}}}}}
+                                                     :example {:success true}}}}
+                            :default {:description "Not success"
+                                      :content {:default {:schema [:map [:error :string]]
+                                                          :example {:error "error"}}}}}
                 :handler (fn [_request]
-                           {:status 200
-                            :body {:success true}})}}]
+                           (if (< (Math/random) 0.5)
+                             {:status 200
+                              :body {:success true}}
+                             {:status 500
+                              :body {:error "an error happened"}}))}}]
 
 
        ["/contact"
