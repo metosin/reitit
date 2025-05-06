@@ -1009,7 +1009,7 @@
                  {:content
                   {"application/json"
                    {:schema
-                    {:$ref "#/components/schemas/reitit.openapi-test~1Plus"}}}}}}
+                    {:$ref "#/components/schemas/reitit.openapi-test.Plus"}}}}}}
                "/get"
                {:get
                 {:parameters
@@ -1019,19 +1019,15 @@
                   {:in "query"
                    :name :y
                    :required true
-                   :schema {:$ref "#/components/schemas/reitit.openapi-test~1Y"}}]}}}
+                   :schema {:$ref "#/components/schemas/reitit.openapi-test.Y"}}]}}}
               :components
               {:schemas
-               {"reitit.openapi-test/Plus"
+               {"reitit.openapi-test.Plus"
                 {:type "object"
                  :properties
                  {:x {:type "integer"}
-                  :y {:$ref "#/components/schemas/reitit.openapi-test~1Y"}}
+                  :y {:$ref "#/components/schemas/reitit.openapi-test.Y"}}
                  :required [:x :y]}
-                "reitit.openapi-test/Y" {:type "integer"}}}}
+                "reitit.openapi-test.Y" {:type "integer"}}}}
              spec))
-      ;; TODO: the OAS 3.1 json schema disallows "/" in :components :schemas keys,
-      ;; even though the text of the spec allows it. See:
-      ;; https://github.com/seriousme/openapi-schema-validator/blob/772375bf4895f0e641d103c27140cdd1d2afc34e/schemas/v3.1/schema.json#L282
-      #_
       (is (nil? (validate spec))))))
