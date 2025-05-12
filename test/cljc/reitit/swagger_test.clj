@@ -161,14 +161,14 @@
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
-                    :definitions {"reitit.swagger-test/req-key" {:type "string"
+                    :definitions {"reitit.swagger-test.req-key" {:type "string"
                                              :x-anyOf [{:type "string"}
                                                        {:type "string"}]}
-                                  "reitit.swagger-test/req-val" {:type "object"
+                                  "reitit.swagger-test.req-val" {:type "object"
                                              :x-anyOf [{:type "object"}
                                                        {:type "string"}]}
-                                  "reitit.swagger-test/resp-map" {:type "object"},
-                                  "reitit.swagger-test/resp-string" {:type "string"
+                                  "reitit.swagger-test.resp-map" {:type "object"},
+                                  "reitit.swagger-test.resp-string" {:type "string"
                                                  :minLength 1}}
                     :paths {"/api/spec/plus/{z}" {:patch {:parameters []
                                                           :summary "patch"
@@ -287,12 +287,12 @@
                                                                        :schema
                                                                        {:type "object"
                                                                         :additionalProperties
-                                                                        {:$ref "#/definitions/reitit.swagger-test~1req-val"}}}]
+                                                                        {:$ref "#/definitions/reitit.swagger-test.req-val"}}}]
                                                          :responses {200
                                                                      {:schema
-                                                                      {:$ref "#/definitions/reitit.swagger-test~1resp-map"
-                                                                       :x-anyOf [{:$ref "#/definitions/reitit.swagger-test~1resp-map"}
-                                                                                 {:$ref "#/definitions/reitit.swagger-test~1resp-string"}]}
+                                                                      {:$ref "#/definitions/reitit.swagger-test.resp-map"
+                                                                       :x-anyOf [{:$ref "#/definitions/reitit.swagger-test.resp-map"}
+                                                                                 {:$ref "#/definitions/reitit.swagger-test.resp-string"}]}
                                                                       :description ""}
                                                                      500 {:description "fail"}}
                                                          :summary "plus put with definitions"}}
@@ -532,24 +532,24 @@
                 {:get {:no-doc true
                        :handler (swagger/create-swagger-handler)}}]]))
         spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
-    (is (= {:definitions {"reitit.swagger-test/Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test~1X"},
-                                                                   :y {:$ref "#/definitions/reitit.swagger-test~1Y"}},
+    (is (= {:definitions {"reitit.swagger-test.Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test.X"},
+                                                                   :y {:$ref "#/definitions/reitit.swagger-test.Y"}},
                                                       :required [:x :y],
                                                       :type "object"},
-                          "reitit.swagger-test/X" {:format "int64",
+                          "reitit.swagger-test.X" {:format "int64",
                                                    :type "integer"},
-                          "reitit.swagger-test/Y" {:format "int64",
+                          "reitit.swagger-test.Y" {:format "int64",
                                                    :type "integer"},
-                          "reitit.swagger-test/Result" {:type "object",
+                          "reitit.swagger-test.Result" {:type "object",
                                                         :properties {:result {:type "integer", :format "int64"}},
                                                         :required [:result]}},
             :paths {"/post" {:post {:parameters [{:description "",
                                                   :in "body",
                                                   :name "body",
                                                   :required true,
-                                                  :schema {:$ref "#/definitions/reitit.swagger-test~1Plus"}}]
+                                                  :schema {:$ref "#/definitions/reitit.swagger-test.Plus"}}]
                                     :responses {200 {:description ""
-                                                     :schema {:$ref "#/definitions/reitit.swagger-test~1Result"}}}}}
+                                                     :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}
                     "/get" {:get {:parameters [{:in "query"
                                                 :name :x
                                                 :description ""
@@ -563,7 +563,7 @@
                                                 :required true
                                                 :format "int64"}]
                                   :responses {200 {:description ""
-                                                   :schema {:$ref "#/definitions/reitit.swagger-test~1Result"}}}}}}
+                                                   :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}}
             :swagger "2.0",
             :x-id #{:reitit.swagger/default}}
            spec))))
