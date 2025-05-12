@@ -21,6 +21,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **BREAKING** Fix & clarify `:responses :default` and `:content :default` handling. See [docs](./doc/ring/coercion.md). [#735](https://github.com/metosin/reitit/pull/735)
   * Summary: If `:responses <status>` is present, `:responses :default` is not used, even if `:responses <status>` defines no schema.
   * Should not break normal use, but might cause surprises related to defaults applying/not applying
+* **NOTE** This release depends on malli 0.18.0, which changes the format of OpenAPI & Swagger named schemas from `foo.bar/quux` to `foo.bar.quux`
 
 ## 0.8.0 (2025-03-28)
 
