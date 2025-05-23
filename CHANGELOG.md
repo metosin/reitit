@@ -12,12 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.9.0 (2025-05-23)
 
 * Improvements to mime type handling in `create-file-handler` and `create-resource-handler` [#733](https://github.com/metosin/reitit/pull/733)
   * New `:mime-types` option to configure a map from file extension to mime type
   * Don't set Content-Type header at all if mime type is not known
-* Fix location of openapi deprecated metadata [#714](https://github.com/metosin/reitit/pull/714)
+* Fix location of OpenAPI deprecated metadata [#714](https://github.com/metosin/reitit/pull/714)
 * **BREAKING** Fix & clarify `:responses :default` and `:content :default` handling. See [docs](./doc/ring/coercion.md). [#735](https://github.com/metosin/reitit/pull/735)
   * Summary: If `:responses <status>` is present, `:responses :default` is not used, even if `:responses <status>` defines no schema.
   * Should not break normal use, but might cause surprises related to defaults applying/not applying
