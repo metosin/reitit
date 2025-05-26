@@ -243,4 +243,5 @@ using all of the above techniques:
 
 - If you have a generic middleware, that doesn't depend on the route, use _top-level middleware_
 - If you want to apply a middleware to only a couple of routes, use _nested middleware_ (ie. _route data_)
-- If you want a middleware to apply to all routes, but use route-specific data, consider _top-level route data_ combined with [Compiling Middleware](compiling_middleware.md)
+- If you want a middleware to apply to all routes, but use route-specific data, you need _top-level route data_ combined with [Compiling Middleware](compiling_middleware.md)
+  - This is what many reitit features like [Ring Coercion](coercion.md) do. Check the examples & docs for the reitit features you want to use!
