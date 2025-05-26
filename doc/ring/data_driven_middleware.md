@@ -2,6 +2,8 @@
 
 Ring [defines middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware) as a function of type `handler & args => request => response`. It is relatively easy to understand and allows for good performance. A downside is that the middleware chain is just a opaque function, making things like debugging and composition hard. It is too easy to apply the middlewares in wrong order.
 
+For the basics of reitit middleware, [read this first](ring.md#middleware).
+
 Reitit defines middleware as data:
 
 1. A middleware can be defined as first-class data entries

@@ -141,7 +141,7 @@ Name-based reverse routing:
 
 # Middleware
 
-Middleware can be mounted using a `:middleware` key - either to top-level or under request method submap. Its value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
+Middleware can be mounted using a `:middleware` key in [Route Data](../basics/route_data.md) - either to top-level or under request method submap. Its value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
 
 1. normal ring middleware function `handler -> request -> response`
 2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
@@ -194,11 +194,56 @@ Top-level middleware, applied before any routing is done:
 (def app
   (ring/ring-handler
     (ring/router
-      ["/api" {:middleware [[mw :api]]}
+      ["/api" {:middleware [[wrap :api]]}
        ["/get" {:get handler}]])
     nil
-    {:middleware [[mw :top]]}))
+    {:middleware [[wrap :top]]}))
 
 (app {:request-method :get, :uri "/api/get"})
 ; {:status 200, :body [:top :api :ok]}
 ```
+
+Same middleware for all routes, using [top-level route data](route_data.md#top-level-route-data):
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api"
+       ["/get" {:get handler
+                :middleware [[wrap :specific]]}]]
+      {:data {:middleware [[wrap :generic]]}})))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:generic :specific :handler]}
+```
+
+## Execution order
+
+Here's a full example that shows the execution order of the middleware
+using all of the above techniques:
+
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[wrap :3-parent]]}
+       ["/get" {:get handler
+                :middleware [[wrap :4-route]]}]]
+      {:data {:middleware [[wrap :2-top-level-route-data]]}})
+    nil
+    {:middleware [[wrap :1-top]]}))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:1-top :2-top-level-route-data :3-parent :4-route :handler]}
+```
+
+## Which method should I use for defining middleware?
+
+- If you have middleware that you want to apply to the default handler (second argument of `ring/ring-handler`), use _top-level middleware_
+- If you have a generic middleware, that doesn't depend on the route, use _top-level middleware_ or _top-level route data_
+  - If you are using top-level route data anyway for some other reasons, it might be clearest to have all the middleware there. This is what most of the reitit examples do.
+- If you want to apply a middleware to only a couple of routes, use _nested middleware_ (ie. _route data_)
+- If you want a middleware to apply to all routes, but use route-specific data, you need _top-level route data_ combined with [Compiling Middleware](compiling_middleware.md)
+  - This is what many reitit features like [Ring Coercion](coercion.md) do. Check the examples & docs for the reitit features you want to use!
