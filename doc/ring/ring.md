@@ -241,6 +241,7 @@ using all of the above techniques:
 
 ## Which method should I use for defining middleware?
 
+- If you have middleware that you want to apply to the default handler (second argument of `ring/ring-handler`), use _top-level middleware_
 - If you have a generic middleware, that doesn't depend on the route, use _top-level middleware_ or _top-level route data_
   - If you are using top-level route data anyway for some other reasons, it might be clearest to have all the middleware there. This is what most of the reitit examples do.
 - If you want to apply a middleware to only a couple of routes, use _nested middleware_ (ie. _route data_)
