@@ -178,8 +178,9 @@
           (let [format->coercer (or (status->format->coercer (:status response))
                                     (status->format->coercer :default))
                 format (extract-response-format request response)
-                coercer (or (format->coercer format)
-                            (format->coercer :default))]
+                coercer (when format->coercer
+                          (or (format->coercer format)
+                              (format->coercer :default)))]
             (if-not coercer
               response
               (let [value (:body response)

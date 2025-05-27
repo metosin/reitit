@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* FIX: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
+
 ## 0.9.0 (2025-05-23)
 
 * Improvements to mime type handling in `create-file-handler` and `create-resource-handler` [#733](https://github.com/metosin/reitit/pull/733)
