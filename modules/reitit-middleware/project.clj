@@ -1,4 +1,4 @@
-(defproject metosin/reitit-middleware "0.9.0"
+(defproject metosin/reitit-middleware "0.9.1"
   :description "Reitit, common middleware bundled"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

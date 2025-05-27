@@ -12,9 +12,9 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.9.1 (2025-05-27)
 
-* FIX: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
+* **FIX**: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
 
 ## 0.9.0 (2025-05-23)
 
