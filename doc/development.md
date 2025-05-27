@@ -32,10 +32,6 @@ We use [Break Versioning][breakver]. Remember our promise: patch-level bumps nev
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
 ```bash
-# Check that you're using Java 8! Making the release with a newer Java version
-# means that it is broken when used with Java 8.
-java -version
-
 # new version
 ./scripts/set-version "1.0.0"
 
