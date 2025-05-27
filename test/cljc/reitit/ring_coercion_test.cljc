@@ -695,15 +695,22 @@
        (testing (str coercion)
          (let [app (ring/ring-handler
                     (ring/router
-                     ["/foo" {:post {:responses {200 {:content {:default {:schema schema-200}}}
-                                                 201 {:content {"application/edn" {:schema schema-200}}}
-                                                 202 {:description "status code and content-type explicitly mentioned, but no :schema"
-                                                      :content {"application/edn" {}
-                                                                "application/json" {}}}
-                                                 :default {:content {"application/json" {:schema schema-default}}}}
-                                     :handler (fn [req]
-                                                {:status (-> req :body-params :status)
-                                                 :body (-> req :body-params :response)})}}]
+                     [["/foo" {:post {:responses {200 {:content {:default {:schema schema-200}}}
+                                                  201 {:content {"application/edn" {:schema schema-200}}}
+                                                  202 {:description "status code and content-type explicitly mentioned, but no :schema"
+                                                       :content {"application/edn" {}
+                                                                 "application/json" {}}}
+                                                  :default {:content {"application/json" {:schema schema-default}}}}
+                                      :handler (fn [req]
+                                                 {:status (-> req :body-params :status)
+                                                  :body (-> req :body-params :response)})}}]
+                      ["/bar" {:post {:responses {200 {:content {:default {:schema schema-200}}}}
+                                      :handler (fn [req]
+                                                 {:status (-> req :body-params :status)
+                                                  :body (-> req :body-params :response)})}}]
+                      ["/quux" {:post {:handler (fn [req]
+                                                  {:status (-> req :body-params :status)
+                                                   :body (-> req :body-params :response)})}}]]
                      {:validate reitit.ring.spec/validate
                       :data {:middleware [rrc/coerce-request-middleware
                                           rrc/coerce-response-middleware]
@@ -713,40 +720,52 @@
                         (app request)
                         (catch ExceptionInfo e
                           (select-keys (ex-data e) [:type :in]))))
-               request (fn [body]
+               request (fn [uri body]
                          {:request-method :post
-                          :uri "/foo"
+                          :uri uri
                           :muuntaja/request {:format "application/json"}
                           :muuntaja/response {:format (:format body "application/json")}
                           :body-params body})]
            (testing "explicit response schema"
              (is (= {:status 200 :body {:a 1}}
-                    (call (request {:status 200 :response {:a 1}})))
+                    (call (request "/foo" {:status 200 :response {:a 1}})))
                  "valid response")
              (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
-                    (call (request {:status 200 :response {:b 1}})))
+                    (call (request "/foo" {:status 200 :response {:b 1}})))
                  "invalid response")
              (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
-                    (call (request {:status 200 :response {:b 1} :format "application/edn"})))
+                    (call (request "/foo" {:status 200 :response {:b 1} :format "application/edn"})))
                  "invalid response, different content-type"))
            (testing "explicit response schema, but for the wrong content-type"
              (is (= {:status 201 :body "anything goes!"}
-                    (call (request {:status 201 :response "anything goes!"})))
+                    (call (request "/foo" {:status 201 :response "anything goes!"})))
                  "no coercion applied"))
            (testing "response config without :schema"
              (is (= {:status 202 :body "anything goes!"}
-                    (call (request {:status 202 :response "anything goes!"})))
+                    (call (request "/foo" {:status 202 :response "anything goes!"})))
                  "no coercion applied"))
            (testing "default response schema"
              (is (= {:status 300 :body {:b 2}}
-                    (call (request {:status 300 :response {:b 2}})))
+                    (call (request "/foo" {:status 300 :response {:b 2}})))
                  "valid response")
              (is (= {:type :reitit.coercion/response-coercion, :in [:response :body]}
-                    (call (request {:status 300 :response {:a 2}})))
+                    (call (request "/foo" {:status 300 :response {:a 2}})))
                  "invalid response")
              (is (= {:status 300 :body "anything goes!"}
-                    (call (request {:status 300 :response "anything goes!" :format "application/edn"})))
-                 "no coercion applied due to content-type")))))))
+                    (call (request "/foo" {:status 300 :response "anything goes!" :format "application/edn"})))
+                 "no coercion applied due to content-type"))
+           (testing "no default"
+             (is (= {:status 200 :body {:a 1}}
+                    (call (request "/bar" {:status 200 :response {:a 1}})))
+                 "valid response")
+             (testing "unlisted response code"
+               (is (= {:status 202 :body "anything goes!"}
+                      (call (request "/bar" {:status 202 :response "anything goes!"})))
+                   "no coercion applied")))
+           (testing "no response coercion"
+             (is (= {:status 200 :body "anything goes!"}
+                      (call (request "/quux" {:status 200 :response "anything goes!"})))
+                   "no coercion applied")))))))
 
 #?(:clj
    (deftest muuntaja-test
