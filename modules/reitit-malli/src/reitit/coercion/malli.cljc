@@ -78,8 +78,9 @@
               (if-let [coercer (get-coercer format)]
                 (if (-validate coercer transformed)
                   (-encode coercer transformed)
-                  (let [error (-explain coercer transformed)]
-                    (-on-invalid coercer transformed error)))
+                  (let [error (-explain coercer transformed)
+                        encoded (-encode coercer transformed)]
+                    (-on-invalid coercer encoded error)))
                 value))))))))
 
 (defn- -query-string-coercer
