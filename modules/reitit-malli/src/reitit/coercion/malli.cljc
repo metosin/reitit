@@ -20,7 +20,8 @@
   (-decode [this value])
   (-encode [this value])
   (-validate [this value])
-  (-explain [this value]))
+  (-explain [this value])
+  (-on-invalid [this value explained]))
 
 (defprotocol TransformationProvider
   (-transformer [this options]))
@@ -37,18 +38,24 @@
 (def json-transformer-provider (-provider (mt/json-transformer)))
 (def default-transformer-provider (-provider nil))
 
-(defn- -coercer [schema type transformers f {:keys [validate enabled options]}]
+(defn- -return-coercion-error
+  [value error]
+  (coercion/map->CoercionError (assoc error :transformed value)))
+
+(defn- -coercer [schema type transformers f {:keys [validate enabled options on-invalid]}]
   (if schema
     (let [->coercer (fn [t]
                       (let [decoder (if t (m/decoder schema options t) identity)
                             encoder (if t (m/encoder schema options t) identity)
                             validator (if validate (m/validator schema options) (constantly true))
-                            explainer (m/explainer schema options)]
+                            explainer (m/explainer schema options)
+                            report (or on-invalid -return-coercion-error)]
                         (reify Coercer
                           (-decode [_ value] (decoder value))
                           (-encode [_ value] (encoder value))
                           (-validate [_ value] (validator value))
-                          (-explain [_ value] (explainer value)))))
+                          (-explain [_ value] (explainer value))
+                          (-on-invalid [_ value explained] (report value explained)))))
           {:keys [formats default]} (transformers type)
           default-coercer (->coercer default)
           format-coercers (some->> (for [[f t] formats] [f (->coercer t)]) (filter second) (seq) (into {}))
@@ -63,8 +70,7 @@
                 (if (-validate coercer transformed)
                   transformed
                   (let [error (-explain coercer transformed)]
-                    (coercion/map->CoercionError
-                     (assoc error :transformed transformed)))))
+                    (-on-invalid coercer transformed error))))
               value))
           ;; encode: decode -> validate -> encode
           (fn [value format]
@@ -73,8 +79,7 @@
                 (if (-validate coercer transformed)
                   (-encode coercer transformed)
                   (let [error (-explain coercer transformed)]
-                    (coercion/map->CoercionError
-                     (assoc error :transformed transformed))))
+                    (-on-invalid coercer transformed error)))
                 value))))))))
 
 (defn- -query-string-coercer
@@ -120,6 +125,8 @@
    :default-values true
    ;; encode-error
    :encode-error nil
+   ;; custom handler for validation errors (vs returning them)
+   :on-invalid nil
    ;; malli options
    :options nil})
 

@@ -245,7 +245,8 @@
    (reduce custom-meta-merge-checking-parameters left (cons right more))))
 
 (deftest malli-coercion-test
-  (let [create (fn [middleware routes]
+  (let [most-recent (atom nil)
+        create (fn [middleware routes]
                  (ring/ring-handler
                   (ring/router
                    routes
@@ -269,6 +270,17 @@
                                                                 :handler (fn [req]
                                                                            {:status 200
                                                                             :body (-> req :parameters :body)})}}]
+
+                                              ["/warn" {:summary "log and return original"
+                                                        :coercion (reitit.coercion.malli/create {:transformers {},
+                                                                                                 :on-invalid (fn [value error]
+                                                                                                               (reset! most-recent error)
+                                                                                                               value)})
+                                                        :post {:parameters {:body [:map [:x int?]]}
+                                                               :responses {200 {:body [:map [:x int?]]}}
+                                                               :handler (fn [req]
+                                                                          {:status 200
+                                                                           :body (-> req :parameters :body)})}}]
 
                                               ["/skip" {:summary "skip"
                                                         :coercion (reitit.coercion.malli/create {:enabled false})
@@ -311,7 +323,16 @@
                                                                 :handler (fn [req]
                                                                            {:status 200
                                                                             :body (-> req :parameters :body)})}}]
-
+                                              ["/warn" {:summary "log and return original"
+                                                        :coercion (reitit.coercion.malli/create {:transformers {}
+                                                                                                 :on-invalid (fn [value error]
+                                                                                                               (reset! most-recent error)
+                                                                                                               value)})
+                                                        :post {:parameters {:body {:x int?}}
+                                                               :responses {200 {:body {:x int?}}}
+                                                               :handler (fn [req]
+                                                                          {:status 200
+                                                                           :body (-> req :parameters :body)})}}]
                                               ["/skip" {:summary "skip"
                                                         :coercion (reitit.coercion.malli/create {:enabled false})
                                                         :post {:parameters {:body {:x int?}}
@@ -396,6 +417,18 @@
                       :reitit.ring.coercion/coerce-request
                       :reitit.ring.coercion/coerce-response]
                      (mounted-middleware app "/api/no-op" :post))))
+
+            (testing "validate and log when invalid"
+              (reset! most-recent nil)
+              (is (= 123 (:body (app {:uri "/api/warn"
+                                      :request-method :post
+                                      :muuntaja/request {:format "application/edn"}
+                                      :body-params 123}))))
+              (is (= 123 (-> @most-recent :errors first :value)))
+              (is (= [:reitit.ring.coercion/coerce-exceptions
+                      :reitit.ring.coercion/coerce-request
+                      :reitit.ring.coercion/coerce-response]
+                     (mounted-middleware app "/api/warn" :post))))
 
             (testing "skipping coercion"
               (is (= nil (:body (app {:uri "/api/skip"

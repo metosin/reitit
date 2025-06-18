@@ -192,7 +192,8 @@
                 (is (= 500 status))))))))))
 
 (deftest malli-coercion-test
-  (let [create (fn [interceptors]
+  (let [most-recent (atom nil)
+        create (fn [interceptors]
                  (http/ring-handler
                   (http/router
                    ["/api"
@@ -213,6 +214,16 @@
                                                  {:status 200
                                                   :body (-> req :parameters :body)})}}]
 
+                    ["/warn" {:summary "log and return original"
+                              :coercion (reitit.coercion.malli/create {:transformers {},
+                                                                       :on-invalid (fn [value error]
+                                                                                     (reset! most-recent error)
+                                                                                     value)})
+                              :post {:parameters {:body [:map [:x int?]]}
+                                     :responses {200 {:body [:map [:x int?]]}}
+                                     :handler (fn [req]
+                                                {:status 200
+                                                 :body (-> req :parameters :body)})}}]
                     ["/skip" {:summary "skip"
                               :coercion (reitit.coercion.malli/create {:enabled false})
                               :post {:parameters {:body [:map [:x int?]]}
@@ -289,6 +300,19 @@
                   :reitit.http.coercion/coerce-response
                   :reitit.interceptor/handler]
                  (mounted-interceptor app "/api/validate" :post))))
+
+        (testing "validation, log on invalid"
+          (is (= 123 (:body (app {:uri "/api/warn"
+                                  :request-method :post
+                                  :muuntaja/request {:format "application/edn"}
+                                  :body-params 123}))))
+          (is (= [:reitit.http.coercion/coerce-exceptions
+                  :reitit.http.coercion/coerce-request
+                  :reitit.http.coercion/coerce-response
+                  :reitit.interceptor/handler]
+                 (mounted-interceptor app "/api/warn" :post)))
+          (let [received @most-recent]
+            (is (= 123 (-> @most-recent :errors first :value)))))
 
         (testing "no tranformation & validation"
           (is (= 123 (:body (app {:uri "/api/no-op"
