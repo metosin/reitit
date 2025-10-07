@@ -206,20 +206,23 @@
            accept-route (fn [route]
                           (-> route second :openapi :id (or ::default) (trie/into-set) (set/intersection ids) seq))
            definitions (volatile! {})
-           transform-endpoint (fn [[method {{:keys [coercion no-doc openapi] :as data} :data
-                                            middleware :middleware
-                                            interceptors :interceptors}]]
-                                (if (and data (not no-doc))
-                                  [method
-                                   (meta-merge
-                                    (apply meta-merge (keep (comp :openapi :data) middleware))
-                                    (apply meta-merge (keep (comp :openapi :data) interceptors))
-                                    (if coercion
-                                      (-get-apidocs-openapi coercion data definitions))
-                                    (select-keys data [:tags :summary :description])
-                                    (strip-top-level-keys openapi))]))
+           transform-endpoint (fn [path [method {{:keys [coercion no-doc openapi] :as data} :data
+                                                 middleware :middleware
+                                                 interceptors :interceptors}]]
+                                (try
+                                  (if (and data (not no-doc))
+                                    [method
+                                     (meta-merge
+                                      (apply meta-merge (keep (comp :openapi :data) middleware))
+                                      (apply meta-merge (keep (comp :openapi :data) interceptors))
+                                      (if coercion
+                                        (-get-apidocs-openapi coercion data definitions))
+                                      (select-keys data [:tags :summary :description])
+                                      (strip-top-level-keys openapi))])
+                                  (catch Throwable t
+                                    (throw (ex-info "While building openapi docs" {:path path :method method} t)))))
            transform-path (fn [[p _ c]]
-                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
+                            (if-let [endpoint (some->> c (keep (partial transform-endpoint p)) (seq) (into {}))]
                               [(openapi-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
            paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
