@@ -12,6 +12,9 @@
 (s/def ::role #{:admin :user})
 (s/def ::roles (s/and (s/coll-of ::role :into #{}) set?))
 
+(defmulti my-multi (constantly :default))
+(defmethod my-multi :default [x] x)
+
 (deftest route-data-validation-test
   (testing "validation is turned off by default"
     (is (r/router?
@@ -85,6 +88,12 @@
          (ring/router
           ["/api" {:handler identity
                    :middleware '()}]
+          {:validate rrs/validate}))))
+
+  (testing "handler can be a multimethod"
+    (is (r/router?
+         (ring/router
+          ["/api" {:get {:handler my-multi}}]
           {:validate rrs/validate})))))
 
 (deftest coercion-spec-test
