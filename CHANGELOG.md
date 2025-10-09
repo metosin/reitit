@@ -12,6 +12,11 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## Unreleased
+
+* Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
+* Improve error reporting when generating OpenAPI fails [#754](https://github.com/metosin/reitit/pull/754)
+
 ## 0.9.1 (2025-05-27)
 
 * **FIX**: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
