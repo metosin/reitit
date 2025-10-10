@@ -58,7 +58,10 @@
   "Creates a Middleware to handle the multipart params, based on
   ring.middleware.multipart-params, taking same options. Mounts only
   if endpoint has `[:parameters :multipart]` defined. Publishes coerced
-  parameters into `[:parameters :multipart]` under request."
+  parameters into `[:parameters :multipart]` under request.
+
+  Note! You want to have multipart-middleware after coerce-request-middleware,
+  because coerce-request-middleware overwrites `:parameters`."
   ([]
    (create-multipart-middleware nil))
   ([options]
@@ -69,5 +72,8 @@
   "Middleware to handle the multipart params, based on
   ring.middleware.multipart-params, taking same options. Mounts only
   if endpoint has `[:parameters :multipart]` defined. Publishes coerced
-  parameters into `[:parameters :multipart]` under request."
+  parameters into `[:parameters :multipart]` under request.
+
+  Note! You want to have multipart-middleware after coerce-request-middleware,
+  because coerce-request-middleware overwrites `:parameters`."
   (create-multipart-middleware))
