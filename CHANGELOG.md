@@ -12,12 +12,25 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## Unreleased
+
+* Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
+* Improve error reporting when generating OpenAPI fails [#754](https://github.com/metosin/reitit/pull/754)
+
+## 0.9.1 (2025-05-27)
+
+* **FIX**: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
+
+## 0.9.0 (2025-05-23)
 
 * Improvements to mime type handling in `create-file-handler` and `create-resource-handler` [#733](https://github.com/metosin/reitit/pull/733)
   * New `:mime-types` option to configure a map from file extension to mime type
   * Don't set Content-Type header at all if mime type is not known
-* Fix location of openapi deprecated metadata [#714](https://github.com/metosin/reitit/pull/714)
+* Fix location of OpenAPI deprecated metadata [#714](https://github.com/metosin/reitit/pull/714)
+* **BREAKING** Fix & clarify `:responses :default` and `:content :default` handling. See [docs](./doc/ring/coercion.md). [#735](https://github.com/metosin/reitit/pull/735)
+  * Summary: If `:responses <status>` is present, `:responses :default` is not used, even if `:responses <status>` defines no schema.
+  * Should not break normal use, but might cause surprises related to defaults applying/not applying
+* **NOTE** This release depends on malli 0.18.0, which changes the format of OpenAPI & Swagger named schemas from `foo.bar/quux` to `foo.bar.quux`
 
 ## 0.8.0 (2025-03-28)
 

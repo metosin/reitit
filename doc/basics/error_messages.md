@@ -22,7 +22,7 @@ The default exception formatting uses `reitit.exception/exception`. It produces 
 ## Pretty Errors
 
 ```clj
-[metosin/reitit-dev "0.8.0"]
+[metosin/reitit-dev "0.9.1"]
 ```
 
 For human-readable and developer-friendly exception messages, there is `reitit.dev.pretty/exception` (in the `reitit-dev` module). It is inspired by the lovely errors messages of [ELM](https://elm-lang.org/blog/compiler-errors-for-humans) and [ETA](https://twitter.com/jyothsnasrin/status/1037703436043603968) and uses [fipp](https://github.com/brandonbloom/fipp), [expound](https://github.com/bhb/expound) and [spell-spec](https://github.com/bhauman/spell-spec) for most of heavy lifting.

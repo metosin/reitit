@@ -1,4 +1,4 @@
-# reitit 
+# reitit
 
 [![Build Status](https://github.com/metosin/reitit/actions/workflows/testsuite.yml/badge.svg)](https://github.com/metosin/reitit/actions)
 [![cljdoc badge](https://cljdoc.org/badge/metosin/reitit)](https://cljdoc.org/d/metosin/reitit/)
@@ -54,7 +54,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `metosin/reitit-sieppari` support for [Sieppari](https://github.com/metosin/sieppari)
 * `metosin/reitit-dev` - development utilities
 
-... * This is not a typo; the new `reitit-openapi` was released under the new, verified `fi.metosin` group. Existing 
+... * This is not a typo; the new `reitit-openapi` was released under the new, verified `fi.metosin` group. Existing
 modules will continue to be released under `metosin` for compatibility purposes.
 
 ## Extra modules
@@ -66,7 +66,7 @@ modules will continue to be released under `metosin` for compatibility purposes.
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.8.0"]
+[metosin/reitit "0.9.1"]
 ```
 
 Optionally, the parts can be required separately.
@@ -109,6 +109,7 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
 (require '[reitit.ring :as ring])
 (require '[reitit.coercion.spec])
 (require '[reitit.ring.coercion :as rrc])
+(require '[reitit.ring.middleware.exception :as exception])
 (require '[reitit.ring.middleware.muuntaja :as muuntaja])
 (require '[reitit.ring.middleware.parameters :as parameters])
 
@@ -124,39 +125,45 @@ A Ring routing app with input & output coercion using [data-specs](https://githu
       ;; router data affecting all routes
       {:data {:coercion   reitit.coercion.spec/coercion
               :muuntaja   m/instance
-              :middleware [parameters/parameters-middleware
+              :middleware [parameters/parameters-middleware ; decoding query & form params
+                           muuntaja/format-middleware       ; content negotiation
+                           exception/exception-middleware   ; converting exceptions to HTTP responses
                            rrc/coerce-request-middleware
-                           muuntaja/format-response-middleware
                            rrc/coerce-response-middleware]}})))
 ```
 
 Valid request:
 
 ```clj
-(app {:request-method :get
-      :uri "/api/math"
-      :query-params {:x "1", :y "2"}})
+(-> (app {:request-method :get
+          :uri "/api/math"
+          :query-params {:x "1", :y "2"}})
+    (update :body slurp))
 ; {:status 200
-;  :body {:total 3}}
+;  :body "{\"total\":3}"
+;  :headers {"Content-Type" "application/json; charset=utf-8"}}
 ```
 
 Invalid request:
 
 ```clj
-(app {:request-method :get
-      :uri "/api/math"
-      :query-params {:x "1", :y "a"}})
-;{:status 400,
-; :body {:type :reitit.coercion/request-coercion,
-;        :coercion :spec,
-;        :spec "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:$spec20745/x :$spec20745/y]), :type :map, :keys #{:y :x}, :keys/req #{:y :x}})",
-;        :problems [{:path [:y],
-;                    :pred "clojure.core/int?",
-;                    :val "a",
-;                    :via [:$spec20745/y],
-;                    :in [:y]}],
-;        :value {:x "1", :y "a"},
-;        :in [:request :query-params]}}
+(-> (app {:request-method :get
+          :uri "/api/math"
+          :query-params {:x "1", :y "a"}})
+    (update :body jsonista.core/read-value))
+; {:status 400
+;  :headers {"Content-Type" "application/json; charset=utf-8"}
+;  :body {"spec" "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:spec$8974/x :spec$8974/y]), :type :map, :leaf? false})"
+;         "value" {"x" "1"
+;                  "y" "a"}
+;         "problems" [{"via" ["spec$8974/y"]
+;                      "path" ["y"]
+;                      "pred" "clojure.core/int?"
+;                      "in" ["y"]
+;                      "val" "a"}]
+;         "type" "reitit.coercion/request-coercion"
+;         "coercion" "spec"
+;         "in" ["request" "query-params"]}}
 ```
 
 ## More examples

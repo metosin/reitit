@@ -1,7 +1,7 @@
 # Default Middleware
 
 ```clj
-[metosin/reitit-middleware "0.8.0"]
+[metosin/reitit-middleware "0.9.1"]
 ```
 
 Any Ring middleware can be used with `reitit-ring`, but using data-driven middleware is preferred as they are easier to manage and in many cases yield better performance. `reitit-middleware` contains a set of common ring middleware, lifted into data-driven middleware.
@@ -16,8 +16,6 @@ Any Ring middleware can be used with `reitit-ring`, but using data-driven middle
 
 `reitit.ring.middleware.parameters/parameters-middleware` to capture query- and form-params. Wraps
 `ring.middleware.params/wrap-params`.
-
-**NOTE**: This middleware will be factored into two parts: a query-parameters middleware and a Muuntaja format responsible for the the `application/x-www-form-urlencoded` body format.  cf. https://github.com/metosin/reitit/issues/134
 
 ## Exception Handling
 

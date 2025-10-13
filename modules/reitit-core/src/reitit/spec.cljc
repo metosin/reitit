@@ -37,8 +37,11 @@
 ;; Default data
 ;;
 
+(defn -multi? [x]
+  (instance? #?(:clj clojure.lang.MultiFn :cljs cljs.core.MultiFn) x))
+
 (s/def ::name keyword?)
-(s/def ::handler (s/or :fn fn? :var var?))
+(s/def ::handler (s/or :fn fn? :var var? :multi -multi?))
 (s/def ::no-doc boolean?)
 (s/def ::conflicting boolean?)
 (s/def ::default-data
