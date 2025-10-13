@@ -88,9 +88,9 @@ Using `create` with options to create the coercion instead of `coercion`:
    ;; strip-extra-keys (affects only predefined transformers)
    :strip-extra-keys true
    ;; add/set default values
+   ;; Can be false, true or a map of options to pass to malli.transform/default-value-transformer,
+   ;; for example {:malli.transform/add-optional-keys true}
    :default-values true
-   ;; add/set defaults also for optional keys. Corresponds to :malli.transform/add-optional-keys
-   :default-values-for-optional-keys false
    ;; encode-error
    :encode-error nil
    ;; malli options

@@ -26,11 +26,11 @@
 
 (defn- -provider [transformer]
   (reify TransformationProvider
-    (-transformer [_ {:keys [strip-extra-keys default-values default-values-for-optional-keys]}]
+    (-transformer [_ {:keys [strip-extra-keys default-values]}]
       (mt/transformer
        (if strip-extra-keys (mt/strip-extra-keys-transformer))
        transformer
-       (if default-values (mt/default-value-transformer {:malli.transform/add-optional-keys default-values-for-optional-keys}))))))
+       (if default-values (mt/default-value-transformer (if (map? default-values) default-values {})))))))
 
 (def string-transformer-provider (-provider (mt/string-transformer)))
 (def json-transformer-provider (-provider (mt/json-transformer)))
@@ -115,10 +115,10 @@
    :enabled true
    ;; strip-extra-keys (affects only predefined transformers)
    :strip-extra-keys true
-   ;; add/set default values
+   ;; add/set default values.
+   ;; Can be false, true or a map of options to pass to malli.transform/default-value-transformer,
+   ;; for example {:malli.transform/add-optional-keys true}
    :default-values true
-   ;; add/set defaults also for optional keys. Corresponds to :malli.transform/add-optional-keys
-   :default-values-for-optional-keys false
    ;; encode-error
    :encode-error nil
    ;; malli options
