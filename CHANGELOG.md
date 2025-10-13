@@ -17,6 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
 * Improve error reporting when generating OpenAPI fails [#754](https://github.com/metosin/reitit/pull/754)
 * Allow middleware registry to be used when defining middleware in `ring-handler`. See [docs](./doc/ring/middleware_registry.md). [#739](https://github.com/metosin/reitit/pull/739)
+* Allow passing options (eg. `:malli.transform/add-optional-keys`) to malli's `default-value-transformer`. See [docs](./doc/coercion/malli_coercion.md). [#756](https://github.com/metosin/reitit/pull/756)
 
 ## 0.9.1 (2025-05-27)
 
