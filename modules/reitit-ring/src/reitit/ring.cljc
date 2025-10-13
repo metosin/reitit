@@ -370,7 +370,7 @@
   ([router default-handler {:keys [middleware inject-match? inject-router?]
                             :or {inject-match? true, inject-router? true}}]
    (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
-         wrap (if middleware (partial middleware/chain middleware) identity)
+         wrap (if middleware #(middleware/chain middleware % nil (r/options router)) identity)
          enrich-request (create-enrich-request inject-match? inject-router?)
          enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
