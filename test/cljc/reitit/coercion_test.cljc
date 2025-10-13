@@ -140,6 +140,36 @@
         (let [m (r/match-by-path r "/none/kikka/abba")]
           (is (= nil (coercion/coerce! m))))))))
 
+(deftest malli-query-parameter-coercion-test
+  (let [router (fn [coercion]
+                 (r/router ["/test"
+                            {:coercion coercion
+                             :parameters {:query [:map
+                                                  [:a [:string {:default "a"}]]
+                                                  [:x {:optional true} [:keyword {:default :a}]]]}}]
+                           {:compile coercion/compile-request-coercers}))]
+    (testing "default values for :optional query keys do not get added"
+      (is (= {:query {:a "a"}}
+             (-> (r/match-by-path (router reitit.coercion.malli/coercion) "/test")
+                 (assoc :query-params {})
+                 (coercion/coerce!)))))
+    (testing "default values for :optional query keys get added when :malli.transform/add-optional-keys is set"
+      (is (= {:query {:a "a" :x :a}}
+             (-> (r/match-by-path (router (reitit.coercion.malli/create
+                                           (assoc reitit.coercion.malli/default-options
+                                                  :default-values {:malli.transform/add-optional-keys true}))) "/test")
+                 (assoc :query-params {})
+                 (coercion/coerce!)))))
+    (testing "default values can be disabled"
+      (is (thrown-with-msg?
+           ExceptionInfo
+           #"Request coercion failed"
+           (-> (r/match-by-path (router (reitit.coercion.malli/create
+                                         (assoc reitit.coercion.malli/default-options
+                                                :default-values false))) "/test")
+               (assoc :query-params {})
+               (coercion/coerce!)))))))
+
 (defn match-by-path-and-coerce! [router path]
   (if-let [match (r/match-by-path router path)]
     (assoc match :parameters (coercion/coerce! match))))

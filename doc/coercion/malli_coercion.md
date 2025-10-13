@@ -73,9 +73,10 @@ Using `create` with options to create the coercion instead of `coercion`:
   {:transformers {:body {:default reitit.coercion.malli/default-transformer-provider
                          :formats {"application/json" reitit.coercion.malli/json-transformer-provider}}
                   :string {:default reitit.coercion.malli/string-transformer-provider}
-                  :response {:default reitit.coercion.malli/default-transformer-provider}}
+                  :response {:default reitit.coercion.malli/default-transformer-provider
+                             :formats {"application/json" reitit.coercion.malli/json-transformer-provider}}}
    ;; set of keys to include in error messages
-   :error-keys #{:type :coercion :in :schema :value :errors :humanized #_:transformed}
+   :error-keys #{:type :coercion :in #_:schema :value #_:errors :humanized #_:transformed}
    ;; support lite syntax?
    :lite true
    ;; schema identity function (default: close all map schemas)
@@ -87,7 +88,11 @@ Using `create` with options to create the coercion instead of `coercion`:
    ;; strip-extra-keys (affects only predefined transformers)
    :strip-extra-keys true
    ;; add/set default values
+   ;; Can be false, true or a map of options to pass to malli.transform/default-value-transformer,
+   ;; for example {:malli.transform/add-optional-keys true}
    :default-values true
+   ;; encode-error
+   :encode-error nil
    ;; malli options
    :options nil})
 ```

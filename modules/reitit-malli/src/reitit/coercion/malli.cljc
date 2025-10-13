@@ -9,8 +9,7 @@
             [malli.swagger :as swagger]
             [malli.transform :as mt]
             [malli.util :as mu]
-            [reitit.coercion :as coercion]
-            [clojure.string :as string]))
+            [reitit.coercion :as coercion]))
 
 ;;
 ;; coercion
@@ -31,7 +30,7 @@
       (mt/transformer
        (if strip-extra-keys (mt/strip-extra-keys-transformer))
        transformer
-       (if default-values (mt/default-value-transformer))))))
+       (if default-values (mt/default-value-transformer (if (map? default-values) default-values {})))))))
 
 (def string-transformer-provider (-provider (mt/string-transformer)))
 (def json-transformer-provider (-provider (mt/json-transformer)))
@@ -116,7 +115,9 @@
    :enabled true
    ;; strip-extra-keys (affects only predefined transformers)
    :strip-extra-keys true
-   ;; add/set default values
+   ;; add/set default values.
+   ;; Can be false, true or a map of options to pass to malli.transform/default-value-transformer,
+   ;; for example {:malli.transform/add-optional-keys true}
    :default-values true
    ;; encode-error
    :encode-error nil
