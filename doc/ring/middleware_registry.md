@@ -2,7 +2,7 @@
 
 The `:middleware` syntax in `reitit-ring` also supports Keywords. Keywords are looked up from the Middleware Registry, which is a map of `keyword => IntoMiddleware`. Middleware registry should be stored under key `:reitit.middleware/registry` in the router options. If a middleware keyword isn't found in the registry, router creation fails fast with a descriptive error message.
 
-## Examples 
+## Examples
 
 Application using middleware defined in the Middleware Registry:
 
@@ -50,6 +50,20 @@ Router creation fails fast if the registry doesn't contain the middleware:
 ;|    :id |                         :description |
 ;|--------+--------------------------------------|
 ;| :bonus | reitit.ring_test$wrap_bonus@59fddabb |
+```
+
+Middleware defined in the registry can also be used on the `ring-handler` level:
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api"
+       ["/bonus" {:get (fn [{:keys [bonus]}]
+                         {:status 200, :body {:bonus bonus}})}]]
+      {::middleware/registry {:bonus wrap-bonus}})
+    nil
+    {:middleware [[:bonus 15]]}))
 ```
 
 ## When to use the registry?
