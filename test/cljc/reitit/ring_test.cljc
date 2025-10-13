@@ -114,6 +114,25 @@
         (is (= {:status 200, :body [:top :api :ok]}
                (app {:uri "/api/get" :request-method :get}))))))
 
+  (testing "middleware from registry"
+    (let [router (ring/router
+                  ["/api" {:middleware [:mw-foo]}
+                   ["/get" {:middleware [[:mw :inner]]
+                            :get handler}]]
+                  {::middleware/registry {:mw mw
+                                          :mw-foo #(mw % :foo)}})
+          app (ring/ring-handler router nil {:middleware [[:mw :top]]})]
+
+      (testing "router can be extracted"
+        (is (= router (ring/get-router app))))
+
+      (testing "not found"
+        (is (= nil (app {:uri "/favicon.ico"}))))
+
+      (testing "on match"
+        (is (= {:status 200, :body [:top :foo :inner :ok]}
+               (app {:uri "/api/get" :request-method :get}))))))
+
   (testing "named routes"
     (let [router (ring/router
                   [["/api"
@@ -743,7 +762,7 @@
                    (is (= (redirect "/docs/index.html") response)))
                  (let [response (app (request "/foobar"))]
                    (is (= 404 (:status response)))))))
-           
+
            (testing "with additional mime types"
              (let [app (ring/ring-handler
                         (ring/router
