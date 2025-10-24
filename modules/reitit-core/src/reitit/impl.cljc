@@ -198,9 +198,8 @@
     (:path route)))
 
 (defn throw-on-missing-path-params [template required path-params]
-  (when-not (every? #(contains? path-params %) required)
-    (let [defined (-> path-params keys set)
-          missing (set/difference required defined)]
+  (let [missing (set (remove #(get path-params %) required))]
+    (when-not (empty? missing)
       (ex/fail!
        (str "missing path-params for route " template " -> " missing)
        {:path-params path-params, :required required}))))

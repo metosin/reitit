@@ -13,8 +13,7 @@
 
   (testing "routers handling wildcard paths"
     (are [r name]
-      (testing "wild"
-
+      (testing (str name)
         (testing "simple"
           (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
             (is (= name (r/router-name router)))
@@ -52,10 +51,17 @@
                        :path-params nil})
                      (r/match-by-name router ::beer)))
               (is (r/partial-match? (r/match-by-name router ::beer)))
+              (is (r/partial-match? (r/match-by-name router ::beer {:size nil}))
+                  "nil counts as missing")
               (is (thrown-with-msg?
                    ExceptionInfo
                    #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
-                   (r/match-by-name! router ::beer))))))
+                   (r/match-by-name! router ::beer)))
+              (is (thrown-with-msg?
+                   ExceptionInfo
+                   #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+                   (r/match-by-name! router ::beer {:size nil}))
+                  "nil counts as missing"))))
 
         (testing "decode %-encoded path params"
           (let [router (r/router [["/one-param-path/:param1" ::one]
