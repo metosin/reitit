@@ -66,7 +66,7 @@ modules will continue to be released under `metosin` for compatibility purposes.
 All main modules bundled:
 
 ```clj
-[metosin/reitit "0.9.1"]
+[metosin/reitit "0.9.2-rc1"]
 ```
 
 Optionally, the parts can be required separately.
