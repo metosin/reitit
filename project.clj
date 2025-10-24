@@ -6,7 +6,8 @@
   :test-paths ["test/clj" "test/cljc"]
   :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
                                     :username :env/clojars_username
-                                    :password :env/clojars_password}]]
+                                    :password :env/clojars_password
+                                    :sign-release false}]]
   :repositories [["clojars" {:url "https://repo.clojars.org"
                              :username :env/clojars_username
                              :password :env/clojars_password}]]
