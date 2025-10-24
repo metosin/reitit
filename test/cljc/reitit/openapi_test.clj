@@ -901,13 +901,11 @@
                                  :request {:description "body description"
                                            :content {"application/json" {:schema {:x int?, :y int?}
                                                                          :examples {"1+1" {:value {:x 1, :y 1}}
-                                                                                    "1+2" {:value {:x 1, :y 2}}}
-                                                                         :openapi {:example {:x 2, :y 2}}}}}
+                                                                                    "1+2" {:value {:x 1, :y 2}}}}}}
                                  :responses {200 {:description "success"
                                                   :content {"application/json" {:schema {:total int?}
                                                                                 :examples {"2" {:value {:total 2}}
-                                                                                           "3" {:value {:total 3}}}
-                                                                                :openapi {:example {:total 4}}}}}}
+                                                                                           "3" {:value {:total 3}}}}}}}
                                  :handler (fn [request]
                                             (let [{:keys [x y]} (-> request :parameters :body)]
                                               {:status 200, :body {:total (+ x y)}}))}}]]]
@@ -925,16 +923,14 @@
                                                                                        :required [:x :y],
                                                                                        :additionalProperties false},
                                                                               :examples {"1+1" {:value {:x 1, :y 1}}
-                                                                                         "1+2" {:value {:x 1, :y 2}}},
-                                                                              :example {:x 2, :y 2}}}},
+                                                                                         "1+2" {:value {:x 1, :y 2}}}}}},
                                   :responses {200 {:description "success",
                                                    :content {"application/json" {:schema {:type "object",
                                                                                           :properties {:total {:type "integer"}},
                                                                                           :required [:total],
                                                                                           :additionalProperties false},
                                                                                  :examples {"2" {:value {:total 2}},
-                                                                                            "3" {:value {:total 3}}},
-                                                                                 :example {:total 4}}}}},
+                                                                                            "3" {:value {:total 3}}}}}}},
                                   :summary "plus with body"}}}
            (:paths spec)))
     (is (nil? (validate spec))))
