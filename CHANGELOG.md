@@ -19,6 +19,18 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Allow middleware registry to be used when defining middleware in `ring-handler`. See [docs](./doc/ring/middleware_registry.md). [#739](https://github.com/metosin/reitit/pull/739)
 * Allow passing options (eg. `:malli.transform/add-optional-keys`) to malli's `default-value-transformer`. See [docs](./doc/coercion/malli_coercion.md). [#756](https://github.com/metosin/reitit/pull/756)
 * **FIX**: `match-by-name!` returning `nil` instead of throwing an exception for some partial matches [#758](https://github.com/metosin/reitit/issues/758)
+* Updated dependencies:
+
+```
+[com.fasterxml.jackson.core/jackson-core "2.20.0"] is available but we use "2.18.2"
+[com.fasterxml.jackson.core/jackson-databind "2.20.0"] is available but we use "2.18.2"
+[compojure "1.7.2"] is available but we use "1.7.1"
+[fipp "0.6.29"] is available but we use "0.6.27"
+[metosin/malli "0.19.2"] is available but we use "0.18.0"
+[ring "1.15.3"] is available but we use "1.14.1"
+[ring/ring-core "1.15.3"] is available but we use "1.14.1"
+[ring/ring-defaults "0.7.0"] is available but we use "0.6.0"
+```
 
 ## 0.9.1 (2025-05-27)
 
