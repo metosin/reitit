@@ -25,6 +25,14 @@ clojure-lsp clean-ns
 The documentation lives under `doc` and it is hosted on [cljdoc](https://cljdoc.org). See their
 documentation for [library authors](https://github.com/cljdoc/cljdoc/blob/master/doc/userguide/for-library-authors.adoc)
 
+## Updating deps
+
+
+* `lein ancient upgrade`
+* Mention non-dev non-test dep upgrades in CHANGELOG.md
+* `npm update --save`
+* Make a PR, run CI
+
 ## Making a release
 
 We use [Break Versioning][breakver]. Remember our promise: patch-level bumps never include breaking changes!
@@ -36,7 +44,7 @@ We use [Break Versioning][breakver]. Remember our promise: patch-level bumps nev
 ./scripts/set-version "1.0.0"
 
 # create a release commit and a tag
-git add -u 
+git add -u
 git commit -m "Release 1.0.0"
 git tag 1.0.0
 
@@ -52,5 +60,5 @@ git push
 git push --tags
 ```
 
-* Remembor to update the changelog!
+* Remember to update the changelog!
 * Announce the release at least on #reitit in Clojurians.
