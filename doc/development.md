@@ -52,10 +52,8 @@ git commit -m "Release 1.0.0"
 git push
 
 # !!! check that tests pass on CI
-
-# Run automated release workflow by pushing a tag
-git tag 1.0.0
-git push --tags
 ```
 
+* Create a new release on github at <https://github.com/metosin/reitit/releases>
+  * This will trigger the automated release workflow <https://github.com/metosin/reitit/actions/workflows/release.yml>
 * Announce the release at least on #reitit in Clojurians.
