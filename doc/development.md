@@ -40,25 +40,22 @@ We use [Break Versioning][breakver]. Remember our promise: patch-level bumps nev
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
 ```bash
-# new version
+# create a release commit
 ./scripts/set-version "1.0.0"
 
-# create a release commit and a tag
+# !!! update the changelog
+
 git add -u
 git commit -m "Release 1.0.0"
-git tag 1.0.0
 
-# works
-./scripts/lein-modules install
-lein test
-
-# deploy to clojars
-CLOJARS_USERNAME=*** CLOJARS_PASSWORD=*** ./scripts/lein-modules do clean, deploy clojars
-
-# push the commit and the tag
+# push the commit
 git push
+
+# !!! check that tests pass on CI
+
+# Run automated release workflow by pushing a tag
+git tag 1.0.0
 git push --tags
 ```
 
-* Remember to update the changelog!
 * Announce the release at least on #reitit in Clojurians.
