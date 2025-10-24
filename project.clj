@@ -15,7 +15,6 @@
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  ;; TODO: need to verify that the code actually worked with Java1.8, see #242
   ;; Ring 1.13.1 drops support for Java 1.8 so lets target 11
   :javac-options ["-Xlint:unchecked" "-target" "11" "-source" "11"]
   :managed-dependencies [[metosin/reitit "0.9.1"]
