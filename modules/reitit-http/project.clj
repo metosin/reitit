@@ -1,4 +1,4 @@
-(defproject metosin/reitit-http "0.9.2-rc1"
+(defproject metosin/reitit-http "0.9.2"
   :description "Reitit: HTTP routing with interceptors"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"

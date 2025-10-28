@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## 0.9.2-rc1 (2025-10-24)
+## 0.9.2 (2025-10-28)
 
 * Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
 * Improve error reporting when generating OpenAPI fails [#754](https://github.com/metosin/reitit/pull/754)
