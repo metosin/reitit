@@ -202,9 +202,11 @@ is:
                                                     "application/edn" {:schema {:x s/Int}}
                                                     :default {:schema {:ww s/Int}}}}}
                          :handler ...}}]]
-    {:data {:middleware [rrc/coerce-exceptions-middleware
-                         rrc/coerce-request-middleware
-                         rrc/coerce-response-middleware]}})))
+    {:data {:muuntaja muuntaja.core/instance
+            :middleware [reitit.ring.middleware.muuntaja/format-middleware
+                         reitit.ring.coercion/coerce-exceptions-middleware
+                         reitit.ring.coercion/coerce-request-middleware
+                         reitit.ring.coercion/coerce-response-middleware]}})))
 ```
 
 The resolution logic for response coercers is:
@@ -214,6 +216,17 @@ The resolution logic for response coercers is:
    2. `:content :default :schema`
    3. `:body`
 3. If nothing was found, do not coerce
+
+To select the response content-type, you can either:
+1. Let muuntaja pick the content-type based on things like the request Accept header
+   - This is what most users want
+2. Set `:muuntaja/content-type` in the response to pick an explicit content type
+3. Set the `"Content-Type"` header in the response
+   - This disables muuntaja, so you need to encode your response body in some other way!
+   - This is not compatible with response schema checking, since coercion won't know what to do with the already-encoded response body.
+4. Use the `:extract-response-format` option to inject your own logic. See `reitit.coercion/extract-response-format-default` for the default.
+
+See also the [muuntaja content negotiation](./content_negotiation.md) docs.
 
 ## Pretty printing spec errors
 

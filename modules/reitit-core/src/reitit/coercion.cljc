@@ -152,8 +152,10 @@
          rcs (request-coercers coercion parameters (cond-> opts route-request (assoc ::skip #{:body})))]
      (if (and crc rcs) (into crc (vec rcs)) (or crc rcs)))))
 
-(defn extract-response-format-default [request _]
-  (-> request :muuntaja/response :format))
+(defn extract-response-format-default [request response]
+  (or (get-in response [:headers "Content-Type"])
+      (:muuntaja/content-type response)
+      (-> request :muuntaja/response :format)))
 
 (defn -format->coercer [coercion {:keys [content body]} _opts]
   (->> (concat (when body
