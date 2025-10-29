@@ -52,23 +52,34 @@
         {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
                :responses {200 {:description "Fetch a pizza as json or EDN"
                                 :content {"application/json" {:schema [:map
+                                                                       [:format [:enum :json]]
                                                                        [:color :keyword]
                                                                        [:pineapple :boolean]]
                                                               :examples {:white {:description "White pizza with pineapple"
-                                                                                 :value {:color :white
+                                                                                 :value {:format :json
+                                                                                         :color :white
                                                                                          :pineapple true}}
                                                                          :red {:description "Red pizza"
-                                                                               :value {:color :red
+                                                                               :value {:format :json
+                                                                                       :color :red
                                                                                        :pineapple false}}}}
                                           "application/edn" {:schema [:map
+                                                                      [:format [:enum :edn]]
                                                                       [:color :keyword]
                                                                       [:pineapple :boolean]]
                                                              :examples {:red {:description "Red pizza with pineapple"
-                                                                              :value (pr-str {:color :red :pineapple true})}}}}}}
+                                                                              :value (pr-str {:format :edn :color :red :pineapple true})}}}}}}
                :handler (fn [_request]
-                          {:status 200
-                           :body {:color :red
-                                  :pineapple true}})}
+                          (rand-nth [{:status 200
+                                      :muuntaja/content-type "application/json"
+                                      :body {:format :json
+                                             :color :red
+                                             :pineapple true}}
+                                     {:status 200
+                                      :muuntaja/content-type "application/edn"
+                                      :body {:format :edn
+                                             :color :red
+                                             :pineapple true}}]))}
          :post {:summary "Create a pizza | Multiple content-types, multiple examples | Default response schema"
                 :request {:description "Create a pizza using json or EDN"
                           :content {"application/json" {:schema [:map
