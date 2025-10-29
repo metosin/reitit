@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Improve & document how response schemas get picked in per-content-type coercion. See [docs](./doc/ring/coercion.md#per-content-type-coercion). [#745](https://github.com/metosin/reitit/issues/745).
+
 ## 0.9.2 (2025-10-28)
 
 * Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
