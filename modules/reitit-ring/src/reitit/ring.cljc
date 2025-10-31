@@ -298,7 +298,8 @@
      | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
      | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
      | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
-     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types"
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types
+     | :allow-symlinks?    | allow symlinks that lead to paths outside the root classpath directories, defaults to false"
      ([]
       (create-resource-handler nil))
      ([opts]
@@ -318,7 +319,8 @@
      | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
      | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
      | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
-     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types"
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types
+     | :allow-symlinks?    | allow symlinks that lead to paths outside the root classpath directories, defaults to false"
      ([]
       (create-file-handler nil))
      ([opts]
