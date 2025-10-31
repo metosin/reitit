@@ -705,13 +705,6 @@
                            :uri "/foo"
                            :muuntaja/request {:format request-format}
                            :body-params body})]
-            (testing "via :headers \"Content-Type\""
-              (is (= {:status 200 :body {:request "json" :response "json"} :headers {"Content-Type" "application/json"}}
-                     (normalize-json (call (request "application/json" {:request :json :response :json} {:status 200 :body {:request :json :response :json} :headers {"Content-Type" "application/json"}}))))
-                  "valid reponse")
-              (is (= {:in [:response :body] :type :reitit.coercion/response-coercion}
-                     (call (request "application/json" {:request :json :response :json} {:status 200 :body {:request :json :response :invalid} :headers {"Content-Type" "application/json"}})))
-                  "invalid reponse"))
             (testing "via :muuntaja/content-type"
               (is (= {:status 200 :body {:request "json" :response "json"} :muuntaja/content-type "application/json"}
                      (normalize-json (call (request "application/json" {:request :json :response :json} {:status 200 :body {:request :json :response :json} :muuntaja/content-type "application/json"}))))
@@ -870,65 +863,72 @@
                   (try
                     (-> (merge {:request-method :post :uri "/foo"} request)
                         (update :body #(ByteArrayInputStream. (.getBytes % "UTF-8")))
-                        (app) :body (maybe-slurp))
+                        (app))
                     (catch ExceptionInfo e
                       #_(ex-data e)
                       (select-keys (ex-data e) [:in :type]))))
-           read-json #(j/read-value % (j/object-mapper {:decode-key-fn true}))]
+           read-json #(j/read-value % (j/object-mapper {:decode-key-fn true}))
+           json-response? (fn [resp]
+                            (and (.startsWith (get-in resp [:headers "Content-Type"]) "application/json") ;; ignore the ;charset=utf-8 part
+                                 (= {:response "json"} (read-json (maybe-slurp (:body resp))))))
+           edn-response? (fn [resp]
+                           (and (.startsWith (get-in resp [:headers "Content-Type"]) "application/edn") ;; ignore the ;charset=utf-8 part
+                                (= {:response :edn} (read-string (maybe-slurp (:body resp))))))
+           custom-response? (fn [resp]
+                              (and (= (get-in resp [:headers "Content-Type"]) "application/custom")
+                                   (= "custom data" (maybe-slurp (:body resp)))))]
        (testing "response content-type defaults to json"
-         (is (= {:response "json"}
-                (read-json
-                 (call {:headers {"content-type" "application/json"}
-                        :body (j/write-value-as-string {:request :json})}
-                       {:status 200
-                        :body {:response :json}}))))
-         (is (= {:response "json"}
-                (read-json
-                 (call {:headers {"content-type" "application/edn"}
-                        :body (pr-str {:request :edn})}
-                       {:status 200
-                        :body {:response :json}}))))
+         (is (json-response?
+              (call {:headers {"content-type" "application/json"}
+                     :body (j/write-value-as-string {:request :json})}
+                    {:status 200
+                     :body {:response :json}})))
+         (is (json-response?
+              (call {:headers {"content-type" "application/edn"}
+                     :body (pr-str {:request :edn})}
+                    {:status 200
+                     :body {:response :json}})))
          (is (= {:in [:response :body] :type :reitit.coercion/response-coercion}
                 (call {:headers {"content-type" "application/json"}
-                        :body (j/write-value-as-string {:request :json})}
-                       {:status 200
-                        :body {:response :invalid}}))))
+                       :body (j/write-value-as-string {:request :json})}
+                      {:status 200
+                       :body {:response :invalid}}))
+             "invalid response"))
        (testing "response content-type negotiated via accept header"
-         (is (= {:response "json"}
-                (read-json
-                 (call {:headers {"content-type" "application/json" "accept" "application/json"}
-                        :body (j/write-value-as-string {:request :json})}
-                       {:status 200
-                        :body {:response :json}}))))
-         (is (= {:response :edn}
-                (read-string
-                 (call {:headers {"content-type" "application/json" "accept" "application/edn"}
-                        :body (j/write-value-as-string {:request :json})}
-                       {:status 200
-                        :body {:response :edn}}))))
+         (is (json-response?
+              (call {:headers {"content-type" "application/json" "accept" "application/json"}
+                     :body (j/write-value-as-string {:request :json})}
+                    {:status 200
+                     :body {:response :json}})))
+         (is (edn-response?
+              (call {:headers {"content-type" "application/json" "accept" "application/edn"}
+                     :body (j/write-value-as-string {:request :json})}
+                    {:status 200
+                     :body {:response :edn}})))
          (is (= {:in [:response :body] :type :reitit.coercion/response-coercion}
                 (call {:headers {"content-type" "application/json" "accept" "application/edn"}
                        :body (j/write-value-as-string {:request :json})}
                       {:status 200
-                       :body {:response :invalid}}))))
+                       :body {:response :invalid}}))
+             "invalid response"))
        (testing "response content-type set via :muuntaja/content-type"
-         (is (= {:response :edn}
-                (read-string
-                 (call {:headers {"content-type" "application/json" "accept" "application/json"}
-                        :body (j/write-value-as-string {:request :json})}
-                       {:status 200
-                        :muuntaja/content-type "application/edn"
-                        :body {:response :edn}}))))
+         (is (edn-response?
+              (call {:headers {"content-type" "application/json" "accept" "application/json"}
+                     :body (j/write-value-as-string {:request :json})}
+                    {:status 200
+                     :muuntaja/content-type "application/edn"
+                     :body {:response :edn}})))
          (is (= {:in [:response :body] :type :reitit.coercion/response-coercion}
                 (call {:headers {"content-type" "application/json" "accept" "application/json"}
                        :body (j/write-value-as-string {:request :json})}
                       {:status 200
                        :muuntaja/content-type "application/edn"
-                       :body {:response :invalid}}))))
+                       :body {:response :invalid}}))
+             "invalid response"))
        (testing "response content-type set via Content-Type header. muuntaja disabled for response."
-         (is (= "custom data"
-                (call {:headers {"content-type" "application/json" "accept" "application/json"}
-                       :body (j/write-value-as-string {:request :json})}
-                      {:status 200
-                       :headers {"Content-Type" "application/custom"}
-                       :body "custom data"})))))))
+         (is (custom-response?
+              (call {:headers {"content-type" "application/json" "accept" "application/json"}
+                     :body (j/write-value-as-string {:request :json})}
+                    {:status 200
+                     :headers {"Content-Type" "application/custom"}
+                     :body "custom data"})))))))
