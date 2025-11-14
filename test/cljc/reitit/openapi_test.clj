@@ -18,6 +18,7 @@
             [reitit.swagger-ui :as swagger-ui]
             [schema.core :as s]
             [schema-tools.core]
+            [clojure.spec.alpha :as sp]
             [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]))
 
@@ -1027,3 +1028,36 @@
                 "reitit.openapi-test.Y" {:type "integer"}}}}
              spec))
       (is (nil? (validate spec))))))
+
+(sp/def ::address string?)
+(sp/def ::zip int?)
+(sp/def ::city string?)
+(sp/def ::street string?)
+(sp/def ::or-and-schema (sp/keys :req-un [(or (and ::address ::zip) (and ::city ::street))]))
+
+(deftest openapi-spec-tests
+  (testing "s/keys + or maps to :anyOf"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+
+                 ["/spec" {:coercion spec/coercion
+                           :post {:summary "or-and-schema"
+                                  :request {:content {"application/json" {:schema ::or-and-schema}}}
+                                  :handler identity}}]]
+                {:validate reitit.ring.spec/validate
+                 :data {:middleware [openapi/openapi-feature]}}))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (nil? (validate spec)))
+      (is (= {:title "reitit.openapi-test/or-and-schema"
+              :type "object"
+              :properties {"address" {:type "string"}
+                           "zip" {:type "integer" :format "int64"}
+                           "city" {:type "string"}
+                           "street" {:type "string"}}
+              :anyOf [{:required ["address" "zip"]}
+                      {:required ["city" "street"]}]}
+             (get-in spec [:paths "/spec" :post :requestBody :content "application/json" :schema]))))))
