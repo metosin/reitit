@@ -109,3 +109,16 @@ Malli humanized error messages can be configured using `:options :errors`:
 ```
 
 See the malli docs for more info.
+
+## Custom registry
+
+Malli registry can be configured conveniently via `:options :registry`:
+
+```clj
+(require '[malli.core :as m])
+
+(reitit.coercion.malli/create
+ {:options
+  {:registry {:registry (merge (m/default-schemas)
+                               {:my-type :string})}}})
+```
