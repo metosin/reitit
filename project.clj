@@ -35,7 +35,7 @@
                          [metosin/reitit-sieppari "0.9.2"]
                          [metosin/reitit-pedestal "0.9.2"]
                          [metosin/ring-swagger-ui "5.20.0"]
-                         [metosin/spec-tools "0.10.7"]
+                         [metosin/spec-tools "0.10.8"]
                          [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.11"]
                          [metosin/jsonista "0.3.13"]
@@ -95,7 +95,7 @@
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
-                                  [metosin/spec-tools "0.10.7"]
+                                  [metosin/spec-tools "0.10.8"]
                                   [metosin/muuntaja "0.6.11"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.13"]
