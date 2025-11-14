@@ -607,8 +607,8 @@
                      :body
                      :humanized)))
           (is (= {:i ["SHOULD INT"] :x ["MISSING"]}
-                 (-> ((->app {:humanize-opts {:errors {:int {:error/message {:en "SHOULD INT"}}
-                                                       :malli.core/missing-key {:error/message {:en "MISSING"}}}}})
+                 (-> ((->app {:options {:errors {:int {:error/message {:en "SHOULD INT"}}
+                                                 :malli.core/missing-key {:error/message {:en "MISSING"}}}}})
                       (assoc request :body-params {:i "x"}))
                      :body
                      :humanized))))

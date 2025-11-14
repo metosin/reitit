@@ -128,7 +128,7 @@
   ([]
    (create nil))
   ([opts]
-   (let [{:keys [transformers lite compile options error-keys encode-error humanize-opts] :as opts} (merge default-options opts)
+   (let [{:keys [transformers lite compile options error-keys encode-error] :as opts} (merge default-options opts)
          show? (fn [key] (contains? error-keys key))
          ;; Query-string-coercer needs to construct transfomer without strip-extra-keys so it will
          ;; use the transformer-provider directly.
@@ -189,7 +189,7 @@
        (-encode-error [_ error]
          (cond-> error
            (show? :humanized) (assoc :humanized (me/humanize error (cond-> {:wrap :message}
-                                                                     humanize-opts (merge humanize-opts))))
+                                                                     options (merge options))))
            (show? :schema) (update :schema edn/write-string opts)
            (show? :errors) (-> (me/with-error-messages opts)
                                (update :errors (partial map #(update % :schema edn/write-string opts))))
