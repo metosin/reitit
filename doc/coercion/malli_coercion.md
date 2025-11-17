@@ -96,3 +96,29 @@ Using `create` with options to create the coercion instead of `coercion`:
    ;; malli options
    :options nil})
 ```
+
+## Configuring humanize error messages
+
+Malli humanized error messages can be configured using `:options :errors`:
+
+```clj
+(reitit.coercion.malli/create
+ {:options
+  {:errors (assoc malli.error/default-errors
+                  :malli.core/missing-key {:error/message {:en "MISSING"}})}})
+```
+
+See the malli docs for more info.
+
+## Custom registry
+
+Malli registry can be configured conveniently via `:options :registry`:
+
+```clj
+(require '[malli.core :as m])
+
+(reitit.coercion.malli/create
+ {:options
+  {:registry {:registry (merge (m/default-schemas)
+                               {:my-type :string})}}})
+```

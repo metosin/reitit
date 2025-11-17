@@ -583,7 +583,40 @@
                                                   :request-method :get}))]
 
         (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call m/schema custom-meta-merge-checking-schema)))
-        (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call identity custom-meta-merge-checking-parameters)))))))
+        (is (= {:status 200, :body {:total "FOO: this, BAR: that"}} (call identity custom-meta-merge-checking-parameters)))))
+
+    (testing "malli options"
+      (let [->app (fn [options]
+                    (ring/ring-handler
+                     (ring/router
+                      ["/api" {:get {:parameters {:body [:map
+                                                         [:i :int]
+                                                         [:x :string]]}
+                                     :handler (fn [{{:keys [body]} :parameters}]
+                                                {:status 200 :body body})}}]
+                      {:data {:middleware [rrc/coerce-exceptions-middleware
+                                           rrc/coerce-request-middleware
+                                           rrc/coerce-response-middleware]
+                              :coercion (malli/create options)}})))
+            request {:uri "/api"
+                     :request-method :get
+                     :muuntaja/request {:format "application/json"}}]
+        (testing "humanize options"
+          (is (= {:i ["should be an integer"] :x ["missing required key"]}
+                 (-> ((->app nil) (assoc request :body-params {:i "x"}))
+                     :body
+                     :humanized)))
+          (is (= {:i ["SHOULD INT"] :x ["MISSING"]}
+                 (-> ((->app {:options {:errors {:int {:error/message {:en "SHOULD INT"}}
+                                                 :malli.core/missing-key {:error/message {:en "MISSING"}}}}})
+                      (assoc request :body-params {:i "x"}))
+                     :body
+                     :humanized))))
+        (testing "overriding registry"
+          (is (= {:body {:i "x" :x "x"} :status 200}
+                 (-> ((->app {:options {:registry (merge (m/default-schemas)
+                                                         {:int :string})}})
+                      (assoc request :body-params {:i "x" :x "x"}))))))))))
 
 #?(:clj
 (deftest per-content-type-test
