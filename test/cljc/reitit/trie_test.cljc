@@ -41,7 +41,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/{:kerran}/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/{a.b/c}/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/{:a.b/c}/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/{" (trie/->CatchAll (keyword "avaruus}"))]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/{" (trie/->CatchAll (keyword "valtavan.suuri/avaruus}"))])))
@@ -53,7 +55,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/*avaruus"]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
@@ -65,7 +69,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
@@ -77,7 +83,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/{:kerran}/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/{a.b/c}/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/{:a.b/c}/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/*avaruus"]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/{*avaruus}"]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/{*valtavan.suuri/avaruus}"]))))
