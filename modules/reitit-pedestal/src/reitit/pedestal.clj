@@ -4,8 +4,7 @@
             [io.pedestal.interceptor.chain :as chain]
             [reitit.http]
             [reitit.interceptor])
-  (:import (java.lang.reflect Method)
-           (reitit.interceptor Executor)))
+  (:import (java.lang.reflect Method)))
 
 ;; TODO: variadic
 (defn- arities [f]
@@ -46,7 +45,7 @@
 
 (def pedestal-executor
   (reify
-    Executor
+    reitit.interceptor/Executor
     (queue [_ interceptors]
       (->> interceptors
            (map (fn [{::interceptor/keys [handler] :as interceptor}]
