@@ -108,7 +108,6 @@
     (testing "spec-coercion (shallow)"
       (testing "succeeds"
         (let [m (r/match-by-path r "/spec-shallow/1/abba")]
-          (def MATCH m)
           (is (= {:path {:keyword :abba, :number 1}, :query nil}
                  (coercion/coerce! m))))
         (let [m (r/match-by-path r "/spec-shallow/1/abba")]
