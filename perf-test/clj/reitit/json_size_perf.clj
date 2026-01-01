@@ -53,27 +53,27 @@
                   request (json-request data)
                   request! (request-stream request)]]
 
-      "10b"
+      ;; # 10b
       ;; 38µs (c-api 1.x)
       ;; 14µs (c-api 2.0.0-alpha21)
       ;;  6µs
 
-      "100b"
+      ;; # 100b
       ;; 74µs (c-api 1.x)
       ;; 16µs (c-api 2.0.0-alpha21)
       ;;  8µs
 
-      "1k"
+      ;; # 1k
       ;; 322µs (c-api 1.x)
       ;;  24µs (c-api 2.0.0-alpha21)
       ;;  16µs
 
-      "10k"
+      ;; # 10k
       ;; 3300µs (c-api 1.x)
       ;;  120µs (c-api 2.0.0-alpha21)
       ;;  110µs
 
-      "100k"
+      ;; # 100k
       ;; 10600µs (c-api 1.x)
       ;;  1100µs (c-api 2.0.0-alpha21)
       ;;  1100µs
