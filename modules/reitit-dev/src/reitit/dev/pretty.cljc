@@ -174,7 +174,7 @@
 ;; TODO: this is hack, but seems to work and is safe.
 (defn source-str [[target _ file line]]
   (try
-    (if (and (not= 1 line))
+    (if (not= 1 line)
       (let [file-name (str/replace file #"(.*?)\.\S[^\.]+" "$1")
             target-name (name target)
             ns (str (subs target-name 0 (or (str/index-of target-name (str file-name "$")) 0)) file-name)]
