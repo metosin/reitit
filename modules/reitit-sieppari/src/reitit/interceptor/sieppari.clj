@@ -1,5 +1,6 @@
 (ns reitit.interceptor.sieppari
-  (:require [reitit.interceptor :as interceptor]
+  (:require [reitit.exception :as ex]
+            [reitit.interceptor :as interceptor]
             [sieppari.core :as sieppari]
             [sieppari.queue :as queue]))
 
@@ -15,4 +16,6 @@
     (execute [_ interceptors request]
       (sieppari/execute interceptors request))
     (execute [_ interceptors request respond raise]
-      (sieppari/execute interceptors request respond raise))))
+      (sieppari/execute interceptors request respond raise))
+    (enqueue [_ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/enqueue))))

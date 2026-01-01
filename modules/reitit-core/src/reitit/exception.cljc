@@ -7,6 +7,10 @@
   ([type data]
    (throw (ex-info (str type) {:type type, :data data}))))
 
+(defn unsupported-protocol-method!
+  [method]
+  (fail! :unsupported-protocol-method {:method method}))
+
 (defn get-message [e]
   #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)))
 

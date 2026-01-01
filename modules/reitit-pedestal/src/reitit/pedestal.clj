@@ -2,6 +2,7 @@
   (:require [io.pedestal.http :as http]
             [io.pedestal.interceptor :as interceptor]
             [io.pedestal.interceptor.chain :as chain]
+            [reitit.exception :as ex]
             [reitit.http]
             [reitit.interceptor])
   (:import (java.lang.reflect Method)))
@@ -51,6 +52,10 @@
            (map (fn [{::interceptor/keys [handler] :as interceptor}]
                   (or handler interceptor)))
            (keep ->interceptor)))
+    (execute [_ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
+    (execute [_ _ _ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
     (enqueue [_ context interceptors]
       (chain/enqueue context interceptors))))
 
