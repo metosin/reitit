@@ -190,7 +190,7 @@
      (color :title message " ")
      (color :title-dark (repeat-str "-" between) " ")
      (color :title source) " "
-     (color :title-dark (str "--"))]))
+     (color :title-dark "--")]))
 
 (defn footer [{:keys [width]}]
   (color :title-dark (repeat-str "-" width)))
