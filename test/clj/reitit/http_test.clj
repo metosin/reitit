@@ -308,10 +308,10 @@
                 ["/ping" {:get {:interceptors [{:enter #(a/go %)}]
                                 :handler (fn [_] (a/go response))}}])
                (ring/create-default-handler)
-               {:executor sieppari/executor})]
-      (let [respond (promise)]
-        (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
-        (is (= response (deref respond 100 ::timeout)))))))
+               {:executor sieppari/executor})
+          respond (promise)]
+      (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
+      (is (= response (deref respond 100 ::timeout))))))
 
 (defrecord MyAsyncContext [])
 
