@@ -1,7 +1,6 @@
 (ns ^:no-doc reitit.impl
   #?(:cljs (:require-macros [reitit.impl]))
-  (:require [clojure.set :as set]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [meta-merge.core :as mm]
             [reitit.exception :as ex]
             [reitit.trie :as trie])

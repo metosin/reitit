@@ -4,7 +4,8 @@
             [reitit.core :as r]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.trie :as trie])
+            #?(:clj [reitit.trie :as trie]
+               :cljs [reitit.trie :as-alias trie]))
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 

@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as cs]
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
-            [malli.core :as m]
             [malli.experimental.lite :as l]
             [reitit.coercion :as coercion]
             [reitit.coercion.malli]
@@ -10,8 +9,7 @@
             [reitit.coercion.spec]
             [reitit.core :as r]
             [schema.core :as s]
-            [spec-tools.data-spec :as ds]
-            [malli.transform :as mt])
+            [spec-tools.data-spec :as ds])
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
