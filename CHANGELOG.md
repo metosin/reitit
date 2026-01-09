@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.10.0 (2026-01-09)
 
 * Improve & document how response schemas get picked in per-content-type coercion. See [docs](./doc/ring/coercion.md#per-content-type-coercion). [#745](https://github.com/metosin/reitit/issues/745).
 * **BREAKING** Remove unused `reitit.dependency` ns. [#763](https://github.com/metosin/reitit/pull/763)

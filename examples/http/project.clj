@@ -5,5 +5,5 @@
                  [funcool/promesa "11.0.678"]
                  [manifold "0.4.2"]
                  [ring/ring-jetty-adapter "1.12.1"]
-                 [metosin/reitit "0.9.2"]]
+                 [metosin/reitit "0.10.0"]]
   :repl-options {:init-ns example.server})
