@@ -11,7 +11,7 @@
   (:import (clojure.lang ExceptionInfo)
            (java.sql SQLException SQLWarning)))
 
-(derive ::kikka ::kukka)
+(derive ::kukka ::kikka)
 
 (deftest exception-test
   (letfn [(create

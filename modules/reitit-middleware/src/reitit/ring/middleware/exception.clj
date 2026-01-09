@@ -19,8 +19,8 @@
       (recur (.getSuperclass sk) (conj ks sk))
       ks)))
 
-(defn- descendants-safe [type]
-  (when-not (class? type) (descendants type)))
+(defn- ancestors-safe [type]
+  (when-not (class? type) (ancestors type)))
 
 (defn- call-error-handler [handlers error request]
   (let [type (:type (ex-data error))
@@ -29,7 +29,7 @@
                           (get handlers ex-class)
                           (some
                            (partial get handlers)
-                           (descendants-safe type))
+                           (ancestors-safe type))
                           (some
                            (partial get handlers)
                            (super-classes ex-class))
