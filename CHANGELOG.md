@@ -17,6 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Improve & document how response schemas get picked in per-content-type coercion. See [docs](./doc/ring/coercion.md#per-content-type-coercion). [#745](https://github.com/metosin/reitit/issues/745).
 * **BREAKING** Remove unused `reitit.dependency` ns. [#763](https://github.com/metosin/reitit/pull/763)
 * Support passing options to malli humanize. See [docs](./doc/coercion/malli_coercion.md). [#467](https://github.com/metosin/reitit/issues/467)
+* **FIX** Handling of ex-type keyword hierarchies in create-exception-middleware. [#768](https://github.com/metosin/reitit/issues/768)
 
 ## 0.9.2 (2025-10-28)
 
