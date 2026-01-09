@@ -71,11 +71,17 @@
 
             (and bracket? (= \{ c))
             (let [^long to' (or (str/index-of s "}" to) (ex/fail! ::unclosed-brackets {:path s}))]
-              (if (= \* (get s (inc to)))
+              (cond
+                (= \* (get s (inc to)))
                 (recur (concat ss (-static from to) (-catch-all (inc to) to')) (long (inc to')) (long (inc to')))
+
+                (= \: (get s (inc to)))
+                (recur (concat ss (-static from to) (-wild (inc to) to')) (long (inc to')) (long (inc to')))
+
+                :else
                 (recur (concat ss (-static from to) (-wild to to')) (long (inc to')) (long (inc to')))))
 
-            (and colon? (= \: c))
+            (and colon? (= \: c) (not= \{ (get s (dec to))))
             (let [^long to' (or (str/index-of s "/" to) (count s))]
               (if (= 1 (- to' to))
                 (recur ss from (inc to))
