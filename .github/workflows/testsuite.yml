@@ -2,16 +2,19 @@ name: testsuite
 
 on:
   push:
+    branches: [master]
   pull_request:
+    branches: [master]
 
 jobs:
   build-clj:
     strategy:
       matrix:
         # Supported Java versions: LTS releases and latest
-        jdk: [11, 17, 21]
+        jdk: [11, 17, 21, 25]
+        clojure: [11, 12]
 
-    name: Clojure (Java ${{ matrix.jdk }})
+    name: Clojure ${{ matrix.clojure }} (Java ${{ matrix.jdk }})
 
     runs-on: ubuntu-latest
 
@@ -47,7 +50,7 @@ jobs:
       run: ./lint.sh
 
     - name: Run tests
-      run: ./scripts/test.sh clj
+      run: ./scripts/test.sh clj${{ matrix.clojure }}
 
   build-cljs:
     name: ClojureScript

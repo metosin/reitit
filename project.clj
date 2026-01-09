@@ -40,16 +40,16 @@
                          [metosin/muuntaja "0.6.11"]
                          [metosin/jsonista "0.3.13"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.19.2"]
+                         [metosin/malli "0.20.0"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.20.0"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.20.0"]
+                         [com.fasterxml.jackson.core/jackson-core "2.20.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.20.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.29" :exclusions [org.clojure/core.rrb-vector]]
                          ;; Deep-diff uses this version, override olders versiom from fipp.
-                         [org.clojure/core.rrb-vector "0.2.0"]
+                         [org.clojure/core.rrb-vector "0.2.1"]
                          [expound "0.9.0"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
@@ -67,7 +67,8 @@
             [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
-  :profiles {:dev {:jvm-opts ^:replace ["-server"]
+  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+             :dev {:jvm-opts ^:replace ["-server"]
 
                    ;; all module sources for development
                    :source-paths ["modules/reitit/src"
@@ -89,9 +90,9 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.11.4"]
-                                  [thheller/shadow-cljs "3.2.1"]
-                                  [org.clojure/clojurescript "1.12.42"]
+                   :dependencies [[org.clojure/clojure "1.12.4"]
+                                  [thheller/shadow-cljs "3.3.4"]
+                                  [org.clojure/clojurescript "1.12.134"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
@@ -99,7 +100,7 @@
                                   [metosin/muuntaja "0.6.11"]
                                   [metosin/sieppari "0.0.0-alpha13"]
                                   [metosin/jsonista "0.3.13"]
-                                  [metosin/malli "0.19.2"]
+                                  [metosin/malli "0.20.0"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -112,11 +113,11 @@
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.5"]
                                   [metosin/ring-swagger-ui "5.20.0"]
-                                  [org.clojure/tools.analyzer "1.2.0"]
+                                  [org.clojure/tools.analyzer "1.2.1"]
 
                                   [criterium "0.4.6"]
-                                  [org.clojure/test.check "1.1.1"]
-                                  [org.clojure/tools.namespace "1.5.0"]
+                                  [org.clojure/test.check "1.1.3"]
+                                  [org.clojure/tools.namespace "1.5.1"]
                                   [com.gfredericks/test.chuck "0.2.15"]
                                   [nubank/matcher-combinators "3.9.2"]
 
@@ -124,10 +125,10 @@
                                   [io.pedestal/pedestal.service "0.6.4" :upgrade false]
 
                                   [org.clojure/core.async "1.8.741"]
-                                  [manifold "0.4.3"]
+                                  [manifold "0.5.0"]
                                   [funcool/promesa "11.0.678"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "1.6.2"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.7.0"]
                                   [ring-cors "0.1.13"]
 
                                   [com.bhauman/rebel-readline "0.1.5"]]}
@@ -143,7 +144,7 @@
                                    [io.pedestal/pedestal.jetty "0.6.4" :upgrade false]
                                    [calfpath "0.8.1"]
                                    [org.clojure/core.async "1.8.741"]
-                                   [manifold "0.4.3"]
+                                   [manifold "0.5.0"]
                                    [funcool/promesa "11.0.678"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
@@ -159,6 +160,7 @@
   :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
+            "test-clj11" ["with-profile" "dev,default,clj11" "do" ["bat-test"] ["check"]]
             ;; NOTE: These are deprecated, kept around for ensuring shadow-cljs works
             ;; the same way.
             "test-browser" ["doo" "chrome-headless" "test"]
