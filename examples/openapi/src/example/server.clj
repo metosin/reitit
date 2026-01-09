@@ -156,22 +156,22 @@
                                      [:regex [:re "[0-9]+"]]
                                      [:enum [:enum 1 3 5 42]]
                                      [:multi [:multi {:dispatch :type}
-                                              [:literal [:map
-                                                         [:type [:= :literal]]
+                                              ["literal" [:map
+                                                         [:type [:= "literal"]]
                                                          [:value [:or :int :string]]]]
-                                              [:reference [:map
-                                                           [:type [:= :reference]]
+                                              ["reference" [:map
+                                                           [:type [:= "reference"]]
                                                            [:description :string]
                                                            [:ref :uuid]]]]]]
                             :example {:vector-of-tuples [["a" 1] ["b" 2]]
                                       :regex "01234"
                                       :enum 5
-                                      :multi {:type :literal
+                                      :multi {:type "literal"
                                               :value "x"}}}}}
-                :responses {200 {:content {:default {:schema [:map]}}}}
+                :responses {200 {:content {:default {:schema [:map-of :keyword :any]}}}}
                 :handler (fn [request]
                            {:status 200
-                            :body (:body request)})}}]
+                            :body (get-in request [:parameters :request])})}}]
 
        ["/secure"
         {:tags #{"secure"}
