@@ -4,7 +4,8 @@
             [reitit.core :as r]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.trie :as trie])
+            #?(:clj [reitit.trie :as trie]
+               :cljs [reitit.trie :as-alias trie]))
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -847,23 +848,22 @@
                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
                   (is (= body (str n))))))))))))
 
-(declare routes)
+(def routes (atom nil))
 
 (deftest reloading-ring-handler-test
   (let [r (fn [body] {:status 200, :body body})]
-    (def routes ["/" (constantly (r "1"))]) ;; initial value
-
-    (let [create-handler (fn [] (ring/ring-handler (ring/router routes)))]
+    (reset! routes ["/" (constantly (r "1"))]) ;; initial value
+    (let [create-handler (fn [] (ring/ring-handler (ring/router @routes)))]
       (testing "static ring handler does not see underlying route changes"
         (let [app (create-handler)]
           (is (= (r "1") (app {:uri "/", :request-method :get})))
-          (def routes ["/" (constantly (r "2"))]) ;; redefine
+          (reset! routes ["/" (constantly (r "2"))]) ;; redefine
           (is (= (r "1") (app {:uri "/", :request-method :get})))))
 
       (testing "reloading ring handler sees underlying route changes"
         (let [app (ring/reloading-ring-handler create-handler)]
           (is (= (r "2") (app {:uri "/", :request-method :get})))
-          (def routes ["/" (constantly (r "3"))]) ;; redefine again
+          (reset! routes ["/" (constantly (r "3"))]) ;; redefine again
           (is (= (r "3") (app {:uri "/", :request-method :get}))))))))
 
 (defrecord FooTest [a b])

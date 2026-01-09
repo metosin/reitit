@@ -1,10 +1,9 @@
 (ns reitit.core-test
   (:require [clojure.test :refer [are deftest is testing]]
-            [reitit.core :as r #?@(:cljs [:refer [Router]])]
+            [reitit.core :as r]
             [reitit.impl :as impl])
   #?(:clj
-     (:import (clojure.lang ExceptionInfo)
-              (reitit.core Router))))
+     (:import (clojure.lang ExceptionInfo))))
 
 (defn- var-handler [& _]
   "var-handler")
@@ -261,10 +260,12 @@
           (is (= #'var-handler result))))))
 
   (testing "custom router"
-    (let [router (r/router ["/ping"] {:router (fn [_ _]
-                                                (reify Router
-                                                  (r/router-name [_]
-                                                    ::custom)))})]
+    (let [router (r/router
+                  ["/ping"]
+                  {:router (fn [_ _]
+                             #_{:clj-kondo/ignore [:missing-protocol-method]}
+                             (reify r/Router
+                               (router-name [_] ::custom)))})]
       (is (= ::custom (r/router-name router)))))
 
   (testing "bide sample"

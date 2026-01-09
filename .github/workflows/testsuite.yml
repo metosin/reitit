@@ -36,11 +36,15 @@ jobs:
       uses: DeLaGuardo/setup-clojure@13.1
       with:
         lein: 2.9.5
+        clj-kondo: 2025.12.23
 
     # Install openapi-schema-validator for openapi-tests
     # Uses node version from the ubuntu-latest
     - name: Install dependencies
       run: npm ci
+
+    - name: Run Linter
+      run: ./lint.sh
 
     - name: Run tests
       run: ./scripts/test.sh clj

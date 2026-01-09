@@ -2,10 +2,10 @@
   (:require [io.pedestal.http :as http]
             [io.pedestal.interceptor :as interceptor]
             [io.pedestal.interceptor.chain :as chain]
+            [reitit.exception :as ex]
             [reitit.http]
             [reitit.interceptor])
-  (:import (java.lang.reflect Method)
-           (reitit.interceptor Executor)))
+  (:import (java.lang.reflect Method)))
 
 ;; TODO: variadic
 (defn- arities [f]
@@ -46,12 +46,16 @@
 
 (def pedestal-executor
   (reify
-    Executor
+    reitit.interceptor/Executor
     (queue [_ interceptors]
       (->> interceptors
            (map (fn [{::interceptor/keys [handler] :as interceptor}]
                   (or handler interceptor)))
            (keep ->interceptor)))
+    (execute [_ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
+    (execute [_ _ _ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
     (enqueue [_ context interceptors]
       (chain/enqueue context interceptors))))
 

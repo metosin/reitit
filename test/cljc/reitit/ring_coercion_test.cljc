@@ -4,18 +4,18 @@
             #?@(:clj [[muuntaja.core]
                       [muuntaja.middleware]
                       [jsonista.core :as j]
-                      [reitit.ring.middleware.muuntaja]])
+                      [reitit.coercion.schema :as schema]
+                      [reitit.ring.middleware.muuntaja]
+                      [schema.core :as s]])
             [malli.core :as m]
             [malli.util :as mu]
             [meta-merge.core :refer [meta-merge]]
             [reitit.coercion.malli :as malli]
-            [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
             [reitit.core :as r]
             [reitit.ring :as ring]
             [reitit.ring.spec]
             [reitit.ring.coercion :as rrc]
-            [schema.core :as s]
             [clojure.spec.alpha]
             [spec-tools.data-spec :as ds])
   #?(:clj

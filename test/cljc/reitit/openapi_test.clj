@@ -4,7 +4,6 @@
             [jsonista.core :as j]
             [malli.core :as mc]
             [matcher-combinators.test :refer [match?]]
-            [matcher-combinators.matchers :as matchers]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]

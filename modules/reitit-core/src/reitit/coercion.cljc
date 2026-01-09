@@ -244,7 +244,7 @@
       (if coercer
         (let [result (coercer query-params :default)]
           (if (error? result)
-            (throw (ex-info (str "Query parameters coercion failed")
+            (throw (ex-info "Query parameters coercion failed"
                             result))
             result))
         query-params))))

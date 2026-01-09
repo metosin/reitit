@@ -12,7 +12,6 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty]
-            [malli.core :as malli]
             [muuntaja.core :as m]))
 
 (def Transaction

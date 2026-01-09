@@ -1,6 +1,5 @@
 (ns frontend-re-frame.core
   (:require [re-frame.core :as re-frame]
-            [reagent.core :as reagent]
             [reagent.dom :as rd]
             [reitit.core :as r]
             [reitit.coercion.spec :as rss]

@@ -1,5 +1,6 @@
 {;;:skip-comments true
- :lint-as {potemkin/def-derived-map clojure.core/defrecord}
+ :lint-as {potemkin/def-derived-map clojure.core/defrecord
+           clojure.test.check.clojure-test/defspec clojure.test/deftest}
  :linters {:missing-else-branch {:level :off}
            :unused-binding {:level :off}
            :unused-referred-var {:exclude {clojure.test [deftest testing is are]
