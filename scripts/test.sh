@@ -13,11 +13,14 @@ case $1 in
         npx shadow-cljs release karma
         npx karma start --single-run
         ;;
-    clj)
+    clj11)
+        lein test-clj11
+        ;;
+    clj12)
         lein test-clj
         ;;
     *)
-        echo "Please select [clj|cljs]"
+        echo "Please select [clj11|clj12|cljs]"
         exit 1
         ;;
 esac

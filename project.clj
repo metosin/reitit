@@ -67,7 +67,8 @@
             [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
-  :profiles {:dev {:jvm-opts ^:replace ["-server"]
+  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+             :dev {:jvm-opts ^:replace ["-server"]
 
                    ;; all module sources for development
                    :source-paths ["modules/reitit/src"
@@ -89,9 +90,9 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.11.4"]
+                   :dependencies [[org.clojure/clojure "1.12.4"]
                                   [thheller/shadow-cljs "3.3.4"]
-                                  [org.clojure/clojurescript "1.12.42"]
+                                  [org.clojure/clojurescript "1.12.134"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.13.1"]
@@ -159,6 +160,7 @@
   :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
+            "test-clj11" ["with-profile" "dev,default,clj11" "do" ["bat-test"] ["check"]]
             ;; NOTE: These are deprecated, kept around for ensuring shadow-cljs works
             ;; the same way.
             "test-browser" ["doo" "chrome-headless" "test"]
