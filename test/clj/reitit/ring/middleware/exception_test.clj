@@ -11,7 +11,7 @@
   (:import (clojure.lang ExceptionInfo)
            (java.sql SQLException SQLWarning)))
 
-(derive ::kikka ::kukka)
+(derive ::kukka ::kikka)
 
 (deftest exception-test
   (letfn [(create
@@ -146,6 +146,55 @@
           (is (http-response/response? resp))
           (is (= status 500))
           (is (= body "too many tries")))))))
+
+(derive ::table ::object)
+(derive ::living ::object)
+(derive ::plant ::living)
+(derive ::animal ::living)
+(derive ::dog ::animal)
+(derive ::cat ::animal)
+(derive ::garfield ::cat)
+
+(deftest exception-hierarchy-test
+  (letfn [(create [f]
+            (ring/ring-handler
+             (ring/router
+              [["/defaults"
+                {:handler f}]]
+              {:data {:middleware [(exception/create-exception-middleware
+                                    (merge
+                                     exception/default-handlers
+                                     {::object (constantly (http-response/bad-request "object"))
+                                      ::living (constantly (http-response/bad-request "living"))
+                                      ::animal (constantly (http-response/bad-request "animal"))
+                                      ::cat (constantly (http-response/bad-request "cat"))}))]}})))
+          (call [ex-typ]
+            (let [app (create (fn [_] (throw (ex-info "fail" {:type ex-typ}))))]
+              (app {:request-method :get, :uri "/defaults"})))]
+    (let [{:keys [status body]} (call ::object)]
+      (is (= status 400))
+      (is (= body "object")))
+    (let [{:keys [status body]} (call ::table)]
+      (is (= status 400))
+      (is (= body "object")))
+    (let [{:keys [status body]} (call ::living)]
+      (is (= status 400))
+      (is (= body "living")))
+    (let [{:keys [status body]} (call ::plant)]
+      (is (= status 400))
+      (is (= body "living")))
+    (let [{:keys [status body]} (call ::animal)]
+      (is (= status 400))
+      (is (= body "animal")))
+    (let [{:keys [status body]} (call ::dog)]
+      (is (= status 400))
+      (is (= body "animal")))
+    (let [{:keys [status body]} (call ::cat)]
+      (is (= status 400))
+      (is (= body "cat")))
+    (let [{:keys [status body]} (call ::garfield)]
+      (is (= status 400))
+      (is (= body "cat")))))
 
 (deftest spec-coercion-exception-test
   (let [app (ring/ring-handler

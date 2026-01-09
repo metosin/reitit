@@ -19,17 +19,17 @@
       (recur (.getSuperclass sk) (conj ks sk))
       ks)))
 
-(defn- descendants-safe [type]
-  (when-not (class? type) (descendants type)))
+(defn- find-closest-ancestor [val m]
+  (or (get m val)
+      (some #(find-closest-ancestor % m) (parents val))))
 
 (defn- call-error-handler [handlers error request]
   (let [type (:type (ex-data error))
         ex-class (class error)
         error-handler (or (get handlers type)
                           (get handlers ex-class)
-                          (some
-                           (partial get handlers)
-                           (descendants-safe type))
+                          (when-not (class? type)
+                            (find-closest-ancestor type handlers))
                           (some
                            (partial get handlers)
                            (super-classes ex-class))
@@ -142,6 +142,9 @@
   3) `:type` ancestors of exception ex-data
   4) Super Classes of exception
   5) The ::default handler
+
+  Note! If the closest ancestor for `:type` is not unique, an
+  arbitrary one is picked.
 
   Example:
 
