@@ -18,6 +18,14 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **BREAKING** Remove unused `reitit.dependency` ns. [#763](https://github.com/metosin/reitit/pull/763)
 * Support passing options to malli humanize. See [docs](./doc/coercion/malli_coercion.md). [#467](https://github.com/metosin/reitit/issues/467)
 * **FIX** Handling of ex-type keyword hierarchies in create-exception-middleware. [#768](https://github.com/metosin/reitit/issues/768)
+* Updated dependencies:
+
+```
+[metosin/malli "0.20.0"] is available but we use "0.19.2"
+[com.fasterxml.jackson.core/jackson-core "2.20.1"] is available but we use "2.20.0"
+[com.fasterxml.jackson.core/jackson-databind "2.20.1"] is available but we use "2.20.0"
+[org.clojure/core.rrb-vector "0.2.1"] is available but we use "0.2.0"
+```
 
 ## 0.9.2 (2025-10-28)
 
