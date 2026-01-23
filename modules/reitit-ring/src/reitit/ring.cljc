@@ -173,7 +173,8 @@
    (letfn [(maybe-redirect [{:keys [query-string] :as request} path]
              (if (and (seq path) (r/match-by-path (::r/router request) path))
                {:status (if (= (:request-method request) :get) 301 308)
-                :headers {"Location" (if query-string (str path "?" query-string) path)}
+                :headers {"Location" (let [path (str/replace-first path #"^/+" "/")] ; Locations starting with // redirect to another hostname. Avoid these due to security implications.
+                                       (if query-string (str path "?" query-string) path))}
                 :body ""}))
            (redirect-handler [request]
              (let [uri (:uri request)]

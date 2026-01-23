@@ -416,7 +416,31 @@
             :get "/slash-less//" "/slash-less?kikka=kukka"
             :post "/with-slash" "/with-slash/?kikka=kukka"
             :post "/slash-less/" "/slash-less?kikka=kukka"
-            :post "/slash-less//" "/slash-less?kikka=kukka"))))))
+            :post "/slash-less//" "/slash-less?kikka=kukka"))))
+
+    ;; See issue #337
+    (testing "Avoid external redirects"
+      (let [app (ring/ring-handler
+                 (ring/router [["*" {:get (constantly nil)}]])
+                 (ring/redirect-trailing-slash-handler))
+            resp (fn [uri & [query-string]]
+                   (let [r (app {:request-method :get :uri uri :query-string query-string})]
+                     {:status (:status r)
+                      :Location (get-in r [:headers "Location"])}))]
+        (testing "without query params"
+          (is (= {:status 301 :Location "/malicious.com/foo/"} (resp "//malicious.com/foo")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "//malicious.com/foo/")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "//malicious.com/foo//")))
+          (is (= {:status 301 :Location "/malicious.com/foo/"} (resp "///malicious.com/foo")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "///malicious.com/foo/")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "///malicious.com/foo//"))))
+        (testing "with query params"
+          (is (= {:status 301 :Location "/malicious.com/foo/?bar=quux"} (resp "//malicious.com/foo" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "//malicious.com/foo/" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "//malicious.com/foo//" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo/?bar=quux"} (resp "///malicious.com/foo" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "///malicious.com/foo/" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "///malicious.com/foo//" "bar=quux"))))))))
 
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
