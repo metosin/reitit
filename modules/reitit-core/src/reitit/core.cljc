@@ -46,7 +46,7 @@
   (options [this])
   (route-names [this])
   (match-by-path [this path])
-  (match-by-name [this name] [this name path-params]))
+  (match-by-name [this name] [this name path-params] [this name path-params opts]))
 
 (defn router? [x]
   (satisfies? Router x))
@@ -124,7 +124,10 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))))))
+           (match (impl/path-params path-params))))
+       (match-by-name [_ name path-params opts]
+         (if-let [match (impl/fast-get lookup name)]
+           (match (impl/path-params path-params opts))))))))
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
@@ -163,7 +166,10 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))))))
+           (match (impl/path-params path-params))))
+       (match-by-name [_ name path-params opts]
+         (if-let [match (impl/fast-get lookup name)]
+           (match (impl/path-params path-params opts))))))))
 
 (defn trie-router
   "Creates a special prefix-tree router from resolved routes and optional
@@ -210,7 +216,10 @@
            (match nil)))
        (match-by-name [_ name path-params]
          (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))))))
+           (match (impl/path-params path-params))))
+       (match-by-name [_ name path-params opts]
+         (if-let [match (impl/fast-get lookup name)]
+           (match (impl/path-params path-params opts))))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
@@ -239,7 +248,9 @@
        (match-by-name [_ name]
          (if (= n name) match))
        (match-by-name [_ name path-params]
-         (if (= n name) (impl/fast-assoc match :path-params (impl/path-params path-params))))))))
+         (if (= n name) (impl/fast-assoc match :path-params (impl/path-params path-params))))
+       (match-by-name [_ name path-params opts]
+         (if (= n name) (impl/fast-assoc match :path-params (impl/path-params path-params opts))))))))
 
 (defn mixed-router
   "Creates two routers: [[lookup-router]] or [[single-static-path-router]] for
@@ -270,7 +281,10 @@
              (match-by-name wildcard-router name)))
        (match-by-name [_ name path-params]
          (or (match-by-name static-router name path-params)
-             (match-by-name wildcard-router name path-params)))))))
+             (match-by-name wildcard-router name path-params)))
+       (match-by-name [_ name path-params opts]
+         (or (match-by-name static-router name path-params opts)
+             (match-by-name wildcard-router name path-params opts)))))))
 
 (defn quarantine-router
   "Creates two routers: [[mixed-router]] for non-conflicting routes
@@ -301,7 +315,10 @@
              (match-by-name linear-router name)))
        (match-by-name [_ name path-params]
          (or (match-by-name mixed-router name path-params)
-             (match-by-name linear-router name path-params)))))))
+             (match-by-name linear-router name path-params)))
+       (match-by-name [_ name path-params opts]
+         (or (match-by-name mixed-router name path-params opts)
+             (match-by-name linear-router name path-params opts)))))))
 
 ;;
 ;; Creating Routers
