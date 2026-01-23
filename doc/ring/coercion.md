@@ -104,7 +104,7 @@ In contrast, the `:body` coercion:
 1. Uses the specified schema
    * depending on the coercion, it can be configured as open or closed, see specific coercion docs for details
 2. Does not keywordize the keys of the input before coercion
-   * however, coercions like malli do the keywordization in the coercion stage anyway
+   * however, coercions like malli might do the keywordization when coercing json bodies, depending on configuration
 
 This admittedly confusing behaviour is retained currently due to
 backwards compatibility reasons. It can be configured by passing
