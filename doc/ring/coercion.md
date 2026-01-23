@@ -63,8 +63,6 @@ Handlers can access the coerced parameters via the `:parameters` key in the requ
                 {:status 200
                  :body {:total total}}))})
 ```
-
-
 ### Nested parameter definitions
 
 Parameters are accumulated recursively along the route tree, just like
@@ -93,6 +91,26 @@ handling for merging eg. malli `:map` schemas.
 ;         [:project-id :int]
 ;         [:task-id :int]]}
 ```
+
+### Differences in behaviour for different parameters
+
+All parameter coercions *except* `:body`:
+
+1. Allow keys outside the schema (by opening up the schema using eg. `malli.util/open-schema`)
+2. Keywordize the keys (ie. header & query parameter names) of the input before coercing
+
+In contrast, the `:body` coercion:
+
+1. Uses the specified schema
+   * depending on the coercion, it can be configured as open or closed, see specific coercion docs for details
+2. Does not keywordize the keys of the input before coercion
+   * however, coercions like malli do the keywordization in the coercion stage anyway
+
+This admittedly confusing behaviour is retained currently due to
+backwards compatibility reasons. It can be configured by passing
+option `:reitit.coercion/parameter-coercion` to `reitit.ring/router`
+or `reitit.coercion/compile-request-coercers`. See also:
+`reitit.coercion/default-parameter-coercion`.
 
 ## Coercion Middleware
 
