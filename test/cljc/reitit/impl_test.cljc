@@ -41,7 +41,33 @@
                             :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
                             :k :kikka
                             :qk ::kikka
-                            :nil nil}))))
+                            :nil nil})))
+  (is (= {:n "1"
+          :n1 "-1"
+          :n2 "1"
+          :n3 "1"
+          :n4 "1"
+          :n5 "1"
+          :d "2.2"
+          :b "true"
+          :s "kikka"
+          :u "c2541900-17a7-4353-9024-db8ac258ba4e"
+          :k "kikka"
+          :qk "reitit.impl-test/kikka"
+          :nil nil}
+         (impl/path-params {:n 1
+                            :n1 -1
+                            :n2 (long 1)
+                            :n3 (int 1)
+                            :n4 (short 1)
+                            :n5 (byte 1)
+                            :d 2.2
+                            :b true
+                            :s "kikka"
+                            :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
+                            :k :kikka
+                            :qk ::kikka
+                            :nil nil} {:url-encode? false}))))
 
 (deftest query-params-test
   (are [x y]
