@@ -122,9 +122,8 @@
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name path-params]
-         (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params opts))))))))
@@ -164,9 +163,8 @@
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name path-params]
-         (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params opts))))))))
@@ -214,9 +212,8 @@
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
            (match nil)))
-       (match-by-name [_ name path-params]
-         (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params))))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if-let [match (impl/fast-get lookup name)]
            (match (impl/path-params path-params opts))))))))
@@ -247,8 +244,8 @@
          (if (#?(:clj .equals :cljs =) p path) match))
        (match-by-name [_ name]
          (if (= n name) match))
-       (match-by-name [_ name path-params]
-         (if (= n name) (impl/fast-assoc match :path-params (impl/path-params path-params))))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if (= n name) (impl/fast-assoc match :path-params (impl/path-params path-params opts))))))))
 
@@ -279,9 +276,8 @@
        (match-by-name [_ name]
          (or (match-by-name static-router name)
              (match-by-name wildcard-router name)))
-       (match-by-name [_ name path-params]
-         (or (match-by-name static-router name path-params)
-             (match-by-name wildcard-router name path-params)))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (or (match-by-name static-router name path-params opts)
              (match-by-name wildcard-router name path-params opts)))))))
@@ -313,9 +309,8 @@
        (match-by-name [_ name]
          (or (match-by-name mixed-router name)
              (match-by-name linear-router name)))
-       (match-by-name [_ name path-params]
-         (or (match-by-name mixed-router name path-params)
-             (match-by-name linear-router name path-params)))
+       (match-by-name [r name path-params]
+         (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (or (match-by-name mixed-router name path-params opts)
              (match-by-name linear-router name path-params opts)))))))
