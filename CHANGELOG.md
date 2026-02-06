@@ -12,6 +12,12 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
+* Allow colons in bracket parameter syntax. [#770](https://github.com/metosin/reitit/pull/770)
+* Add `url-encode?` option to `match-by-name`. [#778](https://github.com/metosin/reitit/pull/778)
+
 ## 0.10.0 (2026-01-09)
 
 * Improve & document how response schemas get picked in per-content-type coercion. See [docs](./doc/ring/coercion.md#per-content-type-coercion). [#745](https://github.com/metosin/reitit/issues/745).
