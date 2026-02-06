@@ -75,6 +75,17 @@ Path-parameters are automatically coerced into strings, with the help of (curren
 ;        :path-params {:id "1"}}
 ```
 
+In case you want to do something like generate a template path for documentation, you can disable url-encoding:
+
+```clj
+(r/match-by-name router ::user {:id "<id goes here>"} {:url-encode? false})
+; #reitit.core.Match{:template "/api/user/:id"
+;                    :data {:name :user/user}
+;                    :path "/api/user/<id goes here>"
+;                    :result nil
+;                    :path-params {:id "<id goes here>"}}
+```
+
 There is also an exception throwing version:
 
 ```clj
@@ -97,5 +108,5 @@ It can take an optional map of query-parameters too:
 (-> router
     (r/match-by-name ::user {:id 1})
     (r/match->path {:iso "möly"}))
-; "/api/user/1?iso=m%C3%B6ly"    
+; "/api/user/1?iso=m%C3%B6ly"
 ```
