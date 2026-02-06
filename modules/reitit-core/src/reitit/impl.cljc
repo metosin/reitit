@@ -297,8 +297,11 @@
 
 (defn path-params
   "Convert parameters' values into URL-encoded strings, suitable for URL paths"
-  [params]
-  (maybe-map-values #(url-encode (into-string %)) params))
+  ([params] (path-params params nil))
+  ([params {:keys [url-encode?] :or {url-encode? true}}]
+   (if url-encode?
+     (maybe-map-values #(url-encode (into-string %)) params)
+     (maybe-map-values #(into-string %) params))))
 
 (defn- query-parameter [k v]
   (str (form-encode (into-string k))
