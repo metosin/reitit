@@ -13,7 +13,7 @@ By default, [Vector Syntax](https://github.com/metosin/malli#vector-syntax) is u
 
 (def router
   (r/router
-    ["/:company/users/:user-id" {:name ::user-view
+    ["/:company/users/:user-id" {:name :user/user-view
                                  :coercion reitit.coercion.malli/coercion
                                  :parameters {:path [:map
                                                      [:company string?]
@@ -28,24 +28,21 @@ By default, [Vector Syntax](https://github.com/metosin/malli#vector-syntax) is u
 Successful coercion:
 
 ```clj
-(match-by-path-and-coerce! "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:malli>>
-;               :parameters {:path [:map
-;                                   [:company string?]
-;                                   [:user-id int?]]}},
-;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :path-params {:company "metosin", :user-id "123"},
-;        :parameters {:path {:company "metosin", :user-id 123}}
-;        :path "/metosin/users/123"}
+(-> (into {} (match-by-path-and-coerce! "/metosin/users/123"))
+    (dissoc :result :data))
+;; => {:template "/:company/users/:user-id",
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :parameters {:path {:company "metosin", :user-id 123}}
+;;     :path "/metosin/users/123"}
 ```
 
 Failing coercion:
 
 ```clj
-(match-by-path-and-coerce! "/metosin/users/ikitommi")
-; => ExceptionInfo Request coercion failed...
+(try
+  (match-by-path-and-coerce! "/metosin/users/ikitommi")
+  (catch clojure.lang.ExceptionInfo e (.getMessage e)))
+;; => "Request coercion failed"
 ```
 
 ## Lite Syntax
@@ -117,8 +114,14 @@ Malli registry can be configured conveniently via `:options :registry`:
 ```clj
 (require '[malli.core :as m])
 
-(reitit.coercion.malli/create
- {:options
-  {:registry {:registry (merge (m/default-schemas)
-                               {:my-type :string})}}})
+(def coercion
+  (reitit.coercion.malli/create
+   {:options
+    {:registry (merge (m/default-schemas)
+                      {:my-type :int})}}))
+
+(def coercer (reitit.coercion/-request-coercer coercion :string [:map [:x :my-type]]))
+
+(coercer {:x "5"} :default)
+=> {:x 5}
 ```
