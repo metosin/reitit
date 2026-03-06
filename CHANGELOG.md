@@ -17,6 +17,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
 * Allow colons in bracket parameter syntax. [#770](https://github.com/metosin/reitit/pull/770)
 * Add `url-encode?` option to `match-by-name`. [#778](https://github.com/metosin/reitit/pull/778)
+* Updated dependencies:
+
+```
+[metosin/ring-swagger-ui "5.31.0"] is available but we use "5.20.0"
+[metosin/jsonista "0.3.14"] is available but we use "0.3.13"
+[metosin/malli "0.20.1"] is available but we use "0.20.0"
+[com.fasterxml.jackson.core/jackson-core "2.21.1"] is available but we use "2.20.1"
+[com.fasterxml.jackson.core/jackson-databind "2.21.1"] is available but we use "2.20.1"
+```
 
 ## 0.10.0 (2026-01-09)
 

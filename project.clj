@@ -34,17 +34,17 @@
                          [metosin/reitit-frontend "0.10.0"]
                          [metosin/reitit-sieppari "0.10.0"]
                          [metosin/reitit-pedestal "0.10.0"]
-                         [metosin/ring-swagger-ui "5.20.0"]
+                         [metosin/ring-swagger-ui "5.31.0"]
                          [metosin/spec-tools "0.10.8"]
                          [metosin/schema-tools "0.13.1"]
                          [metosin/muuntaja "0.6.11"]
-                         [metosin/jsonista "0.3.13"]
+                         [metosin/jsonista "0.3.14"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.20.0"]
+                         [metosin/malli "0.20.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.20.1"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.20.1"]
+                         [com.fasterxml.jackson.core/jackson-core "2.21.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.21.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.29" :exclusions [org.clojure/core.rrb-vector]]
@@ -67,7 +67,7 @@
             [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
-  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.12.4"]]}
              :dev {:jvm-opts ^:replace ["-server"]
 
                    ;; all module sources for development
@@ -91,7 +91,7 @@
                    :java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.12.4"]
-                                  [thheller/shadow-cljs "3.3.4"]
+                                  [thheller/shadow-cljs "3.3.6"]
                                   [org.clojure/clojurescript "1.12.134"]
 
                                   ;; modules dependencies
@@ -99,8 +99,8 @@
                                   [metosin/spec-tools "0.10.8"]
                                   [metosin/muuntaja "0.6.11"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.3.13"]
-                                  [metosin/malli "0.20.0"]
+                                  [metosin/jsonista "0.3.14"]
+                                  [metosin/malli "0.20.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
@@ -112,14 +112,14 @@
                                   [ring "1.15.3"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.5"]
-                                  [metosin/ring-swagger-ui "5.20.0"]
-                                  [org.clojure/tools.analyzer "1.2.1"]
+                                  [metosin/ring-swagger-ui "5.31.0"]
+                                  [org.clojure/tools.analyzer "1.2.2"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.3"]
                                   [org.clojure/tools.namespace "1.5.1"]
                                   [com.gfredericks/test.chuck "0.2.15"]
-                                  [nubank/matcher-combinators "3.9.2"]
+                                  [nubank/matcher-combinators "3.10.0"]
 
                                   ;; TODO: adapt to breaking changes in pedestal 0.7 and 0.8
                                   [io.pedestal/pedestal.service "0.6.4" :upgrade false]
@@ -148,7 +148,7 @@
                                    [funcool/promesa "11.0.678"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.9.3"]
+                                   [aleph "0.9.5"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]
                                    [janus "1.3.2"]]}
