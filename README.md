@@ -65,9 +65,7 @@ modules will continue to be released under `metosin` for compatibility purposes.
 
 All main modules bundled:
 
-```clj
-[metosin/reitit "0.10.0"]
-```
+[![Clojars Project](http://clojars.org/metosin/reitit/latest-version.svg)](http://clojars.org/metosin/reitit)
 
 Optionally, the parts can be required separately.
 
@@ -83,21 +81,21 @@ Reitit is tested with the LTS releases Java 11, 17, 21 and 25
 (def router
   (r/router
     [["/api/ping" ::ping]
-     ["/api/orders/:id" ::order]]))
+     ["/api/orders/:id" ::order]]))
 
-(r/match-by-path router "/api/ping")
-; #Match{:template "/api/ping"
-;        :data {:name ::ping}
-;        :result nil
-;        :path-params {}
-;        :path "/api/ping"}
+(into {} (r/match-by-path router "/api/ping"))
+;; => {:template "/api/ping"
+;;     :data {:name ::ping}
+;;     :result nil
+;;     :path-params {}
+;;     :path "/api/ping"}
 
-(r/match-by-name router ::order {:id 2})
-; #Match{:template "/api/orders/:id",
-;        :data {:name ::order},
-;        :result nil,
-;        :path-params {:id 2},
-;        :path "/api/orders/2"}
+(into {} (r/match-by-name router ::order {:id 2}))
+;; => {:template "/api/orders/:id",
+;;     :data {:name ::order},
+;;     :result nil,
+;;     :path-params {:id "2"},
+;;     :path "/api/orders/2"}
 ```
 
 ## Ring example
@@ -139,31 +137,32 @@ Valid request:
           :uri "/api/math"
           :query-params {:x "1", :y "2"}})
     (update :body slurp))
-; {:status 200
-;  :body "{\"total\":3}"
-;  :headers {"Content-Type" "application/json; charset=utf-8"}}
+;; => {:status 200
+;;     :body "{\"total\":3}"
+;;     :headers {"Content-Type" "application/json; charset=utf-8"}}
 ```
 
 Invalid request:
 
+<!-- FIXME: Not asserted because each run gets a new generated spec name -->
 ```clj
 (-> (app {:request-method :get
           :uri "/api/math"
           :query-params {:x "1", :y "a"}})
     (update :body jsonista.core/read-value))
-; {:status 400
-;  :headers {"Content-Type" "application/json; charset=utf-8"}
-;  :body {"spec" "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:spec$8974/x :spec$8974/y]), :type :map, :leaf? false})"
-;         "value" {"x" "1"
-;                  "y" "a"}
-;         "problems" [{"via" ["spec$8974/y"]
-;                      "path" ["y"]
-;                      "pred" "clojure.core/int?"
-;                      "in" ["y"]
-;                      "val" "a"}]
-;         "type" "reitit.coercion/request-coercion"
-;         "coercion" "spec"
-;         "in" ["request" "query-params"]}}
+;; {:status 400
+;;  :headers {"Content-Type" "application/json; charset=utf-8"}
+;;  :body {"spec" "(spec-tools.core/spec {:spec (clojure.spec.alpha/keys :req-un [:spec$8974/x :spec$8974/y]), :type :map, :leaf? false})"
+;;         "value" {"x" "1"
+;;                  "y" "a"}
+;;         "problems" [{"via" ["spec$8974/y"]
+;;                      "path" ["y"]
+;;                      "pred" "clojure.core/int?"
+;;                      "in" ["y"]
+;;                      "val" "a"}]
+;;         "type" "reitit.coercion/request-coercion"
+;;         "coercion" "spec"
+;;         "in" ["request" "query-params"]}}
 ```
 
 ## More examples
@@ -209,6 +208,6 @@ Roadmap is mostly written in [issues](https://github.com/metosin/reitit/issues).
 
 ## License
 
-Copyright © 2017-2023 [Metosin Oy](http://www.metosin.fi)
+Copyright © 2017-2026 [Metosin Oy](http://www.metosin.fi)
 
 Distributed under the Eclipse Public License, the same as Clojure.
