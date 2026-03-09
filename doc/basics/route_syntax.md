@@ -7,7 +7,7 @@ Routes are defined as vectors of:
 
 Routes can be wrapped in vectors and lists and `nil` routes are ignored.
 
-Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. By default, both syntaxes are supported, see [configuring routers](../advanced/configuring_routers.md) on how to change this.
+Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{:user/id}`, `{*user/path}`. By default, both syntaxes are supported, see [configuring routers](../advanced/configuring_routers.md) on how to change this.
 
 ### Examples
 
@@ -35,7 +35,10 @@ Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [R
 
 ```clj
 [["/users/{user-id}" {:handler get-user}]
- ["/files/file-{number}.pdf" {:handler get-pdf}]]
+ ["/files/file-{number}.pdf" {:handler get-pdf}]
+ ;; Two alternative syntaxes for qualified keyword params:
+ ["/accounts/{qualifed/keyword}" {:handler get-account}]
+ ["/resources/{:resource/id}/activate" {:handler activate-resource}]]
 ```
 
 Route with catch-all parameter:
