@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.10.1 (2026-03-10)
 
 * **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
 * Allow colons in bracket parameter syntax. [#770](https://github.com/metosin/reitit/pull/770)

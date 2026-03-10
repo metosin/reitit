@@ -3,7 +3,7 @@
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [metosin/jsonista "0.3.8"]
                  [ring/ring-jetty-adapter "1.12.1"]
-                 [metosin/reitit "0.10.0"]
+                 [metosin/reitit "0.10.1"]
                  [metosin/ring-swagger-ui "5.9.0"]
                  [org.slf4j/slf4j-simple "2.0.9"]]
   :repl-options {:init-ns example.server}
