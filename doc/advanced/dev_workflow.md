@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:skip true :apply :all-next} -->
 # Dev Workflow
 
 Many applications will require the routes to span multiple namespaces. It is quite easy to do so with reitit, but we might hit a problem during development.
@@ -35,12 +36,12 @@ Consider this sample routing :
 We may query the top router and get the expected result :
 ```clj
 (r/match-by-path router "/api/ns2/more/bar")
-;#reitit.core.Match{:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
+;; => {:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
 ```
 
-Notice the route name : ```:ns1/bar```
+Notice the route name : `:ns1/bar`
 
-When we change the routes in ```ns1``` like this :
+When we change the routes in `ns1` like this :
 ```clj
 (ns ns1
   (:require [reitit.core :as r]))
@@ -49,17 +50,17 @@ When we change the routes in ```ns1``` like this :
   ["/bar" ::bar-with-new-name])
 ```
 
-After we recompile the ```ns1``` namespace, and query again
+After we recompile the `ns1` namespace, and query again
 ```clj
 ns1/routes
 ;["/bar" :ns1/bar-with-new-name]
 ;The routes var in ns1 was changed indeed
 
 (r/match-by-path router "/api/ns2/more/bar")
-;#reitit.core.Match{:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
+;; => {:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
 ```
 
-The route name is still ```:ns1/bar``` !
+The route name is still `:ns1/bar` !
 
 While we could use the [reloaded workflow](http://thinkrelevance.com/blog/2013/06/04/clojure-workflow-reloaded) to reload the whole routing tree, it is not always possible, and quite frankly a bit slower than we might want for fast iterations.
 
@@ -97,12 +98,12 @@ Let's query again
 
 ```clj
 (r/match-by-path (router) "/api/ns2/more/bar") 
-;#reitit.core.Match{:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
+;; => {:template "/api/ns2/more/bar", :data {:name :ns1/bar}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
 ```
 
-Notice that's we're now calling a function rather than just passing ```router``` to the matching function.
+Notice that's we're now calling a function rather than just passing `router` to the matching function.
 
-Now let's again change the route name in ```ns1```, and recompile that namespace.
+Now let's again change the route name in `ns1`, and recompile that namespace.
 
 ```clj
 (ns ns1)
@@ -115,7 +116,7 @@ let's see the query result :
 
 ```clj
 (r/match-by-path (router) "/api/ns2/more/bar")
-;#reitit.core.Match{:template "/api/ns2/more/bar", :data {:name :ns1/bar-with-new-name}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
+;; => {:template "/api/ns2/more/bar", :data {:name :ns1/bar-with-new-name}, :result nil, :path-params {}, :path "/api/ns2/more/bar"}
 ```
 
 Notice that the name is now correct, without reloading every namespace under the sun.
@@ -128,7 +129,7 @@ We need a way to only do this once at production time.
 
 ## An easy fix
 
-Let's apply a small change to our ```ns3```. We'll replace our router by two different routers, one for dev and one for production.
+Let's apply a small change to our `ns3`. We'll replace our router by two different routers, one for dev and one for production.
 
 ```clj
 (ns ns3)

@@ -1,5 +1,6 @@
 # Sieppari
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-sieppari "0.10.1"]
 ```

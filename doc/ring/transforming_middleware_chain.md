@@ -58,12 +58,14 @@ There is an extra option in the Ring router (actually, in the underlying middlew
 
 ### Printing Request Diffs
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-middleware "0.10.1"]
 ```
 
 Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the request diffs between each middleware are printed out to the console. To use it, add the following router option:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 :reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs
 ```

@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:platform :cljs :apply :all-next} -->
 # Frontend basics
 
 Reitit frontend integration is built from multiple layers:

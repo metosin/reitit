@@ -14,6 +14,9 @@ Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parame
 Simple route:
 
 ```clj
+(defn ping [_req] nil)
+(defn pong [_req] nil)
+
 ["/ping" {:handler ping}]
 ```
 
@@ -29,11 +32,16 @@ Two routes with more data:
 Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [Ring Coercion](../ring/coercion.md)):
 
 ```clj
+(defn get-user [_req] nil)
+(defn ping-version [_req] nil)
+
 [["/users/:user-id" {:handler get-user}]
  ["/api/:version/ping" {:handler ping-version}]]
 ```
 
 ```clj
+(defn get-pdf [_req] nil)
+
 [["/users/{user-id}" {:handler get-user}]
  ["/files/file-{number}.pdf" {:handler get-pdf}]
  ;; Two alternative syntaxes for qualified keyword params:
@@ -44,6 +52,8 @@ Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [R
 Route with catch-all parameter:
 
 ```clj
+(defn get-file [_req] nil)
+
 ["/public/*path" {:handler get-file}]
 ```
 
@@ -77,6 +87,7 @@ Reitit does not apply any encoding to your paths. If you need that, you must enc
 
 Normal path-parameters (`:id`) can start anywhere in the path string, but have to end either to slash `/` (currently hardcoded) or to an end of path string:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [["/api/:version" {...}]
  ["/files/file-:number" {...}]
@@ -85,6 +96,7 @@ Normal path-parameters (`:id`) can start anywhere in the path string, but have t
 
 Bracket path-parameters can start and stop anywhere in the path-string, the following character is used as a terminator.
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [["/api/{version}" {...}]
  ["/files/{name}.{extension}" {...}]
@@ -93,6 +105,7 @@ Bracket path-parameters can start and stop anywhere in the path-string, the foll
 
 Having multiple terminators after a bracket path-path parameter with identical path prefix will cause a compile-time error at router creation:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [["/files/file-{name}.pdf" {...}]            ;; terminator \.
  ["/files/file-{name}-{version}.pdf" {...}]] ;; terminator \-
@@ -100,6 +113,7 @@ Having multiple terminators after a bracket path-path parameter with identical p
 
 ### Slash Free Routing
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [["broker.{customer}.{device}.{*data}" {...}]
  ["events.{target}.{type}" {...}]]

@@ -53,7 +53,8 @@ Expected route data:
                            rrc/coerce-request-middleware
                            rrc/coerce-response-middleware]}})))
 
-(jetty/run-jetty #'app {:port 3000, :join? false})
+(defn start []
+  (jetty/run-jetty #'app {:port 3000, :join? false}))
 ```
 
 Testing with [httpie](https://httpie.org/):
@@ -120,10 +121,10 @@ The example below is from `muuntaja` explaining how to add a custom encoder to p
       [:formats "application/json" :encoder-opts]
       {:date-format "yyyy-MM-dd"})))
 
-(->> {:value (java.util.Date.)}
-     (m/encode m "application/json")
+(->> {:value (java.util.Date. 119 9 15 12 0)}
+     (m/encode muuntaja-instance "application/json")
      slurp)
-; => "{\"value\":\"2019-10-15\"}"
+;; => "{\"value\":\"2019-10-15\"}"
 
 ```
 

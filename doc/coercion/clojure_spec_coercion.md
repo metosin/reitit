@@ -55,8 +55,9 @@ Successful coercion:
 Failing coercion:
 
 ```clj
-(match-by-path-and-coerce! "/metosin/users/ikitommi")
-; => ExceptionInfo Request coercion failed...
+(try (match-by-path-and-coerce! "/metosin/users/ikitommi")
+     (catch Exception e (.getMessage e)))
+;; => "Request coercion failed"
 ```
 
 ## Deeply nested

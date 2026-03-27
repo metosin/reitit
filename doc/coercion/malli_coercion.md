@@ -28,9 +28,12 @@ By default, [Vector Syntax](https://github.com/metosin/malli#vector-syntax) is u
 Successful coercion:
 
 ```clj
-(-> (into {} (match-by-path-and-coerce! "/metosin/users/123"))
-    (dissoc :result :data))
+(match-by-path-and-coerce! "/metosin/users/123")
 ;; => {:template "/:company/users/:user-id",
+;;     :data {:name :user/user-view
+;;            :coercion ...
+;;            :parameters ...}
+;;     :result ...
 ;;     :path-params {:company "metosin", :user-id "123"},
 ;;     :parameters {:path {:company "metosin", :user-id 123}}
 ;;     :path "/metosin/users/123"}

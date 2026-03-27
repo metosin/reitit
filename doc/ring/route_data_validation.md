@@ -37,7 +37,7 @@ All good:
 ```clj
 (app {:request-method :get
       :uri "/api/internal/users"})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 ```
 
 ### Explicit specs via middleware
@@ -53,7 +53,7 @@ Middleware that requires `:zone` to be present in route data:
    :wrap (fn [handler]
            (fn [request]
              (let [zone (-> request (ring/get-match) :data :zone)]
-               (println zone)
+               (println "in zone" zone)
                (handler request))))})
 ```
 
@@ -71,6 +71,8 @@ Missing route data fails fast at router creation:
                    :delete {:handler handler}}]]]
       {:validate rrs/validate
        ::rs/explain e/expound-str})))
+;; =thrown-match=> {:type :reitit.spec/invalid-route-data}
+;
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------
@@ -138,8 +140,9 @@ Adding the `:zone` to route data fixes the problem:
 
 (app {:request-method :get
       :uri "/api/internal/users"})
-; in zone :internal
-; => {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
+;; =stdout=>
+;; in zone :internal
 ```
 
 ### Implicit specs
@@ -179,9 +182,10 @@ Let's reuse the `wrap-enforce-roles` from [Dynamic extensions](dynamic_extension
        ::rs/explain e/expound-str})))
 
 (app {:request-method :get
-      :uri "/api/zones/admin/ping"})
-; in zone :internal
-; => {:status 200, :body "ok"}
+      :uri "/api/internal/users"})
+;; => {:status 200, :body "ok"}
+;; =stdout=>
+;; in zone :internal
 ```
 
 But fails if they are present and invalid:
@@ -201,6 +205,8 @@ But fails if they are present and invalid:
                             ::roles #{:adminz}}}]]] ;; <--- added
       {:validate rrs/validate
        ::rs/explain e/expound-str})))
+;; =thrown-match=> {:type :reitit.spec/invalid-route-data}
+;
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------

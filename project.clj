@@ -159,7 +159,9 @@
                                             "-XX:+PrintInlining"]}
 
              :gen-doc-tests {:test-paths   ^:replace ["target/test-doc-blocks/test"]
-                             :dependencies [[com.github.lread/test-doc-blocks "1.2.21"]]}}
+                             :dependencies [[com.github.lread/test-doc-blocks "1.2.21-1"]
+                                            [compojure "1.7.2"]
+                                            [buddy "2.0.0"]]}}
   :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
@@ -171,8 +173,8 @@
             "test-node" ["doo" "node" "node-test"]
 
             "test-docs" ["with-profile" "dev,gen-doc-tests" "do"
-                         ["run" "-m" "lread.test-doc-blocks" "gen-tests" "--platform" "clj"
-                          "README.md" "doc/coercion/malli_coercion.md"]
+                         ["run" "-m" "lread.test-doc-blocks" "gen-tests"
+                          "README.md" "doc/**.md"]
                          ["test"]]}
 
   :bat-test {:report [:pretty

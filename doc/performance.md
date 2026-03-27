@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:skip true :apply :all-next} -->
 # Performance
 
 Reitit tries to be really, really fast.

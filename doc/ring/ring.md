@@ -4,6 +4,7 @@
 
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-ring "0.10.1"]
 ```
@@ -39,12 +40,11 @@ Match contains `:result` compiled by `reitit.ring/router`:
 (require '[reitit.core :as r])
 
 (r/match-by-path router "/ping")
-;#Match{:template "/ping"
-;       :data {:get {:handler #object[...]}}
-;       :result #Methods{:get #Endpoint{...}
-;                        :options #Endpoint{...}}
-;       :path-params {}
-;       :path "/ping"}
+;; => {:template "/ping"
+;;     :data {:get {:handler ...}}
+;;     :result ...
+;;     :path-params {}
+;;     :path "/ping"}
 ```
 
 ## `reitit.ring/ring-handler`
@@ -67,12 +67,12 @@ Applying the handler:
 
 ```clj
 (app {:request-method :get, :uri "/favicon.ico"})
-; nil
+;; => nil
 ```
 
 ```clj
 (app {:request-method :get, :uri "/ping"})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 ```
 
 The router can be accessed via `get-router`:
@@ -109,24 +109,24 @@ Top-level handler catches all methods:
 
 ```clj
 (app {:request-method :delete, :uri "/all"})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 ```
 
 Method-level handler catches only the method:
 
 ```clj
 (app {:request-method :get, :uri "/ping"})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 
 (app {:request-method :put, :uri "/ping"})
-; nil
+;; => nil
 ```
 
 By default, `:options` is also supported (see router options to change this):
 
 ```clj
 (app {:request-method :options, :uri "/ping"})
-; {:status 200, :body ""}
+;; => {:status 200, :body ""}
 ```
 
 Name-based reverse routing:
@@ -136,7 +136,7 @@ Name-based reverse routing:
     (ring/get-router)
     (r/match-by-name ::ping)
     (r/match->path))
-; "/ping"
+;; => "/ping"
 ```
 
 # Middleware
@@ -180,12 +180,12 @@ Middleware is applied correctly:
 
 ```clj
 (app {:request-method :delete, :uri "/api/ping"})
-; {:status 200, :body [:api :handler]}
+;; => {:status 200, :body [:api :handler]}
 ```
 
 ```clj
 (app {:request-method :delete, :uri "/api/admin/db"})
-; {:status 200, :body [:api :admin :db :delete :handler]}
+;; => {:status 200, :body [:api :admin :db :delete :handler]}
 ```
 
 Top-level middleware, applied before any routing is done:
@@ -200,7 +200,7 @@ Top-level middleware, applied before any routing is done:
     {:middleware [[wrap :top]]}))
 
 (app {:request-method :get, :uri "/api/get"})
-; {:status 200, :body [:top :api :ok]}
+;; => {:status 200, :body [:top :api :handler]}
 ```
 
 Same middleware for all routes, using [top-level route data](route_data.md#top-level-route-data):
@@ -215,7 +215,7 @@ Same middleware for all routes, using [top-level route data](route_data.md#top-l
       {:data {:middleware [[wrap :generic]]}})))
 
 (app {:request-method :get, :uri "/api/get"})
-; {:status 200, :body [:generic :specific :handler]}
+;; => {:status 200, :body [:generic :specific :handler]}
 ```
 
 ## Execution order
@@ -236,7 +236,7 @@ using all of the above techniques:
     {:middleware [[wrap :1-top]]}))
 
 (app {:request-method :get, :uri "/api/get"})
-; {:status 200, :body [:1-top :2-top-level-route-data :3-parent :4-route :handler]}
+;; => {:status 200, :body [:1-top :2-top-level-route-data :3-parent :4-route :handler]}
 ```
 
 ## Which method should I use for defining middleware?

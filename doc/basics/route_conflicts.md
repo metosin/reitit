@@ -1,6 +1,6 @@
 # Route Conflicts
 
-We should fail fast if a router contains conflicting paths or route names. 
+We should fail fast if a router contains conflicting paths or route names.
 
 When a `Router` is created via `reitit.core/router`, both path and route name conflicts are checked automatically. By default, in case of conflict, an `ex-info` is thrown with a descriptive message. In some (legacy api) cases, path conflicts should be allowed and one can override the path conflict resolution via `:conflicts` router option or via `:conflicting` route data.
 
@@ -23,6 +23,8 @@ Creating router with defaults:
 
 ```clj
 (r/router routes)
+;; =thrown-match=> {:type :path-conflicts}
+;
 ; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
 ;
 ; -> /:user-id/orders
@@ -55,19 +57,17 @@ To just log the conflicts:
   routes
   {:conflicts (fn [conflicts]
                 (println (exception/format-exception :path-conflicts nil conflicts)))})
-; Router contains conflicting route paths:
-;
-; -> /:user-id/orders
-; -> /public/*path
-; -> /bulk/:bulk-id
-;
-; -> /bulk/:bulk-id
-; -> /:version/status
-;
-; -> /public/*path
-; -> /:version/status
-;
-; => #object[reitit.core$quarantine_router$reify]
+;; Router contains conflicting route paths:
+;;
+;; -> /:user-id/orders
+;; -> /public/*path
+;; -> /bulk/:bulk-id
+;;
+;; -> /bulk/:bulk-id
+;; -> /:version/status
+;;
+;; -> /public/*path
+;; -> /:version/status
 ```
 
 Alternatively, you can ignore conflicting paths individually via `:conflicting` in route data:
@@ -81,7 +81,7 @@ Alternatively, you can ignore conflicting paths individually via `:conflicting` 
    ["/:version/status" {:conflicting true}]])
 ; => #'user/routes
 (r/router routes)
-;  => #object[reitit.core$quarantine_router$reify]
+; => #object[reitit.core$quarantine_router$reify]
 ```
 
 ## Name conflicts
@@ -99,6 +99,8 @@ Creating router with defaults:
 
 ```clj
 (r/router routes)
+;; =thrown-match=> {:type :name-conflicts}
+;
 ;CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route names:
 ;
 ;:reitit.core/ping
