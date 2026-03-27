@@ -130,7 +130,7 @@ Compojure:
                   :handler (fn [{:keys [parameters]}]
                              (ok (get-user (-> parameters :body :id))))}
     ["/pizza" {:post {:middleware [wrap-log]
-                      :handler post-pizza-handler}]]])
+                      :handler post-pizza-handler}}]]])
 ```
 
 #### Features

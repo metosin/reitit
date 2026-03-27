@@ -60,7 +60,7 @@ openapi example](../../examples/openapi).
                                                                [:color :keyword]
                                                                [:pineapple :boolean]]
                                                       :examples {:red {:description "Red pizza with pineapple"
-                                                                       :value (pr-str {:color :red :pineapple true})}}}}}}
+                                                                       :value (pr-str {:color :red :pineapple true})}}}}}}}}]
 ```
 
 The special `:default` content types map to the content types supported by the Muuntaja
@@ -170,7 +170,7 @@ Spec:
                                                                   :openapi/deprecated true
                                                                   :openapi/example 13
                                                                   :openapi/default 42})
-                                      :y int?}}}}}]
+                                      :y int?})}}}]
 ```
 
 ### Adding examples

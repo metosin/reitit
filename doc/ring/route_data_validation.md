@@ -196,7 +196,7 @@ But fails if they are present and invalid:
         ["/ping" {:get handler}]]
        ["/internal" {:zone :internal}
         ["/users" {:get {:handler handler
-                         ::roles #{:manager} ;; <--- added
+                         ::roles #{:manager}} ;; <--- added
                    :delete {:handler handler
                             ::roles #{:adminz}}}]]] ;; <--- added
       {:validate rrs/validate
