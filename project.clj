@@ -159,7 +159,7 @@
                                             "-XX:+PrintInlining"]}
 
              :gen-doc-tests {:test-paths   ^:replace ["target/test-doc-blocks/test"]
-                             :dependencies [[com.github.lread/test-doc-blocks "1.2.21-1"]
+                             :dependencies [[com.github.metosin/test-doc-blocks "1.2.21-reitit1"]
                                             [compojure "1.7.2"]
                                             [buddy "2.0.0"]]}}
   :aliases {"all" ["with-profile" "dev,default"]
