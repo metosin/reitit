@@ -37,7 +37,7 @@ Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [R
 [["/users/{user-id}" {:handler get-user}]
  ["/files/file-{number}.pdf" {:handler get-pdf}]
  ;; Two alternative syntaxes for qualified keyword params:
- ["/accounts/{qualifed/keyword}" {:handler get-account}]
+ ["/accounts/{qualified/keyword}" {:handler get-account}]
  ["/resources/{:resource/id}/activate" {:handler activate-resource}]]
 ```
 
