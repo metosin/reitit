@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:platform :cljs :apply :all-next} -->
 # Controllers
 
 * https://github.com/metosin/reitit/tree/master/examples/frontend-controllers

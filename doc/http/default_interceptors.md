@@ -1,5 +1,6 @@
 # Default Interceptors
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-interceptors "0.10.1"]
 ```

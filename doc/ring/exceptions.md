@@ -1,5 +1,6 @@
 # Exception Handling with Ring
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-middleware "0.10.1"]
 ```

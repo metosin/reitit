@@ -60,7 +60,7 @@ openapi example](../../examples/openapi).
                                                                [:color :keyword]
                                                                [:pineapple :boolean]]
                                                       :examples {:red {:description "Red pizza with pineapple"
-                                                                       :value (pr-str {:color :red :pineapple true})}}}}}}
+                                                                       :value (pr-str {:color :red :pineapple true})}}}}}}}}]
 ```
 
 The special `:default` content types map to the content types supported by the Muuntaja
@@ -111,7 +111,7 @@ A straightforward use case is adding `"externalDocs"`:
  {:get {:summary "Fetch an account | Recursive schemas using malli registry, link to external docs"
         :openapi {:externalDocs {:description "The reitit repository"
                                  :url "https://github.com/metosin/reitit"}}
-        ...}}]
+        ... ...}}]
 ```
 
 In a more complex use case is providing `"securitySchemes"`. See
@@ -148,6 +148,8 @@ Malli:
 Schema:
 
 ```clj
+(require '[schema.core :as s])
+
 ["/plus"
  {:post
   {:parameters
@@ -165,12 +167,12 @@ Spec:
  {:post
   {:parameters
    {:body (spec-tools.data-spec/spec ::foo
-                                     {:x (schema-tools.core/spec {:spec int?
-                                                                  :description "Description for X parameter"
-                                                                  :openapi/deprecated true
-                                                                  :openapi/example 13
-                                                                  :openapi/default 42})
-                                      :y int?}}}}}]
+                                     {:x (spec-tools.core/spec {:spec int?
+                                                                :description "Description for X parameter"
+                                                                :openapi/deprecated true
+                                                                :openapi/example 13
+                                                                :openapi/default 42})
+                                      :y int?})}}}]
 ```
 
 ### Adding examples

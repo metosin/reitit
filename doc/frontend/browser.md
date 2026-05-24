@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:platform :cljs} -->
 # Frontend browser integration
 
 Reitit includes two browser history integrations.
@@ -38,7 +39,7 @@ anchor clicks where the href matches route tree normally (i.e. browser load)
 you can provide `:ignore-anchor-click?` function to add your own logic to
 event handling:
 
-```clj
+```cljs
 (rfe/start!
   router
   on-navigate-fn

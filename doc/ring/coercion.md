@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:test-ns ring-coercion-md :apply :all-next} -->
 # Ring Coercion
 
 Basic coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). With Ring, both request parameters and response bodies can be coerced.
@@ -70,6 +71,7 @@ other [route data](../basics/route_data.md). There is special case
 handling for merging eg. malli `:map` schemas.
 
 ```clj
+(require 'reitit.coercion.malli)
 (def router
  (reitit.ring/router
    ["/api" {:get {:parameters {:query [:map [:api-key :string]]}}}

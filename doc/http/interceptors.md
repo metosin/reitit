@@ -4,6 +4,7 @@ Reitit has also support for [interceptors](http://pedestal.io/reference/intercep
 
 ## Reitit-http
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-http "0.10.1"]
 ```

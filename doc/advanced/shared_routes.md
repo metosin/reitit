@@ -42,11 +42,11 @@ Those can be used as-is from ClojureScript:
   (r/router routes))
 
 (r/match-by-name router ::kikka)
-;#Match{:template "/kikka"
-;       :data {:name :user/kikka}
-;       :result nil
-;       :path-params nil
-;       :path "/kikka"}
+;; => {:template "/kikka"
+;;     :data {:name ::kikka}
+;;     :result nil
+;;     :path-params nil
+;;     :path "/kikka"}
 ```
 
 For the backend, we can use a custom-expander to expand the routes:
@@ -81,5 +81,5 @@ For the backend, we can use a custom-expander to expand the routes:
                   ::bar bar})})))
 
 (app {:request-method :post, :uri "/kikka"})
-; {:status 200, :body "post"}
+;; => {:status 200, :body "post"}
 ```

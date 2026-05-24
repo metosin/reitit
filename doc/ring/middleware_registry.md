@@ -43,13 +43,15 @@ Router creation fails fast if the registry doesn't contain the middleware:
                   :get (fn [{:keys [bonus]}]
                          {:status 200, :body {:bonus bonus}})}]]
       {::middleware/registry {:bonus wrap-bonus}})))
-;CompilerException clojure.lang.ExceptionInfo: Middleware :bonus10 not found in registry.
-;
-;Available middleware in registry:
-;
-;|    :id |                         :description |
-;|--------+--------------------------------------|
-;| :bonus | reitit.ring_test$wrap_bonus@59fddabb |
+;; =thrown-match=> {:id :bonus10}
+;;
+;; CompilerException clojure.lang.ExceptionInfo: Middleware :bonus10 not found in registry.
+;;
+;; Available middleware in registry:
+;;
+;; |    :id |                         :description |
+;; |--------+--------------------------------------|
+;; | :bonus | reitit.ring_test$wrap_bonus@59fddabb |
 ```
 
 Middleware defined in the registry can also be used on the `ring-handler` level:

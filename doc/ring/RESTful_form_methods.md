@@ -26,7 +26,7 @@ We can do this with middleware in reitit like this:
 And apply the middleware like this:
 ```clj
 (reitit.ring/ring-handler
-  (reitit.ring/router ...)
+  (reitit.ring/router [])
   (reitit.ring/create-default-handler)
   {:middleware
     [reitit.ring.middleware.parameters/parameters-middleware ;; needed to have :form-params in the request map

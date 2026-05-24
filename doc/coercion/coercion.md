@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:test-ns coercion-coercion-md :apply :all-next} -->
 # Coercion Explained
 
 Coercion is a process of transforming parameters (and responses) from one format into another. Reitit separates routing and coercion into two separate steps.
@@ -123,7 +124,7 @@ We can use a helper function `reitit.coercion/coerce!` to do the actual coercion
 ```clj
 (coercion/coerce!
   (r/match-by-path router "/metosin/users/123"))
-; {:path {:company "metosin", :user-id 123}}
+;; => {:path {:company "metosin", :user-id 123}}
 ```
 
 We get the coerced parameters back. If a coercion fails, a typed (`:reitit.coercion/request-coercion`) ExceptionInfo is thrown, with data about the actual error:
@@ -131,10 +132,9 @@ We get the coerced parameters back. If a coercion fails, a typed (`:reitit.coerc
 ```clj
 (coercion/coerce!
   (r/match-by-path router "/metosin/users/ikitommi"))
-; => ExceptionInfo Request coercion failed:
-; #CoercionError{:schema {:company java.lang.String, :user-id Int, Any Any},
-;                :errors {:user-id (not (integer? "ikitommi"))}}
-; clojure.core/ex-info (core.clj:4739)
+;; =thrown-match=> {:type :reitit.coercion/request-coercion
+;;                  :schema ...
+;;                  :errors {:user-id ...}}
 ```
 
 ## Full example
@@ -171,7 +171,7 @@ Here's a full example for doing routing and coercion with Reitit and Schema:
 ;        :path "/metosin/users/123"}
 
 (match-by-path-and-coerce! "/metosin/users/ikitommi")
-; => ExceptionInfo Request coercion failed...
+;; =thrown-match=> {:type :reitit.coercion/request-coercion}
 ```
 
 ## Ring Coercion

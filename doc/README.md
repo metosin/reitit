@@ -40,6 +40,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 
 All bundled:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit "0.10.1"]
 ```
@@ -63,52 +64,52 @@ Routing:
 
 ```clj
 (r/match-by-path router "/api/ipa")
-; nil
+;; => nil
 
 (r/match-by-path router "/api/ping")
-; #Match{:template "/api/ping"
-;        :data {:name ::ping}
-;        :result nil
-;        :path-params {}
-;        :path "/api/ping"}
+;; => {:template "/api/ping"
+;;     :data {:name ::ping}
+;;     :result nil
+;;     :path-params {}
+;;     :path "/api/ping"}
 
 (r/match-by-path router "/api/orders/1")
-; #Match{:template "/api/orders/:id"
-;        :data {:name ::order-by-id}
-;        :result nil
-;        :path-params {:id "1"}
-;        :path "/api/orders/1"}
+;; => {:template "/api/orders/:id"
+;;     :data {:name ::order-by-id}
+;;     :result nil
+;;     :path-params {:id "1"}
+;;     :path "/api/orders/1"}
 ```
 
 Reverse-routing:
 
 ```clj
 (r/match-by-name router ::ipa)
-; nil
+;; => nil
 
 (r/match-by-name router ::ping)
-; #Match{:template "/api/ping"
-;        :data {:name ::ping}
-;        :result nil
-;        :path-params {}
-;        :path "/api/ping"}
+;; => {:template "/api/ping"
+;;     :data {:name ::ping}
+;;     :result nil
+;;     :path-params {}
+;;     :path "/api/ping"}
 
 (r/match-by-name router ::order-by-id)
-; #PartialMatch{:template "/api/orders/:id"
-;               :data {:name :user/order-by-id}
-;               :result nil
-;               :path-params nil
-;               :required #{:id}}
+;; => {:template "/api/orders/:id"
+;;     :data {:name ::order-by-id}
+;;     :result nil
+;;     :path-params nil
+;;     :required #{:id}}
 
 (r/partial-match? (r/match-by-name router ::order-by-id))
-; true
+;; => true
 
 (r/match-by-name router ::order-by-id {:id 2})
-; #Match{:template "/api/orders/:id",
-;        :data {:name ::order-by-id},
-;        :result nil,
-;        :path-params {:id 2},
-;        :path "/api/orders/2"}
+;; => {:template "/api/orders/:id",
+;;     :data {:name ::order-by-id},
+;;     :result nil,
+;;     :path-params {:id "2"},
+;;     :path "/api/orders/2"}
 ```
 
 ## Ring router
@@ -140,10 +141,10 @@ Routing:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/users"})
-; {:status 200, :body "ok", :wrap (:api :admin)}
+;; => {:status 200, :body "ok", :wrap '(:api :admin)}
 
 (app {:request-method :put, :uri "/api/admin/users"})
-; nil
+;; => nil
 ```
 
 Reverse-routing:
@@ -152,11 +153,11 @@ Reverse-routing:
 (require '[reitit.core :as r])
 
 (-> app (ring/get-router) (r/match-by-name ::ping))
-; #Match{:template "/api/ping"
-;        :data {:middleware [[#object[user$wrap] :api]]
-;               :get {:handler #object[user$handler]}
-;        :name ::ping}
-;        :result #Methods{...}
-;        :path-params nil
-;        :path "/api/ping"}
+;; => {:template "/api/ping"
+;;     :data {:middleware ...
+;;            :get {:handler ...}
+;;     :name ::ping}
+;;     :result ...
+;;     :path-params nil
+;;     :path "/api/ping"}
 ```

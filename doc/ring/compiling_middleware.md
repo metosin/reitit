@@ -13,6 +13,9 @@ To demonstrate the two approaches, below is the response coercion middleware wri
 * Reads the compiled route information on every request. Everything is done at request-time.
 
 ```clj
+(require '[reitit.ring :as ring])
+(require '[reitit.coercion :as coercion :refer [response-coercer]])
+
 (defn wrap-coerce-response
   "Middleware for pluggable response coercion.
   Expects a :coercion of type `reitit.coercion/Coercion`
@@ -77,6 +80,7 @@ Often it is useful to require a route to provide a specific key.
 
 ```clj
 (require '[buddy.auth.accessrules :as accessrules])
+(require '[clojure.spec.alpha :as s])
 
 (s/def ::authorize
   (s/or :handler :accessrules/handler :rule :accessrules/rule))

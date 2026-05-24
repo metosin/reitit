@@ -15,12 +15,14 @@ The default exception formatting uses `reitit.exception/exception`. It produces 
    ["/bulk/:bulk-id"]
    ["/public/*path"]
    ["/:version/status"]])
+;; =thrown-match=> {:type :path-conflicts}
 ```
 
 ![Pretty error](../images/conflicts1.png)
 
 ## Pretty Errors
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-dev "0.10.1"]
 ```
@@ -37,6 +39,7 @@ For human-readable and developer-friendly exception messages, there is `reitit.d
    ["/public/*path"]
    ["/:version/status"]]
   {:exception pretty/exception})
+;; =thrown-match=> {}
 ```
 
 ![Pretty error](../images/conflicts2.png)

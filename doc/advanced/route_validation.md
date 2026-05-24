@@ -28,6 +28,7 @@ Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) 
 
 First add a `:dev` dependency to:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [expound "0.4.0"] ; or higher
 ```

@@ -71,10 +71,12 @@ When a new router is created, all rules are applied, including the conflict reso
 (add-routes
   router2
   [["/:this/should/:fail" ::fail]])
-;CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
-;
-;   /baz/:id/:subid
-;-> /:this/should/:fail
+;; =thrown-match=> {:type :path-conflicts}
+;;
+;; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
+;;
+;;    /baz/:id/:subid
+;; -> /:this/should/:fail
 ```
 
 ## Merging routers
@@ -127,12 +129,12 @@ Matching by path:
 
 ```clj
 (r/match-by-path router "/olipa/kerran/iso/kala")
-;#Match{:template "/olipa/*"
-;       :data {:name :olipa
-;              :router #object[reitit.core$mixed_router]}
-;       :result nil
-;       :path-params {: "kerran/iso/kala"}
-;       :path "/olipa/iso/kala"}
+;; => {:template "/olipa/*"
+;;     :data {:name :olipa
+;;            :router ...}
+;;     :result nil
+;;     :path-params {(keyword "") "kerran/iso/kala"}
+;;     :path "/olipa/kerran/iso/kala"}
 ```
 
 That didn't work as we wanted, as the nested routers don't have such a route. The core routing doesn't understand anything the `:router` key, so it only matched against the top-level router, which gave a match for the catch-all path.
@@ -155,30 +157,30 @@ With invalid nested path we get now `nil` as expected:
 
 ```clj
 (recursive-match-by-path router "/olipa/kerran/iso/kala")
-; nil
+;; => nil
 ```
 
 With valid path we get all the nested matches:
 
 ```clj
 (recursive-match-by-path router "/olipa/kerran/avaruus")
-;[#reitit.core.Match{:template "/olipa/*"
-;                    :data {:name :olipa
-;                           :router #object[reitit.core$mixed_router]}
-;                    :result nil
-;                    :path-params {: "kerran/avaruus"}
-;                    :path "/olipa/kerran/avaruus"}
-; #reitit.core.Match{:template "/kerran/*"
-;                    :data {:name :kerran
-;                           :router #object[reitit.core$lookup_router]}
-;                    :result nil
-;                    :path-params {: "avaruus"}
-;                    :path "/kerran/avaruus"}
-; #reitit.core.Match{:template "/avaruus" 
-;                    :data {:name :avaruus} 
-;                    :result nil 
-;                    :path-params {} 
-;                    :path "/avaruus"}]
+;;[{:template "/olipa/*"
+;;  :data {:name :olipa
+;;         :router ...}
+;;  :result nil
+;;  :path-params {: "kerran/avaruus"}
+;;  :path "/olipa/kerran/avaruus"}
+;; {:template "/kerran/*"
+;;  :data {:name :kerran
+;;         :router ...}
+;;  :result nil
+;;  :path-params {: "avaruus"}
+;;  :path "/kerran/avaruus"}
+;; {:template "/avaruus"
+;;  :data {:name :avaruus}
+;;  :result nil
+;;  :path-params {}
+;;  :path "/avaruus"}]
 ```
 
 Let's create a helper to get only the route names for matches:
@@ -189,7 +191,7 @@ Let's create a helper to get only the route names for matches:
            (mapv (comp :name :data))))
 
 (name-path router "/olipa/kerran/avaruus")
-; [:olipa :kerran :avaruus]
+;; => [:olipa :kerran :avaruus]
 ```
 
 So, we can nest routers, but why would we do that?
@@ -252,20 +254,20 @@ Matching root routes:
 
 ```clj
 (name-path router "/vodka/russian")
-; nil
+;; => nil
 
 (name-path router "/gin/napue")
-; [:napue]
+;; => [:napue]
 ```
 
 Matching (nested) beer routes:
 
 ```clj
 (name-path router "/beers/lager")
-; [:beers :lager]
+;; => [:beers :lager]
 
 (name-path router "/beers/saison")
-; nil
+;; => nil
 ```
 
 No saison!? Let's add the route:
@@ -285,20 +287,22 @@ We can't add conflicting routes:
 
 ```clj
 (swap! beer-router add-routes [["/saison" :saison]])
-;CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
-;
-;   /saison
-;-> /saison
+;; =thrown-match=> {:type :path-conflicts}
+;;
+;; CompilerException clojure.lang.ExceptionInfo: Router contains conflicting route paths:
+;;
+;;    /saison
+;; -> /saison
 ```
 
 The dynamic routes are re-created on every request:
 
 ```clj
 (name-path router "/dynamic/duo")
-; [:dynamic :duo71]
+; => [:dynamic :duo71]
 
 (name-path router "/dynamic/duo")
-; [:dynamic :duo55]
+; => [:dynamic :duo55]
 ```
 
 ### Performance
@@ -319,13 +323,13 @@ The non-recursive lookup for `/gin/napue` is around 23ns.
 Comparing the dynamic routing performance with Compojure:
 
 ```clj
-(require '[compojure.core :refer [context])
+(require '[compojure.core :refer [context]])
 
 (def app
   (context "/dynamic" [] (constantly :duo)))
 
 (app {:uri "/dynamic/duo" :request-method :get})
-; :duo
+;; => :duo
 ```
 
 | path             | time    | type
@@ -347,8 +351,8 @@ A helper to the root router:
   (r/router
     [["/gin/napue" :napue]
      ["/ciders/*" :ciders]
-     ["/beers" (for [beer beers]
-                 [(str "/" beer) (keyword "beer" beer)])]
+     ["/beers" (vec (for [beer beers]
+                      [(str "/" beer) (keyword "beer" beer)]))]
      ["/dynamic/*" {:name :dynamic
                     :router dynamic-router}]]))
 ```
@@ -396,7 +400,7 @@ And the routing works:
 
 ```clj
 (name-path @router "/beers/sahti")
-;[:beer/sahti]
+;; => [:beer/sahti]
 ```
 
 All the beer-routes now match in constant time.
@@ -419,14 +423,16 @@ In order for a ring handler to be recomposed, we can wrap it into a handler that
 A simplified beer router version that creates a ring-handler.
 
 ```clj
+(require '[reitit.ring :as ring])
+
 (defn create-ring-handler [beers]
   (ring/ring-handler
    (ring/router
     [["/beers"
       (when (seq beers)
-        (for [beer beers]
-          [(str "/" beer)
-           {:get (fn [_] {:status 200 :body beer})}]))]])))
+        (vec (for [beer beers]
+               [(str "/" beer)
+                {:get (fn [_] {:status 200 :body beer})}])))]])))
 
 (def ring-handler
   (atom (create-ring-handler nil)))
@@ -439,7 +445,7 @@ We don't have any matching routes yet.
 
 ```clj
 ((deref-handler ring-handler) {:request-method :get :uri "/beers/lager"})
-; nil
+;; => nil
 ```
 
 But we can add them later.
@@ -447,7 +453,7 @@ But we can add them later.
 ```clj
 (reset-router! ["lager"])
 ((deref-handler ring-handler) {:request-method :get :uri "/beers/lager"})
-; {:status 200, :body "lager"}
+;; => {:status 200, :body "lager"}
 ```
 
 ## TODO

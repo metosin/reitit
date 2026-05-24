@@ -1,5 +1,6 @@
 # Default Middleware
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-middleware "0.10.1"]
 ```
@@ -47,6 +48,7 @@ Expected route data:
 
 `reitit.ring.middleware.dev/print-request-diffs` is a [middleware chain transforming function](transforming_middleware_chain.md). It prints a request and response diff between each middleware. To use it, add the following router option:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 :reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs
 ```

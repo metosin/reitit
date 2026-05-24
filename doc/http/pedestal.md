@@ -1,7 +1,9 @@
+<!-- #:test-doc-blocks{:skip true :apply :all-next} -->
 # Pedestal
 
 [Pedestal](http://pedestal.io/) is a backend web framework for Clojure. `reitit-pedestal` provides an alternative routing engine for Pedestal.
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-pedestal "0.10.1"]
 ```

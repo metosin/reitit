@@ -1,6 +1,7 @@
 # Swagger Support
 
-```
+<!-- #:test-doc-blocks{:skip true} -->
+```clj
 [metosin/reitit-swagger "0.10.1"]
 ```
 
@@ -46,7 +47,8 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 
 [Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger specification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
 
-```
+<!-- #:test-doc-blocks{:skip true} -->
+```clj
 [metosin/reitit-swagger-ui "0.10.1"]
 ```
 
@@ -147,6 +149,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
 
 Whole example project is in [`/examples/ring-spec-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-spec-swagger).
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (ns example.server
   (:require [reitit.ring :as ring]
