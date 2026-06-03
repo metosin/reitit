@@ -1,7 +1,18 @@
 (ns reitit.regex-test
   (:require [clojure.test :refer [deftest is testing]]
+            [clojure.walk :as walk]
             [reitit.core :as r]
             [reitit.regex :as rt.regex]))
+
+(defn re-str
+  "Walks a data structure to convert any regex to its string representation."
+  [x]
+  (walk/postwalk
+   (fn [form]
+     (if (rt.regex/regex? form)
+       (rt.regex/pattern-str form)
+       form))
+   x))
 
 (defn re-=
   "A custom equality function that handles regex patterns specially.
@@ -10,18 +21,18 @@
   [a b]
   (cond
     ;; Handle record comparison by using their map representation
-    (and (instance? clojure.lang.IRecord a)
-         (instance? clojure.lang.IRecord b))
+    (and (record? a)
+         (record? b))
     (re-= (into {} a) (into {} b))
 
     ;; If both are regex patterns, compare their string representations
-    (and (instance? java.util.regex.Pattern a)
-         (instance? java.util.regex.Pattern b))
-    (= (str a) (str b))
+    (and (rt.regex/regex? a)
+         (rt.regex/regex? b))
+    (= (rt.regex/pattern-str a) (rt.regex/pattern-str b))
 
     ;; If one is a regex and the other isn't, they're not equal
-    (or (instance? java.util.regex.Pattern a)
-        (instance? java.util.regex.Pattern b))
+    (or (rt.regex/regex? a)
+        (rt.regex/regex? b))
     false
 
     ;; For maps, compare each key-value pair using regex-aware-equals
@@ -42,15 +53,107 @@
     :else
     (= a b)))
 
+(defn process-match [m]
+  (some-> m
+          (update :data dissoc :conflicting)
+          re-str))
+
+(def regex-routes
+  [["" ::home]
+   [":#item-id" {:name ::item
+                 :path-regex {:item-id #"[a-z]{16,20}"}}]
+   ["inbox" ::inbox]
+   ["teams" ::teams]
+   ["teams/:#team-id-b58/members" {:name ::->members
+                                   :path-regex {:team-id-b58 #"[a-z]"}}]])
+
 (def routes
-  (rt.regex/create-regex-router
-    [["" ::home]
-     [":item-id" {:name ::item
-                  :parameters {:path {:item-id #"[a-z]{16,20}"}}}]
-     ["inbox" ::inbox]
-     ["teams" ::teams]
-     ["teams/:team-id-b58/members" {:name ::->members
-                                    :parameters {:path {:team-id-b58 #"[a-z]"}}}]]))
+  (rt.regex/create-regex-router regex-routes))
+
+(def core-router
+  (r/router
+   ["/" {:conflicting true}
+    regex-routes]
+   {:router rt.regex/regex-router}))
+
+(deftest regex-router-test
+  (testing "Compiled regex routes"
+    (is (= :regex-router (r/router-name routes)))
+    (is (= {} (r/options routes)))
+
+    (is (= [{:name ::home
+             :path-regex nil
+             :pattern #?(:clj "^/?$"
+                         :cljs "^\\/?$")}
+            {:name ::item
+             :path-regex {:item-id "[a-z]{16,20}"}
+             :pattern #?(:clj "^/([a-z]{16,20})$"
+                         :cljs "^\\/([a-z]{16,20})$")}
+            {:name ::inbox
+             :path-regex nil
+             :pattern #?(:clj "^/\\Qinbox\\E$"
+                         :cljs "^\\/inbox$")}
+            {:name ::teams
+             :path-regex nil
+             :pattern #?(:clj "^/\\Qteams\\E$"
+                         :cljs "^\\/teams$")}
+            {:name ::->members
+             :path-regex {:team-id-b58 "[a-z]"}
+             :pattern #?(:clj "^/\\Qteams\\E/([a-z])/\\Qmembers\\E$"
+                         :cljs "^\\/teams\\/([a-z])\\/members$")}]
+           (->> (r/compiled-routes routes)
+                (map (fn [route]
+                       {:name (get-in route [:route-data :name])
+                        :path-regex (get-in route [:route-data :path-regex])
+                        :pattern (:pattern route)}))
+                re-str))))
+
+  (testing "Works as a reitit.core/router implementation"
+    (let [valid-id "abcdefghijklmnopq"]
+      (is (= :regex-router (r/router-name core-router)))
+      (is (= rt.regex/regex-router (:router (r/options core-router))))
+      (is (= (r/map->Match {:path (str "/" valid-id)
+                            :path-params {:item-id valid-id}
+                            :data {:name ::item
+                                   :path-regex {:item-id "[a-z]{16,20}"}}
+                            :template "/:#item-id"
+                            :result nil})
+             (process-match (r/match-by-path core-router (str "/" valid-id)))))
+      (is (nil? (r/match-by-path core-router "/inbox/")))))
+
+  (testing "String regex values are supported"
+    (let [router (rt.regex/regex-router
+                  [["strings/:#id" {:name ::string-id
+                                    :path-regex {:id "\\d+"}}]])]
+      (is (= {:id "123"}
+             (:path-params (r/match-by-path router "/strings/123"))))
+      (is (nil? (r/match-by-path router "/strings/abc")))))
+
+  (testing "Regex segments require path regex data"
+    (is (thrown? #?(:clj clojure.lang.ExceptionInfo
+                    :cljs cljs.core.ExceptionInfo)
+                 (rt.regex/regex-router [[":#id" {:name ::missing-regex}]]))))
+
+  (testing "Plain params are unconstrained by :path-regex"
+    (let [router (rt.regex/regex-router
+                  [[":id" {:name ::plain-id
+                           :path-regex {:id #"\d+"}}]])]
+      (is (= {:id "abc"}
+             (:path-params (r/match-by-path router "/abc"))))))
+
+  (testing "Legacy :parameters :path regexes remain supported"
+    (let [router (rt.regex/create-regex-router
+                  [[":id" {:name ::legacy-id
+                           :parameters {:path {:id #"\d+"}}}]])]
+      (is (= {:id "123"}
+             (:path-params (r/match-by-path router "/123"))))
+      (is (nil? (r/match-by-path router "/abc")))))
+
+  (testing "Compiled route results are preserved"
+    (let [router (rt.regex/regex-router
+                  [["result" {:name ::with-result} ::compiled-result]])]
+      (is (= ::compiled-result
+             (:result (r/match-by-path router "/result")))))))
 
 (deftest regex-match-by-path-test
   (testing "Basic path matching"
@@ -80,8 +183,8 @@
       (is (re-= (r/map->Match {:path (str "/" valid-id)
                                :path-params {:item-id valid-id}
                                :data {:name ::item
-                                      :parameters {:path {:item-id #"[a-z]{16,20}"}}},
-                               :template "/:item-id"
+                                      :path-regex {:item-id #"[a-z]{16,20}"}},
+                               :template "/:#item-id"
                                :result nil})
                 (r/match-by-path routes (str "/" valid-id)))))
 
@@ -94,8 +197,8 @@
     (is (re-= (r/map->Match {:path "/teams/a/members"
                              :path-params {:team-id-b58 "a"}
                              :data {:name ::->members
-                                    :parameters {:path {:team-id-b58 #"[a-z]"}}}
-                             :template "/teams/:team-id-b58/members"
+                                    :path-regex {:team-id-b58 #"[a-z]"}}
+                             :template "/teams/:#team-id-b58/members"
                              :result nil})
               (r/match-by-path routes "/teams/a/members")))
 
@@ -137,8 +240,8 @@
       (is (re-= (r/map->Match {:path (str "/" valid-id)
                                :path-params {:item-id valid-id}
                                :data {:name ::item
-                                      :parameters {:path {:item-id #"[a-z]{16,20}"}}}
-                               :template "/:item-id"
+                                      :path-regex {:item-id #"[a-z]{16,20}"}}
+                               :template "/:#item-id"
                                :result nil})
                 (r/match-by-name routes ::item {:item-id valid-id}))))
 
@@ -146,8 +249,8 @@
     (is (re-= (r/map->Match {:path "/teams/a/members"
                              :path-params {:team-id-b58 "a"}
                              :data {:name ::->members
-                                    :parameters {:path {:team-id-b58 #"[a-z]"}}}
-                             :template "/teams/:team-id-b58/members"
+                                    :path-regex {:team-id-b58 #"[a-z]"}}
+                             :template "/teams/:#team-id-b58/members"
                              :result nil})
               (r/match-by-name routes ::->members {:team-id-b58 "a"}))))
 
@@ -175,9 +278,9 @@
           "Should return a PartialMatch when params are missing")
       (is (= #{:item-id} (:required partial-match))
           "PartialMatch should indicate the required parameters")
-      (is (re-= (r/map->PartialMatch {:template "/:item-id"
+      (is (re-= (r/map->PartialMatch {:template "/:#item-id"
                                       :data {:name ::item
-                                             :parameters {:path {:item-id #"[a-z]{16,20}"}}}
+                                             :path-regex {:item-id #"[a-z]{16,20}"}}
                                       :path-params {}
                                       :required #{:item-id}
                                       :result nil})
@@ -220,11 +323,11 @@
 
   (testing "Complex path patterns"
     (let [complex-router (rt.regex/create-regex-router
-                           [["articles/:year/:month/:slug"
+                           [["articles/:#year/:#month/:#slug"
                              {:name ::article
-                              :parameters {:path {:year #"\d{4}"
-                                                  :month #"\d{2}"
-                                                  :slug #"[a-z0-9\-]+"}}}]
+                              :path-regex {:year #"\d{4}"
+                                           :month #"\d{2}"
+                                           :slug #"[a-z0-9\-]+"}}]
                             ["files/:path*"
                              {:name ::file-path}]])]
 
