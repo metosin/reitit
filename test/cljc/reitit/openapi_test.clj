@@ -3,6 +3,7 @@
             [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [malli.core :as mc]
+            [malli.util :as mu]
             [matcher-combinators.test :refer [match?]]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
@@ -978,6 +979,88 @@
                                                  :y {:$ref "#/components/schemas/y"}}
                                     :required [:x :y]}}}}
              spec))
+      (is (nil? (validate spec)))))
+  (testing ":and schema with :fn validator as header parameters"
+    ;; [:and [:map ...] [:fn ...]] — resolve-parameter-schema extracts the sole :map child.
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion malli/coercion
+                         :parameters {:header [:and
+                                               [:map
+                                                [:user-id {:optional true} :uuid]
+                                                [:shtoken {:optional true} :string]]
+                                               [:fn {:error/message "shtoken or user-id required"}
+                                                (fn [{:keys [user-id shtoken]}] (or user-id shtoken))]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"user-id" "shtoken"} (->> params (map :name) (map name) set)))
+      (is (every? #(false? (:required %)) params))
+      (is (nil? (validate spec)))))
+  (testing ":or schema with :fn fallback as query parameters"
+    ;; [:or [:map ...] [:fn ...]] — resolve-parameter-schema extracts the sole :map child.
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion malli/coercion
+                         :parameters {:query [:or
+                                              [:map
+                                               [:correlation-id {:optional true} :string]
+                                               [:request-id {:optional true} :string]]
+                                              [:fn {:error/message "must be a valid header map"}
+                                               map?]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"correlation-id" "request-id"} (->> params (map :name) (map name) set)))
+      (is (every? #(false? (:required %)) params))
+      (is (nil? (validate spec)))))
+  (testing ":merge schema combines maps for query parameters"
+    ;; :merge is a ref-like schema — m/deref-all flattens it to :map automatically.
+    ;; mu/schemas must be in the registry for :merge to be a known schema type.
+    (let [coercion (malli/create (assoc malli/default-options
+                                        :options {:registry (merge (mc/default-schemas) (mu/schemas))}))
+          app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion coercion
+                         :parameters {:query [:merge [:map [:x :int]] [:map [:y :string]]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"x" "y"} (->> params (map :name) (map name) set)))
+      (is (nil? (validate spec)))))
+  (testing ":union schema combines maps for query parameters"
+    ;; :union is also ref-like — m/deref-all flattens it to :map automatically.
+    ;; mu/schemas must be in the registry for :union to be a known schema type.
+    (let [coercion (malli/create (assoc malli/default-options
+                                        :options {:registry (merge (mc/default-schemas) (mu/schemas))}))
+          app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion coercion
+                         :parameters {:query [:union [:map [:x :int]] [:map [:y :string]]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"x" "y"} (->> params (map :name) (map name) set)))
       (is (nil? (validate spec)))))
   (testing "var schemas"
     (let [app (ring/ring-handler
