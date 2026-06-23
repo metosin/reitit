@@ -3,7 +3,8 @@
 **Stability: alpha**
 
 Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
-documentation. The feature works similarly to [Swagger documentation](swagger.md).
+documentation, and [OpenAPI 3.2.0](https://learn.openapis.org/specification/http-methods.html#query-method-support)
+when routes use the HTTP QUERY method. The feature works similarly to [Swagger documentation](swagger.md).
 
 The main example is [examples/openapi](../../examples/openapi).
 The
@@ -89,6 +90,30 @@ Example:
 ```
 
 If you need to post-process the generated spec, just wrap the handler with a custom `Middleware` or an `Interceptor`.
+
+## QUERY HTTP method
+
+[OpenAPI
+3.2](https://learn.openapis.org/specification/http-methods.html#query-method-support)
+adds a native `query` operation for the [HTTP QUERY
+method](https://httpwg.org/http-extensions/draft-ietf-httpbis-safe-method-w-body.html).
+Reitit routes use the `:query` method key and the generated spec
+version is bumped to `3.2.0` automatically when any `:query` routes
+are present (otherwise the spec version stays at `3.1.0`).
+
+```clj
+["/search"
+ {:query {:summary "Advanced search"
+          :parameters {:body [:map [:filter string?]]}
+          :responses {200 {:body [:map [:hits int?]]}}
+          :handler (fn [{{{:keys [filter]} :body} :parameters}]
+                     {:status 200 :body {:hits 1}})}}]
+```
+
+Note the naming distinction inherited from HTTP/OpenAPI terminology:
+
+- `:parameters {:query ...}` — URI query-string parameters (`?page=1`), documented as OpenAPI `in: query`
+- `:parameters {:body ...}` or `:request` — QUERY request body (query content), documented as `requestBody`
 
 ## Swagger-ui
 
