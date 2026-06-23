@@ -1,5 +1,6 @@
 (ns reitit.openapi-test
   (:require [clojure.java.shell :as shell]
+            [clojure.spec.alpha :as sp]
             [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [malli.core :as mc]
@@ -11,13 +12,12 @@
             [reitit.http.interceptors.multipart]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
             [reitit.ring.malli]
             [reitit.ring.spec]
-            [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
-            [schema.core :as s]
             [schema-tools.core]
-            [clojure.spec.alpha :as sp]
+            [schema.core :as s]
             [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]))
 
@@ -1060,3 +1060,45 @@
               :anyOf [{:required ["address" "zip"]}
                       {:required ["city" "street"]}]}
              (get-in spec [:paths "/spec" :post :requestBody :content "application/json" :schema]))))))
+
+(deftest query-method-openapi-test
+  (let [app (ring/ring-handler
+             (ring/router
+              ["/api"
+               {:openapi {:id ::search-api}
+                :coercion malli/coercion}
+
+               ["/openapi.json"
+                {:get {:no-doc true
+                       :openapi {:info {:title "search-api"
+                                        :version "0.0.1"}}
+                       :handler (openapi/create-openapi-handler)}}]
+
+               ["/search"
+                {:query {:summary "Advanced search"
+                         :parameters {:body [:map [:filter string?]]}
+                         :responses {200 {:body [:map [:hits int?]]}}
+                         :handler (fn [{{{:keys [filter]} :body} :parameters}]
+                                    {:status 200 :body {:hits (count filter)}})}}]]
+              {:data {:middleware [openapi/openapi-feature
+                                   rrc/coerce-request-middleware
+                                   rrc/coerce-response-middleware]}}))
+        spec (:body (app {:request-method :get :uri "/api/openapi.json"}))]
+    (testing "openapi version is bumped to 3.2.0"
+      (is (= "3.2.0" (:openapi spec))))
+    (testing "query operation is documented"
+      (is (match? {:summary "Advanced search"
+                   :requestBody {:content {"application/json" {:schema {:type "object"
+                                                                        :properties {:filter {:type "string"}}
+                                                                        :required [:filter]}}}}
+                   :responses {200 {:content {"application/json" {:schema {:type "object"
+                                                                           :properties {:hits {:type "integer"}}
+                                                                           :required [:hits]}}}}}}
+                  (get-in spec [:paths "/api/search" :query])))
+    (testing "endpoint works"
+      (is (= {:status 200 :body {:hits 3}}
+             (app {:request-method :query
+                   :uri "/api/search"
+                   :body-params {:filter "foo"}}))))
+    (testing "spec is valid"
+      (is (nil? (validate spec)))))))
