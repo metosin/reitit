@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.10.2
+
+* Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
+
 ## 0.10.1 (2026-03-10)
 
 * **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
