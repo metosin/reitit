@@ -91,7 +91,7 @@ The router can be accessed via `get-router`:
 
 # Request-method based routing
 
-Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found.
+Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put`, `:trace` or `:query`). Top-level handler is used if request-method based handler is not found.
 
 By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
