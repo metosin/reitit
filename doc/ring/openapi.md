@@ -212,3 +212,23 @@ Reusable schema objects are generated for Malli `:ref`s and vars. The
 
 Currently (as of 0.7.2), reusable schema objects are **not** generated
 for Plumatic Schema or Spec.
+
+## Other caveats
+
+### Complex Malli schemas using `:and`, `:or`, `:merge` or `:union`
+
+The OpenAPI spec documents each separate query (or path, or header)
+parameter separately. Originally, this meant that the parameter schema
+had to be a literal `:map`. Currently, Reitit tries to figure out what
+the individual parameters are even for more complex schemas, and thus
+supports the following forms as well:
+
+```clj
+[:union [:map ...] [:map ...]]
+[:merge [:map ...] [:map ...]]
+[:and [:map ...] [:fn ...]]
+[:and [:map ...] :anything-that's-not-a-map]
+[:or [:map ...] :anything-that's-not-a-map]
+```
+
+This support is only for Malli so far, not Plumatic Schema or Spec.
