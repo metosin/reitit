@@ -12,6 +12,22 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## 0.11.0-rc1 (2026-08-07)
+
+* OpenAPI named schema support for Plumatic Schema. Also supports recursive schemas. [#788](https://github.com/metosin/reitit/pull/788)
+* Better support for `:and`, `:or`, `:union` and `:merge` schemas when generating OpenAPI (query, path, header) parameter docs. [#783](https://github.com/metosin/reitit/pull/783)
+* Updated dependencies:
+
+```
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[com.fasterxml.jackson.core/jackson-core "2.22.1"] is available but we use "2.21.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.1"] is available but we use "2.21.1"
+[ring/ring-core "1.15.5"] is available but we use "1.15.3"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+```
+
 ## 0.10.1 (2026-03-10)
 
 * **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
