@@ -207,11 +207,13 @@ useful when you have multiple endpoints that use the same schema. It
 can also make OpenAPI-based code nicer for consumers of your API.
 These schemas are also rendered in their own section in Swagger UI.
 
-Reusable schema objects are generated for Malli `:ref`s and vars. The
-[openapi example](../../examples/openapi) showcases this.
+Reusable schema objects are generated for
+- Malli `:ref`s and vars and
+- Plumatic Schema named schemas (`defschema` and `named`).
+The [openapi example](../../examples/openapi) showcases this.
 
 Currently (as of 0.7.2), reusable schema objects are **not** generated
-for Plumatic Schema or Spec.
+for Spec.
 
 ## Other caveats
 

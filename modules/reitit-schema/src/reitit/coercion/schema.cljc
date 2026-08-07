@@ -49,7 +49,11 @@
     (-get-options [_] opts)
     (-get-model-apidocs [_ specification model options]
       (case specification
-        :openapi (openapi/transform model (merge opts options))
+        :openapi (if (= :parameter (:type options))
+                   ;; For :parameters we need to output an object schema with actual :properties, not a $ref
+                   ;; The caller will iterate through the properties and add them individually to the openapi doc.
+                   (openapi/transform-inline model (merge opts options))
+                   (openapi/transform model (merge opts options)))
         (throw
          (ex-info
           (str "Can't produce Schema apidocs for " specification)

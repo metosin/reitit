@@ -36,7 +36,7 @@
                          [metosin/reitit-pedestal "0.10.1"]
                          [metosin/ring-swagger-ui "5.31.0"]
                          [metosin/spec-tools "0.10.8"]
-                         [metosin/schema-tools "0.13.1"]
+                         [metosin/schema-tools "0.14.0"]
                          [metosin/muuntaja "0.6.11"]
                          [metosin/jsonista "0.3.14"]
                          [metosin/sieppari "0.0.0-alpha13"]
@@ -95,7 +95,7 @@
                                   [org.clojure/clojurescript "1.12.134"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.13.1"]
+                                  [metosin/schema-tools "0.14.0"]
                                   [metosin/spec-tools "0.10.8"]
                                   [metosin/muuntaja "0.6.11"]
                                   [metosin/sieppari "0.0.0-alpha13"]
