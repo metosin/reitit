@@ -1197,4 +1197,30 @@
                  :required ["x" "y"]}
                 "reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
              spec))
-      (is (nil? (validate spec))))))
+      (is (nil? (validate spec))))
+    (testing "under additionalParameters"
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/openapi.json"
+                    {:get {:no-doc true
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :handler (openapi/create-openapi-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:body {s/Keyword Y2}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+        (is (= {:openapi "3.1.0"
+                :x-id #{:reitit.openapi/default}
+                :info {:title "" :version "0.0.1"}
+                :paths
+                {"/post"
+                 {:post
+                  {:requestBody
+                   {:content
+                    {"application/json"
+                     {:schema {:type "object"
+                               :additionalProperties {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}}}}}}}
+                :components {:schemas {"reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
+               spec))
+        (is (nil? (validate spec)))))))
