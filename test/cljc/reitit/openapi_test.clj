@@ -992,14 +992,14 @@
                   {:get {:coercion malli/coercion
                          :parameters {:header [:and
                                                [:map
-                                                [:user-id {:optional true} :uuid]
-                                                [:shtoken {:optional true} :string]]
-                                               [:fn {:error/message "shtoken or user-id required"}
-                                                (fn [{:keys [user-id shtoken]}] (or user-id shtoken))]]}
+                                                [:token-a {:optional true} :string]
+                                                [:token-b {:optional true} :string]]
+                                               [:fn {:error/message "token-a or token-b required"}
+                                                (fn [{:keys [token-a token-b]}] (or token-a token-b))]]}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))
           params (get-in spec [:paths "/resource" :get :parameters])]
-      (is (= #{"user-id" "shtoken"} (->> params (map :name) (map name) set)))
+      (is (= #{"token-a" "token-b"} (->> params (map :name) (map name) set)))
       (is (every? #(false? (:required %)) params))
       (is (nil? (validate spec)))))
   (testing ":or schema with :fn fallback as query parameters"
