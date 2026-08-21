@@ -1144,7 +1144,6 @@
                       {:required ["city" "street"]}]}
              (get-in spec [:paths "/spec" :post :requestBody :content "application/json" :schema]))))))
 
-
 (s/defschema Y2 s/Int)
 (s/defschema Plus2 {:x s/Int
                     :y Y2})
