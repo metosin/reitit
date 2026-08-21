@@ -12,6 +12,28 @@
             [reitit.coercion :as coercion]))
 
 ;;
+;; helpers
+;;
+
+(defn- resolve-parameter-schema
+  "Resolves a Malli schema to a :map schema suitable for OpenAPI parameter generation.
+  :merge and :union are ref-like schemas — m/deref-all flattens them to :map automatically.
+  For :and/:or schemas, extracts the sole :map child when there is exactly one
+  (e.g. [:and [:map ...] [:fn ...]]). If there are multiple :map children the
+  original schema is returned unchanged so the caller's WARNING still fires."
+  [schema]
+  (let [resolved (m/deref-all schema)
+        schema-type (m/type resolved)]
+    (if (#{:and :or} schema-type)
+      (let [map-children (->> (m/children resolved)
+                              (map m/deref-all)
+                              (filter #(= :map (m/type %))))]
+        (if (= 1 (count map-children))
+          (first map-children)
+          resolved))
+      resolved)))
+
+;;
 ;; coercion
 ;;
 
@@ -146,8 +168,9 @@
            :openapi (if (= :parameter (:type options))
                       ;; For :parameters we need to output an object schema with actual :properties.
                       ;; The caller will iterate through the properties and add them individually to the openapi doc.
-                      ;; Thus, we deref to get the actual [:map ..] instead of some ref-schema.
-                      (let [should-be-map (m/deref model)]
+                      ;; resolve-parameter-schema dereferences ref-like schemas (:merge, :union) via m/deref-all
+                      ;; and also unwraps :and/:or to their sole :map child when present.
+                      (let [should-be-map (resolve-parameter-schema model)]
                         (when-not (= :map (m/type should-be-map))
                           (println "WARNING: Unsupported schema for OpenAPI (expected :map schema)" (select-keys options [:in :parameter]) should-be-map))
                         (json-schema/transform should-be-map (merge opts options)))

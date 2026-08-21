@@ -232,8 +232,30 @@ useful when you have multiple endpoints that use the same schema. It
 can also make OpenAPI-based code nicer for consumers of your API.
 These schemas are also rendered in their own section in Swagger UI.
 
-Reusable schema objects are generated for Malli `:ref`s and vars. The
-[openapi example](../../examples/openapi) showcases this.
+Reusable schema objects are generated for
+- Malli `:ref`s and vars and
+- Plumatic Schema named schemas (`defschema` and `named`).
+The [openapi example](../../examples/openapi) showcases this.
 
 Currently (as of 0.7.2), reusable schema objects are **not** generated
-for Plumatic Schema or Spec.
+for Spec.
+
+## Other caveats
+
+### Complex Malli schemas using `:and`, `:or`, `:merge` or `:union`
+
+The OpenAPI spec documents each separate query (or path, or header)
+parameter separately. Originally, this meant that the parameter schema
+had to be a literal `:map`. Currently, Reitit tries to figure out what
+the individual parameters are even for more complex schemas, and thus
+supports the following forms as well:
+
+```clj
+[:union [:map ...] [:map ...]]
+[:merge [:map ...] [:map ...]]
+[:and [:map ...] [:fn ...]]
+[:and [:map ...] :anything-that's-not-a-map]
+[:or [:map ...] :anything-that's-not-a-map]
+```
+
+This support is only for Malli so far, not Plumatic Schema or Spec.
