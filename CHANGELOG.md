@@ -31,7 +31,6 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 [metosin/jsonista "1.0.0"] is available but we use "0.3.14"
 [metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
 ```
->>>>>>> origin/master
 
 ## 0.10.1 (2026-03-10)
 
