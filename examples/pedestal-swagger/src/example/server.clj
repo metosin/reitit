@@ -122,9 +122,10 @@
        ::server/join? false
        ;; no pedestal routes
        ::server/routes []
-       ;; allow serving the swagger-ui styles & scripts from self
+       ;; allow serving the swagger-ui styles, scripts and inline images from self
        ::server/secure-headers {:content-security-policy-settings
                                 {:default-src "'self'"
+                                 :img-src "'self' data:"
                                  :style-src "'self' 'unsafe-inline'"
                                  :script-src "'self' 'unsafe-inline'"}}}
       (server/default-interceptors)

@@ -1,4 +1,4 @@
-(defproject metosin/reitit-parent "0.10.1"
+(defproject metosin/reitit-parent "0.11.0-rc1"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
@@ -18,33 +18,33 @@
         :url "https://github.com/metosin/reitit"}
   ;; Ring 1.13.1 drops support for Java 1.8 so lets target 11
   :javac-options ["-Xlint:unchecked" "-target" "11" "-source" "11"]
-  :managed-dependencies [[metosin/reitit "0.10.1"]
-                         [metosin/reitit-core "0.10.1"]
-                         [metosin/reitit-dev "0.10.1"]
-                         [metosin/reitit-spec "0.10.1"]
-                         [metosin/reitit-malli "0.10.1"]
-                         [metosin/reitit-schema "0.10.1"]
-                         [metosin/reitit-ring "0.10.1"]
-                         [metosin/reitit-middleware "0.10.1"]
-                         [metosin/reitit-http "0.10.1"]
-                         [metosin/reitit-interceptors "0.10.1"]
-                         [metosin/reitit-swagger "0.10.1"]
-                         [fi.metosin/reitit-openapi "0.10.1"]
-                         [metosin/reitit-swagger-ui "0.10.1"]
-                         [metosin/reitit-frontend "0.10.1"]
-                         [metosin/reitit-sieppari "0.10.1"]
-                         [metosin/reitit-pedestal "0.10.1"]
-                         [metosin/ring-swagger-ui "5.31.0"]
+  :managed-dependencies [[metosin/reitit "0.11.0-rc1"]
+                         [metosin/reitit-core "0.11.0-rc1"]
+                         [metosin/reitit-dev "0.11.0-rc1"]
+                         [metosin/reitit-spec "0.11.0-rc1"]
+                         [metosin/reitit-malli "0.11.0-rc1"]
+                         [metosin/reitit-schema "0.11.0-rc1"]
+                         [metosin/reitit-ring "0.11.0-rc1"]
+                         [metosin/reitit-middleware "0.11.0-rc1"]
+                         [metosin/reitit-http "0.11.0-rc1"]
+                         [metosin/reitit-interceptors "0.11.0-rc1"]
+                         [metosin/reitit-swagger "0.11.0-rc1"]
+                         [fi.metosin/reitit-openapi "0.11.0-rc1"]
+                         [metosin/reitit-swagger-ui "0.11.0-rc1"]
+                         [metosin/reitit-frontend "0.11.0-rc1"]
+                         [metosin/reitit-sieppari "0.11.0-rc1"]
+                         [metosin/reitit-pedestal "0.11.0-rc1"]
+                         [metosin/ring-swagger-ui "5.32.11"]
                          [metosin/spec-tools "0.10.8"]
-                         [metosin/schema-tools "0.13.1"]
+                         [metosin/schema-tools "0.14.0"]
                          [metosin/muuntaja "0.6.11"]
-                         [metosin/jsonista "0.3.14"]
+                         [metosin/jsonista "1.0.0"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.20.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.21.1"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.21.1"]
+                         [com.fasterxml.jackson.core/jackson-core "2.22.1"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.22.1"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.29" :exclusions [org.clojure/core.rrb-vector]]
@@ -54,7 +54,7 @@
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
                          [mvxcvi/arrangement "2.1.0"]
-                         [ring/ring-core "1.15.3"]
+                         [ring/ring-core "1.15.5"]
 
                          [io.pedestal/pedestal.service "0.6.4" :upgrade false]]
 
@@ -67,7 +67,7 @@
             [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
-  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.12.4"]]}
+  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.11.4" :upgrade false]]}
              :dev {:jvm-opts ^:replace ["-server"]
 
                    ;; all module sources for development
@@ -90,16 +90,16 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.12.4"]
-                                  [thheller/shadow-cljs "3.3.6"]
-                                  [org.clojure/clojurescript "1.12.134"]
+                   :dependencies [[org.clojure/clojure "1.12.5"]
+                                  [thheller/shadow-cljs "3.4.12"]
+                                  [org.clojure/clojurescript "1.12.145"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.13.1"]
+                                  [metosin/schema-tools "0.14.0"]
                                   [metosin/spec-tools "0.10.8"]
                                   [metosin/muuntaja "0.6.11"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.3.14"]
+                                  [metosin/jsonista "1.0.0"]
                                   [metosin/malli "0.20.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
@@ -109,46 +109,46 @@
 
                                   [orchestra "2021.01.01-1"]
 
-                                  [ring "1.15.3"]
+                                  [ring "1.15.5"]
                                   [ikitommi/immutant-web "3.0.0-alpha1"]
                                   [metosin/ring-http-response "0.9.5"]
-                                  [metosin/ring-swagger-ui "5.31.0"]
+                                  [metosin/ring-swagger-ui "5.32.11"]
                                   [org.clojure/tools.analyzer "1.2.2"]
 
                                   [criterium "0.4.6"]
                                   [org.clojure/test.check "1.1.3"]
                                   [org.clojure/tools.namespace "1.5.1"]
                                   [com.gfredericks/test.chuck "0.2.15"]
-                                  [nubank/matcher-combinators "3.10.0"]
+                                  [nubank/matcher-combinators "3.11.0"]
 
                                   ;; TODO: adapt to breaking changes in pedestal 0.7 and 0.8
                                   [io.pedestal/pedestal.service "0.6.4" :upgrade false]
 
-                                  [org.clojure/core.async "1.8.741"]
+                                  [org.clojure/core.async "1.9.865"]
                                   [manifold "0.5.0"]
-                                  [funcool/promesa "11.0.678"]
+                                  [funcool/promesa "12.0.1"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "1.7.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
                                   [ring-cors "0.1.13"]
 
-                                  [com.bhauman/rebel-readline "0.1.5"]]}
+                                  [com.bhauman/rebel-readline "0.1.11"]]}
              :shadow {:test-paths ["test/cljs"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.7.2"]
-                                   [ring/ring-defaults "0.7.0"]
+                                   [ring/ring-defaults "0.7.1"]
                                    [ikitommi/immutant-web "3.0.0-alpha1"]
                                    [io.pedestal/pedestal.service "0.6.4" :upgrade false]
                                    [io.pedestal/pedestal.jetty "0.6.4" :upgrade false]
                                    [calfpath "0.8.1"]
-                                   [org.clojure/core.async "1.8.741"]
+                                   [org.clojure/core.async "1.9.865"]
                                    [manifold "0.5.0"]
-                                   [funcool/promesa "11.0.678"]
+                                   [funcool/promesa "12.0.1"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.9.5"]
+                                   [aleph "0.9.10"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]
                                    [janus "1.3.2"]]}

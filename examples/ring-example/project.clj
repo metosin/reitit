@@ -2,5 +2,5 @@
   :description "Reitit Ring App"
   :dependencies [[org.clojure/clojure "1.11.2"]
                  [ring/ring-jetty-adapter "1.12.1"]
-                 [metosin/reitit "0.10.1"]]
+                 [metosin/reitit "0.11.0-rc1"]]
   :repl-options {:init-ns example.server})
