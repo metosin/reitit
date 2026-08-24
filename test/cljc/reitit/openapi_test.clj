@@ -992,14 +992,14 @@
                   {:get {:coercion malli/coercion
                          :parameters {:header [:and
                                                [:map
-                                                [:user-id {:optional true} :uuid]
-                                                [:shtoken {:optional true} :string]]
-                                               [:fn {:error/message "shtoken or user-id required"}
-                                                (fn [{:keys [user-id shtoken]}] (or user-id shtoken))]]}
+                                                [:token-a {:optional true} :string]
+                                                [:token-b {:optional true} :string]]
+                                               [:fn {:error/message "token-a or token-b required"}
+                                                (fn [{:keys [token-a token-b]}] (or token-a token-b))]]}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))
           params (get-in spec [:paths "/resource" :get :parameters])]
-      (is (= #{"user-id" "shtoken"} (->> params (map :name) (map name) set)))
+      (is (= #{"token-a" "token-b"} (->> params (map :name) (map name) set)))
       (is (every? #(false? (:required %)) params))
       (is (nil? (validate spec)))))
   (testing ":or schema with :fn fallback as query parameters"
@@ -1143,6 +1143,67 @@
               :anyOf [{:required ["address" "zip"]}
                       {:required ["city" "street"]}]}
              (get-in spec [:paths "/spec" :post :requestBody :content "application/json" :schema]))))))
+
+(defn- make-openapi-app [routes]
+  (ring/ring-handler
+   (ring/router
+    (conj routes
+          ["/openapi.json"
+           {:get {:no-doc true
+                  :openapi {:info {:title "" :version "0.0.1"}}
+                  :handler (openapi/create-openapi-handler)}}])
+    {:data {:middleware [openapi/openapi-feature]}})))
+
+(deftest malli-composite-query-params-test
+  (testing ":and with nested :and and :fn — all :map keys emitted, :fn silently ignored"
+    (let [spec (:body ((make-openapi-app
+                        [["/search"
+                          {:get {:coercion malli/coercion
+                                 :parameters {:query [:and
+                                                      [:and
+                                                       [:map [:from :string] [:to :string] [:status :string]]
+                                                       [:map [:page {:optional true} :int] [:size {:optional true} :int]]]
+                                                      [:fn (fn [{:keys [from to]}] (< from to))]]}
+                                 :handler identity}}]])
+                       {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/search" :get :parameters])]
+      (is (= #{:from :to :status :page :size} (set (map :name params)))
+          "all keys from both nested :map schemas are emitted")
+      (is (every? #(true? (:required %)) (filter #(#{:from :to :status} (:name %)) params))
+          ":from :to :status are required")
+      (is (every? #(false? (:required %)) (filter #(#{:page :size} (:name %)) params))
+          ":page :size are optional")
+      (is (nil? (validate spec)))))
+
+  (testing ":or with two :map alternatives — union of keys, all optional"
+    (let [spec (:body ((make-openapi-app
+                        [["/filter"
+                          {:get {:coercion malli/coercion
+                                 :parameters {:query [:or
+                                                      [:map [:category :string]]
+                                                      [:map [:item-id :uuid]]]}
+                                 :handler identity}}]])
+                       {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/filter" :get :parameters])]
+      (is (= #{:category :item-id} (set (map :name params)))
+          "keys from both :or branches are emitted")
+      (is (every? #(false? (:required %)) params)
+          "all keys are optional since only one branch need be satisfied")
+      (is (nil? (validate spec)))))
+
+  (testing ":any query schema — empty parameter list, no warning"
+    (let [output (java.io.StringWriter.)
+          app    (binding [*out* output]
+                   (make-openapi-app
+                    [["/passthrough"
+                      {:get {:coercion malli/coercion
+                             :parameters {:query :any}
+                             :handler identity}}]]))
+          spec   (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/passthrough" :get :parameters])]
+      (is (= [] params) "no parameters emitted for :any")
+      (is (not (re-find #"WARNING" (str output))) "no warning printed for :any")
+      (is (nil? (validate spec))))))
 
 (s/defschema Y2 s/Int)
 (s/defschema Plus2 {:x s/Int

@@ -15,22 +15,30 @@
 ;; helpers
 ;;
 
+(defn- collect-and-maps
+  "Recursively collect :map schemas from an :and tree, ignoring :fn and other non-map entries."
+  [schema]
+  (let [s (m/deref-all schema)]
+    (case (m/type s)
+      :map [s]
+      :and (mapcat collect-and-maps (m/children s))
+      [])))
+
 (defn- resolve-parameter-schema
   "Resolves a Malli schema to a :map schema suitable for OpenAPI parameter generation.
   :merge and :union are ref-like schemas — m/deref-all flattens them to :map automatically.
-  For :and/:or schemas, extracts the sole :map child when there is exactly one
-  (e.g. [:and [:map ...] [:fn ...]]). If there are multiple :map children the
-  original schema is returned unchanged so the caller's WARNING still fires."
+  For :and, recursively collects all :map children (ignoring :fn) and merges them.
+  For :or, merges all :map children and marks every key optional (any branch may satisfy)."
   [schema]
-  (let [resolved (m/deref-all schema)
-        schema-type (m/type resolved)]
-    (if (#{:and :or} schema-type)
-      (let [map-children (->> (m/children resolved)
-                              (map m/deref-all)
-                              (filter #(= :map (m/type %))))]
-        (if (= 1 (count map-children))
-          (first map-children)
-          resolved))
+  (let [resolved (m/deref-all schema)]
+    (case (m/type resolved)
+      :and (let [maps (collect-and-maps resolved)]
+             (if (seq maps) (reduce #(mu/merge %1 %2) maps) resolved))
+      :or  (let [maps (->> (m/children resolved)
+                           (map m/deref-all)
+                           (filter #(= :map (m/type %))))]
+             (if (seq maps) (mu/optional-keys (reduce #(mu/merge %1 %2) maps)) resolved))
+      :any (m/schema [:map])
       resolved)))
 
 ;;
