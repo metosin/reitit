@@ -37,14 +37,14 @@
                          [metosin/ring-swagger-ui "5.32.11"]
                          [metosin/spec-tools "0.10.8"]
                          [metosin/schema-tools "0.14.0"]
-                         [metosin/muuntaja "0.6.11"]
-                         [metosin/jsonista "1.0.0"]
+                         [metosin/muuntaja "0.6.12"]
+                         [metosin/jsonista "1.0.1"]
                          [metosin/sieppari "0.0.0-alpha13"]
                          [metosin/malli "0.20.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.22.1"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.22.1"]
+                         [com.fasterxml.jackson.core/jackson-core "2.22.2"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.22.2"]
 
                          [meta-merge "1.0.0"]
                          [fipp "0.6.29" :exclusions [org.clojure/core.rrb-vector]]
@@ -91,15 +91,15 @@
                    :java-source-paths ["modules/reitit-core/java-src"]
 
                    :dependencies [[org.clojure/clojure "1.12.5"]
-                                  [thheller/shadow-cljs "3.4.12"]
+                                  [thheller/shadow-cljs "3.5.0"]
                                   [org.clojure/clojurescript "1.12.145"]
 
                                   ;; modules dependencies
                                   [metosin/schema-tools "0.14.0"]
                                   [metosin/spec-tools "0.10.8"]
-                                  [metosin/muuntaja "0.6.11"]
+                                  [metosin/muuntaja "0.6.12"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "1.0.0"]
+                                  [metosin/jsonista "1.0.1"]
                                   [metosin/malli "0.20.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
@@ -148,7 +148,7 @@
                                    [funcool/promesa "12.0.1"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.9.10"]
+                                   [aleph "0.9.11"]
                                    [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]
                                    [janus "1.3.2"]]}
