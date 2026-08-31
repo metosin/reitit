@@ -77,15 +77,18 @@ Serving the OpenAPI specification is handled by
 ring handler which collects at request-time data from all routes and returns an
 OpenAPI specification as Clojure data, to be encoded by a response formatter.
 
-You can use the `:openapi` route data key of the `create-openapi-handler` route
-to populate the top level of the OpenAPI spec.
+You can use the `:openapi` route data key of the
+`create-openapi-handler` route to populate the top level of the
+OpenAPI spec. This can be used for example to override the OpenAPI
+version.
 
 Example:
 
 ```
 ["/openapi.json"
  {:get {:handler (openapi/create-openapi-handler)
-        :openapi {:info {:title "my nice api" :version "0.0.1"}}
+        :openapi {:openapi "3.1.0"
+                  :info {:title "my nice api" :version "0.0.1"}}
         :no-doc true}}]
 ```
 

@@ -15,6 +15,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 ## UNRELEASED
 
 * Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
+* Output OpenAPI 3.2.0 by default. You can override the version, see [openapi.md](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md). [#786](https://github.com/metosin/reitit/pull/786)
 * Updated dependencies:
 
 ```
