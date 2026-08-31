@@ -2,9 +2,11 @@
 
 **Stability: alpha**
 
-Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
-documentation, and [OpenAPI 3.2.0](https://learn.openapis.org/specification/http-methods.html#query-method-support)
-when routes use the HTTP QUERY method. The feature works similarly to [Swagger documentation](swagger.md).
+Reitit can generate [OpenAPI 3.2.0](https://spec.openapis.org/oas/v3.2.0)
+documentation. The feature works similarly to [Swagger documentation](swagger.md).
+
+You can override the version number to 3.1.0 if you need OpenAPI 3.1.0.
+This works as long as you don't use any 3.2.0 specific features like QUERY methods.
 
 The main example is [examples/openapi](../../examples/openapi).
 The
@@ -100,9 +102,7 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 3.2](https://learn.openapis.org/specification/http-methods.html#query-method-support)
 adds a native `query` operation for the [HTTP QUERY
 method](https://httpwg.org/http-extensions/draft-ietf-httpbis-safe-method-w-body.html).
-Reitit routes use the `:query` method key and the generated spec
-version is bumped to `3.2.0` automatically when any `:query` routes
-are present (otherwise the spec version stays at `3.1.0`).
+Reitit routes use the `:query` method key:
 
 ```clj
 ["/search"
