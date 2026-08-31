@@ -382,6 +382,20 @@
            (-> {:request-method :get :uri "/openapi.json"}
                (app) :body :x-id)))))
 
+(deftest override-openapi-version-test
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/ping"
+                {:get (constantly "pong")}]
+               ["/openapi.json"
+                {:openapi {:openapi "3.1.0"
+                           :info {:title "" :version "0"}}
+                 :get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]]))
+        spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+    (is (nil? (validate spec)))
+    (is (= "3.1.0" (:openapi spec)))))
+
 (defn- normalize
   "Normalize format of openapi spec by converting it to json and back.
   Handles differences like :q vs \"q\" in openapi generation."
