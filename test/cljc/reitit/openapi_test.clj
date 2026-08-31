@@ -158,7 +158,7 @@
     (let [spec (:body (app {:request-method :get
                             :uri "/api/openapi.json"}))
           expected {:x-id #{::math}
-                    :openapi "3.1.0"
+                    :openapi "3.2.0"
                     :info {:title "my-api"
                            :version "0.0.1"}
                     :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
@@ -862,7 +862,7 @@
                  app
                  :body)]
     (is (= {:info {:title "" :version "0.0.1"}
-            :openapi "3.1.0"
+            :openapi "3.2.0"
             :x-id #{:reitit.openapi/default}
             :paths {"/parameters"
                     {:post
@@ -955,7 +955,7 @@
                          :parameters {:query (mc/schema "plus" {:registry registry})}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.1.0"
+      (is (= {:openapi "3.2.0"
               :x-id #{:reitit.openapi/default}
               :info {:title "" :version "0.0.1"}
               :paths {"/get" {:get {:parameters [{:in "query"
@@ -1078,7 +1078,7 @@
                          :parameters {:query #'Plus}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.1.0"
+      (is (= {:openapi "3.2.0"
               :x-id #{:reitit.openapi/default}
               :info {:title "" :version "0.0.1"}
               :paths
@@ -1225,7 +1225,7 @@
                          :handler identity}}]]
                 {:data {:coercion schema/coercion}}))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.1.0"
+      (is (= {:openapi "3.2.0"
               :x-id #{:reitit.openapi/default}
               :info {:title "" :version "0.0.1"}
               :paths
@@ -1271,7 +1271,7 @@
                             :handler identity}}]]
                   {:data {:coercion schema/coercion}}))
             spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-        (is (= {:openapi "3.1.0"
+        (is (= {:openapi "3.2.0"
                 :x-id #{:reitit.openapi/default}
                 :info {:title "" :version "0.0.1"}
                 :paths
