@@ -12,6 +12,17 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* Updated dependencies:
+
+```
+[metosin/muuntaja "0.6.12"] is available but we use "0.6.11"
+[metosin/jsonista "1.0.1"] is available but we use "1.0.0"
+[com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.22.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.2"] is available but we use "2.22.1"
+```
+
 ## 0.11.0-rc1 (2026-08-07)
 
 * OpenAPI named schema support for Plumatic Schema. Also supports recursive schemas. [#788](https://github.com/metosin/reitit/pull/788)
