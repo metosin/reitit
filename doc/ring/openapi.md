@@ -253,9 +253,10 @@ supports the following forms as well:
 ```clj
 [:union [:map ...] [:map ...]]
 [:merge [:map ...] [:map ...]]
-[:and [:map ...] [:fn ...]]
-[:and [:map ...] :anything-that's-not-a-map]
-[:or [:map ...] :anything-that's-not-a-map]
+[:and [:map ...] [:map ...] :anything-that's-not-a-map]
+[:and [:map ...] [:and [:map ...] [:map ...]]]
+[:or [:map ...] [:map ...] :anything-that's-not-a-map]
+[:or [:map ...] [:or [:map ...] [:map ...]]]
 ```
 
 This support is only for Malli so far, not Plumatic Schema or Spec.
