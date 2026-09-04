@@ -9,7 +9,28 @@
 (deftest arities-test
   (is (= #{0} (#'pedestal/arities (fn []))))
   (is (= #{1} (#'pedestal/arities (fn [_]))))
-  (is (= #{0 1 2} (#'pedestal/arities (fn ([]) ([_]) ([_ _]))))))
+  (is (= #{0 1 2} (#'pedestal/arities (fn ([]) ([_]) ([_ _])))))
+  (testing "variadic fns report their required arity"
+    (is (= #{0} (#'pedestal/arities (fn [& _]))))
+    (is (= #{1} (#'pedestal/arities (fn [_ & _]))))
+    (is (= #{1 2} (#'pedestal/arities (fn ([_]) ([_ _ & _]))))))
+  (testing ":arglists metadata is preferred over reflection"
+    (is (= #{2} (#'pedestal/arities (with-meta (fn [& _]) {:arglists '([_ _])}))))
+    (is (= #{0 1} (#'pedestal/arities (with-meta (fn [& _]) {:arglists '([] [_])}))))))
+
+(deftest accepts-arity?-test
+  (testing "fixed arities"
+    (is (#'pedestal/accepts-arity? (fn [_ _]) 2))
+    (is (not (#'pedestal/accepts-arity? (fn [_]) 2)))
+    (is (not (#'pedestal/accepts-arity? (fn [_ _ _]) 2))))
+  (testing "variadic arities accept their required arity or more"
+    (is (#'pedestal/accepts-arity? (fn [& _]) 2))
+    (is (#'pedestal/accepts-arity? (fn [_ & _]) 2))
+    (is (not (#'pedestal/accepts-arity? (fn [_ _ _ & _]) 2))))
+  (testing ":arglists metadata is preferred over reflection"
+    (is (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_ _])}) 2))
+    (is (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_ & _])}) 2))
+    (is (not (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_])}) 2)))))
 
 (deftest interceptor-test
   (testing "without :enter, :leave or :error are stripped"
