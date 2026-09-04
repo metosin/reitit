@@ -248,7 +248,7 @@
                              :handler #(conj % :ok)}]
                    options)))]
 
-    (testing "by default, all middleware are applied in order"
+    (testing "by default, all middleware are applied in sequential order, first to last"
       (let [app (create nil)]
         (is (= [::olipa ::kerran ::avaruus :ok] (app "/ping")))))
 
