@@ -83,15 +83,25 @@
                            :header :header
                            :path :path
                            :multipart :formData}
+        ;; Swagger 2 parameter locations in spec/test order. Clojure maps do
+        ;; not guarantee seq order, so collect into an array-map independently
+        ;; of the :parameters map implementation.
+        swagger-parameter-order [:query :body :formData :header :path]
         cleaned (-remove-unsupported-coercions data)]
     (->> (update
           cleaned
           :parameters
           (fn [parameters]
-            (->> parameters
-                 (map (fn [[k v]] [(swagger-parameter k) v]))
-                 (filter first)
-                 (into {}))))
+            (let [remapped (into {}
+                                 (keep (fn [[k v]]
+                                         (when-let [in (swagger-parameter k)]
+                                           [in v]))
+                                       parameters))]
+              (into (array-map)
+                    (keep (fn [k]
+                            (when-let [v (get remapped k)]
+                              [k v]))
+                          swagger-parameter-order)))))
          (coercion/-get-apidocs coercion :swagger))))
 
 (defn create-swagger-handler

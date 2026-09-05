@@ -78,6 +78,17 @@
 
 (def ^:private form-content-type "application/x-www-form-urlencoded")
 
+;; OpenAPI parameter locations in spec order. Clojure maps do not guarantee
+;; seq order, so emit :query/:header/:cookie/:path independently of the
+;; :parameters map implementation.
+(def ^:private parameter-in-order [:query :header :cookie :path])
+
+(defn- ordered-parameter-entries [parameters]
+  (keep (fn [in]
+          (when-let [schema (get parameters in)]
+            [in schema]))
+        parameter-in-order))
+
 (defn -get-apidocs-openapi
   [coercion {:keys [request muuntaja parameters responses openapi/request-content-types openapi/response-content-types]} definitions]
   (let [{:keys [body form multipart]} parameters
@@ -103,7 +114,7 @@
     (merge
      (when (seq parameters)
        {:parameters
-        (->> (for [[in schema] parameters
+        (->> (for [[in schema] (ordered-parameter-entries parameters)
                    :let [{:keys [properties required]} (->schema-object schema {:in in :type :parameter})
                          required? (partial contains? (set required))]
                    [k schema] properties]
@@ -201,7 +212,7 @@
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
            strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
            openapi (->> (strip-endpoint-keys openapi)
-                        (merge {:openapi "3.2.0"
+                        (merge {:openapi "3.1.0"
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :openapi :id (or ::default) (trie/into-set) (set/intersection ids) seq))
