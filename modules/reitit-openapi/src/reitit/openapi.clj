@@ -212,7 +212,7 @@
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
            strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
            openapi (->> (strip-endpoint-keys openapi)
-                        (merge {:openapi "3.1.0"
+                        (merge {:openapi "3.2.0"
                                 :x-id ids}))
            accept-route (fn [route]
                           (-> route second :openapi :id (or ::default) (trie/into-set) (set/intersection ids) seq))
