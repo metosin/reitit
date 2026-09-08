@@ -110,7 +110,7 @@
                                   [orchestra "2021.01.01-1"]
 
                                   [ring "1.15.5"]
-                                  [ikitommi/immutant-web "3.0.0-alpha1"]
+                                  [ikitommi/immutant-web "3.0.0-alpha1" :exclusions [ch.qos.logback/logback-classic]]
                                   [metosin/ring-http-response "0.9.5"]
                                   [metosin/ring-swagger-ui "5.32.11"]
                                   [org.clojure/tools.analyzer "1.2.2"]
@@ -139,7 +139,7 @@
                     :test-paths ["perf-test/clj"]
                     :dependencies [[compojure "1.7.2"]
                                    [ring/ring-defaults "0.7.1"]
-                                   [ikitommi/immutant-web "3.0.0-alpha1"]
+                                   [ikitommi/immutant-web "3.0.0-alpha1" :exclusions [ch.qos.logback/logback-classic]]
                                    [io.pedestal/pedestal.service "0.6.4" :upgrade false]
                                    [io.pedestal/pedestal.jetty "0.6.4" :upgrade false]
                                    [calfpath "0.8.1"]
