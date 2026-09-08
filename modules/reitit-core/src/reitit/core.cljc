@@ -16,12 +16,11 @@
      :cljs cljs.core.Keyword)
   (expand [this _] {:name this})
 
-  #?(:clj  clojure.lang.PersistentArrayMap
+  #?(:clj  clojure.lang.APersistentMap
      :cljs cljs.core.PersistentArrayMap)
   (expand [this _] this)
 
-  #?(:clj  clojure.lang.PersistentHashMap
-     :cljs cljs.core.PersistentHashMap)
+  #?(:cljs cljs.core.PersistentHashMap)
   (expand [this _] this)
 
   #?(:clj  clojure.lang.Fn
