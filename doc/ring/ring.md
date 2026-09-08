@@ -220,6 +220,9 @@ Same middleware for all routes, using [top-level route data](route_data.md#top-l
 
 ## Execution order
 
+Chains of middleware specified in a vector are executed in sequential
+order, first to last, outside to inside.
+
 Here's a full example that shows the execution order of the middleware
 using all of the above techniques:
 
@@ -233,11 +236,17 @@ using all of the above techniques:
                 :middleware [[wrap :4-route]]}]]
       {:data {:middleware [[wrap :2-top-level-route-data]]}})
     nil
-    {:middleware [[wrap :1-top]]}))
+    {:middleware [[wrap :1-top-a]
+                  [wrap :1-top-b]]}))
 
 (app {:request-method :get, :uri "/api/get"})
-; {:status 200, :body [:1-top :2-top-level-route-data :3-parent :4-route :handler]}
+; {:status 200, :body [:1-top-a :1-top-b :2-top-level-route-data :3-parent :4-route :handler]}
 ```
+
+The same order within each vector is also applied in all other
+locations where middleware can be specified.
+
+See also (manipulating) the [execution order of data-driven middleware](data_driven_middleware.md#using-middleware).
 
 ## Which method should I use for defining middleware?
 

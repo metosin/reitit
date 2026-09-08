@@ -79,12 +79,15 @@ The following examples produce identical middleware runtime functions.
                        :handler handler}}]])))
 ```
 
-All the middlewares are applied correctly:
+All the middlewares are applied in sequential order, first to last,
+outside to inside:
 
 ```clj
 (app {:request-method :get, :uri "/api/ping"})
 ; {:status 200, :body [1 2 3 :handler]}
 ```
+
+See also the [execution order of ring middleware](ring.md#execution-order).
 
 ## Compiling middleware
 
