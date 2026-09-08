@@ -480,6 +480,28 @@
         (testing "spec is valid"
           (is (nil? (validate spec))))))))
 
+(deftest parameter-location-order-independent-of-map-seq
+  ;; Clojure maps do not guarantee seq order. Emit OpenAPI locations in spec
+  ;; order even when the :parameters map is constructed out of canonical order.
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/parameters"
+                {:post {:coercion spec/coercion
+                        :parameters {:path {:p string?}
+                                     :cookie {:c string?}
+                                     :header {:h string?}
+                                     :query {:q string?}
+                                     :body {:b string?}}
+                        :handler identity}}]
+               ["/openapi.json"
+                {:get {:handler (openapi/create-openapi-handler)
+                       :openapi {:info {:title "" :version "0.0.1"}}
+                       :no-doc true}}]]
+              {:data {:middleware [openapi/openapi-feature]}}))
+        spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+    (is (= ["query" "header" "cookie" "path"]
+           (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
+
 (deftest examples-test
   (doseq [[coercion ->schema]
           [[#'malli/coercion (fn [nom] [:map

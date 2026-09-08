@@ -444,6 +444,26 @@
     (is (= ["query" "body" "formData" "header" "path"]
            (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
 
+(deftest parameter-location-order-independent-of-map-seq
+  ;; Clojure maps do not guarantee seq order. Emit Swagger locations in spec
+  ;; order even when the :parameters map is constructed out of canonical order.
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/parameters"
+                {:post {:coercion spec/coercion
+                        :parameters {:path {:p string?}
+                                     :header {:h string?}
+                                     :form {:f string?}
+                                     :body {:b string?}
+                                     :query {:q string?}}
+                        :handler identity}}]
+               ["/swagger.json"
+                {:get {:no-doc true
+                       :handler (swagger/create-swagger-handler)}}]]))
+        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
+    (is (= ["query" "body" "formData" "header" "path"]
+           (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
+
 (deftest multiple-content-types-test
   (testing ":request coercion"
     (let [app (ring/ring-handler
