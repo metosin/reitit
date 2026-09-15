@@ -19,8 +19,10 @@
   [coll]
   (into (empty coll) keywordize-xf coll))
 
+;; Protocol extend is exact-class. IPersistentVector covers PersistentVector,
+;; subvec (APersistentVector$SubVector), and other IPersistentVector impls.
 (doseq [type [clojure.lang.PersistentHashSet
-              clojure.lang.PersistentVector
+              clojure.lang.IPersistentVector
               clojure.lang.PersistentQueue
               clojure.lang.PersistentStructMap
               clojure.lang.PersistentTreeSet]]
