@@ -20,7 +20,8 @@
      :cljs cljs.core.PersistentArrayMap)
   (expand [this _] this)
 
-  #?(:cljs cljs.core.PersistentHashMap)
+  #?(:clj  clojure.lang.APersistentMap
+     :cljs cljs.core.PersistentHashMap)
   (expand [this _] this)
 
   #?(:clj  clojure.lang.Fn
