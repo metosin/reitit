@@ -23,6 +23,32 @@
       j/write-value-as-string
       (j/read-value j/keyword-keys-object-mapper)))
 
+(defn- sorted-parameters
+  "Swagger parameter arrays are unordered. Sort for `=` so tests do not
+  depend on Clojure map seq order."
+  [params]
+  (when params
+    (vec (sort-by (juxt :in #(str (:name %))) params))))
+
+(defn- sort-spec-parameters [spec]
+  (if-not (:paths spec)
+    spec
+    (update spec :paths
+            (fn [paths]
+              (reduce-kv
+               (fn [ps path methods]
+                 (assoc ps path
+                        (reduce-kv
+                         (fn [ms method op]
+                           (assoc ms method
+                                  (cond-> op
+                                    (contains? op :parameters)
+                                    (update :parameters sorted-parameters))))
+                         methods
+                         methods)))
+               paths
+               paths)))))
+
 (def malli-registry
   (merge
    (mc/base-schemas)
@@ -348,14 +374,15 @@
                                                                             :description "kosh"}
                                                                        500 {:description "fail"}}
                                                            :summary "plus with body"}}}}]
-      (is (= expected spec))
+      (is (= (sort-spec-parameters expected) (sort-spec-parameters spec)))
 
       (testing "ring-async swagger-spec"
         (let [response* (atom nil)
               respond (partial reset! response*)]
           (app {:request-method :get
                 :uri "/api/swagger.json"} respond (fn [_] (is false)))
-          (is (= expected (:body @response*))))))))
+          (is (= (sort-spec-parameters expected)
+                 (sort-spec-parameters (:body @response*)))))))))
 
 (defn spec-paths [app uri]
   (-> {:request-method :get, :uri uri} app :body :paths keys))
@@ -440,9 +467,10 @@
                ["/swagger.json"
                 {:get {:no-doc true
                        :handler (swagger/create-swagger-handler)}}]]))
-        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
-    (is (= ["query" "body" "formData" "header" "path"]
-           (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
+        spec (:body (app {:request-method :get, :uri "/swagger.json"}))
+        ins (map :in (get-in spec [:paths "/parameters" :post :parameters]))]
+    (is (= 5 (count ins)))
+    (is (= #{"query" "body" "formData" "header" "path"} (set ins)))))
 
 (deftest multiple-content-types-test
   (testing ":request coercion"
@@ -495,18 +523,20 @@
                       :uri "/swagger.json"}
                      app
                      :body)]
-        (is (= [{:description ""
-                 :in "formData"
-                 :name "file"
-                 :required true
-                 :type "file"}
-                {:description ""
-                 :in "formData"
-                 :name "more"
-                 :required true
-                 :type "string"}]
-               (normalize
-                (get-in spec [:paths "/upload" :post :parameters]))))))))
+        (is (= (sorted-parameters
+                [{:description ""
+                  :in "formData"
+                  :name "file"
+                  :required true
+                  :type "file"}
+                 {:description ""
+                  :in "formData"
+                  :name "more"
+                  :required true
+                  :type "string"}])
+               (sorted-parameters
+                (normalize
+                 (get-in spec [:paths "/upload" :post :parameters])))))))))
 
 (def X :int)
 (def Y :int)
@@ -532,41 +562,42 @@
                 {:get {:no-doc true
                        :handler (swagger/create-swagger-handler)}}]]))
         spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
-    (is (= {:definitions {"reitit.swagger-test.Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test.X"},
-                                                                   :y {:$ref "#/definitions/reitit.swagger-test.Y"}},
-                                                      :required [:x :y],
-                                                      :type "object"},
-                          "reitit.swagger-test.X" {:format "int64",
-                                                   :type "integer"},
-                          "reitit.swagger-test.Y" {:format "int64",
-                                                   :type "integer"},
-                          "reitit.swagger-test.Result" {:type "object",
-                                                        :properties {:result {:type "integer", :format "int64"}},
-                                                        :required [:result]}},
-            :paths {"/post" {:post {:parameters [{:description "",
-                                                  :in "body",
-                                                  :name "body",
-                                                  :required true,
-                                                  :schema {:$ref "#/definitions/reitit.swagger-test.Plus"}}]
-                                    :responses {200 {:description ""
-                                                     :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}
-                    "/get" {:get {:parameters [{:in "query"
-                                                :name :x
-                                                :description ""
-                                                :type "integer"
-                                                :required true
-                                                :format "int64"}
-                                               {:in "query"
-                                                :name :y
-                                                :description ""
-                                                :type "integer"
-                                                :required true
-                                                :format "int64"}]
-                                  :responses {200 {:description ""
-                                                   :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}}
-            :swagger "2.0",
-            :x-id #{:reitit.swagger/default}}
-           spec))))
+    (is (= (sort-spec-parameters
+            {:definitions {"reitit.swagger-test.Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test.X"},
+                                                                    :y {:$ref "#/definitions/reitit.swagger-test.Y"}},
+                                                       :required [:x :y],
+                                                       :type "object"},
+                           "reitit.swagger-test.X" {:format "int64",
+                                                    :type "integer"},
+                           "reitit.swagger-test.Y" {:format "int64",
+                                                    :type "integer"},
+                           "reitit.swagger-test.Result" {:type "object",
+                                                         :properties {:result {:type "integer", :format "int64"}},
+                                                         :required [:result]}},
+             :paths {"/post" {:post {:parameters [{:description "",
+                                                   :in "body",
+                                                   :name "body",
+                                                   :required true,
+                                                   :schema {:$ref "#/definitions/reitit.swagger-test.Plus"}}]
+                                     :responses {200 {:description ""
+                                                      :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}
+                     "/get" {:get {:parameters [{:in "query"
+                                                 :name :x
+                                                 :description ""
+                                                 :type "integer"
+                                                 :required true
+                                                 :format "int64"}
+                                                {:in "query"
+                                                 :name :y
+                                                 :description ""
+                                                 :type "integer"
+                                                 :required true
+                                                 :format "int64"}]
+                                   :responses {200 {:description ""
+                                                    :schema {:$ref "#/definitions/reitit.swagger-test.Result"}}}}}}
+             :swagger "2.0",
+             :x-id #{:reitit.swagger/default}})
+           (sort-spec-parameters spec)))))
 
 (deftest swagger-schema-tests
   (testing "s/Any"

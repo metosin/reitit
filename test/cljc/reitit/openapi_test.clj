@@ -32,6 +32,32 @@
       (when-not (zero? (:exit result))
         (j/read-value (:out result))))))
 
+(defn- sorted-parameters
+  "OpenAPI parameter arrays are unordered. Sort for `=` / `match?` so tests
+  do not depend on Clojure map seq order."
+  [params]
+  (when params
+    (vec (sort-by (juxt :in #(str (:name %))) params))))
+
+(defn- sort-spec-parameters [spec]
+  (if-not (:paths spec)
+    spec
+    (update spec :paths
+            (fn [paths]
+              (reduce-kv
+               (fn [ps path methods]
+                 (assoc ps path
+                        (reduce-kv
+                         (fn [ms method op]
+                           (assoc ms method
+                                  (cond-> op
+                                    (contains? op :parameters)
+                                    (update :parameters sorted-parameters))))
+                         methods
+                         methods)))
+               paths
+               paths)))))
+
 (def app
   (ring/ring-handler
    (ring/router
@@ -309,7 +335,7 @@
                                                                                                                         :required ["error"]
                                                                                                                         :type "object"}}}}}
                                                            :summary "plus with body"}}}}]
-      (is (= expected spec))
+      (is (= (sort-spec-parameters expected) (sort-spec-parameters spec)))
       (is (= nil (validate spec))))))
 
 (defn spec-paths [app uri]
@@ -435,29 +461,31 @@
                      app
                      :body)]
         (testing "all non-body parameters"
-          (is (match? [{:in "query"
-                        :name "q"
-                        :required true
-                        :description "description :q"
-                        :schema {:type "string"}}
-                       {:in "header"
-                        :name "h"
-                        :required true
-                        :description "description :h"
-                        :schema {:type "string"}}
-                       {:in "cookie"
-                        :name "c"
-                        :required true
-                        :description "description :c"
-                        :schema {:type "string"}}
-                       {:in "path"
-                        :name "p"
-                        :required true
-                        :description "description :p"
-                        :schema {:type "string"}}]
+          (is (match? (sorted-parameters
+                       [{:in "query"
+                         :name "q"
+                         :required true
+                         :description "description :q"
+                         :schema {:type "string"}}
+                        {:in "header"
+                         :name "h"
+                         :required true
+                         :description "description :h"
+                         :schema {:type "string"}}
+                        {:in "cookie"
+                         :name "c"
+                         :required true
+                         :description "description :c"
+                         :schema {:type "string"}}
+                        {:in "path"
+                         :name "p"
+                         :required true
+                         :description "description :p"
+                         :schema {:type "string"}}])
                       (-> spec
                           (get-in [:paths "/parameters" :post :parameters])
-                          normalize))))
+                          normalize
+                          sorted-parameters))))
         (testing "body parameter"
           (is (match? (merge {:type "object"
                               :properties {:b {:type "string"}}
@@ -969,30 +997,31 @@
                          :parameters {:query (mc/schema "plus" {:registry registry})}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.2.0"
-              :x-id #{:reitit.openapi/default}
-              :info {:title "" :version "0.0.1"}
-              :paths {"/get" {:get {:parameters [{:in "query"
-                                                  :name :x
-                                                  :required true
-                                                  :schema {:type "integer"}}
-                                                 {:in "query"
-                                                  :name :y
-                                                  :required true
-                                                  :schema {:$ref "#/components/schemas/y"}}]}}
-                      "/post" {:post
-                               {:requestBody
-                                {:content
-                                 {"application/json"
-                                  {:schema
-                                   {:$ref "#/components/schemas/plus"}}}}}}}
-              :components {:schemas
-                           {"y" {:type "integer"}
-                            "plus" {:type "object"
-                                    :properties {:x {:type "integer"}
-                                                 :y {:$ref "#/components/schemas/y"}}
-                                    :required [:x :y]}}}}
-             spec))
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths {"/get" {:get {:parameters [{:in "query"
+                                                   :name :x
+                                                   :required true
+                                                   :schema {:type "integer"}}
+                                                  {:in "query"
+                                                   :name :y
+                                                   :required true
+                                                   :schema {:$ref "#/components/schemas/y"}}]}}
+                       "/post" {:post
+                                {:requestBody
+                                 {:content
+                                  {"application/json"
+                                   {:schema
+                                    {:$ref "#/components/schemas/plus"}}}}}}}
+               :components {:schemas
+                            {"y" {:type "integer"}
+                             "plus" {:type "object"
+                                     :properties {:x {:type "integer"}
+                                                  :y {:$ref "#/components/schemas/y"}}
+                                     :required [:x :y]}}}})
+             (sort-spec-parameters spec)))
       (is (nil? (validate spec)))))
   (testing ":and schema with :fn validator as header parameters"
     ;; [:and [:map ...] [:fn ...]] — resolve-parameter-schema extracts the sole :map child.
@@ -1092,37 +1121,38 @@
                          :parameters {:query #'Plus}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.2.0"
-              :x-id #{:reitit.openapi/default}
-              :info {:title "" :version "0.0.1"}
-              :paths
-              {"/post"
-               {:post
-                {:requestBody
-                 {:content
-                  {"application/json"
-                   {:schema
-                    {:$ref "#/components/schemas/reitit.openapi-test.Plus"}}}}}}
-               "/get"
-               {:get
-                {:parameters
-                 [{:in "query" :name :x
-                   :required true
-                   :schema {:type "integer"}}
-                  {:in "query"
-                   :name :y
-                   :required true
-                   :schema {:$ref "#/components/schemas/reitit.openapi-test.Y"}}]}}}
-              :components
-              {:schemas
-               {"reitit.openapi-test.Plus"
-                {:type "object"
-                 :properties
-                 {:x {:type "integer"}
-                  :y {:$ref "#/components/schemas/reitit.openapi-test.Y"}}
-                 :required [:x :y]}
-                "reitit.openapi-test.Y" {:type "integer"}}}}
-             spec))
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths
+               {"/post"
+                {:post
+                 {:requestBody
+                  {:content
+                   {"application/json"
+                    {:schema
+                     {:$ref "#/components/schemas/reitit.openapi-test.Plus"}}}}}}
+                "/get"
+                {:get
+                 {:parameters
+                  [{:in "query" :name :x
+                    :required true
+                    :schema {:type "integer"}}
+                   {:in "query"
+                    :name :y
+                    :required true
+                    :schema {:$ref "#/components/schemas/reitit.openapi-test.Y"}}]}}}
+               :components
+               {:schemas
+                {"reitit.openapi-test.Plus"
+                 {:type "object"
+                  :properties
+                  {:x {:type "integer"}
+                   :y {:$ref "#/components/schemas/reitit.openapi-test.Y"}}
+                  :required [:x :y]}
+                 "reitit.openapi-test.Y" {:type "integer"}}}})
+             (sort-spec-parameters spec)))
       (is (nil? (validate spec))))))
 
 (sp/def ::address string?)
@@ -1239,39 +1269,40 @@
                          :handler identity}}]]
                 {:data {:coercion schema/coercion}}))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.2.0"
-              :x-id #{:reitit.openapi/default}
-              :info {:title "" :version "0.0.1"}
-              :paths
-              {"/post"
-               {:post
-                {:requestBody
-                 {:content
-                  {"application/json"
-                   {:schema
-                    {:$ref "#/components/schemas/reitit.openapi-test.Plus2"}}}}}}
-               "/get"
-               {:get
-                {:parameters
-                 [{:in "query" :name "x"
-                   :required true
-                   :schema {:type "integer" :format "int32"}}
-                  {:in "query"
-                   :name "y"
-                   :required true
-                   :schema {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}]}}}
-              :components
-              {:schemas
-               {"reitit.openapi-test.Plus2"
-                {:type "object"
-                 :title "reitit.openapi-test/Plus2"
-                 :additionalProperties false
-                 :properties
-                 {"x" {:type "integer" :format "int32"}
-                  "y" {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}
-                 :required ["x" "y"]}
-                "reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
-             spec))
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths
+               {"/post"
+                {:post
+                 {:requestBody
+                  {:content
+                   {"application/json"
+                    {:schema
+                     {:$ref "#/components/schemas/reitit.openapi-test.Plus2"}}}}}}
+                "/get"
+                {:get
+                 {:parameters
+                  [{:in "query" :name "x"
+                    :required true
+                    :schema {:type "integer" :format "int32"}}
+                   {:in "query"
+                    :name "y"
+                    :required true
+                    :schema {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}]}}}
+               :components
+               {:schemas
+                {"reitit.openapi-test.Plus2"
+                 {:type "object"
+                  :title "reitit.openapi-test/Plus2"
+                  :additionalProperties false
+                  :properties
+                  {"x" {:type "integer" :format "int32"}
+                   "y" {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}
+                  :required ["x" "y"]}
+                 "reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}})
+             (sort-spec-parameters spec)))
       (is (nil? (validate spec))))
     (testing "under additionalParameters"
       (let [app (ring/ring-handler
