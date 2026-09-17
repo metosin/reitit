@@ -1298,7 +1298,34 @@
                                :additionalProperties {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}}}}}}}
                 :components {:schemas {"reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
                spec))
-        (is (nil? (validate spec)))))))
+        (is (nil? (validate spec))))))
+  (testing "s/Any"
+    (let [app (ring/ring-handler
+                 (ring/router
+                  [["/openapi.json"
+                    {:get {:no-doc true
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :handler (openapi/create-openapi-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:query {:q s/Any}
+                                         :body {:foo s/Any}}
+                            :responses {200 {:content {:default {:schema {:bar s/Any}}}}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (= {:parameters [{:in "query",
+                            :name "q",
+                            :required true,
+                            :schema {:oneOf [{:type "string"} {:type "null"}]}}],
+              :requestBody {:content {"application/json" {:schema {:type "object",
+                                                                   :properties {"foo" {:oneOf [{:type "string"} {:type "null"}]}},
+                                                                   :additionalProperties false,
+                                                                   :required ["foo"]}}}},
+              :responses {200 {:content {"application/json" {:schema {:type "object",
+                                                                      :properties {"bar" {:oneOf [{:type "string"} {:type "null"}]}},
+                                                                      :additionalProperties false,
+                                                                      :required ["bar"]}}}}}}
+             (get-in spec [:paths "/post" :post]))))))
 
 (deftest query-method-openapi-test
   (let [app (ring/ring-handler
