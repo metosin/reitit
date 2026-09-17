@@ -567,3 +567,40 @@
             :swagger "2.0",
             :x-id #{:reitit.swagger/default}}
            spec))))
+
+(deftest swagger-schema-tests
+  (testing "s/Any"
+    (let [app (ring/ring-handler
+                 (ring/router
+                  [["/swagger.json"
+                    {:get {:no-doc true
+                           :handler (swagger/create-swagger-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:query {:q s/Any}
+                                         :body {:foo s/Any}}
+                            :responses {200 {:body {:bar s/Any}}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (:body (app {:request-method :get :uri "/swagger.json"}))]
+      (is (= {200 {:schema {:type "object",
+                            :properties {"bar" {}},
+                            :additionalProperties false,
+                            :required ["bar"]},
+                   :description ""}}
+             (get-in spec [:paths "/post" :post :responses])))
+      (is (= [{:in "body",
+               :name "body",
+               :description "",
+               :required true,
+               :schema
+               {:type "object",
+                :properties {"foo" {}},
+                :additionalProperties false,
+                :required ["foo"]}}
+              {:in "query",
+               :name "q",
+               :description "",
+               :type "string",
+               :required true,
+               :allowEmptyValue true}]
+             (sort-by :in (get-in spec [:paths "/post" :post :parameters])))))))
