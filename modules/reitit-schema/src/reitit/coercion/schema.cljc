@@ -48,20 +48,16 @@
     (-get-name [_] :schema)
     (-get-options [_] opts)
     (-get-model-apidocs [_ specification model options]
-      ;; schema-tools uses :body to trigger different logic for eg. s/Any:
-      ;; with :in :body, s/Any becomes {}, but otherwise it becomes {:oneOf [{:type :string} {:type :null}]},
-      ;; which is appropriate for query params etc.
-      (let [options (update options :in #(case % :requestBody :body :responses :body %))]
-        (case specification
-          :openapi (if (= :parameter (:type options))
-                     ;; For :parameters we need to output an object schema with actual :properties, not a $ref
-                     ;; The caller will iterate through the properties and add them individually to the openapi doc.
-                     (openapi/transform-inline model (merge opts options))
-                     (openapi/transform model (merge opts options)))
-          (throw
-           (ex-info
-            (str "Can't produce Schema apidocs for " specification)
-            {:type specification, :coercion :schema})))))
+      (case specification
+        :openapi (if (= :parameter (:type options))
+                   ;; For :parameters we need to output an object schema with actual :properties, not a $ref
+                   ;; The caller will iterate through the properties and add them individually to the openapi doc.
+                   (openapi/transform-inline model (merge opts options))
+                   (openapi/transform model (merge opts options)))
+        (throw
+         (ex-info
+          (str "Can't produce Schema apidocs for " specification)
+          {:type specification, :coercion :schema}))))
     (-get-apidocs [_ specification {:keys [request parameters responses content-types]
                                     :or {content-types ["application/json"]}}]
      ;; TODO: this looks identical to spec, refactor when schema is done.
