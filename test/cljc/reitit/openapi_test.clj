@@ -1299,7 +1299,7 @@
                 :components {:schemas {"reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
                spec))
         (is (nil? (validate spec))))))
-  (testing "s/Any"
+  (testing "s/Any should map to {} in body, nullable string elsewhere"
     (let [app (ring/ring-handler
                  (ring/router
                   [["/openapi.json"
@@ -1318,11 +1318,11 @@
                             :required true,
                             :schema {:oneOf [{:type "string"} {:type "null"}]}}],
               :requestBody {:content {"application/json" {:schema {:type "object",
-                                                                   :properties {"foo" {:oneOf [{:type "string"} {:type "null"}]}},
+                                                                   :properties {"foo" {}},
                                                                    :additionalProperties false,
                                                                    :required ["foo"]}}}},
               :responses {200 {:content {"application/json" {:schema {:type "object",
-                                                                      :properties {"bar" {:oneOf [{:type "string"} {:type "null"}]}},
+                                                                      :properties {"bar" {}},
                                                                       :additionalProperties false,
                                                                       :required ["bar"]}}}}}}
              (get-in spec [:paths "/post" :post]))))))
