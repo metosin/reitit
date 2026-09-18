@@ -35,20 +35,11 @@
   (if-not (:paths spec)
     spec
     (update spec :paths
-            (fn [paths]
-              (reduce-kv
-               (fn [ps path methods]
-                 (assoc ps path
-                        (reduce-kv
-                         (fn [ms method op]
-                           (assoc ms method
-                                  (cond-> op
-                                    (contains? op :parameters)
-                                    (update :parameters sorted-parameters))))
-                         methods
-                         methods)))
-               paths
-               paths)))))
+            update-vals (fn [path]
+                          (update-vals path (fn [method]
+                                              (if-not (:parameters method)
+                                                method
+                                                (update method :parameters sorted-parameters))))))))
 
 (def malli-registry
   (merge
