@@ -15,20 +15,21 @@
             [spec-tools.data-spec :as ds]
             [malli.core :as mc]))
 
-(defn- normalize
-  "Normalize format of swagger spec by converting it to json and back.
-  Handles differences like :q vs \"q\" in swagger generation."
-  [data]
-  (-> data
-      j/write-value-as-string
-      (j/read-value j/keyword-keys-object-mapper)))
-
 (defn- sorted-parameters
   "Swagger parameter arrays are unordered. Sort for `=` so tests do not
   depend on Clojure map seq order."
   [params]
   (when params
     (vec (sort-by (juxt :in #(str (:name %))) params))))
+
+(defn- normalize
+  "Normalize swagger parameter arrays by converting to json and back, then
+  sorting. Handles differences like :q vs \"q\" and map seq order."
+  [data]
+  (-> data
+      j/write-value-as-string
+      (j/read-value j/keyword-keys-object-mapper)
+      sorted-parameters))
 
 (defn- sort-spec-parameters [spec]
   (if-not (:paths spec)
@@ -469,8 +470,7 @@
                        :handler (swagger/create-swagger-handler)}}]]))
         spec (:body (app {:request-method :get, :uri "/swagger.json"}))
         ins (map :in (get-in spec [:paths "/parameters" :post :parameters]))]
-    (is (= 5 (count ins)))
-    (is (= #{"query" "body" "formData" "header" "path"} (set ins)))))
+    (is (= ["body" "formData" "header" "path" "query"] (sort ins)))))
 
 (deftest multiple-content-types-test
   (testing ":request coercion"
@@ -523,7 +523,7 @@
                       :uri "/swagger.json"}
                      app
                      :body)]
-        (is (= (sorted-parameters
+        (is (= (normalize
                 [{:description ""
                   :in "formData"
                   :name "file"
@@ -534,9 +534,8 @@
                   :name "more"
                   :required true
                   :type "string"}])
-               (sorted-parameters
-                (normalize
-                 (get-in spec [:paths "/upload" :post :parameters])))))))))
+               (normalize
+                (get-in spec [:paths "/upload" :post :parameters]))))))))
 
 (def X :int)
 (def Y :int)

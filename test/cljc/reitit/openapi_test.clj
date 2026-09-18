@@ -5,6 +5,7 @@
             [jsonista.core :as j]
             [malli.core :as mc]
             [malli.util :as mu]
+            [matcher-combinators.matchers :as matchers]
             [matcher-combinators.test :refer [match?]]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
@@ -33,8 +34,8 @@
         (j/read-value (:out result))))))
 
 (defn- sorted-parameters
-  "OpenAPI parameter arrays are unordered. Sort for `=` / `match?` so tests
-  do not depend on Clojure map seq order."
+  "OpenAPI parameter arrays are unordered. Sort for `=` so tests do not
+  depend on Clojure map seq order."
   [params]
   (when params
     (vec (sort-by (juxt :in #(str (:name %))) params))))
@@ -461,7 +462,7 @@
                      app
                      :body)]
         (testing "all non-body parameters"
-          (is (match? (sorted-parameters
+          (is (match? (matchers/in-any-order
                        [{:in "query"
                          :name "q"
                          :required true
@@ -484,8 +485,7 @@
                          :schema {:type "string"}}])
                       (-> spec
                           (get-in [:paths "/parameters" :post :parameters])
-                          normalize
-                          sorted-parameters))))
+                          normalize))))
         (testing "body parameter"
           (is (match? (merge {:type "object"
                               :properties {:b {:type "string"}}
