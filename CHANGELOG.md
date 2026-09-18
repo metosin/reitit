@@ -16,11 +16,15 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
 * Output OpenAPI 3.2.0 by default. You can override the version, see [openapi.md](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md). [#786](https://github.com/metosin/reitit/pull/786)
+* Better support for `:and`, `:or`, `:union` and `:merge` when generating OpenAPI. [#791](https://github.com/metosin/reitit/pull/791)
+* Doc improvements
+* Improve OpenAPI output for Schema `s/Any` type: it now maps to JSON Schema `{}` in request and response bodies. [#801](https://github.com/metosin/reitit/pull/801)
 * Updated dependencies:
 
 ```
 [metosin/muuntaja "0.6.12"] is available but we use "0.6.11"
 [metosin/jsonista "1.0.1"] is available but we use "1.0.0"
+[metosin/schema-tools "1.14.1"] is available but we use "0.14.0"
 [com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.22.1"
 [com.fasterxml.jackson.core/jackson-databind "2.22.2"] is available but we use "2.22.1"
 ```
