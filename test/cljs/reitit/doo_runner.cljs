@@ -4,6 +4,7 @@
             reitit.core-test
             reitit.impl-test
             reitit.middleware-test
+            reitit.regex-test
             reitit.ring-test
             reitit.spec-test
             reitit.exception-test
@@ -18,6 +19,7 @@
            'reitit.core-test
            'reitit.impl-test
            'reitit.middleware-test
+           'reitit.regex-test
            'reitit.ring-test
            'reitit.spec-test
            'reitit.exception-test
