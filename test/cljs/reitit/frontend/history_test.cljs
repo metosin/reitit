@@ -170,11 +170,21 @@
                           (js/document.createElement "A")
                            (.setAttribute "href" (rfh/href history ::foo)))
             document-link (create-link)
-            shadow-link (create-link)]
+            shadow-link (create-link)
+            ;; A link in the document that contains a shadow host,
+            ;; e.g. a web component. The click starts inside the shadow tree.
+            host-link (create-link)
+            host-element (js/document.createElement "SPAN")
+            host-shadow-root (.attachShadow host-element #js {:mode "open"})
+            host-shadow-content (js/document.createElement "SPAN")]
         (.appendChild js/document.body document-link)
 
         (.appendChild js/document.body shadow-element)
         (.appendChild shadow-root shadow-link)
 
-        (reset! clicks [document-link shadow-link])
+        (.appendChild js/document.body host-link)
+        (.appendChild host-link host-element)
+        (.appendChild host-shadow-root host-shadow-content)
+
+        (reset! clicks [document-link shadow-link host-shadow-content])
         (click-next)))))
