@@ -12,6 +12,10 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
+
 ## 0.11.0 (2026-09-18)
 
 * Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
