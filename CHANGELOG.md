@@ -12,7 +12,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
-## UNRELEASED
+## 0.11.0 (2026-09-18)
 
 * Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
 * Output OpenAPI 3.2.0 by default. You can override the version, see [openapi.md](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md). [#786](https://github.com/metosin/reitit/pull/786)
