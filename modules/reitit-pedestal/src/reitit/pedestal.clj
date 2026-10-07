@@ -5,18 +5,58 @@
             [reitit.exception :as ex]
             [reitit.http]
             [reitit.interceptor])
-  (:import (java.lang.reflect Method)))
+  (:import (clojure.lang RestFn)
+           (java.lang.reflect Method)))
 
-;; TODO: variadic
-(defn- arities [f]
+(defn- required-arity
+  "Number of positional parameters in an `:arglists` signature, ignoring any
+   variadic tail: `[context ex]` -> 2, `[context & args]` -> 1."
+  [arglist]
+  (count (take-while #(not= '& %) arglist)))
+
+(defn- variadic-arglist? [arglist]
+  (boolean (some #(= '& %) arglist)))
+
+(defn- declared-invoke-arities
+  "Arities of the `invoke` methods declared on `f`'s class. Fns compiled by
+   Clojure on the JVM only declare the arities they actually define, so this
+   is a good approximation there. It says nothing about variadic arities,
+   which are compiled to `doInvoke` instead."
+  [f]
   (->> (class f)
        .getDeclaredMethods
        (filter (fn [^Method m] (= "invoke" (.getName m))))
        (map #(alength (.getParameterTypes ^Method %)))
        (set)))
 
+(defn- signatures
+  "Signatures `f` accepts, as `{:arity n, :variadic? bool}`, where `:arity` is
+   the number of required positional parameters.
+
+   `:arglists` metadata is preferred when present: it is the portable way to
+   describe a fn's signatures, and unlike class reflection it is also correct
+   on runtimes that represent every fn with a single shared class."
+  [f]
+  (if-let [arglists (:arglists (meta f))]
+    (into #{} (map (fn [arglist]
+                     {:arity (required-arity arglist)
+                      :variadic? (variadic-arglist? arglist)}))
+          arglists)
+    (cond-> (into #{} (map (fn [n] {:arity n, :variadic? false}))
+                  (declared-invoke-arities f))
+      (instance? RestFn f) (conj {:arity (.getRequiredArity ^RestFn f)
+                                  :variadic? true}))))
+
+(defn- accepts-arity?
+  "Whether `f` can be called with `n` arguments. Variadic signatures accept
+   their required arity or more."
+  [f n]
+  (boolean (some (fn [{:keys [arity variadic?]}]
+                   (if variadic? (<= arity n) (= arity n)))
+                 (signatures f))))
+
 (defn- error-without-arity-2? [{error-fn :error}]
-  (and error-fn (not (contains? (arities error-fn) 2))))
+  (and error-fn (not (accepts-arity? error-fn 2))))
 
 (defn- error-arity-2->1 [error]
   (fn [context ex]
