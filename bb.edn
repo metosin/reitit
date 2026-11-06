@@ -44,19 +44,18 @@
                         expound/expound {:mvn/version "0.9.0"}
                         lambdaisland/deep-diff {:mvn/version "0.0-47"}
                         com.bhauman/spell-spec {:mvn/version "0.1.2"}
-                        org.clojure/test.check {:mvn/version "1.1.3"}}
-           :requires ([clojure.test :as t])
-           :task (let [nss '[reitit.core-test
-                             reitit.exception-test
-                             reitit.impl-test
-                             reitit.interceptor-test
-                             reitit.middleware-test
-                             reitit.ring-test
-                             reitit.ring.middleware.parameters-test
-                             reitit.spec-test
-                             reitit.trie-test
-                             reitit.walk-test]
-                       _ (apply require nss)
-                       {:keys [fail error]} (apply t/run-tests nss)]
-                   (when (pos? (+ fail error))
-                     (System/exit 1)))}}}
+                        org.clojure/test.check {:mvn/version "1.1.3"}
+                        io.github.cognitect-labs/test-runner {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+           :task (exec 'cognitect.test-runner.api/test)
+           :org.babashka/cli {:coerce {:nses [:symbol] :vars [:symbol]}}
+           :exec-args {:dirs ["test/clj" "test/cljc"]
+                       :nses [reitit.core-test
+                              reitit.exception-test
+                              reitit.impl-test
+                              reitit.interceptor-test
+                              reitit.middleware-test
+                              reitit.ring-test
+                              reitit.ring.middleware.parameters-test
+                              reitit.spec-test
+                              reitit.trie-test
+                              reitit.walk-test]}}}}
