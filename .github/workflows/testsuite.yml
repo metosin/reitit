@@ -90,6 +90,30 @@ jobs:
       - name: Run tests
         run: ./scripts/test.sh cljs
 
+  build-bb:
+    name: Babashka
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+          key: ${{ runner.os }}-bb-${{ hashFiles('bb.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-bb-
+
+      - name: Setup Babashka
+        uses: DeLaGuardo/setup-clojure@13.1
+        with:
+          bb: latest
+
+      - name: Run tests
+        run: bb test-bb
+
   lint:
     name: Lint cljdoc.edn
     runs-on: ubuntu-latest
