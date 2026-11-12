@@ -23,6 +23,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Better support for `:and`, `:or`, `:union` and `:merge` when generating OpenAPI. [#791](https://github.com/metosin/reitit/pull/791)
 * Doc improvements
 * Improve OpenAPI output for Schema `s/Any` type: it now maps to JSON Schema `{}` in request and response bodies. [#801](https://github.com/metosin/reitit/pull/801)
+* Fix HTML5 history link clicks that start inside a shadow root nested in an `<a>`. [#805](https://github.com/metosin/reitit/pull/805)
 * Updated dependencies:
 
 ```

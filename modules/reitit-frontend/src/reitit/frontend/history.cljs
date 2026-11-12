@@ -60,7 +60,11 @@
       (if el
         (if (= tag (.-nodeName el))
           el
-          (recur (.-parentNode el)))))))
+          ;; A ShadowRoot has no parentNode, continue from its host
+          ;; to find a link that contains a shadow host.
+          (recur (if (and (= 11 (.-nodeType el)) (.-host el))
+                   (.-host el)
+                   (.-parentNode el))))))))
 
 (defn- event-target
   "Read event's target from composed path to get shadow dom working,
