@@ -1,6 +1,7 @@
 (ns reitit.coercion
   (:require [#?(:clj reitit.walk :cljs clojure.walk) :as walk]
             [reitit.core :as r]
+            [reitit.exception :as exception]
             [reitit.impl :as impl])
   #?(:clj
      (:import (java.io Writer))))
@@ -195,6 +196,26 @@
 (defn -compile-parameters [data coercion]
   (impl/path-update data [[[:parameters any?] #(-compile-model coercion % nil)]]))
 
+(defn ^:no-doc -compile-failed!
+  "Rethrows a schema compilation error `e` with the route path, method and
+  coercion related route data, so it's easier to find the route that failed."
+  [e path method {:keys [coercion] :as data}]
+  (exception/fail! ::compile-failed
+                   {:path path
+                    :method method
+                    :route-data (cond-> (select-keys data [:parameters :request :responses])
+                                  coercion (assoc :coercion (-get-name coercion)))
+                    :cause-message (exception/get-message e)
+                    :cause-data (ex-data e)}
+                   e))
+
+(defmethod exception/format-exception ::compile-failed [_ _ {:keys [path method route-data cause-message cause-data]}]
+  (str "Coercion failed to compile schemas for path " (pr-str path)
+       (when method (str ", method " (pr-str method)))
+       ": " cause-message
+       (when cause-data (str "\n\n" (pr-str cause-data)))
+       "\n\nRoute data:\n\n" (pr-str route-data)))
+
 ;;
 ;; integration
 ;;
@@ -213,9 +234,12 @@
 
   NOTE: this is not needed with ring/http, where the coercion compilation is
   managed in the request coercion middleware/interceptors."
-  [[_ {:keys [parameters coercion] :as data}] opts]
+  [[path {:keys [parameters coercion] :as data}] opts]
   (if (and parameters coercion)
-    (let [{:keys [parameters] :as data} (-compile-parameters data coercion)]
+    (let [{:keys [parameters] :as data} (try
+                                          (-compile-parameters data coercion)
+                                          (catch #?(:clj Exception, :cljs js/Error) e
+                                            (-compile-failed! e path nil data)))]
       {:data data
        :coerce (request-coercers coercion parameters opts)})))
 

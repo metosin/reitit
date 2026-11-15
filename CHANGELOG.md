@@ -14,6 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* Schema compilation failures in coercion now report the route path, method and coercion route data (`:parameters`, `:request`, `:responses`), instead of only the coercion library's error. [#449](https://github.com/metosin/reitit/pull/449)
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
 
 ## 0.11.0 (2026-09-18)

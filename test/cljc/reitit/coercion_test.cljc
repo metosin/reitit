@@ -249,3 +249,21 @@
              (-> (r/match-by-path router "/olipa/kerran")
                  (assoc :query-params {:x ["__a" "__b"]})
                  (coercion/coerce!)))))))
+
+(deftest schema-compile-failure-test
+  (let [e (try
+            (r/router
+             ["/api/:id" {:parameters {:query [:map [:x ::invalid-schema]]}
+                          :coercion reitit.coercion.malli/coercion}]
+             {:compile coercion/compile-request-coercers})
+            nil
+            (catch #?(:clj Exception :cljs js/Error) e
+              e))]
+    (testing "invalid schema fails router creation with route path and data"
+      (is (= ::coercion/compile-failed (-> e ex-data :type)))
+      (is (= {:path "/api/:id"
+              :method nil
+              :route-data {:parameters {:query [[:map [:x ::invalid-schema]]]}
+                           :coercion :malli}}
+             (-> e ex-data :data (select-keys [:path :method :route-data]))))
+      (is (re-find #"path \"/api/:id\": :malli.core/invalid-schema" (ex-message e))))))
