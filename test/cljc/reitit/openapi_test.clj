@@ -1,8 +1,11 @@
 (ns reitit.openapi-test
   (:require [clojure.java.shell :as shell]
+            [clojure.spec.alpha :as sp]
             [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [malli.core :as mc]
+            [malli.util :as mu]
+            [matcher-combinators.matchers :as matchers]
             [matcher-combinators.test :refer [match?]]
             [muuntaja.core :as m]
             [reitit.coercion.malli :as malli]
@@ -11,13 +14,12 @@
             [reitit.http.interceptors.multipart]
             [reitit.openapi :as openapi]
             [reitit.ring :as ring]
+            [reitit.ring.coercion :as rrc]
             [reitit.ring.malli]
             [reitit.ring.spec]
-            [reitit.ring.coercion :as rrc]
             [reitit.swagger-ui :as swagger-ui]
-            [schema.core :as s]
             [schema-tools.core]
-            [clojure.spec.alpha :as sp]
+            [schema.core :as s]
             [spec-tools.core :as st]
             [spec-tools.data-spec :as ds]))
 
@@ -30,6 +32,23 @@
     (let [result (shell/sh "npx" "-p" "@seriousme/openapi-schema-validator" "validate-api" (.getPath file))]
       (when-not (zero? (:exit result))
         (j/read-value (:out result))))))
+
+(defn- sorted-parameters
+  "OpenAPI parameter arrays are unordered. Sort for `=` so tests do not
+  depend on Clojure map seq order."
+  [params]
+  (when params
+    (vec (sort-by (juxt :in #(str (:name %))) params))))
+
+(defn- sort-spec-parameters [spec]
+  (if-not (:paths spec)
+    spec
+    (update spec :paths
+            update-vals (fn [path]
+                          (update-vals path (fn [method]
+                                              (if-not (:parameters method)
+                                                method
+                                                (update method :parameters sorted-parameters))))))))
 
 (def app
   (ring/ring-handler
@@ -157,7 +176,7 @@
     (let [spec (:body (app {:request-method :get
                             :uri "/api/openapi.json"}))
           expected {:x-id #{::math}
-                    :openapi "3.1.0"
+                    :openapi "3.2.0"
                     :info {:title "my-api"
                            :version "0.0.1"}
                     :paths {"/api/spec/plus/{z}" {:get {:parameters [{:in "query"
@@ -308,7 +327,7 @@
                                                                                                                         :required ["error"]
                                                                                                                         :type "object"}}}}}
                                                            :summary "plus with body"}}}}]
-      (is (= expected spec))
+      (is (= (sort-spec-parameters expected) (sort-spec-parameters spec)))
       (is (= nil (validate spec))))))
 
 (defn spec-paths [app uri]
@@ -381,6 +400,20 @@
            (-> {:request-method :get :uri "/openapi.json"}
                (app) :body :x-id)))))
 
+(deftest override-openapi-version-test
+  (let [app (ring/ring-handler
+             (ring/router
+              [["/ping"
+                {:get (constantly "pong")}]
+               ["/openapi.json"
+                {:openapi {:openapi "3.1.0"
+                           :info {:title "" :version "0"}}
+                 :get {:no-doc true
+                       :handler (openapi/create-openapi-handler)}}]]))
+        spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+    (is (nil? (validate spec)))
+    (is (= "3.1.0" (:openapi spec)))))
+
 (defn- normalize
   "Normalize format of openapi spec by converting it to json and back.
   Handles differences like :q vs \"q\" in openapi generation."
@@ -420,26 +453,27 @@
                      app
                      :body)]
         (testing "all non-body parameters"
-          (is (match? [{:in "query"
-                        :name "q"
-                        :required true
-                        :description "description :q"
-                        :schema {:type "string"}}
-                       {:in "header"
-                        :name "h"
-                        :required true
-                        :description "description :h"
-                        :schema {:type "string"}}
-                       {:in "cookie"
-                        :name "c"
-                        :required true
-                        :description "description :c"
-                        :schema {:type "string"}}
-                       {:in "path"
-                        :name "p"
-                        :required true
-                        :description "description :p"
-                        :schema {:type "string"}}]
+          (is (match? (matchers/in-any-order
+                       [{:in "query"
+                         :name "q"
+                         :required true
+                         :description "description :q"
+                         :schema {:type "string"}}
+                        {:in "header"
+                         :name "h"
+                         :required true
+                         :description "description :h"
+                         :schema {:type "string"}}
+                        {:in "cookie"
+                         :name "c"
+                         :required true
+                         :description "description :c"
+                         :schema {:type "string"}}
+                        {:in "path"
+                         :name "p"
+                         :required true
+                         :description "description :p"
+                         :schema {:type "string"}}])
                       (-> spec
                           (get-in [:paths "/parameters" :post :parameters])
                           normalize))))
@@ -861,7 +895,7 @@
                  app
                  :body)]
     (is (= {:info {:title "" :version "0.0.1"}
-            :openapi "3.1.0"
+            :openapi "3.2.0"
             :x-id #{:reitit.openapi/default}
             :paths {"/parameters"
                     {:post
@@ -954,30 +988,113 @@
                          :parameters {:query (mc/schema "plus" {:registry registry})}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.1.0"
-              :x-id #{:reitit.openapi/default}
-              :info {:title "" :version "0.0.1"}
-              :paths {"/get" {:get {:parameters [{:in "query"
-                                                  :name :x
-                                                  :required true
-                                                  :schema {:type "integer"}}
-                                                 {:in "query"
-                                                  :name :y
-                                                  :required true
-                                                  :schema {:$ref "#/components/schemas/y"}}]}}
-                      "/post" {:post
-                               {:requestBody
-                                {:content
-                                 {"application/json"
-                                  {:schema
-                                   {:$ref "#/components/schemas/plus"}}}}}}}
-              :components {:schemas
-                           {"y" {:type "integer"}
-                            "plus" {:type "object"
-                                    :properties {:x {:type "integer"}
-                                                 :y {:$ref "#/components/schemas/y"}}
-                                    :required [:x :y]}}}}
-             spec))
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths {"/get" {:get {:parameters [{:in "query"
+                                                   :name :x
+                                                   :required true
+                                                   :schema {:type "integer"}}
+                                                  {:in "query"
+                                                   :name :y
+                                                   :required true
+                                                   :schema {:$ref "#/components/schemas/y"}}]}}
+                       "/post" {:post
+                                {:requestBody
+                                 {:content
+                                  {"application/json"
+                                   {:schema
+                                    {:$ref "#/components/schemas/plus"}}}}}}}
+               :components {:schemas
+                            {"y" {:type "integer"}
+                             "plus" {:type "object"
+                                     :properties {:x {:type "integer"}
+                                                  :y {:$ref "#/components/schemas/y"}}
+                                     :required [:x :y]}}}})
+             (sort-spec-parameters spec)))
+      (is (nil? (validate spec)))))
+  (testing ":and schema with :fn validator as header parameters"
+    ;; [:and [:map ...] [:fn ...]] — resolve-parameter-schema extracts the sole :map child.
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion malli/coercion
+                         :parameters {:header [:and
+                                               [:map
+                                                [:token-a {:optional true} :string]
+                                                [:token-b {:optional true} :string]]
+                                               [:fn {:error/message "token-a or token-b required"}
+                                                (fn [{:keys [token-a token-b]}] (or token-a token-b))]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"token-a" "token-b"} (->> params (map :name) (map name) set)))
+      (is (every? #(false? (:required %)) params))
+      (is (nil? (validate spec)))))
+  (testing ":or schema with :fn fallback as query parameters"
+    ;; [:or [:map ...] [:fn ...]] — resolve-parameter-schema extracts the sole :map child.
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion malli/coercion
+                         :parameters {:query [:or
+                                              [:map
+                                               [:correlation-id {:optional true} :string]
+                                               [:request-id {:optional true} :string]]
+                                              [:fn {:error/message "must be a valid header map"}
+                                               map?]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"correlation-id" "request-id"} (->> params (map :name) (map name) set)))
+      (is (every? #(false? (:required %)) params))
+      (is (nil? (validate spec)))))
+  (testing ":merge schema combines maps for query parameters"
+    ;; :merge is a ref-like schema — m/deref-all flattens it to :map automatically.
+    ;; mu/schemas must be in the registry for :merge to be a known schema type.
+    (let [coercion (malli/create (assoc malli/default-options
+                                        :options {:registry (merge (mc/default-schemas) (mu/schemas))}))
+          app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion coercion
+                         :parameters {:query [:merge [:map [:x :int]] [:map [:y :string]]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"x" "y"} (->> params (map :name) (map name) set)))
+      (is (nil? (validate spec)))))
+  (testing ":union schema combines maps for query parameters"
+    ;; :union is also ref-like — m/deref-all flattens it to :map automatically.
+    ;; mu/schemas must be in the registry for :union to be a known schema type.
+    (let [coercion (malli/create (assoc malli/default-options
+                                        :options {:registry (merge (mc/default-schemas) (mu/schemas))}))
+          app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/resource"
+                  {:get {:coercion coercion
+                         :parameters {:query [:union [:map [:x :int]] [:map [:y :string]]]}
+                         :handler identity}}]]))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/resource" :get :parameters])]
+      (is (= #{"x" "y"} (->> params (map :name) (map name) set)))
       (is (nil? (validate spec)))))
   (testing "var schemas"
     (let [app (ring/ring-handler
@@ -995,37 +1112,38 @@
                          :parameters {:query #'Plus}
                          :handler identity}}]]))
           spec (:body (app {:request-method :get :uri "/openapi.json"}))]
-      (is (= {:openapi "3.1.0"
-              :x-id #{:reitit.openapi/default}
-              :info {:title "" :version "0.0.1"}
-              :paths
-              {"/post"
-               {:post
-                {:requestBody
-                 {:content
-                  {"application/json"
-                   {:schema
-                    {:$ref "#/components/schemas/reitit.openapi-test.Plus"}}}}}}
-               "/get"
-               {:get
-                {:parameters
-                 [{:in "query" :name :x
-                   :required true
-                   :schema {:type "integer"}}
-                  {:in "query"
-                   :name :y
-                   :required true
-                   :schema {:$ref "#/components/schemas/reitit.openapi-test.Y"}}]}}}
-              :components
-              {:schemas
-               {"reitit.openapi-test.Plus"
-                {:type "object"
-                 :properties
-                 {:x {:type "integer"}
-                  :y {:$ref "#/components/schemas/reitit.openapi-test.Y"}}
-                 :required [:x :y]}
-                "reitit.openapi-test.Y" {:type "integer"}}}}
-             spec))
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths
+               {"/post"
+                {:post
+                 {:requestBody
+                  {:content
+                   {"application/json"
+                    {:schema
+                     {:$ref "#/components/schemas/reitit.openapi-test.Plus"}}}}}}
+                "/get"
+                {:get
+                 {:parameters
+                  [{:in "query" :name :x
+                    :required true
+                    :schema {:type "integer"}}
+                   {:in "query"
+                    :name :y
+                    :required true
+                    :schema {:$ref "#/components/schemas/reitit.openapi-test.Y"}}]}}}
+               :components
+               {:schemas
+                {"reitit.openapi-test.Plus"
+                 {:type "object"
+                  :properties
+                  {:x {:type "integer"}
+                   :y {:$ref "#/components/schemas/reitit.openapi-test.Y"}}
+                  :required [:x :y]}
+                 "reitit.openapi-test.Y" {:type "integer"}}}})
+             (sort-spec-parameters spec)))
       (is (nil? (validate spec))))))
 
 (sp/def ::address string?)
@@ -1060,3 +1178,215 @@
               :anyOf [{:required ["address" "zip"]}
                       {:required ["city" "street"]}]}
              (get-in spec [:paths "/spec" :post :requestBody :content "application/json" :schema]))))))
+
+(defn- make-openapi-app [routes]
+  (ring/ring-handler
+   (ring/router
+    (conj routes
+          ["/openapi.json"
+           {:get {:no-doc true
+                  :openapi {:info {:title "" :version "0.0.1"}}
+                  :handler (openapi/create-openapi-handler)}}])
+    {:data {:middleware [openapi/openapi-feature]}})))
+
+(deftest malli-composite-query-params-test
+  (testing ":and with nested :and and :fn — all :map keys emitted, :fn silently ignored"
+    (let [spec (:body ((make-openapi-app
+                        [["/search"
+                          {:get {:coercion malli/coercion
+                                 :parameters {:query [:and
+                                                      [:and
+                                                       [:map [:from :string] [:to :string] [:status :string]]
+                                                       [:map [:page {:optional true} :int] [:size {:optional true} :int]]]
+                                                      [:fn (fn [{:keys [from to]}] (< from to))]]}
+                                 :handler identity}}]])
+                       {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/search" :get :parameters])]
+      (is (= #{:from :to :status :page :size} (set (map :name params)))
+          "all keys from both nested :map schemas are emitted")
+      (is (every? #(true? (:required %)) (filter #(#{:from :to :status} (:name %)) params))
+          ":from :to :status are required")
+      (is (every? #(false? (:required %)) (filter #(#{:page :size} (:name %)) params))
+          ":page :size are optional")
+      (is (nil? (validate spec)))))
+
+  (testing ":or with two :map alternatives — union of keys, all optional"
+    (let [spec (:body ((make-openapi-app
+                        [["/filter"
+                          {:get {:coercion malli/coercion
+                                 :parameters {:query [:or
+                                                      [:map [:category :string]]
+                                                      [:map [:item-id :uuid]]]}
+                                 :handler identity}}]])
+                       {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/filter" :get :parameters])]
+      (is (= #{:category :item-id} (set (map :name params)))
+          "keys from both :or branches are emitted")
+      (is (every? #(false? (:required %)) params)
+          "all keys are optional since only one branch need be satisfied")
+      (is (nil? (validate spec)))))
+
+  (testing ":any query schema — empty parameter list, no warning"
+    (let [output (java.io.StringWriter.)
+          app    (binding [*out* output]
+                   (make-openapi-app
+                    [["/passthrough"
+                      {:get {:coercion malli/coercion
+                             :parameters {:query :any}
+                             :handler identity}}]]))
+          spec   (:body (app {:request-method :get :uri "/openapi.json"}))
+          params (get-in spec [:paths "/passthrough" :get :parameters])]
+      (is (= [] params) "no parameters emitted for :any")
+      (is (not (re-find #"WARNING" (str output))) "no warning printed for :any")
+      (is (nil? (validate spec))))))
+
+(s/defschema Y2 s/Int)
+(s/defschema Plus2 {:x s/Int
+                    :y Y2})
+
+(deftest openapi-schema-tests
+  (testing "named schemas"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/openapi.json"
+                  {:get {:no-doc true
+                         :openapi {:info {:title "" :version "0.0.1"}}
+                         :handler (openapi/create-openapi-handler)}}]
+                 ["/post"
+                  {:post {:parameters {:body Plus2}
+                          :handler identity}}]
+                 ["/get"
+                  {:get {:parameters {:query Plus2}
+                         :handler identity}}]]
+                {:data {:coercion schema/coercion}}))
+          spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (= (sort-spec-parameters
+              {:openapi "3.2.0"
+               :x-id #{:reitit.openapi/default}
+               :info {:title "" :version "0.0.1"}
+               :paths
+               {"/post"
+                {:post
+                 {:requestBody
+                  {:content
+                   {"application/json"
+                    {:schema
+                     {:$ref "#/components/schemas/reitit.openapi-test.Plus2"}}}}}}
+                "/get"
+                {:get
+                 {:parameters
+                  [{:in "query" :name "x"
+                    :required true
+                    :schema {:type "integer" :format "int32"}}
+                   {:in "query"
+                    :name "y"
+                    :required true
+                    :schema {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}]}}}
+               :components
+               {:schemas
+                {"reitit.openapi-test.Plus2"
+                 {:type "object"
+                  :title "reitit.openapi-test/Plus2"
+                  :additionalProperties false
+                  :properties
+                  {"x" {:type "integer" :format "int32"}
+                   "y" {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}
+                  :required ["x" "y"]}
+                 "reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}})
+             (sort-spec-parameters spec)))
+      (is (nil? (validate spec))))
+    (testing "under additionalParameters"
+      (let [app (ring/ring-handler
+                 (ring/router
+                  [["/openapi.json"
+                    {:get {:no-doc true
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :handler (openapi/create-openapi-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:body {s/Keyword Y2}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+        (is (= {:openapi "3.2.0"
+                :x-id #{:reitit.openapi/default}
+                :info {:title "" :version "0.0.1"}
+                :paths
+                {"/post"
+                 {:post
+                  {:requestBody
+                   {:content
+                    {"application/json"
+                     {:schema {:type "object"
+                               :additionalProperties {:$ref "#/components/schemas/reitit.openapi-test.Y2"}}}}}}}}
+                :components {:schemas {"reitit.openapi-test.Y2" {:type "integer" :format "int32"}}}}
+               spec))
+        (is (nil? (validate spec))))))
+  (testing "s/Any should map to {} in body, nullable string elsewhere"
+    (let [app (ring/ring-handler
+                 (ring/router
+                  [["/openapi.json"
+                    {:get {:no-doc true
+                           :openapi {:info {:title "" :version "0.0.1"}}
+                           :handler (openapi/create-openapi-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:query {:q s/Any}
+                                         :body {:foo s/Any}}
+                            :responses {200 {:content {:default {:schema {:bar s/Any}}}}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (:body (app {:request-method :get :uri "/openapi.json"}))]
+      (is (= {:parameters [{:in "query",
+                            :name "q",
+                            :required true,
+                            :schema {:oneOf [{:type "string"} {:type "null"}]}}],
+              :requestBody {:content {"application/json" {:schema {:type "object",
+                                                                   :properties {"foo" {}},
+                                                                   :additionalProperties false,
+                                                                   :required ["foo"]}}}},
+              :responses {200 {:content {"application/json" {:schema {:type "object",
+                                                                      :properties {"bar" {}},
+                                                                      :additionalProperties false,
+                                                                      :required ["bar"]}}}}}}
+             (get-in spec [:paths "/post" :post]))))))
+
+(deftest query-method-openapi-test
+  (let [app (ring/ring-handler
+             (ring/router
+              ["/api"
+               {:openapi {:id ::search-api}
+                :coercion malli/coercion}
+
+               ["/openapi.json"
+                {:get {:no-doc true
+                       :openapi {:info {:title "search-api"
+                                        :version "0.0.1"}}
+                       :handler (openapi/create-openapi-handler)}}]
+
+               ["/search"
+                {:query {:summary "Advanced search"
+                         :parameters {:body [:map [:filter string?]]}
+                         :responses {200 {:body [:map [:hits int?]]}}
+                         :handler (fn [{{{:keys [filter]} :body} :parameters}]
+                                    {:status 200 :body {:hits (count filter)}})}}]]
+              {:data {:middleware [openapi/openapi-feature
+                                   rrc/coerce-request-middleware
+                                   rrc/coerce-response-middleware]}}))
+        spec (:body (app {:request-method :get :uri "/api/openapi.json"}))]
+    (testing "openapi version is bumped to 3.2.0"
+      (is (= "3.2.0" (:openapi spec))))
+    (testing "query operation is documented"
+      (is (match? {:summary "Advanced search"
+                   :requestBody {:content {"application/json" {:schema {:type "object"
+                                                                        :properties {:filter {:type "string"}}
+                                                                        :required [:filter]}}}}
+                   :responses {200 {:content {"application/json" {:schema {:type "object"
+                                                                           :properties {:hits {:type "integer"}}
+                                                                           :required [:hits]}}}}}}
+                  (get-in spec [:paths "/api/search" :query])))
+    (testing "endpoint works"
+      (is (= {:status 200 :body {:hits 3}}
+             (app {:request-method :query
+                   :uri "/api/search"
+                   :body-params {:filter "foo"}}))))
+    (testing "spec is valid"
+      (is (nil? (validate spec)))))))

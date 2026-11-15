@@ -438,7 +438,15 @@
 (deftest default-expand-test
   (let [router (r/router ["/endpoint" (Named. :kikka)])]
     (is (= [["/endpoint" {:name :kikka}]]
-           (r/routes router)))))
+           (r/routes router))))
+  (testing "map route data expands as-is"
+    (are [data] (= data (r/expand data nil))
+      {:name ::kikka}
+      (array-map :name ::kikka)
+      (hash-map :name ::kikka))
+    #?(:clj
+       (testing "APersistentMap subclasses (e.g. PersistentTreeMap)"
+         (is (= {:name ::kikka} (r/expand (sorted-map :name ::kikka) nil)))))))
 
 (deftest routing-order-test-229
   (let [router (r/router

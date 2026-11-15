@@ -6,7 +6,7 @@ Reitit has also support for [interceptors](http://pedestal.io/reference/intercep
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-http "0.10.1"]
+[metosin/reitit-http "0.11.0"]
 ```
 
 A module for http-routing using interceptors instead of middleware. Builds on top of the [`reitit-ring`](../ring/ring.md) module having all the same features.

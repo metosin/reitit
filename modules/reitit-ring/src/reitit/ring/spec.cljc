@@ -18,6 +18,7 @@
 (s/def ::options map?)
 (s/def ::trace map?)
 (s/def ::patch map?)
+(s/def ::query map?)
 
 (s/def ::data
   (s/keys :opt-un [::rs/handler ::rs/name ::rs/no-doc ::middleware]))

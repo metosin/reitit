@@ -81,6 +81,8 @@
                          (.getDomain ^goog.Uri (.parse goog.Uri js/location)))]
     (and (or (and (not (.hasScheme uri)) (not (.hasDomain uri)))
              (= current-domain (.getDomain uri)))
+         ;; A listener closer to the anchor has already cancelled the navigation.
+         (not (.-defaultPrevented e))
          (not (.-altKey e))
          (not (.-ctrlKey e))
          (not (.-metaKey e))

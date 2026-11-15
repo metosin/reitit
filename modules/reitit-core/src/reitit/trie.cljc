@@ -171,7 +171,9 @@
                     (update-in node [:wilds path] (fn [n] (-insert (or n (-node {})) ps fp params data)))))
 
                 (instance? CatchAll path)
-                (assoc-in node [:catch-all path] (-node {:params params, :data data}))
+                (if (seq ps)
+                  (ex/fail! ::catch-all-not-terminal {:path fp, :parameter (:value path)})
+                  (assoc-in node [:catch-all path] (-node {:params params, :data data})))
 
                 (empty? path)
                 (-insert node ps fp params data)

@@ -2,8 +2,11 @@
 
 **Stability: alpha**
 
-Reitit can generate [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0)
+Reitit can generate [OpenAPI 3.2.0](https://spec.openapis.org/oas/v3.2.0)
 documentation. The feature works similarly to [Swagger documentation](swagger.md).
+
+You can override the version number to 3.1.0 if you need OpenAPI 3.1.0.
+This works as long as you don't use any 3.2.0 specific features like QUERY methods.
 
 The main example is [examples/openapi](../../examples/openapi).
 The
@@ -76,19 +79,44 @@ Serving the OpenAPI specification is handled by
 ring handler which collects at request-time data from all routes and returns an
 OpenAPI specification as Clojure data, to be encoded by a response formatter.
 
-You can use the `:openapi` route data key of the `create-openapi-handler` route
-to populate the top level of the OpenAPI spec.
+You can use the `:openapi` route data key of the
+`create-openapi-handler` route to populate the top level of the
+OpenAPI spec. This can be used for example to override the OpenAPI
+version.
 
 Example:
 
 ```
 ["/openapi.json"
  {:get {:handler (openapi/create-openapi-handler)
-        :openapi {:info {:title "my nice api" :version "0.0.1"}}
+        :openapi {:openapi "3.1.0"
+                  :info {:title "my nice api" :version "0.0.1"}}
         :no-doc true}}]
 ```
 
 If you need to post-process the generated spec, just wrap the handler with a custom `Middleware` or an `Interceptor`.
+
+## QUERY HTTP method
+
+[OpenAPI
+3.2](https://learn.openapis.org/specification/http-methods.html#query-method-support)
+adds a native `query` operation for the [HTTP QUERY
+method](https://httpwg.org/http-extensions/draft-ietf-httpbis-safe-method-w-body.html).
+Reitit routes use the `:query` method key:
+
+```clj
+["/search"
+ {:query {:summary "Advanced search"
+          :parameters {:body [:map [:filter string?]]}
+          :responses {200 {:body [:map [:hits int?]]}}
+          :handler (fn [{{{:keys [filter]} :body} :parameters}]
+                     {:status 200 :body {:hits 1}})}}]
+```
+
+Note the naming distinction inherited from HTTP/OpenAPI terminology:
+
+- `:parameters {:query ...}` — URI query-string parameters (`?page=1`), documented as OpenAPI `in: query`
+- `:parameters {:body ...}` or `:request` — QUERY request body (query content), documented as `requestBody`
 
 ## Swagger-ui
 
@@ -209,8 +237,31 @@ useful when you have multiple endpoints that use the same schema. It
 can also make OpenAPI-based code nicer for consumers of your API.
 These schemas are also rendered in their own section in Swagger UI.
 
-Reusable schema objects are generated for Malli `:ref`s and vars. The
-[openapi example](../../examples/openapi) showcases this.
+Reusable schema objects are generated for
+- Malli `:ref`s and vars and
+- Plumatic Schema named schemas (`defschema` and `named`).
+The [openapi example](../../examples/openapi) showcases this.
 
 Currently (as of 0.7.2), reusable schema objects are **not** generated
-for Plumatic Schema or Spec.
+for Spec.
+
+## Other caveats
+
+### Complex Malli schemas using `:and`, `:or`, `:merge` or `:union`
+
+The OpenAPI spec documents each separate query (or path, or header)
+parameter separately. Originally, this meant that the parameter schema
+had to be a literal `:map`. Currently, Reitit tries to figure out what
+the individual parameters are even for more complex schemas, and thus
+supports the following forms as well:
+
+```clj
+[:union [:map ...] [:map ...]]
+[:merge [:map ...] [:map ...]]
+[:and [:map ...] [:map ...] :anything-that's-not-a-map]
+[:and [:map ...] [:and [:map ...] [:map ...]]]
+[:or [:map ...] [:map ...] :anything-that's-not-a-map]
+[:or [:map ...] [:or [:map ...] [:map ...]]]
+```
+
+This support is only for Malli so far, not Plumatic Schema or Spec.

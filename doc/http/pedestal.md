@@ -5,7 +5,7 @@
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-pedestal "0.10.1"]
+[metosin/reitit-pedestal "0.11.0"]
 ```
 
 Why should one use reitit instead of the Pedestal [default routing](http://pedestal.io/reference/routing-quick-reference)?
@@ -28,8 +28,8 @@ A minimalistic example on how to to swap the default-router with a reitit router
 ```clj
 ; [io.pedestal/pedestal.service "0.5.5"]
 ; [io.pedestal/pedestal.jetty "0.5.5"]
-; [metosin/reitit-pedestal "0.10.1"]
-; [metosin/reitit "0.10.1"]
+; [metosin/reitit-pedestal "0.11.0"]
+; [metosin/reitit "0.11.0"]
 
 (require '[io.pedestal.http :as server])
 (require '[reitit.pedestal :as pedestal])

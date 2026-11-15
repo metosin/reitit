@@ -13,6 +13,7 @@ pom.xml.asc
 /_book
 figwheel_server.log
 /.idea
+*.iml
 .clj-kondo
 .shadow-cljs
 .cache

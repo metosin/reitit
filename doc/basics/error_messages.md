@@ -24,7 +24,7 @@ The default exception formatting uses `reitit.exception/exception`. It produces 
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-dev "0.10.1"]
+[metosin/reitit-dev "0.11.0"]
 ```
 
 For human-readable and developer-friendly exception messages, there is `reitit.dev.pretty/exception` (in the `reitit-dev` module). It is inspired by the lovely errors messages of [ELM](https://elm-lang.org/blog/compiler-errors-for-humans) and [ETA](https://twitter.com/jyothsnasrin/status/1037703436043603968) and uses [fipp](https://github.com/brandonbloom/fipp), [expound](https://github.com/bhb/expound) and [spell-spec](https://github.com/bhauman/spell-spec) for most of heavy lifting.

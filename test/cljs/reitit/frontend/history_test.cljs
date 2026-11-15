@@ -178,3 +178,24 @@
 
         (reset! clicks [document-link shadow-link])
         (click-next)))))
+
+(deftest html5-history-default-prevented-link-click-test
+  (when browser
+    (gevents/removeAll js/window goog.events.EventType.POPSTATE)
+    (gevents/removeAll js/window goog.events.EventType.HASHCHANGE)
+    (gevents/removeAll js/document goog.events.EventType.CLICK)
+
+    (let [history (rfh/start! router (fn [_ _]) {:use-fragment false})
+          ;; Start somewhere else than the link target, so that a handled click
+          ;; would show up as a change of path.
+          _ (rfh/push-state history ::frontpage)
+          path-before (rfh/-get-path history)
+          link (doto (js/document.createElement "A")
+                 (.setAttribute "href" (rfh/href history ::foo))
+                 (.addEventListener "click" (fn [e] (.preventDefault e))))]
+      (.appendChild js/document.body link)
+      (.click link)
+      (is (= path-before (rfh/-get-path history))
+          "link click is not handled when its default action is prevented")
+      (.remove link)
+      (rfh/stop! history))))

@@ -6,7 +6,7 @@ Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Co
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-ring "0.10.1"]
+[metosin/reitit-ring "0.11.0"]
 ```
 
 ## `reitit.ring/router`
@@ -91,7 +91,7 @@ The router can be accessed via `get-router`:
 
 # Request-method based routing
 
-Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found.
+Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put`, `:trace` or `:query`). Top-level handler is used if request-method based handler is not found.
 
 By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
@@ -220,6 +220,9 @@ Same middleware for all routes, using [top-level route data](route_data.md#top-l
 
 ## Execution order
 
+Chains of middleware specified in a vector are executed in sequential
+order, first to last, outside to inside.
+
 Here's a full example that shows the execution order of the middleware
 using all of the above techniques:
 
@@ -233,11 +236,17 @@ using all of the above techniques:
                 :middleware [[wrap :4-route]]}]]
       {:data {:middleware [[wrap :2-top-level-route-data]]}})
     nil
-    {:middleware [[wrap :1-top]]}))
+    {:middleware [[wrap :1-top-a]
+                  [wrap :1-top-b]]}))
 
 (app {:request-method :get, :uri "/api/get"})
-;; => {:status 200, :body [:1-top :2-top-level-route-data :3-parent :4-route :handler]}
+;; => {:status 200, :body [:1-top-a :1-top-b :2-top-level-route-data :3-parent :4-route :handler]}
 ```
+
+The same order within each vector is also applied in all other
+locations where middleware can be specified.
+
+See also (manipulating) the [execution order of data-driven middleware](data_driven_middleware.md#using-middleware).
 
 ## Which method should I use for defining middleware?
 

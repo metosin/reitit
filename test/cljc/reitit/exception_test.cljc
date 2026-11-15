@@ -39,6 +39,9 @@
       #":reitit.trie/following-parameters"
       ["/{a}{b}"]
 
+      #":reitit.trie/catch-all-not-terminal"
+      ["/foo/{*bar}/baz"]
+
       #":reitit.trie/unclosed-brackets"
       ["/api/{ipa"]
 

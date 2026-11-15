@@ -312,6 +312,23 @@
           (is (= response (app {:request-method :get, :uri "/any"})))
           (is (= response (app {:request-method :options, :uri "/any"}))))))))
 
+(deftest query-method-test
+  (let [response {:status 200 :body {:hits 2}}
+        app (ring/ring-handler
+             (ring/router
+              [["/search" {:query {:handler (constantly response)}}]])
+             (ring/create-default-handler))]
+    (testing "query handler is matched"
+      (is (= response
+             (app {:request-method :query
+                   :uri "/search"
+                   :body-params {:filter "foo"}}))))
+    (testing "wrong method is not matched"
+      (is (= 405 (:status (app {:request-method :post :uri "/search"})))))
+    (testing "options allow header includes QUERY"
+      (is (= {:status 200 :body "" :headers {"Allow" "OPTIONS,QUERY"}}
+             (app {:request-method :options :uri "/search"}))))))
+
 (deftest trailing-slash-handler-test
   (let [ok {:status 200, :body "ok"}
         routes [["" {:summary "unreachable"

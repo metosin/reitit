@@ -16,12 +16,29 @@
             [malli.core :as mc]))
 
 (defn- normalize
-  "Normalize format of swagger spec by converting it to json and back.
-  Handles differences like :q vs \"q\" in swagger generation."
+  "Normalize swagger parameter arrays by converting to json and back.
+   Handles differences like :q vs \"q\"."
   [data]
   (-> data
       j/write-value-as-string
       (j/read-value j/keyword-keys-object-mapper)))
+
+(defn- sorted-parameters
+  "Swagger parameter arrays are unordered. Sort for `=` so tests do not
+  depend on Clojure map seq order."
+  [params]
+  (when params
+    (vec (sort-by (juxt :in #(str (:name %))) params))))
+
+(defn- sort-spec-parameters [spec]
+  (if-not (:paths spec)
+    spec
+    (update spec :paths
+            update-vals (fn [path]
+                          (update-vals path (fn [method]
+                                              (if-not (:parameters method)
+                                                method
+                                                (update method :parameters sorted-parameters))))))))
 
 (def malli-registry
   (merge
@@ -156,8 +173,8 @@
                    :query-params {:x "2", :y "1"}})))))
 
   (testing "swagger-spec"
-    (let [spec (:body (app {:request-method :get
-                            :uri "/api/swagger.json"}))
+    (let [spec (sort-spec-parameters (:body (app {:request-method :get
+                                                  :uri "/api/swagger.json"})))
           expected {:x-id #{::math}
                     :swagger "2.0"
                     :info {:title "my-api"}
@@ -177,7 +194,13 @@
                                                   :options {:parameters []
                                                             :summary "options"
                                                             :responses {200 {:description "200"}}}
-                                                  :get {:parameters [{:in "query"
+                                                  :get {:parameters [{:in "path"
+                                                                      :name "z"
+                                                                      :description ""
+                                                                      :required true
+                                                                      :type "integer"
+                                                                      :format "int64"}
+                                                                     {:in "query"
                                                                       :name "x"
                                                                       :description ""
                                                                       :required true
@@ -185,12 +208,6 @@
                                                                       :format "int64"}
                                                                      {:in "query"
                                                                       :name "y"
-                                                                      :description ""
-                                                                      :required true
-                                                                      :type "integer"
-                                                                      :format "int64"}
-                                                                     {:in "path"
-                                                                      :name "z"
                                                                       :description ""
                                                                       :required true
                                                                       :type "integer"
@@ -228,7 +245,13 @@
                                                                           :description "kosh"}
                                                                      500 {:description "fail"}}
                                                          :summary "plus with body"}}
-                            "/api/malli/plus/{z}" {:get {:parameters [{:in "query"
+                            "/api/malli/plus/{z}" {:get {:parameters [{:in "path"
+                                                                       :name :z
+                                                                       :description ""
+                                                                       :required true
+                                                                       :type "integer"
+                                                                       :format "int64"}
+                                                                      {:in "query"
                                                                        :name :x
                                                                        :description ""
                                                                        :required true
@@ -236,12 +259,6 @@
                                                                        :format "int64"}
                                                                       {:in "query"
                                                                        :name :y
-                                                                       :description ""
-                                                                       :required true
-                                                                       :type "integer"
-                                                                       :format "int64"}
-                                                                      {:in "path"
-                                                                       :name :z
                                                                        :description ""
                                                                        :required true
                                                                        :type "integer"
@@ -296,7 +313,13 @@
                                                                       :description ""}
                                                                      500 {:description "fail"}}
                                                          :summary "plus put with definitions"}}
-                            "/api/schema/plus/{z}" {:get {:parameters [{:description ""
+                            "/api/schema/plus/{z}" {:get {:parameters [{:in "path"
+                                                                        :name "z"
+                                                                        :description ""
+                                                                        :type "integer"
+                                                                        :required true
+                                                                        :format "int32"}
+                                                                       {:description ""
                                                                         :format "int32"
                                                                         :in "query"
                                                                         :name "x"
@@ -307,13 +330,7 @@
                                                                         :in "query"
                                                                         :name "y"
                                                                         :required true
-                                                                        :type "integer"}
-                                                                       {:in "path"
-                                                                        :name "z"
-                                                                        :description ""
-                                                                        :type "integer"
-                                                                        :required true
-                                                                        :format "int32"}]
+                                                                        :type "integer"}]
                                                           :responses {200 {:description ""
                                                                            :schema {:additionalProperties false
                                                                                     :properties {"total" {:format "int32"
@@ -355,7 +372,8 @@
               respond (partial reset! response*)]
           (app {:request-method :get
                 :uri "/api/swagger.json"} respond (fn [_] (is false)))
-          (is (= expected (:body @response*))))))))
+          (is (= expected
+                 (sort-spec-parameters (:body @response*)))))))))
 
 (defn spec-paths [app uri]
   (-> {:request-method :get, :uri uri} app :body :paths keys))
@@ -440,9 +458,9 @@
                ["/swagger.json"
                 {:get {:no-doc true
                        :handler (swagger/create-swagger-handler)}}]]))
-        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
-    (is (= ["query" "body" "formData" "header" "path"]
-           (map :in (get-in spec [:paths "/parameters" :post :parameters]))))))
+        spec (:body (app {:request-method :get, :uri "/swagger.json"}))
+        ins (map :in (get-in spec [:paths "/parameters" :post :parameters]))]
+    (is (= ["body" "formData" "header" "path" "query"] (sort ins)))))
 
 (deftest multiple-content-types-test
   (testing ":request coercion"
@@ -494,7 +512,8 @@
             spec (-> {:request-method :get
                       :uri "/swagger.json"}
                      app
-                     :body)]
+                     :body
+                     sort-spec-parameters)]
         (is (= [{:description ""
                  :in "formData"
                  :name "file"
@@ -505,8 +524,7 @@
                  :name "more"
                  :required true
                  :type "string"}]
-               (normalize
-                (get-in spec [:paths "/upload" :post :parameters]))))))))
+               (normalize (get-in spec [:paths "/upload" :post :parameters]))))))))
 
 (def X :int)
 (def Y :int)
@@ -531,7 +549,7 @@
                ["/swagger.json"
                 {:get {:no-doc true
                        :handler (swagger/create-swagger-handler)}}]]))
-        spec (:body (app {:request-method :get, :uri "/swagger.json"}))]
+        spec (sort-spec-parameters (:body (app {:request-method :get, :uri "/swagger.json"})))]
     (is (= {:definitions {"reitit.swagger-test.Plus" {:properties {:x {:$ref "#/definitions/reitit.swagger-test.X"},
                                                                    :y {:$ref "#/definitions/reitit.swagger-test.Y"}},
                                                       :required [:x :y],
@@ -567,3 +585,40 @@
             :swagger "2.0",
             :x-id #{:reitit.swagger/default}}
            spec))))
+
+(deftest swagger-schema-tests
+  (testing "s/Any"
+    (let [app (ring/ring-handler
+                 (ring/router
+                  [["/swagger.json"
+                    {:get {:no-doc true
+                           :handler (swagger/create-swagger-handler)}}]
+                   ["/post"
+                    {:post {:parameters {:query {:q s/Any}
+                                         :body {:foo s/Any}}
+                            :responses {200 {:body {:bar s/Any}}}
+                            :handler identity}}]]
+                  {:data {:coercion schema/coercion}}))
+            spec (sort-spec-parameters (:body (app {:request-method :get :uri "/swagger.json"})))]
+      (is (= {200 {:schema {:type "object",
+                            :properties {"bar" {}},
+                            :additionalProperties false,
+                            :required ["bar"]},
+                   :description ""}}
+             (get-in spec [:paths "/post" :post :responses])))
+      (is (= [{:in "body",
+               :name "body",
+               :description "",
+               :required true,
+               :schema
+               {:type "object",
+                :properties {"foo" {}},
+                :additionalProperties false,
+                :required ["foo"]}}
+              {:in "query",
+               :name "q",
+               :description "",
+               :type "string",
+               :required true,
+               :allowEmptyValue true}]
+             (get-in spec [:paths "/post" :post :parameters]))))))

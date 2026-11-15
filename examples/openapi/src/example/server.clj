@@ -2,6 +2,7 @@
   (:require [reitit.ring :as ring]
             [reitit.ring.spec]
             [reitit.coercion.malli]
+            [reitit.coercion.schema]
             [reitit.openapi :as openapi]
             [reitit.ring.malli]
             [reitit.swagger-ui :as swagger-ui]
@@ -12,7 +13,8 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.adapter.jetty :as jetty]
-            [muuntaja.core :as m]))
+            [muuntaja.core :as m]
+            [schema.core :as s]))
 
 (def Transaction
   [:map
@@ -31,7 +33,19 @@
    [:balance :double]
    [:transactions [:vector #'Transaction]]])
 
+(s/defschema TransactionSchema
+  {:amount s/Num
+   :from s/Str})
 
+(s/defschema AccountIdSchema
+  {:bank s/Str
+   :id s/Str})
+
+(s/defschema AccountSchema
+  {:bank s/Str
+   :id s/Str
+   :balance s/Num
+   :transactions [TransactionSchema]})
 
 (def app
   (ring/ring-handler
@@ -132,7 +146,7 @@
                                    :email "heidi@alps.ch"}]})}}]
 
        ["/account"
-        {:get {:summary "Fetch an account | Recursive schemas using malli registry, link to external docs"
+        {:get {:summary "Fetch an account | Named schemas using malli registry, link to external docs"
                :parameters {:query #'AccountId}
                :responses {200 {:content {:default {:schema #'Account}}}}
                :openapi {:externalDocs {:description "The reitit repository"
@@ -186,7 +200,22 @@
                              {:status 200
                               :body {:secret "I am a marmot"}}
                              {:status 401
-                              :body {:error "unauthorized"}}))}}]]]
+                              :body {:error "unauthorized"}}))}}]]
+
+       ["/plumatic-schema/account"
+        {:get {:summary "Fetch an account | Named schemas using Plumatic Schema"
+               :coercion reitit.coercion.schema/coercion
+               :parameters {:query AccountIdSchema}
+               :responses {200 {:content {:default {:schema AccountSchema}}}}
+               :handler (fn [_request]
+                          {:status 200
+                           :body {:bank "MiniBank"
+                                  :id "0001"
+                                  :balance 13.5
+                                  :transactions [{:from "0002"
+                                                  :amount 20.0}
+                                                 {:from "0003"
+                                                  :amount -6.5}]}})}}]]
 
       {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
        :validate reitit.ring.spec/validate

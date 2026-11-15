@@ -67,7 +67,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-interceptors "0.10.1"]
+[metosin/reitit-interceptors "0.11.0"]
 ```
 
 Using `reitit.http.interceptors.dev/print-context-diffs` transformation, the context diffs between each interceptor are printed out to the console. To use it, add the following router option:

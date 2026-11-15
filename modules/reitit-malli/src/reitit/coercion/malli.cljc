@@ -12,6 +12,36 @@
             [reitit.coercion :as coercion]))
 
 ;;
+;; helpers
+;;
+
+(defn- collect-and-maps
+  "Recursively collect :map schemas from an :and tree, ignoring :fn and other non-map entries."
+  [schema]
+  (let [s (m/deref-all schema)]
+    (case (m/type s)
+      :map [s]
+      :and (mapcat collect-and-maps (m/children s))
+      [])))
+
+(defn- resolve-parameter-schema
+  "Resolves a Malli schema to a :map schema suitable for OpenAPI parameter generation.
+  :merge and :union are ref-like schemas — m/deref-all flattens them to :map automatically.
+  For :and, recursively collects all :map children (ignoring :fn) and merges them.
+  For :or, merges all :map children and marks every key optional (any branch may satisfy)."
+  [schema]
+  (let [resolved (m/deref-all schema)]
+    (case (m/type resolved)
+      :and (let [maps (collect-and-maps resolved)]
+             (if (seq maps) (reduce #(mu/merge %1 %2) maps) resolved))
+      :or  (let [maps (->> (m/children resolved)
+                           (map m/deref-all)
+                           (filter #(= :map (m/type %))))]
+             (if (seq maps) (mu/optional-keys (reduce #(mu/merge %1 %2) maps)) resolved))
+      :any (m/schema [:map])
+      resolved)))
+
+;;
 ;; coercion
 ;;
 
@@ -146,8 +176,9 @@
            :openapi (if (= :parameter (:type options))
                       ;; For :parameters we need to output an object schema with actual :properties.
                       ;; The caller will iterate through the properties and add them individually to the openapi doc.
-                      ;; Thus, we deref to get the actual [:map ..] instead of some ref-schema.
-                      (let [should-be-map (m/deref model)]
+                      ;; resolve-parameter-schema dereferences ref-like schemas (:merge, :union) via m/deref-all
+                      ;; and also unwraps :and/:or to their sole :map child when present.
+                      (let [should-be-map (resolve-parameter-schema model)]
                         (when-not (= :map (m/type should-be-map))
                           (println "WARNING: Unsupported schema for OpenAPI (expected :map schema)" (select-keys options [:in :parameter]) should-be-map))
                         (json-schema/transform should-be-map (merge opts options)))

@@ -2,7 +2,7 @@
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit-interceptors "0.10.1"]
+[metosin/reitit-interceptors "0.11.0"]
 ```
 
 Just like the [ring default middleware](../ring/default_middleware.md), but for interceptors.

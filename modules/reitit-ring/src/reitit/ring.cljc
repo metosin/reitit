@@ -11,8 +11,9 @@
 (declare get-match)
 (declare get-router)
 
-(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
-(defrecord Methods [get head post put delete connect options trace patch])
+(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch :query})
+(defrecord Methods [get head post put delete connect options trace patch query])
+(def ^:private idempotent-redirect-methods #{:get :head :query})
 (defrecord Endpoint [data handler path method middleware])
 
 (defn ^:no-wiki group-keys [data]
@@ -172,7 +173,7 @@
   ([{:keys [method]}]
    (letfn [(maybe-redirect [{:keys [query-string] :as request} path]
              (if (and (seq path) (r/match-by-path (::r/router request) path))
-               {:status (if (= (:request-method request) :get) 301 308)
+               {:status (if (contains? idempotent-redirect-methods (:request-method request)) 301 308)
                 :headers {"Location" (let [path (str/replace-first path #"^/+" "/")] ; Locations starting with // redirect to another hostname. Avoid these due to security implications.
                                        (if query-string (str path "?" query-string) path))}
                 :body ""}))

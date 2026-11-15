@@ -67,7 +67,7 @@ All main modules bundled:
 
 <!-- #:test-doc-blocks{:skip true} -->
 ```clj
-[metosin/reitit "0.10.1"]
+[metosin/reitit "0.11.0"]
 ```
 
 Optionally, the parts can be required separately.

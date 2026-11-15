@@ -12,6 +12,43 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
+
+## 0.11.0 (2026-09-18)
+
+* Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
+* Output OpenAPI 3.2.0 by default. You can override the version, see [openapi.md](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md). [#786](https://github.com/metosin/reitit/pull/786)
+* Better support for `:and`, `:or`, `:union` and `:merge` when generating OpenAPI. [#791](https://github.com/metosin/reitit/pull/791)
+* Doc improvements
+* Improve OpenAPI output for Schema `s/Any` type: it now maps to JSON Schema `{}` in request and response bodies. [#801](https://github.com/metosin/reitit/pull/801)
+* Updated dependencies:
+
+```
+[metosin/muuntaja "0.6.12"] is available but we use "0.6.11"
+[metosin/jsonista "1.0.1"] is available but we use "1.0.0"
+[metosin/schema-tools "1.14.1"] is available but we use "0.14.0"
+[com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.22.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.2"] is available but we use "2.22.1"
+```
+
+## 0.11.0-rc1 (2026-08-07)
+
+* OpenAPI named schema support for Plumatic Schema. Also supports recursive schemas. [#788](https://github.com/metosin/reitit/pull/788)
+* Better support for `:and`, `:or`, `:union` and `:merge` schemas when generating OpenAPI (query, path, header) parameter docs. [#783](https://github.com/metosin/reitit/pull/783)
+* Updated dependencies:
+
+```
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[com.fasterxml.jackson.core/jackson-core "2.22.1"] is available but we use "2.21.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.1"] is available but we use "2.21.1"
+[ring/ring-core "1.15.5"] is available but we use "1.15.3"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+```
+
 ## 0.10.1 (2026-03-10)
 
 * **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
