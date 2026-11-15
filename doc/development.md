@@ -11,6 +11,8 @@
 ```bash
 ./scripts/test.sh clj
 ./scripts/test.sh cljs
+# code examples in README.md and doc/
+lein test-docs
 ```
 
 ## Formatting
