@@ -23,15 +23,15 @@ We can query the resolved routes and options:
 
 ```clj
 (r/routes router)
-;[["/foo" {:name :user/foo}]
-; ["/bar/:id" {:name :user/bar}]]
+;; => [["/foo" {:name ::foo}]
+;;     ["/bar/:id" {:name ::bar}]]
 
 (r/options router)
-;{:lookup #object[...]
-; :expand #object[...]
-; :coerce #object[...]
-; :compile #object[...]
-; :conflicts #object[...]}
+;; => {:lookup ...
+;;     :expand ...
+;;     :coerce ...
+;;     :compile ...
+;;     :conflicts ...}
 ```
 
 Let's add a helper function to create a new router with extra routes:
@@ -52,17 +52,17 @@ We can now create a new router with extra routes:
     [["/baz/:id/:subid" ::baz]]))
 
 (r/routes router2)
-;[["/foo" {:name :user/foo}]
-; ["/bar/:id" {:name :user/bar}]
-; ["/baz/:id/:subid" {:name :user/baz}]]
+;; => [["/foo" {:name ::foo}]
+;;     ["/bar/:id" {:name ::bar}]
+;;     ["/baz/:id/:subid" {:name ::baz}]]
 ```
 
 The original router was not changed:
 
 ```clj
 (r/routes router)
-;[["/foo" {:name :user/foo}]
-; ["/bar/:id" {:name :user/bar}]]
+;; => [["/foo" {:name ::foo}]
+;;     ["/bar/:id" {:name ::bar}]]
 ```
 
 When a new router is created, all rules are applied, including the conflict resolution:
@@ -100,9 +100,9 @@ We can now merge multiple routers into one:
     (r/router ["/route3" ::route3])))
 
 (r/routes router)
-;[["/route1" {:name :user/route1}]
-; ["/route2" {:name :user/route2}]
-; ["/route3" {:name :user/route3}]]
+;; => [["/route1" {:name ::route1}]
+;;     ["/route2" {:name ::route2}]
+;;     ["/route3" {:name ::route3}]]
 ```
 
 ## Nesting routers
@@ -280,7 +280,7 @@ There we have it:
 
 ```clj
 (name-path router "/beers/saison")
-; [:beers :saison]
+;; => [:beers :saison]
 ```
 
 We can't add conflicting routes:
@@ -371,10 +371,10 @@ The routing tree:
 
 ```clj
 (r/routes @router)
-;[["/gin/napue" {:name :napue}]
-; ["/ciders/*" {:name :ciders}]
-; ["/dynamic/*" {:name :dynamic,
-;                :router #object[user$reify__24359]}]]
+;; => [["/gin/napue" {:name :napue}]
+;;     ["/ciders/*" {:name :ciders}]
+;;     ["/dynamic/*" {:name :dynamic,
+;;                    :router ...}]]
 ```
 
 Let's reset the router with some beers:
@@ -387,13 +387,13 @@ We can see that the beer routes are now embedded into the core router:
 
 ```clj
 (r/routes @router)
-;[["/gin/napue" {:name :napue}]
-; ["/ciders/*" {:name :ciders}]
-; ["/beers/lager" {:name :beer/lager}]
-; ["/beers/sahti" {:name :beer/sahti}]
-; ["/beers/bock" {:name :beer/bock}]
-; ["/dynamic/*" {:name :dynamic,
-;                :router #object[user$reify__24359]}]]
+;; => [["/gin/napue" {:name :napue}]
+;;     ["/ciders/*" {:name :ciders}]
+;;     ["/beers/lager" {:name :beer/lager}]
+;;     ["/beers/sahti" {:name :beer/sahti}]
+;;     ["/beers/bock" {:name :beer/bock}]
+;;     ["/dynamic/*" {:name :dynamic,
+;;                    :router ...}]]
 ```
 
 And the routing works:

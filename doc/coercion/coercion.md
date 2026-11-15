@@ -17,11 +17,11 @@ Match with the parsed `:path-params` as strings:
 
 ```clj
 (r/match-by-path router "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view},
-;        :result nil,
-;        :path-params {:company "metosin", :user-id "123"},
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name ::user-view},
+;;     :result nil,
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :path "/metosin/users/123"}
 ```
 
 To enable parameter coercion, the following things need to be done:
@@ -65,14 +65,14 @@ A Match:
 
 ```clj
 (r/match-by-path router "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:schema>>
-;               :parameters {:path {:company java.lang.String,
-;                                   :user-id Int}}},
-;        :result nil,
-;        :path-params {:company "metosin", :user-id "123"},
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name ::user-view,
+;;            :coercion ...
+;;            :parameters {:path [{:company java.lang.String,
+;;                                 :user-id ...}]}},
+;;     :result nil,
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :path "/metosin/users/123"}
 ```
 
 Coercion was not applied. Why? In Reitit, routing and coercion are separate processes and we have done just the routing part. We need to apply coercion after the successful routing.
@@ -105,14 +105,14 @@ Routing again:
 
 ```clj
 (r/match-by-path router "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:schema>>
-;               :parameters {:path {:company java.lang.String,
-;                                   :user-id Int}}},
-;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :path-params {:company "metosin", :user-id "123"},
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name ::user-view,
+;;            :coercion ...
+;;            :parameters {:path [{:company java.lang.String,
+;;                                 :user-id ...}]}},
+;;     :result {:data ..., :coerce ...},
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :path "/metosin/users/123"}
 ```
 
 The compiler added a `:result` key into the match (done just once, at router creation time), which holds the compiled coercers. We are almost done.
@@ -160,15 +160,15 @@ Here's a full example for doing routing and coercion with Reitit and Schema:
     (assoc match :parameters (coercion/coerce! match))))
 
 (match-by-path-and-coerce! "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:schema>>
-;               :parameters {:path {:company java.lang.String,
-;                                   :user-id Int}}},
-;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :path-params {:company "metosin", :user-id "123"},
-;        :parameters {:path {:company "metosin", :user-id 123}}
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name ::user-view,
+;;            :coercion ...
+;;            :parameters {:path [{:company java.lang.String,
+;;                                 :user-id ...}]}},
+;;     :result {:data ..., :coerce ...},
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :parameters {:path {:company "metosin", :user-id 123}}
+;;     :path "/metosin/users/123"}
 
 (match-by-path-and-coerce! "/metosin/users/ikitommi")
 ;; =thrown-match=> {:type :reitit.coercion/request-coercion}

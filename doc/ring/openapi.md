@@ -177,6 +177,7 @@ Schema:
 
 ```clj
 (require '[schema.core :as s])
+(require '[schema-tools.core])
 
 ["/plus"
  {:post

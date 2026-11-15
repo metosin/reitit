@@ -35,18 +35,20 @@ First add a `:dev` dependency to:
 
 Some bootstrapping:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (require '[clojure.spec.test.alpha :as stest])
 (require '[expound.alpha :as expound])
 (require '[clojure.spec.alpha :as s])
 (require '[reitit.spec])
 
-(stest/instrument `reitit/router)
+(stest/instrument `reitit.core/router)
 (set! s/*explain-out* expound/printer)
 ```
 
 And we are ready to go:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (require '[reitit.core :as r])
 

@@ -23,7 +23,7 @@ There is an extra option in the Ring router (actually, in the underlying middlew
                        :handler handler}}]])))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 2 3 :handler]}
+;; => {:status 200, :body [1 2 3 :handler]}
 ```
 
 ### Reversing the Middleware Chain
@@ -38,7 +38,7 @@ There is an extra option in the Ring router (actually, in the underlying middlew
       {::middleware/transform reverse})))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [3 2 1 :handler]}
+;; => {:status 200, :body [3 2 1 :handler]}
 ```
 
 ## Interleaving Middleware
@@ -53,7 +53,7 @@ There is an extra option in the Ring router (actually, in the underlying middlew
       {::middleware/transform #(interleave % (repeat [wrap :debug]))})))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
+;; => {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
 ```
 
 ### Printing Request Diffs

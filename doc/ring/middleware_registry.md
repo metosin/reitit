@@ -29,7 +29,7 @@ Works as expected:
 
 ```clj
 (app {:request-method :get, :uri "/api/bonus"})
-; {:status 200, :body {:bonus 30}}
+;; => {:status 200, :body {:bonus 30}}
 ```
 
 Router creation fails fast if the registry doesn't contain the middleware:

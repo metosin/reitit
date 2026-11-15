@@ -48,10 +48,10 @@ The differences:
 
 
 (app {:request-method :get, :uri "/"})
-; {:status 404, :body "", :headers {}}
+;; => {:status 404, :body "", :headers {}}
 
 (app {:request-method :get, :uri "/api/number"})
-; {:status 200, :body {:number 111}}
+;; => {:status 200, :body {:number 111}}
 ```
 
 ## Why interceptors?

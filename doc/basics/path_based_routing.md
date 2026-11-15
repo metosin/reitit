@@ -22,16 +22,16 @@ No match returns `nil`:
 
 ```clj
 (r/match-by-path router "/hello")
-; nil
+;; => nil
 ```
 
 Match provides the route information:
 
 ```clj
 (r/match-by-path router "/api/user/1")
-; #Match{:template "/api/user/:id"
-;        :data {:name :user/user}
-;        :path "/api/user/1"
-;        :result nil
-;        :path-params {:id "1"}}
+;; => {:template "/api/user/:id"
+;;     :data {:name ::user}
+;;     :path "/api/user/1"
+;;     :result nil
+;;     :path-params {:id "1"}}
 ```

@@ -41,6 +41,8 @@ Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [R
 
 ```clj
 (defn get-pdf [_req] nil)
+(defn get-account [_req] nil)
+(defn activate-resource [_req] nil)
 
 [["/users/{user-id}" {:handler get-user}]
  ["/files/file-{number}.pdf" {:handler get-pdf}]
@@ -139,10 +141,10 @@ Routes are just data, so it's easy to create them programmatically:
   [[:query   'get-user]
    [:command 'add-user]
    [:command 'add-order]])
-; ["/api" {:interceptors [::api ::db]}
-;  (["/get-user" {:get {:interceptors [get-user]}}]
-;   ["/add-user" {:post {:interceptors [add-user]}}]
-;   ["/add-order" {:post {:interceptors [add-order]}}])]
+;; => '["/api" {:interceptors [::api ::db]}
+;;     (["/get-user" {:get {:interceptors [get-user]}}]
+;;      ["/add-user" {:post {:interceptors [add-user]}}]
+;;      ["/add-order" {:post {:interceptors [add-order]}}])]
 ```
 
 ### Explicit path-parameter syntax
@@ -155,11 +157,11 @@ With defaults:
 (-> (r/router
       ["http://localhost:8080/api/user/{id}" ::user-by-id])
     (r/match-by-path "http://localhost:8080/api/user/123"))
-;#Match{:template "http://localhost:8080/api/user/{id}",
-;       :data {:name :user/user-by-id},
-;       :result nil,
-;       :path-params {:id "123", :8080 ":8080"},
-;       :path "http://localhost:8080/api/user/123"}
+;; => {:template "http://localhost:8080/api/user/{id}",
+;;     :data {:name ::user-by-id},
+;;     :result nil,
+;;     :path-params {:id "123", :8080 ":8080"},
+;;     :path "http://localhost:8080/api/user/123"}
 ```
 
 Supporting only `:bracket` syntax:
@@ -171,9 +173,9 @@ Supporting only `:bracket` syntax:
       ["http://localhost:8080/api/user/{id}" ::user-by-id]
       {:syntax :bracket})
     (r/match-by-path "http://localhost:8080/api/user/123"))
-;#Match{:template "http://localhost:8080/api/user/{id}",
-;       :data {:name :user/user-by-id},
-;       :result nil,
-;       :path-params {:id "123"},
-;       :path "http://localhost:8080/api/user/123"}
+;; => {:template "http://localhost:8080/api/user/{id}",
+;;     :data {:name ::user-by-id},
+;;     :result nil,
+;;     :path-params {:id "123"},
+;;     :path "http://localhost:8080/api/user/123"}
 ```

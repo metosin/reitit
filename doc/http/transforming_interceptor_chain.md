@@ -27,7 +27,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [1 2 3]}}
+;; => {:status 200, :body {:message [1 2 3]}}
 
 ```
 
@@ -44,7 +44,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [3 2 1]}}
+;; => {:status 200, :body {:message [3 2 1]}}
 ```
 
 ### Interleaving Interceptors
@@ -60,7 +60,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [1 :debug 2 :debug 3 :debug]}}
+;; => {:status 200, :body {:message [1 :debug 2 :debug 3 :debug]}}
 ```
 
 ### Printing Context Diffs

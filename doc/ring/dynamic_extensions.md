@@ -35,21 +35,21 @@ Anonymous access to public route:
 
 ```clj
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 ```
 
 Anonymous access to guarded route:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/ping"})
-; {:status 403, :body "forbidden"}
+;; => {:status 403, :body "forbidden"}
 ```
 
 Authorized access to guarded route:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/ping", :my-roles #{:admin}})
-; {:status 200, :body "ok"}
+;; => {:status 200, :body "ok"}
 ```
 
 Dynamic extensions are nice, but we can do much better. See [data-driven middleware](data_driven_middleware.md) and [compiling routes](compiling_middleware.md).

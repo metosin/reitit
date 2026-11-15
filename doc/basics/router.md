@@ -37,8 +37,8 @@ The flattened route tree:
 
 ```clj
 (r/routes router)
-; [["/api/ping" {:name :user/ping}]
-;  ["/api/user/:id" {:name :user/user}]]
+;; => [["/api/ping" {:name :user/ping}]
+;;     ["/api/user/:id" {:name :user/user}]]
 ```
 
 With a router instance, we can do [Path-based routing](path_based_routing.md) or [Name-based (Reverse) routing](name_based_routing.md).
@@ -87,10 +87,10 @@ Merged route tree:
 
 ```clj
 (r/routes router)
-; [["/admin/ping" {:name :user/ping}]
-;  ["/admin/db" {:name :user/db}]
-;  ["/users" {:name :user/users}]
-;  ["/users/:id" {:name :user/user}]]
+;; => [["/admin/ping" {:name :user/ping}]
+;;     ["/admin/db" {:name :user/db}]
+;;     ["/users" {:name :user/users}]
+;;     ["/users/:id" {:name :user/user}]]
 ``` 
 
 More details on [composing routers](../advanced/composing_routers.md).

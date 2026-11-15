@@ -43,7 +43,7 @@ We can use both synchronous ring and [async-ring](https://www.booleanknot.com/bl
 ;leave  :get
 ;leave  :ping
 ;leave  :api
-;=> {:status 200, :body "pong"}
+;; => {:status 200, :body "pong"}
 ```
 
 ## Async-ring
@@ -58,7 +58,7 @@ We can use both synchronous ring and [async-ring](https://www.booleanknot.com/bl
 ;leave  :get
 ;leave  :ping
 ;leave  :api
-;=> {:status 200, :body "pong"}
+;; => {:status 200, :body "pong"}
 ```
 
 ## Examples
