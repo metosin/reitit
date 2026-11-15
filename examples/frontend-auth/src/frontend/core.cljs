@@ -1,5 +1,6 @@
 (ns frontend.core
     (:require [reagent.core :as r]
+              [reagent.dom :as rd]
               [reitit.frontend :as rf]
               [reitit.frontend.easy :as rfe]
               [reitit.frontend.controllers :as rfc]
@@ -147,6 +148,6 @@
                          (assoc state :match (assoc new-match :controllers (rfc/apply-controllers (:controllers (:match state)) new-match)))
                          (assoc state :match new-match))))))
     {:use-fragment true})
-  (r/render [main-view] (.getElementById js/document "app")))
+  (rd/render [main-view] (.getElementById js/document "app")))
 
 (init!)

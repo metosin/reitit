@@ -1,7 +1,7 @@
 (ns reitit.ring.coercion
   (:require [reitit.coercion :as coercion]
-            [reitit.spec :as rs]
-            [reitit.impl :as impl]))
+            [reitit.impl :as impl]
+            [reitit.spec :as rs]))
 
 (defn handle-coercion-exception [e respond raise]
   (let [data (ex-data e)]
@@ -10,8 +10,9 @@
                       ::coercion/response-coercion 500
                       nil)]
       (respond
-        {:status status
-         :body (coercion/encode-error data)})
+       {:status status
+        :headers {}
+        :body (coercion/encode-error data)})
       (raise e))))
 
 ;;
@@ -24,33 +25,24 @@
   and :parameters from route data, otherwise does not mount."
   {:name ::coerce-request
    :spec ::rs/parameters
-   :compile (fn [{:keys [coercion parameters] :as route-data} opts]
+   :compile (fn [{:keys [coercion parameters request]} opts]
               (cond
                 ;; no coercion, skip
                 (not coercion) nil
                 ;; just coercion, don't mount
-                (not parameters) {}
+                (not (or parameters request)) {}
                 ;; mount
                 :else
-                (try
-                  (if-let [coercers (coercion/request-coercers coercion parameters opts)]
-                    (fn [handler]
-                      (fn
-                        ([request]
-                         (let [coerced (coercion/coerce-request coercers request)]
-                           (handler (impl/fast-assoc request :parameters coerced))))
-                        ([request respond raise]
-                         (let [coerced (coercion/coerce-request coercers request)]
-                           (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
-                    {})
-                  (catch Exception e
-                    (throw (ex-info (str "Coerce-request-middleware failed: " (.getMessage e))
-                                    ;; TODO: Format error properly
-                                    {:type :coerce-request-middleware-fail
-                                     ;; TODO: Add path?
-                                     :data {:route-data (select-keys route-data [:parameters])
-                                            :cause-data (ex-data e)}}
-                                    e))))))})
+                (if-let [coercers (coercion/request-coercers coercion parameters request opts)]
+                  (fn [handler]
+                    (fn
+                      ([request]
+                       (let [coerced (coercion/coerce-request coercers request)]
+                         (handler (impl/fast-assoc request :parameters coerced))))
+                      ([request respond raise]
+                       (let [coerced (coercion/coerce-request coercers request)]
+                         (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
+                  {})))})
 
 (def coerce-response-middleware
   "Middleware for pluggable response coercion.
@@ -66,13 +58,13 @@
                 (not responses) {}
                 ;; mount
                 :else
-                (if-let [coercers (coercion/response-coercers coercion responses opts)]
+                (if-let [coercer (coercion/response-coercer coercion responses opts)]
                   (fn [handler]
                     (fn
                       ([request]
-                       (coercion/coerce-response coercers request (handler request)))
+                       (coercer request (handler request)))
                       ([request respond raise]
-                       (handler request #(respond (coercion/coerce-response coercers request %)) raise))))
+                       (handler request #(respond (coercer request %)) raise))))
                   {})))})
 
 (def coerce-exceptions-middleware

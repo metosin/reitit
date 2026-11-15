@@ -2,7 +2,11 @@
 
 ext="sedbak$$"
 
+# metosin/reitit-*
 find . -name project.clj -exec sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" '{}' \;
 find . -name project.clj -exec sed -i.$ext "s/defproject metosin\/reitit\(.*\) \".*\"/defproject metosin\/reitit\1 \"$1\"/g" '{}' \;
+# fi.metosin/reitit-*
+find . -name project.clj -exec sed -i.$ext "s/\[fi.metosin\/reitit\(.*\) \".*\"\]/[fi.metosin\/reitit\1 \"$1\"\]/g" '{}' \;
+find . -name project.clj -exec sed -i.$ext "s/defproject fi.metosin\/reitit\(.*\) \".*\"/defproject fi.metosin\/reitit\1 \"$1\"/g" '{}' \;
 sed -i.$ext "s/\[metosin\/reitit\(.*\) \".*\"\]/[metosin\/reitit\1 \"$1\"\]/g" README.md doc/**/*.md
 find . -name "*.$ext" -exec rm '{}' \;

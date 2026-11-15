@@ -12,7 +12,8 @@
   metosin/reitit-swagger-ui
   metosin/reitit-frontend
   metosin/reitit-sieppari
-  metosin/reitit-pedestal]
+  metosin/reitit-pedestal
+  fi.metosin/reitit-openapi]
  :cljdoc.doc/tree
  [["Introduction" {:file "doc/README.md"}]
   ["Basics" {}
@@ -31,7 +32,7 @@
    ["Data-specs" {:file "doc/coercion/data_spec_coercion.md"}]
    ["Malli" {:file "doc/coercion/malli_coercion.md"}]]
   ["Ring" {}
-   ["Ring-router" {:file "doc/ring/ring.md"}]
+   ["Ring Router" {:file "doc/ring/ring.md"}]
    ["Reverse-routing" {:file "doc/ring/reverse_routing.md"}]
    ["Default handler" {:file "doc/ring/default_handler.md"}]
    ["Slash handler" {:file "doc/ring/slash_handler.md"}]
@@ -47,6 +48,7 @@
    ["Route Data Validation" {:file "doc/ring/route_data_validation.md"}]
    ["Compiling Middleware" {:file "doc/ring/compiling_middleware.md"}]
    ["Swagger Support" {:file "doc/ring/swagger.md"}]
+   ["OpenAPI Support" {:file "doc/ring/openapi.md"}]
    ["RESTful form methods" {:file "doc/ring/RESTful_form_methods.md"}]]
   ["HTTP" {}
    ["Interceptors" {:file "doc/http/interceptors.md"}]

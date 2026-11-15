@@ -1,6 +1,7 @@
 (ns example.server
   (:require [reitit.ring :as ring]
             [reitit.coercion.spec]
+            [reitit.openapi :as openapi]
             [reitit.swagger :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [reitit.ring.coercion :as coercion]
@@ -13,6 +14,7 @@
             ; [reitit.ring.middleware.dev :as dev]
             ; [reitit.ring.spec :as spec]
             ; [spec-tools.spell :as spell]
+            [spec-tools.core :as st]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.spec.alpha :as s]
@@ -25,7 +27,12 @@
 (s/def ::size int?)
 (s/def ::file-response (s/keys :req-un [::name ::size]))
 
-(s/def ::x int?)
+;; Use data-specs to provide extra JSON-Schema properties:
+;; https://github.com/metosin/spec-tools/blob/master/docs/04_json_schema.md#annotated-specs
+(s/def ::x (st/spec {:spec int?
+                     :name "X parameter"
+                     :description "Description for X parameter"
+                     :json-schema/default 42}))
 (s/def ::y int?)
 (s/def ::total int?)
 (s/def ::math-request (s/keys :req-un [::x ::y]))
@@ -38,9 +45,15 @@
         {:get {:no-doc true
                :swagger {:info {:title "my-api"}}
                :handler (swagger/create-swagger-handler)}}]
+       ["/openapi.json"
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openapi3-docs with reitit-http"
+                                :version "0.0.1"}}
+               :handler (openapi/create-openapi-handler)}}]
 
        ["/files"
-        {:swagger {:tags ["files"]}}
+        {:tags ["files"]}
 
         ["/upload"
          {:post {:summary "upload a file"
@@ -54,6 +67,8 @@
         ["/download"
          {:get {:summary "downloads a file"
                 :swagger {:produces ["image/png"]}
+                :responses {200 {:description "an image"
+                                 :content {"image/png" {:schema string?}}}}
                 :handler (fn [_]
                            {:status 200
                             :headers {"Content-Type" "image/png"}
@@ -61,7 +76,7 @@
                                     (io/resource "reitit.png"))})}}]]
 
        ["/math"
-        {:swagger {:tags ["math"]}}
+        {:tags ["math"]}
 
         ["/plus"
          {:get {:summary "plus with spec query parameters"
@@ -105,6 +120,9 @@
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
          :config {:validatorUrl nil
+                  :urls [{:name "swagger" :url "swagger.json"}
+                         {:name "openapi" :url "openapi.json"}]
+                  :urls.primaryName "openapi"
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
 

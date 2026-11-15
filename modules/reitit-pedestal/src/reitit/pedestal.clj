@@ -1,11 +1,11 @@
 (ns reitit.pedestal
-  (:require [io.pedestal.interceptor.chain :as chain]
+  (:require [io.pedestal.http :as http]
             [io.pedestal.interceptor :as interceptor]
-            [io.pedestal.http :as http]
-            [reitit.interceptor]
-            [reitit.http])
-  (:import (reitit.interceptor Executor)
-           (java.lang.reflect Method)))
+            [io.pedestal.interceptor.chain :as chain]
+            [reitit.exception :as ex]
+            [reitit.http]
+            [reitit.interceptor])
+  (:import (java.lang.reflect Method)))
 
 ;; TODO: variadic
 (defn- arities [f]
@@ -36,9 +36,9 @@
     interceptor
     (->> (select-keys interceptor [:enter :leave :error]) (vals) (keep identity) (seq))
     (interceptor/interceptor
-      (if (error-without-arity-2? interceptor)
-        (wrap-error-arity-2->1 interceptor)
-        interceptor))))
+     (if (error-without-arity-2? interceptor)
+       (wrap-error-arity-2->1 interceptor)
+       interceptor))))
 
 ;;
 ;; Public API
@@ -46,12 +46,16 @@
 
 (def pedestal-executor
   (reify
-    Executor
+    reitit.interceptor/Executor
     (queue [_ interceptors]
       (->> interceptors
            (map (fn [{::interceptor/keys [handler] :as interceptor}]
                   (or handler interceptor)))
            (keep ->interceptor)))
+    (execute [_ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
+    (execute [_ _ _ _ _]
+      (ex/unsupported-protocol-method! 'reitit.interceptor/execute))
     (enqueue [_ context interceptors]
       (chain/enqueue context interceptors))))
 
@@ -62,11 +66,11 @@
    (routing-interceptor router default-handler nil))
   ([router default-handler {:keys [interceptors]}]
    (interceptor/interceptor
-     (reitit.http/routing-interceptor
-       router
-       default-handler
-       {:executor pedestal-executor
-        :interceptors interceptors}))))
+    (reitit.http/routing-interceptor
+     router
+     default-handler
+     {:executor pedestal-executor
+      :interceptors interceptors}))))
 
 (defn replace-last-interceptor [service-map interceptor]
   (-> service-map

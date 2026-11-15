@@ -7,6 +7,10 @@
   ([type data]
    (throw (ex-info (str type) {:type type, :data data}))))
 
+(defn unsupported-protocol-method!
+  [method]
+  (fail! :unsupported-protocol-method {:method method}))
+
 (defn get-message [e]
   #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)))
 
@@ -31,20 +35,20 @@
                  path " " (not-empty (select-keys route-data [:conflicting]))))]
     (apply str "Router contains conflicting route paths:\n\n"
            (mapv
-             (fn [[[path route-data] vals]]
-               (str (resolve-str path route-data)
-                    "\n"
-                    (str/join "\n" (mapv (fn [[path route-data]]
-                                           (resolve-str path route-data)) vals))
-                    "\n\n"))
-             conflicts))))
+            (fn [[[path route-data] vals]]
+              (str (resolve-str path route-data)
+                   "\n"
+                   (str/join "\n" (mapv (fn [[path route-data]]
+                                          (resolve-str path route-data)) vals))
+                   "\n\n"))
+            conflicts))))
 
 (defmethod format-exception :name-conflicts [_ _ conflicts]
   (apply str "Router contains conflicting route names:\n\n"
          (mapv
-           (fn [[name vals]]
-             (str name "\n-> " (str/join "\n-> " (mapv first vals)) "\n"))
-           conflicts)))
+          (fn [[name vals]]
+            (str name "\n-> " (str/join "\n-> " (mapv first vals)) "\n"))
+          conflicts)))
 
 (defmethod format-exception :reitit.impl/merge-data [_ _ data]
   (str "Error merging route-data\n\n" (pr-str data)))

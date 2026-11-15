@@ -1,13 +1,13 @@
 (ns reitit.http-test
   "just Clojure before Sieppari is ported into cljs"
-  (:require [clojure.test :refer [deftest testing is]]
+  (:require [clojure.core.async :as a]
             [clojure.set :as set]
+            [clojure.test :refer [deftest is testing]]
+            [reitit.core :as r]
+            [reitit.http :as http]
             [reitit.interceptor :as interceptor]
             [reitit.interceptor.sieppari :as sieppari]
-            [reitit.http :as http]
-            [reitit.ring :as ring]
-            [reitit.core :as r]
-            [clojure.core.async :as a])
+            [reitit.ring :as ring])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn interceptor [name]
@@ -21,14 +21,14 @@
   (testing "http-handler"
     (let [api-interceptor (interceptor :api)
           router (http/router
-                   ["/api" {:interceptors [api-interceptor]}
-                    ["/all" handler]
-                    ["/get" {:get handler}]
-                    ["/users" {:interceptors [[interceptor :users]]
-                               :get handler
-                               :post {:handler handler
-                                      :interceptors [[interceptor :post]]}
-                               :handler handler}]])
+                  ["/api" {:interceptors [api-interceptor]}
+                   ["/all" handler]
+                   ["/get" {:get handler}]
+                   ["/users" {:interceptors [[interceptor :users]]
+                              :get handler
+                              :post {:handler handler
+                                     :interceptors [[interceptor :post]]}
+                              :handler handler}]])
           app (http/ring-handler router nil {:executor sieppari/executor})]
 
       (testing "router can be extracted"
@@ -68,14 +68,14 @@
 
   (testing "named routes"
     (let [router (http/router
-                   [["/api"
-                     ["/all" {:handler handler :name ::all}]
-                     ["/get" {:get {:handler handler :name ::HIDDEN}
-                              :name ::get}]
-                     ["/users" {:get handler
-                                :post handler
-                                :handler handler
-                                :name ::users}]]])
+                  [["/api"
+                    ["/all" {:handler handler :name ::all}]
+                    ["/get" {:get {:handler handler :name ::HIDDEN}
+                             :name ::get}]
+                    ["/users" {:get handler
+                               :post handler
+                               :handler handler
+                               :name ::users}]]])
           app (http/ring-handler router nil {:executor sieppari/executor})]
 
       (testing "router can be extracted"
@@ -88,7 +88,24 @@
 
       (testing "all named routes can be matched"
         (doseq [name (r/route-names router)]
-          (is (= name (-> (r/match-by-name router name) :data :name))))))))
+          (is (= name (-> (r/match-by-name router name) :data :name)))))))
+
+  (testing "path prefixed routes"
+    (let [router (http/router
+                   [["/all" {:handler handler}]
+                    ["/get" {:get {:handler handler}}]
+                    ["/users" {:get handler}]]
+                   {:path "/api"})
+          app (http/ring-handler router nil {:executor sieppari/executor})]
+
+      (testing "router can be extracted"
+        (is (= (r/routes router)
+               (r/routes (http/get-router app)))))
+
+      (testing "handler resolved original router routes"
+        (doseq [router-path (mapv first (r/routes router))]
+          (is (= 200
+                 (:status (app {:uri router-path :request-method :get})))))))))
 
 (def enforce-roles-interceptor
   {:enter (fn [{{::keys [roles] :as request} :request :as ctx}]
@@ -102,13 +119,13 @@
 (deftest enforcing-data-rules-at-runtime-test
   (let [handler (constantly {:status 200, :body "ok"})
         app (http/ring-handler
-              (http/router
-                [["/api"
-                  ["/ping" handler]
-                  ["/admin" {::roles #{:admin}}
-                   ["/ping" handler]]]]
-                {:data {:interceptors [enforce-roles-interceptor]}})
-              nil {:executor sieppari/executor})]
+             (http/router
+              [["/api"
+                ["/ping" handler]
+                ["/admin" {::roles #{:admin}}
+                 ["/ping" handler]]]]
+              {:data {:interceptors [enforce-roles-interceptor]}})
+             nil {:executor sieppari/executor})]
 
     (testing "public handler"
       (is (= {:status 200, :body "ok"}
@@ -128,8 +145,8 @@
 (deftest default-handler-test
   (let [response {:status 200, :body "ok"}
         router (http/router
-                 [["/ping" {:get (constantly response)}]
-                  ["/pong" (constantly nil)]])
+                [["/ping" {:get (constantly response)}]
+                 ["/pong" (constantly nil)]])
         app (http/ring-handler router nil {:executor sieppari/executor})]
 
     (testing "match"
@@ -146,9 +163,9 @@
 
       (testing "with default http responses"
         (let [app (http/ring-handler
-                    router
-                    (ring/create-default-handler)
-                    {:executor sieppari/executor})]
+                   router
+                   (ring/create-default-handler)
+                   {:executor sieppari/executor})]
           (testing "route doesn't match yields 404"
             (is (= 404 (:status (app {:request-method :get, :uri "/"})))))
           (testing "method doesn't match yields 405"
@@ -158,12 +175,12 @@
 
       (testing "with custom http responses"
         (let [app (http/ring-handler
-                    router
-                    (ring/create-default-handler
-                      {:not-found (constantly {:status -404})
-                       :method-not-allowed (constantly {:status -405})
-                       :not-acceptable (constantly {:status -406})})
-                    {:executor sieppari/executor})]
+                   router
+                   (ring/create-default-handler
+                    {:not-found (constantly {:status -404})
+                     :method-not-allowed (constantly {:status -405})
+                     :not-acceptable (constantly {:status -406})})
+                   {:executor sieppari/executor})]
           (testing "route doesn't match"
             (is (= -404 (:status (app {:request-method :get, :uri "/"})))))
           (testing "method doesn't match"
@@ -180,12 +197,12 @@
 
     (testing "with defaults"
       (let [app (http/ring-handler
-                  (http/router
-                    [["/get" {:get (constantly response)
-                              :post (constantly response)}]
-                     ["/options" {:options (constantly response)}]
-                     ["/any" (constantly response)]])
-                  {:executor sieppari/executor})]
+                 (http/router
+                  [["/get" {:get (constantly response)
+                            :post (constantly response)}]
+                   ["/options" {:options (constantly response)}]
+                   ["/any" (constantly response)]])
+                 {:executor sieppari/executor})]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
@@ -201,12 +218,12 @@
 
     (testing "disabled via options"
       (let [app (http/ring-handler
-                  (http/router
-                    [["/get" {:get (constantly response)}]
-                     ["/options" {:options (constantly response)}]
-                     ["/any" (constantly response)]]
-                    {::http/default-options-endpoint nil})
-                  {:executor sieppari/executor})]
+                 (http/router
+                  [["/get" {:get (constantly response)}]
+                   ["/options" {:options (constantly response)}]
+                   ["/any" (constantly response)]]
+                  {::http/default-options-endpoint nil})
+                 {:executor sieppari/executor})]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
@@ -227,8 +244,8 @@
                       (reset! value x))))
         response {:status 200, :body "ok"}
         router (http/router
-                 [["/ping" {:get (fn [_] response)}]
-                  ["/pong" (fn [_] nil)]])
+                [["/ping" {:get (fn [_] response)}]
+                 ["/pong" (fn [_] nil)]])
         app (http/ring-handler router nil {:executor sieppari/executor})]
 
     (testing "match"
@@ -287,14 +304,14 @@
     (require '[sieppari.async.core-async])
     (let [response {:status 200, :body "ok"}
           app (http/ring-handler
-                (http/router
-                  ["/ping" {:get {:interceptors [{:enter #(a/go %)}]
-                                  :handler (fn [_] (a/go response))}}])
-                (ring/create-default-handler)
-                {:executor sieppari/executor})]
-      (let [respond (promise)]
-        (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
-        (is (= response (deref respond 100 ::timeout)))))))
+               (http/router
+                ["/ping" {:get {:interceptors [{:enter #(a/go %)}]
+                                :handler (fn [_] (a/go response))}}])
+               (ring/create-default-handler)
+               {:executor sieppari/executor})
+          respond (promise)]
+      (app {:request-method :get, :uri "/ping"} respond ::irrelevant)
+      (is (= response (deref respond 100 ::timeout))))))
 
 (defrecord MyAsyncContext [])
 
@@ -302,11 +319,11 @@
   (testing "works if registered"
     (let [response {:status 200, :body "ok"}
           app (http/ring-handler
-                (http/router
-                  ["/ping" {:get {:interceptors [{:enter map->MyAsyncContext}]
-                                  :handler (fn [_] response)}}])
-                (ring/create-default-handler)
-                {:executor sieppari/executor})
+               (http/router
+                ["/ping" {:get {:interceptors [{:enter map->MyAsyncContext}]
+                                :handler (fn [_] response)}}])
+               (ring/create-default-handler)
+               {:executor sieppari/executor})
           respond (promise)
           raise (promise)]
       (app {:request-method :get, :uri "/ping"} respond raise)
@@ -321,14 +338,14 @@
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (http/ring-handler
-                   (http/router
-                     ["/api" {:interceptors [(interceptor :olipa)]}
-                      ["/avaruus" {:interceptors [(interceptor :kerran)]
-                                   :get {:handler handler
-                                         :interceptors [(interceptor :avaruus)]}}]]
-                     options)
-                   nil
-                   {:executor sieppari/executor}))]
+                  (http/router
+                   ["/api" {:interceptors [(interceptor :olipa)]}
+                    ["/avaruus" {:interceptors [(interceptor :kerran)]
+                                 :get {:handler handler
+                                       :interceptors [(interceptor :avaruus)]}}]]
+                   options)
+                  nil
+                  {:executor sieppari/executor}))]
 
     (testing "by default, all middleware are applied in order"
       (let [app (create nil)]
@@ -352,10 +369,10 @@
 
       (testing "from root"
         (let [app (http/ring-handler
-                    (http/router
-                      ["/*" (ring/create-resource-handler)])
-                    (ring/create-default-handler)
-                    {:executor sieppari/executor})]
+                   (http/router
+                    ["/*" (ring/create-resource-handler)])
+                   (ring/create-default-handler)
+                   {:executor sieppari/executor})]
           (testing test
             (testing "different file-types"
               (let [response (app (request "/hello.json"))]
@@ -369,9 +386,9 @@
 
             (testing "index-files"
               (let [response (app (request "/docs"))]
-                (is (= (redirect "/docs/index.html") response)))
+                (is (= (redirect "/docs/") response)))
               (let [response (app (request "/docs/"))]
-                (is (= (redirect "/docs/index.html") response))))
+                (is (= 200 (:status response)))))
 
             (testing "not found"
               (let [response (app (request "/not-found"))]
@@ -388,10 +405,10 @@
 
       (testing "from path"
         (let [app (http/ring-handler
-                    (http/router
-                      ["/files/*" (ring/create-resource-handler)])
-                    (ring/create-default-handler)
-                    {:executor sieppari/executor})
+                   (http/router
+                    ["/files/*" (ring/create-resource-handler)])
+                   (ring/create-default-handler)
+                   {:executor sieppari/executor})
               request #(request (str "/files" %))
               redirect #(redirect (str "/files" %))]
           (testing test
@@ -407,9 +424,9 @@
 
             (testing "index-files"
               (let [response (app (request "/docs"))]
-                (is (= (redirect "/docs/index.html") response)))
+                (is (= (redirect "/docs/") response)))
               (let [response (app (request "/docs/"))]
-                (is (= (redirect "/docs/index.html") response))))
+                (is (= 200 (:status response)))))
 
             (testing "not found"
               (let [response (app (request "/not-found"))]
@@ -428,11 +445,11 @@
 
       (testing "from root"
         (let [app (http/ring-handler
-                    (http/router [])
-                    (ring/routes
-                      (ring/create-resource-handler {:path "/"})
-                      (ring/create-default-handler))
-                    {:executor sieppari/executor})]
+                   (http/router [])
+                   (ring/routes
+                    (ring/create-resource-handler {:path "/"})
+                    (ring/create-default-handler))
+                   {:executor sieppari/executor})]
           (testing test
             (testing "different file-types"
               (let [response (app (request "/hello.json"))]
@@ -446,9 +463,9 @@
 
             (testing "index-files"
               (let [response (app (request "/docs"))]
-                (is (= (redirect "/docs/index.html") response)))
+                (is (= (redirect "/docs/") response)))
               (let [response (app (request "/docs/"))]
-                (is (= (redirect "/docs/index.html") response))))
+                (is (= 200 (:status response)))))
 
             (testing "not found"
               (let [response (app (request "/not-found"))]
@@ -465,11 +482,11 @@
 
       (testing "from path"
         (let [app (http/ring-handler
-                    (http/router [])
-                    (ring/routes
-                      (ring/create-resource-handler {:path "/files"})
-                      (ring/create-default-handler))
-                    {:executor sieppari/executor})
+                   (http/router [])
+                   (ring/routes
+                    (ring/create-resource-handler {:path "/files"})
+                    (ring/create-default-handler))
+                   {:executor sieppari/executor})
               request #(request (str "/files" %))
               redirect #(redirect (str "/files" %))]
           (testing test
@@ -485,9 +502,9 @@
 
             (testing "index-files"
               (let [response (app (request "/docs"))]
-                (is (= (redirect "/docs/index.html") response)))
+                (is (= (redirect "/docs/") response)))
               (let [response (app (request "/docs/"))]
-                (is (= (redirect "/docs/index.html") response))))
+                (is (= 200 (:status response)))))
 
             (testing "not found"
               (let [response (app (request "/not-found"))]
@@ -510,18 +527,18 @@
         interceptor (fn [x] {:enter (fn [ctx] (swap! times update-in [:enter x] (fnil inc 0)) ctx)
                              :leave (fn [ctx] (swap! times update-in [:leave x] (fnil inc 0)) ctx)})
         app (http/ring-handler
-              (http/router
-                ["/api"
-                 {:interceptors [(interceptor :api)]}
-                 ["/ping"
-                  {:interceptors [(interceptor :ping)]
-                   :get {:interceptors [(interceptor :get)]
-                         :handler (fn [_] response)}}]])
-              (ring/routes
-                (ring/create-default-handler)
-                {:data {:interceptors [(interceptor :router)]}})
-              {:executor sieppari/executor
-               :interceptors [(interceptor :top)]})]
+             (http/router
+              ["/api"
+               {:interceptors [(interceptor :api)]}
+               ["/ping"
+                {:interceptors [(interceptor :ping)]
+                 :get {:interceptors [(interceptor :get)]
+                       :handler (fn [_] response)}}]])
+             (ring/routes
+              (ring/create-default-handler)
+              {:data {:interceptors [(interceptor :router)]}})
+             {:executor sieppari/executor
+              :interceptors [(interceptor :top)]})]
     (is (= response (app {:request-method :get, :uri "/api/ping"})))
     (is (= {:enter {:top 1, :api 1, :ping 1, :get 1}
             :leave {:get 1, :ping 1, :api 1, :top 1}}
@@ -530,15 +547,15 @@
 (deftest router-available-in-default-branch
   (testing "1-arity"
     ((http/ring-handler
-       (http/router [])
-       (fn [{::r/keys [router]}]
-         (is router))
-       {:executor sieppari/executor})
+      (http/router [])
+      (fn [{::r/keys [router]}]
+        (is router))
+      {:executor sieppari/executor})
      {}))
   (testing "3-arity"
     ((http/ring-handler
-       (http/router [])
-       (fn [{::r/keys [router]}]
-         (is router))
-       {:executor sieppari/executor})
+      (http/router [])
+      (fn [{::r/keys [router]}]
+        (is router))
+      {:executor sieppari/executor})
      {} ::respond ::raise)))

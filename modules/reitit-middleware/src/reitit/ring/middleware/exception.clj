@@ -1,10 +1,10 @@
 (ns reitit.ring.middleware.exception
-  (:require [reitit.coercion :as coercion]
-            [reitit.ring :as ring]
-            [clojure.spec.alpha :as s]
-            [clojure.string :as str])
-  (:import (java.time Instant)
-           (java.io PrintWriter)))
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [reitit.coercion :as coercion]
+            [reitit.ring :as ring])
+  (:import (java.io Writer PrintWriter)
+           (java.time Instant)))
 
 (s/def ::handlers (s/map-of any? fn?))
 (s/def ::spec (s/keys :opt-un [::handlers]))
@@ -19,17 +19,20 @@
       (recur (.getSuperclass sk) (conj ks sk))
       ks)))
 
+(defn- find-closest-ancestor [val m]
+  (or (get m val)
+      (some #(find-closest-ancestor % m) (parents val))))
+
 (defn- call-error-handler [handlers error request]
   (let [type (:type (ex-data error))
         ex-class (class error)
         error-handler (or (get handlers type)
                           (get handlers ex-class)
+                          (when-not (class? type)
+                            (find-closest-ancestor type handlers))
                           (some
-                            (partial get handlers)
-                            (descendants type))
-                          (some
-                            (partial get handlers)
-                            (super-classes ex-class))
+                           (partial get handlers)
+                           (super-classes ex-class))
                           (get handlers ::default))]
     (if-let [wrap (get handlers ::wrap)]
       (wrap error-handler error request)
@@ -55,7 +58,7 @@
          (catch Throwable e
            (on-exception handlers e request respond raise)))))))
 
-(defn print! [^PrintWriter writer & more]
+(defn print! [^Writer writer & more]
   (.write writer (str (str/join " " more) "\n")))
 
 ;;
@@ -66,6 +69,7 @@
   "Default safe handler for any exception."
   [^Exception e _]
   {:status 500
+   :headers {}
    :body {:type "exception"
           :class (.getName (.getClass e))}})
 
@@ -74,6 +78,7 @@
   [status]
   (fn [e _]
     {:status status
+     :headers {}
      :body (coercion/encode-error (ex-data e))}))
 
 (defn http-response-handler
@@ -88,7 +93,7 @@
 
 (defn wrap-log-to-console [handler ^Throwable e {:keys [uri request-method] :as req}]
   (print! *out* (Instant/now) request-method (pr-str uri) "=>" (.getMessage e))
-  (.printStackTrace e ^PrintWriter *out*)
+  (.printStackTrace e (PrintWriter. ^Writer *out*))
   (handler e req))
 
 ;;
@@ -137,6 +142,9 @@
   3) `:type` ancestors of exception ex-data
   4) Super Classes of exception
   5) The ::default handler
+
+  Note! If the closest ancestor for `:type` is not unique, an
+  arbitrary one is picked.
 
   Example:
 

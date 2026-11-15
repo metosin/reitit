@@ -1,9 +1,8 @@
 (ns reitit.middleware
-  (:require [meta-merge.core :refer [meta-merge]]
-            [clojure.pprint :as pprint]
+  (:require [clojure.pprint :as pprint]
             [reitit.core :as r]
-            [reitit.impl :as impl]
-            [reitit.exception :as exception]))
+            [reitit.exception :as exception]
+            [reitit.impl :as impl]))
 
 (defprotocol IntoMiddleware
   (into-middleware [this data opts]))
@@ -21,17 +20,17 @@
     (if-let [middleware (if registry (registry this))]
       (into-middleware middleware data opts)
       (throw
-        (ex-info
-          (str
-            "Middleware " this " not found in registry.\n\n"
-            (if (seq registry)
-              (str
-                "Available middleware in registry:\n"
-                (with-out-str
-                  (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
-              "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
-          {:id this
-           :registry registry}))))
+       (ex-info
+        (str
+         "Middleware " this " not found in registry.\n\n"
+         (if (seq registry)
+           (str
+            "Available middleware in registry:\n"
+            (with-out-str
+              (pprint/print-table [:id :description] (for [[k v] registry] {:id k :description v}))))
+           "see [reitit.middleware/router] on how to add middleware to the registry.\n") "\n")
+        {:id this
+         :registry registry}))))
 
   #?(:clj  clojure.lang.APersistentVector
      :cljs cljs.core.PersistentVector)
@@ -43,7 +42,7 @@
      :cljs function)
   (into-middleware [this _ _]
     (map->Middleware
-      {:wrap this}))
+     {:wrap this}))
 
   #?(:clj  clojure.lang.PersistentArrayMap
      :cljs cljs.core.PersistentArrayMap)
@@ -63,13 +62,13 @@
             opts (assoc opts ::compiled (inc ^long compiled))]
         (when (>= ^long compiled ^long *max-compile-depth*)
           (exception/fail!
-            (str "Too deep Middleware compilation - " compiled)
-            {:this this, :data data, :opts opts}))
+           (str "Too deep Middleware compilation - " compiled)
+           {:this this, :data data, :opts opts}))
         (if-let [middeware (into-middleware (compile data opts) data opts)]
           (map->Middleware
-            (merge
-              (dissoc this :compile)
-              (impl/strip-nils middeware)))))))
+           (merge
+            (dissoc this :compile)
+            (impl/strip-nils middeware)))))))
 
   nil
   (into-middleware [_ _ _]))
@@ -77,10 +76,10 @@
 (defn- ensure-handler! [path data scope]
   (when-not (:handler data)
     (exception/fail!
-      (str "path \"" path "\" doesn't have a :handler defined"
-           (if scope (str " for " scope)))
-      (merge {:path path, :data data}
-             (if scope {:scope scope})))))
+     (str "path \"" path "\" doesn't have a :handler defined"
+          (if scope (str " for " scope)))
+     (merge {:path path, :data data}
+            (if scope {:scope scope})))))
 
 (defn- expand-and-transform
   [middleware data {::keys [transform] :or {transform identity} :as opts}]
@@ -116,9 +115,9 @@
    (ensure-handler! path data scope)
    (let [middleware (expand-and-transform middleware data opts)]
      (map->Endpoint
-       {:handler (compile-handler middleware handler)
-        :middleware middleware
-        :data data}))))
+      {:handler (compile-handler middleware handler)
+       :middleware middleware
+       :data data}))))
 
 (defn router
   "Creates a [[reitit.core/Router]] from raw route data and optionally an options map with
@@ -139,14 +138,14 @@
   ([data]
    (router data nil))
   ([data opts]
-   (let [opts (meta-merge {:compile compile-result} opts)]
+   (let [opts (impl/meta-merge {:compile compile-result} opts opts)]
      (r/router data opts))))
 
 (defn middleware-handler [router]
   (with-meta
-    (fn [path]
-      (some->> path
-               (r/match-by-path router)
-               :result
-               :handler))
-    {::router router}))
+   (fn [path]
+     (some->> path
+              (r/match-by-path router)
+              :result
+              :handler))
+   {::router router}))

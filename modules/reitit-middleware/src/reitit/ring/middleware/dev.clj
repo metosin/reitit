@@ -48,6 +48,6 @@
   printer between all middleware."
   [chain]
   (reduce
-    (fn [chain mw]
-      (into chain [mw (print-diff-middleware (select-keys mw [:name]))]))
-    [(print-diff-middleware)] chain))
+   (fn [chain mw]
+     (into chain [mw (print-diff-middleware (select-keys mw [:name]))]))
+   [(print-diff-middleware)] chain))

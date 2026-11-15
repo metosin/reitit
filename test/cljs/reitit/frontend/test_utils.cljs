@@ -10,6 +10,6 @@
                 (set! js/console.warn (partial log :warn))
                 (f)
                 (finally
-                  (set! js/console.warn original-console-warn)))]
+                 (set! js/console.warn original-console-warn)))]
     {:value value
      :messages @messages}))

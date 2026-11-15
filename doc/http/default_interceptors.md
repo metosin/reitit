@@ -1,13 +1,13 @@
 # Default Interceptors
 
 ```clj
-[metosin/reitit-interceptors "0.5.10"]
+[metosin/reitit-interceptors "0.11.0"]
 ```
 
 Just like the [ring default middleware](../ring/default_middleware.md), but for interceptors.
 
 ### Parameters handling
-* `reitit.http.interceptors.parameters/parameters-interceptor` 
+* `reitit.http.interceptors.parameters/parameters-interceptor`
 
 ### Exception handling
 * `reitit.http.interceptors.exception/exception-interceptor`

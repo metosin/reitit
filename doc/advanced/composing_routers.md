@@ -143,10 +143,10 @@ As the `Match` contains all the route data, we can create a new matching functio
 (require '[clojure.string :as str])
 
 (defn recursive-match-by-path [router path]
-  (if-let [match (r/match-by-path router path)]
+  (when-let [match (r/match-by-path router path)]
     (if-let [subrouter (-> match :data :router)]
       (let [subpath (subs path (str/last-index-of (:template match) "/"))]
-        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+        (when-let [submatch (recursive-match-by-path subrouter subpath)]
           (cons match submatch)))
       (list match))))
 ```
@@ -206,10 +206,10 @@ First, we need to modify our matching function to support router references:
     (deref x) x))
 
 (defn recursive-match-by-path [router path]
-  (if-let [match (r/match-by-path (<< router) path)]
+  (when-let [match (r/match-by-path (<< router) path)]
     (if-let [subrouter (-> match :data :router <<)]
       (let [subpath (subs path (str/last-index-of (:template match) "/"))]
-        (if-let [submatch (recursive-match-by-path subrouter subpath)]
+        (when-let [submatch (recursive-match-by-path subrouter subpath)]
           (cons match submatch)))
       (list match))))
 ```
@@ -405,9 +405,53 @@ All the beer-routes now match in constant time.
 |-----------------|---------|-----------------------
 | `/beers/sahti`  | 40ns    | static
 
+### Wrapping a swappable ring handler
+
+In order for a ring handler to be recomposed, we can wrap it into a handler that dereferences it on request.
+
+```clj
+(defn deref-handler [rf]
+  (fn
+    ([request] (@rf request))
+    ([request respond raise] (@rf request respond raise))))
+```
+
+A simplified beer router version that creates a ring-handler.
+
+```clj
+(defn create-ring-handler [beers]
+  (ring/ring-handler
+   (ring/router
+    [["/beers"
+      (when (seq beers)
+        (for [beer beers]
+          [(str "/" beer)
+           {:get (fn [_] {:status 200 :body beer})}]))]])))
+
+(def ring-handler
+  (atom (create-ring-handler nil)))
+
+(defn reset-router! [beers]
+  (reset! ring-handler (create-ring-handler beers)))
+```
+
+We don't have any matching routes yet.
+
+```clj
+((deref-handler ring-handler) {:request-method :get :uri "/beers/lager"})
+; nil
+```
+
+But we can add them later.
+
+```clj
+(reset-router! ["lager"])
+((deref-handler ring-handler) {:request-method :get :uri "/beers/lager"})
+; {:status 200, :body "lager"}
+```
+
 ## TODO
 
-* add an example how to do dynamic routing with `reitit-ring`
 * maybe create a `recursive-router` into a separate ns with all `Router` functions implemented correctly? maybe not...
 * add `reitit.core/merge-routes` to effectively merge routes with route data
 

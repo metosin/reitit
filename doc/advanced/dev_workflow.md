@@ -147,3 +147,19 @@ Let's apply a small change to our ```ns3```. We'll replace our router by two dif
 
 And there you have it, dynamic during dev, performance at production. We have it all !
 
+## Var handlers
+
+You can use a var instead of a function as a `:handler`. This will
+allow you to modify the handler function without rebuilding the reitit
+router.
+
+For example:
+
+```clj
+(def router
+  (ring/router
+    ["/ping" {:get #'my-ns/handler}]))
+```
+
+Now you can reload `my-ns` or redefine `my-ns/handler` and the router
+will use the new definition automatically.

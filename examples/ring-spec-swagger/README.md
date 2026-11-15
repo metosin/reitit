@@ -1,4 +1,4 @@
-# reitit-ring, clojure.spec, swagger
+# reitit-ring, clojure.spec, swagger, openapi 3
 
 ## Usage
 
@@ -6,6 +6,10 @@
 > lein repl
 (start)
 ```
+
+- Swagger spec served at <http://localhost:3000/swagger.json>
+- Openapi spec served at <http://localhost:3000/openapi.json>
+- Swagger UI served at <http://localhost:3000/>
 
 To test the endpoints using [httpie](https://httpie.org/):
 

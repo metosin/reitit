@@ -1,62 +1,74 @@
-(defproject metosin/reitit-parent "0.5.10"
+(defproject metosin/reitit-parent "0.11.0"
   :description "Snappy data-driven router for Clojure(Script)"
   :url "https://github.com/metosin/reitit"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :test-paths ["test/clj" "test/cljc"]
-  :deploy-repositories [["releases" :clojars]]
+  :deploy-repositories [["clojars" {:url "https://repo.clojars.org"
+                                    :username :env/clojars_username
+                                    :password :env/clojars_password
+                                    :sign-releases false}]]
+  :repositories [["clojars" {:url "https://repo.clojars.org"
+                             :username :env/clojars_username
+                             :password :env/clojars_password}]]
   :codox {:output-path "doc"
           :source-uri "https://github.com/metosin/reitit/{version}/{filepath}#L{line}"
           :metadata {:doc/format :markdown}}
   :scm {:name "git"
         :url "https://github.com/metosin/reitit"}
-  ;; TODO: need to verify that the code actually worked with Java1.8, see #242
-  :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
-  :managed-dependencies [[metosin/reitit "0.5.10"]
-                         [metosin/reitit-core "0.5.10"]
-                         [metosin/reitit-dev "0.5.10"]
-                         [metosin/reitit-spec "0.5.10"]
-                         [metosin/reitit-malli "0.5.10"]
-                         [metosin/reitit-schema "0.5.10"]
-                         [metosin/reitit-ring "0.5.10"]
-                         [metosin/reitit-middleware "0.5.10"]
-                         [metosin/reitit-http "0.5.10"]
-                         [metosin/reitit-interceptors "0.5.10"]
-                         [metosin/reitit-swagger "0.5.10"]
-                         [metosin/reitit-swagger-ui "0.5.10"]
-                         [metosin/reitit-frontend "0.5.10"]
-                         [metosin/reitit-sieppari "0.5.10"]
-                         [metosin/reitit-pedestal "0.5.10"]
-                         [metosin/ring-swagger-ui "3.25.3"]
-                         [metosin/spec-tools "0.10.4"]
-                         [metosin/schema-tools "0.12.2"]
-                         [metosin/muuntaja "0.6.7"]
-                         [metosin/jsonista "0.2.7"]
+  ;; Ring 1.13.1 drops support for Java 1.8 so lets target 11
+  :javac-options ["-Xlint:unchecked" "-target" "11" "-source" "11"]
+  :managed-dependencies [[metosin/reitit "0.11.0"]
+                         [metosin/reitit-core "0.11.0"]
+                         [metosin/reitit-dev "0.11.0"]
+                         [metosin/reitit-spec "0.11.0"]
+                         [metosin/reitit-malli "0.11.0"]
+                         [metosin/reitit-schema "0.11.0"]
+                         [metosin/reitit-ring "0.11.0"]
+                         [metosin/reitit-middleware "0.11.0"]
+                         [metosin/reitit-http "0.11.0"]
+                         [metosin/reitit-interceptors "0.11.0"]
+                         [metosin/reitit-swagger "0.11.0"]
+                         [fi.metosin/reitit-openapi "0.11.0"]
+                         [metosin/reitit-swagger-ui "0.11.0"]
+                         [metosin/reitit-frontend "0.11.0"]
+                         [metosin/reitit-sieppari "0.11.0"]
+                         [metosin/reitit-pedestal "0.11.0"]
+                         [metosin/ring-swagger-ui "5.32.11"]
+                         [metosin/spec-tools "0.10.8"]
+                         [metosin/schema-tools "0.14.1"]
+                         [metosin/muuntaja "0.6.12"]
+                         [metosin/jsonista "1.0.1"]
                          [metosin/sieppari "0.0.0-alpha13"]
-                         [metosin/malli "0.2.1"]
+                         [metosin/malli "0.20.1"]
 
                          ;; https://clojureverse.org/t/depending-on-the-right-versions-of-jackson-libraries/5111
-                         [com.fasterxml.jackson.core/jackson-core "2.11.3"]
-                         [com.fasterxml.jackson.core/jackson-databind "2.11.3"]
+                         [com.fasterxml.jackson.core/jackson-core "2.22.2"]
+                         [com.fasterxml.jackson.core/jackson-databind "2.22.2"]
 
                          [meta-merge "1.0.0"]
-                         [fipp "0.6.23" :exclusions [org.clojure/core.rrb-vector]]
-                         [expound "0.8.6"]
+                         [fipp "0.6.29" :exclusions [org.clojure/core.rrb-vector]]
+                         ;; Deep-diff uses this version, override olders versiom from fipp.
+                         [org.clojure/core.rrb-vector "0.2.1"]
+                         [expound "0.9.0"]
                          [lambdaisland/deep-diff "0.0-47"]
                          [com.bhauman/spell-spec "0.1.2"]
-                         [ring/ring-core "1.8.2"]
+                         [mvxcvi/arrangement "2.1.0"]
+                         [ring/ring-core "1.15.5"]
 
-                         [io.pedestal/pedestal.service "0.5.8"]]
+                         [io.pedestal/pedestal.service "0.6.4" :upgrade false]]
 
-  :plugins [[jonase/eastwood "0.3.11"]
+  :plugins [[jonase/eastwood "1.4.3"]
             ;[lein-virgil "0.1.7"]
+            [lein-ancient "1.0.0-RC3"]
             [lein-doo "0.1.11"]
             [lein-cljsbuild "1.1.8"]
-            [lein-cloverage "1.2.1"]
-            [lein-codox "0.10.7"]
+            [lein-cloverage "1.2.4"]
+            [lein-codox "0.10.8"]
             [metosin/bat-test "0.4.4"]]
 
-  :profiles {:dev {:jvm-opts ^:replace ["-server"]
+  :profiles {:clj11 {:dependencies [[org.clojure/clojure "1.11.4" :upgrade false]]}
+             :dev {:jvm-opts ^:replace ["-server"]
 
                    ;; all module sources for development
                    :source-paths ["modules/reitit/src"
@@ -65,6 +77,7 @@
                                   "modules/reitit-ring/src"
                                   "modules/reitit-http/src"
                                   "modules/reitit-middleware/src"
+                                  "modules/reitit-openapi/src"
                                   "modules/reitit-interceptors/src"
                                   "modules/reitit-malli/src"
                                   "modules/reitit-spec/src"
@@ -77,63 +90,66 @@
 
                    :java-source-paths ["modules/reitit-core/java-src"]
 
-                   :dependencies [[org.clojure/clojure "1.10.1"]
-                                  [org.clojure/clojurescript "1.10.597"]
+                   :dependencies [[org.clojure/clojure "1.12.5"]
+                                  [thheller/shadow-cljs "3.5.0"]
+                                  [org.clojure/clojurescript "1.12.145"]
 
                                   ;; modules dependencies
-                                  [metosin/schema-tools "0.12.2"]
-                                  [metosin/spec-tools "0.10.4"]
-                                  [metosin/muuntaja "0.6.7"]
+                                  [metosin/schema-tools "0.14.1"]
+                                  [metosin/spec-tools "0.10.8"]
+                                  [metosin/muuntaja "0.6.12"]
                                   [metosin/sieppari "0.0.0-alpha13"]
-                                  [metosin/jsonista "0.2.7"]
-                                  [metosin/malli "0.2.1"]
+                                  [metosin/jsonista "1.0.1"]
+                                  [metosin/malli "0.20.1"]
                                   [lambdaisland/deep-diff "0.0-47"]
                                   [meta-merge "1.0.0"]
                                   [com.bhauman/spell-spec "0.1.2"]
-                                  [expound "0.8.6"]
-                                  [fipp "0.6.23"]
+                                  [expound "0.9.0"]
+                                  [fipp "0.6.29"]
 
-                                  [orchestra "2020.09.18-1"]
+                                  [orchestra "2021.01.01-1"]
 
-                                  [ring "1.8.2"]
-                                  [ikitommi/immutant-web "3.0.0-alpha1"]
-                                  [metosin/ring-http-response "0.9.1"]
-                                  [metosin/ring-swagger-ui "3.25.3"]
+                                  [ring "1.15.5"]
+                                  [ikitommi/immutant-web "3.0.0-alpha1" :exclusions [ch.qos.logback/logback-classic]]
+                                  [metosin/ring-http-response "0.9.5"]
+                                  [metosin/ring-swagger-ui "5.32.11"]
+                                  [org.clojure/tools.analyzer "1.2.2"]
 
                                   [criterium "0.4.6"]
-                                  [org.clojure/test.check "1.1.0"]
-                                  [org.clojure/tools.namespace "1.0.0"]
-                                  [com.gfredericks/test.chuck "0.2.10"]
+                                  [org.clojure/test.check "1.1.3"]
+                                  [org.clojure/tools.namespace "1.5.1"]
+                                  [com.gfredericks/test.chuck "0.2.15"]
+                                  [nubank/matcher-combinators "3.11.0"]
 
-                                  [io.pedestal/pedestal.service "0.5.8"]
+                                  ;; TODO: adapt to breaking changes in pedestal 0.7 and 0.8
+                                  [io.pedestal/pedestal.service "0.6.4" :upgrade false]
 
-                                  [org.clojure/core.async "1.3.610"]
-                                  [manifold "0.1.8"]
-                                  [funcool/promesa "6.0.0"]
+                                  [org.clojure/core.async "1.9.865"]
+                                  [manifold "0.5.0"]
+                                  [funcool/promesa "12.0.1"]
 
-                                  [com.clojure-goes-fast/clj-async-profiler "0.4.1"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
                                   [ring-cors "0.1.13"]
 
-                                  [com.bhauman/rebel-readline "0.1.4"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+                                  [com.bhauman/rebel-readline "0.1.11"]]}
+             :shadow {:test-paths ["test/cljs"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]
                     :test-paths ["perf-test/clj"]
-                    :dependencies [[compojure "1.6.2"]
-                                   [ring/ring-defaults "0.3.2"]
-                                   [ikitommi/immutant-web "3.0.0-alpha1"]
-                                   [io.pedestal/pedestal.service "0.5.8"]
-                                   [io.pedestal/pedestal.jetty "0.5.8"]
-                                   [calfpath "0.7.2"]
-                                   [org.clojure/core.async "1.3.610"]
-                                   [manifold "0.1.8"]
-                                   [funcool/promesa "6.0.0"]
+                    :dependencies [[compojure "1.7.2"]
+                                   [ring/ring-defaults "0.7.1"]
+                                   [ikitommi/immutant-web "3.0.0-alpha1" :exclusions [ch.qos.logback/logback-classic]]
+                                   [io.pedestal/pedestal.service "0.6.4" :upgrade false]
+                                   [io.pedestal/pedestal.jetty "0.6.4" :upgrade false]
+                                   [calfpath "0.8.1"]
+                                   [org.clojure/core.async "1.9.865"]
+                                   [manifold "0.5.0"]
+                                   [funcool/promesa "12.0.1"]
                                    [metosin/sieppari]
                                    [yada "1.2.16"]
-                                   [aleph "0.4.6"]
-                                   [ring/ring-defaults "0.3.2"]
-                                   [ataraxy "0.4.2"]
+                                   [aleph "0.9.11"]
+                                   [ataraxy "0.4.3"]
                                    [bidi "2.1.6"]
                                    [janus "1.3.2"]]}
              :analyze {:jvm-opts ^:replace ["-server"
@@ -141,9 +157,12 @@
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
                                             "-XX:+PrintInlining"]}}
-  :aliases {"all" ["with-profile" "dev,default:dev,default,1.9"]
+  :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
+            "test-clj11" ["with-profile" "dev,default,clj11" "do" ["bat-test"] ["check"]]
+            ;; NOTE: These are deprecated, kept around for ensuring shadow-cljs works
+            ;; the same way.
             "test-browser" ["doo" "chrome-headless" "test"]
             "test-advanced" ["doo" "chrome-headless" "advanced-test"]
             "test-node" ["doo" "node" "node-test"]}
@@ -153,9 +172,7 @@
                        :output-to "target/results/reitit/junit.xml"}]}
 
   :doo {:paths {:karma "./node_modules/.bin/karma"}
-        :karma {:config {"plugins" ["karma-junit-reporter"]
-                         "reporters" ["progress", "junit"]
-                         "junitReporter" {"outputDir" "target/results/cljs"}}}}
+        :karma {:config {"reporters" ["progress"]}}}
 
   :cljsbuild {:builds [{:id "test"
                         :source-paths ["src" "test/cljc" "test/cljs"]

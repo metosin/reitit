@@ -10,11 +10,11 @@
   (let [log (atom [])
         controller-state (atom [])
         controller-1 {:start (fn [_] (swap! log conj :start-1))
-                      :stop  (fn [_] (swap! log conj :stop-1))}
+                      :stop (fn [_] (swap! log conj :stop-1))}
         controller-2 {:start (fn [_] (swap! log conj :start-2))
-                      :stop  (fn [_] (swap! log conj :stop-2))}
+                      :stop (fn [_] (swap! log conj :stop-2))}
         controller-3 {:start (fn [{:keys [foo]}] (swap! log conj [:start-3 foo]))
-                      :stop  (fn [{:keys [foo]}] (swap! log conj [:stop-3 foo]))
+                      :stop (fn [{:keys [foo]}] (swap! log conj [:stop-3 foo]))
                       :identity (fn [match]
                                   {:foo (-> match :parameters :path :foo)})}]
 
@@ -70,9 +70,9 @@
   (let [log (atom [])
         controller-state (atom [])
         static {:start (fn [params] (swap! log conj [:start-static]))
-                :stop  (fn [params] (swap! log conj [:stop-static]))}
+                :stop (fn [params] (swap! log conj [:stop-static]))}
         controller {:start (fn [params] (swap! log conj [:start params]))
-                    :stop  (fn [params] (swap! log conj [:stop params]))
+                    :stop (fn [params] (swap! log conj [:stop params]))
                     :parameters {:path [:foo]}}]
 
     (testing "init"

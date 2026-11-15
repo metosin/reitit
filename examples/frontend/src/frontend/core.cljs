@@ -1,5 +1,6 @@
 (ns frontend.core
   (:require [reagent.core :as r]
+            [reagent.dom :as rd]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
             [reitit.coercion.spec :as rss]
@@ -77,6 +78,6 @@
     (fn [m] (reset! match m))
     ;; set to false to enable HistoryAPI
     {:use-fragment true})
-  (r/render [current-page] (.getElementById js/document "app")))
+  (rd/render [current-page] (.getElementById js/document "app")))
 
 (init!)

@@ -9,9 +9,10 @@ Route data is the key feature of reitit. Routes can have any map-like data attac
                   :handler identity}}]]
 ```
 
-Besides map-like data, raw routes can have any non-sequential route argument after the path. This argument is expanded by `Router` (via `:expand` option) into route data at router creation time. 
+Besides map-like data, raw routes can have any non-sequential route argument after the path. This argument is expanded by `Router` (via `:expand` option) into route data at router creation time.
 
-By default, Keywords are expanded into `:name` and functions into `:handler` keys.
+By default, Keywords are expanded into `:name` (see [Name-based Routing](./name_based_routing.md))
+and functions into `:handler` keys.
 
 ```clj
 (require '[reitit.core :as r])
@@ -79,10 +80,12 @@ Resolved route tree:
 ;                :name :user/ping}]
 ;  ["/api/admin/users" {:interceptors [::api]
 ;                       :roles #{:admin}
-;                       :name ::users} nil]
+;                       :name ::users}]
 ;  ["/api/admin/db" {:interceptors [::api ::db]
 ;                    :roles #{:db-admin}}]]
 ```
+
+See also [nested parameter definitions for coercions](../ring/coercion.md#nested-parameter-definitions)
 
 ## Route Data Fragments
 
@@ -117,7 +120,7 @@ Accumulated route data:
       ["/api-docs" ::api-docs]]
      ["/api/ping" ::ping]
      ["/api/pong" ::pong]]))
-     
+
 (r/routes router)
 ; [["/swagger.json" {:no-doc true, :name ::swagger}]
 ;  ["/api-docs" {:no-doc true, :name ::api-docs}]

@@ -1,0 +1,256 @@
+(ns example.server
+  (:require [reitit.ring :as ring]
+            [reitit.ring.spec]
+            [reitit.coercion.malli]
+            [reitit.coercion.schema]
+            [reitit.openapi :as openapi]
+            [reitit.ring.malli]
+            [reitit.swagger-ui :as swagger-ui]
+            [reitit.ring.coercion :as coercion]
+            [reitit.dev.pretty :as pretty]
+            [reitit.ring.middleware.muuntaja :as muuntaja]
+            [reitit.ring.middleware.exception :as exception]
+            [reitit.ring.middleware.multipart :as multipart]
+            [reitit.ring.middleware.parameters :as parameters]
+            [ring.adapter.jetty :as jetty]
+            [muuntaja.core :as m]
+            [schema.core :as s]))
+
+(def Transaction
+  [:map
+   [:amount :double]
+   [:from :string]])
+
+(def AccountId
+  [:map
+   [:bank :string]
+   [:id :string]])
+
+(def Account
+  [:map
+   [:bank :string]
+   [:id :string]
+   [:balance :double]
+   [:transactions [:vector #'Transaction]]])
+
+(s/defschema TransactionSchema
+  {:amount s/Num
+   :from s/Str})
+
+(s/defschema AccountIdSchema
+  {:bank s/Str
+   :id s/Str})
+
+(s/defschema AccountSchema
+  {:bank s/Str
+   :id s/Str
+   :balance s/Num
+   :transactions [TransactionSchema]})
+
+(def app
+  (ring/ring-handler
+    (ring/router
+      [["/openapi.json"
+        {:get {:no-doc true
+               :openapi {:info {:title "my-api"
+                                :description "openapi3 docs with [malli](https://github.com/metosin/malli) and reitit-ring"
+                                :version "0.0.1"}
+                         ;; used in /secure APIs below
+                         :components {:securitySchemes {"auth" {:type :apiKey
+                                                                :in :header
+                                                                :name "Example-Api-Key"}}}}
+               :handler (openapi/create-openapi-handler)}}]
+
+       ["/pizza"
+        {:get {:summary "Fetch a pizza | Multiple content-types, multiple examples"
+               :responses {200 {:description "Fetch a pizza as json or EDN"
+                                :content {"application/json" {:schema [:map
+                                                                       [:format [:enum :json]]
+                                                                       [:color :keyword]
+                                                                       [:pineapple :boolean]]
+                                                              :examples {:white {:description "White pizza with pineapple"
+                                                                                 :value {:format :json
+                                                                                         :color :white
+                                                                                         :pineapple true}}
+                                                                         :red {:description "Red pizza"
+                                                                               :value {:format :json
+                                                                                       :color :red
+                                                                                       :pineapple false}}}}
+                                          "application/edn" {:schema [:map
+                                                                      [:format [:enum :edn]]
+                                                                      [:color :keyword]
+                                                                      [:pineapple :boolean]]
+                                                             :examples {:red {:description "Red pizza with pineapple"
+                                                                              :value (pr-str {:format :edn :color :red :pineapple true})}}}}}}
+               :handler (fn [_request]
+                          (rand-nth [{:status 200
+                                      :muuntaja/content-type "application/json"
+                                      :body {:format :json
+                                             :color :red
+                                             :pineapple true}}
+                                     {:status 200
+                                      :muuntaja/content-type "application/edn"
+                                      :body {:format :edn
+                                             :color :red
+                                             :pineapple true}}]))}
+         :post {:summary "Create a pizza | Multiple content-types, multiple examples | Default response schema"
+                :request {:description "Create a pizza using json or EDN"
+                          :content {"application/json" {:schema [:map
+                                                                 [:color :keyword]
+                                                                 [:pineapple :boolean]]
+                                                        :examples {:purple {:value {:color :purple
+                                                                                    :pineapple false}}}}
+                                    "application/edn" {:schema [:map
+                                                                [:color :keyword]
+                                                                [:pineapple :boolean]]
+                                                       :examples {:purple {:value (pr-str {:color :purple
+                                                                                           :pineapple false})}}}}}
+                :responses {200 {:description "Success"
+                                 :content {:default {:schema [:map [:success :boolean]]
+                                                     :example {:success true}}}}
+                            :default {:description "Not success"
+                                      :content {:default {:schema [:map [:error :string]]
+                                                          :example {:error "error"}}}}}
+                :handler (fn [_request]
+                           (if (< (Math/random) 0.5)
+                             {:status 200
+                              :body {:success true}}
+                             {:status 500
+                              :body {:error "an error happened"}}))}}]
+
+
+       ["/contact"
+        {:get {:summary "Search for a contact | Customizing via malli properties"
+               :parameters {:query [:map
+                                    [:limit {:title "How many results to return? Optional."
+                                             :optional true
+                                             :json-schema/default 30
+                                             :json-schema/example 10}
+                                     int?]
+                                    [:charset {:title "Which charset to use?"
+                                               :optional true
+                                               :json-schema/deprecated true}
+                                     string?]
+                                    [:email {:title "Email address to search for"
+                                             :json-schema/format "email"}
+                                     string?]]}
+               :responses {200 {:content {:default {:schema [:vector
+                                                             [:map
+                                                              [:name {:json-schema/example "Heidi"}
+                                                               string?]
+                                                              [:email {:json-schema/example "heidi@alps.ch"}
+                                                               string?]]]}}}}
+               :handler (fn [_request]
+                          {:status 200
+                           :body [{:name "Heidi"
+                                   :email "heidi@alps.ch"}]})}}]
+
+       ["/account"
+        {:get {:summary "Fetch an account | Named schemas using malli registry, link to external docs"
+               :parameters {:query #'AccountId}
+               :responses {200 {:content {:default {:schema #'Account}}}}
+               :openapi {:externalDocs {:description "The reitit repository"
+                                        :url "https://github.com/metosin/reitit"}}
+               :handler (fn [_request]
+                          {:status 200
+                           :body {:bank "MiniBank"
+                                  :id "0001"
+                                  :balance 13.5
+                                  :transactions [{:from "0002"
+                                                  :amount 20.0}
+                                                 {:from "0003"
+                                                  :amount -6.5}]}})}}]
+
+       ["/complex"
+        {:post {:summary "Complex schema with :multi, :enum, :tuple etc."
+                :request {:content
+                          {:default
+                           {:schema [:map
+                                     [:vector-of-tuples [:vector [:tuple :string :int]]]
+                                     [:regex [:re "[0-9]+"]]
+                                     [:enum [:enum 1 3 5 42]]
+                                     [:multi [:multi {:dispatch :type}
+                                              ["literal" [:map
+                                                         [:type [:= "literal"]]
+                                                         [:value [:or :int :string]]]]
+                                              ["reference" [:map
+                                                           [:type [:= "reference"]]
+                                                           [:description :string]
+                                                           [:ref :uuid]]]]]]
+                            :example {:vector-of-tuples [["a" 1] ["b" 2]]
+                                      :regex "01234"
+                                      :enum 5
+                                      :multi {:type "literal"
+                                              :value "x"}}}}}
+                :responses {200 {:content {:default {:schema [:map-of :keyword :any]}}}}
+                :handler (fn [request]
+                           {:status 200
+                            :body (get-in request [:parameters :request])})}}]
+
+       ["/secure"
+        {:tags #{"secure"}
+         :openapi {:security [{"auth" []}]}}
+        ["/get"
+         {:get {:summary "endpoint authenticated with a header"
+                :responses {200 {:body [:map [:secret :string]]}
+                            401 {:body [:map [:error :string]]}}
+                :handler (fn [request]
+                           ;; In a real app authentication would be handled by middleware
+                           (if (= "secret" (get-in request [:headers "example-api-key"]))
+                             {:status 200
+                              :body {:secret "I am a marmot"}}
+                             {:status 401
+                              :body {:error "unauthorized"}}))}}]]
+
+       ["/plumatic-schema/account"
+        {:get {:summary "Fetch an account | Named schemas using Plumatic Schema"
+               :coercion reitit.coercion.schema/coercion
+               :parameters {:query AccountIdSchema}
+               :responses {200 {:content {:default {:schema AccountSchema}}}}
+               :handler (fn [_request]
+                          {:status 200
+                           :body {:bank "MiniBank"
+                                  :id "0001"
+                                  :balance 13.5
+                                  :transactions [{:from "0002"
+                                                  :amount 20.0}
+                                                 {:from "0003"
+                                                  :amount -6.5}]}})}}]]
+
+      {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
+       :validate reitit.ring.spec/validate
+       :exception pretty/exception
+       :data {:coercion reitit.coercion.malli/coercion
+              :muuntaja m/instance
+              :middleware [openapi/openapi-feature
+                           ;; query-params & form-params
+                           parameters/parameters-middleware
+                           ;; content-negotiation
+                           muuntaja/format-negotiate-middleware
+                           ;; encoding response body
+                           muuntaja/format-response-middleware
+                           ;; exception handling
+                           exception/exception-middleware
+                           ;; decoding request body
+                           muuntaja/format-request-middleware
+                           ;; coercing response bodys
+                           coercion/coerce-response-middleware
+                           ;; coercing request parameters
+                           coercion/coerce-request-middleware
+                           ;; multipart
+                           multipart/multipart-middleware]}})
+    (ring/routes
+      (swagger-ui/create-swagger-ui-handler
+        {:path "/"
+         :config {:validatorUrl nil
+                  :urls [{:name "openapi", :url "openapi.json"}]
+                  :urls.primaryName "openapi"
+                  :operationsSorter "alpha"}})
+      (ring/create-default-handler))))
+
+(defn start []
+  (jetty/run-jetty #'app {:port 3000, :join? false})
+  (println "server running in port 3000"))
+
+(comment
+  (start))

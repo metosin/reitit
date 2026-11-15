@@ -80,12 +80,15 @@
 (defrecord NoOpCoercion []
   coercion/Coercion
   (-get-name [_] :no-op)
+  (-get-options [_])
   (-get-apidocs [_ _ {:keys [parameters responses] :as info}])
+  (-get-model-apidocs [_ _ _ _])
   (-compile-model [_ model _] model)
   (-open-model [_ spec] spec)
   (-encode-error [_ error] error)
   (-request-coercer [_ type spec] (fn [value format] value))
-  (-response-coercer [this spec] (coercion/request-coercer this :response spec {})))
+  (-response-coercer [this spec] (coercion/request-coercer this :response spec {}))
+  (-query-string-coercer [_ _]))
 
 (comment
   (doseq [coercion [nil (->NoOpCoercion) spec/coercion]]

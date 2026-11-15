@@ -1,8 +1,8 @@
 (ns reitit.http.spec
   (:require [clojure.spec.alpha :as s]
-            [reitit.ring.spec :as rrs]
-            [reitit.interceptor :as interceptor]
             [reitit.exception :as exception]
+            [reitit.interceptor :as interceptor]
+            [reitit.ring.spec :as rrs]
             [reitit.spec :as rs]))
 
 ;;
@@ -22,5 +22,5 @@
   [routes {:keys [spec ::rs/wrap] :or {spec ::data, wrap identity}}]
   (when-let [problems (rrs/validate-route-data routes :interceptors wrap spec)]
     (exception/fail!
-      ::rs/invalid-route-data
-      {:problems problems})))
+     ::rs/invalid-route-data
+     {:problems problems})))

@@ -1,12 +1,14 @@
 # Swagger Support
 
 ```
-[metosin/reitit-swagger "0.5.10"]
+[metosin/reitit-swagger "0.11.0"]
 ```
 
 Reitit supports [Swagger2](https://swagger.io/) documentation, thanks to [schema-tools](https://github.com/metosin/schema-tools) and [spec-tools](https://github.com/metosin/spec-tools). Documentation is extracted from route definitions, coercion `:parameters` and `:responses` and from a set of new documentation keys.
 
-To enable swagger-documentation for a ring-router:
+See also: [OpenAPI support](openapi.md).
+
+To enable swagger-documentation for a Ring router:
 
 1. annotate your routes with swagger-data
 2. mount a swagger-handler to serve the swagger-spec
@@ -23,6 +25,7 @@ The following route data keys contribute to the generated swagger specification:
 | :tags         | optional set of string or keyword tags for an endpoint api docs
 | :summary      | optional short string summary of an endpoint
 | :description  | optional long description of an endpoint. Supports http://spec.commonmark.org/
+| :operationId  | optional string specifying the unique ID of an Operation
 
 Coercion keys also contribute to the docs:
 
@@ -44,10 +47,10 @@ If you need to post-process the generated spec, just wrap the handler with a cus
 [Swagger-ui](https://github.com/swagger-api/swagger-ui) is a user interface to visualize and interact with the Swagger specification. To make things easy, there is a pre-integrated version of the swagger-ui as a separate module.
 
 ```
-[metosin/reitit-swagger-ui "0.5.10"]
+[metosin/reitit-swagger-ui "0.11.0"]
 ```
 
-`reitit.swagger-ui/create-swagger-ui-hander` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:
+`reitit.swagger-ui/create-swagger-ui-handler` can be used to create a ring-handler to serve the swagger-ui. It accepts the following options:
 
 | key              | description |
 | -----------------|-------------|
@@ -128,7 +131,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
         ["/pong" {:post (constantly {:status 200, :body "pong"})}]]
        ["/swagger.json"
         {:get {:no-doc true
-               :handler (swagger/create-swagger-handler)}}]]) 
+               :handler (swagger/create-swagger-handler)}}]])
     (swagger-ui/create-swagger-ui-handler {:path "/api-docs"})))
 ```
 
@@ -142,7 +145,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
 * missed routes are handled by `create-default-handler`
 * served via [ring-jetty](https://github.com/ring-clojure/ring/tree/master/ring-jetty-adapter)
 
-Whole example project is in [`/examples/ring-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-swagger).
+Whole example project is in [`/examples/ring-spec-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-spec-swagger).
 
 ```clj
 (ns example.server
@@ -283,7 +286,18 @@ Example with:
 ; ("/common/ping" "/one/ping" "/two/ping" "/two/deep/ping")
 ```
 
-### TODO
+## Reusable schema definitions
+
+Swagger supports having reusable schema definitions under the
+`"definitions"` key. These can be reused in different parts of
+swagger.json using the `"$ref": "#/definitions/Foo"` syntax. These
+definitions are also rendered in their own section in Swagger UI.
+
+Reusable schema objects are generated for Malli `:ref`s and vars.
+Currently (as of 0.7.2), reusable schema objects are **not** generated
+for Plumatic Schema or Spec.
+
+## TODO
 
 * ClojureScript
   * example for [Macchiato](https://github.com/macchiato-framework)

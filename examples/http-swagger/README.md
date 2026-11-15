@@ -1,4 +1,4 @@
-# Http with Swagger example
+# Http with Swagger/OpenAPI example
 
 ## Usage
 
@@ -6,6 +6,10 @@
 > lein repl
 (start)
 ```
+
+- Swagger spec served at <http://localhost:3000/swagger.json>
+- Openapi spec served at <http://localhost:3000/openapi.json>
+- Swagger UI served at <http://localhost:3000/>
 
 To test the endpoints using [httpie](https://httpie.org/):
 
@@ -20,4 +24,4 @@ http GET :3000/async results==1 seed==reitit
 
 ## License
 
-Copyright © 2018 Metosin Oy
+Copyright © 2018-2023 Metosin Oy

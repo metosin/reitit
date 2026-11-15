@@ -37,40 +37,40 @@
 (defn routing-test []
 
   ;; 21385 / 14337
-  "barista"
+  ;; "barista"
 
   ;; 26259 / 25571
-  "choreographer"
+  ;; "choreographer"
 
   ;; 24277 / 19174
-  "clutch"
+  ;; "clutch"
 
   ;; 26158 / 25584
-  "connect"
+  ;; "connect"
 
   ;; 24614 / 25413
-  "escort"
+  ;; "escort"
 
   ;; 21979 / 18595
-  "express"
+  ;; "express"
 
   ;; 23123 / 25405
-  "find-my-way"
+  ;; "find-my-way"
 
   ;; 24798 / 25286
-  "http-hash"
+  ;; "http-hash"
 
   ;; 24215 / 23670
-  "i40"
+  ;; "i40"
 
   ;; 23561 / 26278
-  "light-router"
+  ;; "light-router"
 
   ;; 28362 / 30056
-  "http-raw"
+  ;; "http-raw"
 
   ;; 25310 / 25126
-  "regex"
+  ;; "regex"
 
   ;; 112719 / 113959
   (title "reitit")

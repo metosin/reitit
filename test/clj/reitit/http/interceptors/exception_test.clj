@@ -1,12 +1,12 @@
 (ns reitit.http.interceptors.exception-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [reitit.ring :as ring]
+  (:require [clojure.test :refer [deftest is testing]]
+            [muuntaja.core :as m]
+            [reitit.coercion.spec]
             [reitit.http :as http]
+            [reitit.http.coercion]
             [reitit.http.interceptors.exception :as exception]
             [reitit.interceptor.sieppari :as sieppari]
-            [reitit.coercion.spec]
-            [reitit.http.coercion]
-            [muuntaja.core :as m])
+            [reitit.ring :as ring])
   (:import (java.sql SQLException SQLWarning)))
 
 (derive ::kikka ::kukka)
@@ -17,23 +17,23 @@
              (create f nil))
             ([f wrap]
              (http/ring-handler
-               (http/router
-                 [["/defaults"
-                   {:handler f}]
-                  ["/coercion"
-                   {:interceptors [(reitit.http.coercion/coerce-request-interceptor)
-                                   (reitit.http.coercion/coerce-response-interceptor)]
-                    :coercion reitit.coercion.spec/coercion
-                    :parameters {:query {:x int?, :y int?}}
-                    :responses {200 {:body {:total pos-int?}}}
-                    :handler f}]]
-                 {:data {:interceptors [(exception/exception-interceptor
-                                          (merge
-                                            exception/default-handlers
-                                            {::kikka (constantly {:status 400, :body "kikka"})
-                                             SQLException (constantly {:status 400, :body "sql"})
-                                             ::exception/wrap wrap}))]}})
-               {:executor sieppari/executor})))]
+              (http/router
+               [["/defaults"
+                 {:handler f}]
+                ["/coercion"
+                 {:interceptors [(reitit.http.coercion/coerce-request-interceptor)
+                                 (reitit.http.coercion/coerce-response-interceptor)]
+                  :coercion reitit.coercion.spec/coercion
+                  :parameters {:query {:x int?, :y int?}}
+                  :responses {200 {:body {:total pos-int?}}}
+                  :handler f}]]
+               {:data {:interceptors [(exception/exception-interceptor
+                                       (merge
+                                        exception/default-handlers
+                                        {::kikka (constantly {:status 400, :body "kikka"})
+                                         SQLException (constantly {:status 400, :body "sql"})
+                                         ::exception/wrap wrap}))]}})
+              {:executor sieppari/executor})))]
 
     (testing "normal calls work ok"
       (let [response {:status 200, :body "ok"}

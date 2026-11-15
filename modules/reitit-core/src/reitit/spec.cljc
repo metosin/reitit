@@ -1,8 +1,8 @@
 (ns reitit.spec
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [reitit.exception :as exception]
-            [reitit.core :as r]))
+            [reitit.core :as r]
+            [reitit.exception :as exception]))
 
 ;;
 ;; routes
@@ -16,9 +16,9 @@
 
 (s/def ::raw-route
   (s/nilable
-    (s/cat :path ::path
-           :arg (s/? ::arg)
-           :childs (s/* (s/and (s/nilable ::raw-routes))))))
+   (s/cat :path ::path
+          :arg (s/? ::arg)
+          :childs (s/* (s/nilable ::raw-routes)))))
 
 (s/def ::raw-routes
   (s/or :route ::raw-route
@@ -37,8 +37,11 @@
 ;; Default data
 ;;
 
+(defn -multi? [x]
+  (instance? #?(:clj clojure.lang.MultiFn :cljs cljs.core.MultiFn) x))
+
 (s/def ::name keyword?)
-(s/def ::handler fn?)
+(s/def ::handler (s/or :fn fn? :var var? :multi -multi?))
 (s/def ::no-doc boolean?)
 (s/def ::conflicting boolean?)
 (s/def ::default-data
@@ -60,19 +63,19 @@
 
 (s/def ::opts
   (s/nilable
-    (s/keys :opt-un [:reitit.router/path
-                     :reitit.router/routes
-                     :reitit.router/data
-                     :reitit.router/expand
-                     :reitit.router/coerce
-                     :reitit.router/compile
-                     :reitit.router/conflicts
-                     :reitit.router/router])))
+   (s/keys :opt-un [:reitit.router/path
+                    :reitit.router/routes
+                    :reitit.router/data
+                    :reitit.router/expand
+                    :reitit.router/coerce
+                    :reitit.router/compile
+                    :reitit.router/conflicts
+                    :reitit.router/router])))
 
 (s/fdef r/router
-        :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
-                    :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
-        :ret ::router)
+  :args (s/or :1arity (s/cat :data (s/spec ::raw-routes))
+              :2arity (s/cat :data (s/spec ::raw-routes), :opts ::opts))
+  :ret ::router)
 
 ;;
 ;; coercion
@@ -82,14 +85,24 @@
 
 (s/def :reitit.core.coercion/model any?)
 
+(s/def :reitit.core.coercion/schema any?)
+(s/def :reitit.core.coercion/map-model (s/keys :opt-un [:reitit.core.coercion/schema]))
+
+(s/def :reitit.core.coercion/content
+  (s/map-of (s/or :string string?, :default #{:default}) :reitit.core.coercion/map-model))
+
 (s/def :reitit.core.coercion/query :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/body :reitit.core.coercion/model)
+(s/def :reitit.core.coercion/request
+  (s/keys :opt-un [:reitit.core.coercion/content
+                   :reitit.core.coercion/body]))
 (s/def :reitit.core.coercion/form :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/header :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/path :reitit.core.coercion/model)
 (s/def :reitit.core.coercion/parameters
   (s/keys :opt-un [:reitit.core.coercion/query
                    :reitit.core.coercion/body
+                   :reitit.core.coercion/request
                    :reitit.core.coercion/form
                    :reitit.core.coercion/header
                    :reitit.core.coercion/path]))
@@ -103,7 +116,8 @@
 (s/def :reitit.core.coercion/body any?)
 (s/def :reitit.core.coercion/description string?)
 (s/def :reitit.core.coercion/response
-  (s/keys :opt-un [:reitit.core.coercion/body
+  (s/keys :opt-un [:reitit.core.coercion/content
+                   :reitit.core.coercion/body
                    :reitit.core.coercion/description]))
 (s/def :reitit.core.coercion/responses
   (s/map-of :reitit.core.coercion/status :reitit.core.coercion/response))
@@ -119,24 +133,25 @@
 (defrecord Problem [path scope data spec problems])
 
 (defn validate-route-data [routes wrap spec]
-  (let [spec (wrap spec)]
-    (some->> (for [[p d _] routes]
-               (when-let [problems (and spec (s/explain-data spec d))]
-                 (->Problem p nil d spec problems)))
-             (keep identity) (seq) (vec))))
+  (let [spec (wrap spec)
+        spec-explain (fn [[p d _]]
+                       (when-let [problems (and spec (s/explain-data spec d))]
+                         (->Problem p nil d spec problems)))
+        errors (into [] (keep spec-explain) routes)]
+    (when (pos? (count errors)) errors)))
 
 (defn validate [routes {:keys [spec] ::keys [wrap] :or {spec ::default-data, wrap identity}}]
   (when-let [problems (validate-route-data routes wrap spec)]
     (exception/fail!
-      ::invalid-route-data
-      {:problems problems})))
+     ::invalid-route-data
+     {:problems problems})))
 
 (defmethod exception/format-exception :reitit.spec/invalid-route-data [_ _ {:keys [problems]}]
   (apply str "Invalid route data:\n\n"
          (mapv
-           (fn [{:keys [path scope data spec]}]
-             (str "-- On route -----------------------\n\n"
-                  (pr-str path) (if scope (str " " (pr-str scope))) "\n\n"
-                  (pr-str data) "\n\n"
-                  (s/explain-str spec data) "\n"))
-           problems)))
+          (fn [{:keys [path scope data spec]}]
+            (str "-- On route -----------------------\n\n"
+                 (pr-str path) (if scope (str " " (pr-str scope))) "\n\n"
+                 (pr-str data) "\n\n"
+                 (s/explain-str spec data) "\n"))
+          problems)))

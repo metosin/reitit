@@ -1,17 +1,18 @@
 (ns reitit.core-test
-  (:require [clojure.test :refer [deftest testing is are]]
-            [reitit.core :as r #?@(:cljs [:refer [Router]])]
+  (:require [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
             [reitit.impl :as impl])
   #?(:clj
-     (:import (reitit.core Router)
-              (clojure.lang ExceptionInfo))))
+     (:import (clojure.lang ExceptionInfo))))
+
+(defn- var-handler [& _]
+  "var-handler")
 
 (deftest reitit-test
 
   (testing "routers handling wildcard paths"
     (are [r name]
-      (testing "wild"
-
+      (testing (str name)
         (testing "simple"
           (let [router (r/router ["/api" ["/ipa" ["/:size" ::beer]]] {:router r})]
             (is (= name (r/router-name router)))
@@ -21,38 +22,51 @@
             (is (= nil
                    (r/match-by-path router "/api")))
             (is (= (r/map->Match
-                     {:template "/api/ipa/:size"
-                      :data {:name ::beer}
-                      :path "/api/ipa/large"
-                      :path-params {:size "large"}})
+                    {:template "/api/ipa/:size"
+                     :data {:name ::beer}
+                     :path "/api/ipa/large"
+                     :path-params {:size "large"}})
                    (r/match-by-path router "/api/ipa/large")))
             (is (= (r/map->Match
-                     {:template "/api/ipa/:size"
-                      :data {:name ::beer}
-                      :path "/api/ipa/large"
-                      :path-params {:size "large"}})
+                    {:template "/api/ipa/:size"
+                     :data {:name ::beer}
+                     :path "/api/ipa/large"
+                     :path-params {:size "large"}})
                    (r/match-by-name router ::beer {:size "large"})))
             (is (= (r/map->Match
-                     {:template "/api/ipa/:size"
-                      :data {:name ::beer}
-                      :path "/api/ipa/large"
-                      :path-params {:size "large"}})
+                    {:template "/api/ipa/:size"
+                     :data {:name ::beer}
+                     :path "/api/ipa/:large"
+                     :path-params {:size ":large"}})
+                   (r/match-by-name router ::beer {:size ":large"} {:url-encode? false})))
+            (is (= (r/map->Match
+                    {:template "/api/ipa/:size"
+                     :data {:name ::beer}
+                     :path "/api/ipa/large"
+                     :path-params {:size "large"}})
                    (r/match-by-name router ::beer {:size :large})))
             (is (= nil (r/match-by-name router "ILLEGAL")))
             (is (= [::beer] (r/route-names router)))
 
             (testing "name-based routing with missing parameters"
               (is (= (r/map->PartialMatch
-                       {:template "/api/ipa/:size"
-                        :data {:name ::beer}
-                        :required #{:size}
-                        :path-params nil})
+                      {:template "/api/ipa/:size"
+                       :data {:name ::beer}
+                       :required #{:size}
+                       :path-params nil})
                      (r/match-by-name router ::beer)))
               (is (r/partial-match? (r/match-by-name router ::beer)))
+              (is (r/partial-match? (r/match-by-name router ::beer {:size nil}))
+                  "nil counts as missing")
               (is (thrown-with-msg?
-                    ExceptionInfo
-                    #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
-                    (r/match-by-name! router ::beer))))))
+                   ExceptionInfo
+                   #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+                   (r/match-by-name! router ::beer)))
+              (is (thrown-with-msg?
+                   ExceptionInfo
+                   #"^missing path-params for route /api/ipa/:size -> \#\{:size\}$"
+                   (r/match-by-name! router ::beer {:size nil}))
+                  "nil counts as missing"))))
 
         (testing "decode %-encoded path params"
           (let [router (r/router [["/one-param-path/:param1" ::one]
@@ -71,14 +85,14 @@
 
         (testing "complex"
           (let [router (r/router
-                         [["/:abba" ::abba]
-                          ["/abba/1" ::abba2]
-                          ["/:jabba/2" ::jabba2]
-                          ["/:abba/:dabba/doo" ::doo]
-                          ["/abba/dabba/boo/baa" ::baa]
-                          ["/abba/:dabba/boo" ::boo]
-                          ["/:jabba/:dabba/:doo/:daa/*foo" ::wild]]
-                         {:router r})
+                        [["/:abba" ::abba]
+                         ["/abba/1" ::abba2]
+                         ["/:jabba/2" ::jabba2]
+                         ["/:abba/:dabba/doo" ::doo]
+                         ["/abba/dabba/boo/baa" ::baa]
+                         ["/abba/:dabba/boo" ::boo]
+                         ["/:jabba/:dabba/:doo/:daa/*foo" ::wild]]
+                        {:router r})
                 by-path #(-> router (r/match-by-path %) :data :name)]
             (is (= ::abba (by-path "/abba")))
             (is (= ::abba2 (by-path "/abba/1")))
@@ -93,19 +107,19 @@
         (testing "bracket-params"
           (testing "successful"
             (let [router (r/router
-                           [["/{abba}" ::abba]
-                            ["/abba/1" ::abba2]
-                            ["/{jabba}/2" ::jabba2]
-                            ["/{abba}/{dabba}/doo" ::doo]
-                            ["/abba/dabba/boo/baa" ::baa]
-                            ["/abba/{dabba}/boo" ::boo]
-                            ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
-                            ["/files/file-{name}.html" ::html]
-                            ["/files/file-{name}.json" ::json]
-                            ["/{eskon}/{saum}/pium\u2215paum" ::loru]
-                            ["/{🌈}🤔/🎈" ::emoji]
-                            ["/extra-end}s-are/ok" ::bracket]]
-                           {:router r})
+                          [["/{abba}" ::abba]
+                           ["/abba/1" ::abba2]
+                           ["/{jabba}/2" ::jabba2]
+                           ["/{abba}/{dabba}/doo" ::doo]
+                           ["/abba/dabba/boo/baa" ::baa]
+                           ["/abba/{dabba}/boo" ::boo]
+                           ["/{a/jabba}/{a.b/dabba}/{a.b.c/doo}/{a.b.c.d/daa}/{*foo/bar}" ::wild]
+                           ["/files/file-{name}.html" ::html]
+                           ["/files/file-{name}.json" ::json]
+                           ["/{eskon}/{saum}/pium\u2215paum" ::loru]
+                           ["/{🌈}🤔/🎈" ::emoji]
+                           ["/extra-end}s-are/ok" ::bracket]]
+                          {:router r})
                   by-path #(-> router (r/match-by-path %) ((juxt (comp :name :data) :path-params)))]
               (is (= [::abba {:abba "abba"}] (by-path "/abba")))
               (is (= [::abba2 {}] (by-path "/abba/1")))
@@ -121,6 +135,7 @@
                               :foo/bar "ei/toista/kertaa"}]
                      (by-path "/olipa/kerran/avaruus/vaan/ei/toista/kertaa")))
               (is (= [::html {:name "10"}] (by-path "/files/file-10.html")))
+              (is (= [nil nil] (by-path "/files/file-..html")))
               (is (= [::loru {:eskon "viitan", :saum "aa"}] (by-path "/viitan/aa/pium\u2215paum")))
               (is (= [nil nil] (by-path "/ei/osu/pium/paum")))
               (is (= [::emoji {:🌈 "brackets"}] (by-path "/brackets🤔/🎈")))
@@ -129,22 +144,22 @@
           (testing "invalid syntax fails fast"
             (testing "unclosed brackets"
               (is (thrown-with-msg?
-                    ExceptionInfo
-                    #":reitit.trie/unclosed-brackets"
-                    (r/router ["/kikka/{kukka"]))))
+                   ExceptionInfo
+                   #":reitit.trie/unclosed-brackets"
+                   (r/router ["/kikka/{kukka"]))))
             (testing "multiple terminators"
               (is (thrown-with-msg?
-                    ExceptionInfo
-                    #":reitit.trie/multiple-terminators"
-                    (r/router [["/{kukka}.json"]
-                               ["/{kukka}-json"]]))))))
+                   ExceptionInfo
+                   #":reitit.trie/multiple-terminators"
+                   (r/router [["/{kukka}.json"]
+                              ["/{kukka}-json"]]))))))
 
         (testing "empty path segments"
           (let [router (r/router
-                         [["/items" ::list]
-                          ["/items/:id" ::item]
-                          ["/items/:id/:side" ::deep]]
-                         {:router r})
+                        [["/items" ::list]
+                         ["/items/:id" ::item]
+                         ["/items/:id/:side" ::deep]]
+                        {:router r})
                 matches #(-> router (r/match-by-path %) :data :name)]
             (is (= ::list (matches "/items")))
             (is (= nil (matches "/items/")))
@@ -168,28 +183,28 @@
         (is (= nil
                (r/match-by-path router "/api")))
         (is (= (r/map->Match
-                 {:template "/api/ipa/large"
-                  :data {:name ::beer}
-                  :path "/api/ipa/large"
-                  :path-params {}})
+                {:template "/api/ipa/large"
+                 :data {:name ::beer}
+                 :path "/api/ipa/large"
+                 :path-params {}})
                (r/match-by-path router "/api/ipa/large")))
         (is (= (r/map->Match
-                 {:template "/api/ipa/large"
-                  :data {:name ::beer}
-                  :path "/api/ipa/large"
-                  :path-params {:size "large"}})
+                {:template "/api/ipa/large"
+                 :data {:name ::beer}
+                 :path "/api/ipa/large"
+                 :path-params {:size "large"}})
                (r/match-by-name router ::beer {:size "large"})))
         (is (= nil (r/match-by-name router "ILLEGAL")))
         (is (= [::beer] (r/route-names router)))
 
         (testing "can't be created with wildcard routes"
           (is (thrown-with-msg?
-                ExceptionInfo
-                #"can't create :lookup-router with wildcard routes"
-                (r/lookup-router
-                  (impl/resolve-routes
-                    ["/api/:version/ping"]
-                    (r/default-router-options)))))))
+               ExceptionInfo
+               #"can't create :lookup-router with wildcard routes"
+               (r/lookup-router
+                (impl/resolve-routes
+                 ["/api/:version/ping"]
+                 (r/default-router-options)))))))
 
       r/lookup-router :lookup-router
       r/single-static-path-router :single-static-path-router
@@ -215,14 +230,14 @@
                       (swap! compile-times inc)
                       (constantly path))
             router (r/router
-                     ["/api" {:roles #{:admin}}
-                      ["/ping" ::ping]
-                      ["/pong" ::pong]
-                      ["/hidden" {:invalid? true}
-                       ["/utter"]
-                       ["/crap"]]]
-                     {:coerce coerce
-                      :compile compile})]
+                    ["/api" {:roles #{:admin}}
+                     ["/ping" ::ping]
+                     ["/pong" ::pong]
+                     ["/hidden" {:invalid? true}
+                      ["/utter"]
+                      ["/crap"]]]
+                    {:coerce coerce
+                     :compile compile})]
 
         (testing "routes are coerced"
           (is (= [["/api/ping" {:name ::ping
@@ -244,13 +259,19 @@
       (let [router (r/router ["/ping" (constantly "ok")])
             {:keys [result]} (r/match-by-path router "/ping")]
         (is result)
-        (is (= "ok" (result))))))
+        (is (= "ok" (result))))
+      (testing "var handler gets expanded"
+        (let [router (r/router ["/ping" #'var-handler])
+              {:keys [result]} (r/match-by-path router "/ping")]
+          (is (= #'var-handler result))))))
 
   (testing "custom router"
-    (let [router (r/router ["/ping"] {:router (fn [_ _]
-                                                (reify Router
-                                                  (r/router-name [_]
-                                                    ::custom)))})]
+    (let [router (r/router
+                  ["/ping"]
+                  {:router (fn [_ _]
+                             #_{:clj-kondo/ignore [:missing-protocol-method]}
+                             (reify r/Router
+                               (router-name [_] ::custom)))})]
       (is (= ::custom (r/router-name router)))))
 
   (testing "bide sample"
@@ -266,24 +287,24 @@
     (let [pong (constantly "ok")
           routes ["/api" {:mw [:api]}
                   ["/ping" :kikka]
-                  ["/user/:id" {:parameters {:id "String"}}
-                   ["/:sub-id" {:parameters {:sub-id "String"}}]]
+                  ["/user/:id" {:parameters {:path {:id :string}}}
+                   ["/:sub-id" {:parameters {:path {:sub-id :string}}}]]
                   ["/pong" pong]
                   ["/admin" {:mw [:admin] :roles #{:admin}}
                    ["/user" {:roles ^:replace #{:user}}]
                    ["/db" {:mw [:db]}]]]
           expected [["/api/ping" {:mw [:api], :name :kikka}]
-                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:id "String", :sub-id "String"}}]
+                    ["/api/user/:id/:sub-id" {:mw [:api], :parameters {:path [{:id :string} {:sub-id :string}]}}]
                     ["/api/pong" {:mw [:api], :handler pong}]
                     ["/api/admin/user" {:mw [:api :admin], :roles #{:user}}]
                     ["/api/admin/db" {:mw [:api :admin :db], :roles #{:admin}}]]
           router (r/router routes)]
       (is (= expected (impl/resolve-routes routes (r/default-router-options))))
       (is (= (r/map->Match
-               {:template "/api/user/:id/:sub-id"
-                :data {:mw [:api], :parameters {:id "String", :sub-id "String"}}
-                :path "/api/user/1/2"
-                :path-params {:id "1", :sub-id "2"}})
+              {:template "/api/user/:id/:sub-id"
+               :data {:mw [:api], :parameters {:path [{:id :string} {:sub-id :string}]}}
+               :path "/api/user/1/2"
+               :path-params {:id "1", :sub-id "2"}})
              (r/match-by-path router "/api/user/1/2"))))))
 
 (deftest conflicting-routes-test
@@ -333,10 +354,10 @@
     (testing "router with conflicting routes"
       (testing "throws by default"
         (is (thrown-with-msg?
-              ExceptionInfo
-              #"Router contains conflicting route paths"
-              (r/router
-                [["/a"] ["/a"]]))))
+             ExceptionInfo
+             #"Router contains conflicting route paths"
+             (r/router
+              [["/a"] ["/a"]]))))
       (testing "can be configured to ignore with route data"
         (are [paths expected]
           (let [router (r/router paths)]
@@ -363,9 +384,9 @@
         (testing "unmarked path conflicts throw"
           (are [paths]
             (is (thrown-with-msg?
-                  ExceptionInfo
-                  #"Router contains conflicting route paths"
-                  (r/router paths)))
+                 ExceptionInfo
+                 #"Router contains conflicting route paths"
+                 (r/router paths)))
             [["/a"] ["/a" {:conflicting true}]]
             [["/a" {:conflicting true}] ["/a"]])))
       (testing "can be configured to ignore with router option"
@@ -374,10 +395,10 @@
   (testing "name conflicts"
     (testing "router with conflicting routes always throws"
       (is (thrown-with-msg?
-            ExceptionInfo
-            #"Router contains conflicting route names"
-            (r/router
-              [["/1" ::1] ["/2" ::1]]))))))
+           ExceptionInfo
+           #"Router contains conflicting route names"
+           (r/router
+            [["/1" ::1] ["/2" ::1]]))))))
 
 (deftest match->path-test
   (let [router (r/router ["/:a/:b" ::route])]
@@ -405,28 +426,48 @@
                (r/routes)))))
   (testing "sequential route definition fails"
     (is (thrown?
-          #?(:clj Exception, :cljs js/Error)
-          (-> ["/api"
-               (list "/ipa")]
-              (r/router))))))
+         #?(:clj Exception, :cljs js/Error)
+         (-> ["/api"
+              (list "/ipa")]
+             (r/router))))))
 
 (defrecord Named [n]
   r/Expand
   (r/expand [_ _] {:name n}))
 
 (deftest default-expand-test
-  (let [router (r/router ["/endpoint" (->Named :kikka)])]
+  (let [router (r/router ["/endpoint" (Named. :kikka)])]
     (is (= [["/endpoint" {:name :kikka}]]
-           (r/routes router)))))
+           (r/routes router))))
+  (testing "map route data expands as-is"
+    (are [data] (= data (r/expand data nil))
+      {:name ::kikka}
+      (array-map :name ::kikka)
+      (hash-map :name ::kikka))
+    #?(:clj
+       (testing "APersistentMap subclasses (e.g. PersistentTreeMap)"
+         (is (= {:name ::kikka} (r/expand (sorted-map :name ::kikka) nil)))))))
 
 (deftest routing-order-test-229
   (let [router (r/router
-                 [["/" :root]
-                  ["/" {:name :create :method :post}]]
-                 {:conflicts nil})
+                [["/" :root]
+                 ["/" {:name :create :method :post}]]
+                {:conflicts nil})
         router2 (r/router
-                  [["/*a" :root]
-                   ["/:a/b/c/d" {:name :create :method :post}]]
-                  {:conflicts nil})]
+                 [["/*a" :root]
+                  ["/:a/b/c/d" {:name :create :method :post}]]
+                 {:conflicts nil})]
     (is (= :root (-> (r/match-by-path router "/") :data :name)))
     (is (= :root (-> (r/match-by-path router2 "/") :data :name)))))
+
+(deftest routing-bug-test-538
+  (let [router (r/router [["/:a"] ["/:b"]] {:conflicts nil})]
+    (is (nil? (r/match-by-path router "")))))
+
+(deftest metadata-regression-679
+  (is (= ["/context/leaf" {:roles {:foo true}}]
+         (-> ["/context" {:roles {:foo false :bar true}}
+              ["/leaf" {:roles ^:replace {:foo true}}]]
+             (r/router)
+             (r/routes)
+             (first)))))

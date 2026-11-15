@@ -1,11 +1,19 @@
 (ns frontend-re-frame.core
   (:require [re-frame.core :as re-frame]
-            [reagent.core :as reagent]
+            [reagent.dom :as rd]
             [reitit.core :as r]
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]))
+
+;;; Effects ;;;
+
+;; Triggering navigation from events.
+
+(re-frame/reg-fx :push-state
+  (fn [route]
+    (apply rfe/push-state route)))
 
 ;;; Events ;;;
 
@@ -16,7 +24,7 @@
       {:current-route nil})))
 
 (re-frame/reg-event-fx ::push-state
-  (fn [db [_ & route]]
+  (fn [_ [_ & route]]
     {:push-state route}))
 
 (re-frame/reg-event-db ::navigated
@@ -48,14 +56,6 @@
 (defn sub-page2 []
   [:div
    [:h1 "This is sub-page 2"]])
-
-;;; Effects ;;;
-
-;; Triggering navigation from events.
-
-(re-frame/reg-fx :push-state
-  (fn [route]
-    (apply rfe/push-state route)))
 
 ;;; Routes ;;;
 
@@ -143,7 +143,7 @@
   (re-frame/dispatch-sync [::initialize-db])
   (dev-setup)
   (init-routes!) ;; Reset routes on figwheel reload
-  (reagent/render [router-component {:router router}]
+  (rd/render [router-component {:router router}]
                   (.getElementById js/document "app")))
 
 (init)

@@ -1,53 +1,54 @@
 # Route Syntax
 
-Routes are defined as vectors of String path and optional (non-sequential) route argument child routes.
+Routes are defined as vectors of:
+- path (a string)
+- optional route data: usually a map, but see [Route Data](./route_data.md)
+- any number of child routes
 
 Routes can be wrapped in vectors and lists and `nil` routes are ignored.
 
-Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{*user/path}`. By default, both syntaxes are supported, see [configuring routers](../advanced/configuring_routers.md) on how to change this.
+Paths can have path-parameters (`:id`) or catch-all-parameters (`*path`). Parameters can also be wrapped in brackets, enabling use of qualified keywords `{user/id}`, `{:user/id}`, `{*user/path}`. By default, both syntaxes are supported, see [configuring routers](../advanced/configuring_routers.md) on how to change this.
 
 ### Examples
 
 Simple route:
 
 ```clj
-["/ping"]
+["/ping" {:handler ping}]
 ```
 
-Two routes:
+Two routes with more data:
 
 ```clj
-[["/ping"]
- ["/pong"]]
+[["/ping" {:handler ping
+           :cost 300}]
+ ["/pong" {:handler pong
+           :tags #{:game}}]]
 ```
 
-Routes with route arguments:
+Routes with path parameters (see also [Coercion](../coercion/coercion.md) and [Ring Coercion](../ring/coercion.md)):
 
 ```clj
-[["/ping" ::ping]
- ["/pong" {:name ::pong}]]
-```
-
-Routes with path parameters:
-
-```clj
-[["/users/:user-id"]
- ["/api/:version/ping"]]
+[["/users/:user-id" {:handler get-user}]
+ ["/api/:version/ping" {:handler ping-version}]]
 ```
 
 ```clj
-[["/users/{user-id}"]
- ["/files/file-{number}.pdf"]]
+[["/users/{user-id}" {:handler get-user}]
+ ["/files/file-{number}.pdf" {:handler get-pdf}]
+ ;; Two alternative syntaxes for qualified keyword params:
+ ["/accounts/{qualified/keyword}" {:handler get-account}]
+ ["/resources/{:resource/id}/activate" {:handler activate-resource}]]
 ```
 
 Route with catch-all parameter:
 
 ```clj
-["/public/*path"]
+["/public/*path" {:handler get-file}]
 ```
 
 ```clj
-["/public/{*path}"]
+["/public/{*path}" {:handler get-file}]
 ```
 
 Nested routes:
@@ -55,9 +56,9 @@ Nested routes:
 ```clj
 ["/api"
  ["/admin" {:middleware [::admin]}
-  ["" ::admin]
-  ["/db" ::db]]
- ["/ping" ::ping]]
+  ["" {:name ::admin}]
+  ["/db" {:name ::db}]]
+ ["/ping" {:name ::ping}]]
 ```
 
 Same routes flattened:
@@ -77,31 +78,31 @@ Reitit does not apply any encoding to your paths. If you need that, you must enc
 Normal path-parameters (`:id`) can start anywhere in the path string, but have to end either to slash `/` (currently hardcoded) or to an end of path string:
 
 ```clj
-[["/api/:version"]
- ["/files/file-:number"]
- ["/user/:user-id/orders"]]
+[["/api/:version" {...}]
+ ["/files/file-:number" {...}]
+ ["/user/:user-id/orders" {...}]]
 ```
 
 Bracket path-parameters can start and stop anywhere in the path-string, the following character is used as a terminator.
 
 ```clj
-[["/api/{version}"]
- ["/files/{name}.{extension}"]
- ["/user/{user-id}/orders"]]
+[["/api/{version}" {...}]
+ ["/files/{name}.{extension}" {...}]
+ ["/user/{user-id}/orders" {...}]]
 ```
 
 Having multiple terminators after a bracket path-path parameter with identical path prefix will cause a compile-time error at router creation:
 
 ```clj
-[["/files/file-{name}.pdf"]            ;; terminator \.
- ["/files/file-{name}-{version}.pdf"]] ;; terminator \-
+[["/files/file-{name}.pdf" {...}]            ;; terminator \.
+ ["/files/file-{name}-{version}.pdf" {...}]] ;; terminator \-
 ```
 
 ### Slash Free Routing
 
 ```clj
-[["broker.{customer}.{device}.{*data}"]
- ["events.{target}.{type}"]]
+[["broker.{customer}.{device}.{*data}" {...}]
+ ["events.{target}.{type}" {...}]]
 ```
 
 ### Generating routes
@@ -132,7 +133,7 @@ Routes are just data, so it's easy to create them programmatically:
 
 ### Explicit path-parameter syntax
 
-Router options `:syntax` allows the path-parameter syntax to be explicitely defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
+Router options `:syntax` allows the path-parameter syntax to be explicitly defined. It takes a keyword or set of keywords as a value. Valid values are `:colon` and `:bracket`. Default value is `#{:colon :bracket}`.
 
 With defaults:
 

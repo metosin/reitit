@@ -1,74 +1,119 @@
 (ns reitit.ring
-  (:require [meta-merge.core :refer [meta-merge]]
-            [reitit.middleware :as middleware]
-            [reitit.exception :as ex]
-            [reitit.core :as r]
-            [reitit.impl :as impl]
+  (:require [clojure.string :as str]
             #?@(:clj [[ring.util.mime-type :as mime-type]
                       [ring.util.response :as response]])
-            [clojure.string :as str]))
+            [reitit.core :as r]
+            [reitit.coercion :as coercion]
+            [reitit.exception :as ex]
+            [reitit.impl :as impl]
+            [reitit.middleware :as middleware]))
 
 (declare get-match)
 (declare get-router)
 
-(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch})
-(defrecord Methods [get head post put delete connect options trace patch])
+(def http-methods #{:get :head :post :put :delete :connect :options :trace :patch :query})
+(defrecord Methods [get head post put delete connect options trace patch query])
+(def ^:private idempotent-redirect-methods #{:get :head :query})
 (defrecord Endpoint [data handler path method middleware])
 
 (defn ^:no-wiki group-keys [data]
   (reduce-kv
-    (fn [[top childs] k v]
-      (if (http-methods k)
-        [top (assoc childs k v)]
-        [(assoc top k v) childs])) [{} {}] data))
+   (fn [[top childs] k v]
+     (if (http-methods k)
+       [top (assoc childs k v)]
+       [(assoc top k v) childs])) [{} {}] data))
 
 (defn coerce-handler [[path data] {:keys [expand] :as opts}]
   [path (reduce
-          (fn [acc method]
-            (if (contains? acc method)
-              (update acc method expand opts)
-              acc)) data http-methods)])
+         (fn [acc method]
+           (if (contains? acc method)
+             (update acc method expand opts)
+             acc)) data http-methods)])
+
+(defn -update-paths [f]
+  (let [not-request? #(not= :request %)
+        http-method? #(contains? http-methods %)]
+    [;; default parameters
+     [[:parameters not-request?] f]
+     [[http-method? :parameters not-request?] f]
+
+     ;; default responses
+     [[:responses any? :body] f]
+     [[http-method? :responses any? :body] f]
+
+     ;; openapi3 request
+     [[:request :content any? :schema] f]
+     [[http-method? :request :content any? :schema] f]
+
+     ;; openapi3 LEGACY body
+     [[:request :body] f]
+     [[http-method? :request :body] f]
+
+     ;; openapi3 responses
+     [[:responses any? :content any? :schema] f]
+     [[http-method? :responses any? :content any? :schema] f]]))
+
+(defn -compile-coercion [{:keys [coercion] :as data}]
+  (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))
 
 (defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
         childs (cond-> childs
-                       (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
-                       (assoc :options (expand default-options-endpoint opts)))
+                 (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
+                 (assoc :options (expand default-options-endpoint opts)))
         ->endpoint (fn [p d m s]
-                     (-> (middleware/compile-result [p d] opts s)
-                         (map->Endpoint)
-                         (assoc :path p)
-                         (assoc :method m)))
+                     (let [d (-compile-coercion d)]
+                       (-> (middleware/compile-result [p d] opts s)
+                           (map->Endpoint)
+                           (assoc :path p)
+                           (assoc :method m))))
         ->methods (fn [any? data]
                     (reduce
-                      (fn [acc method]
-                        (cond-> acc
-                                any? (assoc method (->endpoint path data method nil))))
-                      (map->Methods {})
-                      http-methods))]
+                     (fn [acc method]
+                       (cond-> acc
+                         any? (assoc method (->endpoint path data method nil))))
+                     (map->Methods {})
+                     http-methods))]
     (if-not (seq childs)
       (->methods true top)
       (reduce-kv
-        (fn [acc method data]
-          (let [data (meta-merge top data)]
-            (assoc acc method (->endpoint path data method method))))
-        (->methods (:handler top) data)
-        childs))))
+       (fn [acc method data]
+         (let [data (impl/meta-merge top data opts)]
+           (assoc acc method (->endpoint path data method method))))
+       (->methods (:handler top) data)
+       childs))))
 
 (def default-options-handler
-  (let [handle (fn [request]
-                 (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
-                       allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
-                   {:status 200, :body "", :headers {"Allow" allow}}))]
+  (let [handler (fn [request]
+                  (let [methods (->> request get-match :result (keep (fn [[k v]] (if v k))))
+                        allow (->> methods (map (comp str/upper-case name)) (str/join ","))]
+                    {:status 200, :body "", :headers {"Allow" allow}}))]
     (fn
       ([request]
-       (handle request))
+       (handler request))
       ([request respond _]
-       (respond (handle request))))))
+       (respond (handler request))))))
 
 (def default-options-endpoint
   {:no-doc true
    :handler default-options-handler})
+
+(defn- comp-handlers
+  "Compose two ring handlers such that if the first has an empty response
+  the second will be invoked."
+  [handler1 handler2]
+  (let [single-arity (fn [request]
+                       (or (handler1 request) (handler2 request)))
+        multi-arity (fn [request respond raise]
+                      (handler1 request (fn [response]
+                                          (if response
+                                            (respond response)
+                                            (handler2 request respond raise))) raise))]
+    (fn
+      ([request]
+       (single-arity request))
+      ([request respond raise]
+       (multi-arity request respond raise)))))
 
 ;;
 ;; public api
@@ -89,15 +134,16 @@
 
       (router
         [\"/api\" {:middleware [wrap-format wrap-oauth2]}
-          [\"/users\" {:get get-user
-                       :post update-user
-                       :delete {:middleware [wrap-delete]
-                               :handler delete-user}}]])"
+         [\"/users\" {:get get-user
+                    :post update-user
+                    :delete {:middleware [wrap-delete]
+                             :handler delete-user}}]])"
   ([data]
    (router data nil))
   ([data opts]
    (let [opts (merge {:coerce coerce-handler
                       :compile compile-result
+                      :update-paths (-update-paths impl/accumulate)
                       ::default-options-endpoint default-options-endpoint}
                      opts)]
      (when (contains? opts ::default-options-handler)
@@ -107,19 +153,11 @@
 
 (defn routes
   "Create a ring handler by combining several handlers into one."
-  [& handlers]
-  (if-let [single-arity (some->> handlers (keep identity) (seq) (apply some-fn))]
-    (fn
-      ([request]
-       (single-arity request))
-      ([request respond raise]
-       (letfn [(f [handlers]
-                 (if (seq handlers)
-                   (let [handler (first handlers)
-                         respond' #(if % (respond %) (f (rest handlers)))]
-                     (handler request respond' raise))
-                   (respond nil)))]
-         (f handlers))))))
+  {:arglists '([& handlers])}
+  ([& [handler1 handler2 & handlers]]
+   (cond (seq handlers) (reduce routes (routes handler1 handler2) handlers)
+         (and handler1 handler2) (comp-handlers handler1 handler2)
+         :else (or handler1 handler2))))
 
 (defn redirect-trailing-slash-handler
   "A ring handler that redirects a missing path if there is an
@@ -133,10 +171,11 @@
   "
   ([] (redirect-trailing-slash-handler {:method :both}))
   ([{:keys [method]}]
-   (letfn [(maybe-redirect [request path]
+   (letfn [(maybe-redirect [{:keys [query-string] :as request} path]
              (if (and (seq path) (r/match-by-path (::r/router request) path))
-               {:status (if (= (:request-method request) :get) 301 308)
-                :headers {"Location" path}
+               {:status (if (contains? idempotent-redirect-methods (:request-method request)) 301 308)
+                :headers {"Location" (let [path (str/replace-first path #"^/+" "/")] ; Locations starting with // redirect to another hostname. Avoid these due to security implications.
+                                       (if query-string (str path "?" query-string) path))}
                 :body ""}))
            (redirect-handler [request]
              (let [uri (:uri request)]
@@ -190,16 +229,21 @@
    ;; TODO: ring.middleware.head/wrap-head
    ;; TODO: handle etags
    (defn -create-file-or-resource-handler
-     [response-fn {:keys [parameter root path loader allow-symlinks? index-files paths not-found-handler]
+     [response-fn {:keys [parameter root path loader allow-symlinks? index-files index-redirect? canonicalize-uris? paths not-found-handler mime-types]
                    :or {parameter (keyword "")
                         root "public"
                         index-files ["index.html"]
-                        paths (constantly nil)
-                        not-found-handler (constantly {:status 404, :body "", :headers {}})}}]
+                        index-redirect? false
+                        canonicalize-uris? true
+                        paths (constantly nil)}}]
      (let [options {:root root
                     :loader loader
                     :index-files? false
                     :allow-symlinks? allow-symlinks?}
+           not-found-handler (or not-found-handler
+                                 (if path
+                                   (constantly nil)
+                                   (constantly {:status 404, :body "", :headers {}})))
            path-size (count path)
            create (fn [handler]
                     (fn
@@ -208,23 +252,35 @@
            join-paths (fn [& paths]
                         (str/replace (str/replace (str/join "/" paths) #"([/]+)" "/") #"/$" ""))
            response (fn [path]
-                      (if-let [response (or (paths (join-paths "/" path))
-                                            (response-fn path options))]
-                        (response/content-type response (mime-type/ext-mime-type path))))
+                      (when-let [response (or (paths (join-paths "/" path))
+                                              (response-fn path options))]
+                        (if-let [content-type (mime-type/ext-mime-type path mime-types)]
+                          (response/content-type response content-type)
+                          response)))
            path-or-index-response (fn [path uri]
                                     (or (response path)
-                                        (loop [[file & files] index-files]
-                                          (if file
-                                            (if (response (join-paths path file))
-                                              (response/redirect (join-paths uri file))
-                                              (recur files))))))
+                                        (when (or canonicalize-uris? (str/ends-with? uri "/"))
+                                          (loop [[file & files] index-files]
+                                            (if file
+                                              (if-let [resp (response (join-paths path file))]
+                                                (cond
+                                                  index-redirect?
+                                                  (response/redirect (join-paths uri file))
+
+                                                  (not (str/ends-with? uri "/"))
+                                                  (response/redirect (str uri "/"))
+
+                                                  :else
+                                                  resp)
+                                                (recur files)))))))
            handler (if path
                      (fn [request]
-                       (let [uri (:uri request)]
-                         (if (.startsWith uri path)
-                           (path-or-index-response (subs uri path-size) uri))))
+                       (let [uri (impl/url-decode (:uri request))]
+                         (if (str/starts-with? uri path)
+                           (or (path-or-index-response (subs uri path-size) uri)
+                               (not-found-handler request)))))
                      (fn [request]
-                       (let [uri (:uri request)
+                       (let [uri (impl/url-decode (:uri request))
                              path (-> request :path-params parameter)]
                          (or (path-or-index-response path uri)
                              (not-found-handler request)))))]
@@ -234,14 +290,18 @@
    (defn create-resource-handler
      "A ring handler for serving classpath resources, configured via options:
 
-     | key                | description |
-     | -------------------|-------------|
-     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
-     | :loader            | optional class loader to resolve the resources
-     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | key                 | description |
+     | --------------------|-------------|
+     | :parameter          | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root               | optional resource root, defaults to `\"public\"`
+     | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
+     | :loader             | optional class loader to resolve the resources
+     | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types
+     | :allow-symlinks?    | allow symlinks that lead to paths outside the root classpath directories, defaults to false"
      ([]
       (create-resource-handler nil))
      ([opts]
@@ -251,14 +311,18 @@
    (defn create-file-handler
      "A ring handler for serving file resources, configured via options:
 
-     | key                | description |
-     | -------------------|-------------|
-     | :parameter         | optional name of the wildcard parameter, defaults to unnamed keyword `:`
-     | :root              | optional resource root, defaults to `\"public\"`
-     | :path              | optional path to mount the handler to. Works only if mounted outside of a router.
-     | :loader            | optional class loader to resolve the resources
-     | :index-files       | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
-     | :not-found-handler | optional handler function to use if the requested resource is missing (404 Not Found)"
+     | key                 | description |
+     | --------------------|-------------|
+     | :parameter          | optional name of the wildcard parameter, defaults to unnamed keyword `:`
+     | :root               | optional resource root, defaults to `\"public\"`
+     | :path               | path to mount the handler to. Required when mounted outside of a router, does not work inside a router.
+     | :loader             | optional class loader to resolve the resources
+     | :index-files        | optional vector of index-files to look in a resource directory, defaults to `[\"index.html\"]`
+     | :index-redirect?    | optional boolean: if true (default false), redirect to index file, if false serve it directly
+     | :canonicalize-uris? | optional boolean: if true (default), try to serve index files for non directory paths (paths that end with slash)
+     | :not-found-handler  | optional handler function to use if the requested resource is missing (404 Not Found)
+     | :mime-types         | optional map of filename extensions to mime-types that will be used to guess the content type in addition to the ones defined in ring.util.mime-type/default-mime-types
+     | :allow-symlinks?    | allow symlinks that lead to paths outside the root classpath directories, defaults to false"
      ([]
       (create-file-handler nil))
      ([opts]
@@ -310,32 +374,51 @@
   ([router default-handler {:keys [middleware inject-match? inject-router?]
                             :or {inject-match? true, inject-router? true}}]
    (let [default-handler (or default-handler (fn ([_]) ([_ respond _] (respond nil))))
-         wrap (if middleware (partial middleware/chain middleware) identity)
+         wrap (if middleware #(middleware/chain middleware % nil (r/options router)) identity)
          enrich-request (create-enrich-request inject-match? inject-router?)
          enrich-default-request (create-enrich-default-request inject-router?)]
      (with-meta
-       (wrap
-         (fn
-           ([request]
-            (if-let [match (r/match-by-path router (:uri request))]
-              (let [method (:request-method request)
-                    path-params (:path-params match)
-                    result (:result match)
-                    handler (-> result method :handler (or default-handler))
-                    request (enrich-request request path-params match router)]
-                (or (handler request) (default-handler request)))
-              (default-handler (enrich-default-request request router))))
-           ([request respond raise]
-            (if-let [match (r/match-by-path router (:uri request))]
-              (let [method (:request-method request)
-                    path-params (:path-params match)
-                    result (:result match)
-                    handler (-> result method :handler (or default-handler))
-                    request (enrich-request request path-params match router)]
-                ((routes handler default-handler) request respond raise))
-              (default-handler (enrich-default-request request router) respond raise))
-            nil)))
-       {::r/router router}))))
+      (wrap
+       (fn
+         ([request]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              (or (handler request) (default-handler request)))
+            (default-handler (enrich-default-request request router))))
+         ([request respond raise]
+          (if-let [match (r/match-by-path router (:uri request))]
+            (let [method (:request-method request)
+                  path-params (:path-params match)
+                  result (:result match)
+                  handler (-> result method :handler (or default-handler))
+                  request (enrich-request request path-params match router)]
+              (handler request (fn [response]
+                                 (if response
+                                   (respond response)
+                                   (default-handler request respond raise))) raise))
+            (default-handler (enrich-default-request request router) respond raise))
+          nil)))
+      {::r/router router}))))
+
+(defn reloading-ring-handler
+  "Returns a ring-handler that recreates the actual ring-handler for each request.
+  Takes a 0-arity function that should return a valid ring-handler. Effectively creates
+  an auto-reloading ring-handler, which is good for REPL-driven development.
+
+  Example:
+
+        ;; for dev-mode, recreate the ring-handler for each request, for prod, just once
+        (let [dev-mode ...
+              f (fn [] (reitit.ring/ring-handler ...)]
+          (if dev-mode (reitit.ring/reloading-ring-handler f) (f)))"
+  [f]
+  (fn
+    ([request] ((f) request))
+    ([request respond raise] ((f) request respond raise))))
 
 (defn get-router [handler]
   (-> handler meta ::r/router))

@@ -1,12 +1,12 @@
 # Compiling Middleware
 
-The [dynamic extensions](dynamic_extensions.md) is a easy way to extend the system. To enable fast lookups into route data, we can compile them into any shape (records, functions etc.) we want, enabling fast access at request-time.
+The [dynamic extensions](dynamic_extensions.md) are an easy way to extend the system. To enable fast lookup of route data, we can compile them into any shape (records, functions etc.), enabling fast access at request-time.
 
-But, we can do much better. As we know the exact route that middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware at creation-time. It can do local reasoning: extract and transform relevant data just for it and pass the optimized data into the actual request-handler via a closure - yielding much faster runtime processing. Middleware can also decide not to mount itself by returning `nil`. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?
+But, we can do much better. As we know the exact route that a middleware/interceptor is linked to, we can pass the (compiled) route information into the middleware at creation-time. It can do local reasoning: Extract and transform relevant data just for it and pass the optimized data into the actual request-handler via a closure - yielding much faster runtime processing. A middleware can also decide not to mount itself by returning `nil`. (E.g. Why mount a `wrap-enforce-roles` middleware for a route if there are no roles required for it?)
 
 To enable this we use [middleware records](data_driven_middleware.md) `:compile` key instead of the normal `:wrap`. `:compile` expects a function of `route-data router-opts => ?IntoMiddleware`.
 
-To demonstrate the two approaches, below are response coercion middleware written as normal ring middleware function and as middleware record with `:compile`.
+To demonstrate the two approaches, below is the response coercion middleware written as normal ring middleware function and as middleware record with `:compile`.
 
 ## Normal Middleware
 
@@ -27,8 +27,8 @@ To demonstrate the two approaches, below are response coercion middleware writte
            coercion (-> match :data :coercion)
            opts (-> match :data :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (coerce-response coercers request response))
+         (let [coercer (response-coercer coercion responses opts)]
+           (coercer request response))
          response)))
     ([request respond raise]
      (let [method (:request-method request)
@@ -37,8 +37,8 @@ To demonstrate the two approaches, below are response coercion middleware writte
            coercion (-> match :data :coercion)
            opts (-> match :data :opts)]
        (if (and coercion responses)
-         (let [coercers (response-coercers coercion responses opts)]
-           (handler request #(respond (coerce-response coercers request %))))
+         (let [coercer (response-coercer coercion responses opts)]
+           (handler request #(respond (coercer request %))))
          (handler request respond raise))))))
 ```
 
@@ -60,13 +60,13 @@ To demonstrate the two approaches, below are response coercion middleware writte
    :spec ::rs/responses
    :compile (fn [{:keys [coercion responses]} opts]
               (if (and coercion responses)
-                (let [coercers (coercion/response-coercers coercion responses opts)]
+                (let [coercer (coercion/response-coercer coercion responses opts)]
                   (fn [handler]
                     (fn
                       ([request]
-                       (coercion/coerce-response coercers request (handler request)))
+                       (coercer request (handler request)))
                       ([request respond raise]
-                       (handler request #(respond (coercion/coerce-response coercers request %)) raise)))))))})
+                       (handler request #(respond (coercer request %)) raise)))))))})
 ```
 
 It has 50% less code, it's much easier to reason about and is much faster.

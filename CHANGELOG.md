@@ -12,7 +12,474 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
+## UNRELEASED
+
+* **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
+
+## 0.11.0 (2026-09-18)
+
+* Add support for `QUERY` method. [#786](https://github.com/metosin/reitit/pull/786)
+* Output OpenAPI 3.2.0 by default. You can override the version, see [openapi.md](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md). [#786](https://github.com/metosin/reitit/pull/786)
+* Better support for `:and`, `:or`, `:union` and `:merge` when generating OpenAPI. [#791](https://github.com/metosin/reitit/pull/791)
+* Doc improvements
+* Improve OpenAPI output for Schema `s/Any` type: it now maps to JSON Schema `{}` in request and response bodies. [#801](https://github.com/metosin/reitit/pull/801)
+* Updated dependencies:
+
+```
+[metosin/muuntaja "0.6.12"] is available but we use "0.6.11"
+[metosin/jsonista "1.0.1"] is available but we use "1.0.0"
+[metosin/schema-tools "1.14.1"] is available but we use "0.14.0"
+[com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.22.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.2"] is available but we use "2.22.1"
+```
+
+## 0.11.0-rc1 (2026-08-07)
+
+* OpenAPI named schema support for Plumatic Schema. Also supports recursive schemas. [#788](https://github.com/metosin/reitit/pull/788)
+* Better support for `:and`, `:or`, `:union` and `:merge` schemas when generating OpenAPI (query, path, header) parameter docs. [#783](https://github.com/metosin/reitit/pull/783)
+* Updated dependencies:
+
+```
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[com.fasterxml.jackson.core/jackson-core "2.22.1"] is available but we use "2.21.1"
+[com.fasterxml.jackson.core/jackson-databind "2.22.1"] is available but we use "2.21.1"
+[ring/ring-core "1.15.5"] is available but we use "1.15.3"
+[metosin/jsonista "1.0.0"] is available but we use "0.3.14"
+[metosin/ring-swagger-ui "5.32.11"] is available but we use "5.31.0"
+```
+
+## 0.10.1 (2026-03-10)
+
+* **FIX** redirect-trailing-slash-handler won't make external redirects. [#776](https://github.com/metosin/reitit/pull/776)
+* Allow colons in bracket parameter syntax. [#770](https://github.com/metosin/reitit/pull/770)
+* Add `url-encode?` option to `match-by-name`. [#778](https://github.com/metosin/reitit/pull/778)
+* Updated dependencies:
+
+```
+[metosin/ring-swagger-ui "5.31.0"] is available but we use "5.20.0"
+[metosin/jsonista "0.3.14"] is available but we use "0.3.13"
+[metosin/malli "0.20.1"] is available but we use "0.20.0"
+[com.fasterxml.jackson.core/jackson-core "2.21.1"] is available but we use "2.20.1"
+[com.fasterxml.jackson.core/jackson-databind "2.21.1"] is available but we use "2.20.1"
+```
+
+## 0.10.0 (2026-01-09)
+
+* Improve & document how response schemas get picked in per-content-type coercion. See [docs](./doc/ring/coercion.md#per-content-type-coercion). [#745](https://github.com/metosin/reitit/issues/745).
+* **BREAKING** Remove unused `reitit.dependency` ns. [#763](https://github.com/metosin/reitit/pull/763)
+* Support passing options to malli humanize. See [docs](./doc/coercion/malli_coercion.md). [#467](https://github.com/metosin/reitit/issues/467)
+* **FIX** Handling of ex-type keyword hierarchies in create-exception-middleware. [#768](https://github.com/metosin/reitit/issues/768)
+* Updated dependencies:
+
+```
+[metosin/malli "0.20.0"] is available but we use "0.19.2"
+[com.fasterxml.jackson.core/jackson-core "2.20.1"] is available but we use "2.20.0"
+[com.fasterxml.jackson.core/jackson-databind "2.20.1"] is available but we use "2.20.0"
+[org.clojure/core.rrb-vector "0.2.1"] is available but we use "0.2.0"
+```
+
+## 0.9.2 (2025-10-28)
+
+* Allow multimethods as handlers when validating [#755](https://github.com/metosin/reitit/pull/755)
+* Improve error reporting when generating OpenAPI fails [#754](https://github.com/metosin/reitit/pull/754)
+* Allow middleware registry to be used when defining middleware in `ring-handler`. See [docs](./doc/ring/middleware_registry.md). [#739](https://github.com/metosin/reitit/pull/739)
+* Allow passing options (eg. `:malli.transform/add-optional-keys`) to malli's `default-value-transformer`. See [docs](./doc/coercion/malli_coercion.md). [#756](https://github.com/metosin/reitit/pull/756)
+* **FIX**: `match-by-name!` returning `nil` instead of throwing an exception for some partial matches [#758](https://github.com/metosin/reitit/issues/758)
+* Updated dependencies:
+
+```
+[com.fasterxml.jackson.core/jackson-core "2.20.0"] is available but we use "2.18.2"
+[com.fasterxml.jackson.core/jackson-databind "2.20.0"] is available but we use "2.18.2"
+[compojure "1.7.2"] is available but we use "1.7.1"
+[fipp "0.6.29"] is available but we use "0.6.27"
+[metosin/malli "0.19.2"] is available but we use "0.18.0"
+[ring "1.15.3"] is available but we use "1.14.1"
+[ring/ring-core "1.15.3"] is available but we use "1.14.1"
+[ring/ring-defaults "0.7.0"] is available but we use "0.6.0"
+```
+
+## 0.9.1 (2025-05-27)
+
+* **FIX**: response coercion threw an exception for unlisted HTTP status codes if there was no `:default`. Broken in 0.9.0. [#742](https://github.com/metosin/reitit/issues/742)
+
+## 0.9.0 (2025-05-23)
+
+* Improvements to mime type handling in `create-file-handler` and `create-resource-handler` [#733](https://github.com/metosin/reitit/pull/733)
+  * New `:mime-types` option to configure a map from file extension to mime type
+  * Don't set Content-Type header at all if mime type is not known
+* Fix location of OpenAPI deprecated metadata [#714](https://github.com/metosin/reitit/pull/714)
+* **BREAKING** Fix & clarify `:responses :default` and `:content :default` handling. See [docs](./doc/ring/coercion.md). [#735](https://github.com/metosin/reitit/pull/735)
+  * Summary: If `:responses <status>` is present, `:responses :default` is not used, even if `:responses <status>` defines no schema.
+  * Should not break normal use, but might cause surprises related to defaults applying/not applying
+* **NOTE** This release depends on malli 0.18.0, which changes the format of OpenAPI & Swagger named schemas from `foo.bar/quux` to `foo.bar.quux`
+
+## 0.8.0 (2025-03-28)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0)**
+
+* **BREAKING**: throw error if `:responses` keys are not integers [#667](https://github.com/metosin/reitit/issues/667)
+* **BREAKING**: Java 8 is no longer supported (Ring-core requires Apache Commons FileUpload which now requires Java 11)
+* File and resource handlers (`create-file-handler` and `create-resource-handler`)
+    * **BREAKING**: New default is to redirect from `dir` path to `dir/` and serve the index file (if found) on the path ending with `/`
+        * For example the Swagger UI handler now serves the index from `/api-docs/` instead of redirecting to `/api-docs/index.html` (both work)
+        * Mostly this is a visual change, though if you have unit tests checking for response status or redirect, those could break
+    * New option `:index-redirect?` (default false) allows enable redirecting to the index file, e.g. `dir` -> `dir/index.html` (same as the old default)
+    * New option `:canonicalize-uris?` (default true) enables redirect from `dir` to `dir/` if the index file exists for the path
+        * Without this option `dir` would return 404 and `dir/` and `dir/index.html` would return the file
+* Changes in 0.8.0-alpha1
+* Updated dependencies:
+
+```
+[fipp "0.6.27"] is available but we use "0.6.26"
+[metosin/jsonista "0.3.13"] is available but we use "0.3.10"
+[metosin/malli "0.17.0"] is available but we use "0.16.4"
+[metosin/muuntaja "0.6.11"] is available but we use "0.6.10"
+[metosin/ring-swagger-ui "5.20.0"] is available but we use "5.9.0"
+[ring/ring-core "1.14.1"] is available but we use "1.12.2"
+[ring/ring-defaults "0.6.0"] is available but we use "0.5.0"
+```
+
+## 0.8.0-alpha1 (2025-01-31)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.2..0.8.0-alpha1)**
+
+* Improve OpenAPI docs, plus don't emit `:description` in the wrong place [#702](https://github.com/metosin/reitit/pull/702)
+* Support reitit.walk for all IPersitentMap implementations, fixes coercion with
+  aleph 0.7.2 [#700](https://github.com/metosin/reitit/issues/700), [#701](https://github.com/metosin/reitit/pull/701)
+* *POTENTIALLY BREAKING* The frontend functions (href, push/replace-state, navigate, set-query) now
+  encode query-string values using configured coercion when possible (only Malli supports encoding).
+  [#716](https://github.com/metosin/reitit/pull/716)
+    - You can use this to encode query parameter values before they are URL-encoded. This works for DateTimes, collections etc.
+    - In most cases this shouldn't break existing uses, but it is possible even without
+      a custom encoding function, the default Malli string-transformer could encode some values differently
+      then previously.
+
+## 0.7.2 (2024-09-02)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.1..0.7.2)**
+
+* Speed up routes and inline it in code ring handler [#693](https://github.com/metosin/reitit/pull/693) [#693](https://github.com/metosin/reitit/pull/696)
+* Fix: Can't get descendants of classes [#555](https://github.com/metosin/reitit/issues/555)
+* Faster keywordize [#506](https://github.com/metosin/reitit/pull/506)
+* Updated dependencies:
+
+```clojure
+[metosin/jsonista "0.3.10"] is available but we use "0.3.9"
+[metosin/malli "0.16.4"] is available but we use "0.16.2"
+[com.fasterxml.jackson.core/jackson-core "2.17.2"] is available but we use "2.17.1"
+[com.fasterxml.jackson.core/jackson-databind "2.17.2"] is available but we use "2.17.1"
+```
+
+## 0.7.1 (2024-06-30)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0..0.7.1)**
+
+* FIX: Route data maps ignore meta-merge options in 0.7.0, breaking compatibility [#679](https://github.com/metosin/reitit/issues/679)
+* FIX: Clojure record in route data is converted to a plain map [#686](https://github.com/metosin/reitit/issues/686)
+* Add arities 1 and 2 to rf/match->path [#685](https://github.com/metosin/reitit/pull/685)
+* Updated dependencies:
+
+```clojure
+[ring/ring-core "1.12.2"] is available but we use "1.12.1"
+[metosin/malli "0.16.2"] is available but we use "0.16.1"
+[metosin/jsonista "0.3.9"] is available but we use "0.3.8"
+[metosin/spec-tools "0.10.7"] is available but we use "0.10.6"
+[com.fasterxml.jackson.core/jackson-core "2.17.1"] is available but we use "2.17.0"
+[com.fasterxml.jackson.core/jackson-databind "2.17.1"] is available but we use "2.17.0"
+```
+
+## 0.7.0 (2024-04-30)
+
+**[compare](https://github.com/metosin/reitit/compare/0.6.0..0.7.0)**
+
+The OpenAPI3 release, Year in the making - the changes span over multiple repositories.
+
+* Openapi3 support, see the [docs](https://github.com/metosin/reitit/blob/master/doc/ring/openapi.md)
+  * Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
+  * OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
+  * Generate correct OpenAPI $ref schemas for malli var and ref schemas [#673](https://github.com/metosin/reitit/pull/673)
+  * new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
+  * [#84](https://github.com/metosin/reitit/issues/84)
+* Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
+* Fix swagger generation when unsupported coercions are present [#671](https://github.com/metosin/reitit/pull/671)
+* **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
+* **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
+* **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
+* Fixed some module dependencies so Cljdoc can properly analyze all the modules
+* Fix reading fragment string on `Html5History` initialization
+* Add fragment string parameter to reitit-frontend functions ([#604](https://github.com/metosin/reitit/pull/604))
+* Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
+
+* Updated dependencies:
+
+```clojure
+[metosin/malli "0.16.1"] is available but we use "0.10.1"
+[metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
+[metosin/spec-tools "0.10.6"] is available but we use "0.10.5"
+[metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
+[metosin/jsonista "0.3.8"] is available but we use "0.3.7"
+[com.fasterxml.jackson.core/jackson-core "2.17.0"] is available but we use "2.14.2"
+[com.fasterxml.jackson.core/jackson-databind "2.17.0"] is available but we use "2.14.2"
+[ring/ring-core "1.12.1"] is available but we use "1.9.6"
+[metosin/ring-swagger-ui "5.9.0"] is available but we use "4.15.5"
+```
+
+## 0.7.0-alpha8 (2024-04-30)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha7...0.7.0-alpha8)**
+
+* Handlers can be vars [#585](https://github.com/metosin/reitit/pull/585)
+* Fetch OpenAPI content types from Muuntaja [#636](https://github.com/metosin/reitit/issues/636)
+* **BREAKING** OpenAPI support is now clj only
+* Fix swagger generation when unsupported coercions are present [#671](https://github.com/metosin/reitit/pull/671)
+* Generate correct OpenAPI $ref schemas for malli var and ref schemas [#673](https://github.com/metosin/reitit/pull/673)
+* Updated dependencies:
+
+```clojure
+[metosin/malli "0.16.1"] is available but we use "0.13.0"
+[metosin/muuntaja "0.6.10"] is available but we use "0.6.8"
+[metosin/spec-tools "0.10.6"] is available but we use "0.10.5"
+[metosin/jsonista "0.3.8"] is available but we use "0.3.7"
+[com.fasterxml.jackson.core/jackson-core "2.17.0"] is available but we use "2.15.1"
+[com.fasterxml.jackson.core/jackson-databind "2.17.0"] is available but we use "2.15.1"
+[ring/ring-core "1.12.1"] is available but we use "1.10.0"
+[metosin/ring-swagger-ui "5.9.0"] is available but we use "4.19.1"
+```
+
+## 0.7.0-alpha7 (2023-10-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha6...0.7.0-alpha7)**
+
+* Revert the group id change from alpha6
+* New release to bring alpha6 changes to the old group id
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.19.1"] is available but we use "4.18.1"
+```
+
+## 0.7.0-alpha6 (2023-09-11)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha5...0.7.0-alpha6)**
+
+* **BREAKING**: require Clojure 1.11, drop support for Clojure 1.10
+* **BREAKING**: new syntax for `:request` and `:response` per-content-type coercions. See [coercion.md](doc/ring/coercion.md). [#627](https://github.com/metosin/reitit/issues/627)
+* **BREAKING**: replace the openapi `:content-types` keyword with separate `:openapi/request-content-types` and `:openapi/response-content-types`. See [openapi.md](doc/ring/openapi.md)
+* **NOTE!**: all reitit libraries are now under the `fi.metosin` group on clojars instead of `metosin`. Use `fi.metosin/reitit` in your dependencies instead of `metosin/reitit` to get new versions.
+    - **Reverted in alpha7 due to problems with renaming artifacts**
+
+## 0.7.0-alpha5 (2023-06-14)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha4...0.7.0-alpha5)**
+
+* **BREAKING**: `compile-request-coercers` returns a map with `:data` and `:coerce` instead of plain `:coerce` function
+* **BREAKING**: Parameter and Response schemas are merged into the route data vector - so they can be properly merged into the compiled result, fixes [#422](https://github.com/metosin/reitit/issues/422) - merging multiple schemas together works with `Malli` and `Schema`, partially with `data-spec` but not with `spec`.
+* Fixed some module dependencies so Cljdoc can properly analyze all the modules
+* Updated dependencies:
+
+```clojure
+[metosin/schema-tools "0.13.1"] is available but we use "0.13.0"
+[com.fasterxml.jackson.core/jackson-core "2.15.1"] is available but we use "2.14.2"
+[com.fasterxml.jackson.core/jackson-databind "2.15.1"] is available but we use "2.14.2"
+```
+
+## 0.7.0-alpha4 (2023-05-17)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha3...0.7.0-alpha4)**
+
+* OpenAPI 3 parameter descriptions get populated from malli/spec/schema descriptions. [#612](https://github.com/metosin/reitit/issues/612)
+
+## 0.7.0-alpha3 (2023-05-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha2...0.7.0-alpha3)**
+
+* Compile `reitit.Trie` with Java 1.8 target for compatibility
+
+## 0.7.0-alpha2 (2023-05-04)
+
+**[compare](https://github.com/metosin/reitit/compare/0.7.0-alpha1...0.7.0-alpha2)**
+
+* Fix reading fragment string on `Html5History` initialization
+* Add fragment string parameter to reitit-frontend functions ([#604](https://github.com/metosin/reitit/pull/604))
+
+## 0.7.0-alpha1 (2023-05-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.6.0...0.7.0-alpha1)**
+
+* Initial Openapi3 support. See [docs](./doc/ring/openapi.md). Works for simple cases but might still have some rough edges. [#84](https://github.com/metosin/reitit/issues/84)
+* Frontend: provide easy way to update current query params. [#600](https://github.com/metosin/reitit/issues/600)
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.18.1"] is available but we use "4.15.5"
+[metosin/malli "0.11.0"] is available but we use "0.10.1"
+[ring/ring-core "1.10.0"] is available but we use "1.9.6"
+```
+
+## 0.6.0 (2023-02-21)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.18...0.6.0)**
+
+* Add reitit-frontend support for fragment string [#581](https://github.com/metosin/reitit/pull/581)
+* reloading-ring-handler [#584](https://github.com/metosin/reitit/pull/584)
+* Remove redundant s/and [#552](https://github.com/metosin/reitit/pull/552)
+* FIX: redirect-trailing-slash-handler strips query-params [#565](https://github.com/metosin/reitit/issues/565)
+* **BREAKING**: Drop tests for Clojure 1.9, run tests with 1.10 & 1.11
+* NEW option `:meta-merge` on a router for custom merge strategy on route data
+* Swagger: support operationId in generated swagger json [#452](https://github.com/metosin/reitit/pull/452) & [#569](https://github.com/metosin/reitit/pull/569)
+* Update documentation and link to the startrek project [#578](https://github.com/metosin/reitit/pull/578)
+* Upgrade jackson for CVE-2022-42003 and CVE-2022-42004 [#577](https://github.com/metosin/reitit/pull/577)
+* Improved coercion errors perf [#576](https://github.com/metosin/reitit/pull/576)
+* Add example for Reitit + Pedestal + Malli coercion [#572](https://github.com/metosin/reitit/pull/572)
+* Handle empty seq as empty string in query-string [#566](https://github.com/metosin/reitit/pull/566)
+* Polish pedestal chains when printing context diffs [#557](https://github.com/metosin/reitit/pull/557)
+* Updated dependencies:
+
+```clojure
+[metosin/ring-swagger-ui "4.15.5"] is available but we use "4.3.0"
+[metosin/jsonista "0.3.7"] is available but we use "0.3.5"
+[metosin/malli "0.10.1"] is available but we use "0.8.2"
+[fipp "0.6.26"] is available but we use "0.6.25"
+[ring/ring-core "1.9.6"] is available but we use "1.9.5"
+[com.fasterxml.jackson.core/jackson-core "2.14.2"] is available but we use "2.14.1"
+[com.fasterxml.jackson.core/jackson-databind "2.14.2"] is available but we use "2.14.1"
+```
+
+## 0.5.18 (2022-04-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.17...0.5.18)**
+
+* FIX [#334](https://github.com/metosin/reitit/pull/334) - Frontend: there is no way to catch the exception if coercion fails (via [#549](https://github.com/metosin/reitit/pull/549))
+* Save three seq constructions [#537](https://github.com/metosin/reitit/pull/537)
+* update jackson-databind for CVE-2020-36518 [#544](https://github.com/metosin/reitit/pull/544)
+* Balance parenthesis in docs [#547](https://github.com/metosin/reitit/pull/547)
+
+## 0.5.17 (2022-03-10)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.16...0.5.17)**
+
+* FIX match-by-path is broken if there are no non-conflicting wildcard routes [#538](https://github.com/metosin/reitit/issues/538)
+
+## 0.5.16 (2022-02-15)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.15...0.5.16)**
+
+* Support for [Malli Lite Syntax](https://github.com/metosin/malli#lite) in coercion (enabled by default):
+
+```clj
+["/add/:id" {:post {:parameters {:path {:id int?}
+                                 :query {:a (l/optional int?)}
+                                 :body {:id int?
+                                        :data {:id (l/maybe int?)
+                                               :orders (l/map-of uuid? {:name string?})}}}
+                    :responses {200 {:body {:total pos-int?}}
+                                500 {:description "fail"}}}}]
+```
+
+* Improved Reitit-frontend function docstrings
+
+* Updated deps:
+
+```clj
+[metosin/ring-swagger-ui "4.3.0"] is available but we use "3.46.0"
+[metosin/jsonista "0.3.5"] is available but we use "0.3.3"
+[metosin/malli "0.8.2"] is available but we use "0.5.1"
+[com.fasterxml.jackson.core/jackson-core "2.13.1"] is available but we use "2.12.4"
+[com.fasterxml.jackson.core/jackson-databind "2.13.1"] is available but we use "2.12.4"
+[fipp "0.6.25"] is available but we use "0.6.24"
+[expound "0.9.0"] is available but we use "0.8.9"
+[ring/ring-core "1.9.5"] is available but we use "1.9.4"
+```
+
+## 0.5.15 (2021-08-05)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.14...0.5.15)**
+
+* recompiled with Java8
+
+## 0.5.14 (2021-08-03)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.13...0.5.14)**
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.46.0"] is available but we use "3.36.0"
+[metosin/jsonista "0.3.3"] is available but we use "0.3.1"
+[metosin/malli "0.5.1"] is available but we use "0.3.0"
+[com.fasterxml.jackson.core/jackson-core "2.12.4"] is available but we use "2.12.1"
+[com.fasterxml.jackson.core/jackson-databind "2.12.4"] is available but we use "2.12.1"
+[fipp "0.6.24"] is available but we use "0.6.23"
+[ring/ring-core "1.9.4"] is available but we use "1.9.1"
+[io.pedestal/pedestal.service "0.5.9"] is available but we use "0.5.8"
+```
+
+### `reitit-ring`
+
+* Fixes `reitit.ring/create-resource-handler` and `reitit.ring/create-file-handler` to support URL-escaped characters. [#484](https://github.com/metosin/reitit/issues/484). PR [#489](https://github.com/metosin/reitit/pull/489).
+
+### `reitit-malli`
+
+* FIX: Malli response coercision seems to do nothing at all [#498](https://github.com/metosin/reitit/pull/501)
+
+### `reitit-pedestal`
+
+* Enrich request for pedestal/routing-interceptor default-queue [#495](https://github.com/metosin/reitit/pull/495)
+
+## 0.5.13 (2021-04-23)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.12...0.5.13)**
+
+* updated deps:
+
+```clj
+[metosin/malli "0.3.0"] is available but we use "0.2.1"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[ring/ring-core "1.9.1"] is available but we use "1.9.0"
+[metosin/schema-tools "0.12.3"] is available but we use "0.12.2"
+[expound "0.8.9"] is available but we use "0.8.7"
+[ring "1.9.1"] is available but we use "1.9.0"
+```
+
+### `reitit-ring`
+
+* Make reitit.ring/create-resource-handler's `:not-found-handler` work when used outside of a router. [#464](https://github.com/metosin/reitit/issues/464). PR [#471](https://github.com/metosin/reitit/pull/471) by Kari Marttila and Metosin Maintenance Mob.
+
+## 0.5.12 (2021-02-01)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.11...0.5.12)**
+
+* updated deps:
+
+```
+[metosin/spec-tools "0.10.5"] is available but we use "0.10.4"
+[metosin/jsonista "0.3.1"] is available but we use "0.3.0"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[ring/ring-core "1.9.0"] is available but we use "1.8.2"
+[metosin/muuntaja "0.6.8"] is available but we use "0.6.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.1"] is available but we use "2.12.0"
+[com.fasterxml.jackson.core/jackson-databind "2.12.1"] is available but we use "2.12.0"
+```
+
+* Allow whitespace as separator in route paths. [#411](https://github.com/metosin/reitit/issues/411). PR [#466](https://github.com/metosin/reitit/pull/466) by Kimmo Koskinen and Metosin Maintenance Mob.
+
+## 0.5.11 (2020-12-27)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.10...0.5.11)**
+
+* updated deps:
+
+```clj
+[metosin/ring-swagger-ui "3.36.0"] is available but we use "3.25.3"
+[metosin/jsonista "0.3.0"] is available but we use "0.2.7"
+[com.fasterxml.jackson.core/jackson-core "2.12.0"] is available but we use "2.11.2"
+[com.fasterxml.jackson.core/jackson-databind "2.12.0"] is available but we use "2.11.2"
+```
+
 ## 0.5.10 (2020-10-22)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.9...0.5.10)**
 
 * updated deps:
 
@@ -26,6 +493,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## 0.5.9 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.8...0.5.9)**
+
 ### `reitit-frontend`
 
 - `reitit.frontend.easy/start!` now correctly removes old event listeners
@@ -34,9 +503,13 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.8 (2020-10-19)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.7...0.5.8)**
+
 * Add `:conflicting` to route data spec [#444](https://github.com/metosin/reitit/pull/444).
 
 ## 0.5.7 (2020-10-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.6...0.5.7)**
 
 * updated deps:
 
@@ -55,6 +528,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.6 (2020-09-26)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.5...0.5.6)**
+
 * updated deps:
 
 ```clj
@@ -67,17 +542,19 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ### `reitit-malli`
 
-* `:map-of` keys in JSON are correctly decoded using string-decoders 
+* `:map-of` keys in JSON are correctly decoded using string-decoders
 * new `:encode-error` option in coercion:
 
 ```clj
-(def coercion 
-  (reitit.coercion.malli/create 
+(def coercion
+  (reitit.coercion.malli/create
     {:encode-error (fn [error] {:errors (:humanized error)})}))
 ; results in... => {:status 400, :body {:errors {:x ["missing required key"]}}}
 ```
 
 ## 0.5.5 (2020-07-15)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.4...0.5.5)**
 
 * recompile with Java8
 
@@ -87,17 +564,23 @@ when called repeatedly (e.g. with hot code reload workflow)
 
 ## 0.5.4 (2020-07-13)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.3...0.5.4)**
+
 ```clj
 [metosin/malli "0.0.1-20200713.080243-20"] is available but we use "0.0.1-20200709.163702-18"
 ```
 
 ## 0.5.3 (2020-07-09)
 
+**[compare](https://github.com/metosin/reitit/compare/0.5.2...0.5.3)**
+
 ```clj
 [metosin/malli "0.0.1-20200709.163702-18"] is available but we use "0.0.1-20200525.162645-15"
 ```
 
 ## 0.5.2 (2020-05-27)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.1...0.5.2)**
 
 ```clj
 [metosin/malli "0.0.1-20200525.162645-15"] is available but we use "0.0.1-20200404.091302-14"
@@ -123,6 +606,8 @@ when called repeatedly (e.g. with hot code reload workflow)
 * Coercion interceptor will not to mount if the selected `:coercion` is not enabled for the given `:parameters`, e.g. "just api-docs"
 
 ## 0.5.1 (2020-05-18)
+
+**[compare](https://github.com/metosin/reitit/compare/0.5.0...0.5.1)**
 
 ```clj
 [metosin/sieppari "0.0.0-alpha13"] is available but we use "0.0.0-alpha10"
@@ -172,13 +657,13 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * `reitit.ring/routes` strips away `nil` routes, fixes [#394](https://github.com/metosin/reitit/issues/394)
 * `reitit.ring/create-file-handler` to serve files from filesystem, fixes [#395](https://github.com/metosin/reitit/issues/395)
-* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated 
+* **BREAKING**: router option `:reitit.ring/default-options-handler` is deprecated
   * fails with router creation time error
   * use `:reitit.ring/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
 
 ### `reitit-http`
 
-* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated 
+* **BREAKING**: router option `:reitit.http/default-options-handler` is deprecated
   * fails with router creation time error
   * use `:reitit.http/default-options-endpoint` instead, takes an expandable route data instead just of a handler.
 
@@ -257,7 +742,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 * **BREAKING**: Decode multi-valued query params correctly into seqs (e.g. `foo=bar&foo=baz` ↦ `{:foo ["bar", "baz"]}`).
   * Previously you'd get only the first value. (e.g. `foo=bar&foo=baz` ↦ `{:foo "bar"}`)
-  
+
 ### `reitit-ring`
 
 * **BREAKING**: New validation rule: `:middleware` must be a vector, not a list. Fixes [#296](https://github.com/metosin/reitit/issues/296). ([#319](https://github.com/metosin/reitit/pull/319) by [Daw-Ran Liou](https://github.com/dawran6))
@@ -375,23 +860,23 @@ is called the first time, so that `rfe/push-state` and such can be called
     {:parameters {:body [s/Str]}}]]
   {:exception pretty/exception})
 ; -- Router creation failed -------------------------------------------- user:7 --
-; 
+;
 ; Error merging route-data:
-; 
+;
 ; -- On route -----------------------
-; 
+;
 ; /kikka/kakka
-; 
+;
 ; -- Exception ----------------------
-; 
+;
 ; Don't know how to create ISeq from: java.lang.Class
-; 
+;
 ;    {:parameters {:body {:id java.lang.String}}}
-; 
+;
 ;    {:parameters {:body [java.lang.String]}}
-; 
+;
 ; https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data
-; 
+;
 ; --------------------------------------------------------------------------------
 ```
 
@@ -410,7 +895,7 @@ is called the first time, so that `rfe/push-state` and such can be called
 
 ### `reitit-core`
 
-* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs. 
+* new options `:reitit.spec/wrap` to wrap top-level route data specs when spec validation is enabled. Using `spec-tools.spell/closed` closes top-level specs.
   * Updated swagger-examples to easily enable closed spec validation
 
 ```clj
@@ -475,9 +960,9 @@ is called the first time, so that `rfe/push-state` and such can be called
 * new module for friendly router creation time exception handling
   * new option `:exception` in `r/router`, of type `Exception => Exception` (default `reitit.exception/exception`)
   * new exception pretty-printer `reitit.dev.pretty/exception`, based on [fipp](https://github.com/brandonbloom/fipp) and [expound](https://github.com/bhb/expound) for human readable, newbie-friendly errors.
-  
+
 #### Conflicting paths
- 
+
 ```clj
 (require '[reitit.core :as r])
 (require '[reitit.dev.pretty :as pretty])

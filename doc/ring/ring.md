@@ -5,14 +5,14 @@
 Read more about the [Ring Concepts](https://github.com/ring-clojure/ring/wiki/Concepts).
 
 ```clj
-[metosin/reitit-ring "0.5.10"]
+[metosin/reitit-ring "0.11.0"]
 ```
 
-## `reitit.ring/ring-router`
+## `reitit.ring/router`
 
-`ring-router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
- 
- It accepts the following options:
+`reitit.ring/router` is a higher order router, which adds support for `:request-method` based routing, [handlers](https://github.com/ring-clojure/ring/wiki/Concepts#handlers) and [middleware](https://github.com/ring-clojure/ring/wiki/Concepts#middleware).
+
+It accepts the following options:
 
 | key                                     | description |
 | ----------------------------------------|-------------|
@@ -33,7 +33,7 @@ Example router:
     ["/ping" {:get handler}]))
 ```
 
-Match contains `:result` compiled by the `ring-router`:
+Match contains `:result` compiled by `reitit.ring/router`:
 
 ```clj
 (require '[reitit.core :as r])
@@ -49,11 +49,11 @@ Match contains `:result` compiled by the `ring-router`:
 
 ## `reitit.ring/ring-handler`
 
-Given a `ring-router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
+Given a router from `reitit.ring/router`, optional default-handler & options, `ring-handler` function will return a valid ring handler supporting both synchronous and [asynchronous](https://www.booleanknot.com/blog/2016/07/15/asynchronous-ring.html) request handling. The following options are available:
 
 | key               | description |
 | ------------------|-------------|
-| `:middleware`     | Optional sequence of middleware that wrap the ring-handler"
+| `:middleware`     | Optional sequence of middlewares that wrap the ring-handler
 | `:inject-match?`  | Boolean to inject `match` into request under `:reitit.core/match` key (default true)
 | `:inject-router?` | Boolean to inject `router` into request under `:reitit.core/router` key (default true)
 
@@ -91,7 +91,7 @@ The router can be accessed via `get-router`:
 
 # Request-method based routing
 
-Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put` or `:trace`). Top-level handler is used if request-method based handler is not found. 
+Handlers can be placed either to the top-level (all methods) or under a specific method (`:get`, `:head`, `:patch`, `:delete`, `:options`, `:post`, `:put`, `:trace` or `:query`). Top-level handler is used if request-method based handler is not found.
 
 By default, the `:options` route is generated for all paths - to enable thing like [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
 
@@ -141,7 +141,7 @@ Name-based reverse routing:
 
 # Middleware
 
-Middleware can be mounted using a `:middleware` key - either to top-level or under request method submap. Its value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
+Middleware can be mounted using a `:middleware` key in [Route Data](../basics/route_data.md) - either to top-level or under request method submap. Its value should be a vector of `reitit.middleware/IntoMiddleware` values. These include:
 
 1. normal ring middleware function `handler -> request -> response`
 2. vector of middleware function `[handler args*] -> request -> response` and it's arguments
@@ -194,11 +194,65 @@ Top-level middleware, applied before any routing is done:
 (def app
   (ring/ring-handler
     (ring/router
-      ["/api" {:middleware [[mw :api]]}
+      ["/api" {:middleware [[wrap :api]]}
        ["/get" {:get handler}]])
-    nil 
-    {:middleware [[mw :top]]}))
+    nil
+    {:middleware [[wrap :top]]}))
 
 (app {:request-method :get, :uri "/api/get"})
 ; {:status 200, :body [:top :api :ok]}
 ```
+
+Same middleware for all routes, using [top-level route data](route_data.md#top-level-route-data):
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api"
+       ["/get" {:get handler
+                :middleware [[wrap :specific]]}]]
+      {:data {:middleware [[wrap :generic]]}})))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:generic :specific :handler]}
+```
+
+## Execution order
+
+Chains of middleware specified in a vector are executed in sequential
+order, first to last, outside to inside.
+
+Here's a full example that shows the execution order of the middleware
+using all of the above techniques:
+
+
+```clj
+(def app
+  (ring/ring-handler
+    (ring/router
+      ["/api" {:middleware [[wrap :3-parent]]}
+       ["/get" {:get handler
+                :middleware [[wrap :4-route]]}]]
+      {:data {:middleware [[wrap :2-top-level-route-data]]}})
+    nil
+    {:middleware [[wrap :1-top-a]
+                  [wrap :1-top-b]]}))
+
+(app {:request-method :get, :uri "/api/get"})
+; {:status 200, :body [:1-top-a :1-top-b :2-top-level-route-data :3-parent :4-route :handler]}
+```
+
+The same order within each vector is also applied in all other
+locations where middleware can be specified.
+
+See also (manipulating) the [execution order of data-driven middleware](data_driven_middleware.md#using-middleware).
+
+## Which method should I use for defining middleware?
+
+- If you have middleware that you want to apply to the default handler (second argument of `ring/ring-handler`), use _top-level middleware_
+- If you have a generic middleware, that doesn't depend on the route, use _top-level middleware_ or _top-level route data_
+  - If you are using top-level route data anyway for some other reasons, it might be clearest to have all the middleware there. This is what most of the reitit examples do.
+- If you want to apply a middleware to only a couple of routes, use _nested middleware_ (ie. _route data_)
+- If you want a middleware to apply to all routes, but use route-specific data, you need _top-level route data_ combined with [Compiling Middleware](compiling_middleware.md)
+  - This is what many reitit features like [Ring Coercion](coercion.md) do. Check the examples & docs for the reitit features you want to use!

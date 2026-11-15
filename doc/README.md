@@ -6,7 +6,7 @@
 * Route [conflict resolution](./basics/route_conflicts.md)
 * First-class [route data](./basics/route_data.md)
 * Bi-directional routing
-* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema) & [clojure.spec](https://clojure.org/about/spec))
+* [Pluggable coercion](./coercion/coercion.md) ([schema](https://github.com/plumatic/schema), [clojure.spec](https://clojure.org/about/spec), [malli](https://github.com/metosin/malli))
 * Helpers for [ring](./ring/ring.md), [http](./http/interceptors.md), [pedestal](./http/pedestal.md) & [frontend](./frontend/basics.md)
 * Friendly [Error Messages](./basics/error_messages.md)
 * Extendable
@@ -24,6 +24,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 * `reitit-spec` [clojure.spec](https://clojure.org/about/spec) coercion
 * `reitit-schema` [Schema](https://github.com/plumatic/schema) coercion
 * `reitit-swagger` [Swagger2](https://swagger.io/) apidocs
+* `reitit-openapi` OpenAPI 3 apidocs
 * `reitit-swagger-ui` Integrated [Swagger UI](https://github.com/swagger-api/swagger-ui).
 * `reitit-frontend` Tools for [frontend routing](frontend/basics.md)
 * `reitit-http` http-routing with Pedestal-style Interceptors
@@ -40,7 +41,7 @@ There is [#reitit](https://clojurians.slack.com/messages/reitit/) in [Clojurians
 All bundled:
 
 ```clj
-[metosin/reitit "0.5.10"]
+[metosin/reitit "0.11.0"]
 ```
 
 Optionally, the parts can be required separately.
@@ -110,9 +111,9 @@ Reverse-routing:
 ;        :path "/api/orders/2"}
 ```
 
-## Ring-router
+## Ring router
 
-Ring-router adds support for `:handler` functions, `:middleware` and routing based on `:request-method`. It also supports pluggable parameter coercion (`clojure.spec`), data-driven middleware, route and middleware compilation, dynamic extensions and more.
+A Ring router function adds support for `:handler` functions, `:middleware` and routing based on `:request-method`. It also supports pluggable parameter coercion (`clojure.spec`), data-driven middleware, route and middleware compilation, dynamic extensions and more.
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -139,7 +140,7 @@ Routing:
 
 ```clj
 (app {:request-method :get, :uri "/api/admin/users"})
-; {:status 200, :body "ok", :wrap (:api :admin}
+; {:status 200, :body "ok", :wrap (:api :admin)}
 
 (app {:request-method :put, :uri "/api/admin/users"})
 ; nil

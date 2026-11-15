@@ -1,10 +1,11 @@
 (ns reitit.ring-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [clojure.set :as set]
+  (:require [clojure.set :as set]
+            [clojure.test :refer [are deftest is testing]]
+            [reitit.core :as r]
             [reitit.middleware :as middleware]
             [reitit.ring :as ring]
-            [reitit.core :as r]
-            [reitit.trie :as trie])
+            #?(:clj [reitit.trie :as trie]
+               :cljs [reitit.trie :as-alias trie]))
   #?(:clj
      (:import (clojure.lang ExceptionInfo))))
 
@@ -28,35 +29,36 @@
   (testing "nils are removed"
     (is (= 123
            ((ring/routes
-              (constantly nil)
-              nil
-              (constantly 123))
+             (constantly nil)
+             nil
+             (constantly 123))
             ::irrelevant))))
   (testing "can return nil"
     (is (= nil
            (ring/routes
-             nil
-             nil)))))
+            nil
+            nil)))))
 
-(deftest ring-router-test
+(deftest router-test
 
   (testing "all paths should have a handler"
     (is (thrown-with-msg?
-          ExceptionInfo
-          #"path \"/ping\" doesn't have a :handler defined for :get"
-          (ring/router ["/ping" {:get {}}]))))
+         ExceptionInfo
+         #"path \"/ping\" doesn't have a :handler defined for :get"
+         (ring/router ["/ping" {:get {}}]))))
 
   (testing "ring-handler"
     (let [api-mw #(mw % :api)
           router (ring/router
-                   ["/api" {:middleware [api-mw]}
-                    ["/all" handler]
-                    ["/get" {:get handler}]
-                    ["/users" {:middleware [[mw :users]]
-                               :get handler
-                               :post {:handler handler
-                                      :middleware [[mw :post]]}
-                               :handler handler}]])
+                  ["/api" {:middleware [api-mw]}
+                   ["/all" handler]
+                   ["/get" {:get handler}]
+                   ["/get-var" {:get {:handler #'handler}}]
+                   ["/users" {:middleware [[mw :users]]
+                              :get handler
+                              :post {:handler handler
+                                     :middleware [[mw :post]]}
+                              :handler handler}]])
           app (ring/ring-handler router)]
 
       (testing "router can be extracted"
@@ -73,6 +75,10 @@
         (is (= {:status 200, :body [:api :ok]}
                (app {:uri "/api/get" :request-method :get})))
         (is (= nil (app {:uri "/api/get" :request-method :post}))))
+
+      (testing "var handler"
+        (is (= {:status 200, :body [:api :ok]}
+               (app {:uri "/api/get-var" :request-method :get}))))
 
       (testing "expanded method handler"
         (is (= {:status 200, :body [:api :users :ok]}
@@ -95,8 +101,8 @@
 
   (testing "with top-level middleware"
     (let [router (ring/router
-                   ["/api" {:middleware [[mw :api]]}
-                    ["/get" {:get handler}]])
+                  ["/api" {:middleware [[mw :api]]}
+                   ["/get" {:get handler}]])
           app (ring/ring-handler router nil {:middleware [[mw :top]]})]
 
       (testing "router can be extracted"
@@ -109,16 +115,35 @@
         (is (= {:status 200, :body [:top :api :ok]}
                (app {:uri "/api/get" :request-method :get}))))))
 
+  (testing "middleware from registry"
+    (let [router (ring/router
+                  ["/api" {:middleware [:mw-foo]}
+                   ["/get" {:middleware [[:mw :inner]]
+                            :get handler}]]
+                  {::middleware/registry {:mw mw
+                                          :mw-foo #(mw % :foo)}})
+          app (ring/ring-handler router nil {:middleware [[:mw :top]]})]
+
+      (testing "router can be extracted"
+        (is (= router (ring/get-router app))))
+
+      (testing "not found"
+        (is (= nil (app {:uri "/favicon.ico"}))))
+
+      (testing "on match"
+        (is (= {:status 200, :body [:top :foo :inner :ok]}
+               (app {:uri "/api/get" :request-method :get}))))))
+
   (testing "named routes"
     (let [router (ring/router
-                   [["/api"
-                     ["/all" {:handler handler :name ::all}]
-                     ["/get" {:get {:handler handler :name ::HIDDEN}
-                              :name ::get}]
-                     ["/users" {:get handler
-                                :post handler
-                                :handler handler
-                                :name ::users}]]])
+                  [["/api"
+                    ["/all" {:handler handler :name ::all}]
+                    ["/get" {:get {:handler handler :name ::HIDDEN}
+                             :name ::get}]
+                    ["/users" {:get handler
+                               :post handler
+                               :handler handler
+                               :name ::users}]]])
           app (ring/ring-handler router)]
 
       (testing "router can be extracted"
@@ -141,21 +166,21 @@
 
 (deftest mw-variadic-test
   (let [app (ring/ring-handler
-              (ring/router
-                ["/" {:middleware [[mw-variadic "kikka" "kakka" "kukka"]]
-                      :handler handler}]))]
+             (ring/router
+              ["/" {:middleware [[mw-variadic "kikka" "kakka" "kukka"]]
+                    :handler handler}]))]
     (is (= {:status 200, :body [:kikka_kakka_kukka :ok]}
            (app {:request-method :get, :uri "/"})))))
 
 (deftest enforcing-data-rules-at-runtime-test
   (let [handler (constantly {:status 200, :body "ok"})
         app (ring/ring-handler
-              (ring/router
-                [["/api"
-                  ["/ping" handler]
-                  ["/admin" {::roles #{:admin}}
-                   ["/ping" handler]]]]
-                {:data {:middleware [wrap-enforce-roles]}}))]
+             (ring/router
+              [["/api"
+                ["/ping" handler]
+                ["/admin" {::roles #{:admin}}
+                 ["/ping" handler]]]]
+              {:data {:middleware [wrap-enforce-roles]}}))]
 
     (testing "public handler"
       (is (= {:status 200, :body "ok"}
@@ -175,8 +200,8 @@
 (deftest default-handler-test
   (let [response {:status 200, :body "ok"}
         router (ring/router
-                 [["/ping" {:get (constantly response)}]
-                  ["/pong" (constantly nil)]])
+                [["/ping" {:get (constantly response)}]
+                 ["/pong" (constantly nil)]])
         app (ring/ring-handler router)]
 
     (testing "match"
@@ -202,9 +227,9 @@
 
       (testing "with custom http responses"
         (let [app (ring/ring-handler router (ring/create-default-handler
-                                              {:not-found (constantly {:status -404})
-                                               :method-not-allowed (constantly {:status -405})
-                                               :not-acceptable (constantly {:status -406})}))]
+                                             {:not-found (constantly {:status -404})
+                                              :method-not-allowed (constantly {:status -405})
+                                              :not-acceptable (constantly {:status -406})}))]
           (testing "route doesn't match"
             (is (= -404 (:status (app {:request-method :get, :uri "/"})))))
           (testing "method doesn't match"
@@ -214,7 +239,7 @@
 
       (testing "with some custom http responses"
         (let [app (ring/ring-handler router (ring/create-default-handler
-                                              {:not-found (constantly {:status -404})}))]
+                                             {:not-found (constantly {:status -404})}))]
           (testing "route doesn't match"
             (is (= 405 (:status (app {:request-method :post, :uri "/ping"}))))))))))
 
@@ -227,11 +252,11 @@
 
     (testing "with defaults"
       (let [app (ring/ring-handler
-                  (ring/router
-                    [["/get" {:get (constantly response)
-                              :post (constantly response)}]
-                     ["/options" {:options (constantly response)}]
-                     ["/any" (constantly response)]]))]
+                 (ring/router
+                  [["/get" {:get (constantly response)
+                            :post (constantly response)}]
+                   ["/options" {:options (constantly response)}]
+                   ["/any" (constantly response)]]))]
 
         (testing "endpoint with a non-options handler"
           (let [request {:request-method :options, :uri "/get"}]
@@ -258,10 +283,10 @@
                         (constantly {:status 200, :body "ok"})]]
         (let [response {:status 200, :body "ok"}
               app (ring/ring-handler
-                    (ring/router
-                      ["/get" {:get (constantly response)
-                               :post (constantly response)}]
-                      {::ring/default-options-endpoint endpoint}))]
+                   (ring/router
+                    ["/get" {:get (constantly response)
+                             :post (constantly response)}]
+                    {::ring/default-options-endpoint endpoint}))]
 
           (testing "endpoint with a non-options handler"
             (let [request {:request-method :options, :uri "/get"}]
@@ -270,11 +295,11 @@
 
     (testing "disabled via options"
       (let [app (ring/ring-handler
-                  (ring/router
-                    [["/get" {:get (constantly response)}]
-                     ["/options" {:options (constantly response)}]
-                     ["/any" (constantly response)]]
-                    {::ring/default-options-endpoint nil}))]
+                 (ring/router
+                  [["/get" {:get (constantly response)}]
+                   ["/options" {:options (constantly response)}]
+                   ["/any" (constantly response)]]
+                  {::ring/default-options-endpoint nil}))]
 
         (testing "endpoint with a non-options handler"
           (is (= response (app {:request-method :get, :uri "/get"})))
@@ -287,6 +312,23 @@
           (is (= response (app {:request-method :get, :uri "/any"})))
           (is (= response (app {:request-method :options, :uri "/any"}))))))))
 
+(deftest query-method-test
+  (let [response {:status 200 :body {:hits 2}}
+        app (ring/ring-handler
+             (ring/router
+              [["/search" {:query {:handler (constantly response)}}]])
+             (ring/create-default-handler))]
+    (testing "query handler is matched"
+      (is (= response
+             (app {:request-method :query
+                   :uri "/search"
+                   :body-params {:filter "foo"}}))))
+    (testing "wrong method is not matched"
+      (is (= 405 (:status (app {:request-method :post :uri "/search"})))))
+    (testing "options allow header includes QUERY"
+      (is (= {:status 200 :body "" :headers {"Allow" "OPTIONS,QUERY"}}
+             (app {:request-method :options :uri "/search"}))))))
+
 (deftest trailing-slash-handler-test
   (let [ok {:status 200, :body "ok"}
         routes [["" {:summary "unreachable"
@@ -297,8 +339,8 @@
                                  :post (constantly ok)}]]]
     (testing "using :method :add"
       (let [app (ring/ring-handler
-                  (ring/router routes)
-                  (ring/redirect-trailing-slash-handler {:method :add}))]
+                 (ring/router routes)
+                 (ring/redirect-trailing-slash-handler {:method :add}))]
 
         (testing "exact matches work"
           (is (= ok (app {:request-method :get, :uri "/slash-less"})))
@@ -312,12 +354,20 @@
 
         (testing "does not strip slashes"
           (is (= nil (app {:request-method :get, :uri "/slash-less/"})))
-          (is (= nil (app {:request-method :post, :uri "/slash-less/"}))))))
+          (is (= nil (app {:request-method :post, :uri "/slash-less/"}))))
+
+        (testing "retains query-string in location header"
+          (are [method uri]
+            (is (= "/with-slash/?kikka=kukka"
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/with-slash"
+            :post "/with-slash"))))
 
     (testing "using :method :strip"
       (let [app (ring/ring-handler
-                  (ring/router routes)
-                  (ring/redirect-trailing-slash-handler {:method :strip}))]
+                 (ring/router routes)
+                 (ring/redirect-trailing-slash-handler {:method :strip}))]
 
         (testing "stripping to empty string doesn't match"
           (is (= nil (:status (app {:request-method :get, :uri "/"})))))
@@ -338,12 +388,22 @@
 
         (testing "strips multiple slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))
+
+        (testing "retains query-string in location header"
+          (are [method uri]
+            (is (= "/slash-less?kikka=kukka"
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/slash-less/"
+            :get "/slash-less//"
+            :post "/slash-less/"
+            :post "/slash-less//"))))
 
     (testing "without option (equivalent to using :method :both)"
       (let [app (ring/ring-handler
-                  (ring/router routes)
-                  (ring/redirect-trailing-slash-handler))]
+                 (ring/router routes)
+                 (ring/redirect-trailing-slash-handler))]
 
         (testing "exact matches work"
           (is (= ok (app {:request-method :get, :uri "/slash-less"})))
@@ -361,7 +421,43 @@
 
         (testing "strips multiple slashes"
           (is (= 301 (:status (app {:request-method :get, :uri "/slash-less/////"}))))
-          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))))))
+          (is (= 308 (:status (app {:request-method :post, :uri "/slash-less//"})))))
+
+        (testing "retains query-string in location header"
+          (are [method uri expected-location]
+            (is (= expected-location
+                   (get-in (app {:request-method method :uri uri :query-string "kikka=kukka"})
+                           [:headers "Location"])))
+            :get "/with-slash" "/with-slash/?kikka=kukka"
+            :get "/slash-less/" "/slash-less?kikka=kukka"
+            :get "/slash-less//" "/slash-less?kikka=kukka"
+            :post "/with-slash" "/with-slash/?kikka=kukka"
+            :post "/slash-less/" "/slash-less?kikka=kukka"
+            :post "/slash-less//" "/slash-less?kikka=kukka"))))
+
+    ;; See issue #337
+    (testing "Avoid external redirects"
+      (let [app (ring/ring-handler
+                 (ring/router [["*" {:get (constantly nil)}]])
+                 (ring/redirect-trailing-slash-handler))
+            resp (fn [uri & [query-string]]
+                   (let [r (app {:request-method :get :uri uri :query-string query-string})]
+                     {:status (:status r)
+                      :Location (get-in r [:headers "Location"])}))]
+        (testing "without query params"
+          (is (= {:status 301 :Location "/malicious.com/foo/"} (resp "//malicious.com/foo")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "//malicious.com/foo/")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "//malicious.com/foo//")))
+          (is (= {:status 301 :Location "/malicious.com/foo/"} (resp "///malicious.com/foo")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "///malicious.com/foo/")))
+          (is (= {:status 301 :Location "/malicious.com/foo"} (resp "///malicious.com/foo//"))))
+        (testing "with query params"
+          (is (= {:status 301 :Location "/malicious.com/foo/?bar=quux"} (resp "//malicious.com/foo" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "//malicious.com/foo/" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "//malicious.com/foo//" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo/?bar=quux"} (resp "///malicious.com/foo" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "///malicious.com/foo/" "bar=quux")))
+          (is (= {:status 301 :Location "/malicious.com/foo?bar=quux"} (resp "///malicious.com/foo//" "bar=quux"))))))))
 
 (deftest async-ring-test
   (let [promise #(let [value (atom ::nil)]
@@ -370,10 +466,10 @@
                      ([x] (reset! value x))))
         response {:status 200, :body "ok"}
         router (ring/router
-                 [["/ping" {:get (fn [_ respond _]
-                                   (respond response))}]
-                  ["/pong" (fn [_ respond _]
-                             (respond nil))]])
+                [["/ping" {:get (fn [_ respond _]
+                                  (respond response))}]
+                 ["/pong" (fn [_ respond _]
+                            (respond nil))]])
         app (ring/ring-handler router)]
 
     (testing "match"
@@ -436,12 +532,12 @@
         request {:uri "/api/avaruus" :request-method :get}
         create (fn [options]
                  (ring/ring-handler
-                   (ring/router
-                     ["/api" {:middleware [(middleware :olipa)]}
-                      ["/avaruus" {:middleware [(middleware :kerran)]
-                                   :get {:handler handler
-                                         :middleware [(middleware :avaruus)]}}]]
-                     options)))]
+                  (ring/router
+                   ["/api" {:middleware [(middleware :olipa)]}
+                    ["/avaruus" {:middleware [(middleware :kerran)]
+                                 :get {:handler handler
+                                       :middleware [(middleware :avaruus)]}}]]
+                   options)))]
 
     (testing "by default, all middleware are applied in order"
       (let [app (create nil)]
@@ -471,164 +567,310 @@
 
              (testing "from root"
                (let [app (ring/ring-handler
-                           (ring/router
-                             ["/*" (create nil)])
-                           (ring/create-default-handler))]
-                 (testing test
-                   (testing "different file-types"
-                     (let [response (app (request "/hello.json"))]
-                       (is (= "application/json" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
-                     (let [response (app (request "/hello.xml"))]
-                       (is (= "text/xml" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+                          (ring/router
+                           ["/*" (create nil)])
+                          (ring/create-default-handler))]
+                 (testing "different file-types"
+                   (let [response (app (request "/hello.json"))]
+                     (is (= "application/json" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
+                   (let [response (app (request "/hello.xml"))]
+                     (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
-                   (testing "index-files"
-                     (let [response (app (request "/docs"))]
-                       (is (= (redirect "/docs/index.html") response)))
-                     (let [response (app (request "/docs/"))]
-                       (is (= (redirect "/docs/index.html") response))))
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
-                   (testing "not found"
-                     (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                 (testing "index-files"
+                   (let [response (app (request "/docs"))]
+                     (is (= (redirect "/docs/") response)))
+                   (let [response (app (request "/docs/"))]
+                     (is (= 200 (:status response)))))
 
-                   (testing "3-arity"
-                     (let [result (atom nil)
-                           respond (partial reset! result)
-                           raise ::not-called]
-                       (app (request "/hello.xml") respond raise)
-                       (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
-                       (is (get-in @result [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))
+                 (testing "not found"
+                   (let [response (app (request "/not-found"))]
+                     (is (= 404 (:status response)))))
+
+                 (testing "3-arity"
+                   (let [result (atom nil)
+                         respond (partial reset! result)
+                         raise ::not-called]
+                     (app (request "/hello.xml") respond raise)
+                     (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+                     (is (get-in @result [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))
 
              (testing "from path"
                (let [app (ring/ring-handler
-                           (ring/router
-                             ["/files/*" (create nil)])
-                           (ring/create-default-handler))
+                          (ring/router
+                           ["/files/*" (create nil)])
+                          (ring/create-default-handler))
                      request #(request (str "/files" %))
                      redirect #(redirect (str "/files" %))]
-                 (testing test
-                   (testing "different file-types"
-                     (let [response (app (request "/hello.json"))]
-                       (is (= "application/json" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
-                     (let [response (app (request "/hello.xml"))]
-                       (is (= "text/xml" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+                 (testing "different file-types"
+                   (let [response (app (request "/hello.json"))]
+                     (is (= "application/json" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
+                   (let [response (app (request "/hello.xml"))]
+                     (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
-                   (testing "index-files"
-                     (let [response (app (request "/docs"))]
-                       (is (= (redirect "/docs/index.html") response)))
-                     (let [response (app (request "/docs/"))]
-                       (is (= (redirect "/docs/index.html") response))))
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
-                   (testing "not found"
-                     (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                 (testing "index-files"
+                   (let [response (app (request "/docs"))]
+                     (is (= (redirect "/docs/") response)))
+                   (let [response (app (request "/docs/"))]
+                     (is (= 200 (:status response)))))
 
-                   (testing "3-arity"
-                     (let [result (atom nil)
-                           respond (partial reset! result)
-                           raise ::not-called]
-                       (app (request "/hello.xml") respond raise)
-                       (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
-                       (is (get-in @result [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))))
+                 (testing "not found"
+                   (let [response (app (request "/not-found"))]
+                     (is (= 404 (:status response)))))
+
+                 (testing "3-arity"
+                   (let [result (atom nil)
+                         respond (partial reset! result)
+                         raise ::not-called]
+                     (app (request "/hello.xml") respond raise)
+                     (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+                     (is (get-in @result [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))
 
            (testing "outside a router"
 
              (testing "from root"
                (let [app (ring/ring-handler
-                           (ring/router [])
-                           (ring/routes
-                             (create {:path "/"})
-                             (ring/create-default-handler)))]
-                 (testing test
-                   (testing "different file-types"
-                     (let [response (app (request "/hello.json"))]
-                       (is (= "application/json" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
-                     (let [response (app (request "/hello.xml"))]
-                       (is (= "text/xml" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+                          (ring/router [])
+                          (ring/routes
+                           (create {:path "/" :not-found-handler (fn [x] {:status 404 :body "resource-handler"})})
+                           (ring/create-default-handler)))]
+                 (testing "different file-types"
+                   (let [response (app (request "/hello.json"))]
+                     (is (= "application/json" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
+                   (let [response (app (request "/hello.xml"))]
+                     (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
-                   (testing "index-files"
-                     (let [response (app (request "/docs"))]
-                       (is (= (redirect "/docs/index.html") response)))
-                     (let [response (app (request "/docs/"))]
-                       (is (= (redirect "/docs/index.html") response))))
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
-                   (testing "not found"
-                     (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                 (testing "index-files"
+                   (let [response (app (request "/docs"))]
+                     (is (= (redirect "/docs/") response)))
+                   (let [response (app (request "/docs/"))]
+                     (is (= 200 (:status response)))))
 
-                   (testing "3-arity"
-                     (let [result (atom nil)
-                           respond (partial reset! result)
-                           raise ::not-called]
-                       (app (request "/hello.xml") respond raise)
-                       (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
-                       (is (get-in @result [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))
+                 (testing "not found"
+                   (let [response (app (request "/not-found"))]
+                     (is (= 404 (:status response)))
+                     (is (= "resource-handler" (:body response)))))
+
+                 (testing "3-arity"
+                   (let [result (atom nil)
+                         respond (partial reset! result)
+                         raise ::not-called]
+                     (app (request "/hello.xml") respond raise)
+                     (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+                     (is (get-in @result [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result))))))))
 
              (testing "from path"
                (let [app (ring/ring-handler
-                           (ring/router [])
-                           (ring/routes
-                             (create {:path "/files"})
-                             (ring/create-default-handler)))
+                          (ring/router [])
+                          (ring/routes
+                           (create {:path "/files" :not-found-handler (fn [x] {:status 404 :body "resource-handler"})})
+                           (ring/create-default-handler)))
                      request #(request (str "/files" %))
                      redirect #(redirect (str "/files" %))]
-                 (testing test
-                   (testing "different file-types"
-                     (let [response (app (request "/hello.json"))]
-                       (is (= "application/json" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
-                     (let [response (app (request "/hello.xml"))]
-                       (is (= "text/xml" (get-in response [:headers "Content-Type"])))
-                       (is (get-in response [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
+                 (testing "different file-types"
+                   (let [response (app (request "/hello.json"))]
+                     (is (= "application/json" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "{\"hello\": \"file\"}" (slurp (:body response)))))
+                   (let [response (app (request "/hello.xml"))]
+                     (is (= "text/xml" (get-in response [:headers "Content-Type"])))
+                     (is (get-in response [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body response))))))
 
-                   (testing "index-files"
-                     (let [response (app (request "/docs"))]
-                       (is (= (redirect "/docs/index.html") response)))
-                     (let [response (app (request "/docs/"))]
-                       (is (= (redirect "/docs/index.html") response))))
+                 (testing "with url decoding"
+                   (let [response (app (request "/with%20space.txt"))]
+                     (is (= 200 (:status response)))
+                     (is (= "hello\n" (slurp (:body response))))))
 
-                   (testing "not found"
-                     (let [response (app (request "/not-found"))]
-                       (is (= 404 (:status response)))))
+                 (testing "index-files"
+                   (let [response (app (request "/docs"))]
+                     (is (= (redirect "/docs/") response)))
+                   (let [response (app (request "/docs/"))]
+                     (is (= 200 (:status response)))))
 
-                   (testing "3-arity"
-                     (let [result (atom nil)
-                           respond (partial reset! result)
-                           raise ::not-called]
-                       (app (request "/hello.xml") respond raise)
-                       (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
-                       (is (get-in @result [:headers "Last-Modified"]))
-                       (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))))))))
+                 (testing "not found"
+                   (let [response (app {:uri "/not-found" :request-method :get})]
+                     (is (= 404 (:status response)))
+                     (is (= "" (:body response))))
+                   (let [response (app {:uri "/files/not-found" :request-method :get})]
+                     (is (= 404 (:status response)))
+                     (is (= "resource-handler" (:body response)))))
+
+                 (testing "3-arity"
+                   (let [result (atom nil)
+                         respond (partial reset! result)
+                         raise ::not-called]
+                     (app (request "/hello.xml") respond raise)
+                     (is (= "text/xml" (get-in @result [:headers "Content-Type"])))
+                     (is (get-in @result [:headers "Last-Modified"]))
+                     (is (= "<xml><hello>file</hello></xml>\n" (slurp (:body @result)))))))))
+
+           (testing "with index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response))))))
+
+           (testing "without index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? false
+                                        :index-redirect? false})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= 404 (:status response))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= 200 (:status response)))
+                   (is (= "<h1>hello</h1>\n" (slurp (:body response))))))))
+
+           (testing "with canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/") response)))
+                 (testing "not found if dir doesn't exist"
+                   (let [response (app (request "/foobar"))]
+                     (is (= 404 (:status response)))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= 200 (:status response))))
+                 (let [response (app (request "/docs/index.html"))]
+                   (is (= 200 (:status response)))))))
+
+           (testing "with canonicalize-uris and index-redirect"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? true
+                                        :index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response))))))
+
+           (testing "without canonicalize-uris"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:canonicalize-uris? false
+                                        :index-redirect? true})])
+                        (ring/create-default-handler))]
+
+               (testing "index-files"
+                 (let [response (app (request "/docs"))]
+                   (is (= 404 (:status response))))
+                 (let [response (app (request "/docs/"))]
+                   (is (= (redirect "/docs/index.html") response)))
+                 (let [response (app (request "/foobar"))]
+                   (is (= 404 (:status response)))))))
+
+           (testing "with additional mime types"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create {:mime-types {"webmanifest" "application/manifest+json"}})])
+                        (ring/create-default-handler))
+                   response (app (request "/site.webmanifest"))]
+                  (is (= "application/manifest+json" (get-in response [:headers "Content-Type"])))))
+           (testing "when content type cannot be guessed"
+             (let [app (ring/ring-handler
+                        (ring/router
+                         ["/*" (create nil)])
+                        (ring/create-default-handler))
+                   response (app (request "/site.webmanifest"))]
+                  (is (not (contains? (:headers response) "Content-Type"))))))))))
+
+#?(:clj
+   (deftest file-resource-handler-not-found-test
+     (let [redirect (fn [uri] {:status 302, :body "", :headers {"Location" uri}})
+           request (fn [uri] {:uri uri, :request-method :get})
+           not-found-handler (fn [_] {:status 404, :body "not-found-handler"})]
+
+       (doseq [[name create] [["resource-handler" ring/create-resource-handler]
+                              ["file-handler" #(ring/create-file-handler (assoc % :root "dev-resources/public"))]]]
+         (testing (str "for " name)
+           (testing "inside a router"
+             (let [create-app (fn [handler]
+                                (ring/ring-handler
+                                 (ring/router
+                                  ["/files/*" handler])))]
+               (testing "not-found-handler not set"
+                 (let [app (create-app (create nil))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "" (:body (app (request "/files/not-found")))))))
+
+               (testing "not-found-handler set"
+                 (let [app (create-app (create {:not-found-handler not-found-handler}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "not-found-handler" (:body (app (request "/files/not-found")))))))))
+
+           (testing "outside a router"
+             (let [create-app (fn [handler]
+                                (ring/ring-handler
+                                 (ring/router [])
+                                 handler))]
+               (testing "not-found-handler not set"
+                 (let [app (create-app (create {:path "/files"}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (nil? (app (request "/files/not-found"))))))
+
+               (testing "not-found-handler set"
+                 (let [app (create-app (create {:path "/files" :not-found-handler not-found-handler}))]
+                   (is (nil? (app (request "/not-found"))))
+                   (is (= "not-found-handler" (:body (app (request "/files/not-found"))))))))))))))
 
 (deftest router-available-in-default-branch
   (testing "1-arity"
     ((ring/ring-handler
-       (ring/router [])
-       (fn [{::r/keys [router]}]
-         (is router)))
+      (ring/router [])
+      (fn [{::r/keys [router]}]
+        (is router)))
      {}))
   (testing "3-arity"
     ((ring/ring-handler
-       (ring/router [])
-       (fn [{::r/keys [router]} _ _]
-         (is router)))
+      (ring/router [])
+      (fn [{::r/keys [router]} _ _]
+        (is router)))
      {} ::respond ::raise)))
 
 #?(:clj
@@ -636,13 +878,44 @@
      (testing "in enough concurrent system, path-parameters can bleed"
        (doseq [compiler [trie/java-trie-compiler trie/clojure-trie-compiler]]
          (let [app (ring/ring-handler
-                     (ring/router
-                       ["/:id" (fn [request]
-                                 {:status 200
-                                  :body (-> request :path-params :id)})])
-                     {::trie/trie-compiler compiler})]
+                    (ring/router
+                     ["/:id" (fn [request]
+                               {:status 200
+                                :body (-> request :path-params :id)})])
+                    {::trie/trie-compiler compiler})]
            (dotimes [_ 10]
              (future
-               (dotimes [n 100000]
-                 (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
-                   (is (= body (str n))))))))))))
+              (dotimes [n 100000]
+                (let [body (:body (app {:request-method :get, :uri (str "/" n)}))]
+                  (is (= body (str n))))))))))))
+
+(def routes (atom nil))
+
+(deftest reloading-ring-handler-test
+  (let [r (fn [body] {:status 200, :body body})]
+    (reset! routes ["/" (constantly (r "1"))]) ;; initial value
+    (let [create-handler (fn [] (ring/ring-handler (ring/router @routes)))]
+      (testing "static ring handler does not see underlying route changes"
+        (let [app (create-handler)]
+          (is (= (r "1") (app {:uri "/", :request-method :get})))
+          (reset! routes ["/" (constantly (r "2"))]) ;; redefine
+          (is (= (r "1") (app {:uri "/", :request-method :get})))))
+
+      (testing "reloading ring handler sees underlying route changes"
+        (let [app (ring/reloading-ring-handler create-handler)]
+          (is (= (r "2") (app {:uri "/", :request-method :get})))
+          (reset! routes ["/" (constantly (r "3"))]) ;; redefine again
+          (is (= (r "3") (app {:uri "/", :request-method :get}))))))))
+
+(defrecord FooTest [a b])
+
+(deftest path-update-fix-686
+  (testing "records are retained"
+    (is (record? (-> ["/api/foo" {:get {:handler (constantly {:status 200})
+                                        :test (FooTest. 1 2)}}]
+                     (ring/router)
+                     (r/compiled-routes)
+                     (first)
+                     (second)
+                     :get
+                     :test)))))

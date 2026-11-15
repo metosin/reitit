@@ -13,25 +13,47 @@
 ./scripts/test.sh cljs
 ```
 
+## Formatting
+
+```bash
+clojure-lsp format
+clojure-lsp clean-ns
+```
+
 ## Documentation
 
 The documentation lives under `doc` and it is hosted on [cljdoc](https://cljdoc.org). See their
 documentation for [library authors](https://github.com/cljdoc/cljdoc/blob/master/doc/userguide/for-library-authors.adoc)
 
-## To bump up version:
+## Updating deps
+
+
+* `lein ancient upgrade`
+* Mention non-dev non-test dep upgrades in CHANGELOG.md
+* `npm update --save`
+* Make a PR, run CI
+
+## Making a release
 
 We use [Break Versioning][breakver]. Remember our promise: patch-level bumps never include breaking changes!
 
 [breakver]: https://github.com/ptaoussanis/encore/blob/master/BREAK-VERSIONING.md
 
 ```bash
-# new version
+# create a release commit
 ./scripts/set-version "1.0.0"
-./scripts/lein-modules install
 
-# works
-lein test
+# !!! update the changelog
 
-# deploy to clojars
-./scripts/lein-modules do clean, deploy clojars
+git add -u
+git commit -m "Release 1.0.0"
+
+# push the commit
+git push
+
+# !!! check that tests pass on CI
 ```
+
+* Create a new release on github at <https://github.com/metosin/reitit/releases>
+  * This will trigger the automated release workflow <https://github.com/metosin/reitit/actions/workflows/release.yml>
+* Announce the release at least on #reitit in Clojurians.

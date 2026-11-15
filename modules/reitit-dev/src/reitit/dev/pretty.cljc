@@ -1,18 +1,15 @@
 (ns reitit.dev.pretty
-  (:require [clojure.string :as str]
+  (:require [arrangement.core] ;; spell-spec
             [clojure.spec.alpha :as s]
-            [reitit.exception :as exception]
-            [arrangement.core]
-    ;; spell-spec
-            [spell-spec.expound]
-    ;; expound
+            [clojure.string :as str]
+            [expound.alpha] ;; fipp
             [expound.ansi]
-            [expound.alpha]
-    ;; fipp
-            [fipp.visit]
             [fipp.edn]
             [fipp.ednize]
-            [fipp.engine]))
+            [fipp.engine]
+            [fipp.visit]
+            [reitit.exception :as exception]
+            [spell-spec.expound])) ;; expound
 
 ;;
 ;; colors
@@ -48,17 +45,17 @@
    :error 196})
 
 (comment
-  (defn- -color [color & text]
-    (str "\033[38;5;" (colors color color) "m" (apply str text) "\u001B[0m"))
+ (defn- -color [color & text]
+   (str "\033[38;5;" (colors color color) "m" (apply str text) "\u001B[0m"))
 
-  (doseq [c (range 0 255)]
-    (println (-color c "kikka") "->" c))
+ (doseq [c (range 0 255)]
+   (println (-color c "kikka") "->" c))
 
-  (doseq [[n c] colors]
-    (println (-color c "kikka") "->" c n))
+ (doseq [[n c] colors]
+   (println (-color c "kikka") "->" c n))
 
-  (doseq [[k v] expound.ansi/sgr-code]
-    (println (expound.ansi/sgr "kikka" k) "->" k)))
+ (doseq [[k v] expound.ansi/sgr-code]
+   (println (expound.ansi/sgr "kikka" k) "->" k)))
 
 (defn- -start [x] (str "\033[38;5;" x "m"))
 (defn- -end [] "\u001B[0m")
@@ -152,13 +149,13 @@
    (printer nil))
   ([options]
    (map->EdnPrinter
-     (merge
-       {:width 80
-        :symbols {}
-        :print-length *print-length*
-        :print-level *print-level*
-        :print-meta *print-meta*}
-       options))))
+    (merge
+     {:width 80
+      :symbols {}
+      :print-length *print-length*
+      :print-level *print-level*
+      :print-meta *print-meta*}
+     options))))
 
 (defn pprint
   ([x] (pprint x {}))
@@ -177,7 +174,7 @@
 ;; TODO: this is hack, but seems to work and is safe.
 (defn source-str [[target _ file line]]
   (try
-    (if (and (not= 1 line))
+    (if (not= 1 line)
       (let [file-name (str/replace file #"(.*?)\.\S[^\.]+" "$1")
             target-name (name target)
             ns (str (subs target-name 0 (or (str/index-of target-name (str file-name "$")) 0)) file-name)]
@@ -193,7 +190,7 @@
      (color :title message " ")
      (color :title-dark (repeat-str "-" between) " ")
      (color :title source) " "
-     (color :title-dark (str "--"))]))
+     (color :title-dark "--")]))
 
 (defn footer [{:keys [width]}]
   (color :title-dark (repeat-str "-" width)))
@@ -209,33 +206,33 @@
 (defn exception-str [message source printer]
   (with-out-str
     (print-doc
-      [:group
-       (title "Router creation failed" source printer)
-       [:break] [:break]
-       message
-       [:break]
-       (footer printer)]
-      printer)))
+     [:group
+      (title "Router creation failed" source printer)
+      [:break] [:break]
+      message
+      [:break]
+      (footer printer)]
+     printer)))
 
 (defmulti format-exception (fn [type _ _] type))
 
 (defn exception [e]
   (let [data (-> e ex-data :data)
         message (format-exception (-> e ex-data :type) #?(:clj (.getMessage ^Exception e) :cljs (ex-message e)) data)
-        source #?(:clj  (->> e Throwable->map :trace
-                             (drop-while #(not= (name (first %)) "reitit.core$router"))
-                             (drop-while #(= (name (first %)) "reitit.core$router"))
-                             next first source-str)
+        source #?(:clj (->> e Throwable->map :trace
+                            (drop-while #(not= (name (first %)) "reitit.core$router"))
+                            (drop-while #(= (name (first %)) "reitit.core$router"))
+                            next first source-str)
                   :cljs "unknown")]
     (ex-info (exception-str message source (printer)) (assoc (or data {}) ::exception/cause e))))
 
 (defn de-expound-colors [^String s mappings]
   (let [s' (reduce
-             (fn [s [from to]]
-               (.replace ^String s
-                         ^String (expound.ansi/esc [from])
-                         ^String (-start (colors to))))
-             s mappings)]
+            (fn [s [from to]]
+              (.replace ^String s
+                        ^String (expound.ansi/esc [from])
+                        ^String (-start (colors to))))
+            s mappings)]
     (.replace ^String s'
               ^String (expound.ansi/esc [:none])
               (str (expound.ansi/esc [:none]) (-start (colors :text))))))
@@ -254,9 +251,9 @@
 
 (def expound-printer
   (expound.alpha/custom-printer
-    {:theme :figwheel-theme
-     :show-valid-values? false
-     :print-specs? false}))
+   {:theme :figwheel-theme
+    :show-valid-values? false
+    :print-specs? false}))
 
 ;;
 ;; Formatters
@@ -276,18 +273,18 @@
                            " ")
               (edn (not-empty (select-keys route-data [:conflicting])))])]
      (into
-       [:group]
-       (mapv
-         (fn [[[path route-data] vals]]
-           [:group
-            (path-report path route-data)
-            (into
-              [:group]
-              (map
-                (fn [[path route-data]] (path-report path route-data))
-                vals))
-            [:break]])
-         conflicts)))
+      [:group]
+      (mapv
+       (fn [[[path route-data] vals]]
+         [:group
+          (path-report path route-data)
+          (into
+           [:group]
+           (map
+            (fn [[path route-data]] (path-report path route-data))
+            vals))
+          [:break]])
+       conflicts)))
    [:span (text "Either fix the conflicting paths or disable the conflict resolution")
     [:break] (text "by setting route data for conflicting route: ") [:break] [:break]
     (edn {:conflicting true} {:margin 3})
@@ -302,19 +299,19 @@
    (text "Router contains conflicting route names:")
    [:break] [:break]
    (into
-     [:group]
-     (mapv
-       (fn [[name vals]]
-         [:group
-          [:span (text name)]
-          [:break]
-          (into
-            [:group]
-            (map
-              (fn [p] [:span (color :grey "-> " p) [:break]])
-              (mapv first vals)))
-          [:break]])
-       conflicts))
+    [:group]
+    (mapv
+     (fn [[name vals]]
+       [:group
+        [:span (text name)]
+        [:break]
+        (into
+         [:group]
+         (map
+          (fn [p] [:span (color :grey "-> " p) [:break]])
+          (mapv first vals)))
+        [:break]])
+     conflicts))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-conflicts")
    [:break]])
 
@@ -323,22 +320,22 @@
    (text "Invalid route data:")
    [:break] [:break]
    (into
-     [:group]
-     (map
-       (fn [{:keys [data path spec scope]}]
-         [:group
-          [:span (color :grey "-- On route -----------------------")]
-          [:break]
-          [:break]
-          (text path) (if scope [:span " " (text scope)])
-          [:break]
-          [:break]
-          (-> (s/explain-data spec data)
-              (expound-printer)
-              (with-out-str)
-              (fippify))
-          [:break]])
-       problems))
+    [:group]
+    (map
+     (fn [{:keys [data path spec scope]}]
+       [:group
+        [:span (color :grey "-- On route -----------------------")]
+        [:break]
+        [:break]
+        (text path) (if scope [:span " " (text scope)])
+        [:break]
+        [:break]
+        (-> (s/explain-data spec data)
+            (expound-printer)
+            (with-out-str)
+            (fippify))
+        [:break]])
+     problems))
    (color :white "https://cljdoc.org/d/metosin/reitit/CURRENT/doc/basics/route-data-validation")
    [:break]])
 

@@ -4,7 +4,9 @@
 #?(:clj
    (def temp-file-part
      "Schema for file param created by ring.middleware.multipart-params.temp-file store."
-     [:map {:json-schema {:type "file"}}
+     [:map {:swagger {:type "file"}
+            :json-schema {:type "string"
+                          :format "binary"}}
       [:filename string?]
       [:content-type string?]
       [:size int?]
@@ -13,7 +15,9 @@
 #?(:clj
    (def bytes-part
      "Schema for file param created by ring.middleware.multipart-params.byte-array store."
-     [:map {:json-schema {:type "file"}}
+     [:map {:swagger {:type "file"}
+            :json-schema {:type "string"
+                          :format "binary"}}
       [:filename string?]
       [:content-type string?]
       [:bytes bytes?]]))

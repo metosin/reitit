@@ -1,5 +1,6 @@
 (ns frontend.core
     (:require [reagent.core :as r]
+              [reagent.dom :as rd]
               [reitit.frontend :as rf]
               [reitit.frontend.easy :as rfe]
               [reitit.frontend.controllers :as rfc]
@@ -18,11 +19,18 @@
     [:div
      [:ul
       [:li [:a {:href (rfe/href ::item {:id 1})} "Item 1"]]
-      [:li [:a {:href (rfe/href ::item {:id 2} {:foo "bar"})} "Item 2"]]]
-     (if id
+      [:li [:a {:href (rfe/href ::item {:id 2} {:foo "bar"} "zzz")} "Item 2"]]]
+     (when id
        [:h2 "Selected item " id])
-     (if (:foo query)
-       [:p "Optional foo query param: " (:foo query)])]))
+     [:p "Query params: " [:pre (pr-str query)]]
+     [:ul
+      [:li [:a {:on-click #(rfe/set-query {:a 1})} "set a=1"]]
+      [:li [:a {:on-click #(rfe/set-query {:a 2} {:replace true})} "set a=2 and replaceState"]]
+      [:li [:a {:on-click (fn [_] (rfe/set-query #(assoc % :foo "zzz")))} "add foo=zzz"]]]
+     [:button
+      {:on-click #(rfe/navigate ::item {:path-params {:id 3}
+                                        :query-params {:foo "aaa"}})}
+      "Navigate example, go to item 3"]]))
 
 (defonce match (r/atom nil))
 
@@ -31,9 +39,8 @@
    [:ul
     [:li [:a {:href (rfe/href ::frontpage)} "Frontpage"]]
     [:li
-     [:a {:href (rfe/href ::item-list)} "Item list"]
-     ]]
-   (if @match
+     [:a {:href (rfe/href ::item-list)} "Item list"]]]
+   (when @match
      (let [view (:view (:data @match))]
        [view @match]))
    [:pre (with-out-str (fedn/pprint @match))]])
@@ -63,7 +70,8 @@
       ["/:id"
        {:name ::item
         :parameters {:path {:id s/Int}
-                     :query {(s/optional-key :foo) s/Keyword}}
+                     :query {(s/optional-key :a) s/Int
+                             (s/optional-key :foo) s/Keyword}}
         :controllers [{:parameters {:path [:id]}
                        :start (fn [{:keys [path]}]
                                 (js/console.log "start" "item controller" (:id path)))
@@ -81,6 +89,6 @@
                      (if new-match
                        (assoc new-match :controllers (rfc/apply-controllers (:controllers old-match) new-match))))))
     {:use-fragment true})
-  (r/render [current-page] (.getElementById js/document "app")))
+  (rd/render [current-page] (.getElementById js/document "app")))
 
 (init!)

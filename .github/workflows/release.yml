@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published # reacts to releases and prereleases, but not their drafts
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: "Setup Java"
+      uses: actions/setup-java@v5
+      with:
+        distribution: zulu
+        java-version: 11
+    - name: "Setup Clojure"
+      uses: DeLaGuardo/setup-clojure@master
+      with:
+        lein: 2.9.5
+    - name: Deploy to Clojars
+      run: ./scripts/lein-modules do clean, deploy clojars
+      env:
+        CLOJARS_USERNAME: metosinci
+        CLOJARS_PASSWORD: "${{ secrets.CLOJARS_DEPLOY_TOKEN }}"

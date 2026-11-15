@@ -1,5 +1,5 @@
 (ns reitit.impl-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [are deftest is]]
             [reitit.impl :as impl]))
 
 (deftest strip-nils-test
@@ -41,7 +41,33 @@
                             :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
                             :k :kikka
                             :qk ::kikka
-                            :nil nil}))))
+                            :nil nil})))
+  (is (= {:n "1"
+          :n1 "-1"
+          :n2 "1"
+          :n3 "1"
+          :n4 "1"
+          :n5 "1"
+          :d "2.2"
+          :b "true"
+          :s "kikka"
+          :u "c2541900-17a7-4353-9024-db8ac258ba4e"
+          :k "kikka"
+          :qk "reitit.impl-test/kikka"
+          :nil nil}
+         (impl/path-params {:n 1
+                            :n1 -1
+                            :n2 (long 1)
+                            :n3 (int 1)
+                            :n4 (short 1)
+                            :n5 (byte 1)
+                            :d 2.2
+                            :b true
+                            :s "kikka"
+                            :u #uuid "c2541900-17a7-4353-9024-db8ac258ba4e"
+                            :k :kikka
+                            :qk ::kikka
+                            :nil nil} {:url-encode? false}))))
 
 (deftest query-params-test
   (are [x y]
@@ -50,6 +76,8 @@
     {"a" "b"} "a=b"
     {:a 1} "a=1"
     {:a nil} "a="
+    {:a []} "a="
+    {:a '()} "a="
     {:a :b :c "d"} "a=b&c=d"
     {:a "b c"} "a=b+c"
     {:a ["b" "c"]} "a=b&a=c"
@@ -169,3 +197,39 @@
           :path-parts ["https://google.com"]
           :path-params #{}}
          (impl/parse "https://google.com" nil))))
+
+(deftest path-update-test
+  (is (= {:get {:responses {200 {:body [[:map [:total :int]]]}}
+                :parameters {:query [[:map [:x :int]]]}},
+          :parameters {:query [[:map [:x :int]]]}
+          :post {}}
+         (impl/path-update
+          {:parameters {:query [:map [:x :int]]}
+           :get {:parameters {:query [:map [:x :int]]}
+                 :responses {200 {:body [:map [:total :int]]}}}
+           :post {}}
+          [[[:parameters any?] vector]
+           [[any? :parameters any?] vector]
+           [[:responses any? :body] vector]
+           [[any? :responses any? :body] vector]]))))
+
+(deftest meta-merge-test
+  (is (= {:get {:responses {200 {:body [[:map [:total :int]]
+                                        [:map [:total :int]]]}},
+                :parameters {:query [[:map [:x :int]]
+                                     [:map [:y :int]]]}},
+          :parameters {:query [[:map [:x :int]]
+                               [:map [:y :int]]]},
+          :post {:parameters {:query [[:map [:y :int]]]}}}
+         (impl/meta-merge
+          {:parameters {:query [:map [:x :int]]}
+           :get {:parameters {:query [:map [:x :int]]}
+                 :responses {200 {:body [:map [:total :int]]}}}}
+          {:parameters {:query [:map [:y :int]]}
+           :get {:parameters {:query [:map [:y :int]]}
+                 :responses {200 {:body [:map [:total :int]]}}}
+           :post {:parameters {:query [:map [:y :int]]}}}
+          {:update-paths [[[:parameters any?] vector]
+                          [[any? :parameters any?] vector]
+                          [[:responses any? :body] vector]
+                          [[any? :responses any? :body] vector]]}))))

@@ -1,8 +1,8 @@
 (defproject ring-example "0.1.0-SNAPSHOT"
   :description "Reitit-http with pedestal"
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [io.pedestal/pedestal.service "0.5.5"]
-                 [io.pedestal/pedestal.jetty "0.5.5"]
-                 [metosin/reitit-pedestal "0.5.10"]
-                 [metosin/reitit "0.5.10"]]
+  :dependencies [[org.clojure/clojure "1.11.2"]
+                 [io.pedestal/pedestal.service "0.6.3"]
+                 [io.pedestal/pedestal.jetty "0.6.3"]
+                 [metosin/reitit-pedestal "0.11.0"]
+                 [metosin/reitit "0.11.0"]]
   :repl-options {:init-ns example.server})

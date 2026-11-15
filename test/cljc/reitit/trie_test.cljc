@@ -1,5 +1,5 @@
 (ns reitit.trie-test
-  (:require [clojure.test :refer [deftest testing is are]]
+  (:require [clojure.test :refer [are deftest is testing]]
             [reitit.trie :as trie]))
 
 (deftest into-set-test
@@ -41,7 +41,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/{:kerran}/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/{a.b/c}/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/{:a.b/c}/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/{" (trie/->CatchAll (keyword "avaruus}"))]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/{" (trie/->CatchAll (keyword "valtavan.suuri/avaruus}"))])))
@@ -53,7 +55,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/*avaruus"]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
@@ -65,7 +69,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/" (trie/->Wild :kerran) "/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/" (trie/->Wild :a.b/c) "/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/" (trie/->CatchAll :avaruus)]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/" (trie/->CatchAll :valtavan.suuri/avaruus)])))
@@ -77,7 +83,9 @@
 
         "/olipa/:kerran/avaruus", ["/olipa/:kerran/avaruus"]
         "/olipa/{kerran}/avaruus", ["/olipa/{kerran}/avaruus"]
+        "/olipa/{:kerran}/avaruus", ["/olipa/{:kerran}/avaruus"]
         "/olipa/{a.b/c}/avaruus", ["/olipa/{a.b/c}/avaruus"]
+        "/olipa/{:a.b/c}/avaruus", ["/olipa/{:a.b/c}/avaruus"]
         "/olipa/kerran/*avaruus", ["/olipa/kerran/*avaruus"]
         "/olipa/kerran/{*avaruus}", ["/olipa/kerran/{*avaruus}"]
         "/olipa/kerran/{*valtavan.suuri/avaruus}", ["/olipa/kerran/{*valtavan.suuri/avaruus}"]))))
@@ -121,4 +129,11 @@
                       (trie/compile)
                       (trie/path-matcher)) "/a")]
        (is (record? (:params match)))
-       (is (= (trie/->Match {:a "a"} {:a 1}) (update match :params (partial into {})))))))
+       (is (= (trie/->Match {:a "a"} {:a 1}) (update match :params (partial into {}))))))
+
+  (testing "space as separator"
+    (is (= (trie/->Match {:arg1 "say" :arg2 "hello"} ::cmd1)
+           ((-> (trie/insert nil "/command1 {arg1} {arg2}" ::cmd1)
+                (trie/insert "/command2 {arg1} {arg2} {arg3}" ::cmd2)
+                (trie/compile)
+                (trie/path-matcher)) "/command1 say hello")))))

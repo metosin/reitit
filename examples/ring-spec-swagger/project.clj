@@ -1,7 +1,8 @@
 (defproject ring-example "0.1.0-SNAPSHOT"
   :description "Reitit Ring App with Swagger"
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [ring/ring-jetty-adapter "1.7.1"]
-                 [metosin/reitit "0.5.10"]]
+  :dependencies [[org.clojure/clojure "1.11.2"]
+                 [ring/ring-jetty-adapter "1.12.1"]
+                 [metosin/reitit "0.11.0"]
+                 [metosin/ring-swagger-ui "5.9.0"]]
   :repl-options {:init-ns example.server}
-  :profiles {:dev {:dependencies [[ring/ring-mock "0.3.2"]]}})
+  :profiles {:dev {:dependencies [[ring/ring-mock "0.4.0"]]}})

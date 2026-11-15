@@ -1,20 +1,21 @@
 (ns reitit.swagger
-  (:require [reitit.core :as r]
-            [meta-merge.core :refer [meta-merge]]
+  (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [clojure.set :as set]
             [clojure.string :as str]
+            [meta-merge.core :refer [meta-merge]]
             [reitit.coercion :as coercion]
+            [reitit.core :as r]
             [reitit.trie :as trie]))
 
 (s/def ::id (s/or :keyword keyword? :set (s/coll-of keyword? :into #{})))
 (s/def ::no-doc boolean?)
-(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?) :kind #{}))
+(s/def ::tags (s/coll-of (s/or :keyword keyword? :string string?)))
 (s/def ::summary string?)
 (s/def ::description string?)
+(s/def ::operationId string?)
 
 (s/def ::swagger (s/keys :opt-un [::id]))
-(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description]))
+(s/def ::spec (s/keys :opt-un [::swagger ::no-doc ::tags ::summary ::description ::operationId]))
 
 (def swagger-feature
   "Feature for handling swagger-documentation for routes.
@@ -52,6 +53,7 @@
 
        [\"/plus\"
         {:get {:swagger {:tags \"math\"}
+               :operationId \"addTwoNumbers\"
                :summary \"adds numbers together\"
                :description \"takes `x` and `y` query-params and adds them together\"
                :parameters {:query {:x int?, :y int?}}
@@ -66,6 +68,32 @@
 (defn- swagger-path [path opts]
   (-> path (trie/normalize opts) (str/replace #"\{\*" "{")))
 
+(defn -remove-unsupported-coercions [{:keys [request responses] :as data}]
+  (when request
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :request coercion"))
+  (when (some :content (vals responses))
+    (println "WARNING [reitit.coercion]: swagger apidocs don't support :responses :content coercion"))
+  (cond-> (dissoc data :request)
+    responses (assoc :responses (update-vals responses #(dissoc % :content)))))
+
+(defn -get-swagger-apidocs [coercion data]
+  (let [swagger-parameter {:query :query
+                           :body :body
+                           :form :formData
+                           :header :header
+                           :path :path
+                           :multipart :formData}
+        cleaned (-remove-unsupported-coercions data)]
+    (->> (update
+          cleaned
+          :parameters
+          (fn [parameters]
+            (->> parameters
+                 (map (fn [[k v]] [(swagger-parameter k) v]))
+                 (filter first)
+                 (into {}))))
+         (coercion/-get-apidocs coercion :swagger))))
+
 (defn create-swagger-handler
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
@@ -75,7 +103,7 @@
      (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
-           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
+           strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description :operationId)
            swagger (->> (strip-endpoint-keys swagger)
                         (merge {:swagger "2.0"
                                 :x-id ids}))
@@ -88,20 +116,26 @@
                                 (if (and data (not no-doc))
                                   [method
                                    (meta-merge
-                                     base-swagger-spec
-                                     (apply meta-merge (keep (comp :swagger :data) middleware))
-                                     (apply meta-merge (keep (comp :swagger :data) interceptors))
-                                     (if coercion
-                                       (coercion/get-apidocs coercion :swagger data))
-                                     (select-keys data [:tags :summary :description])
-                                     (strip-top-level-keys swagger))]))
+                                    base-swagger-spec
+                                    (apply meta-merge (keep (comp :swagger :data) middleware))
+                                    (apply meta-merge (keep (comp :swagger :data) interceptors))
+                                    (if coercion
+                                      (-get-swagger-apidocs coercion data))
+                                    (select-keys data [:tags :summary :description :operationId])
+                                    (strip-top-level-keys swagger))]))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
-           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)]
+           paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
+           definitions (apply merge
+                              (for [[_path path-data] paths
+                                    [_method data] path-data]
+                                (:definitions data)))
+           paths-without-definitions (update-vals paths (fn [methods]
+                                                          (update-vals methods #(dissoc % :definitions))))]
        {:status 200
-        :body (meta-merge swagger {:paths paths})}))
+        :body (meta-merge swagger {:paths paths-without-definitions :definitions definitions})}))
     ([req res raise]
      (try
        (res (create-swagger req))

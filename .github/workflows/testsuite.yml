@@ -1,0 +1,118 @@
+name: testsuite
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-clj:
+    strategy:
+      matrix:
+        # Supported Java versions: LTS releases and latest
+        jdk: [11, 17, 21, 25]
+        clojure: [11, 12]
+
+    name: Clojure ${{ matrix.clojure }} (Java ${{ matrix.jdk }})
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-clj-${{ hashFiles('**/project.clj') }}
+        restore-keys: |
+          ${{ runner.os }}-clj-
+
+    - name: Setup Java ${{ matrix.jdk }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: ${{ matrix.jdk }}
+
+    - name: Setup Clojure
+      uses: DeLaGuardo/setup-clojure@13.1
+      with:
+        lein: 2.9.5
+        clj-kondo: 2025.12.23
+
+    # Install openapi-schema-validator for openapi-tests
+    # Uses node version from the ubuntu-latest
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Linter
+      run: ./lint.sh
+
+    - name: Run tests
+      run: ./scripts/test.sh clj${{ matrix.clojure }}
+
+  build-cljs:
+    name: ClojureScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+          key: ${{ runner.os }}-cljs-${{ hashFiles('**/project.clj') }}
+          restore-keys: |
+            ${{ runner.os }}-cljs-
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@13.1
+        with:
+          lein: 2.9.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: ./scripts/test.sh cljs
+
+  lint:
+    name: Lint cljdoc.edn
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify cljdoc.edn
+        run: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
+
+  check-cljdoc:
+    name: Check cljdoc analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@13.1
+        with:
+          lein: 2.9.5
+          cli: 1.11.0.1100
+
+      - name: Install cljdoc analyzer
+        run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer '{:git/tag "RELEASE"}' :as cljdoc-analyzer
+
+      - name: CljDoc Check
+        run: ./scripts/cljdoc-check.sh

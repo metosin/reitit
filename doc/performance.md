@@ -76,7 +76,7 @@ The routing sample taken from [bide](https://github.com/funcool/bide) README:
     (r/match-by-path routes "/workspace/1/1")))
 ```
 
-Based on the [perf tests](https://github.com/metosin/reitit/tree/master/perf-test/clj/reitit/perf/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 18-110x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
+Based on the [perf tests](https://github.com/metosin/reitit/blob/master/perf-test/clj/reitit/bide_perf_test.clj), the first (static path) lookup is 300-500x faster and the second (wildcard path) lookup is 18-110x faster that the other tested routing libs (Ataraxy, Bidi, Compojure and Pedestal).
 
 But, the example is too simple for any real benchmark. Also, some of the libraries always match on the `:request-method` too and by doing so, do more work than just match by path. Compojure does most work also by invoking the handler.
 
@@ -114,7 +114,7 @@ A quick poke to [the fast routers in Go](https://github.com/julienschmidt/go-htt
 
 ### Faster!
 
-By default, `reitit.ring/ring-router`, `reitit.http/ring-router` and `reitit.http/routing-interceptor` inject both `Match` and `Router` into the request. You can remove the injections setting options `:inject-match?` and `:inject-router?` to `false`. This saves some tens of nanos (with the hw described above).
+By default, `reitit.ring/router`, `reitit.http/router` and `reitit.http/routing-interceptor` inject both `Match` and `Router` into the request. You can remove the injections setting options `:inject-match?` and `:inject-router?` to `false`. This saves some tens of nanos (with the hw described above).
 
 ```clj
 (require '[reitit.ring :as ring])
@@ -146,6 +146,6 @@ Few things that have an effect on performance:
 
 * Wildcard-routes are an order of magnitude slower than static routes
 * Conflicting routes are served with LinearRouter, which is the slowest implementation.
-* It's ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation. 
+* It's ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation.
 * Move computation from request processing time into creation time, using by compiling [middleware](ring/compiling_middleware.md), [interceptors](http/interceptors.md) and [route data](advanced/configuring_routers.md).
   * Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.

@@ -3,14 +3,22 @@
             [reitit.core :as r]
             [reitit.frontend.history :as rfh]
             [reitit.frontend.test-utils :refer [capture-console]]
-            [goog.events :as gevents]))
+            [goog.events :as gevents]
+            [reitit.coercion.malli :as rcm]))
 
 (def browser (exists? js/window))
 
 (def router (r/router ["/"
                        ["" ::frontpage]
                        ["foo" ::foo]
-                       ["bar/:id" ::bar]]))
+                       ["bar/:id"
+                        {:name ::bar
+                         :coercion rcm/coercion
+                         :parameters {:query [:map
+                                              [:q {:optional true}
+                                               [:keyword
+                                                {:decode/string (fn [s] (keyword (subs s 2)))
+                                                 :encode/string (fn [k] (str "__" (name k)))}]]]}}]]))
 
 (deftest fragment-history-test
   (when browser
@@ -24,11 +32,16 @@
                (rfh/href history ::foo)))
         (is (= "#/bar/5"
                (rfh/href history ::bar {:id 5})))
-        (is (= "#/bar/5?q=x"
+        (testing "query string coercion doesn't strip extra keys"
+          (is (= "#/bar/5?extra=a"
+                 (rfh/href history ::bar {:id 5} {:extra "a"}))))
+        (is (= "#/bar/5?q=__x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
+        (is (= "#/bar/5?q=__x#foo"
+               (rfh/href history ::bar {:id 5} {:q "x"} "foo")))
         (let [{:keys [value messages]} (capture-console
-                                         (fn []
-                                           (rfh/href history ::asd)))]
+                                        (fn []
+                                          (rfh/href history ::asd)))]
           (is (= nil value))
           (is (= [{:type :warn
                    :message ["missing route" ::asd]}]
@@ -47,22 +60,23 @@
                     (fn [match history]
                       (let [url (rfh/-get-path history)]
                         (case (swap! n inc)
-                          1 (do (is (= "/" url)
+                          1 (rfh/push-state history ::frontpage)
+                          2 (do (is (= "/" url)
                                     "start at root")
                                 (rfh/push-state history ::foo))
-                          2 (do (is (= "/foo" url)
+                          3 (do (is (= "/foo" url)
                                     "push-state")
                                 (.back js/window.history))
-                          3 (do (is (= "/" url)
+                          4 (do (is (= "/" url)
                                     "go back")
-                                (rfh/push-state history ::bar {:id 1}))
-                          4 (do (is (= "/bar/1" url)
+                                (rfh/push-state history ::bar {:id 1} {:extra "a"}))
+                          5 (do (is (= "/bar/1?extra=a" url)
                                     "push-state 2")
-                                (rfh/replace-state history ::bar {:id 2}))
-                          5 (do (is (= "/bar/2" url)
+                                (rfh/replace-state history ::bar {:id 2} {:q "x"}))
+                          6 (do (is (= "/bar/2?q=__x" url)
                                     "replace-state")
                                 (.back js/window.history))
-                          6 (do (is (= "/" url)
+                          7 (do (is (= "/" url)
                                     "go back after replace state")
                                 (rfh/stop! history)
                                 (done))
@@ -81,11 +95,11 @@
                (rfh/href history ::foo)))
         (is (= "/bar/5"
                (rfh/href history ::bar {:id 5})))
-        (is (= "/bar/5?q=x"
+        (is (= "/bar/5?q=__x"
                (rfh/href history ::bar {:id 5} {:q "x"})))
         (let [{:keys [value messages]} (capture-console
-                                         (fn []
-                                           (rfh/href history ::asd)))]
+                                        (fn []
+                                          (rfh/href history ::asd)))]
           (is (= nil value))
           (is (= [{:type :warn
                    :message ["missing route" ::asd]}]
@@ -116,8 +130,8 @@
                                 (rfh/push-state history ::bar {:id 1}))
                           5 (do (is (= "/bar/1" url)
                                     "push-state 2")
-                                (rfh/replace-state history ::bar {:id 2}))
-                          6 (do (is (= "/bar/2" url)
+                                (rfh/replace-state history ::bar {:id 2} {:q "x"}))
+                          6 (do (is (= "/bar/2?q=__x" url)
                                     "replace-state")
                                 (.back js/window.history))
                           7 (do (is (= "/" url)
@@ -153,7 +167,7 @@
                                                (done)))))
                                 {:use-fragment false})
             create-link #(doto
-                           (js/document.createElement "A")
+                          (js/document.createElement "A")
                            (.setAttribute "href" (rfh/href history ::foo)))
             document-link (create-link)
             shadow-link (create-link)]
@@ -164,3 +178,24 @@
 
         (reset! clicks [document-link shadow-link])
         (click-next)))))
+
+(deftest html5-history-default-prevented-link-click-test
+  (when browser
+    (gevents/removeAll js/window goog.events.EventType.POPSTATE)
+    (gevents/removeAll js/window goog.events.EventType.HASHCHANGE)
+    (gevents/removeAll js/document goog.events.EventType.CLICK)
+
+    (let [history (rfh/start! router (fn [_ _]) {:use-fragment false})
+          ;; Start somewhere else than the link target, so that a handled click
+          ;; would show up as a change of path.
+          _ (rfh/push-state history ::frontpage)
+          path-before (rfh/-get-path history)
+          link (doto (js/document.createElement "A")
+                 (.setAttribute "href" (rfh/href history ::foo))
+                 (.addEventListener "click" (fn [e] (.preventDefault e))))]
+      (.appendChild js/document.body link)
+      (.click link)
+      (is (= path-before (rfh/-get-path history))
+          "link click is not handled when its default action is prevented")
+      (.remove link)
+      (rfh/stop! history))))
