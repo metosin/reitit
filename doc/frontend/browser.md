@@ -32,7 +32,7 @@ Check examples for simple Ring handler example.
 ### Anchor click handling
 
 HTML5 History router will handle click events on anchors where the href
-matches the route tree (and other [rules](../../modules/reitit-frontend/src/reitit/frontend/history.cljs#L84-L98)).
+matches the route tree (and other [rules](../../modules/reitit-frontend/src/reitit/frontend/history.cljs#L80-L104)).
 If you have need to control this logic, for example to handle some
 anchor clicks where the href matches route tree normally (i.e. browser load)
 you can provide `:ignore-anchor-click?` function to add your own logic to
