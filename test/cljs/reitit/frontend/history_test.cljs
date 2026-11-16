@@ -158,25 +158,65 @@
                            (.click target)))
             shadow-element (js/document.createElement "DIV")
             shadow-root (.attachShadow shadow-element #js {:mode "open"})
+            ;; Elements appended to the document, removed when the test is done.
+            appended (atom [])
+            append! (fn [el] (swap! appended conj el) (.appendChild js/document.body el))
             history (rfh/start! router (fn [_ history]
                                          (when @clicks
                                            (if (seq @clicks)
                                              (click-next)
                                              (do
                                                (rfh/stop! history)
+                                               (doseq [el @appended] (.remove el))
                                                (done)))))
                                 {:use-fragment false})
             create-link #(doto
                           (js/document.createElement "A")
                            (.setAttribute "href" (rfh/href history ::foo)))
             document-link (create-link)
-            shadow-link (create-link)]
-        (.appendChild js/document.body document-link)
+            shadow-link (create-link)
+            ;; A link in the document that contains a shadow host,
+            ;; e.g. a web component. The click starts inside the shadow tree.
+            host-link (create-link)
+            host-element (js/document.createElement "SPAN")
+            host-shadow-root (.attachShadow host-element #js {:mode "open"})
+            host-shadow-content (js/document.createElement "SPAN")
+            ;; A link in the document containing a shadow host whose shadow tree
+            ;; contains another shadow host. The click starts in the inner shadow tree.
+            nested-link (create-link)
+            outer-host (js/document.createElement "SPAN")
+            outer-shadow-root (.attachShadow outer-host #js {:mode "open"})
+            inner-host (js/document.createElement "SPAN")
+            inner-shadow-root (.attachShadow inner-host #js {:mode "open"})
+            inner-shadow-content (js/document.createElement "SPAN")
+            ;; A web component whose shadow tree is a link wrapping a slot,
+            ;; e.g. <my-link><span>Foo</span></my-link>. The click starts on the
+            ;; slotted light DOM content, which is not a DOM descendant of the link.
+            slot-host (js/document.createElement "DIV")
+            slot-shadow-root (.attachShadow slot-host #js {:mode "open"})
+            slot-link (create-link)
+            slotted-content (js/document.createElement "SPAN")]
+        (append! document-link)
 
-        (.appendChild js/document.body shadow-element)
+        (append! shadow-element)
         (.appendChild shadow-root shadow-link)
 
-        (reset! clicks [document-link shadow-link])
+        (append! host-link)
+        (.appendChild host-link host-element)
+        (.appendChild host-shadow-root host-shadow-content)
+
+        (append! nested-link)
+        (.appendChild nested-link outer-host)
+        (.appendChild outer-shadow-root inner-host)
+        (.appendChild inner-shadow-root inner-shadow-content)
+
+        (append! slot-host)
+        (.appendChild slot-shadow-root slot-link)
+        (.appendChild slot-link (js/document.createElement "SLOT"))
+        (.appendChild slot-host slotted-content)
+
+        (reset! clicks [document-link shadow-link host-shadow-content
+                        inner-shadow-content slotted-content])
         (click-next)))))
 
 (deftest html5-history-default-prevented-link-click-test

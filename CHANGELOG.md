@@ -16,6 +16,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * **reitit-core**, **reitit-ring**: run in [babashka](https://babashka.org), with `clojure-trie-compiler` as the default trie compiler.
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
+* **reitit-frontend**: `Html5History` now handles clicks on links when the click starts inside shadow DOM: inside a shadow root nested in an `<a>`, or on content slotted into an `<a>` in a shadow root. [#804](https://github.com/metosin/reitit/issues/804) [#805](https://github.com/metosin/reitit/pull/805) [#808](https://github.com/metosin/reitit/pull/808)
 * Code examples in the documentation are now tested with [test-doc-blocks](https://github.com/lread/test-doc-blocks) (`lein test-docs`), and outdated examples were fixed. [#779](https://github.com/metosin/reitit/pull/779)
 
 ## 0.11.0 (2026-09-18)

@@ -60,16 +60,22 @@
       (if el
         (if (= tag (.-nodeName el))
           el
-          (recur (.-parentNode el)))))))
+          ;; A ShadowRoot has no parentNode, continue from its host.
+          (recur (or (.-parentNode el) (.-host el))))))))
 
-(defn- event-target
-  "Read event's target from composed path to get shadow dom working,
-  fallback to target property if not available"
-  [^goog.events.BrowserEvent event]
+(defn- closest-in-event-path
+  "Returns the closest element with the given tag on the event's composed path.
+  The composed path crosses shadow DOM boundaries and follows slot assignments,
+  so this finds the anchor also when the click started inside a shadow tree
+  or on content slotted into an anchor in a shadow tree.
+  Falls back to walking up from the event target if composedPath is not available."
+  [^goog.events.BrowserEvent event tag]
   (let [original-event (.getBrowserEvent event)]
     (if (exists? (.-composedPath original-event))
-      (aget (.composedPath original-event) 0)
-      (.-target event))))
+      (let [tag (.toUpperCase tag)]
+        (some (fn [el] (when (= tag (.-nodeName el)) el))
+              (.composedPath original-event)))
+      (closest-by-tag (.-target event) tag))))
 
 (defn ignore-anchor-click?
   "Precicate to check if the anchor click event default action
@@ -110,8 +116,7 @@
           ;; Prevent document load when clicking a elements, if the href points to URL that is part
           ;; of the routing tree."
           ignore-anchor-click (fn [e]
-                                ;; Returns the next matching ancestor of event target
-                                (when-let [el (closest-by-tag (event-target e) "a")]
+                                (when-let [el (closest-in-event-path e "a")]
                                   (let [^goog.Uri uri (.parse goog.Uri (.-href el))]
                                     (when (ignore-anchor-click-predicate router e el uri)
                                       (.preventDefault e)
