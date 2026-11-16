@@ -19,8 +19,11 @@ case $1 in
     clj12)
         lein test-clj
         ;;
+    bb)
+        bb test-bb
+        ;;
     *)
-        echo "Please select [clj11|clj12|cljs]"
+        echo "Please select [clj11|clj12|cljs|bb]"
         exit 1
         ;;
 esac
