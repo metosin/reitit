@@ -16,6 +16,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 * **reitit-core**, **reitit-ring**: run in [babashka](https://babashka.org), with `clojure-trie-compiler` as the default trie compiler.
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
+* **reitit-frontend**: `Html5History` now handles clicks on links when the click starts inside shadow DOM: inside a shadow root nested in an `<a>`, or on content slotted into an `<a>` in a shadow root. [#804](https://github.com/metosin/reitit/issues/804) [#805](https://github.com/metosin/reitit/pull/805)
 
 ## 0.11.0 (2026-09-18)
 
@@ -24,7 +25,6 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * Better support for `:and`, `:or`, `:union` and `:merge` when generating OpenAPI. [#791](https://github.com/metosin/reitit/pull/791)
 * Doc improvements
 * Improve OpenAPI output for Schema `s/Any` type: it now maps to JSON Schema `{}` in request and response bodies. [#801](https://github.com/metosin/reitit/pull/801)
-* Fix HTML5 history link clicks that start inside a shadow root nested in an `<a>`. [#805](https://github.com/metosin/reitit/pull/805)
 * Updated dependencies:
 
 ```
