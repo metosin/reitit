@@ -876,7 +876,8 @@
 #?(:clj
    (deftest invalid-path-parameters-parsing-concurrent-requests-277-test
      (testing "in enough concurrent system, path-parameters can bleed"
-       (doseq [compiler [trie/java-trie-compiler trie/clojure-trie-compiler]]
+       (doseq [compiler #?(:bb [trie/clojure-trie-compiler]
+                           :clj [trie/java-trie-compiler trie/clojure-trie-compiler])]
          (let [app (ring/ring-handler
                     (ring/router
                      ["/:id" (fn [request]

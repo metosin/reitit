@@ -14,6 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* **reitit-core**, **reitit-ring**: run in [babashka](https://babashka.org), with `clojure-trie-compiler` as the default trie compiler.
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
 
 ## 0.11.0 (2026-09-18)
