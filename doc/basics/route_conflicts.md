@@ -86,12 +86,12 @@ Alternatively, you can ignore conflicting paths individually via `:conflicting` 
 
 ## How conflicting routes are matched
 
-When path conflicts are allowed, the router is created as a `:quarantine-router`. At creation time, it splits the routes into two groups:
+When path conflicts are allowed and no `:router` option is given, the router is created as a `:quarantine-router`. At creation time, it splits the routes into two groups:
 
 * routes that don't conflict with any other route are served by a `:mixed-router`, which uses a lookup table for static paths and a prefix tree for paths with parameters (see [Different Routers](../advanced/different_routers.md))
 * routes that conflict with at least one other route are served by a `:linear-router`, which tries the routes one by one
 
-`match-by-path` and `match-by-name` first try the non-conflicting routes, then the conflicting ones in the order they are defined in the route tree. The first match wins.
+`match-by-path` first tries the non-conflicting routes, then the conflicting ones in the order they are defined in the route tree. The first match wins.
 
 ```clj
 (def router
