@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [muuntaja.core :as m]
+            [reitit.coercion :as coercion]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
@@ -456,6 +457,33 @@
                  (catch clojure.lang.ExceptionInfo e e))]
       (is (= "Invalid :swagger route data in GET /swagger.json, expected a map, got: \"foobar\"" (ex-message e)))
       (is (= {:path "/swagger.json", :method :get, :swagger "foobar"} (ex-data e))))))
+
+(deftest endpoint-error-test
+  (testing "errors while building an endpoint's docs are wrapped with the route path and method"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/ping"
+                  {:get {:coercion (reify coercion/Coercion
+                                     (-get-name [_] ::failing)
+                                     (-get-options [_])
+                                     (-get-apidocs [_ _ _] (throw (ex-info "boom" {})))
+                                     (-get-model-apidocs [_ _ _ _])
+                                     (-compile-model [_ model _] model)
+                                     (-open-model [_ model] model)
+                                     (-encode-error [_ error] error)
+                                     (-request-coercer [_ _ _])
+                                     (-response-coercer [_ _])
+                                     (-query-string-coercer [_ _]))
+                         :parameters {:query {:x 1}}
+                         :handler (constantly "ping")}}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+          e (try (app {:request-method :get :uri "/swagger.json"}) nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+      (is (= "While building swagger docs" (ex-message e)))
+      (is (= {:path "/ping", :method :get} (ex-data e)))
+      (is (= "boom" (ex-message (ex-cause e)))))))
 
 (deftest with-options-endpoint-test
   (let [app (ring/ring-handler
