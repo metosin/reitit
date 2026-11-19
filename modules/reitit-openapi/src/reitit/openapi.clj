@@ -188,6 +188,12 @@
                                         {:content content}))]))
                    responses))}))))
 
+(defn- -check-openapi-data! [path method openapi]
+  (when-not (or (nil? openapi) (map? openapi))
+    (throw (ex-info (str "Invalid :openapi route data in " (some-> method name str/upper-case (str " ")) path
+                         ", expected a map, got: " (pr-str openapi))
+                    {:path path, :method method, :openapi openapi}))))
+
 (defn create-openapi-handler
   "Stability: alpha
 
@@ -196,7 +202,9 @@
   []
   (fn create-openapi
     ([{::r/keys [router match] :keys [request-method]}]
-     (let [{:keys [id] :or {id ::default} :as openapi} (-> match :result request-method :data :openapi)
+     (let [openapi (-> match :result request-method :data :openapi)
+           _ (-check-openapi-data! (:template match) request-method openapi)
+           {:keys [id] :or {id ::default}} openapi
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
            strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description)
@@ -209,6 +217,8 @@
            transform-endpoint (fn [path [method {{:keys [coercion no-doc openapi] :as data} :data
                                                  middleware :middleware
                                                  interceptors :interceptors}]]
+                                (when (and data (not no-doc))
+                                  (-check-openapi-data! path method openapi))
                                 (try
                                   (if (and data (not no-doc))
                                     [method

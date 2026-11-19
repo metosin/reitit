@@ -429,6 +429,34 @@
            (-> {:request-method :get :uri "/swagger.json"}
                (app) :body :x-id)))))
 
+(deftest invalid-swagger-data-test
+  (testing "invalid :swagger data on an endpoint"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/ping"
+                  {:get {:swagger :foobar
+                         :handler (constantly "ping")}}]
+                 ["/swagger.json"
+                  {:get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+          e (try (app {:request-method :get :uri "/swagger.json"}) nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+      (is (= "Invalid :swagger route data in GET /ping, expected a map, got: :foobar" (ex-message e)))
+      (is (= {:path "/ping", :method :get, :swagger :foobar} (ex-data e)))))
+  (testing "invalid :swagger data on the swagger handler route"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/ping"
+                  {:get (constantly "ping")}]
+                 ["/swagger.json"
+                  {:swagger "foobar"
+                   :get {:no-doc true
+                         :handler (swagger/create-swagger-handler)}}]]))
+          e (try (app {:request-method :get :uri "/swagger.json"}) nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+      (is (= "Invalid :swagger route data in GET /swagger.json, expected a map, got: \"foobar\"" (ex-message e)))
+      (is (= {:path "/swagger.json", :method :get, :swagger "foobar"} (ex-data e))))))
+
 (deftest with-options-endpoint-test
   (let [app (ring/ring-handler
              (ring/router
