@@ -385,6 +385,34 @@
            (-> {:request-method :get :uri "/openapi.json"}
                (app) :body :x-id)))))
 
+(deftest invalid-openapi-data-test
+  (testing "invalid :openapi data on an endpoint"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/ping"
+                  {:get {:openapi :foobar
+                         :handler (constantly "ping")}}]
+                 ["/openapi.json"
+                  {:get {:no-doc true
+                         :handler (openapi/create-openapi-handler)}}]]))
+          e (try (app {:request-method :get :uri "/openapi.json"}) nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+      (is (= "Invalid :openapi route data in GET /ping, expected a map, got: :foobar" (ex-message e)))
+      (is (= {:path "/ping", :method :get, :openapi :foobar} (ex-data e)))))
+  (testing "invalid :openapi data on the openapi handler route"
+    (let [app (ring/ring-handler
+               (ring/router
+                [["/ping"
+                  {:get (constantly "ping")}]
+                 ["/openapi.json"
+                  {:openapi "foobar"
+                   :get {:no-doc true
+                         :handler (openapi/create-openapi-handler)}}]]))
+          e (try (app {:request-method :get :uri "/openapi.json"}) nil
+                 (catch clojure.lang.ExceptionInfo e e))]
+      (is (= "Invalid :openapi route data in GET /openapi.json, expected a map, got: \"foobar\"" (ex-message e)))
+      (is (= {:path "/openapi.json", :method :get, :openapi "foobar"} (ex-data e))))))
+
 (deftest with-options-endpoint-test
   (let [app (ring/ring-handler
              (ring/router
