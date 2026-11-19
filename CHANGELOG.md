@@ -17,7 +17,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **reitit-core**, **reitit-ring**: run in [babashka](https://babashka.org), with `clojure-trie-compiler` as the default trie compiler.
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
 * **reitit-frontend**: `Html5History` now handles clicks on links when the click starts inside shadow DOM: inside a shadow root nested in an `<a>`, or on content slotted into an `<a>` in a shadow root. [#804](https://github.com/metosin/reitit/issues/804) [#805](https://github.com/metosin/reitit/pull/805) [#808](https://github.com/metosin/reitit/pull/808)
-* **reitit-swagger**, **reitit-openapi**: the swagger and openapi handlers now throw a clear error with the route path and the bad value when `:swagger` or `:openapi` route data is not a map, instead of a `ClassCastException`. [#517](https://github.com/metosin/reitit/issues/517)
+* **reitit-swagger**, **reitit-openapi**: the swagger and openapi handlers now throw a clear error with the route path and the bad value when `:swagger` or `:openapi` route data is not a map, instead of a `ClassCastException` or a generic "While building openapi docs" error. [#517](https://github.com/metosin/reitit/issues/517)
 
 ## 0.11.0 (2026-09-18)
 
