@@ -122,16 +122,20 @@
                                                  middleware :middleware
                                                  interceptors :interceptors}]]
                                 (when (and data (not no-doc))
-                                  (-check-swagger-data! path method swagger)
-                                  [method
-                                   (meta-merge
-                                    base-swagger-spec
-                                    (apply meta-merge (keep (comp :swagger :data) middleware))
-                                    (apply meta-merge (keep (comp :swagger :data) interceptors))
-                                    (if coercion
-                                      (-get-swagger-apidocs coercion data))
-                                    (select-keys data [:tags :summary :description :operationId])
-                                    (strip-top-level-keys swagger))]))
+                                  (-check-swagger-data! path method swagger))
+                                (try
+                                  (if (and data (not no-doc))
+                                    [method
+                                     (meta-merge
+                                      base-swagger-spec
+                                      (apply meta-merge (keep (comp :swagger :data) middleware))
+                                      (apply meta-merge (keep (comp :swagger :data) interceptors))
+                                      (if coercion
+                                        (-get-swagger-apidocs coercion data))
+                                      (select-keys data [:tags :summary :description :operationId])
+                                      (strip-top-level-keys swagger))])
+                                  (catch #?(:clj Throwable :cljs :default) t
+                                    (throw (ex-info "While building swagger docs" {:path path :method method} t)))))
            transform-path (fn [[p _ c]]
                             (if-let [endpoint (some->> c (keep (partial transform-endpoint p)) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
