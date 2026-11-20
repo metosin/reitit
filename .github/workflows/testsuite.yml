@@ -160,16 +160,11 @@ jobs:
   check-cljdoc:
     name: Check cljdoc analysis
     runs-on: ubuntu-latest
-    # Analysis logs are printed at the end, so don't wait 6h on a hang.
-    timeout-minutes: 30
     env:
       # Pinned so a new analyzer release can't change CI without a commit here.
       # Also part of the cache key, so a bump caches the new analyzer deps.
       CLJDOC_ANALYZER_TAG: v1.0.937
       CLJDOC_ANALYZER_SHA: e67c8101106ebc0c4061801bb7f5b142bb779209
-      # Each analysis uses more than one core, 4 at once on a 4 vCPU runner
-      # made every module ~2x slower.
-      CLJDOC_CHECK_JOBS: 2
     steps:
       - uses: actions/checkout@v7
 
