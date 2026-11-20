@@ -152,23 +152,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Same check as cljdoc's script/verify-cljdoc-edn, inlined to avoid
-      # piping a script from the cljdoc master branch into bash.
-      # Like the original, a :file line where no path is found fails.
+      # cljdoc's script/verify-cljdoc-edn, pinned to a commit so the script
+      # that runs can't change without a commit here.
       - name: Verify cljdoc.edn
-        run: |
-          fail=0
-          while IFS= read -r line; do
-            f=$(printf '%s\n' "$line" | sed -nE 's/.*:file[[:space:]]+"([^"]+)".*/\1/p')
-            if [ -z "$f" ]; then
-              echo "::error file=doc/cljdoc.edn::No file path found on line: $line"
-              fail=1
-            elif [ ! -f "$f" ]; then
-              echo "::error file=doc/cljdoc.edn::$f is referenced in cljdoc.edn but not present"
-              fail=1
-            fi
-          done < <(grep ':file' doc/cljdoc.edn)
-          exit $fail
+        run: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/b5dc94d159624564e44347d672aeb874a0d967f8/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
 
   check-cljdoc:
     name: Check cljdoc analysis
