@@ -165,6 +165,11 @@ jobs:
   check-cljdoc:
     name: Check cljdoc analysis
     runs-on: ubuntu-latest
+    env:
+      # Pinned so a new analyzer release can't change CI without a commit here.
+      # Also part of the cache key, so a bump caches the new analyzer deps.
+      CLJDOC_ANALYZER_TAG: v1.0.937
+      CLJDOC_ANALYZER_SHA: e67c8101106ebc0c4061801bb7f5b142bb779209
     steps:
       - uses: actions/checkout@v7
 
@@ -174,7 +179,7 @@ jobs:
           path: |
             ~/.m2/repository
             ~/.gitlibs
-          key: ${{ runner.os }}-cljdoc-${{ hashFiles('**/project.clj') }}
+          key: ${{ runner.os }}-cljdoc-${{ env.CLJDOC_ANALYZER_TAG }}-${{ hashFiles('**/project.clj') }}
           restore-keys: |
             ${{ runner.os }}-cljdoc-
 
@@ -185,7 +190,7 @@ jobs:
           cli: 1.12.7.1681
 
       - name: Install cljdoc analyzer
-        run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer '{:git/tag "RELEASE"}' :as cljdoc-analyzer
+        run: clojure -Ttools install io.github.cljdoc/cljdoc-analyzer "{:git/tag \"$CLJDOC_ANALYZER_TAG\" :git/sha \"$CLJDOC_ANALYZER_SHA\"}" :as cljdoc-analyzer
 
       - name: CljDoc Check
         run: ./scripts/cljdoc-check.sh
