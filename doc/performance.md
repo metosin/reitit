@@ -103,7 +103,7 @@ Both `reitit-ring` and Pedestal shine in this test, thanks to the fast lookup-ro
 
 ### Path conflicts
 
-**TODO**
+If path conflicts are allowed, only the conflicting routes are served by the slower `:linear-router`, all other routes are still served by the fast routers. See [How conflicting routes are matched](basics/route_conflicts.md#how-conflicting-routes-are-matched).
 
 ### Why measure?
 
@@ -146,7 +146,7 @@ By default, `reitit.ring/router`, `reitit.http/router` and `reitit.http/routing-
 Few things that have an effect on performance:
 
 * Wildcard-routes are an order of magnitude slower than static routes
-* Conflicting routes are served with LinearRouter, which is the slowest implementation.
+* Conflicting routes are served with LinearRouter, which is the slowest implementation. Only the conflicting routes are affected, see [Path conflicts](#path-conflicts).
 * It's ok to mix non-wildcard, wildcard or even conflicting routes in a same routing tree. Reitit will create an hierarchy of routers to serve all the routes with best possible implementation.
 * Move computation from request processing time into creation time, using by compiling [middleware](ring/compiling_middleware.md), [interceptors](http/interceptors.md) and [route data](advanced/configuring_routers.md).
   * Unmounted middleware (or interceptor) is infinitely faster than a mounted one effectively doing nothing.

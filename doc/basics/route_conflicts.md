@@ -84,6 +84,68 @@ Alternatively, you can ignore conflicting paths individually via `:conflicting` 
 ; => #object[reitit.core$quarantine_router$reify]
 ```
 
+## How conflicting routes are matched
+
+When path conflicts are allowed and no `:router` option is given, the router is created as a `:quarantine-router`. At creation time, it splits the routes into two groups:
+
+* routes that don't conflict with any other route are served by a `:mixed-router`, which uses a lookup table for static paths and a prefix tree for paths with parameters (see [Different Routers](../advanced/different_routers.md))
+* routes that conflict with at least one other route are served by a `:linear-router`, which tries the routes one by one
+
+`match-by-path` first tries the non-conflicting routes, then the conflicting ones in the order they are defined in the route tree. The first match wins.
+
+```clj
+(def router
+  (r/router
+    [["/ping" ::ping]
+     ["/users/:id" ::user]
+     ["/users/active" ::active-users]
+     ["/users/:id/orders" ::user-orders]]
+    {:conflicts nil}))
+
+(r/router-name router)
+;; => :quarantine-router
+```
+
+`/users/:id` and `/users/active` conflict with each other. `/ping` and `/users/:id/orders` don't conflict with anything, so they are still served by the `:mixed-router`.
+
+As `/users/:id` is defined first, it matches `/users/active` too, and the `::active-users` route is never matched by path:
+
+```clj
+(:template (r/match-by-path router "/users/active"))
+;; => "/users/:id"
+
+(:template (r/match-by-path router "/users/1"))
+;; => "/users/:id"
+```
+
+To match the more specific route, define it first:
+
+```clj
+(def router
+  (r/router
+    [["/ping" ::ping]
+     ["/users/active" ::active-users]
+     ["/users/:id" ::user]
+     ["/users/:id/orders" ::user-orders]]
+    {:conflicts nil}))
+
+(:template (r/match-by-path router "/users/active"))
+;; => "/users/active"
+
+(:template (r/match-by-path router "/users/1"))
+;; => "/users/:id"
+```
+
+The order is the order of the flattened routes, as returned by `r/routes`.
+
+With `reitit.ring`, the route is chosen by path only. If the first matching route has no handler for the request method, the request goes to the default handler (e.g. `405 Method Not Allowed` with `ring/create-default-handler`). It does not fall through to the next conflicting route.
+
+Since route names can't conflict, the lookup order doesn't matter for `match-by-name`.
+
+### Performance
+
+Only the conflicting routes pay the cost of linear matching. Matching a path that is served by a non-conflicting route is about as fast as without any conflicts. Matching a conflicting route, or a path that matches no route at all, is slower, and gets slower the more conflicting routes there are. So it's fine to have a few conflicting routes in a large route tree. See also [Performance](../performance.md).
+
 ## Name conflicts
 
 Routes with name conflicts:
