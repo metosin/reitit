@@ -53,8 +53,14 @@
      [[:responses any? :content any? :schema] f]
      [[http-method? :responses any? :content any? :schema] f]]))
 
-(defn -compile-coercion [{:keys [coercion] :as data}]
-  (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))
+(defn -compile-coercion
+  ([{:keys [coercion] :as data}]
+   (cond-> data coercion (impl/path-update (-update-paths #(coercion/-compile-model coercion % nil)))))
+  ([path method data]
+   (try
+     (-compile-coercion data)
+     (catch #?(:clj Exception, :cljs js/Error) e
+       (coercion/-compile-failed! e path method data)))))
 
 (defn compile-result [[path data] {:keys [::default-options-endpoint expand] :as opts}]
   (let [[top childs] (group-keys data)
@@ -62,7 +68,7 @@
                  (and (not (:options childs)) (not (:handler top)) default-options-endpoint)
                  (assoc :options (expand default-options-endpoint opts)))
         ->endpoint (fn [p d m s]
-                     (let [d (-compile-coercion d)]
+                     (let [d (-compile-coercion p m d)]
                        (-> (middleware/compile-result [p d] opts s)
                            (map->Endpoint)
                            (assoc :path p)

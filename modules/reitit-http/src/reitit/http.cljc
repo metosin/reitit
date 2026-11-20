@@ -22,7 +22,7 @@
         compile (fn [[path data] opts scope]
                   (interceptor/compile-result [path data] opts scope))
         ->endpoint (fn [p d m s]
-                     (let [d (ring/-compile-coercion d)
+                     (let [d (ring/-compile-coercion p m d)
                            compiled (compile [p d] opts s)]
                        (-> compiled
                            (map->Endpoint)

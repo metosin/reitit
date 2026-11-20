@@ -10,6 +10,7 @@
             [malli.core :as m]
             [malli.util :as mu]
             [meta-merge.core :refer [meta-merge]]
+            [reitit.coercion :as coercion]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.spec :as spec]
             [reitit.core :as r]
@@ -617,6 +618,27 @@
                  (-> ((->app {:options {:registry (merge (m/default-schemas)
                                                          {:int :string})}})
                       (assoc request :body-params {:i "x" :x "x"}))))))))))
+
+(deftest schema-compile-failure-test
+  (let [e (try
+            (ring/ring-handler
+             (ring/router
+              ["/api/:id" {:get {:parameters {:query [:map [:x ::invalid-schema]]}
+                                 :handler identity}}]
+              {:data {:coercion malli/coercion
+                      :middleware [rrc/coerce-request-middleware]}}))
+            nil
+            (catch #?(:clj Exception :cljs js/Error) e
+              e))]
+    (testing "invalid schema fails router creation with route path, method and data"
+      (is (= ::coercion/compile-failed (-> e ex-data :type)))
+      (is (= {:path "/api/:id"
+              :method :get
+              :route-data {:parameters {:query [[:map [:x ::invalid-schema]]]}
+                           :coercion :malli}}
+             (-> e ex-data :data (select-keys [:path :method :route-data]))))
+      (is (= :malli.core/invalid-schema (-> e ex-data :data :cause-data :type)))
+      (is (re-find #"path \"/api/:id\", method :get: :malli.core/invalid-schema" (ex-message e))))))
 
 #?(:clj
 (deftest per-content-type-test

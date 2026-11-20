@@ -14,6 +14,7 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 
 ## UNRELEASED
 
+* Schema compilation failures in coercion now report the route path, method and coercion route data (`:parameters`, `:request`, `:responses`), instead of only the coercion library's error. [#449](https://github.com/metosin/reitit/pull/449)
 * **reitit-core**, **reitit-ring**: run in [babashka](https://babashka.org), with `clojure-trie-compiler` as the default trie compiler.
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
 * **reitit-frontend**: `Html5History` now handles clicks on links when the click starts inside shadow DOM: inside a shadow root nested in an `<a>`, or on content slotted into an `<a>` in a shadow root. [#804](https://github.com/metosin/reitit/issues/804) [#805](https://github.com/metosin/reitit/pull/805) [#808](https://github.com/metosin/reitit/pull/808)

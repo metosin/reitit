@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as j]
             [muuntaja.interceptor]
+            [reitit.coercion :as coercion]
             [reitit.coercion.malli :as malli]
             [reitit.coercion.schema :as schema]
             [reitit.coercion.spec :as spec]
@@ -471,3 +472,22 @@
                      (app) :body slurp (read-string))]
         (is (= data-edn (e2e data-edn)))
         (is (thrown? ExceptionInfo (e2e data-json)))))))
+
+(deftest schema-compile-failure-test
+  (let [e (try
+            (http/router
+             ["/api/:id" {:post {:parameters {:body [:map [:x ::invalid-schema]]}
+                                 :handler identity}}]
+             {:data {:coercion malli/coercion
+                     :interceptors [(rrc/coerce-request-interceptor)]}})
+            nil
+            (catch Exception e
+              e))]
+    (testing "invalid schema fails router creation with route path, method and data"
+      (is (= ::coercion/compile-failed (-> e ex-data :type)))
+      (is (= {:path "/api/:id"
+              :method :post
+              :route-data {:parameters {:body [[:map [:x ::invalid-schema]]]}
+                           :coercion :malli}}
+             (-> e ex-data :data (select-keys [:path :method :route-data]))))
+      (is (= :malli.core/invalid-schema (-> e ex-data :data :cause-data :type))))))

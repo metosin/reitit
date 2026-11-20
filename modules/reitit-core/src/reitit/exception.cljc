@@ -5,7 +5,9 @@
   ([type]
    (fail! type nil))
   ([type data]
-   (throw (ex-info (str type) {:type type, :data data}))))
+   (throw (ex-info (str type) {:type type, :data data})))
+  ([type data cause]
+   (throw (ex-info (str type) {:type type, :data data} cause))))
 
 (defn unsupported-protocol-method!
   [method]
