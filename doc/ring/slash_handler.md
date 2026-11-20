@@ -11,7 +11,7 @@ The router works with precise matches. If a route is defined without a trailing 
       ["/ping" (constantly {:status 200, :body ""})])))
 
 (app {:uri "/ping/"})
-; nil
+;; => nil
 ```
 
 Sometimes it is desirable that paths with and without a trailing slash are recognized as the same.
@@ -27,10 +27,10 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
     (ring/redirect-trailing-slash-handler)))
 
 (app {:uri "/ping/"})
-; {:status 308, :headers {"Location" "/ping"}, :body ""}
+;; => {:status 308, :headers {"Location" "/ping"}, :body ""}
 
 (app {:uri "/pong"})
-; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+;; => {:status 308, :headers {"Location" "/pong/"}, :body ""}
 ```
 
 `redirect-trailing-slash-handler` accepts an optional `:method` parameter that allows configuring how (whether) to handle missing/extra slashes. The default is to handle both.
@@ -45,10 +45,10 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
     (ring/redirect-trailing-slash-handler {:method :strip})))
 
 (app {:uri "/ping/"})
-; {:status 308, :headers {"Location" "/ping"}, :body ""}
+;; => {:status 308, :headers {"Location" "/ping"}, :body ""}
 
 (app {:uri "/pong"})
-; nil
+;; => nil
 ```
 
 ```clj
@@ -61,10 +61,10 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
     (ring/redirect-trailing-slash-handler {:method :add})))
 
 (app {:uri "/ping/"})
-; nil
+;; => nil
 
 (app {:uri "/pong"})
-; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+;; => {:status 308, :headers {"Location" "/pong/"}, :body ""}
 ```
 
 `redirect-trailing-slash-handler` can be composed with the default handler using `ring/routes` for more correct http error responses:
@@ -79,8 +79,8 @@ Setting the `redirect-trailing-slash-handler` as a second argument to `ring-hand
       (ring/create-default-handler))))
 
 (app {:uri "/ping/"})
-; {:status 404, :body "", :headers {}}
+;; => {:status 404, :body "", :headers {}}
 
 (app {:uri "/pong"})
-; {:status 308, :headers {"Location" "/pong/"}, :body ""}
+;; => {:status 308, :headers {"Location" "/pong/"}, :body ""}
   ```

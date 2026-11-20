@@ -1,5 +1,6 @@
 # Exception Handling with Ring
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-middleware "0.11.0"]
 ```
@@ -29,9 +30,9 @@ A preconfigured middleware using `exception/default-handlers`. Catches:
       {:data {:middleware [exception/exception-middleware]}})))
 
 (app {:request-method :get, :uri "/fail"})
-;{:status 500
-; :body {:type "exception"
-;        :class "java.lang.Exception"}}
+;; => {:status 500
+;;     :body {:type "exception"
+;;            :class "java.lang.Exception"}}
 ```
 
 ### `exception/create-exception-middleware`
@@ -98,10 +99,10 @@ The handler is selected from the options map by exception identifier in the foll
       {:data {:middleware [exception-middleware]}})))
 
 (app {:request-method :get, :uri "/fail"})
-; ERROR "/fail"
-; => {:status 500,
-;     :body {:message "default"
-;            :exception clojure.lang.ExceptionInfo
-;            :data {:type :user/failure}
-;            :uri "/fail"}}
+;; =stdout=> ERROR "/fail"
+;; => {:status 500,
+;;     :body {:message "exception"
+;;            :exception clojure.lang.ExceptionInfo
+;;            :data {:type ::failure}
+;;            :uri "/fail"}}
 ```

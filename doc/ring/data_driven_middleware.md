@@ -84,7 +84,7 @@ outside to inside:
 
 ```clj
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 2 3 :handler]}
+;; => {:status 200, :body [1 2 3 :handler]}
 ```
 
 See also the [execution order of ring middleware](ring.md#execution-order).

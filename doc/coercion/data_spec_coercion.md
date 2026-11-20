@@ -9,7 +9,7 @@
 
 (def router
   (r/router
-    ["/:company/users/:user-id" {:name ::user-view
+    ["/:company/users/:user-id" {:name :user/user-view
                                  :coercion reitit.coercion.spec/coercion
                                  :parameters {:path {:company string?
                                                      :user-id int?}}}]
@@ -24,20 +24,17 @@ Successful coercion:
 
 ```clj
 (match-by-path-and-coerce! "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:spec>>
-;               :parameters {:path {:company string?,
-;                                   :user-id int?}}},
-;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :path-params {:company "metosin", :user-id "123"},
-;        :parameters {:path {:company "metosin", :user-id 123}}
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name :user/user-view,
+;;            :coercion ...
+;;            :parameters ...}
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :parameters {:path {:company "metosin", :user-id 123}}}
 ```
 
 Failing coercion:
 
 ```clj
 (match-by-path-and-coerce! "/metosin/users/ikitommi")
-; => ExceptionInfo Request coercion failed...
+;; =thrown-match=> {:type :reitit.coercion/request-coercion, :problems ...}
 ```

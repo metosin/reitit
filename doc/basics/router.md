@@ -22,23 +22,23 @@ Creating a router:
 (def router
   (r/router
     ["/api"
-     ["/ping" ::ping]
-     ["/user/:id" ::user]]))
+     ["/ping" :user/ping]
+     ["/user/:id" :user/user]]))
 ```
 
 Name of the created router:
 
 ```clj
 (r/router-name router)
-; :mixed-router
+;; => :mixed-router
 ```
 
 The flattened route tree:
 
 ```clj
 (r/routes router)
-; [["/api/ping" {:name :user/ping}]
-;  ["/api/user/:id" {:name :user/user}]]
+;; => [["/api/ping" {:name :user/ping}]
+;;     ["/api/user/:id" {:name :user/user}]]
 ```
 
 With a router instance, we can do [Path-based routing](path_based_routing.md) or [Name-based (Reverse) routing](name_based_routing.md).
@@ -49,18 +49,18 @@ Router options:
 
 ```clj
 (r/options router)
-{:lookup #object[...]
- :expand #object[...]
- :coerce #object[...]
- :compile #object[...]
- :conflicts #object[...]}
+=> {:lookup ...
+    :expand ...
+    :coerce ...
+    :compile ...
+    :conflicts ...}
 ```
 
 Route names:
 
 ```clj
 (r/route-names router)
-; [:user/ping :user/user]
+;; => [:user/ping :user/user]
 ```
 
 ### Composing
@@ -69,13 +69,13 @@ As routes are defined as plain data, it's easy to merge multiple route trees int
 
 ```clj
 (def user-routes
-  [["/users" ::users]
-   ["/users/:id" ::user]]) 
+  [["/users" :user/users]
+   ["/users/:id" :user/user]])
 
 (def admin-routes
   ["/admin"
-   ["/ping" ::ping]
-   ["/db" ::db]])
+   ["/ping" :user/ping]
+   ["/db" :user/db]])
 
 (def router
   (r/router
@@ -87,10 +87,10 @@ Merged route tree:
 
 ```clj
 (r/routes router)
-; [["/admin/ping" {:name :user/ping}]
-;  ["/admin/db" {:name :user/db}]
-;  ["/users" {:name :user/users}]
-;  ["/users/:id" {:name :user/user}]]
+;; => [["/admin/ping" {:name :user/ping}]
+;;     ["/admin/db" {:name :user/db}]
+;;     ["/users" {:name :user/users}]
+;;     ["/users/:id" {:name :user/user}]]
 ``` 
 
 More details on [composing routers](../advanced/composing_routers.md).

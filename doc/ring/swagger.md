@@ -104,11 +104,11 @@ The generated swagger spec:
 
 ```clj
 (app {:request-method :get :uri "/swagger.json"})
-;{:status 200
-; :body {:swagger "2.0"
-;        :x-id #{:reitit.swagger/default}
-;        :paths {"/api/ping" {:get {}}
-;                "/api/pong" {:post {}}}}}
+;; => {:status 200
+;;     :body {:swagger "2.0"
+;;            :x-id #{:reitit.swagger/default}
+;;            :paths {"/api/ping" {:get {}}
+;;                    "/api/pong" {:post {}}}}}
 ```
 
 Swagger-ui:
@@ -147,6 +147,7 @@ Another way to serve the swagger-ui is using the [default handler](default_handl
 
 Whole example project is in [`/examples/ring-spec-swagger`](https://github.com/metosin/reitit/tree/master/examples/ring-spec-swagger).
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (ns example.server
   (:require [reitit.ring :as ring]
@@ -273,17 +274,17 @@ Example with:
 
 ```clj
 (-> {:request-method :get, :uri "/one/swagger.json"} app :body :paths keys)
-; ("/common/ping" "/one/ping" "/two/deep/ping")
+;; => ["/common/ping" "/one/ping" "/two/deep/ping"]
 ```
 
 ```clj
 (-> {:request-method :get, :uri "/two/swagger.json"} app :body :paths keys)
-; ("/common/ping" "/two/ping")
+;; => ["/common/ping" "/two/ping"]
 ```
 
 ```clj
 (-> {:request-method :get, :uri "/one-two/swagger.json"} app :body :paths keys)
-; ("/common/ping" "/one/ping" "/two/ping" "/two/deep/ping")
+;; => ["/common/ping" "/one/ping" "/two/ping" "/two/deep/ping"]
 ```
 
 ## Reusable schema definitions

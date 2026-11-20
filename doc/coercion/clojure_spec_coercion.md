@@ -42,21 +42,22 @@ Successful coercion:
 
 ```clj
 (match-by-path-and-coerce! "/metosin/users/123")
-; #Match{:template "/:company/users/:user-id",
-;        :data {:name :user/user-view,
-;               :coercion <<:spec>>
-;               :parameters {:path ::path-params}},
-;        :result {:path #object[reitit.coercion$request_coercer$]},
-;        :path-params {:company "metosin", :user-id "123"},
-;        :parameters {:path {:company "metosin", :user-id 123}}
-;        :path "/metosin/users/123"}
+;; => {:template "/:company/users/:user-id",
+;;     :data {:name ::user-view,
+;;            :coercion ...
+;;            :parameters {:path [::path-params]}},
+;;     :result {:data ..., :coerce ...},
+;;     :path-params {:company "metosin", :user-id "123"},
+;;     :parameters {:path {:company "metosin", :user-id 123}}
+;;     :path "/metosin/users/123"}
 ```
 
 Failing coercion:
 
 ```clj
-(match-by-path-and-coerce! "/metosin/users/ikitommi")
-; => ExceptionInfo Request coercion failed...
+(try (match-by-path-and-coerce! "/metosin/users/ikitommi")
+     (catch Exception e (.getMessage e)))
+;; => "Request coercion failed"
 ```
 
 ## Deeply nested
@@ -88,8 +89,8 @@ Apply a string->edn coercion to the data:
   {:skus [{:id "123"}]
    :photos [{:id "123"}]}
   st/string-transformer)
-; {:skus [{:id :123}]
-;  :photos [{:id 123}]}
+;; => {:skus [{:id :123}]
+;;     :photos [{:id 123}]}
 ```
 
 Apply a json->edn coercion to the data:
@@ -100,8 +101,8 @@ Apply a json->edn coercion to the data:
   {:skus [{:id "123"}]
    :photos [{:id "123"}]}
   st/json-transformer)
-; {:skus [{:id :123}]
-;  :photos [{:id "123"}]}
+;; => {:skus [{:id :123}]
+;;     :photos [{:id "123"}]}
 ```
 
 By default, reitit uses custom transformers that also strip out extra keys from `s/keys` specs:
@@ -117,8 +118,8 @@ By default, reitit uses custom transformers that also strip out extra keys from 
    :photos [{:id "123"
              :HERE "TOO"}]}
   rcs/json-transformer)
-; {:skus [{:id :123}]
-;  :photos [{:id "123"}]}
+;; => {:skus [{:id :123}]
+;;     :photos [{:id "123"}]}
 ```
 
 ## Defining Optional Keys

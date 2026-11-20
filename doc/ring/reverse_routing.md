@@ -24,15 +24,15 @@ Below is an example how to do reverse routing from a ring handler:
          :get (constantly {:status 200, :body "user..."})}]])))
 
 (app {:request-method :get, :uri "/users"})
-; {:status 200,
-;  :body ({:uri "/users/0?iso=m%C3%B6ly"}
-;         {:uri "/users/1?iso=m%C3%B6ly"}
-;         {:uri "/users/2?iso=m%C3%B6ly"}
-;         {:uri "/users/3?iso=m%C3%B6ly"}
-;         {:uri "/users/4?iso=m%C3%B6ly"}
-;         {:uri "/users/5?iso=m%C3%B6ly"}
-;         {:uri "/users/6?iso=m%C3%B6ly"}
-;         {:uri "/users/7?iso=m%C3%B6ly"}
-;         {:uri "/users/8?iso=m%C3%B6ly"}
-;         {:uri "/users/9?iso=m%C3%B6ly"})}
+;; => {:status 200,
+;;     :body [{:uri "/users/0?iso=m%C3%B6ly"}
+;;            {:uri "/users/1?iso=m%C3%B6ly"}
+;;            {:uri "/users/2?iso=m%C3%B6ly"}
+;;            {:uri "/users/3?iso=m%C3%B6ly"}
+;;            {:uri "/users/4?iso=m%C3%B6ly"}
+;;            {:uri "/users/5?iso=m%C3%B6ly"}
+;;            {:uri "/users/6?iso=m%C3%B6ly"}
+;;            {:uri "/users/7?iso=m%C3%B6ly"}
+;;            {:uri "/users/8?iso=m%C3%B6ly"}
+;;            {:uri "/users/9?iso=m%C3%B6ly"}]}
 ```

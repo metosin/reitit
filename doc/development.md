@@ -12,6 +12,8 @@
 ./scripts/test.sh clj12
 ./scripts/test.sh cljs
 ./scripts/test.sh bb
+# code examples in README.md and doc/
+lein test-docs
 ```
 
 ## Formatting

@@ -28,6 +28,8 @@ Failing fast with `clojure.spec` validation turned on:
 (r/router
   ["/api" {:handler "identity"}]
   {:validate rs/validate})
+;; =thrown-match=> {:type :reitit.spec/invalid-route-data}
+;
 ; CompilerException clojure.lang.ExceptionInfo: Invalid route data:
 ;
 ; -- On route -----------------------
@@ -51,6 +53,7 @@ Turning on [Pretty Errors](error_messages.md#pretty-errors) will give much nicer
   ["/api" {:handler "identity"}]
   {:validate rs/validate
    :exception pretty/exception})
+;; =thrown-match=> {:problems ... :reitit.exception/cause ...}
 ```
 
 ![Pretty error](../images/pretty-error.png)
@@ -79,6 +82,7 @@ Invalid spec value:
            ::roles #{:adminz}}]
   {:validate rs/validate
   :exception pretty/exception})
+;; =thrown-match=> {:problems ...}
 ```
 
 ![Invalid Role Error](../images/invalid_roles.png)
@@ -89,6 +93,7 @@ To fail-fast on non-defined and misspelled keys on route data, we can close the 
 
 Requiring a`:description` and validating using closed specs:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (require '[spec-tools.spell :as spell])
 
@@ -107,6 +112,7 @@ Requiring a`:description` and validating using closed specs:
 
 It catches also typing errors:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (r/router
   ["/api" {:descriptionz "kikka"}]

@@ -156,7 +156,12 @@
                                             "-Dclojure.compiler.direct-linking=true"
                                             "-XX:+PrintCompilation"
                                             "-XX:+UnlockDiagnosticVMOptions"
-                                            "-XX:+PrintInlining"]}}
+                                            "-XX:+PrintInlining"]}
+
+             :gen-doc-tests {:test-paths   ^:replace ["target/test-doc-blocks/test"]
+                             :dependencies [[com.github.metosin/test-doc-blocks "1.2.21-reitit1"]
+                                            [compojure "1.7.2"]
+                                            [buddy "2.0.0"]]}}
   :aliases {"all" ["with-profile" "dev,default"]
             "perf" ["with-profile" "default,dev,perf"]
             "test-clj" ["all" "do" ["bat-test"] ["check"]]
@@ -165,7 +170,12 @@
             ;; the same way.
             "test-browser" ["doo" "chrome-headless" "test"]
             "test-advanced" ["doo" "chrome-headless" "advanced-test"]
-            "test-node" ["doo" "node" "node-test"]}
+            "test-node" ["doo" "node" "node-test"]
+
+            "test-docs" ["with-profile" "dev,gen-doc-tests" "do"
+                         ["run" "-m" "lread.test-doc-blocks" "gen-tests"
+                          "README.md" "doc/**.md"]
+                         ["test"]]}
 
   :bat-test {:report [:pretty
                       {:type :junit

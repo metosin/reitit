@@ -23,7 +23,7 @@ There is an extra option in the Ring router (actually, in the underlying middlew
                        :handler handler}}]])))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 2 3 :handler]}
+;; => {:status 200, :body [1 2 3 :handler]}
 ```
 
 ### Reversing the Middleware Chain
@@ -38,7 +38,7 @@ There is an extra option in the Ring router (actually, in the underlying middlew
       {::middleware/transform reverse})))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [3 2 1 :handler]}
+;; => {:status 200, :body [3 2 1 :handler]}
 ```
 
 ## Interleaving Middleware
@@ -53,17 +53,19 @@ There is an extra option in the Ring router (actually, in the underlying middlew
       {::middleware/transform #(interleave % (repeat [wrap :debug]))})))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
+;; => {:status 200, :body [1 :debug 2 :debug 3 :debug :handler]}
 ```
 
 ### Printing Request Diffs
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-middleware "0.11.0"]
 ```
 
 Using `reitit.ring.middleware.dev/print-request-diffs` transformation, the request diffs between each middleware are printed out to the console. To use it, add the following router option:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 :reitit.middleware/transform reitit.ring.middleware.dev/print-request-diffs
 ```

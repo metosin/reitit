@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:test-ns ring-coercion-md :apply :all-next} -->
 # Ring Coercion
 
 Basic coercion is explained in detail [in the Coercion Guide](../coercion/coercion.md). With Ring, both request parameters and response bodies can be coerced.
@@ -70,6 +71,7 @@ other [route data](../basics/route_data.md). There is special case
 handling for merging eg. malli `:map` schemas.
 
 ```clj
+(require 'reitit.coercion.malli)
 (def router
  (reitit.ring/router
    ["/api" {:get {:parameters {:query [:map [:api-key :string]]}}}
@@ -164,7 +166,7 @@ Valid request:
       :uri "/api/plus/3"
       :query-params {"x" "1"}
       :body-params {:y 2}})
-; {:status 200, :body {:total 6}}
+;; => {:status 200, :body {:total 6}}
 ```
 
 Invalid request:
@@ -174,13 +176,13 @@ Invalid request:
       :uri "/api/plus/3"
       :query-params {"x" "abba"}
       :body-params {:y 2}})
-; {:status 400,
-;  :body {:schema {:x "Int", "Any" "Any"},
-;         :errors {:x "(not (integer? \"abba\"))"},
-;         :type :reitit.coercion/request-coercion,
-;         :coercion :schema,
-;         :value {:x "abba"},
-;         :in [:request :query-params]}}
+;; => {:status 400,
+;;     :body {:schema {:x "Int", "Keyword" "Any"},
+;;            :errors {:x "(not (integer? \"abba\"))"},
+;;            :type :reitit.coercion/request-coercion,
+;;            :coercion :schema,
+;;            :value {:x "abba"},
+;;            :in [:request :query-params]}}
 ```
 
 Invalid response:
@@ -190,13 +192,13 @@ Invalid response:
       :uri "/api/plus/3"
       :query-params {"x" "1"}
       :body-params {:y -10}})
-; {:status 500,
-;  :body {:schema {:total "(constrained Int PositiveInt)"},
-;         :errors {:total "(not (PositiveInt -6))"},
-;         :type :reitit.coercion/response-coercion,
-;         :coercion :schema,
-;         :value {:total -6},
-;         :in [:response :body]}}
+;; => {:status 500,
+;;     :body {:schema {:total "(constrained Int PositiveInt)"},
+;;            :errors {:total "(not (PositiveInt -6))"},
+;;            :type :reitit.coercion/response-coercion,
+;;            :coercion :schema,
+;;            :value {:total -6},
+;;            :in [:response :body]}}
 ```
 
 ## Per-content-type coercion
@@ -206,6 +208,7 @@ content-type. These are also read by the [OpenAPI
 feature](./openapi.md) when generating api docs. The syntax for this
 is:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (def app
   (ring/ring-handler
@@ -250,10 +253,12 @@ See also the [muuntaja content negotiation](./content_negotiation.md) docs.
 
 Spec problems are exposed as is in request & response coercion errors. Pretty-printers like [expound](https://github.com/bhb/expound) can be enabled like this:
 
+<!-- #:test-doc-blocks{:test-ns ring-coercion-expound-md-test} -->
 ```clj
 (require '[reitit.ring :as ring])
 (require '[reitit.ring.middleware.exception :as exception])
 (require '[reitit.ring.coercion :as coercion])
+(require '[reitit.coercion.spec])
 (require '[expound.alpha :as expound])
 
 (defn coercion-error-handler [status]
@@ -318,6 +323,7 @@ The coercion middlewares are [compiled against a route](compiling_middleware.md)
 
 We can query the compiled middleware chain for the routes:
 
+<!-- #:test-doc-blocks{:test-ns ring-coercion-md} -->
 ```clj
 (require '[reitit.core :as r])
 
@@ -325,16 +331,16 @@ We can query the compiled middleware chain for the routes:
     (r/match-by-name ::plus)
     :result :post :middleware
     (->> (mapv :name)))
-; [::mw/coerce-exceptions
-;  ::mw/coerce-request
-;  ::mw/coerce-response]
+;; => [:reitit.ring.coercion/coerce-exceptions
+;;     :reitit.ring.coercion/coerce-request
+;;     :reitit.ring.coercion/coerce-response]
 ```
 
 Route without coercion defined:
 
 ```clj
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body "pong"}
+;; => {:status 200, :body "pong"}
 ```
 
 Has no mounted middleware:
@@ -344,5 +350,5 @@ Has no mounted middleware:
     (r/match-by-name ::ping)
     :result :get :middleware
     (->> (mapv :name)))
-; []
+;; => []
 ```

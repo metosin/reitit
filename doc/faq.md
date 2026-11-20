@@ -111,6 +111,15 @@ Reitit routing was originally based on Pedestal Routing an thus they same simila
 Compojure:
 
 ```clj
+(require '[compojure.core :refer [defroutes wrap-routes context GET POST]])
+(require '[compojure.coercions :refer [as-int]])
+(require '[ring.util.http-response :refer [ok]])
+
+(defn wrap-api [handler x] :example)
+(defn wrap-log [handler] :example)
+(defn get-user [id] :example)
+(defn post-pizza-handler [_req] :example)
+
 (defroutes routes
   (wrap-routes
     (context "/api" []
@@ -124,13 +133,14 @@ Compojure:
 `reitit-ring` with `reitit-spec` module:
 
 ```clj
+
 (def routes
   ["/api" {:middleware [[wrap-api :secure]]}
    ["/users/:id" {:get {:parameters {:path {:id int?}}}
                   :handler (fn [{:keys [parameters]}]
                              (ok (get-user (-> parameters :body :id))))}
     ["/pizza" {:post {:middleware [wrap-log]
-                      :handler post-pizza-handler}]]])
+                      :handler post-pizza-handler}}]]])
 ```
 
 #### Features

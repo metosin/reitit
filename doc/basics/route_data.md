@@ -31,28 +31,28 @@ Expanded route data can be retrieved from a router with `routes` and is returned
 
 ```clj
 (r/routes router)
-; [["/ping" {:name ::ping}]
-;  ["/pong" {:handler identity]}
-;  ["/users" {:get {:roles #{:admin}
-;                   :handler identity}}]]
+;; => [["/ping" {:name ::ping}]
+;;     ["/pong" {:handler identity}]
+;;     ["/users" {:get {:roles #{:admin}
+;;                      :handler identity}}]]
 ```
 
 ```clj
 (r/match-by-path router "/ping")
-; #Match{:template "/ping"
-;        :data {:name :user/ping}
-;        :result nil
-;        :path-params {}
-;        :path "/ping"}
+;; => {:template "/ping"
+;;     :data {:name ::ping}
+;;     :result nil
+;;     :path-params {}
+;;     :path "/ping"}
 ```
 
 ```clj
 (r/match-by-name router ::ping)
-; #Match{:template "/ping"
-;        :data {:name :user/ping}
-;        :result nil
-;        :path-params {}
-;        :path "/ping"}
+;; => {:template "/ping"
+;;     :data {:name ::ping}
+;;     :result nil
+;;     :path-params nil
+;;     :path "/ping"}
 ```
 
 ## Nested Route Data
@@ -76,13 +76,13 @@ Resolved route tree:
 
 ```clj
 (r/routes router)
-; [["/api/ping" {:interceptors [::api]
-;                :name :user/ping}]
-;  ["/api/admin/users" {:interceptors [::api]
-;                       :roles #{:admin}
-;                       :name ::users}]
-;  ["/api/admin/db" {:interceptors [::api ::db]
-;                    :roles #{:db-admin}}]]
+;; => [["/api/ping" {:interceptors [::api]
+;;                   :name ::ping}]
+;;     ["/api/admin/users" {:interceptors [::api]
+;;                          :roles #{:admin}
+;;                          :name ::users}]
+;;     ["/api/admin/db" {:interceptors [::api ::db]
+;;                       :roles #{:db-admin}}]]
 ```
 
 See also [nested parameter definitions for coercions](../ring/coercion.md#nested-parameter-definitions)
@@ -122,10 +122,10 @@ Accumulated route data:
      ["/api/pong" ::pong]]))
 
 (r/routes router)
-; [["/swagger.json" {:no-doc true, :name ::swagger}]
-;  ["/api-docs" {:no-doc true, :name ::api-docs}]
-;  ["/api/ping" {:name ::ping}]
-;  ["/api/pong" {:name ::pong}]]
+;; => [["/swagger.json" {:no-doc true, :name ::swagger}]
+;;     ["/api-docs" {:no-doc true, :name ::api-docs}]
+;;     ["/api/ping" {:name ::ping}]
+;;     ["/api/pong" {:name ::pong}]]
 ```
 
 ## Top-level Route Data

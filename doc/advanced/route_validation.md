@@ -28,24 +28,27 @@ Namespace `reitit.spec` contains [clojure.spec](https://clojure.org/about/spec) 
 
 First add a `:dev` dependency to:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [expound "0.4.0"] ; or higher
 ```
 
 Some bootstrapping:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (require '[clojure.spec.test.alpha :as stest])
 (require '[expound.alpha :as expound])
 (require '[clojure.spec.alpha :as s])
 (require '[reitit.spec])
 
-(stest/instrument `reitit/router)
+(stest/instrument `reitit.core/router)
 (set! s/*explain-out* expound/printer)
 ```
 
 And we are ready to go:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 (require '[reitit.core :as r])
 

@@ -22,7 +22,7 @@ The router name can be asked from the router:
      ["/api/:users" ::users]]))
 
 (r/router-name router)
-; :mixed-router
+;; => :mixed-router
 ```
 
 Overriding the router implementation:
@@ -37,5 +37,5 @@ Overriding the router implementation:
     {:router r/linear-router}))
 
 (r/router-name router)
-; :linear-router
+;; => :linear-router
 ```

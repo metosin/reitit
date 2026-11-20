@@ -9,6 +9,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
 ```clj
 (require '[reitit.http :as http])
 (require '[reitit.interceptor.sieppari :as sieppari])
+(require '[reitit.interceptor :as interceptor])
 
 (defn interceptor [message]
   {:enter (fn [ctx] (update-in ctx [:request :message] (fnil conj []) message))})
@@ -26,7 +27,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [1 2 3]}}
+;; => {:status 200, :body {:message [1 2 3]}}
 
 ```
 
@@ -43,7 +44,7 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [3 2 1]}}
+;; => {:status 200, :body {:message [3 2 1]}}
 ```
 
 ### Interleaving Interceptors
@@ -59,17 +60,19 @@ There is an extra option in http-router (actually, in the underlying interceptor
     {:executor sieppari/executor}))
 
 (app {:request-method :get, :uri "/api/ping"})
-; {:status 200, :body {:message [1 :debug 2 :debug 3 :debug]}}
+;; => {:status 200, :body {:message [1 :debug 2 :debug 3 :debug]}}
 ```
 
 ### Printing Context Diffs
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 [metosin/reitit-interceptors "0.11.0"]
 ```
 
 Using `reitit.http.interceptors.dev/print-context-diffs` transformation, the context diffs between each interceptor are printed out to the console. To use it, add the following router option:
 
+<!-- #:test-doc-blocks{:skip true} -->
 ```clj
 :reitit.interceptor/transform reitit.http.interceptor.dev/print-context-diffs
 ```

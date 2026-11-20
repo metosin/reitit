@@ -14,7 +14,7 @@ By default, if no routes match, `nil` is returned, which is not a valid response
       ["/ping" handler])))
 
 (app {:uri "/invalid"})
-; nil
+;; => nil
 ```
 
 Setting the default-handler as a second argument to `ring-handler`:
@@ -27,7 +27,7 @@ Setting the default-handler as a second argument to `ring-handler`:
     (constantly {:status 404, :body ""})))
 
 (app {:uri "/invalid"})
-; {:status 404, :body ""}
+;; => {:status 404, :body ""}
 ```
 
 To get more correct http error responses, `ring/create-default-handler` can be used. It differentiates `:not-found` (no route matched), `:method-not-allowed` (no method matched) and `:not-acceptable` (handler returned `nil`).
@@ -43,16 +43,16 @@ With defaults:
     (ring/create-default-handler)))
 
 (app {:request-method :get, :uri "/ping"})
-; {:status 200, :body ""}
+;; => {:status 200, :body ""}
 
 (app {:request-method :get, :uri "/"})
-; {:status 404, :body ""}
+;; => {:status 404, :body ""}
 
 (app {:request-method :post, :uri "/ping"})
-; {:status 405, :body ""}
+;; => {:status 405, :body ""}
 
 (app {:request-method :get, :uri "/pong"})
-; {:status 406, :body ""}
+;; => {:status 406, :body ""}
 ```
 
 With custom responses:
@@ -69,14 +69,14 @@ With custom responses:
        :not-acceptable (constantly {:status 406, :body "kosh"})})))
 
 (app {:request-method :get, :uri "/ping"})
-; {:status 200, :body ""}
+;; => {:status 200, :body ""}
 
 (app {:request-method :get, :uri "/"})
-; {:status 404, :body "kosh"}
+;; => {:status 404, :body "kosh"}
 
 (app {:request-method :post, :uri "/ping"})
-; {:status 405, :body "kosh"}
+;; => {:status 405, :body "kosh"}
 
 (app {:request-method :get, :uri "/pong"})
-; {:status 406, :body "kosh"}
+;; => {:status 406, :body "kosh"}
 ```

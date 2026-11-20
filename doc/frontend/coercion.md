@@ -1,3 +1,4 @@
+<!-- #:test-doc-blocks{:platform :cljs :test-ns frontend-coercion-md :apply :all-next} -->
 # Frontend coercion
 
 The Reitit frontend leverages [coercion](../coercion/coercion.md) for path,
