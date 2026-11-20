@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  # 2.13.x tags on the GitHub mirror have a stale bin/lein (2.12.1-SNAPSHOT)
+  LEIN_VERSION: 2.12.0
+
 jobs:
   build-clj:
     strategy:
@@ -38,8 +42,7 @@ jobs:
     - name: Setup Clojure
       uses: DeLaGuardo/setup-clojure@13.7.0
       with:
-        # 2.13.x tags on the GitHub mirror have a stale bin/lein (2.12.1-SNAPSHOT)
-        lein: 2.12.0
+        lein: ${{ env.LEIN_VERSION }}
         clj-kondo: 2026.10.26
 
     # Install openapi-schema-validator for openapi-tests
@@ -77,7 +80,7 @@ jobs:
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.7.0
         with:
-          lein: 2.12.0
+          lein: ${{ env.LEIN_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -138,7 +141,7 @@ jobs:
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.7.0
         with:
-          lein: 2.12.0
+          lein: ${{ env.LEIN_VERSION }}
 
       - name: Run doc tests
         run: lein test-docs
@@ -151,20 +154,27 @@ jobs:
 
       # Same check as cljdoc's script/verify-cljdoc-edn, inlined to avoid
       # piping a script from the cljdoc master branch into bash.
+      # Like the original, a :file line where no path is found fails.
       - name: Verify cljdoc.edn
         run: |
           fail=0
-          for f in $(grep -oE ':file "[^"]+"' doc/cljdoc.edn | cut -d'"' -f2); do
-            if [ ! -f "$f" ]; then
+          while IFS= read -r line; do
+            f=$(printf '%s\n' "$line" | sed -nE 's/.*:file[[:space:]]+"([^"]+)".*/\1/p')
+            if [ -z "$f" ]; then
+              echo "::error file=doc/cljdoc.edn::No file path found on line: $line"
+              fail=1
+            elif [ ! -f "$f" ]; then
               echo "::error file=doc/cljdoc.edn::$f is referenced in cljdoc.edn but not present"
               fail=1
             fi
-          done
+          done < <(grep ':file' doc/cljdoc.edn)
           exit $fail
 
   check-cljdoc:
     name: Check cljdoc analysis
     runs-on: ubuntu-latest
+    # Analysis logs are printed at the end, so don't wait 6h on a hang.
+    timeout-minutes: 30
     env:
       # Pinned so a new analyzer release can't change CI without a commit here.
       # Also part of the cache key, so a bump caches the new analyzer deps.
@@ -189,7 +199,7 @@ jobs:
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.7.0
         with:
-          lein: 2.12.0
+          lein: ${{ env.LEIN_VERSION }}
           cli: 1.12.7.1681
 
       - name: Install cljdoc analyzer
