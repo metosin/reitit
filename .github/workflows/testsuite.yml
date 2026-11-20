@@ -149,14 +149,34 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Same check as cljdoc's script/verify-cljdoc-edn, inlined to avoid
+      # piping a script from the cljdoc master branch into bash.
       - name: Verify cljdoc.edn
-        run: curl -fsSL https://raw.githubusercontent.com/cljdoc/cljdoc/master/script/verify-cljdoc-edn | bash -s doc/cljdoc.edn
+        run: |
+          fail=0
+          for f in $(grep -oE ':file "[^"]+"' doc/cljdoc.edn | cut -d'"' -f2); do
+            if [ ! -f "$f" ]; then
+              echo "::error file=doc/cljdoc.edn::$f is referenced in cljdoc.edn but not present"
+              fail=1
+            fi
+          done
+          exit $fail
 
   check-cljdoc:
     name: Check cljdoc analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      - name: Cache dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+          key: ${{ runner.os }}-cljdoc-${{ hashFiles('**/project.clj') }}
+          restore-keys: |
+            ${{ runner.os }}-cljdoc-
 
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@13.7.0
