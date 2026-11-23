@@ -83,6 +83,18 @@
             (is (= "!#$&'()*+,/:;=?@[]"
                    (decoded-param1 "/one-param-path/%21%23%24%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D")))))
 
+        (testing "catch-all parameters keep their path separators"
+          (let [router (r/router [["/a/{*rest}" ::a]
+                                  ["/b/:param" ::b]] {:router r})]
+            (is (= "/a/foo/bar" (:path (r/match-by-name router ::a {:rest "foo/bar"}))))
+            (is (= {:rest "foo/bar"} (:path-params (r/match-by-name router ::a {:rest "foo/bar"}))))
+            (is (= "/a/foo%20bar/baz%252Fqux"
+                   (:path (r/match-by-name router ::a {:rest "foo bar/baz%2Fqux"}))))
+            (is (= "foo bar/baz%2Fqux"
+                   (-> router (r/match-by-path "/a/foo%20bar/baz%252Fqux") :path-params :rest)))
+            (is (= "/b/foo%2Fbar" (:path (r/match-by-name router ::b {:param "foo/bar"})))
+                "non catch-all parameters are still encoded as a whole")))
+
         (testing "complex"
           (let [router (r/router
                         [["/:abba" ::abba]
