@@ -75,6 +75,11 @@
      :path-parts path-parts
      :path path}))
 
+(defn catch-all-params
+  "Returns the set of catch-all parameter keys of a parsed route."
+  [route]
+  (->> (:path-parts route) (filter trie/catch-all?) (map :value) set))
+
 (defn wild-path? [path opts]
   (-> path (parse opts) :path-params seq boolean))
 
@@ -237,6 +242,13 @@
     #?(:clj  (str/replace s #"[^A-Za-z0-9\!'\(\)\*_~.-]+" percent-encode)
        :cljs (js/encodeURIComponent s))))
 
+;; the path separators are safe, so that a catch-all parameter value can span
+;; multiple path segments
+(defn url-encode-catch-all [s]
+  (if s
+    #?(:clj  (str/replace s #"[^A-Za-z0-9\!'\(\)\*_~./-]+" percent-encode)
+       :cljs (str/replace (js/encodeURIComponent s) "%2F" "/"))))
+
 (defn maybe-url-decode [s]
   (if s
     #?(:clj  (if (.contains ^String s "%")
@@ -297,11 +309,20 @@
   (into-string [_]))
 
 (defn path-params
-  "Convert parameters' values into URL-encoded strings, suitable for URL paths"
+  "Convert parameters' values into URL-encoded strings, suitable for URL paths.
+  The values of the parameters named in `:catch-all` are encoded part by part,
+  so that the path separators inside them are kept."
   ([params] (path-params params nil))
-  ([params {:keys [url-encode?] :or {url-encode? true}}]
+  ([params {:keys [url-encode? catch-all] :or {url-encode? true}}]
    (if url-encode?
-     (maybe-map-values #(url-encode (into-string %)) params)
+     (reduce-kv
+      (fn [acc k v]
+        (let [v' (if (contains? catch-all k)
+                   (url-encode-catch-all (into-string v))
+                   (url-encode (into-string v)))]
+          (if (some? v') (assoc acc k v') acc)))
+      params
+      params)
      (maybe-map-values #(into-string %) params))))
 
 (defn- query-parameter [k v]

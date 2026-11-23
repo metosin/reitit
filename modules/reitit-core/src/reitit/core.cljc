@@ -94,10 +94,13 @@
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                    (let [{:keys [path-params] :as route} (impl/parse p opts)
-                          f #(if-let [path (impl/path-for route %)]
-                               (->Match p data result (impl/url-decode-coll %) path)
-                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                    (let [{required :path-params, :as route} (impl/parse p opts)
+                          catch-all (impl/catch-all-params route)
+                          f (fn [path-params opts]
+                              (let [params (impl/path-params path-params (assoc opts :catch-all catch-all))]
+                                (if-let [path (impl/path-for route params)]
+                                  (->Match p data result (impl/url-decode-coll params) path)
+                                  (->PartialMatch p data result (impl/url-decode-coll params) required))))]
                       [(conj pl (-> (trie/insert nil p (->Match p data result nil nil) opts) (trie/compile)))
                        (if name (assoc nl name f) nl)]))
                   [[] {}]
@@ -121,12 +124,12 @@
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
-           (match nil)))
+           (match nil nil)))
        (match-by-name [r name path-params]
          (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params opts))))))))
+           (match path-params opts)))))))
 
 (defn lookup-router
   "Creates a lookup-router from resolved routes and optional
@@ -184,10 +187,13 @@
          names (impl/find-names compiled-routes opts)
          [pl nl] (reduce
                   (fn [[pl nl] [p {:keys [name] :as data} result]]
-                    (let [{:keys [path-params] :as route} (impl/parse p opts)
-                          f #(if-let [path (impl/path-for route %)]
-                               (->Match p data result (impl/url-decode-coll %) path)
-                               (->PartialMatch p data result (impl/url-decode-coll %) path-params))]
+                    (let [{required :path-params, :as route} (impl/parse p opts)
+                          catch-all (impl/catch-all-params route)
+                          f (fn [path-params opts]
+                              (let [params (impl/path-params path-params (assoc opts :catch-all catch-all))]
+                                (if-let [path (impl/path-for route params)]
+                                  (->Match p data result (impl/url-decode-coll params) path)
+                                  (->PartialMatch p data result (impl/url-decode-coll params) required))))]
                       [(trie/insert pl p (->Match p data result nil nil) opts)
                        (if name (assoc nl name f) nl)]))
                   [nil {}]
@@ -211,12 +217,12 @@
                (assoc :path path))))
        (match-by-name [_ name]
          (if-let [match (impl/fast-get lookup name)]
-           (match nil)))
+           (match nil nil)))
        (match-by-name [r name path-params]
          (match-by-name r name path-params nil))
        (match-by-name [_ name path-params opts]
          (if-let [match (impl/fast-get lookup name)]
-           (match (impl/path-params path-params opts))))))))
+           (match path-params opts)))))))
 
 (defn single-static-path-router
   "Creates a fast router of 1 static route(s) and optional
