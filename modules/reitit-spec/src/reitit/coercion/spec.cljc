@@ -122,6 +122,8 @@
          (= (count model) 1) (first model)
          ;; here be dragons, best effort
          (every? map? model) (apply mm/meta-merge model)
+         ;; all elements are the same
+         (apply = model) (first model)
          ;; fail fast
          :else (ex/fail! ::model-error {:message "Can't merge nested clojure specs", :spec model}))
        name))
