@@ -6,10 +6,39 @@
             [reitit.http.interceptors.exception :as exception]
             [reitit.pedestal :as pedestal]))
 
-(deftest arities-test
-  (is (= #{0} (#'pedestal/arities (fn []))))
-  (is (= #{1} (#'pedestal/arities (fn [_]))))
-  (is (= #{0 1 2} (#'pedestal/arities (fn ([]) ([_]) ([_ _]))))))
+(deftest signatures-test
+  (is (= #{{:arity 0, :variadic? false}} (#'pedestal/signatures (fn []))))
+  (is (= #{{:arity 1, :variadic? false}} (#'pedestal/signatures (fn [_]))))
+  (is (= #{{:arity 0, :variadic? false}
+           {:arity 1, :variadic? false}
+           {:arity 2, :variadic? false}}
+         (#'pedestal/signatures (fn ([]) ([_]) ([_ _])))))
+  (testing "variadic fns report their required arity"
+    (is (= #{{:arity 0, :variadic? true}} (#'pedestal/signatures (fn [& _]))))
+    (is (= #{{:arity 1, :variadic? true}} (#'pedestal/signatures (fn [_ & _]))))
+    (is (= #{{:arity 1, :variadic? false}
+             {:arity 2, :variadic? true}}
+           (#'pedestal/signatures (fn ([_]) ([_ _ & _]))))))
+  (testing ":arglists metadata is preferred over reflection"
+    (is (= #{{:arity 2, :variadic? false}}
+           (#'pedestal/signatures (with-meta (fn [& _]) {:arglists '([_ _])}))))
+    (is (= #{{:arity 0, :variadic? false}
+             {:arity 1, :variadic? false}}
+           (#'pedestal/signatures (with-meta (fn [& _]) {:arglists '([] [_])}))))))
+
+(deftest accepts-arity?-test
+  (testing "fixed arities"
+    (is (#'pedestal/accepts-arity? (fn [_ _]) 2))
+    (is (not (#'pedestal/accepts-arity? (fn [_]) 2)))
+    (is (not (#'pedestal/accepts-arity? (fn [_ _ _]) 2))))
+  (testing "variadic arities accept their required arity or more"
+    (is (#'pedestal/accepts-arity? (fn [& _]) 2))
+    (is (#'pedestal/accepts-arity? (fn [_ & _]) 2))
+    (is (not (#'pedestal/accepts-arity? (fn [_ _ _ & _]) 2))))
+  (testing ":arglists metadata is preferred over reflection"
+    (is (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_ _])}) 2))
+    (is (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_ & _])}) 2))
+    (is (not (#'pedestal/accepts-arity? (with-meta (fn [& _]) {:arglists '([_])}) 2)))))
 
 (deftest interceptor-test
   (testing "without :enter, :leave or :error are stripped"
@@ -19,8 +48,7 @@
                                (-> interceptor
                                    (pedestal/->interceptor)
                                    (:error)
-                                   (#'pedestal/arities)
-                                   (contains? 2)))]
+                                   (#'pedestal/accepts-arity? 2)))]
       (is (has-2-arity-error? {:error (fn [_])}))
       (is (has-2-arity-error? {:error (fn [_ _])}))
       (is (has-2-arity-error? {:error (fn [_ _ _])}))
