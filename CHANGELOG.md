@@ -18,6 +18,8 @@ We use [Break Versioning][breakver]. The version numbers follow a `<major>.<mino
 * **reitit-frontend**: `Html5History` no longer handles anchor clicks whose default action has already been prevented. [#803](https://github.com/metosin/reitit/pull/803)
 * **reitit-frontend**: `Html5History` now handles clicks on links when the click starts inside shadow DOM: inside a shadow root nested in an `<a>`, or on content slotted into an `<a>` in a shadow root. [#804](https://github.com/metosin/reitit/issues/804) [#805](https://github.com/metosin/reitit/pull/805) [#808](https://github.com/metosin/reitit/pull/808)
 * Code examples in the documentation are now tested with [test-doc-blocks](https://github.com/lread/test-doc-blocks) (`lein test-docs`), and outdated examples were fixed. [#779](https://github.com/metosin/reitit/pull/779)
+* **reitit-swagger**, **reitit-openapi**: the swagger and openapi handlers now throw a clear error with the route path and the bad value when `:swagger` or `:openapi` route data is not a map, instead of a `ClassCastException` or a generic "While building openapi docs" error. [#517](https://github.com/metosin/reitit/issues/517)
+* **reitit-swagger**: like reitit-openapi, other errors while building an endpoint's docs are wrapped in a "While building swagger docs" error with the route `:path` and `:method`.
 
 ## 0.11.0 (2026-09-18)
 

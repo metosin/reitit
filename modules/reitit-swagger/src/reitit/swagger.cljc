@@ -94,13 +94,21 @@
                  (into {}))))
          (coercion/-get-apidocs coercion :swagger))))
 
+(defn- -check-swagger-data! [path method swagger]
+  (when-not (or (nil? swagger) (map? swagger))
+    (throw (ex-info (str "Invalid :swagger route data in " (some-> method name str/upper-case (str " ")) path
+                         ", expected a map, got: " (pr-str swagger))
+                    {:path path, :method method, :swagger swagger}))))
+
 (defn create-swagger-handler
   "Create a ring handler to emit swagger spec. Collects all routes from router which have
   an intersecting `[:swagger :id]` and which are not marked with `:no-doc` route data."
   []
   (fn create-swagger
     ([{::r/keys [router match] :keys [request-method]}]
-     (let [{:keys [id] :or {id ::default} :as swagger} (-> match :result request-method :data :swagger)
+     (let [swagger (-> match :result request-method :data :swagger)
+           _ (-check-swagger-data! (:template match) request-method swagger)
+           {:keys [id] :or {id ::default}} swagger
            ids (trie/into-set id)
            strip-top-level-keys #(dissoc % :id :info :host :basePath :definitions :securityDefinitions)
            strip-endpoint-keys #(dissoc % :id :parameters :responses :summary :description :operationId)
@@ -110,21 +118,26 @@
            accept-route (fn [route]
                           (-> route second :swagger :id (or ::default) (trie/into-set) (set/intersection ids) seq))
            base-swagger-spec {:responses ^:displace {:default {:description ""}}}
-           transform-endpoint (fn [[method {{:keys [coercion no-doc swagger] :as data} :data
-                                            middleware :middleware
-                                            interceptors :interceptors}]]
-                                (if (and data (not no-doc))
-                                  [method
-                                   (meta-merge
-                                    base-swagger-spec
-                                    (apply meta-merge (keep (comp :swagger :data) middleware))
-                                    (apply meta-merge (keep (comp :swagger :data) interceptors))
-                                    (if coercion
-                                      (-get-swagger-apidocs coercion data))
-                                    (select-keys data [:tags :summary :description :operationId])
-                                    (strip-top-level-keys swagger))]))
+           transform-endpoint (fn [path [method {{:keys [coercion no-doc swagger] :as data} :data
+                                                 middleware :middleware
+                                                 interceptors :interceptors}]]
+                                (when (and data (not no-doc))
+                                  (-check-swagger-data! path method swagger))
+                                (try
+                                  (if (and data (not no-doc))
+                                    [method
+                                     (meta-merge
+                                      base-swagger-spec
+                                      (apply meta-merge (keep (comp :swagger :data) middleware))
+                                      (apply meta-merge (keep (comp :swagger :data) interceptors))
+                                      (if coercion
+                                        (-get-swagger-apidocs coercion data))
+                                      (select-keys data [:tags :summary :description :operationId])
+                                      (strip-top-level-keys swagger))])
+                                  (catch #?(:clj Throwable :cljs :default) t
+                                    (throw (ex-info "While building swagger docs" {:path path :method method} t)))))
            transform-path (fn [[p _ c]]
-                            (if-let [endpoint (some->> c (keep transform-endpoint) (seq) (into {}))]
+                            (if-let [endpoint (some->> c (keep (partial transform-endpoint p)) (seq) (into {}))]
                               [(swagger-path p (r/options router)) endpoint]))
            map-in-order #(->> % (apply concat) (apply array-map))
            paths (->> router (r/compiled-routes) (filter accept-route) (map transform-path) map-in-order)
